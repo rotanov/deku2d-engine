@@ -1,0 +1,25 @@
+<resources>
+	<textures>
+		Bg3	= "bg3.png"
+		Bg1	= "bg1.png"
+		Font1	= "Font1.png"
+		Font	= "Font.bmp"
+		Ninja	= "Ninja.bmp"
+		DocT	= "PrtOside.bmp"
+		Tileset1	= "tileset 01.bmp"
+		BlckNinja	= "blackninja.bmp"
+		NFrames	= "frames.bmp"
+		GrTile	= "Groundtile.bmp"
+		Font10	= "Font10ok.bmp"
+		ball	= "ball.bmp"
+	</textures>
+	<font>
+		FFont	= "Font.fif"
+		FHge	= "hge.fif"
+		aFont	= "Font.fif"
+		FBeta	= "Beta.fif"
+	</font>
+	<tileset>
+		Dokutsu = "TileSet01.tls"
+	</tileset>
+</resources>

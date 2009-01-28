@@ -1,0 +1,13 @@
+[Sun Dec 14 12:42:42 2008] [INFO] Log file "System.log" created
+[Sun Dec 14 12:42:42 2008] [INFO] Memory allocated for FontManager
+[Sun Dec 14 12:42:42 2008] [INFO] Font manager instanced by ninja.cpp
+[Sun Dec 14 12:42:44 2008] [INFO] Font manager instanced by resource.cpp
+[Sun Dec 14 12:42:44 2008] [INFO] BMP image "Data/Textures/Font.bmp" loaded
+[Sun Dec 14 12:42:44 2008] [AHTUNG] Cant load bmp file: "Data/Textures/Font1.png" is not a BMP file
+[Sun Dec 14 12:42:44 2008] [INFO] PNG image "Data/Textures/Font1.png" loaded
+[Sun Dec 14 12:42:44 2008] [INFO] BMP image "Data/Textures/Font10ok.bmp" loaded
+[Sun Dec 14 12:42:44 2008] [INFO] Font manager instanced by gui.cpp
+[Sun Dec 14 12:42:44 2008] [INFO] Loading GUI scheme "data\main.gui".
+[Sun Dec 14 12:42:44 2008] [INFO] Gui Scheme "Name" loaded.
+[Sun Dec 14 12:42:44 2008] [INFO] BMP image "data\maingui.bmp" loaded
+[Sun Dec 14 12:42:44 2008] [INFO] Initialization success

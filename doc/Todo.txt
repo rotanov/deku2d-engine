@@ -1,0 +1,36 @@
+--------------------------------------------
+	        Global Todo
+--------------------------------------------
+engine:
+TODO: It will be good to do some listing of resorces - COMPLETED	// Data/config/res.xml
+TODO: assosation beetween resorse name && Resourse file name and path.  COMPLETED; // XML запрос
+TODO: complete CResourceManager to useable state - PROCESSING; YES;
+TODO: make basic camera. COMPLETED;
+TODO: make basic GUI (buttons & edits & Buttons lists) PROCESSSING; BUTTONS OK;
+TODO: add update manager COMPLETED;
+TODO: make advanced camera.
+TODO: Smooth camera animation.
+TODO: add sripting language
+TODO: Add fonts etc PROCESSING; PARTIALLY COPLETED;
+TODO: Upgrade CSprite
+TODO: make advanced GUI
+
+Game:
+TODO: CTileSet need to be upgraded according to Formats.txt COMPLETED;
+TODO: Upgrade map format; divide it into some separate files described in Formats.txt COMPLETED;
+TODO: basic charachter movement and collisions
+TODO: add collisions between map and something
+TODO: make collision map //PROCESSING;
+TODO: make event map //PROCESSING;
+TODO: detail in-game objects class hierarchy
+TODO: add more functionality to in-game objects
+TODO: Background with animation with parallax effect
+TODO: add events
+
+Unknown:
+TODO: care about collition detection // yeah
+TODO: add advanced geometries // Like convex polygon
+TODO: make Font Editor COMPLETED; next TODO: make font editor to use GUI engine and then improve and document it
+
+
+Changes: All graphic functions that incapsulates OpenGL calls should be named with low-case g prefics. Such as gSetBlendMode();

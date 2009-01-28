@@ -1,0 +1,83 @@
+--------------------------------------------
+	Map Format
+--------------------------------------------
+Map name (also should be a name of map in resources.xml)
+tilesetname (not a tileset FILENAME. It is tilesetname Just like in resurces.xml)
+width
+height
+next width*height bytes - indexes of tiles in specified tile set if index is <something> then it is white space
+next width*height bytes - collision map
+next width*height bytes - interaction info for each tile
+
+-Map info file
+	-file names... width height etc
+-collision map
+	-determines which tiles blocks should
+	 be checked for collision. And if block
+	 shouldn't be checked for collition it 
+	 determines z-order of tile
+-interaction info
+	-This file contains info about how the game should interact
+	 with user, when he gets in collision with this tile
+
+--------------------------------------------
+	Tile Set
+--------------------------------------------
+
+-TileSetInfoFile
+	-ImageDatafilename
+	-byte TileWidth;
+	-byte TileHeight;
+	-int HorNumTiles;
+	-int VerNumTiles;
+
+	array of BBoxes for now
+-Bounding Splines info
+	-This file contains shapes needed for determining
+	 collisions beetwen tile and other objects.
+-Interaction ifo
+	-This file contains info about how the game should interact
+	 with user, when he gets in collision with this tile
+-PNG file
+	-Tile set is just a PNG image with power
+	 of two dimentions. The Both dimentions
+	 couldn't be much then 32x16=512 pixels.
+
+--------------------------------------------
+	         Font description
+--------------------------------------------
+CFont class uses to create a font 2wo files:
+The first is Bmp || Png image with font symbols
+this image is 256x256 pixels size.
+Another file is Font InFo file *.fif. itt contains
+image name
+int distsance beetween symbols
+int height of symbol
+256*sizeof(byteRect) bytes with 256 BBOXes
+of each symbol.
+
+
+
+--------------------------------------------
+	Анимированные объекты
+--------------------------------------------
+Так кароче бля. Будут всякие анимированные
+объекты в игре, я так думаю, что для одного объекта мы храним
+:
+-Png file
+	-include all frames for all animations of objects
+-Bounding Splines file // это бля нада не спрайту а объекту
+	-This file contains shapes needed for determining
+	 collisions beetwen tile and other objects.
+-Animation settings File
+	-here settings for all animations of object
+-object file
+	-conatins description of object and filenames of all above. //и это тоже
+
+	/*Sprite.AddAnimation(true, 50, 32, 32, 9, 1, 9, 32, 32, 0, 94, ANIM_WALK_RIGHT, true);
+	Sprite.AddAnimation(true, 50, 32, 32, 9, 1, 9, 32, 32, 0, 62, ANIM_WALK_LEFT, true);
+
+	Sprite.AddAnimation(false, 50, 30, 30, 1, 1, 1, 30, 30, 60, 0, ANIM_STAND_RIGHT, true);
+	Sprite.AddAnimation(false, 50, 30, 30, 1, 1, 1, 30, 30, 30, 0, ANIM_STAND_LEFT, true);
+
+	Sprite.AddAnimation(true, 50, 32, 32, 3, 1, 3, 32, 32, 0, 126, ANIM_ATTAK_DEMO, false);*/
