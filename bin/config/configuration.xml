@@ -4,7 +4,7 @@
 	WindowBpp		= "32"
 	WindowCaption		= "Ninja!"
 	DoCalcFps		= "true"
-	DoLimitFps		= "true"
+	DoLimitFps		= "false"
 	FpsLimit			= "20" // он пиздит, это не фпс лимит, а кол-во миллисекунд между кадрами
 	XMLResourcesFilename    	= "config/resources.xml"
      	DataPath               	= "Data/"

@@ -7,15 +7,13 @@ CParticleSystem *psys, *enemy_l;
 CSprite *Spr;
 CHero *Hero;
 CMap *Map;
-//CGUIRenderer *_Dummy;
-//CTexture *BackGround, *Gift, *Ground;
 Vector2 pnts[2];
 CEnemyController *enemyc;
 
 bool Init()
 {	
-	Ninja->ResourceManager.LoadTextures(Ninja->ResourceListPath);
-	Ninja->ResourceManager.LoadResources(Ninja->ResourceListPath);
+	Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath);
+	Ninja->ResourceManager.LoadResources();
 	CFactory *Factory = CFactory::Instance();
 	gSetBlendingMode();
 
@@ -23,14 +21,19 @@ bool Init()
 	Hero->x = 200;
 	Hero->y = 200;//GROUND;
 	Hero->z = 0.0f;
-	((CTexture*)Ninja->TextureManager->GetObject("hero"))->Load();
-	((CTexture*)Ninja->TextureManager->GetObject("heroa"))->Load();
-	((CTexture*)Ninja->TextureManager->GetObject("herob"))->Load();
-	((CTexture*)Ninja->TextureManager->GetObject("snwbl"))->Load();
 
-	((CTexture*)Ninja->TextureManager->GetObject("bg"))->Load();
-	((CTexture*)Ninja->TextureManager->GetObject("gift"))->Load();
-	((CTexture*)Ninja->TextureManager->GetObject("gr"))->Load();
+	
+ 	CTextureManager *TxMan = Ninja->TextureManager;
+	TxMan->LoadAllTextures(); //MemoryWarning;
+	TxMan->LoadTextureByName("hero");
+	TxMan->LoadTextureByName("heroa");
+	TxMan->LoadTextureByName("herob");
+	TxMan->LoadTextureByName("snwbl");
+
+	TxMan->LoadTextureByName("bg");
+	TxMan->LoadTextureByName("gift");
+	TxMan->LoadTextureByName("gr");
+
 
 	Hero->sprite.m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("hero"))->TexID;
 	Hero->sprite.m_nTextureHeight = 32;
@@ -57,7 +60,7 @@ bool Init()
 	psys->name = "psys";
 	psys->Init();
 	psys->info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-	psys->info.ec = RGBAf(1.0f, 1.0f, 1.0f, .0f);
+	psys->info.ec = RGBAf(1.0f, 1.0f, 1.0f, 0.0f);
 	psys->visible = true;	
 	pnts[0] = Vector2(0, 480);
 	pnts[1] = Vector2(640, 480);
@@ -87,10 +90,6 @@ bool Init()
 	enemyc->AssignPS(enemy_l);
 
 
-//	_testenemy = (CEnemy*)Factory->Create(OBJ_USER_DEFINED, &(CEnemy::NewEnemy));
-//	_testenemy->AssignParticle(enemy_l->CreateParticle());
-//	_testenemy->MoveInstant(Vector2(100.0f, GROUND));
-//	_testenemy->Move(300.0f, 6.0f);
 
 	((CTexture*)Ninja->TextureManager->GetObject("enemy"))->Load();
 	enemy_l->TexID = ((CTexture*)Ninja->TextureManager->GetObject("enemy"))->TexID;
@@ -138,17 +137,13 @@ bool Init()
 	}
 
 	
-	//Map = (CMap*)Factory->Create(OBJ_USER_DEFINED, &(CMap::NewMap));	
-	//_Dummy = (CGUIRenderer*)Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
-	//CGUIScheme *sch = new CGUIScheme("data\\main.gui", "data\\maingui.bmp");
-	//CForm *frm = (CForm*)addForm("data\\test.df");
 	Ninja->RenderManager.Camera.Assign(&Hero->x, &Hero->y);
 
-	//glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LINE_WIDTH);
 	
-	//Ninja->RenderManager.SortByZ();
-	//Ninja->RenderManager.SortByAlpha();
+	Ninja->RenderManager.SortByZ();
+	Ninja->RenderManager.SortByAlpha();
 
 	Ninja->FontManager->SetCurrentFont("FFont");
 	Factory->FreeInst();
@@ -157,42 +152,8 @@ bool Init()
 
 bool Draw()
 {	
-	
 	glLoadIdentity();
-	glEnable(GL_TEXTURE_2D);
-
 	Ninja->FontManager->PrintEx(560, 460, 1, "Fps: %d", Ninja->GetFps());
-	
-// 	glTranslatef(0.0f, 0.0f, -0.9f);
-// 	gSetColor(Vector4(1,1,1,1));
-// 	glBindTexture(GL_TEXTURE_2D, BackGround->TexID);
-// 	glBegin(GL_QUADS);
-// 		glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
-// 		glTexCoord2f(2.0f, 0.0f); glVertex2f(1024, 0);
-// 		glTexCoord2f(2.0f, 1.0f); glVertex2f(1024, 512);
-// 		glTexCoord2f(0.0f, 1.0f); glVertex2f(0, 512);
-// 	glEnd();
-// 
-// 	glTranslatef(0.0f, 0.0f, 1.0f);
-// 	gSetColor(Vector4(1,1,1,1));
-// 	glBindTexture(GL_TEXTURE_2D, Ground->TexID);
-// 	glBegin(GL_QUADS);
-// 		glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
-// 		glTexCoord2f(2.0f, 0.0f); glVertex2f(1024, 0);
-// 		glTexCoord2f(2.0f, 1.0f); glVertex2f(1024, 32);
-// 		glTexCoord2f(0.0f, 1.0f); glVertex2f(0, 32);
-// 	glEnd();
-
-	//gSetColor(Vector4(1,1,1,1));
-	//glBindTexture(GL_TEXTURE_2D, Gift->TexID);
-	//glBegin(GL_QUADS);
-	//glTexCoord2f(0.0f, 0.0f); glVertex2f(260, 24);
-	//glTexCoord2f(1.0f, 0.0f); glVertex2f(260+128, 24);
-	//glTexCoord2f(1.0f, 1.0f); glVertex2f(260+128,24+ 128);
-	//glTexCoord2f(0.0f, 1.0f); glVertex2f(260, 24 + 128);
-	//glEnd();
-
-
 	return true;
 }
 

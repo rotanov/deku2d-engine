@@ -552,6 +552,8 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 	if (Height == 0)		
 		Height = 1;
+	if (Width == 0)		
+		Width = 1;
 	glViewport(0, 0, Width, Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();			
@@ -562,9 +564,9 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);	
 
-// 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-// 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-// 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	// 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	// 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	// 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 
 
 	//strstr(WGL_EXT_swap_control);
@@ -909,7 +911,7 @@ void gEndFrame()
 
 void gSetBlendingMode(void)
 {
-		glDisable			(GL_BLEND);
+		glEnable			(GL_BLEND);
 		glBlendFunc			(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
 		glEnable			(GL_ALPHA_TEST);
 		glAlphaFunc			(GL_GREATER, 0);
@@ -1399,7 +1401,7 @@ void CTextureManager::FreeInst()
 
 CTextureManager::CTextureManager()
 {
-
+	name = "TextureManager";
 }
 
 CTextureManager::~CTextureManager()
@@ -1416,6 +1418,33 @@ bool CTextureManager::AddTexture( char* filename, bool load)
 	return true;
 }
 
+bool CTextureManager::LoadTextureByName(char *TextureName)
+{
+	CTexture *tmp = NULL;
+	tmp = (CTexture*)GetObject(TextureName);
+	if (tmp == NULL)
+	{
+		Log("WARNING", "Can't load find texture with name %s", TextureName);
+		return false;
+	}
+	return tmp->Load();
+}
+
+bool CTextureManager::LoadAllTextures()
+{
+	CTexture *tmp = NULL;
+	this->Reset();
+	while (this->Enum((CObject*&)tmp))
+	{	
+		if (tmp == NULL)
+		{
+			Log("WARNING", "Can't find some texture");
+			return false;
+		}
+		tmp->Load();
+		tmp = NULL;
+	}
+}
 CTextureManager* CTextureManager::_instance = 0;
 int CTextureManager::_refcount = 0;
 
@@ -1425,6 +1454,11 @@ int CTextureManager::_refcount = 0;
 //////////////////////////////////////////////////////////////////////////
 bool CTexture::Load()
 {
+	if (filename == "")
+	{
+		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", name);
+		return false;
+	}
 	if (!loaded)
 		if (LoadTexture(filename.c_str()))
 			loaded = true;

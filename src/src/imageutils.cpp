@@ -91,7 +91,7 @@ bool  CImageData::MakeRGBA()
     return true;
 }
 
-bool	CImageData::LoadPNG(const char * filename)
+bool CImageData::LoadPNG(const char * filename)
 {
 	FILE *png_file = fopen(filename, "rb");
 	if (png_file == NULL)

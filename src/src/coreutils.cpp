@@ -447,7 +447,7 @@ CObject* CObjectList::GetObject(string objectname)
 		}
 		tmp = tmp->next;
 	}
-	Log("WARNING", "Object with name %s requested from GetObject() not found in %s", objectname.c_str(), name);
+	Log("WARNING", "Object with name %s requested from GetObject() not found in %s", objectname.c_str(), name.c_str());
 	return NULL;
 	//Reset();
 	//CObject *result = Next();

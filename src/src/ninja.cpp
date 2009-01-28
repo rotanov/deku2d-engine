@@ -225,9 +225,6 @@ bool CNinja::Init()
 //	if (ResourceListPath != NULL && ResourceManager.DataPath != "")
 
 
-
-
-
 	if (procUserInit != NULL)
 		if (!procUserInit())
 		{
@@ -355,6 +352,11 @@ bool CNinja::Run()
 	MemChp2();
 	MemCheck();
 	SDLGLExit(0);
+	return true;
+}
+
+bool CNinja::MidInit()
+{
 	return true;
 }
 

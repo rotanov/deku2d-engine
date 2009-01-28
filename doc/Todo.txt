@@ -28,9 +28,9 @@ TODO: Background with animation with parallax effect
 TODO: add events
 
 Unknown:
-TODO: care about collition detection // yeah
+TODO: Collisions; Physics;
 TODO: add advanced geometries // Like convex polygon
 TODO: make Font Editor COMPLETED; next TODO: make font editor to use GUI engine and then improve and document it
 
 
-Changes: All graphic functions that incapsulates OpenGL calls should be named with low-case g prefics. Such as gSetBlendMode();
+note: All graphic functions that incapsulates OpenGL calls should be named with low-case g prefics. Such as gSetBlendMode();

@@ -144,45 +144,38 @@ CResourceManager::CResourceManager()
 	DataPath = "";
 	TexturesFldr = "";
 	FontsFldr = "";
+	ResourceListFileName = NULL;
+	ResourceList = NULL;
 }
 
-bool CResourceManager::LoadResources(char *ResourceList)
+bool CResourceManager::LoadSection(char *SectionName)
 {
-	XMLTable XMLResourceList;
-	if (!XMLResourceList.LoadFromFile(ResourceList))
-	{
-		Log("AHTUNG", "Can't load XMLTable %s", ResourceList);
-		return false;
-	}
 
-	XMLNode x = XMLResourceList.First->Get(CRESOURCE_SECTION_FONTS);
-	string key, val;
-	int Result;
-	CFactory *Factory = CFactory::Instance();
-	CFont *Font; 
-
-	while (x->Enum(key, val, Result))
-	{
-		Font = (CFont*)Factory->Create(OBJ_FONT, NULL);
-		Font->name = key;
-		Font->LoadFromFile((char*)(DataPath+FontsFldr+val).data());
-	}
-
-	x->ResetEnum(0);
-	Factory->FreeInst();
 	return true;
 }
 
-CObject* CResourceManager::LoadResource(char *ResourceList, char* section, char *name, CreateFunc creator)
+bool CResourceManager::LoadResources()
 {
-	XMLTable XMLResourceList;
-	if (!XMLResourceList.LoadFromFile(ResourceList))
+	if (!LoadTextures())
 	{
-		Log("AHTUNG", "Can't load XMLTable %s", ResourceList);
+		Log("ERROR","Error loading textures");
 		return false;
 	}
+	if (!LoadFonts())
+	{
+		Log("ERROR", "ERROR loading fonts");
+		return false;
+	}
+	return true;
+}
 
-	XMLNode x = XMLResourceList.First->Get(section);
+CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc creator)
+{
+	if (ResourceList == NULL)
+	{
+		return false;
+	}
+	XMLNode x = ResourceList->First->Get(section);
 	string val;
 	CFactory *Factory = CFactory::Instance();
 	CResource *result;
@@ -194,31 +187,62 @@ CObject* CResourceManager::LoadResource(char *ResourceList, char* section, char 
 	result->LoadFromFile();
 
 	Factory->FreeInst();
+	return result;
 }
 
-bool CResourceManager::LoadTextures(char *ResourceList)
+bool CResourceManager::LoadFonts()
 {
-	XMLTable XMLResourceList;
-	if (!XMLResourceList.LoadFromFile(ResourceList))
+	if (ResourceList == NULL)
 	{
-		Log("AHTUNG", "Can't load XMLTable %s", ResourceList);
+		Log("WARNING", "Trying to load fonts while Resource list has not been loaded");
 		return false;
 	}
+	XMLNode x = ResourceList->First->Get(CRESOURCE_SECTION_FONTS);
+	string key, val;
+	int Result;
+	CFactory *Factory = CFactory::Instance();
+	CFont *Font;
+	while (x->Enum(key, val, Result))
+	{
+		Font = (CFont*)Factory->Create(OBJ_FONT, NULL);
+		Font->name = key;
+		Font->LoadFromFile((char*)(DataPath+FontsFldr+val).data());
+	}
+	Factory->FreeInst();
+	return true;
+}
 
-	XMLNode x = XMLResourceList.First->Get(CRESOURCE_SECTION_TEXTURES);
+bool CResourceManager::LoadTextures()
+{
+	if (ResourceList == NULL)
+	{
+		Log("WARNING", "Trying to load textures while Resource list has not been loaded");
+		return false;
+	}
+	XMLNode x = ResourceList->First->Get(CRESOURCE_SECTION_TEXTURES);
 	string key, val;
 	int Result;
 	CFactory *Factory = CFactory::Instance(); 
-
-	CTexture * TextureRes;
+	CTexture *TextureRes;
 	while (x->Enum(key, val, Result))
 	{
 		TextureRes = (CTexture*)Factory->Create(OBJ_TEXTURE_RES, CTexture::NewTextureRes);
 		TextureRes->name = key;
 		TextureRes->filename = DataPath + TexturesFldr + val;
 	}
-	
-	x->ResetEnum(0);
 	Factory->FreeInst();
 	return true;
 };
+
+bool CResourceManager::OpenResourceList(char *_ResourceListFileName)
+{
+	if (ResourceList != NULL)
+		delete ResourceList;
+	ResourceList = new XMLTable;
+	ResourceListFileName = _ResourceListFileName;
+	if (!ResourceList->LoadFromFile(ResourceListFileName))
+	{
+		Log("AHTUNG", "Error while loading %s Resource list", ResourceListFileName);
+	}
+	return true;
+}

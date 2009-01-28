@@ -1,8 +1,6 @@
 #ifndef CORE_UTILS_H
 #define CORE_UTILS_H
 
-//#define _DEBUG
-
 #pragma warning (disable  : 4996) 
 #pragma warning (disable  : 4312) 
 
@@ -18,6 +16,7 @@ typedef char				CHAR;
 typedef short				SHORT;
 typedef long				LONG;
 
+//#define _DEBUG
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -38,7 +37,7 @@ using namespace std;
 
 inline char *str(string Str)
 {
-	return (char*)Str.data();
+	return (char*)Str.c_str();
 }
 
 #define T_COBJECT		0x01

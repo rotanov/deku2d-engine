@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
 				AdditionalDependencies="libpng13d.lib zlib1d.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName)_$(ConfigurationName).exe"
+				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib\"
 				GenerateDebugInformation="true"
@@ -144,7 +144,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName)_$(ConfigurationName).exe"
+				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				AdditionalLibraryDirectories="..\lib\"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -181,24 +181,14 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			Name="src"
 			>
 			<File
-				RelativePath=".\zlib\adler32.c"
+				RelativePath=".\src\coreutils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\CoreUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crc32.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Game.cpp"
+				RelativePath=".\src\game.cpp"
 				>
 			</File>
 			<File
@@ -206,23 +196,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ImageUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\ioapi.c"
+				RelativePath=".\src\imageutils.cpp"
 				>
 			</File>
 			<File
@@ -230,23 +204,177 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\MathUtils.cpp"
+				RelativePath=".\src\mathutils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Ninja.cpp"
+				RelativePath=".\src\ninja.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\OpenglUtils.cpp"
+				RelativePath=".\src\openglutils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Physics.cpp"
+				RelativePath=".\src\physics.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\resource.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xml.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="inc"
+			>
+			<File
+				RelativePath=".\inc\CoreUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\event.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Game.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\gui.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\ImageUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MathUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Ninja.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\OpenglUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Physics.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\xml.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath=".\cursor1.cur"
+				>
+			</File>
+			<File
+				RelativePath=".\icon2.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\icon_snw.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Ninja engine.rc"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="libs"
+			>
+			<File
+				RelativePath=".\zlib\adler32.c"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\begin_code.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\close_code.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\crc32.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\crc32.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\crypt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\deflate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inffast.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inffast.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inffixed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inflate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inflate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inftrees.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inftrees.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\ioapi.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\ioapi.h"
 				>
 			</File>
 			<File
 				RelativePath=".\libpng\png.c"
+				>
+			</File>
+			<File
+				RelativePath=".\libpng\png.h"
+				>
+			</File>
+			<File
+				RelativePath=".\libpng\pngconf.h"
 				>
 			</File>
 			<File
@@ -311,140 +439,6 @@
 			</File>
 			<File
 				RelativePath=".\libpng\pngwutil.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\resource.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\trees.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\uncompr.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\unzip.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\xml.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zutil.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath=".\SDL\begin_code.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\close_code.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\CoreUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crc32.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crypt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\deflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\event.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\Game.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gl\gl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gl\GLAux.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gl\GLU.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\gui.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\ImageUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffixed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\ioapi.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MathUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\Ninja.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\OpenglUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\Physics.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\png.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngconf.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
 				>
 			</File>
 			<File
@@ -560,15 +554,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\zlib\trees.c"
+				>
+			</File>
+			<File
 				RelativePath=".\zlib\trees.h"
 				>
 			</File>
 			<File
-				RelativePath=".\zlib\unzip.h"
+				RelativePath=".\zlib\uncompr.c"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\xml.h"
+				RelativePath=".\zlib\unzip.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\unzip.h"
 				>
 			</File>
 			<File
@@ -588,29 +590,11 @@
 				>
 			</File>
 			<File
+				RelativePath=".\zlib\zutil.c"
+				>
+			</File>
+			<File
 				RelativePath=".\zlib\zutil.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-			<File
-				RelativePath=".\cursor1.cur"
-				>
-			</File>
-			<File
-				RelativePath=".\icon2.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\icon_snw.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\Ninja engine.rc"
 				>
 			</File>
 		</Filter>

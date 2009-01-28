@@ -5,7 +5,6 @@
 #include <SDL.h>
 #include <gl\gl.h>
 #include <gl\glu.h>
-//#include <gl\glaux.h>
 #include "CoreUtils.h"
 #include "ImageUtils.h"
 #include "MathUtils.h"
@@ -148,6 +147,8 @@ class CTextureManager : public CObjectList
 {
 public:
 	bool AddTexture(char* filename, bool load = false);
+	bool LoadTextureByName(char *TextureName);
+	bool LoadAllTextures();
 	static CTextureManager* Instance();
 	void FreeInst();
 protected:

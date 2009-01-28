@@ -82,6 +82,7 @@ private:
 
 
 	bool						Init();
+	bool						MidInit();
 	void						CalcFps();
 	bool						LimitFps();
 	bool						Suicide();
