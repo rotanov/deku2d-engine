@@ -12,6 +12,16 @@
 		GrTile	= "Groundtile.bmp"
 		Font10	= "Font10ok.bmp"
 		ball	= "ball.bmp"
+		gift	= "Gift_r.bmp"
+		giftd	= "Gift_d.bmp"
+		bg	= "Bg_b.bmp"
+		gr 	= "Ground.bmp"
+		enemy	= "Enemy_r.bmp"
+		hero	= "Hero_r1.bmp"
+		sball	= "snowb_b.bmp"
+		snwbl	= "snowb_br.bmp"
+		heroa	= "Hero_a1.bmp"
+		herob	= "Hero_b1.bmp"
 	</textures>
 	<font>
 		FFont	= "Font.fif"
