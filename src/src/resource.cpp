@@ -198,6 +198,8 @@ bool CResourceManager::LoadFonts()
 		return false;
 	}
 	XMLNode x = ResourceList->First->Get(CRESOURCE_SECTION_FONTS);
+	if (x == NULL)
+		return false;
 	string key, val;
 	int Result;
 	CFactory *Factory = CFactory::Instance();
@@ -205,6 +207,8 @@ bool CResourceManager::LoadFonts()
 	while (x->Enum(key, val, Result))
 	{
 		Font = (CFont*)Factory->Create(OBJ_FONT, NULL);
+		if (Font == NULL)
+			return false;
 		Font->name = key;
 		Font->LoadFromFile((char*)(DataPath+FontsFldr+val).data());
 	}
@@ -220,6 +224,8 @@ bool CResourceManager::LoadTextures()
 		return false;
 	}
 	XMLNode x = ResourceList->First->Get(CRESOURCE_SECTION_TEXTURES);
+	if (x == NULL)
+		return false;
 	string key, val;
 	int Result;
 	CFactory *Factory = CFactory::Instance(); 
@@ -227,6 +233,8 @@ bool CResourceManager::LoadTextures()
 	while (x->Enum(key, val, Result))
 	{
 		TextureRes = (CTexture*)Factory->Create(OBJ_TEXTURE_RES, CTexture::NewTextureRes);
+		if (TextureRes == NULL) 
+			return false;
 		TextureRes->name = key;
 		TextureRes->filename = DataPath + TexturesFldr + val;
 	}
@@ -243,6 +251,7 @@ bool CResourceManager::OpenResourceList(char *_ResourceListFileName)
 	if (!ResourceList->LoadFromFile(ResourceListFileName))
 	{
 		Log("AHTUNG", "Error while loading %s Resource list", ResourceListFileName);
+		return false;
 	}
 	return true;
 }

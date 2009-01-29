@@ -40,6 +40,8 @@ inline char *str(string Str)
 	return (char*)Str.c_str();
 }
 
+#define EVER (;;)
+
 #define T_COBJECT		0x01
 #define T_RENDERABLE	0x02
 

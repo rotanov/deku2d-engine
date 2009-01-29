@@ -321,7 +321,7 @@ bool CNinja::Run()
 
 
 
-	for(;;)
+	for EVER
 	{
 		if (isHaveFocus)
 		{	

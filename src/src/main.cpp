@@ -12,8 +12,10 @@ CEnemyController *enemyc;
 
 bool Init()
 {	
-	Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath);
-	Ninja->ResourceManager.LoadResources();
+	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
+		return false;
+	if (!Ninja->ResourceManager.LoadResources())
+		return false;
 	CFactory *Factory = CFactory::Instance();
 	gSetBlendingMode();
 
@@ -157,14 +159,10 @@ bool Draw()
 	return true;
 }
 
-bool Update()
-{
-	return true;
-}
+
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_UPDATE_FUNC, &Update);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
 	Ninja->SetState(STATE_USER_INIT, &Init);
 	
