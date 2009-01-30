@@ -9,6 +9,24 @@ CHero *Hero;
 Vector2 pnts[2];
 CEnemyController *enemyc;
 
+void tempMakeTileSet()
+{
+	CTileSet ts;
+	ts.Info.HorNumTiles = 16;
+	ts.Info.VerNumTiles = 4;
+	ts.Info.TileHeight = 16;
+	ts.Info.TileWidth = 16;
+
+	ts.TextureName = "DocT";
+	ts.filename = "Tilsets/TileSet01.tls";
+	ts.SaveToFile();
+}
+
+void tempMakeMap()
+{
+
+}
+
 bool Init()
 {	
 	gSetBlendingMode();
@@ -135,6 +153,9 @@ bool Init()
 
 	Ninja->FontManager->SetCurrentFont("FFont");
 	Factory->FreeInst();
+
+	tempMakeTileSet();
+	tempMakeMap();
 	return true;
 }
 

@@ -32,4 +32,7 @@
 	<tileset>
 		Dokutsu = "TileSet01.tls"
 	</tileset>
+	<levels>
+		Level01 = "Level01.lvl"
+	</levels>
 </resources>

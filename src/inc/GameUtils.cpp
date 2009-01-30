@@ -90,6 +90,28 @@ CObject * CLevelMap::NewLevelMap()
 
 bool CLevelMap::Render()
 {
+	if (!loaded)
+		LoadFromFile();
+	glEnable(GL_TEXTURE);
+	TileSet->Texture->Bind();
+	glBegin(GL_QUADS);
+	for(int i=0;i<numCellsVer;i++)
+		for(int j=0;j<numCellsHor;j++)
+		{
+			CMapCellInfo *t = &Cells[_Cell(j, i)];
+
+			glTexCoord2f(t->tc[0].x, t->tc[0].y);
+			glVertex3f(t->pos[0].x,	t->pos[0].y, t->z);
+
+			glTexCoord2f(t->tc[1].x, t->tc[1].y); 
+			glVertex3f(t->pos[1].x,	t->pos[1].y, t->z);
+
+			glTexCoord2f(t->tc[2].x, t->tc[2].y); 
+			glVertex3f(t->pos[2].x,	t->pos[2].y, t->z);
+
+			glTexCoord2f(t->tc[3].x, t->tc[3].y); 
+			glVertex3f(t->pos[3].x,	t->pos[3].y, t->z);
+		}
 	return true;
 }
 
@@ -122,6 +144,36 @@ bool CLevelMap::LoadFromFile()
 		delete [] Cells;
 	Cells = new CMapCellInfo [numCellsVer*numCellsVer];
 	File.Read(Cells, numCellsVer*numCellsVer*sizeof(CMapCellInfo));
+
+	for(int i=0;i<numCellsVer;i++)
+		for(int j=0;j<numCellsHor;j++)
+		{
+			CMapCellInfo *t = &Cells[_Cell(j, i)];
+			int th, tv;
+			th = t->index % TileSet->Info.HorNumTiles;
+			tv = (t->index) / TileSet->Info.HorNumTiles;
+
+			t->tc[0].x = (th + 0)*TileSet->Info.TileWidth/TileSet->Texture->width;
+			t->tc[0].y = (tv + 0)*TileSet->Info.TileHeight/TileSet->Texture->height;
+			t->pos[0].x = (j + 0)*TileSet->Info.TileWidth;
+			t->pos[0].y = (i + 0)*TileSet->Info.TileHeight;
+
+			t->tc[1].x = (th + 1)*TileSet->Info.TileWidth/TileSet->Texture->width;
+			t->tc[1].y = (tv + 0)*TileSet->Info.TileHeight/TileSet->Texture->height;
+			t->pos[1].x = (j + 1)*TileSet->Info.TileWidth;
+			t->pos[1].y = (i + 0)*TileSet->Info.TileHeight;
+
+			t->tc[2].x = (th + 1)*TileSet->Info.TileWidth/TileSet->Texture->width;
+			t->tc[2].y = (tv + 1)*TileSet->Info.TileHeight/TileSet->Texture->height;
+			t->pos[2].x = (j + 1)*TileSet->Info.TileWidth;
+			t->pos[2].y = (i + 1)*TileSet->Info.TileHeight;	
+
+			t->tc[3].x = (th + 0)*TileSet->Info.TileWidth/TileSet->Texture->width;
+			t->tc[3].y = (tv + 1)*TileSet->Info.TileHeight/TileSet->Texture->height;
+			t->pos[3].x = (j + 0)*TileSet->Info.TileWidth;
+			t->pos[3].y = (i + 1)*TileSet->Info.TileHeight;
+		}
+
 	File.Close();
 	Factory->FreeInst();
 	return true;

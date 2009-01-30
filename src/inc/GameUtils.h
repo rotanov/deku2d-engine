@@ -26,7 +26,7 @@ public:
 	{
 		return new CTileSet;
 	}
-
+	
 
 	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData);
 	bool LoadFromFile();
@@ -42,7 +42,6 @@ struct CMapCellInfo
 	int z; // if 0 then - check for collision; else z.0f = 1/256.0f;
 	Vector2 tc[4];
 	Vector2 pos[4];
-	CBBox *BBox;
 };
 
 /**
