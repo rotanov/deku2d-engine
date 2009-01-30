@@ -192,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\GameUtils.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\gui.cpp"
 				>
 			</File>
@@ -241,6 +245,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\Game.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\GameUtils.h"
 				>
 			</File>
 			<File
