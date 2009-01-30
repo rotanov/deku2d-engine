@@ -9,7 +9,7 @@
 
 #pragma warning(disable:4244)
 
-class CUnit : public CRenderObject
+class CUnit : public CRenderObject, public CUpdateObject
 {
 public:
 	int Health;
@@ -26,7 +26,7 @@ public:
 		Health  = 100;
 		Gift = CBBox(274, GROUND, 260 + 102 , GROUND + 59 );
 	}
-	virtual bool Update(float dt)
+	bool Update(float dt)
 	{
 		return true;
 	}
@@ -42,6 +42,10 @@ public:
 		EnemyPos = NULL;
 	}
 	bool Update(float dt);
+	bool Render()
+	{
+		return true;
+	}
 	void Move(float dm, float dt);
 	void MoveInstant(Vector2 pos);
 	void Stop();
@@ -115,13 +119,13 @@ public:
 
 		CNinja *Ninja = CNinja::Instance();
 		CFactory  *Factory  = CFactory::Instance();
-		snowballs = (CParticleSystem*)Factory->Create(OBJ_PSYSTEM, NULL);
+		snowballs = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 		Factory->FreeInst();
 
 		snowballs->name = "snowballs";
 		snowballs->Init();
-		((CTexture*)Ninja->TextureManager->GetObject("snwbl"))->Load();
-		snowballs->TexID = ((CTexture*)Ninja->TextureManager->GetObject("snwbl"))->GetTexID();
+		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snwbl")))->Load();
+		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snwbl")))->GetTexID();
 
 		snowballs->info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 		snowballs->info.ec = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);

@@ -16,7 +16,7 @@ bool CTileSet::LoadFromFile()
 
 	file.ReadLine(TextureName);
 
-	Texture = (CTexture*)((CTextureManager*)Factory->GetManager(MANAGER_TYPE_TEX))->GetObject(TextureName);
+	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
 
 
 	file.Read(&Info, sizeof(Info));
@@ -50,7 +50,7 @@ bool CTileSet::SaveToFile()
 		return false;
 	}
 
-	file.Write(Texture->name.c_str(), strlen(Texture->name.c_str())+1);
+	file.Write(TextureName, strlen(TextureName)+1);
 	file.Write(&Info, sizeof(Info));
 	file.Write(BBox, sizeof(CBBox)*Info.HorNumTiles*Info.VerNumTiles);
 
@@ -125,18 +125,16 @@ bool CLevelMap::LoadFromFile()
 		return false;
 	}
 
-	char *tmp = NULL;
-	File.ReadLine(tmp);
-	name = tmp;
 	File.ReadLine(TileSetName);
 
 	TileSet = NULL;
-	TileSet = (CTileSet*)Factory->GetObject(TileSetName);
+	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
 	if (TileSet == NULL)
 	{
-		TileSet = (CTileSet*)Factory->Create(OBJ_USER_DEFINED, CTileSet::NewTileSet);		
+		TileSet = dynamic_cast<CTileSet*>(Factory->Create(OBJ_USER_DEFINED, CTileSet::NewTileSet));		
 		//TileSet->LoadFromFile(tilesetname);
 	}
+	TileSet->Texture->Load();
 
 	File.Read(&numCellsHor, sizeof(numCellsHor));
 	File.Read(&numCellsVer, sizeof(numCellsVer));
@@ -188,7 +186,7 @@ bool CLevelMap::SaveToFile()
 		Log("AHTUNG", "Can't open file %s to save the map", filename);
 		return false;
 	}
-	file.Write((void*)name.data(), strlen(name.data())+1);
+	
 	file.Write(TileSetName, strlen(TileSetName)+1);
 	file.Write(&numCellsHor, sizeof(numCellsHor));
 	file.Write(&numCellsVer, sizeof(numCellsVer));

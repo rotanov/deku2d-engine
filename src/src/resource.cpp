@@ -181,9 +181,9 @@ CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc cr
 	CResource *result;
 	val = x->Get(name)->GetValue();
 
-	result = static_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator)); // May be not safe, be careful here: creator sholud return class derived from CResource
+	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator)); // May be not safe, be careful here: creator sholud return class derived from CResource
 	result->name = name;
-	result->filename = (char*)((DataPath+val).data());
+	result->filename = DataPath + val;
 	result->LoadFromFile();
 
 	Factory->FreeInst();
@@ -232,7 +232,7 @@ bool CResourceManager::LoadTextures()
 	CTexture *TextureRes;
 	while (x->Enum(key, val, Result))
 	{
-		TextureRes = (CTexture*)Factory->Create(OBJ_TEXTURE_RES, CTexture::NewTextureRes);
+		TextureRes = dynamic_cast<CTexture*>(Factory->Create(OBJ_TEXTURE_RES, CTexture::NewTextureRes));
 		if (TextureRes == NULL) 
 			return false;
 		TextureRes->name = key;

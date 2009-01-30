@@ -30,9 +30,9 @@
 		FBeta	= "Beta.fif"
 	</font>
 	<tileset>
-		Dokutsu = "TileSet01.tls"
+		Dokutsu = "Tilesets/TileSet01.tls"
 	</tileset>
 	<levels>
-		Level01 = "Level01.lvl"
+		Level01 = "Levels/Level01.lvl"
 	</levels>
 </resources>

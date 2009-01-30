@@ -118,7 +118,7 @@ public:
 };
 
 
-class CGraphObj : public CObject
+class CGraphObj : public CUpdateObject
 {
 public:
 	CGraphObj()
@@ -294,6 +294,8 @@ public:
 	CEdit(unsigned int _Style);
 	~CEdit(){};
 	virtual void			Draw();
+	virtual bool			Update(float dt){return true;};
+	// сорри, нехуй в аське не отвечать
 	virtual void			Step();
 	virtual void			MouseProcess(byte btn, byte event);
 	virtual void			KeyProcess(SDLKey &btn, byte event);

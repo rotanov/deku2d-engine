@@ -192,7 +192,7 @@ void		setWidgetStyle(PWidget obj, unsigned int Style){
 	obj->setStyle(Style);
 }
 PWidget		getWidget(char *name){
-	return (PWidget)(Objects.GetObject(name));
+	return dynamic_cast<PWidget>(Objects.GetObject(name));
 }
 
 void CGraphObj::setStyle(unsigned int _Style)
@@ -620,7 +620,7 @@ void CForm::Draw()
 	Items.Reset();
 	while (Items.Enum(obj))
 	{
-		((PWidget)obj)->Draw();
+		(dynamic_cast<PWidget>(obj))->Draw();
 	}
 	Top = Top - HeaderHeight;
 //	Body.Items.Call(FormDraw);
@@ -720,7 +720,7 @@ bool CForm::Update( float dt )
 	Items.Reset();
 	while (Items.Enum(tmp))
 	{
-		PWidget obj = (CGraphObj*)tmp;
+		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
 		if (MouseInObjRect(obj))
 		{
 			if (((MouseFocus != NULL) && (!ISFORM(MouseFocus))) && (MouseFocus != obj))
@@ -756,7 +756,7 @@ void CForm::DrawText()
 	}
 	while (Items.Enum(tmp))
 	{
-		PWidget obj = (CGraphObj*)tmp;
+		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
 		obj->DrawText();
 	}
 }
@@ -915,15 +915,15 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 
 bool FormSort(CObject *obj1, CObject *obj2)
 {
-	((PWidget)obj1)->ZDepth = GUI_BOTTOM + ((PWidget)obj1)->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	((PWidget)obj2)->ZDepth = GUI_BOTTOM + ((PWidget)obj2)->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	return ((PWidget)obj1)->Tag <= ((PWidget)obj2)->Tag;
+	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	return (dynamic_cast<PWidget>(obj1))->Tag <= (dynamic_cast<PWidget>(obj2))->Tag;
 }
 bool InvFormSort(CObject *obj1, CObject *obj2)
 {
-	((PWidget)obj1)->ZDepth = GUI_BOTTOM + ((PWidget)obj1)->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	((PWidget)obj2)->ZDepth = GUI_BOTTOM + ((PWidget)obj2)->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	return ((PWidget)obj1)->Tag >= ((PWidget)obj2)->Tag;
+	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	return (dynamic_cast<PWidget>(obj1))->Tag >= (dynamic_cast<PWidget>(obj2))->Tag;
 }
 
 bool CGUIRenderer::Render()
@@ -937,9 +937,9 @@ bool CGUIRenderer::Render()
 	GUIScheme->BeginUI();
 	while (Forms.Enum(tmp))
 	{
-		PWidget obj = (CGraphObj*)tmp;
-		((PWidget)obj)->ZDepth = GUI_BOTTOM + ((PWidget)obj)->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-		((CForm*)obj)->Items.Sort(FormSort);
+		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
+		(dynamic_cast<PWidget>(obj))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+		(dynamic_cast<CForm*>(obj))->Items.Sort(FormSort);
 		obj->Draw();
 	}
 	GUIScheme->EndUI();
@@ -947,7 +947,7 @@ bool CGUIRenderer::Render()
 	Forms.Reset();
 	while (Forms.Enum(tmp))
 	{
-		PWidget obj = (CGraphObj*)tmp;
+		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
 		obj->DrawText();
 	}
 	
@@ -961,7 +961,7 @@ bool CGUIRenderer::Update( float dt )
 	CObject *tmp;
 	while (Forms.Enum(tmp))
 	{
-		CForm *obj = (CForm*)tmp;
+		CForm *obj = dynamic_cast<CForm*>(tmp);
 
 		if (MouseIn(obj->Left, obj->Top, obj->Width, obj->HeaderHeight*obj->Properties[GUI_DRAWFORMHEADER]))
 		{

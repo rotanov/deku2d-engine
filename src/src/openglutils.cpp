@@ -613,8 +613,8 @@ bool CFont::LoadFromFile(char* filename)
 	
 	file.ReadLine(FontImageName);	
 	CTextureManager *TexMan = CTextureManager ::Instance();
-	((CTexture*)TexMan->GetObject(FontImageName))->Load();
-	image = (CTexture*)(TexMan->GetObject(FontImageName));
+	(dynamic_cast<CTexture*>(TexMan->GetObject(FontImageName)))->Load();
+	image = dynamic_cast<CTexture*>((TexMan->GetObject(FontImageName)));
 	TexMan->FreeInst();
 	//image->LoadTexture(FontImageName);
 	font = image->GetTexID();
@@ -856,7 +856,7 @@ CRenderManager::~CRenderManager()
 bool CRenderManager::DrawObjects()
 {
 	Reset();
-	CRenderObject *data = (CRenderObject*)(Next());
+	CRenderObject *data = dynamic_cast<CRenderObject*>(Next());
 	glPushMatrix();
 	Camera.Update();
 	
@@ -870,7 +870,7 @@ bool CRenderManager::DrawObjects()
 			glTranslatef((int)data->x,(int) data->y, data->z);
 			data->Render();
 		}
-		data = (CRenderObject*)(Next());
+		data = dynamic_cast<CRenderObject*>(Next());
 	}
 	glPopMatrix();
 
@@ -883,12 +883,12 @@ bool CRenderManager::DrawObjects()
 
 bool CompAlpha(CObject *a, CObject *b)
 {
-	return ((CRenderObject*)a)->color.a >= ((CRenderObject*)b)->color.a;
+	return (dynamic_cast<CRenderObject*>(a))->color.a >= (dynamic_cast<CRenderObject*>(b))->color.a;
 }
 
 bool CompZ(CObject *a, CObject *b)
 {
-	return ((CRenderObject*)a)->z <= ((CRenderObject*)b)->z;
+	return (dynamic_cast<CRenderObject*>(a))->z <= (dynamic_cast<CRenderObject*>(b)->z);
 }
 
 
@@ -1436,7 +1436,7 @@ bool CTextureManager::AddTexture( char* filename, bool load)
 bool CTextureManager::LoadTextureByName(char *TextureName)
 {
 	CTexture *tmp = NULL;
-	tmp = (CTexture*)GetObject(TextureName);
+	tmp = dynamic_cast<CTexture*>(GetObject(TextureName));
 	if (tmp == NULL)
 	{
 		Log("WARNING", "Can't load find texture with name %s", TextureName);

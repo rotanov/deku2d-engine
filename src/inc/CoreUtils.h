@@ -79,12 +79,14 @@ class CObject
 public:
 	int type, id;	// type - флаши свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
 	string name;	// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
-	virtual bool Update(float dt)
-	{
-		return false;
-	};
 	CObject();
 	virtual ~CObject(){};
+};
+
+class CUpdateObject : public virtual CObject
+{
+public:
+	virtual bool Update(float dt) = 0;
 };
 
 typedef CObject* (*CreateFunc)();
@@ -163,7 +165,7 @@ public:
 	CBaseResource():loaded(false), filename(""){}
 };
 
-class CResource : public CObject, public CBaseResource
+class CResource : public CBaseResource, virtual public CObject
 {
 public:
 	CResource(){}

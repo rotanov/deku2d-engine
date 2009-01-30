@@ -367,11 +367,11 @@ bool CUpdateManager::UpdateObjects()
 {
 	Reset();
 	CNinja *engine = CNinja::Instance();
-	CObject *data = (CObject*)(Next());
+	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
 	while (data)
 	{
 		data->Update(0.02f); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
-		data = (Next());
+		data = dynamic_cast<CUpdateObject*>(Next());
 	}
 	engine->FreeInst();
 	return true;

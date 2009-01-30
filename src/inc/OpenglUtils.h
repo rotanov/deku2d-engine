@@ -24,7 +24,7 @@ public:
 	void glSet();
 };
 
-class CRenderObject : public CObject
+class CRenderObject : public virtual CObject
 {
 public:
 	float				x, y, z;
@@ -36,7 +36,7 @@ public:
 		type = T_RENDERABLE;
 	};
 	void SetColor(byte _r, byte _g, byte _b, byte _a);
-	virtual bool Render(){return true;};
+	virtual bool Render() = 0;
 	virtual ~CRenderObject(){};
 };
 
@@ -122,7 +122,7 @@ protected:
 	GLuint TexID;
 };
 
-class CTexture : public CGLImageData, public CRenderResource
+class CTexture : public CGLImageData, public CResource, public CRenderObject
 {
 public:
 	CTexture(char * vfilename)
@@ -465,7 +465,7 @@ struct CPsysteminfo
 typedef void (*FCreateFunc)(CParticle *);
 typedef void (*FUpdateFunc)(CParticle *, float);
 
-class CParticleSystem :  public CRenderResource
+class CParticleSystem :  public CResource, public CRenderObject, public CUpdateObject
 {
 public:
 	CPsysteminfo			info;

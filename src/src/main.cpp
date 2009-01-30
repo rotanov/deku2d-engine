@@ -18,13 +18,26 @@ void tempMakeTileSet()
 	ts.Info.TileWidth = 16;
 
 	ts.TextureName = "DocT";
-	ts.filename = "Tilsets/TileSet01.tls";
+	ts.filename = "data\\Tilesets\\TileSet01.tls";
 	ts.SaveToFile();
 }
 
 void tempMakeMap()
 {
+	CLevelMap m;
+	m.filename = "Data\\Levels\\Level01.lvl";
+	m.TileSetName = "Dokutsu";
+	m.numCellsHor = 4;
+	m.numCellsVer = 3;
 
+	int ind[12] = {1,2,3,4,5,6,7,8,9,1,2,3};
+	m.Cells = new  CMapCellInfo [12];
+	for (int i=0;i<12;i++)
+	{
+		m.Cells[i].index = ind[i];
+		m.Cells[i].z = 0.5f;
+	}
+	m.SaveToFile();
 }
 
 bool Init()
@@ -38,18 +51,18 @@ bool Init()
 	CFactory *Factory = CFactory::Instance();
 	
 
-	Hero = (CHero*)Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero));
+	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
 	Hero->x = 200;
 	Hero->y = 200;//GROUND;
 	Hero->z = 0.0f;
 
-	Hero->sprite.m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("hero"))->GetTexID();
+	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("hero")))->GetTexID();
 	Hero->sprite.m_nTextureHeight = 32;
 	Hero->sprite.m_nTextureWidth = 32;
 	Hero->sprite.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->sprite.SetAnimation(1);
 
-	Hero->spra.m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("heroa"))->GetTexID();
+	Hero->spra.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("heroa")))->GetTexID();
 	Hero->spra.m_nTextureHeight = 32;
 	Hero->spra.m_nTextureWidth = 32;
 	Hero->spra.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
@@ -58,13 +71,13 @@ bool Init()
 	Hero->sprb.z = 0.0f;
 	Hero->z = -0.5f;
 
-	Hero->sprb.m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("herob"))->GetTexID();
+	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("herob")))->GetTexID();
 	Hero->sprb.m_nTextureHeight = 32;
 	Hero->sprb.m_nTextureWidth = 32;
 	Hero->sprb.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->sprb.SetAnimation(1);
 
-	ps = (CParticleSystem*)Factory->Create(OBJ_PSYSTEM, NULL);
+	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 	ps->name = "psys";
 	ps->Init();
 	ps->info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
@@ -78,7 +91,7 @@ bool Init()
 	// debug //
 	ps->info.sizevar = 8;
 	ps->info.isSnow = true; // костыль
-	ps->TexID = ((CTexture*)Ninja->TextureManager->GetObject("sball"))->GetTexID();
+	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("sball")))->GetTexID();
 	ps->SetGeometry(pnts, 2);
 
 	int i;
@@ -87,7 +100,7 @@ bool Init()
 		ps->Update(0.02f);
 	}
 
-	ps = (CParticleSystem*)Factory->Create(OBJ_PSYSTEM, NULL);
+	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 	ps->name = "enemy_l";
 	ps->Init();
 
@@ -99,13 +112,13 @@ bool Init()
 	ps->info.emission = 0;
 	ps->info.startsize = 64;
 
-	enemyc = (CEnemyController*)Factory->Create(OBJ_USER_DEFINED, &(CEnemyController::NewController));
+	enemyc = dynamic_cast<CEnemyController*>(Factory->Create(OBJ_USER_DEFINED, &(CEnemyController::NewController)));
 	enemyc->AssignPS(ps);
 
-	ps->TexID = ((CTexture*)Ninja->TextureManager->GetObject("enemy"))->GetTexID();
+	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("enemy")))->GetTexID();
 
-	Spr = (CSprite*)Factory->Create(OBJ_SPRITE, NULL);
-	Spr->m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("gift"))->GetTexID();
+	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("gift")))->GetTexID();
 	Spr->m_nTextureHeight = 64;
 	Spr->m_nTextureWidth = 64;
 	Spr->AddAnimation(true, 1, 104, 98, 1, 1, 1, 52, 49, 2, 15, 1, true);
@@ -116,8 +129,8 @@ bool Init()
 	Spr->z = 0.9f; 
 	Spr->visible = true;
 
-	Spr = (CSprite*)Factory->Create(OBJ_SPRITE, NULL);
-	Spr->m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("bg"))->GetTexID();
+	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("bg")))->GetTexID();
 	Spr->m_nTextureHeight = 256;
 	Spr->m_nTextureWidth = 256;
 	Spr->AddAnimation(true, 1, 512, 512, 1, 1, 1, 256, 256, 0, 0, 1, true);
@@ -128,8 +141,8 @@ bool Init()
 	Spr->z = -0.9f; 
 	Spr->visible = true;
 
-	Spr = (CSprite*)Factory->Create(OBJ_SPRITE, NULL);
-	Spr->m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("gr"))->GetTexID();
+	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("gr")))->GetTexID();
 	Spr->m_nTextureHeight = 16;
 	Spr->m_nTextureWidth = 256;
 	Spr->AddAnimation(true, 1, 512, 32, 1, 1, 1, 256, 16, 0, 0, 1, true);
@@ -147,6 +160,13 @@ bool Init()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LINE_WIDTH);
+
+	CTileSet *ts;
+	ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("tileset", "Dokutsu", CTileSet::NewTileSet));
+	
+	CLevelMap *lm;
+	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("levels", "Level01", CLevelMap::NewLevelMap));
+	lm->visible = false;
 	
 	Ninja->RenderManager.SortByZ();
 	Ninja->RenderManager.SortByAlpha();
@@ -154,8 +174,8 @@ bool Init()
 	Ninja->FontManager->SetCurrentFont("FFont");
 	Factory->FreeInst();
 
-	tempMakeTileSet();
-	tempMakeMap();
+	//tempMakeTileSet();
+	//tempMakeMap();
 	return true;
 }
 

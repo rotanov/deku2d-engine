@@ -80,7 +80,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 		p->p.y = 0;
 	}
 	CNinja *Ninja = CNinja::Instance();
-	CParticleSystem *ps = (CParticleSystem*)Ninja->RenderManager.GetObject("snowballs");
+	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObject("snowballs"));
 	Ninja->FreeInst();
 
 	CBBox Gift = CBBox(274, GROUND, 260 + 102 , GROUND + 59 );
@@ -163,7 +163,7 @@ bool CHero::Update( float dt )
 	{
 		if (abs(Snow - 100.0f) > 0.001f)
 		{
-			CParticleSystem *ps = (CParticleSystem*)Ninja->Factory->GetObject("psys");
+			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("psys"));
 			Vector2 n;
 
 			for (int i=0; i< ps->info.ParticlesActive; i++)
@@ -199,7 +199,7 @@ bool CHero::Update( float dt )
 	}
 
 
-	CParticleSystem *ps = (CParticleSystem*)Ninja->Factory->GetObject("enemy_l");
+	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("enemy_l"));
 	for (int i=0; i< ps->info.ParticlesActive; i++)
 	{
 		CBBox tmp = CBBox(ps->particles[i].p, ps->particles[i].p + Vector2(ps->particles[i].size, ps->particles[i].size));
@@ -212,8 +212,8 @@ bool CHero::Update( float dt )
 	Health= clampf(Health, 0.0f, 100.0f);
 	if (Health <= 0.001f)
 	{
-		((CTexture*)Ninja->TextureManager->GetObject("giftd"))->Load();
-		((CSprite*)Ninja->RenderManager.GetObject("GftSpr"))->m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("giftd"))->GetTexID();
+		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->Load();
+		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObject("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->GetTexID();
 	}
 
 
@@ -331,7 +331,7 @@ bool CEnemyController::Update( float dt )
 		bool flag = false;
 		for (int i = 0; i < ps->info.ParticlesActive; i++)
 		{
-			if (((CEnemy*)obj)->EnemyPos == &ps->particles[i])
+			if ((dynamic_cast<CEnemy*>(obj))->EnemyPos == &ps->particles[i])
 			{
 				flag = true;
 				break;
@@ -351,7 +351,7 @@ CEnemy * CEnemyController::SpawnEnemy()
 {
 	if (ps->info.ParticlesActive >= ps->info.MaxParticles)
 		return NULL;
-	CEnemy *enemy = (CEnemy*)factory->Create(OBJ_USER_DEFINED, &(CEnemy::NewEnemy));
+	CEnemy *enemy = dynamic_cast<CEnemy*>(factory->Create(OBJ_USER_DEFINED, &(CEnemy::NewEnemy)));
 	enemy->AssignParticle(ps->CreateParticle());
 	bool side = rand()%2;
 	enemy->EnemyPos->p.y = GROUND;

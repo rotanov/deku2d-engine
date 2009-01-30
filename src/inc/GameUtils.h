@@ -48,7 +48,7 @@ struct CMapCellInfo
 * Cells: ^>
 */
 
-class CLevelMap : public CRenderResource
+class CLevelMap : public CResource, public CRenderObject
 {
 public:
 	int				numCellsHor, numCellsVer;
@@ -70,6 +70,10 @@ public:
 	}
 	~CLevelMap(){}
 	
+	bool Update(float dt)
+	{
+		return true;
+	}
 	bool LoadFromFile();
 	bool SaveToFile();
 	bool Render();
