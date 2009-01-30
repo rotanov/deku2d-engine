@@ -1,7 +1,0 @@
-[Thu Jan 29 01:09:28 2009] [INFO] Log file "System.log" created
-[Thu Jan 29 01:09:28 2009] [INFO] Memory allocated for FontManager
-[Thu Jan 29 01:09:28 2009] [INFO] Font manager instanced by ninja.cpp
-[Thu Jan 29 01:09:28 2009] [AHTUNG] Can't open file config/configuration.xml.
-[Thu Jan 29 01:09:28 2009] [XMLERROR] Cannot load xml file "config/configuration.xml".
-[Thu Jan 29 01:09:28 2009] [AHTUNG] Can't load XMLTable config/configuration.xml
-[Thu Jan 29 01:09:28 2009] [PIZDEC] Init failed
