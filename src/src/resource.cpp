@@ -101,6 +101,11 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 					RenderManager->AddObject(tmp);
 					break;
 				}
+			case T_RENDERABLE | T_COBJECT:
+				{
+					RenderManager->AddObject(tmp);
+					break;
+				}
 			}
 			switch(tmp->type & T_RIGHT_MASK)
 			{

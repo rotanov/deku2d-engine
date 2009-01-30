@@ -77,15 +77,26 @@ protected:
 class CObject
 {
 public:
-	int type, id;	// type - флаши свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
+	unsigned int type, id;	// type - флаши свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
 	string name;	// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
-	CObject();
+	CObject()
+	{
+		type = 0;
+		name += "CObject ";
+		id = 0;
+	};
 	virtual ~CObject(){};
 };
 
 class CUpdateObject : public virtual CObject
 {
 public:
+	CUpdateObject()
+	{
+		type |= T_UPDATABLE;
+		name += "CUdateObject ";
+		id = 0;
+	}
 	virtual bool Update(float dt) = 0;
 };
 
@@ -168,7 +179,7 @@ public:
 class CResource : public CBaseResource, virtual public CObject
 {
 public:
-	CResource(){}
+	//CResource(){}
 };
 
 /**

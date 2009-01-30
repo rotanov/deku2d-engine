@@ -5,11 +5,6 @@
 int ___w=0, ___h=0;
 bool Enabled = true;
 
-CObject::CObject()
-{
-	type = T_COBJECT;
-	name = "CObject";
-}
 
 CFile::CFile(char *filename, int mode)
 {
@@ -24,6 +19,7 @@ CFile::CFile(char *filename, int mode)
 			Log("AHTUNG", "Can't open file %s", filename);
 		}
 }
+
 bool CFile::Open(const char *filename, int mode)
 {
 	if (filename == NULL)

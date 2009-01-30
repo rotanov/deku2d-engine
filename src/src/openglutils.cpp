@@ -866,7 +866,7 @@ bool CRenderManager::DrawObjects()
 		if (data->visible)
 		{
 			glLoadIdentity();
-			Camera.gTranslate();
+				Camera.gTranslate();
 			glTranslatef((int)data->x,(int) data->y, data->z);
 			data->Render();
 		}

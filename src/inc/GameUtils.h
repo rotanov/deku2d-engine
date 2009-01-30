@@ -39,7 +39,7 @@ struct CMapCellInfo
 {
 	int index;
 	int interaction;
-	int z; // if 0 then - check for collision; else z.0f = 1/256.0f;
+	float z; // if 0 then - check for collision; else z.0f = 1/256.0f;
 	Vector2 tc[4];
 	Vector2 pos[4];
 };
@@ -48,7 +48,7 @@ struct CMapCellInfo
 * Cells: ^>
 */
 
-class CLevelMap : public CResource, public CRenderObject
+class CLevelMap : public CResource, public CRenderObject, public CUpdateObject
 {
 public:
 	int				numCellsHor, numCellsVer;
@@ -59,14 +59,11 @@ public:
 	static CObject *NewLevelMap();
 	CLevelMap()
 	{
-		// TODO : in cpp ->
-		name = "CLevelMap";
-		type = T_RENDERABLE | T_UPDATABLE;
-		TileSetName = NULL;
-		name = "New map";
 		numCellsHor = numCellsVer = 0;
-		TileSet = NULL;
 		Cells = NULL;
+		TileSet = NULL;
+		TileSetName = NULL;
+		name = "CLevelMap";		
 	}
 	~CLevelMap(){}
 	

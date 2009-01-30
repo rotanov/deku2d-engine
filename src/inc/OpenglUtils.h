@@ -32,19 +32,15 @@ public:
 	glRGBAub			color;
 	CRenderObject() : x(0), y(0), z(0), visible(true), color(255, 255, 255, 255)
 	{
-		name = "CRenderObject";
-		type = T_RENDERABLE;
+		name += "CRenderObject ";
+		type |= T_RENDERABLE;
 	};
 	void SetColor(byte _r, byte _g, byte _b, byte _a);
 	virtual bool Render() = 0;
 	virtual ~CRenderObject(){};
 };
 
-class CRenderResource : public CRenderObject, public CBaseResource
-{
-public:
-	CRenderResource(){}
-};
+
 
 
 class CCamera : public CObject

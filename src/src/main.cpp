@@ -30,12 +30,16 @@ void tempMakeMap()
 	m.numCellsHor = 4;
 	m.numCellsVer = 3;
 
-	int ind[12] = {1,2,3,4,5,6,7,8,9,1,2,3};
+	int ind[12] = {12,13,44,47,
+				   48,48,60,63,
+				   52,48,48,48};
 	m.Cells = new  CMapCellInfo [12];
+	memset(m.Cells, 0, 12*(sizeof(CMapCellInfo)));
 	for (int i=0;i<12;i++)
 	{
 		m.Cells[i].index = ind[i];
 		m.Cells[i].z = 0.5f;
+		m.Cells[i].interaction = 0;
 	}
 	m.SaveToFile();
 }
@@ -161,12 +165,15 @@ bool Init()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LINE_WIDTH);
 
+	tempMakeTileSet();
+	tempMakeMap();
+
 	CTileSet *ts;
 	ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("tileset", "Dokutsu", CTileSet::NewTileSet));
 	
 	CLevelMap *lm;
 	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("levels", "Level01", CLevelMap::NewLevelMap));
-	lm->visible = false;
+	lm->visible = true;
 	
 	Ninja->RenderManager.SortByZ();
 	Ninja->RenderManager.SortByAlpha();
@@ -174,8 +181,7 @@ bool Init()
 	Ninja->FontManager->SetCurrentFont("FFont");
 	Factory->FreeInst();
 
-	//tempMakeTileSet();
-	//tempMakeMap();
+
 	return true;
 }
 
