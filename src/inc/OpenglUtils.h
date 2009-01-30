@@ -80,7 +80,6 @@ public:
 class CGLImageData : public CImageData
 {
 public:
-	GLuint TexID;
 	bool CleanData;
 
 	/**
@@ -115,9 +114,12 @@ public:
 	*	Ends Drawing procedure.
 	*/
 	bool EndDraw();
+	virtual GLuint& GetTexID();
 
 private:
 	bool isDrawing;
+protected:
+	GLuint TexID;
 };
 
 class CTexture : public CGLImageData, public CRenderResource
@@ -141,6 +143,7 @@ public:
 		return new CTexture;
 	}
 	bool Load();
+	GLuint& GetTexID();
 };
 
 class CTextureManager : public CObjectList
@@ -379,6 +382,8 @@ public:
 	bool			Print(int x, int y, float depth, char* text, ...);
 	CFont*			GetFont(char* fontname);
 	CFont*			GetFontEx(string fontname);
+	bool			AddObject(CObject *object);
+
 protected:
 	CFontManager();
 	~CFontManager();

@@ -178,6 +178,13 @@ bool CGLImageData::EndDraw()
 	glPopAttrib();
 	return true;
 }
+
+GLuint& CGLImageData::GetTexID()
+{
+	if (TexID == 0)
+		Log("WARNING", "GLImageData. Trying to access TexID but it is 0");
+	return TexID;
+}
 //-------------------------------------------//
 //				CSprite functions			 //
 //-------------------------------------------//
@@ -206,7 +213,7 @@ bool CSprite::LoadTexture(char *filename)
 {
 	CGLImageData temp;
 	temp.LoadTexture(filename);
-	m_textureID = temp.TexID;
+	m_textureID = temp.GetTexID();
 	m_nTextureWidth = temp.width;
 	m_nTextureHeight = temp.height;	
 	return true;
@@ -610,7 +617,7 @@ bool CFont::LoadFromFile(char* filename)
 	image = (CTexture*)(TexMan->GetObject(FontImageName));
 	TexMan->FreeInst();
 	//image->LoadTexture(FontImageName);
-	font = image->TexID;
+	font = image->GetTexID();
 	file.Read(bbox, sizeof(bbox));
 	file.Close();
 	base = glGenLists(256);
@@ -1335,7 +1342,7 @@ CFontManager* CFontManager::_instance = 0;
 int CFontManager::_refcount = 0;
 
 
-CFont* CFontManager::GetFont( char* fontname )
+CFont* CFontManager::GetFont( char* fontname )	
 {
 	return (CFont*)GetObject(fontname);
 }
@@ -1359,7 +1366,6 @@ bool CFontManager::Print( int x, int y, float depth, char* text, ... )
 	return true;
 }
 
-
 bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 {
 	if (!CurrentFont)
@@ -1375,9 +1381,18 @@ bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 	return true;
 }
 
+bool CFontManager::AddObject( CObject *object )
+{
+	CObjectList::AddObject(object);
+	if (CurrentFont == NULL)
+		CurrentFont = (CFont*)object;
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //						CTexture Manager
 //////////////////////////////////////////////////////////////////////////
+
 CTextureManager* CTextureManager::Instance()
 {
 	if (_instance == NULL)
@@ -1465,6 +1480,18 @@ bool CTexture::Load()
 	return loaded;
 }
 
+GLuint& CTexture::GetTexID()
+{
+	if (TexID == 0)
+	{
+		Log("WARNING", "CTextuere named %s. Trying to access TexID but it is 0", name.c_str());
+		if (!loaded)
+		{
+			Load();
+		}		
+	}
+	return TexID;
+}
 
 void CCamera::Assign(scalar *x, scalar *y)
 {

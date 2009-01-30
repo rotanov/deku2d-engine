@@ -40,7 +40,7 @@ void CTileSet::RenderTileSet()
 	// encapsulate Opengl calls
 	glEnable(GL_TEXTURE_2D);
 	glLoadIdentity();
-	glBindTexture(GL_TEXTURE_2D, Data.TexID);
+	glBindTexture(GL_TEXTURE_2D, Data.GetTexID());
 	glBegin(GL_QUADS);
 		glTexCoord2f(0, 0); glVertex2f(0, 0);
 		glTexCoord2f(1, 0); glVertex2f(Info.TileWidth*Info.HorNumTiles, 0);
@@ -402,7 +402,7 @@ bool CHero::Update( float dt )
 	if (Health <= 0.001f)
 	{
 		((CTexture*)Ninja->TextureManager->GetObject("giftd"))->Load();
-		((CSprite*)Ninja->RenderManager.GetObject("GftSpr"))->m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("giftd"))->TexID;
+		((CSprite*)Ninja->RenderManager.GetObject("GftSpr"))->m_textureID = ((CTexture*)Ninja->TextureManager->GetObject("giftd"))->GetTexID();
 	}
 
 

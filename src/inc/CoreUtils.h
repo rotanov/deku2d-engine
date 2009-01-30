@@ -40,15 +40,22 @@ inline char *str(string Str)
 	return (char*)Str.c_str();
 }
 
+// Это для улучшения читабельности дефайн. Тоесть мы хотим бесконечный цикл: for(;;). А можно for EVER.
 #define EVER (;;)
 
+// Это дефайны для флагов свойств объекта
 #define T_COBJECT		0x01
 #define T_RENDERABLE	0x02
-
 #define T_UPDATABLE		0x10
 
 #define T_LEFT_MASK		0x0f
 #define T_RIGHT_MASK	0xf0
+
+/**
+*	Есть такая вещь как паттерны. Есть паттерн синглтон. Этот класс демонстрирует как его делать.
+*	Суть синглотона в том, что в памяти всегда присутствует только один экзмепляр класса.
+*	Этот класс реально нигде не используется и лежит здесь, чтобы не забыть как делать синглтон.
+*/ 
 
 class CPSingleTone
 {
@@ -62,12 +69,15 @@ protected:
 	static int _refcount;
 };
 
+/**
+*	CObject - самый базовый класс. Всё наследовать от него.
+*/
 
 class CObject
 {
 public:
-	int type, id;
-	string name;
+	int type, id;	// type - флаши свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
+	string name;	// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
 	virtual bool Update(float dt)
 	{
 		return false;
@@ -77,6 +87,10 @@ public:
 };
 
 typedef CObject* (*CreateFunc)();
+
+/**
+*	CNodeObject - это узел списка.
+*/
 
 class CNodeObject
 {
@@ -89,40 +103,49 @@ public:
 	void SetData(CObject *object);
 };
 
+/**
+*	Это тайпдефайнил Петя, я не ебу что это. DOC!
+*/
+
 typedef bool (*ObjCompCall)(CObject*, CObject*);
 typedef bool (*ObjCall)(CObject*);
+
+/**
+*	CObjectList - список объектов. Двусвязный.
+*/
 
 class CObjectList : public CObject
 {
 private:
-	CNodeObject* GetNodeObject(string objectname);
-	void SwapObjs(CNodeObject *obj1, CNodeObject *obj2);
+	CNodeObject* GetNodeObject(string objectname);			// неебу что она делает DOC!
+	void SwapObjs(CNodeObject *obj1, CNodeObject *obj2);	// Скорей всего ф-я меняет в списке местами 2 объекта. 
 protected:
-	CNodeObject *first, *last, *current;
+	CNodeObject *first, *last, *current;					// указатели на соответсвенно первый, последний и текущий объект в списке.
 public:
 	CObjectList();
 	~CObjectList();
-	CObject* Next();
-	bool Enum(CObject* &result);
-	void Reset();
-	void Clear();
-	bool Call(ObjCall callproc);
-	void Sort(ObjCompCall comp);
-	bool AddObject(CObject *object);
-	bool DelObject(string objectname);
-	bool DelObj(int ind);
-	CObject* GetObject(string objectname);
+	CObject* Next();										// неебу что она делает  DOC!
+	bool Enum(CObject* &result);							// перечисление вроде как DOC!
+	void Reset();											// неебу что она делает DOC!
+	void Clear();											// неебу что она делает... хотя возможно очищает список DOC!
+	bool Call(ObjCall callproc);							// неебу что она делает DOC!
+	void Sort(ObjCompCall comp);							// Сортировка. В парметр принимает ф-ю сравнения 2х объектов. Пока квадратичная.
+	virtual bool AddObject(CObject *object);						// Добавить объект в конец списка.
+	bool DelObject(string objectname);						// удалить объект с именем objectname
+	bool DelObj(int ind);									// удалить объект рукоодствуясь непонятнвым параметром 
+	CObject* GetObject(string objectname);					// получить указатель на объект по имени
 };
 
 /**
-*	Any object which you want to load from file
-*	should be derived from CResource.
+*	Все загружаемые из файла объекты следует наследовать от
+*	CResource. класс CBaseResource нужен чтобы всё работало и компилятор не ругался.
 */
+
 class CBaseResource
 {
 public:
-	bool loaded;		// Should be true if instance has been loaded from file.
-	string filename;	// Full path to file.
+	bool loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
+	string filename;	// Полный путь к файлу.
 	virtual bool LoadFromFile()
 	{
 		return false;
@@ -140,6 +163,10 @@ public:
 	CResource(){}
 };
 
+/**
+*	CUpdateManager - менеджер объектов, который следует обновлять. Такие дела.
+*	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
+*/
 
 class CUpdateManager : public CObjectList
 {
@@ -165,10 +192,19 @@ public:
 	RGBAub(void){}
 };
 
+/**
+*	Петя. ... я незнаю зачем. Но выглядит как костыль. DOC!
+*/
+
 void SetScreenParams(int Width, int Height);
 void GetScreenParams(int &Width, int &Height);
 int ScreenW();
 int ScreenH();
+
+/**
+*	CFile - класс для работы с файлом. Названия ф-ий интуитивны.
+*	Как с ним работать я думаю тоже интуитивно понятно.
+*/
 
 class CFile
 {
@@ -199,24 +235,30 @@ public:
 	*	funtion realeses the memory using delete []
 	*	then allocates new meory using new.
 	*/
+	// Вверху бесполезный комментарий на ломаном английском. Впрочем аткой же бесполезный как и этот.
 	bool ReadLine(char* &data);
 	bool Eof();
 	bool Seek(unsigned int offset, byte kind);
 };
 
-//here are log function(s)
+/**
+*	Внизу ф-ии для работы с логом. DOC!
+*/
+
 void CreateLogFile(char *fname);
 void Log(char* Event, char* Format, ...);
 void ToggleLog(bool _Enabled);
+
+/**
+*	Внизу временные ф-ии для отлова утечек памяти. TODO!
+*/
 
 void MemChp1();
 void MemChp2();
 void MemCheck();
 
 /**
-*	used to initialize log.h
-*	with strange method
-*	Yes, this is important to note.
+*	хитрый план создавать лог. мне не нравиться. TODO!
 */
 
 class CDummy

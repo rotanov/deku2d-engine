@@ -9,5 +9,5 @@
 	XMLResourcesFilename    	= "config/resources.xml"
      	DataPath               	= "Data/"
 	TexturesFldr		= "Textures/"
-	FontsFldr			= "Fonts/"
+	FontsFldr		= "Fonts/"
 </configuration>
