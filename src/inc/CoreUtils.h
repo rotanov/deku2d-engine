@@ -25,6 +25,7 @@ typedef long				LONG;
 #define CFILE_MAX_STRING_LENGTH	1024
 
 #define LOG_TIME_TICK_
+#define SAFE_DELETE(obj){if (obj) {delete obj; obj = NULL;}}
 
 #include <iostream>
 #include <stdio.h>
@@ -121,18 +122,19 @@ typedef bool (*ObjCall)(CObject*);
 class CObjectList : public CObject
 {
 private:
-	CNodeObject* GetNodeObject(string objectname);			// неебу что она делает DOC!
+	CNodeObject* GetNodeObject(string objectname);			// указатель на нодобжект по имени
 	void SwapObjs(CNodeObject *obj1, CNodeObject *obj2);	// Скорей всего ф-я меняет в списке местами 2 объекта. 
 protected:
 	CNodeObject *first, *last, *current;					// указатели на соответсвенно первый, последний и текущий объект в списке.
 public:
 	CObjectList();
 	~CObjectList();
-	CObject* Next();										// неебу что она делает  DOC!
-	bool Enum(CObject* &result);							// перечисление вроде как DOC!
-	void Reset();											// неебу что она делает DOC!
-	void Clear();											// неебу что она делает... хотя возможно очищает список DOC!
-	bool Call(ObjCall callproc);							// неебу что она делает DOC!
+	CObject* Next();										// current переместить на следующий элемент
+	bool Enum(CObject* &result);							// адрес текущего элемента с переводом указателя на следующий
+															// короче вначале указывает на один объект, вызвали енум, она вернула содержимое(адрес) в результ, и сдвинула указатель на следующий
+	void Reset();											// скидывает текущий указатель(помоему current) на первый эл-т
+	void Clear();											// очищает список НЕ удаляя элементы...
+	bool Call(ObjCall callproc);							// для всех объектов списька вызвать callproc
 	void Sort(ObjCompCall comp);							// Сортировка. В парметр принимает ф-ю сравнения 2х объектов. Пока квадратичная.
 	virtual bool AddObject(CObject *object);						// Добавить объект в конец списка.
 	bool DelObject(string objectname);						// удалить объект с именем objectname

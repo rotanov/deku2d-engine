@@ -25,11 +25,13 @@ child of class CObject inherits all of it's propiertes
 #define GUI_OBJFORM			0x0
 #define GUI_OBJBUTTON		0x1
 #define GUI_OBJEDIT			0x2
-#define STYLE_OBJMASK		0xff
-#define STYLE_OBJDUMMY		0xff
-#define STYLE_OBJFORM		0x00
-#define STYLE_OBJBUTTON		0x01
-#define STYLE_OBJEDIT		0x02
+#define STYLE_OBJMASK		0x00ff
+#define STYLE_OBJDUMMY		0x00ff
+#define STYLE_OBJFORM		0x0000
+#define STYLE_OBJBUTTON		0x0001
+#define STYLE_OBJEDIT		0x0002
+#define STYLE_ADDTOLISTMASK 0xff00
+#define STYLE_DONOTADD		0x0100
 //#end of fixed defines
 
 #define STYLE_DRAWMASK		0x00ff0000
@@ -175,6 +177,7 @@ class CGUIScheme : public CObject
 {
 public:
 	CGUIScheme(char* fname, char* tname);
+	~CGUIScheme();
 	void					Release();
 	PWidget					objects[200];
 	int						ObjCount;

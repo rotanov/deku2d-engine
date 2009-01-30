@@ -123,9 +123,12 @@ PWidget		newWidget(char *name, unsigned int Style){
 		res = new CForm(Style);
 		clearWidget(res);
 		res->name=name;
-		Objects.AddObject(res);
-		if (strcmp(name, "!@#$%^&*()") != 0 )
-			Forms.AddObject(res);
+		if (!(Style & STYLE_ADDTOLISTMASK))
+		{
+			Objects.AddObject(res);
+			if (strcmp(name, "!@#$%^&*()") != 0 )
+				Forms.AddObject(res);
+		}
 		res->Tag = CTag;
 		CTag++;
 		return res;
@@ -134,7 +137,8 @@ PWidget		newWidget(char *name, unsigned int Style){
 		res = new CButton(Style);
 		clearWidget(res);
 		res->name=name;
-		Objects.AddObject(res);
+		if (!(Style & STYLE_ADDTOLISTMASK))
+			Objects.AddObject(res);
 		res->Tag = CTag;
 		CTag++;
 		return res;
@@ -143,7 +147,8 @@ PWidget		newWidget(char *name, unsigned int Style){
 		res = new CEdit(Style);
 		clearWidget(res);
 		res->name=name;
-		Objects.AddObject(res);
+		if (!(Style & STYLE_ADDTOLISTMASK))
+			Objects.AddObject(res);
 		res->Tag = CTag;
 		CTag++;
 		return res;
@@ -230,6 +235,7 @@ int CGraphObj::GetTop()
 	}
 	return t;
 }
+
 /*void BeginUI()
 {
 	szBind=false;
@@ -240,6 +246,8 @@ void EndUI()
 }*/
 CGUIScheme::CGUIScheme(char *fname, char *tname)
 {
+	//creating new form( - main form)
+	CForm *frm = (CForm*)newWidget("ScreenForm", STYLE_OBJFORM);
 	CFile f;
 	GUIScheme = this;
 	if (fname==NULL||tname==NULL)
@@ -304,7 +312,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 //						end
 					//This is form
 					//now we need to do something xP =)
-					CForm * obj = (CForm*)newWidget("!@#$%^&*()", STYLE_OBJFORM);
+					CForm * obj = (CForm*)newWidget("!@#$%^&*()", STYLE_OBJFORM|STYLE_DONOTADD);
 					objects[i] = obj;
 					obj->Tag = i;
 					f.ReadString(obj->name);
@@ -323,7 +331,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 			case 1:
 				{
 					//button
-					CButton *obj = (CButton*)newWidget("noname", STYLE_OBJBUTTON);
+					CButton *obj = (CButton*)newWidget("noname", STYLE_OBJBUTTON|STYLE_DONOTADD);
 					objects[i] = obj;
 					obj->Tag = i;
 			//				string Name
@@ -346,10 +354,10 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 					//f.Read(&obj->Cursor, 4);
 					break;
 				}
-			case 2:
+			case 3:
 				{
 					//edit
-					CEdit *obj = (CEdit*)newWidget("noname", STYLE_OBJEDIT);
+					CEdit *obj = (CEdit*)newWidget("noname", STYLE_OBJEDIT|STYLE_DONOTADD);
 					objects[i] = obj;
 					obj->Tag = i;
 					f.ReadString(obj->name);
@@ -562,6 +570,12 @@ void CGUIScheme::CopyWidget( int kind, PWidget wdg )
 		int MaxHeight
 		int MaxWidth
 		int Cursor*/
+}
+
+CGUIScheme::~CGUIScheme()
+{
+	for (int i = 0; i < ObjCount; i++)
+		SAFE_DELETE(objects[i]);
 }
 CControl::CControl()
 {
