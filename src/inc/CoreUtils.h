@@ -235,7 +235,7 @@ public:
 	*	funtion realeses the memory using delete []
 	*	then allocates new meory using new.
 	*/
-	// ¬верху бесполезный комментарий на ломаном английском. ¬прочем аткой же бесполезный как и этот.
+	// ¬верху бесполезный комментарий на ломаном английском. ¬прочем такой же бесполезный как и этот.
 	bool ReadLine(char* &data);
 	bool Eof();
 	bool Seek(unsigned int offset, byte kind);
@@ -258,7 +258,7 @@ void MemChp2();
 void MemCheck();
 
 /**
-*	хитрый план создавать лог. мне не нравитьс€. TODO!
+*	хитрый план создавать лог. мне не нравитс€. TODO!
 */
 
 class CDummy
