@@ -2,17 +2,12 @@
 #define GAME_H
 
 #include "Ninja.h"
+#include "GameUtils.h"
 #include "MathUtils.h"
 
 #define GROUND 16
 
 #pragma warning(disable:4244)
-
-#define TILE_SIZE 16
-#define CELL_SIZE 32
-
-class CMap;
-class CTileSet;
 
 class CUnit : public CRenderObject
 {
@@ -21,7 +16,7 @@ public:
 	CSprite sprite;
 	CBBox BBox;
 	bool dead;
-	CMap *map;
+	CLevelMap *map;
 	CBBox Gift;
 	Vector2 v; //скорость
 
@@ -151,60 +146,9 @@ public:
 	bool Render();
 };
 
-struct CTileSetInfo 
-{
-	byte TileWidth;
-	byte TileHeight;
-	int HorNumTiles;
-	int VerNumTiles;
-};
 
-class CTileSet : public CObject
-{
-public:
-	CGLImageData Data;
-	CTileSetInfo Info;
-	char *ImageDataFileName;
-	CBBox *BBox;
-	//string InteractionFile;
-	//string BoundingGeometryFileName;
 
-	CTileSet ();
-	static CObject* NewTileSet()
-	{
-		return new CTileSet;
-	}
-	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData);
-	bool LoadFromFile(char *filename);
-	bool SaveToFile(char *filename);
-	void RenderTileSet(); //FOR DEBUGGING
-};
 
-struct CMapCell
-{
-	int index;
-	int interaction;
-	int z; // if 0 then - check for collision; else z.0f = 1/256.0f;
-	Vector2 tc[4];
-	Vector2 pos[4];
-	CBBox *BBox;
-};
-
-class CMap : public CRenderObject
-{
-public:
-	char		*TileSetName;
-	int			mHeight, mWidth;
-	CMapCell	*Cells;
-	CTileSet	*TileSet;
-
-	CMap();
-	static CObject *NewMap();
-	
-	bool LoadFromFile(char *filename);
-	bool SaveToFile(char *filename);
-	bool Render();
-};
 
 
 #endif GAME_H

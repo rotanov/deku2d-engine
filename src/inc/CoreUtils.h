@@ -228,11 +228,11 @@ public:
 	bool Read(void* buffer, DWORD nbytes);
 	bool WriteByte(pbyte buffer);
 	bool WriteByte(byte buffer);
-	bool Write(void* buffer, DWORD nbytes);
+	bool Write(const void* buffer, DWORD nbytes);
 	bool ReadString(char* buffer);
-	bool WriteString(char* buffer);
+	bool WriteString(const char* buffer);
 	bool ReadString(string &buffer);
-	bool WriteString(string buffer);
+	bool WriteString(const string buffer);
 	bool Writeln(string buffer);
 	DWORD Size();
 	/**

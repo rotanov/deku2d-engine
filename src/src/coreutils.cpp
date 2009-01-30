@@ -87,7 +87,7 @@ bool CFile::ReadByte(pbyte buffer)
 	return true;
 }
 
-bool CFile::Write(void* buffer, DWORD nbytes)
+bool CFile::Write(const void* buffer, DWORD nbytes)
 {
 	if (buffer == NULL)
 		return false;
@@ -191,7 +191,7 @@ bool CFile::ReadString(char* buffer)
 	return true;
 }
 
-bool CFile::WriteString(char* buffer)
+bool CFile::WriteString(const char* buffer)
 {
 	if (file == NULL)
 		return false;
@@ -223,7 +223,7 @@ bool CFile::ReadString(string &buffer)
 	return true;
 }
 
-bool CFile::WriteString(string buffer)
+bool CFile::WriteString(const string buffer)
 {
 	if (file == NULL)
 		return false;

@@ -6,7 +6,6 @@ CNinja* Ninja = CNinja::Instance();
 CParticleSystem *ps;
 CSprite *Spr;
 CHero *Hero;
-CMap *Map;
 Vector2 pnts[2];
 CEnemyController *enemyc;
 

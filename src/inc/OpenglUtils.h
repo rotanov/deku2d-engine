@@ -131,6 +131,10 @@ public:
 		name = "CTexture";
 		this->type = T_RENDERABLE;
 	}
+	void Bind()
+	{
+		glBindTexture(GL_TEXTURE_2D, GetTexID());
+	}
 	bool Render()
 	{
 		return true;

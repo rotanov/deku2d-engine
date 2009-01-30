@@ -28,6 +28,11 @@ enum EResType {RT_FONT, RT_IMAGE, RT_PSYSTEM, RT_ANIMATION, RT_XML};
 #define	OBJ_USER_DEFINED 0x04
 #define OBJ_TEXTURE_RES 0x05
 
+#define MANAGER_TYPE_REN 0x00
+#define MANAGER_TYPE_FNT 0x01
+#define MANAGER_TYPE_UPD 0x02
+#define MANAGER_TYPE_TEX 0x03
+
 /**
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
 *
@@ -42,6 +47,27 @@ public:
 	void			FreeInst();
 	CObject*		Create(int ObjectId, CreateFunc creator);
 	bool			InitManagers(CUpdateManager *vUpdateManager, CRenderManager *vRenderManager);
+	CObjectList*	GetManager(int mantype)
+	{
+		switch (mantype)
+		{
+		case MANAGER_TYPE_REN:
+			return RenderManager;
+			break;
+		case MANAGER_TYPE_FNT:
+			return FontManager;
+			break;
+		case MANAGER_TYPE_UPD:
+			return UpdateManager;
+			break;
+		case MANAGER_TYPE_TEX:
+			return TextureManager;
+			break;
+		default:
+			return this;
+			break;
+		}
+	}
 
 protected:
 	bool initialized;
