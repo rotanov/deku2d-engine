@@ -106,7 +106,7 @@ void						clearWidget(PWidget res)
 	res->MinHeight = 0;
 	res->MinWidth = 0;
 	res->name="";
-	res->Parent = NULL;
+	res->Parent = dynamic_cast<PWidget>(Objects.GetObject("ScreenForm"));
 	res->Top = 0;
 	memset(res->type, 0, 100);
 	res->Visible = 0;
@@ -163,8 +163,18 @@ PWidget		newWidget(char *name, unsigned int Style){
 	}
 }
 void		FormAddWidget(PWidget obj, PWidget form){
-	if (form == NULL || obj==NULL)
+	if (obj==NULL)
 		return;
+	if (form == NULL)
+	{
+		CForm *__form = dynamic_cast<CForm*>(Objects.GetObject("ScreenForm"));
+		if (__form != NULL)
+		{
+			__form->Items.AddObject(obj);
+			obj->Parent = __form;
+		}
+		return;
+	}
 	if (!ISFORM(form))
 		return;
 	CForm *_form=(CForm*)form;
@@ -230,7 +240,10 @@ int CGraphObj::GetTop()
 	{
 		t += tmpobj->Top;
 		if (ISFORM(tmpobj))
-			t+= ((CForm*)tmpobj)->HeaderHeight;
+		{
+			if (((CForm*)tmpobj)->Properties[GUI_DRAWFORMHEADER])
+				t+= ((CForm*)tmpobj)->HeaderHeight;
+		}
 		tmpobj = tmpobj->Parent;
 	}
 	return t;
@@ -248,6 +261,16 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 {
 	//creating new form( - main form)
 	CForm *frm = (CForm*)newWidget("ScreenForm", STYLE_OBJFORM);
+	frm->Width = ScreenW();
+	frm->Height = ScreenH();
+	frm->Left = 0;
+	frm->Top = 0;
+	frm->Properties[GUI_DRAWFORMHEADER] = 0;
+	frm->Properties[GUI_DRAWFORMBODY] = 0;
+	frm->Properties[GUI_FORMRESIZABLE] = 0;
+	frm->Properties[GUI_FORMCANMOVE] = 0;
+	frm->Visible = true;
+	frm->Enabled = true;
 	CFile f;
 	GUIScheme = this;
 	if (fname==NULL||tname==NULL)
@@ -361,7 +384,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 					objects[i] = obj;
 					obj->Tag = i;
 					f.ReadString(obj->name);
-					f.Read(&obj->_Style, 4);
+					f.Read(&obj->ThisStyle, 4);
 					f.Read(&obj->MinHeight, 4);
 					f.Read(&obj->MinWidth, 4);
 					f.Read(&obj->MaxHeight, 4);
@@ -558,6 +581,18 @@ void CGUIScheme::CopyWidget( int kind, PWidget wdg )
 		res->Cursor		   = tmp->Cursor;
 		res->Font		   = tmp->Font;
 	}
+	if (_tmp == "class CEdit")
+	{
+		CEdit *res = (CEdit*)wdg;
+		CEdit *tmp = (CEdit*)objects[kind];
+		res->ThisStyle	   = tmp->ThisStyle;
+		res->MinHeight	   = tmp->MinHeight;
+		res->MinWidth	   = tmp->MinWidth;
+		res->MaxHeight	   = tmp->MaxHeight;
+		res->MaxWidth	   = tmp->MaxWidth;
+		res->Cursor		   = tmp->Cursor;
+		res->Font		   = tmp->Font;
+	}
 /*	color Color
 		style Style
 		int Height
@@ -608,6 +643,8 @@ PWidget addForm( char *Fname )
 }
 void CForm::Draw()
 {
+	if (!this->Visible)
+		return;
 	if (Properties[GUI_DRAWFORMHEADER] == 1)
 	{
 		glColor4f((float)_GetRValue(HeaderColor)/256,(float)_GetGValue(HeaderColor)/256,(float)_GetBValue(HeaderColor)/256,1);
@@ -615,14 +652,16 @@ void CForm::Draw()
 		glColor4f(1,1,1,1);
 		Top = Top + HeaderHeight;
 	}
-	GUIScheme->Draw(BodyStyle, Left, Top, ZDepth, Width, Height);
+	if (Properties[GUI_DRAWFORMBODY] == 1)
+		GUIScheme->Draw(BodyStyle, Left, Top, ZDepth, Width, Height);
 	CObject *obj;
 	Items.Reset();
 	while (Items.Enum(obj))
 	{
 		(dynamic_cast<PWidget>(obj))->Draw();
 	}
-	Top = Top - HeaderHeight;
+	if (Properties[GUI_DRAWFORMHEADER] == 1)
+		Top = Top - HeaderHeight;
 //	Body.Items.Call(FormDraw);
 	//first of all drawing form but after somethiung else
 }
@@ -888,7 +927,7 @@ void CEdit::Draw()
 	//now drawing
 	if (!Visible)
 		return;
-	GUIScheme->Draw(Style, Left, Top, 0, Width, Height);
+	GUIScheme->Draw(ThisStyle, GetLeft(), GetTop(), 0, Width, Height);
 }
 
 void CEdit::DrawText()
@@ -901,7 +940,7 @@ void CEdit::MouseProcess(byte btn, byte event)
 		return;
 	if (event==GUI_MBCLICK)
 	{
-		if (MouseIn(Left, Top, Width, Height))
+		if (MouseInObjRect(this))
 		{
 			SAFECALL(onClick, this);
 			Focus = this;

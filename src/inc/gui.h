@@ -102,7 +102,7 @@ bool GUIInit(char *fname);
 void GUIStep();
 void GUIDraw();
 
-class CGUIRenderer : public CRenderObject
+class CGUIRenderer : public CRenderObject, public CUpdateObject
 {
 public:
 	CGUIRenderer();
@@ -112,7 +112,7 @@ public:
 	static CObject*	NewRenderer()
 	{
 		CRenderObject *res = new CGUIRenderer;
-		res->type = T_RENDERABLE|T_UPDATABLE;
+//		res->type = T_RENDERABLE|T_UPDATABLE;
 		return res;
 	}
 };
@@ -210,7 +210,7 @@ bool						LoadGUI(char *fname);
 // делай как в mathutils.h
 //////////////////////////////////////////////////////////////////////////
 
-__forceinline bool ISFORM(CGraphObj *obj){return ((obj->getStyle() & STYLE_OBJMASK) == STYLE_OBJFORM)?true:false;}
+__INLINE bool ISFORM(CGraphObj *obj){return ((obj->getStyle() & STYLE_OBJMASK) == STYLE_OBJFORM)?true:false;}
 
 
 PWidget						newWidget(char *name, unsigned int Style);
@@ -304,6 +304,7 @@ public:
 	int						SelStart, SelLength;
 	int						_Style;
 	void					DrawText();
+	DWORD					ThisStyle;
 };
 
 /*

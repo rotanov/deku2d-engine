@@ -8,6 +8,8 @@ CSprite *Spr;
 CHero *Hero;
 Vector2 pnts[2];
 CEnemyController *enemyc;
+CGUIScheme *guidummy = NULL;
+CEdit *Edit = NULL;
 
 void tempMakeTileSet()
 {
@@ -46,13 +48,24 @@ void tempMakeMap()
 
 bool Init()
 {	
+	CFactory *Factory = CFactory::Instance();
+	guidummy = new CGUIScheme("Data\\main.gui", "Data\\maingui.bmp");
+	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
+	Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
+	guidummy->CopyWidget(2, Edit);
+	FormAddWidget(Edit, NULL);
+	Edit->Enabled = true;
+	Edit->Left = 10;
+	Edit->Top = 10;
+	Edit->Height = 100;
+	Edit->Width = 100;
+	Edit->Visible = true;
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
 		return false;
 	if (!Ninja->ResourceManager.LoadResources())
 		return false;
 	
-	CFactory *Factory = CFactory::Instance();
 	
 
 	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
