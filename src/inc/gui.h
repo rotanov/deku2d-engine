@@ -313,6 +313,7 @@ public:
 	byte					KeyState;
 	DWORD					KeyTime;
 	byte					Shift;
+	char					_cout;
 };
 
 /*

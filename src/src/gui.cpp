@@ -1051,8 +1051,8 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 			}
 		default:
 			{
-				char _out = 0;
-				if (btn <= SDLK_z && btn >= SDLK_a)
+				char _out = _key;
+				/*if (btn <= SDLK_z && btn >= SDLK_a)
 				{
 					_out = btn - SDLK_a;
 					if (!Shift)
@@ -1068,9 +1068,10 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 				{
 					_out = btn - SDLK_0;
 					_out += '0';
-				}
+				}*/
 				if (_out != 0)
 				{
+					_cout = _out;
 					CurrentKey = btn;
 					KeyState = 1;
 					KeyTime = SDL_GetTicks();
@@ -1133,12 +1134,9 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 			}
 		default:
 			{
-				if ((btn <= SDLK_z && btn >= SDLK_a) || (btn == SDLK_SPACE) || (btn <= SDLK_9 && btn >= SDLK_0))
-				{
-					if (btn == CurrentKey)
-						KeyState = 0;
-					break;
-				}
+				if (btn == CurrentKey)
+					KeyState = 0;
+				break;
 			}
 		}
 
@@ -1236,8 +1234,8 @@ bool CEdit::Update( float dt )
 				}
 			default:
 				{
-					char _out = 0;
-					if (CurrentKey <= SDLK_z && CurrentKey >= SDLK_a)
+					char _out = _cout;
+					/*if (CurrentKey <= SDLK_z && CurrentKey >= SDLK_a)
 					{
 						_out = CurrentKey - SDLK_a;
 						if (!Shift)
@@ -1253,7 +1251,7 @@ bool CEdit::Update( float dt )
 					{
 						_out = CurrentKey - SDLK_0;
 						_out += '0';
-					}
+					}*/
 					if (_out != 0)
 					{
 						if (SelLength == 0)
