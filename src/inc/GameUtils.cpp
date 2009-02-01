@@ -92,7 +92,7 @@ bool CLevelMap::Render()
 {
 	if (!loaded)
 		LoadFromFile();
-	glLoadIdentity();
+	
 	CMapCellInfo *t;
 	glEnable(GL_TEXTURE);
 	TileSet->Texture->Bind();

@@ -41,7 +41,7 @@ void tempMakeMap()
 	for (int i=0;i<12;i++)
 	{
 		m.Cells[i].index = ind[i];
-		m.Cells[i].z = 0.5f;
+		m.Cells[i].z = -0.01f;
 		m.Cells[i].interaction = 0;
 	}
 	m.SaveToFile();
@@ -96,7 +96,7 @@ bool Init()
 	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
 	Hero->x = 200;
 	Hero->y = 200;//GROUND;
-	Hero->z = 0.0f;
+	
 
 	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("hero")))->GetTexID();
 	Hero->sprite.m_nTextureHeight = 32;
@@ -109,8 +109,8 @@ bool Init()
 	Hero->spra.m_nTextureWidth = 32;
 	Hero->spra.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->spra.SetAnimation(1);
-	Hero->spra.z = 0.0f;
-	Hero->sprb.z = 0.0f;
+	Hero->spra.z = -0.5f;
+	Hero->sprb.z = -0.5f;
 	Hero->z = -0.5f;
 
 	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("herob")))->GetTexID();
@@ -168,7 +168,7 @@ bool Init()
 	Spr->name = "GftSpr";
 	Spr->x = 260; 
 	Spr->y = GROUND; 
-	Spr->z = 0.9f; 
+	Spr->z = -0.01f; 
 	Spr->visible = true;
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
@@ -192,7 +192,7 @@ bool Init()
 	Spr->name = "grSpr";
 	Spr->x = 0; 
 	Spr->y = 0; 
-	Spr->z = 0.3f; 
+	Spr->z = -0.3f; 
 	Spr->visible = true;
 
 
@@ -212,9 +212,11 @@ bool Init()
 	CLevelMap *lm;
 	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("levels", "Level01", CLevelMap::NewLevelMap));
 	lm->visible = true;
+	lm->z = -0.1f;
 	
-	Ninja->RenderManager.SortByZ();
 	Ninja->RenderManager.SortByAlpha();
+	Ninja->RenderManager.SortByZ();
+	
 
 	Ninja->FontManager->SetCurrentFont("FFont");
 	Factory->FreeInst();
