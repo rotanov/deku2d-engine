@@ -9,7 +9,7 @@ CHero *Hero;
 Vector2 pnts[2];
 CEnemyController *enemyc;
 CGUIScheme *guidummy = NULL;
-CEdit *Edit = NULL;
+CEdit *Edit = NULL, *Edit1 = NULL;
 CButton *Button = NULL;
 
 void tempMakeTileSet()
@@ -69,6 +69,24 @@ bool Init()
 		Edit->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
 		Edit->SelStart = 5;
 		Edit->SelLength = -3;
+
+		//Edit creation sample
+		Edit1 = dynamic_cast<CEdit*>(newWidget("NewEdit1", STYLE_OBJEDIT));
+		//создание едита с именем нью едит
+		guidummy->CopyWidget(2, Edit1);
+		//заполнение его свойств из уже загруженных эл-тов(по индексу)
+		FormAddWidget(Edit1, NULL);
+		//добавление едита на форму, если нулл то добавл€етс€ на форму окна
+		//--- ¬с€кий стафф
+		Edit1->Enabled = true;
+		Edit1->Visible = true;
+		Edit1->Left = 10;
+		Edit1->Top = 380;
+		Edit1->Height = 30;
+		Edit1->Width = 400;
+		Edit1->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
+		Edit1->SelStart = 0;
+		Edit1->SelLength = 0;
 
 		//Button creation sample
 		Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));

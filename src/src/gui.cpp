@@ -762,22 +762,23 @@ bool CForm::Update( float dt )
 			if (((MouseFocus != NULL) && (!ISFORM(MouseFocus))) && (MouseFocus != obj))
 			{
 				MouseFocus->Update(dt);
-				if (MouseFocus == Focus)
-					flag = 1;
+				flag = 1;
 			}
 			MouseFocus = obj;
-			if (obj == Focus)
-				flag = 1;
+			flag = 1;
 			obj->Update(dt);
-			return true;
+			//return true;
+			break;
 		}
 	}
-	if (!flag&&Focus)
+	if (Focus)
 		Focus->Update(dt);
-
+	
 	if (MouseFocus != NULL)
 		if (!(ISFORM(MouseFocus)))
 			MouseFocus->Update(dt);
+	if (flag)
+		return true;
 	MouseFocus = this;
 	return true;
 }
@@ -969,11 +970,14 @@ void CEdit::MouseProcess(byte btn, byte event)
 		{
 			SAFECALL(onClick, this);
 			Focus = this;
+			KeyState = 0;
 		}
 	}
 	if (event==GUI_MBDOWN&&btn==1)
 	{
 		//getting position
+		if (!Focus)
+			return;
 		if (MouseIn(GetLeft() + GUIScheme->GetXOffset(ThisStyle),
 					GetTop() + GUIScheme->GetYOffset(ThisStyle),
 					GUIScheme->GetCWidth(ThisStyle, Width),
