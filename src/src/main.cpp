@@ -10,6 +10,7 @@ Vector2 pnts[2];
 CEnemyController *enemyc;
 CGUIScheme *guidummy = NULL;
 CEdit *Edit = NULL;
+CButton *Button = NULL;
 
 void tempMakeTileSet()
 {
@@ -51,18 +52,39 @@ bool Init()
 	CFactory *Factory = CFactory::Instance();
 	guidummy = new CGUIScheme("Data\\main.gui", "Data\\maingui.bmp");
 	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
-	Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
-	guidummy->CopyWidget(2, Edit);
-	FormAddWidget(Edit, NULL);
-	Edit->Enabled = true;
-	Edit->Left = 10;
-	Edit->Top = 10;
-	Edit->Height = 100;
-	Edit->Width = 100;
-	Edit->Visible = true;
-	Edit->Caption = "Fuckkk!!";
-	Edit->SelStart = 1;
-	Edit->SelLength = 3;
+		//Edit creation sample
+		Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
+		//создание едита с именем нью едит
+		guidummy->CopyWidget(2, Edit);
+		//заполнение его свойств из уже загруженных эл-тов(по индексу)
+		FormAddWidget(Edit, NULL);
+		//добавление едита на форму, если нулл то добавляется на форму окна
+		//--- Всякий стафф
+		Edit->Enabled = true;
+		Edit->Visible = true;
+		Edit->Left = 10;
+		Edit->Top = 345;
+		Edit->Height = 30;
+		Edit->Width = 100;
+		Edit->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
+		Edit->SelStart = 5;
+		Edit->SelLength = 1;
+
+		//Button creation sample
+		Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));
+		//создание буттона с именем нью буттон
+		guidummy->CopyWidget(1, Button);
+		//заполнение его свойств из уже загруженных эл-тов(по индексу)
+		FormAddWidget(Button, NULL);
+		//добавление буттона на форму, если нулл то добавляется на форму окна
+		//--- Всякий стафф
+		Button->Enabled = true;
+		Button->Visible = true;
+		Button->Left = 115;
+		Button->Top = 345;
+		Button->Height = 30;
+		Button->Width = 100;
+		Button->Caption = "OK";
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
 		return false;
@@ -205,6 +227,10 @@ bool Draw()
 {	
 	glLoadIdentity();
 	Ninja->FontManager->PrintEx(560, 460, 1, "Fps: %d", Ninja->GetFps());
+	char buff[1024];
+	memset(buff, 0, sizeof(buff));
+	sprintf(buff, "%d %d", Edit->KeyState, SDL_GetTicks() - Edit->KeyTime);
+	Button->Caption = buff;
 	return true;
 }
 

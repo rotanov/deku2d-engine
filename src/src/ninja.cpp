@@ -289,6 +289,8 @@ bool CNinja::ProcessEvents()
 			{
 				SDLKey sym = event.key.keysym.sym;
 				keys[sym] = 0;
+				if (procGUIGetKeyUp)
+					GUIKeyUp(event.key.keysym.unicode & 0xFF, sym);
 				break;
 			}
 			case SDL_VIDEORESIZE:

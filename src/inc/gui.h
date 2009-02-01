@@ -89,6 +89,10 @@ child of class CObject inherits all of it's propiertes
 #define _GUI_DRAWFORMBODY			0x4
 #define __GUI_DRAWFORMBODY			0x5
 
+
+#define GUI_DELAY0					500
+#define GUI_DELAY1					250
+
 bool GUIKeyUp(char key, SDLKey sym);
 bool GUIKeyDown(char key, SDLKey sym);
 bool GUIMbDown(int x, int y, byte btn);
@@ -294,7 +298,7 @@ public:
 	CEdit(unsigned int _Style);
 	~CEdit(){};
 	virtual void			Draw();
-	virtual bool			Update(float dt){return true;};
+	virtual bool			Update(float dt);
 	// сорри, нехуй в аське не отвечать
 	virtual void			Step();
 	virtual void			MouseProcess(byte btn, byte event);
@@ -305,6 +309,10 @@ public:
 	int						_Style;
 	void					DrawText();
 	DWORD					ThisStyle;
+	SDLKey					CurrentKey;
+	byte					KeyState;
+	DWORD					KeyTime;
+	byte					Shift;
 };
 
 /*

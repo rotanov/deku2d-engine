@@ -762,8 +762,6 @@ void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int o
 		return;
 	if ((uInt)offset >= strlen(text) || offset < 0)
 		return;
-	if (s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text))
-		return;
 	int xpos, ypos, swidth, sheight;
 	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
 	swidth = GetStringWidth(text + offset);
@@ -795,12 +793,17 @@ void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int o
 	{
 		xpos = x + width/2 - swidth/2;
 	}
-	int selw = GetStringWidthEx(s1, s2, text), selx = xpos + GetStringWidthEx(0, s1-1-offset, text+offset);
 
 	glPushAttrib(GL_SCISSOR_TEST);
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(x, y, width, height);
-	gSolidRectEx(selx, ypos, selw, sheight, depth, &glRGBAub(10, 50, 200, 150));
+	int selx = xpos + GetStringWidthEx(0, s1-1-offset, text+offset);
+	if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
+	{
+		int selw = GetStringWidthEx(s1, s2, text);
+		gSolidRectEx(selx, ypos, selw, sheight, depth, &glRGBAub(10, 50, 200, 150));
+	}
+	gSolidRectEx(selx, ypos, 2, min(sheight, GetStringHeight("!\0")), depth, &glRGBAub(10, 10, 10, 200));
 	Print(xpos, ypos, depth, text+offset);
 	glDisable(GL_SCISSOR_TEST);
 	glPopAttrib();

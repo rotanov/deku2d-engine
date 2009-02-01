@@ -898,6 +898,10 @@ CEdit::CEdit(unsigned int _Style)
 	onClick = NULL;
 	SelStart = 0;
 	SelLength = 0;
+	CurrentKey = SDLK_HELP;
+	KeyState = 0;
+	KeyTime = 0;
+	Shift = 0;
 }
 void CEdit::Step()
 {
@@ -937,7 +941,7 @@ void CEdit::DrawText()
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
 			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
-			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelLength);
+			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);
 		glColor4f(1,1,1,1);
 	}
 }
@@ -957,9 +961,199 @@ void CEdit::MouseProcess(byte btn, byte event)
 }
 void CEdit::KeyProcess(SDLKey &btn, byte event)
 {
+	if (event == GUI_KEYDOWN)
+	{
+		switch (btn)
+		{
+		case SDLK_LSHIFT:
+			{
+				Shift = 1;
+				KeyState = (KeyState > 0);//0;mb 
+				break;
+			}
+		case SDLK_DELETE:
+			{
+				//removing selection and setting key to delete
+				//Caption.erase()
+				if (SelLength != 0)
+					//Caption.replace(SelStart, SelStart + SelLength, "");
+					Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+				else
+					if (Caption.length() != SelStart)
+						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
+				SelLength = 0;
+				CurrentKey = SDLK_DELETE;
+				KeyState = 1;
+				KeyTime = SDL_GetTicks();
+				break;
+			}
+		case SDLK_LEFT:
+			{
+				if (Shift)
+				{
+					if (SelLength == 0)
+						SelStart = max(0, SelStart - 1);
+					else
+						SelLength = SelLength - 1;
+				}
+				else
+				{
+					SelStart = max(0, SelStart - 1);
+					SelLength = 0;
+				}
+				CurrentKey = SDLK_LEFT;
+				KeyState = 1;
+				KeyTime = SDL_GetTicks();
+				break;
+			}
+		case SDLK_RIGHT:
+			{
+				if (Shift)
+				{
+					if (SelLength == 0)
+						if (SelStart + 1 > Caption.length())
+							SelStart = Caption.length();
+						else
+							SelStart ++;
+					else
+						SelLength = SelLength + 1;
+				}
+				else
+				{
+					if (SelStart + 1 > Caption.length())
+						SelStart = Caption.length();
+					else
+						SelStart ++;
+					SelLength = 0;
+				}
+				CurrentKey = SDLK_RIGHT;
+				KeyState = 1;
+				KeyTime = SDL_GetTicks();
+				break;
+			}
+		}
+
+	}
+	if (event == GUI_KEYUP)
+	{
+		switch (btn)
+		{
+		case SDLK_LSHIFT:
+			{
+				Shift = 0;
+				KeyState = (KeyState > 0);//0;mb 
+				break;
+			}
+		case SDLK_DELETE:
+			{
+				//removing selection and setting key to delete
+				//Caption.erase()
+				if (CurrentKey == SDLK_DELETE)
+					KeyState = 0;
+				break;
+			}
+		case SDLK_LEFT:
+			{
+				//removing selection and setting key to delete
+				//Caption.erase()
+				if (CurrentKey == SDLK_LEFT)
+					KeyState = 0;
+				break;
+			}
+		case SDLK_RIGHT:
+			{
+				//removing selection and setting key to delete
+				//Caption.erase()
+				if (CurrentKey == SDLK_RIGHT)
+					KeyState = 0;
+				break;
+			}
+		}
+
+	}
 	return;
 }
 
+bool CEdit::Update( float dt )
+{
+	if (KeyState > 0)
+	{
+		bool flag = 0;
+		if (KeyState == 2)
+		{
+			if (SDL_GetTicks() - KeyTime >= GUI_DELAY1)
+			{
+				KeyTime = SDL_GetTicks() - GUI_DELAY1;//0;
+				flag = 1;
+			}
+		}
+		if (KeyState == 1)
+		{
+			if (SDL_GetTicks() - KeyTime >= GUI_DELAY0)
+			{
+				KeyTime = SDL_GetTicks() - GUI_DELAY0;//0;
+				KeyState = 2;
+				flag = 1;
+			}
+		}
+		if (flag)
+		{
+			switch (CurrentKey)
+			{
+			case SDLK_DELETE:
+				{
+					if (SelLength != 0)
+						//Caption.replace(SelStart, SelStart + SelLength, "");
+						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+					else
+						if (Caption.length() != SelStart)
+							Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
+					SelLength = 0;
+					break;
+				}
+			case SDLK_LEFT:
+				{
+					if (Shift)
+					{
+						if (SelLength == 0)
+							SelStart = max(0, SelStart - 1);
+						else
+							SelLength = SelLength - 1;
+					}
+					else
+					{
+						SelStart = max(0, SelStart - 1);
+						SelLength = 0;
+					}
+					break;
+				}
+			case SDLK_RIGHT:
+				{
+					if (Shift)
+					{
+						if (SelLength == 0)
+							if (SelStart + 1 > Caption.length())
+								SelStart = Caption.length();
+							else
+								SelStart ++;
+						else
+							SelLength = SelLength + 1;
+					}
+					else
+					{
+						if (SelStart + 1 > Caption.length())
+							SelStart = Caption.length();
+						else
+							SelStart ++;
+						SelLength = 0;
+					}
+					break;
+				}
+			}
+		}
+	}
+	return true;
+}
 bool FormSort(CObject *obj1, CObject *obj2)
 {
 	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
