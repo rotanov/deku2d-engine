@@ -226,7 +226,7 @@ void						enableWidget(PWidget obj);
 void						disableWidget(PWidget obj);
 void						setWidgetStyle(PWidget obj, unsigned int Style);//NOTE if you are trying to change 
 																			//object type, you'll get nothing=)
-PWidget						getWidget(PWidget obj, char *name);
+PWidget						getWidget(char *name);
 PWidget						addForm(char *Fname);
 
 class Cdummy : public CGraphObj
