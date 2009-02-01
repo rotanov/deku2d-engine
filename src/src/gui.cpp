@@ -904,6 +904,7 @@ CEdit::CEdit(unsigned int _Style)
 	KeyState = 0;
 	KeyTime = 0;
 	Shift = 0;
+	offset = 0;
 }
 void CEdit::Step()
 {
@@ -943,7 +944,7 @@ void CEdit::DrawText()
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
 			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
-			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);
+			,offset,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);
 		glColor4f(1,1,1,1);
 	}
 }
@@ -978,8 +979,11 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 				//removing selection and setting key to delete
 				//Caption.erase()
 				if (SelLength != 0)
+				{
 					//Caption.replace(SelStart, SelStart + SelLength, "");
-					Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+					Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
+					SelStart = min(SelStart, SelStart + SelLength);
+				}
 				else
 					if (Caption.length() != SelStart)
 						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
@@ -992,8 +996,11 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 		case SDLK_BACKSPACE:
 			{
 				if (SelLength != 0)
+				{
 					//Caption.replace(SelStart, SelStart + SelLength, "");
-					Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+					Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
+					SelStart = min(SelStart, SelStart + SelLength);
+				}
 				else
 					if (0 != SelStart)
 						Caption.erase(Caption.begin() + SelStart - 1, Caption.begin() + SelStart);
@@ -1009,14 +1016,16 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 			{
 				if (Shift)
 				{
-					if (SelLength == 0)
-						SelStart = max(0, SelStart - 1);
-					else
-						SelLength = SelLength - 1;
+					if (SelLength + SelStart> 0)
+						SelLength --;
 				}
 				else
 				{
-					SelStart = max(0, SelStart - 1);
+					if (SelLength != 0)
+						SelStart = min(SelStart, SelStart + SelLength);
+					else
+						SelStart = max(0, SelStart - 1);
+					SelStart = max(0, SelStart);
 					SelLength = 0;
 				}
 				CurrentKey = SDLK_LEFT;
@@ -1028,25 +1037,49 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 			{
 				if (Shift)
 				{
+					if (!(SelStart + SelLength >= Caption.length()))
+						SelLength ++;
+				}
+				else
+				{
 					if (SelLength == 0)
+					{
 						if (SelStart + 1 > Caption.length())
 							SelStart = Caption.length();
 						else
 							SelStart ++;
+					}
 					else
-						SelLength = SelLength + 1;
-				}
-				else
-				{
+						SelStart = max(SelStart + SelLength, SelStart);
 					if (SelStart + 1 > Caption.length())
 						SelStart = Caption.length();
-					else
-						SelStart ++;
 					SelLength = 0;
 				}
 				CurrentKey = SDLK_RIGHT;
 				KeyState = 1;
 				KeyTime = SDL_GetTicks();
+				break;
+			}
+		case SDLK_HOME:
+			{
+				if (Shift)
+					SelLength = -SelStart;
+				else
+				{
+					SelStart = 0;
+					SelLength = 0;
+				}
+				break;
+			}
+		case SDLK_END:
+			{
+				if (Shift)
+					SelLength = Caption.length() - SelStart;
+				else
+				{
+					SelStart = Caption.length();
+					SelLength = 0;
+				}
 				break;
 			}
 		default:
@@ -1079,7 +1112,8 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 						Caption.insert(Caption.begin() + SelStart, 1, _out);
 					else
 					{
-						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
+						Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
+						SelStart = min(SelStart, SelStart + SelLength);
 						Caption.insert(Caption.begin() + SelStart, 1, _out);
 					}
 					SelLength = 0;
@@ -1146,6 +1180,13 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 
 bool CEdit::Update( float dt )
 {
+	fnt = FontManager->GetFontEx("FFont");
+	//int sw = ;
+	//int cw = ;
+	while (fnt->GetStringWidthEx(offset, SelStart, (char*)Caption.data()) > GUIScheme->GetCWidth(ThisStyle, Width) - 10 && offset < Caption.length() - 1)
+		offset++;
+	while (fnt->GetStringWidthEx(0, SelStart, (char*)Caption.data()) < fnt->GetStringWidthEx(0, offset, (char*)Caption.data()) + 10 && offset > 0)
+		offset--;
 	if (KeyState > 0)
 	{
 		bool flag = 0;
@@ -1173,8 +1214,11 @@ bool CEdit::Update( float dt )
 			case SDLK_DELETE:
 				{
 					if (SelLength != 0)
+					{
 						//Caption.replace(SelStart, SelStart + SelLength, "");
-						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+						Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
+						SelStart = min(SelStart, SelStart + SelLength);
+					}
 					else
 						if (Caption.length() != SelStart)
 							Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
@@ -1184,8 +1228,11 @@ bool CEdit::Update( float dt )
 			case SDLK_BACKSPACE:
 				{
 					if (SelLength != 0)
+					{
 						//Caption.replace(SelStart, SelStart + SelLength, "");
-						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+						Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
+						SelStart = min(SelStart, SelStart + SelLength);
+					}
 					else
 						if (0 != SelStart)
 							Caption.erase(Caption.begin() + SelStart - 1, Caption.begin() + SelStart);
@@ -1198,14 +1245,16 @@ bool CEdit::Update( float dt )
 				{
 					if (Shift)
 					{
-						if (SelLength == 0)
-							SelStart = max(0, SelStart - 1);
-						else
-							SelLength = SelLength - 1;
+						if (SelLength + SelStart> 0)
+							SelLength --;
 					}
 					else
 					{
-						SelStart = max(0, SelStart - 1);
+						if (SelLength != 0)
+							SelStart = min(SelStart, SelStart + SelLength);
+						else
+							SelStart = max(0, SelStart - 1);
+						SelStart = max(0, SelStart);
 						SelLength = 0;
 					}
 					break;
@@ -1214,20 +1263,22 @@ bool CEdit::Update( float dt )
 				{
 					if (Shift)
 					{
+						if (!(SelStart + SelLength >= Caption.length()))
+							SelLength ++;
+					}
+					else
+					{
 						if (SelLength == 0)
+						{
 							if (SelStart + 1 > Caption.length())
 								SelStart = Caption.length();
 							else
 								SelStart ++;
+						}
 						else
-							SelLength = SelLength + 1;
-					}
-					else
-					{
+							SelStart = max(SelStart + SelLength, SelStart);
 						if (SelStart + 1 > Caption.length())
 							SelStart = Caption.length();
-						else
-							SelStart ++;
 						SelLength = 0;
 					}
 					break;
@@ -1258,7 +1309,8 @@ bool CEdit::Update( float dt )
 							Caption.insert(Caption.begin() + SelStart, 1, _out);
 						else
 						{
-							Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
+							Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
+							SelStart = min(SelStart, SelStart + SelLength);
 							Caption.insert(Caption.begin() + SelStart, 1, _out);
 						}
 						SelLength = 0;

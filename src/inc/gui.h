@@ -314,6 +314,7 @@ public:
 	DWORD					KeyTime;
 	byte					Shift;
 	char					_cout;
+	int						offset;
 };
 
 /*

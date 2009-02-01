@@ -68,7 +68,7 @@ bool Init()
 		Edit->Width = 400;
 		Edit->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
 		Edit->SelStart = 5;
-		Edit->SelLength = 1;
+		Edit->SelLength = -3;
 
 		//Button creation sample
 		Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));
@@ -83,7 +83,7 @@ bool Init()
 		Button->Left = 415;
 		Button->Top = 345;
 		Button->Height = 30;
-		Button->Width = 100;
+		Button->Width = 200;
 		Button->Caption = "OK";
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
@@ -231,7 +231,7 @@ bool Draw()
 	Ninja->FontManager->PrintEx(560, 460, 1, "Fps: %d", Ninja->GetFps());
 	char buff[1024];
 	memset(buff, 0, sizeof(buff));
-	sprintf(buff, "%d %d", Edit->KeyState, SDL_GetTicks() - Edit->KeyTime);
+	sprintf(buff, "%d %d %d %d", Edit->KeyState, SDL_GetTicks() - Edit->KeyTime, Edit->Shift, Edit->SelLength);
 	Button->Caption = buff;
 	return true;
 }
