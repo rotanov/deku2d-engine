@@ -60,6 +60,9 @@ bool Init()
 	Edit->Height = 100;
 	Edit->Width = 100;
 	Edit->Visible = true;
+	Edit->Caption = "Fuckkk!!";
+	Edit->SelStart = 1;
+	Edit->SelLength = 3;
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
 		return false;

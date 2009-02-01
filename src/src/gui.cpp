@@ -37,16 +37,9 @@ bool MouseIn(int l, int t, int w, int h)
 bool MouseInObjRect(PWidget obj)
 {
 	int l, t;
-	l = t = 0;
+	l = obj->GetLeft();
+	t = obj->GetTop();
 	PWidget tmpobj = obj;
-	while (tmpobj != NULL)
-	{
-		l += tmpobj->Left;
-		t += tmpobj->Top;
-		if (ISFORM(tmpobj))
-			t+= ((CForm*)tmpobj)->HeaderHeight;
-		tmpobj = tmpobj->Parent;
-	}
 	return MouseIn(l, t, obj->Width, obj->Height);
 }
 bool MbState(byte btn)
@@ -658,6 +651,7 @@ void CForm::Draw()
 	Items.Reset();
 	while (Items.Enum(obj))
 	{
+		dynamic_cast<PWidget>(obj)->ZDepth = (float)(Tag/CTag)*(GUI_TOP - GUI_BOTTOM) + GUI_BOTTOM;
 		(dynamic_cast<PWidget>(obj))->Draw();
 	}
 	if (Properties[GUI_DRAWFORMHEADER] == 1)
@@ -932,6 +926,20 @@ void CEdit::Draw()
 
 void CEdit::DrawText()
 {
+	fnt = FontManager->GetFontEx("FFont");
+	if (fnt!=NULL)
+	{
+		//fnt->PrintEx(
+		glColor4f(0,0,1,1);
+		int l = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
+		fnt->PrintSelRect(l
+			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
+			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
+			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
+			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
+			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelLength);
+		glColor4f(1,1,1,1);
+	}
 }
 
 void CEdit::MouseProcess(byte btn, byte event)
