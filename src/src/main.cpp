@@ -65,7 +65,7 @@ bool Init()
 		Edit->Left = 10;
 		Edit->Top = 345;
 		Edit->Height = 30;
-		Edit->Width = 100;
+		Edit->Width = 400;
 		Edit->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
 		Edit->SelStart = 5;
 		Edit->SelLength = 1;
@@ -80,7 +80,7 @@ bool Init()
 		//--- Всякий стафф
 		Button->Enabled = true;
 		Button->Visible = true;
-		Button->Left = 115;
+		Button->Left = 415;
 		Button->Top = 345;
 		Button->Height = 30;
 		Button->Width = 100;

@@ -9,6 +9,7 @@ bool					_Mbt[10];
 CGraphObj				*MouseFocus = NULL, *Focus = NULL;
 int						CTag = 0;
 CFontManager			*FontManager = NULL;
+char					_key = 0;
 
 bool MouseIn(int l, int t, int w, int h)
 {
@@ -56,6 +57,7 @@ bool GUIKeyUp(char key, SDLKey sym)
 }
 bool GUIKeyDown(char key, SDLKey sym)
 {
+	_key = key;
 	if (Focus!=NULL)
 		Focus->KeyProcess(sym, GUI_KEYDOWN);
 	return 1;
@@ -987,6 +989,22 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 				KeyTime = SDL_GetTicks();
 				break;
 			}
+		case SDLK_BACKSPACE:
+			{
+				if (SelLength != 0)
+					//Caption.replace(SelStart, SelStart + SelLength, "");
+					Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+				else
+					if (0 != SelStart)
+						Caption.erase(Caption.begin() + SelStart - 1, Caption.begin() + SelStart);
+				SelLength = 0;
+				if (SelStart)
+					SelStart--;
+				CurrentKey = SDLK_BACKSPACE;
+				KeyState = 1;
+				KeyTime = SDL_GetTicks();
+				break;
+			}
 		case SDLK_LEFT:
 			{
 				if (Shift)
@@ -1031,6 +1049,43 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 				KeyTime = SDL_GetTicks();
 				break;
 			}
+		default:
+			{
+				char _out = 0;
+				if (btn <= SDLK_z && btn >= SDLK_a)
+				{
+					_out = btn - SDLK_a;
+					if (!Shift)
+						_out += 'a';
+					else
+						_out += 'A';
+				}
+				if (btn == SDLK_SPACE)
+				{
+					_out = ' ';
+				}
+				if (btn <= SDLK_9 && btn >= SDLK_0)
+				{
+					_out = btn - SDLK_0;
+					_out += '0';
+				}
+				if (_out != 0)
+				{
+					CurrentKey = btn;
+					KeyState = 1;
+					KeyTime = SDL_GetTicks();
+					if (SelLength == 0)
+						Caption.insert(Caption.begin() + SelStart, 1, _out);
+					else
+					{
+						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
+						Caption.insert(Caption.begin() + SelStart, 1, _out);
+					}
+					SelLength = 0;
+					SelStart++;
+				}
+				break;
+			}
 		}
 
 	}
@@ -1052,6 +1107,14 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 					KeyState = 0;
 				break;
 			}
+		case SDLK_BACKSPACE:
+			{
+				//removing selection and setting key to delete
+				//Caption.erase()
+				if (CurrentKey == SDLK_BACKSPACE)
+					KeyState = 0;
+				break;
+			}
 		case SDLK_LEFT:
 			{
 				//removing selection and setting key to delete
@@ -1067,6 +1130,15 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 				if (CurrentKey == SDLK_RIGHT)
 					KeyState = 0;
 				break;
+			}
+		default:
+			{
+				if ((btn <= SDLK_z && btn >= SDLK_a) || (btn == SDLK_SPACE) || (btn <= SDLK_9 && btn >= SDLK_0))
+				{
+					if (btn == CurrentKey)
+						KeyState = 0;
+					break;
+				}
 			}
 		}
 
@@ -1111,6 +1183,19 @@ bool CEdit::Update( float dt )
 					SelLength = 0;
 					break;
 				}
+			case SDLK_BACKSPACE:
+				{
+					if (SelLength != 0)
+						//Caption.replace(SelStart, SelStart + SelLength, "");
+						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + SelLength);
+					else
+						if (0 != SelStart)
+							Caption.erase(Caption.begin() + SelStart - 1, Caption.begin() + SelStart);
+					SelLength = 0;
+					if (SelStart)
+						SelStart--;
+					break;
+				}
 			case SDLK_LEFT:
 				{
 					if (Shift)
@@ -1149,6 +1234,41 @@ bool CEdit::Update( float dt )
 					}
 					break;
 				}
+			default:
+				{
+					char _out = 0;
+					if (CurrentKey <= SDLK_z && CurrentKey >= SDLK_a)
+					{
+						_out = CurrentKey - SDLK_a;
+						if (!Shift)
+							_out += 'a';
+						else
+							_out += 'A';
+					}
+					if (CurrentKey == SDLK_SPACE)
+					{
+						_out = ' ';
+					}
+					if (CurrentKey <= SDLK_9 && CurrentKey >= SDLK_0)
+					{
+						_out = CurrentKey - SDLK_0;
+						_out += '0';
+					}
+					if (_out != 0)
+					{
+						if (SelLength == 0)
+							Caption.insert(Caption.begin() + SelStart, 1, _out);
+						else
+						{
+							Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
+							Caption.insert(Caption.begin() + SelStart, 1, _out);
+						}
+						SelLength = 0;
+						SelStart++;
+					}
+					break;
+				}
+
 			}
 		}
 	}
