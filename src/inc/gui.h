@@ -315,6 +315,7 @@ public:
 	byte					Shift;
 	char					_cout;
 	int						offset;
+	bool					mbpr;
 };
 
 /*

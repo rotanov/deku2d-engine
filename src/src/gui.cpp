@@ -986,6 +986,7 @@ void CEdit::MouseProcess(byte btn, byte event)
 			if (!fnt)
 				return;
 			int i = 0;
+			mbpr = 1;
 			for (i = 0; i < Caption.length() - offset; i++)
 				if (fnt->GetStringWidthEx(offset, offset + i - (i > 0), (char*)Caption.data()) >= x)
 					break;
@@ -998,6 +999,11 @@ void CEdit::MouseProcess(byte btn, byte event)
 			}
 		}
 	}
+	if (event==GUI_MBUP&&btn==1)
+	{
+		mbpr = 0;
+	}
+
 }
 void CEdit::KeyProcess(SDLKey &btn, byte event)
 {
@@ -1006,6 +1012,12 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 		switch (btn)
 		{
 		case SDLK_LSHIFT:
+			{
+				Shift = 1;
+				KeyState = (KeyState > 0);//0;mb 
+				break;
+			}
+		case SDLK_RSHIFT:
 			{
 				Shift = 1;
 				KeyState = (KeyState > 0);//0;mb 
@@ -1171,6 +1183,12 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 				KeyState = (KeyState > 0);//0;mb 
 				break;
 			}
+		case SDLK_RSHIFT:
+			{
+				Shift = 0;
+				KeyState = (KeyState > 0);//0;mb 
+				break;
+			}
 		case SDLK_DELETE:
 			{
 				//removing selection and setting key to delete
@@ -1224,6 +1242,30 @@ bool CEdit::Update( float dt )
 		offset++;
 	while (fnt->GetStringWidthEx(0, SelStart, (char*)Caption.data()) < fnt->GetStringWidthEx(0, offset, (char*)Caption.data()) + 20 && offset > 0)
 		offset--;
+	if (mbpr&&MbState(1))
+	{
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+		x -= GetLeft() + GUIScheme->GetXOffset(ThisStyle);
+		//getting letter pos
+		if (x>0)
+		{
+			int i = 0;
+			//mbpr = 1;
+			for (i = 0; i < Caption.length() - offset; i++)
+				if (fnt->GetStringWidthEx(offset, offset + i - (i > 0), (char*)Caption.data()) >= x)
+					break;
+			//if (Shift)
+				SelLength = i + offset - SelStart;
+			//else
+			//{
+			//	SelStart = i + offset;
+			//	SelLength = 0;
+			//}
+		}
+	}
+	else
+		mbpr = 0;
 	if (KeyState > 0)
 	{
 		bool flag = 0;
