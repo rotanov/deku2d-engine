@@ -158,19 +158,19 @@ bool CHero::Update( float dt )
 		C1 = 33;
 	else
 		C1 = 23;
-
+	//if something wrong simply replace tangle*(C1!=33) + (180 - tangle)*(C1==33) with tangle
 	if (Ninja->keys[SDLK_z])
 	{
 		if (abs(Snow - 100.0f) > 0.001f)
 		{
 			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("psys"));
 			Vector2 n;
-
+//					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 			for (int i=0; i< ps->info.ParticlesActive; i++)
 			{
 				n = (ps->particles[i].p - Vector2(x+C1, y+C2)).Normalized();
 				if (((ps->particles[i].p-Vector2(x, y)).Length())<= 200)
-					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
+					if (DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33)+ 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33) - 15))
 					{
 						ps->particles[i].p += (Vector2(x, y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(x, y)).Length()*0.15f);
 						if (((ps->particles[i].p-Vector2(x+C1, y+C2)).Length())<= 35)
@@ -186,9 +186,9 @@ bool CHero::Update( float dt )
 		else
 		{
 			CParticle *prt = snowballs->CreateParticle();
-			prt->v = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*500.01f;
+			prt->v = Vector2(cos(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))), sin(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))))*500.01f;
 
-			Vector2 pos = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*32;
+			Vector2 pos = Vector2(cos(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))), sin(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))))*32;
 			pos += Vector2(C1-16+x, C2-16+y);
 
 			prt->p = pos;
