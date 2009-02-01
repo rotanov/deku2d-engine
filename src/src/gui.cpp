@@ -961,6 +961,33 @@ void CEdit::MouseProcess(byte btn, byte event)
 			Focus = this;
 		}
 	}
+	if (event==GUI_MBDOWN&&btn==1)
+	{
+		//getting position
+		if (MouseIn(GetLeft() + GUIScheme->GetXOffset(ThisStyle),
+					GetTop() + GUIScheme->GetYOffset(ThisStyle),
+					GUIScheme->GetCWidth(ThisStyle, Width),
+					GUIScheme->GetCHeight(ThisStyle, Height)))
+		{
+			int x, y;
+			SDL_GetMouseState(&x, &y);
+			x -= GetLeft() + GUIScheme->GetXOffset(ThisStyle);
+			//getting letter pos
+			if (!fnt)
+				return;
+			int i = 0;
+			for (i = 0; i < Caption.length() - offset; i++)
+				if (fnt->GetStringWidthEx(offset, offset + i - (i > 0), (char*)Caption.data()) >= x)
+					break;
+			if (Shift)
+				SelLength = i + offset - SelStart;
+			else
+			{
+				SelStart = i + offset;
+				SelLength = 0;
+			}
+		}
+	}
 }
 void CEdit::KeyProcess(SDLKey &btn, byte event)
 {
