@@ -100,9 +100,9 @@ bool Init()
 		Button->Visible = true;
 		Button->Left = 415;
 		Button->Top = 345;
-		Button->Height = 30;
+		Button->Height = 65;
 		Button->Width = 200;
-		Button->Caption = "OK";
+		Button->Caption = "<--Grats-->";
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
 		return false;
@@ -247,10 +247,10 @@ bool Draw()
 {	
 	glLoadIdentity();
 	Ninja->FontManager->PrintEx(560, 460, 1, "Fps: %d", Ninja->GetFps());
-	char buff[1024];
-	memset(buff, 0, sizeof(buff));
-	sprintf(buff, "%d %d %d %d", Edit->KeyState, SDL_GetTicks() - Edit->KeyTime, Edit->Shift, Edit->SelLength);
-	Button->Caption = buff;
+//	char buff[1024];
+//	memset(buff, 0, sizeof(buff));
+//	sprintf(buff, "%d %d %d %d", Edit->KeyState, SDL_GetTicks() - Edit->KeyTime, Edit->Shift, Edit->SelLength);
+//	Button->Caption = buff;
 	return true;
 }
 

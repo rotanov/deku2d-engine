@@ -152,17 +152,30 @@ bool CGLImageData::PushQuad(float x0, float y0, float z0, float _width, float _h
 	return true;
 }
 /*Don't touch it!!!! only for Gui(may be xP)*/
-bool CGLImageData::PushQuadEx(float x0, float y0, float z0, float _width, float _height, int s0, int t0, int s1, int t1)
+bool CGLImageData::PushQuadEx(float x0, float y0, float z0, float _width, float _height, int s0, int t0, int s1, int t1, bool tiled)
 {
 	if (!isDrawing)
 	{
 		Log("AHTUNG", "Illegal PushQuadEx method call. BeginDraw() should be called before.");
 		return false;
 	}
-	glTexCoord2f((float)s0/width, (float)(height-t0)/height); glVertex3f(x0, ScreenH()-y0, z0);
-	glTexCoord2f((float)(s1 + s0)/width, (float)(height-t0)/height); glVertex3f(x0+_width,  ScreenH()-y0, z0);
-	glTexCoord2f((float)(s1 + s0)/width, (float)(height-t1-t0)/height); glVertex3f(x0+_width,  ScreenH()-(y0+_height), z0);
-	glTexCoord2f((float)s0/width, (float)(height-t1-t0)/height); glVertex3f(x0,  ScreenH()-(y0+_height), z0);
+
+	glTexCoord2f((float)s0/width, (float)(height-t0)/height); 
+	glVertex3f(x0, ScreenH()-y0, z0);
+
+
+	glTexCoord2f((float)(s1 + s0)/width, (float)(height-t0)/height); 
+	glVertex3f(x0+_width,  ScreenH()-y0, z0);
+
+
+	glTexCoord2f((float)(s1 + s0)/width, (float)(height-t1-t0)/height); 
+	glVertex3f(x0+_width,  ScreenH()-(y0+_height), z0);
+
+
+	glTexCoord2f((float)s0/width, (float)(height-t1-t0)/height); 
+	glVertex3f(x0,  ScreenH()-(y0+_height), z0);
+
+
 	return true;
 }
 

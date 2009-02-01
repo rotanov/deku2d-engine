@@ -105,7 +105,7 @@ public:
 	*	Sends a quad from image to video memory.
 	*/
 	bool PushQuad(float x0, float y0, float z0, float _width, float _height, int s0, int t0, int s1, int t1);
-	bool PushQuadEx(float x0, float y0, float z0, float _width, float _height, int s0, int t0, int s1, int t1);
+	bool PushQuadEx(float x0, float y0, float z0, float _width, float _height, int s0, int t0, int s1, int t1, bool tiled);
 	/**
 	*	Ends Drawing procedure.
 	*/

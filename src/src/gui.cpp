@@ -440,55 +440,55 @@ void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int
 	if (!Drawing)
 		return;
 	if (target == 0|| target > 8)
-		ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5]);
+		ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5], 0); //- lt
 	if (target == 1)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
 		Styles[StInd].Data[1],
 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
-		Styles[StInd].Data[5]);
+		Styles[StInd].Data[5], Styles[StInd].Data[9]);//t
 	if (target == 2)
 		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[4],
+		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],//mb - 4
 		Styles[StInd].Data[1],
-		Styles[StInd].Data[4],
-		Styles[StInd].Data[5]);
+		Styles[StInd].Data[6],//4, 5
+		Styles[StInd].Data[7], 0);// rt
 	if (target == 3)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0],
 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
 		Styles[StInd].Data[4],
-		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5]);
+		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//l
 	if (target == 4)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
 		Styles[StInd].Data[2] - Styles[StInd].Data[4] - Styles[StInd].Data[6],
-		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5]);
+		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[8]);//c
 	if (target == 5)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[4],
 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
 		Styles[StInd].Data[6],
-		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5]);
+		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//r
 	if (target == 6)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0],
 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
 		Styles[StInd].Data[4],
-		Styles[StInd].Data[7]);
+		Styles[StInd].Data[7], 0);//bl
 	if (target == 7)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
-		Styles[StInd].Data[7]);
+		Styles[StInd].Data[7], Styles[StInd].Data[9]);//b
 	if (target == 8)
 		ImgData.PushQuadEx(x,y,z,w,h,
 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],
 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
 		Styles[StInd].Data[6],
-		Styles[StInd].Data[7]);
+		Styles[StInd].Data[7], 0);//br
 }
 bool CGUIScheme::Draw(int StInd, int x, int y, float z, int w, int h)
 {
@@ -900,6 +900,7 @@ void CButton::MouseProcess(byte btn, byte event)
 		if (MouseIn(Left, Top, Width, Height))
 		{
 			SAFECALL(onClick, this);
+			Focus = this;
 		}
 	}
 }
@@ -969,8 +970,19 @@ void CEdit::MouseProcess(byte btn, byte event)
 		if (MouseInObjRect(this))
 		{
 			SAFECALL(onClick, this);
-			Focus = this;
 			KeyState = 0;
+			if (Focus)
+			{
+				if (typeid(*Focus).name() == "class CEdit")
+				{
+					if (!dynamic_cast<CEdit*>(Focus)->mbpr)
+						Focus = this;
+				}
+				else
+					Focus = this;
+			}
+			else
+				Focus = this;
 		}
 	}
 	if (event==GUI_MBDOWN&&btn==1)
