@@ -753,18 +753,28 @@ bool CForm::Update( float dt )
 {
 	CObject *tmp;
 	Items.Reset();
+	bool flag = 0;
 	while (Items.Enum(tmp))
 	{
 		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
 		if (MouseInObjRect(obj))
 		{
 			if (((MouseFocus != NULL) && (!ISFORM(MouseFocus))) && (MouseFocus != obj))
+			{
 				MouseFocus->Update(dt);
+				if (MouseFocus == Focus)
+					flag = 1;
+			}
 			MouseFocus = obj;
+			if (obj == Focus)
+				flag = 1;
 			obj->Update(dt);
 			return true;
 		}
 	}
+	if (!flag&&Focus)
+		Focus->Update(dt);
+
 	if (MouseFocus != NULL)
 		if (!(ISFORM(MouseFocus)))
 			MouseFocus->Update(dt);
@@ -1212,7 +1222,7 @@ bool CEdit::Update( float dt )
 	//int cw = ;
 	while (fnt->GetStringWidthEx(offset, SelStart, (char*)Caption.data()) > GUIScheme->GetCWidth(ThisStyle, Width) - 10 && offset < Caption.length() - 1)
 		offset++;
-	while (fnt->GetStringWidthEx(0, SelStart, (char*)Caption.data()) < fnt->GetStringWidthEx(0, offset, (char*)Caption.data()) + 10 && offset > 0)
+	while (fnt->GetStringWidthEx(0, SelStart, (char*)Caption.data()) < fnt->GetStringWidthEx(0, offset, (char*)Caption.data()) + 20 && offset > 0)
 		offset--;
 	if (KeyState > 0)
 	{

@@ -809,7 +809,7 @@ void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int o
 	int selx = xpos + GetStringWidthEx(0, s1-1-offset, text+offset);
 	if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
 	{
-		int selw = GetStringWidthEx(s1, s2, text);
+		int selw = GetStringWidthEx(max(s1, offset), s2, text);
 		gSolidRectEx(selx, ypos, selw, sheight, depth, &glRGBAub(10, 50, 200, 150));
 	}
 	gSolidRectEx(selx - 1, ypos, 1, min(sheight, GetStringHeight("!\0")), depth, &glRGBAub(10, 10, 10, 200));
