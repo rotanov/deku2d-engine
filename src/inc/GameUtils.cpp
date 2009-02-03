@@ -197,3 +197,43 @@ bool CLevelMap::SaveToFile()
 	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
 	file.Close();
 }
+
+bool CCollisionInfo::LoadFromFile()
+{
+	if (loaded)
+	{
+		Log("Warning", "Resource %s already loaded", name);
+		return false;
+	}
+
+	CFile file;
+	if (!file.Open(filename.c_str(), CFILE_READ))
+		return false;
+
+	file.ReadLine(TileSetName);
+	CFactory *Factory = CFactory::Instance();
+	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
+	Factory->FreeInst();
+	if (TileSet == NULL)
+		return false;
+	TileSet->Texture->Load();
+
+	boxes = new CBBox [TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles];
+	file.Read(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CBBox));
+
+	loaded = true;
+	return true;
+}
+
+bool CCollisionInfo::SaveToFile()
+{
+	CFile file;
+	if (!file.Open(filename.c_str(), CFILE_WRITE))
+		return false;
+	file.Write(TileSetName, strlen(TileSetName)+1);
+	if (TileSet == NULL)
+		return false;
+	file.Write(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CBBox));
+
+	return true;
+}

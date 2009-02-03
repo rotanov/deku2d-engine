@@ -79,13 +79,13 @@ class CObject
 public:
 	unsigned int type, id;	// type - флаши свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
 	string name;	// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
+	virtual ~CObject(){};
 	CObject()
 	{
 		type = 0;
 		name += "CObject ";
 		id = 0;
 	};
-	virtual ~CObject(){};
 };
 
 class CUpdateObject : public virtual CObject
@@ -132,7 +132,7 @@ typedef bool (*ObjCall)(CObject*);
 *	CObjectList - список объектов. Двусвязный.
 */
 
-class CObjectList : public CObject
+class CObjectList : public virtual CObject
 {
 private:
 	CNodeObject* GetNodeObject(string objectname);			// указатель на нодобжект по имени

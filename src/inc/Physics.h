@@ -4,7 +4,7 @@
 #include "CoreUtils.h"
 #include "MathUtils.h"
 
-class CPhysicalObject
+class CPhysicalObject : public CUpdateObject
 {
 public:
 	Vector2 p;
@@ -19,7 +19,7 @@ public:
 	virtual ~CPhysicalObject(){};
 };
 
-class CPhysicsManager
+class CPhysicsManager : public CObjectList
 {
 //	... 
 };

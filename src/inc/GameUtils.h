@@ -35,6 +35,28 @@ public:
 
 };
 
+class CCollisionInfo : public CResource
+{
+public:
+	char *TileSetName;
+	CTileSet *TileSet;
+	CBBox *boxes;
+
+	CCollisionInfo()
+	{
+		TileSetName = NULL;
+		TileSet = NULL;
+		boxes = NULL;
+	}
+	static CObject* NewCollisionInfo()
+	{
+		return new CCollisionInfo;
+	}
+
+	bool LoadFromFile();
+	bool SaveToFile();
+};
+
 struct CMapCellInfo
 {
 	int index;
@@ -48,7 +70,7 @@ struct CMapCellInfo
 * Cells: ^>
 */
 
-class CLevelMap : public CResource, public CRenderObject, public CUpdateObject
+class CLevelMap : public CResource, public CRenderObject, public CUpdateObject, public CObjectList
 {
 public:
 	int				numCellsHor, numCellsVer;

@@ -22,11 +22,11 @@
 enum EResType {RT_FONT, RT_IMAGE, RT_PSYSTEM, RT_ANIMATION, RT_XML};
 
 // Типы объектов. Это для CFactory
-#define OBJ_SPRITE		0x01
-#define OBJ_PSYSTEM		0x02
-#define OBJ_FONT		0x03
-#define	OBJ_USER_DEFINED 0x04
-#define OBJ_TEXTURE_RES 0x05
+#define OBJ_SPRITE			0x01
+#define OBJ_PSYSTEM			0x02
+#define OBJ_FONT			0x03
+#define	OBJ_USER_DEFINED	0x04
+#define OBJ_TEXTURE_RES		0x05
 
 #define MANAGER_TYPE_REN 0x00
 #define MANAGER_TYPE_FNT 0x01

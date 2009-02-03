@@ -1,0 +1,24 @@
+->
+• We can switch between the two classes at runtime. As long as pSoundSystem
+points to a valid object, the rest of the program doesn't know which one it is
+using, so we can change them at will. Obviously, we have to be careful with spe-
+cific class restrictions. For example, some classes will keep some state information
+or require initialization before being used for the first time.
+<-
+
+->
+We need to always include a virtual destructor in our abstract interfaces. If
+we don't, C++ will automatically generate a nonvirtual destructor, which
+will cause the real destructor of our specific implementation not to be called
+(and that is usually a hard bug to track down). Unlike normal member
+functions, we can't just provide a pure virtual destructor, so we need to create
+an empty function to keep the compiler happy.
+<-
+
+->
+
+<-
+
+->
+
+<-

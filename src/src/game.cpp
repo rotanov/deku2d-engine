@@ -159,6 +159,9 @@ bool CHero::Update( float dt )
 	else
 		C1 = 23;
 	//if something wrong simply replace tangle*(C1!=33) + (180 - tangle)*(C1==33) with tangle
+	if (spra.mirror_h)
+		tangle = 180 - tangle;
+
 	if (Ninja->keys[SDLK_z])
 	{
 		if (abs(Snow - 100.0f) > 0.001f)
@@ -197,6 +200,9 @@ bool CHero::Update( float dt )
 		}
 
 	}
+
+	if (spra.mirror_h)
+		tangle = - 180 - tangle;
 
 
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("enemy_l"));

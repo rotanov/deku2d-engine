@@ -553,10 +553,10 @@ void CGLWindow::glResize(GLsizei Width, GLsizei Height)
 {
 	if (Height == 0)		
 		Height = 1;
-	glViewport(0, 0, Width, Height);
+	glViewport(0, 0, Width-1, Height-1);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();			
-	gluOrtho2D(0.0f, Width - 1, 0.0f, Height - 1);
+	gluOrtho2D(0.0f, Width-1, 0.0f, Height-1);
 	glMatrixMode(GL_MODELVIEW);	
 	SetScreenParams(width, height);
 }

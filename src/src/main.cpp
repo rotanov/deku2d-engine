@@ -15,33 +15,34 @@ CButton *Button = NULL;
 void tempMakeTileSet()
 {
 	CTileSet ts;
-	ts.Info.HorNumTiles = 16;
-	ts.Info.VerNumTiles = 4;
-	ts.Info.TileHeight = 16;
-	ts.Info.TileWidth = 16;
+	ts.Info.HorNumTiles = 8;
+	ts.Info.VerNumTiles = 2;
+	ts.Info.TileHeight = 32;
+	ts.Info.TileWidth = 32;
 
-	ts.TextureName = "DocT";
-	ts.filename = "data\\Tilesets\\TileSet01.tls";
+	ts.TextureName = "SnowTiles";
+	ts.filename = "data\\Tilesets\\TileSet02-Snow01.tls";
 	ts.SaveToFile();
 }
 
 void tempMakeMap()
 {
 	CLevelMap m;
-	m.filename = "Data\\Levels\\Level01.lvl";
-	m.TileSetName = "Dokutsu";
+	m.filename = "Data\\Levels\\Level02.lvl";
+	m.TileSetName = "TileSetSnow";
 	m.numCellsHor = 4;
-	m.numCellsVer = 3;
+	m.numCellsVer = 4;
 
-	int ind[12] = {12,13,44,47,
-				   48,48,60,63,
-				   52,48,48,48};
-	m.Cells = new  CMapCellInfo [12];
-	memset(m.Cells, 0, 12*(sizeof(CMapCellInfo)));
-	for (int i=0;i<12;i++)
+	int ind[16] = {5,14,5,15,
+				   4,4,4,4,
+				   4,4,4,4,
+				   4,4,12,4};
+	m.Cells = new  CMapCellInfo [16];
+	memset(m.Cells, 0, 16*(sizeof(CMapCellInfo)));
+	for (int i=0;i<16;i++)
 	{
 		m.Cells[i].index = ind[i];
-		m.Cells[i].z = -0.01f;
+		m.Cells[i].z = -0.0f;
 		m.Cells[i].interaction = 0;
 	}
 	m.SaveToFile();
@@ -66,8 +67,8 @@ bool Init()
 		Edit->Top = 345;
 		Edit->Height = 30;
 		Edit->Width = 400;
-		Edit->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
-		Edit->SelStart = 5;
+		Edit->Caption = "Fuck";
+		Edit->SelStart = 1;
 		Edit->SelLength = -3;
 
 		//Edit creation sample
@@ -119,13 +120,13 @@ bool Init()
 	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("hero")))->GetTexID();
 	Hero->sprite.m_nTextureHeight = 32;
 	Hero->sprite.m_nTextureWidth = 32;
-	Hero->sprite.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
+	Hero->sprite.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->sprite.SetAnimation(1);
 
 	Hero->spra.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("heroa")))->GetTexID();
 	Hero->spra.m_nTextureHeight = 32;
 	Hero->spra.m_nTextureWidth = 32;
-	Hero->spra.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
+	Hero->spra.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->spra.SetAnimation(1);
 	Hero->spra.z = -0.5f;
 	Hero->sprb.z = -0.5f;
@@ -134,7 +135,7 @@ bool Init()
 	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("herob")))->GetTexID();
 	Hero->sprb.m_nTextureHeight = 32;
 	Hero->sprb.m_nTextureWidth = 32;
-	Hero->sprb.AddAnimation(true, 1, 56, 48, 1, 1, 1, 28, 24, 2, 7, 1, true);
+	Hero->sprb.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->sprb.SetAnimation(1);
 
 	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
@@ -181,7 +182,7 @@ bool Init()
 	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("gift")))->GetTexID();
 	Spr->m_nTextureHeight = 64;
 	Spr->m_nTextureWidth = 64;
-	Spr->AddAnimation(true, 1, 104, 98, 1, 1, 1, 52, 49, 2, 15, 1, true);
+	Spr->AddAnimation(true, 1, 52, 49, 1, 1, 1, 52, 49, 2, 15, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "GftSpr";
 	Spr->x = 260; 
@@ -193,7 +194,7 @@ bool Init()
 	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("bg")))->GetTexID();
 	Spr->m_nTextureHeight = 256;
 	Spr->m_nTextureWidth = 256;
-	Spr->AddAnimation(true, 1, 512, 512, 1, 1, 1, 256, 256, 0, 0, 1, true);
+	Spr->AddAnimation(true, 1, 256, 256, 1, 1, 1, 256, 256, 0, 0, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "BgrSpr";
 	Spr->x = 0; 
@@ -205,7 +206,7 @@ bool Init()
 	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("gr")))->GetTexID();
 	Spr->m_nTextureHeight = 16;
 	Spr->m_nTextureWidth = 256;
-	Spr->AddAnimation(true, 1, 512, 32, 1, 1, 1, 256, 16, 0, 0, 1, true);
+	Spr->AddAnimation(true, 1, 256, 16, 1, 1, 1, 256, 16, 0, 0, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "grSpr";
 	Spr->x = 0; 
@@ -225,12 +226,13 @@ bool Init()
 	tempMakeMap();
 
 	CTileSet *ts;
-	ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("tileset", "Dokutsu", CTileSet::NewTileSet));
+	//ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("tileset", "Dokutsu", CTileSet::NewTileSet));
+	ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("tileset", "TileSetSnow", CTileSet::NewTileSet));
 	
 	CLevelMap *lm;
-	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("levels", "Level01", CLevelMap::NewLevelMap));
+	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("levels", "Level02", CLevelMap::NewLevelMap));
 	lm->visible = true;
-	lm->z = -0.1f;
+	lm->z = -0.6f;
 	
 	Ninja->RenderManager.SortByAlpha();
 	Ninja->RenderManager.SortByZ();
