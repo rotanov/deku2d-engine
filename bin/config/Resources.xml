@@ -1,0 +1,52 @@
+<Data>
+	1maingui = "D:\Projects\Ninja Story\bin\data\1maingui.bmp"
+	Art = "D:\Projects\Ninja Story\bin\data\Art.rar"
+	data = "D:\Projects\Ninja Story\bin\data\data.rar"
+	<Fonts>
+		Beta = "D:\Projects\Ninja Story\bin\data\Fonts\Beta.fif"
+		Font = "D:\Projects\Ninja Story\bin\data\Fonts\Font.fif"
+		hge = "D:\Projects\Ninja Story\bin\data\Fonts\hge.fif"
+	</Fonts>
+	gui = "gui"
+	gui = "D:\Projects\Ninja Story\bin\data\gui.rar"
+	<Levels>
+		Level01 = "D:\Projects\Ninja Story\bin\data\Levels\Level01.lvl"
+		Level02 = "D:\Projects\Ninja Story\bin\data\Levels\Level02.lvl"
+	</Levels>
+	main = "D:\Projects\Ninja Story\bin\data\main.gui"
+	maingui = "D:\Projects\Ninja Story\bin\data\maingui.bmp"
+	Objects = "Objects"
+	Scripts = "Scripts"
+	test = "D:\Projects\Ninja Story\bin\data\test.df"
+	<Textures>
+		1ball = "D:\Projects\Ninja Story\bin\data\Textures\1ball.bmp"
+		bat2_scetch_col2 = "D:\Projects\Ninja Story\bin\data\Textures\bat2_scetch_col2.bmp"
+		bg1 = "D:\Projects\Ninja Story\bin\data\Textures\bg1.png"
+		bg_b = "D:\Projects\Ninja Story\bin\data\Textures\bg_b.bmp"
+		box = "D:\Projects\Ninja Story\bin\data\Textures\box.bmp"
+		cells = "D:\Projects\Ninja Story\bin\data\Textures\cells.bmp"
+		copy of Ground = "D:\Projects\Ninja Story\bin\data\Textures\copy of Ground.bmp"
+		Enemy_r = "D:\Projects\Ninja Story\bin\data\Textures\Enemy_r.bmp"
+		Font = "D:\Projects\Ninja Story\bin\data\Textures\Font.bmp"
+		font1 = "D:\Projects\Ninja Story\bin\data\Textures\font1.png"
+		Font10ok = "D:\Projects\Ninja Story\bin\data\Textures\Font10ok.bmp"
+		frames = "D:\Projects\Ninja Story\bin\data\Textures\frames.bmp"
+		Gift_d = "D:\Projects\Ninja Story\bin\data\Textures\Gift_d.bmp"
+		Gift_r = "D:\Projects\Ninja Story\bin\data\Textures\Gift_r.bmp"
+		Ground = "D:\Projects\Ninja Story\bin\data\Textures\Ground.bmp"
+		Groundtile = "D:\Projects\Ninja Story\bin\data\Textures\Groundtile.bmp"
+		Hero_a1 = "D:\Projects\Ninja Story\bin\data\Textures\Hero_a1.bmp"
+		Hero_b1 = "D:\Projects\Ninja Story\bin\data\Textures\Hero_b1.bmp"
+		Hero_r1 = "D:\Projects\Ninja Story\bin\data\Textures\Hero_r1.bmp"
+		Particle = "D:\Projects\Ninja Story\bin\data\Textures\Particle.bmp"
+		PrtOside = "D:\Projects\Ninja Story\bin\data\Textures\PrtOside.bmp"
+		snowb_b = "D:\Projects\Ninja Story\bin\data\Textures\snowb_b.bmp"
+		snowb_br = "D:\Projects\Ninja Story\bin\data\Textures\snowb_br.bmp"
+		SnowyTileSet = "D:\Projects\Ninja Story\bin\data\Textures\SnowyTileSet.bmp"
+	</Textures>
+	<Tilesets>
+		TileSet01 = "D:\Projects\Ninja Story\bin\data\Tilesets\TileSet01.tls"
+		TileSet02-Snow01 = "D:\Projects\Ninja Story\bin\data\Tilesets\TileSet02-Snow01.tls"
+		TileSet02 = "D:\Projects\Ninja Story\bin\data\Tilesets\TileSet02.tls"
+	</Tilesets>
+</Data>
