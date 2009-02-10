@@ -1,0 +1,33 @@
+Backus-Naur Form = BNF = Форма Бэкуса Наура
+--> проекция (читать как "может иметь вид")
+stmt means statement
+expr means expression
+indent means identifier
+
+Tokens (Токены):
+if
+else
+(
+)
+
+op1 --> +|-
+op2 --> *|/
+digit --> 0|1|2|3|4|5|6|7|8|9
+
+factor --> digit | (expr)
+term --> {term op2} factor
+expr --> {expr op1} term
+
+stmt --> {ident =} expr
+
+
+
+Engine Functions:
+Write to log ::= >LOG string
+Exit program ::= >END
+Fade in	::= >FDI expr
+Fade out ::= >FDO expr
+Show hero ::= >SHR 0 | 1
+Wait for n ms ::= >WAS expr
+Wait for user input >WAI
+Wait for user input or ms >WAB expr

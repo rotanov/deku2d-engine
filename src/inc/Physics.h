@@ -9,12 +9,11 @@ class CPhysicalObject : public CUpdateObject
 public:
 	Vector2 p;
 	Vector2 v;
-	//... some physical stuff here
-	CRecti *bbox;
-	//CColisionStruct *Coll;
-	CPhysicalObject *next;
 
-	// methods
+	CGeometry G;	// Геометрическая интерпретация формы объекта	
+	
+	CBBox *box;
+
 	CPhysicalObject(){};
 	virtual ~CPhysicalObject(){};
 };

@@ -563,12 +563,12 @@ void CGLWindow::glResize(GLsizei Width, GLsizei Height)
 
 void CGLWindow::glInit(GLsizei Width, GLsizei Height)	
 {
-	glShadeModel(GL_FLAT);	//GL_SMOOTH GL_FLAT
+	glShadeModel(GL_SMOOTH);	//GL_SMOOTH GL_FLAT
 	
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClearColor(0.0, 0.0, 0.0, 0.5);
 	
-	//glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 
 	if (Height == 0)		
 		Height = 1;
@@ -584,9 +584,9 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);	
 
-	// 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	// 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	// 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 
 
 	//strstr(WGL_EXT_swap_control);
@@ -950,6 +950,7 @@ void gSetBlendingMode(void)
 {
 		glEnable			(GL_BLEND);
 		glBlendFunc			(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
+		//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 		glEnable			(GL_ALPHA_TEST);
 		glAlphaFunc			(GL_GREATER, 0);
 }
@@ -969,6 +970,64 @@ void gLineRect(float x, float y, float width, float height)
 	glPopAttrib();
 	glPopMatrix();
 }
+
+void gRenderSegment(Vector2 *v0, Vector2 *v1, RGBAf *col)
+{
+	glPushMatrix();
+	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glLoadIdentity();
+
+	glColor4fv(&(col->r));
+
+	glBegin(GL_LINES);
+		glVertex2fv(&(v0->x));
+		glVertex2fv(&(v1->x));
+	glEnd();
+
+	glPopAttrib();
+	glPopMatrix();
+}
+
+void gRenderCircle(const Vector2 &pos, float Radius, RGBAf *col)
+{
+	static int glList = -1;
+	if (!glIsList(glList))
+	{
+		glList = glGenLists(1);
+
+		glNewList(glList, GL_COMPILE_AND_EXECUTE);
+
+		glBegin(GL_LINE_LOOP);
+
+		for(int i = 0; i < 64 + 1; i ++)
+		{
+			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+
+			glVertex2f(P.x, P.y);
+		}
+
+		glEnd();
+
+		glEndList();
+	}
+
+	glPushMatrix();
+	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glLoadIdentity();
+
+	glColor4fv(&(col->r));
+
+	glTranslatef(pos.x, pos.y, 0.0f);
+	glScalef(Radius, Radius, 0.0f);
+	glCallList(glList);
+
+
+	glPopAttrib();
+	glPopMatrix();
+}
+
 
 void gSolidRect(float x, float y, float width, float height, glRGBAub* color)
 {
@@ -1001,6 +1060,51 @@ void gSolidRectEx(float x, float y, float width, float height, float depth, glRG
 	glPopAttrib();
 	glPopMatrix();
 }
+
+void gRenderPolygon(Vector2 *pos, Matrix2 *rot, CPolygon *poly, RGBAf *col)
+{
+	glPushMatrix();
+	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	//glLoadIdentity();
+	glTranslatef(pos->x, pos->y, 0.0f);
+	//glRotatef(rot->); TODO!
+	glColor4fv(&(col->r));
+#ifdef G_POLY_TEXTURE_ENABLE
+	glEnable(GL_TEXTURE_2D);
+	CTextureManager *Tman = CTextureManager::Instance();
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	Tman->FreeInst();
+	cells->Bind();
+#endif 
+	glBegin(GL_TRIANGLE_FAN);
+		for(int i = 0; i < poly->numV; i++)
+		{
+#ifdef G_POLY_TEXTURE_ENABLE
+			glTexCoord2f(poly->V[i].x/20, poly->V[i].y/20);
+#endif 
+			glVertex2fv(&(poly->V[i].x));
+		}
+	glEnd();
+
+#ifdef G_POLY_OUTLINE_ENABLE
+
+	glEnable(GL_LINE_WIDTH);
+	glLineWidth(1.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	glBegin(GL_LINE_LOOP);
+	for(int i = 0; i < poly->numV; i++)
+	{
+		glVertex2fv(&(poly->V[i].x));
+	}
+	glEnd();
+
+#endif 
+
+	glPopAttrib();
+	glPopMatrix();
+}
+
 
 
 void SDLGLExit(int code)
@@ -1218,6 +1322,11 @@ bool CParticleSystem::Render()
 		glPushAttrib(GL_TEXTURE_BIT | GL_POINTS);
 		glDisable(GL_POINTS);
 		glEnable(GL_TEXTURE_2D);
+
+		
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		
+
 		glBindTexture(GL_TEXTURE_2D, TexID);
 		
 		glBegin(GL_QUADS);
@@ -1231,6 +1340,8 @@ bool CParticleSystem::Render()
 		}
 		glEnd();
 		glPopAttrib();
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	return true;
 }
@@ -1560,8 +1671,6 @@ void CCamera::Update()
 
 	}
 */
-
-	glShadeModel(GL_FLAT);
 	v = Vector2(*Atx, *Aty) - Point;
 	if (abs(v.x) < 0.001f && abs(v.y) < 0.001f)
 		v = Vector2::Blank();

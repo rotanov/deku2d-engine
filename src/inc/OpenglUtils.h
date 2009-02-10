@@ -513,6 +513,13 @@ void gEndFrame();
 void gLineRect(float x, float y, float width, float height);
 void gSolidRect(float x, float y, float width, float height, glRGBAub* color);
 void gSolidRectEx(float x, float y, float width, float height, float depth, glRGBAub* color);
+void gRenderSegment(Vector2 *v0, Vector2 *v1, RGBAf *col);
+void gRenderCircle(const Vector2 &pos, float Radius, RGBAf *col);
+
+#define G_POLY_OUTLINE_ENABLE
+#define G_POLY_TEXTURE_ENABLE
+
+void gRenderPolygon(Vector2 *pos, Matrix2 *rot, CPolygon *poly, RGBAf *col);
 void gDrawBBox(CBBox box);
 /**
 *	Controls scissor test

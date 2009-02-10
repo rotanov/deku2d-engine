@@ -239,7 +239,7 @@ bool isAllowed(unsigned char c)
 
 bool isAllowedEx(unsigned char c)
 {
-	if (((c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A')) || ((c <= '9' && c >= '0') || (c <= 46 && c >= 32))|| c == 9|| c =='\\' || c == '/' || c == '_')
+	if (((c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A')) || ((c <= '9' && c >= '0') || (c <= 46 && c >= 32))|| c == 9|| c =='\\' || c == '/' || c == '_' /* hello there it's me */ || c == ':')
 		return 1;
 	return 0;
 }
@@ -351,7 +351,7 @@ unsigned int XMLParse(string Str, string &Buff1, string &Buff2){
 		}
 		else
 		{
-			int ind = GetString(Str, pos, Buff1, '=', true, false, 0);
+			int ind = GetString(Str, pos, Buff1, '=', true, false, /* hello it's me again. there was 0 befor me*/ 1);
 			if (ind == -1)
 			{
 				Log("XMLERROR", XML_ERROR2);
@@ -503,7 +503,7 @@ bool XMLTable::LoadFromFile(char *fname)
 	delete _tmp;
 	return true;
 }
-/*
+/**
 ------------------------------------------------
 *	bool XMLTable::SaveToFile(char *fname)
 ------------------------------------------------

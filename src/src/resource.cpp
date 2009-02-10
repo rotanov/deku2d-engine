@@ -190,7 +190,7 @@ CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc cr
 
 	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator)); // May be not safe, be careful here: creator sholud return class derived from CResource
 	result->name = name;
-	result->filename = DataPath + val;
+	result->filename = val; // DataPath + // debug here
 	result->LoadFromFile();
 
 	Factory->FreeInst();
@@ -217,7 +217,7 @@ bool CResourceManager::LoadFonts()
 		if (Font == NULL)
 			return false;
 		Font->name = key;
-		Font->LoadFromFile((char*)(DataPath+FontsFldr+val).data());
+		Font->LoadFromFile((char*)(val).data()); // DataPath+FontsFldr+ // debug here
 	}
 	Factory->FreeInst();
 	return true;
@@ -243,7 +243,7 @@ bool CResourceManager::LoadTextures()
 		if (TextureRes == NULL) 
 			return false;
 		TextureRes->name = key;
-		TextureRes->filename = DataPath + TexturesFldr + val;
+		TextureRes->filename = val; // DataPath + TexturesFldr + // debug here
 	}
 	Factory->FreeInst();
 	return true;

@@ -83,7 +83,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObject("snowballs"));
 	Ninja->FreeInst();
 
-	CBBox Gift = CBBox(274, GROUND, 260 + 102 , GROUND + 59 );
+	CBBox Gift = CBBox(274, GROUND, 260 + 51 , GROUND + 29 );
 
 	Vector2 n;
 	float delta;
@@ -173,7 +173,7 @@ bool CHero::Update( float dt )
 			{
 				n = (ps->particles[i].p - Vector2(x+C1, y+C2)).Normalized();
 				if (((ps->particles[i].p-Vector2(x, y)).Length())<= 200)
-					if (DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33)+ 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33) - 15))
+					if (DegToRad(tangle+ 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 					{
 						ps->particles[i].p += (Vector2(x, y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(x, y)).Length()*0.15f);
 						if (((ps->particles[i].p-Vector2(x+C1, y+C2)).Length())<= 35)
@@ -189,9 +189,9 @@ bool CHero::Update( float dt )
 		else
 		{
 			CParticle *prt = snowballs->CreateParticle();
-			prt->v = Vector2(cos(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))), sin(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))))*500.01f;
+			prt->v = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*500.01f;
 
-			Vector2 pos = Vector2(cos(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))), sin(DegToRad(tangle*(C1!=33) + (180 - tangle)*(C1==33))))*32;
+			Vector2 pos = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*32;
 			pos += Vector2(C1-16+x, C2-16+y);
 
 			prt->p = pos;
@@ -232,7 +232,7 @@ bool CHero::Update( float dt )
 	x += v.x*dt;
 	tmp.Offset(x, y);
 	if (tmp.Intersect(Gift))
-	{
+	{	
 		if (v.x > 0)
 			x = Gift.vMin.x  - 56;
 		else

@@ -1,10 +1,7 @@
 #include "CoreUtils.h"
 
-#define _CRT_SECURE_NO_DEPRECATE
-
 int ___w=0, ___h=0;
 bool Enabled = true;
-
 
 CFile::CFile(char *filename, int mode)
 {
@@ -265,93 +262,6 @@ bool CFile::Seek(unsigned int offset, byte kind)
 }
 
 
-//----------------------------------//
-//			Log Stuff				//
-//----------------------------------//
-void SetScreenParams(int Width, int Height){
-	___w=Width;
-	___h=Height;
-}
-
-void GetScreenParams(int &Width, int &Height){
-	Width=___w;
-	Height=___h;
-}
-
-int ScreenW()
-{
-	return ___w;
-}
-int ScreenH()
-{
-	return ___h;
-}
-
-
-char LogFile[2048];
-int __l=0;
-char _day[7][4];
-char _mon[12][4];
-CDummy InitLog = CDummy();
-void CreateLogFile(char *fname)
-{
-	memset(LogFile,0,2048);//(LogFile,2048);
-	memcpy(LogFile,fname,strlen(fname));
-	FILE *hf = NULL;
-	hf = fopen(LogFile, "w");
-#ifdef LOG_TIME_TICK
-	fprintf(hf, "[0]%c%c[INFO] Log file \"%s\" created\n", 9,9,fname);
-#else
-	__time64_t long_time;
-	_time64( &long_time ); 
-	struct tm *newtime;
-	newtime = localtime(&long_time);
-	char buff[256];
-	memset(buff,0,256);
-	strcpy(buff,asctime(newtime));
-	for (unsigned int i=0;i<strlen(buff);i++){
-		if (buff[i]<=13)
-			buff[i] = 0;
-	}
-	fprintf(hf, "[%s] [INFO] Log file \"%s\" created\n", buff,fname);
-#endif
-	fclose(hf);
-}
-void Log(char* Event,char* Format,...)
-{
-	if (!Enabled)
-		return;
-	va_list ap;
-	FILE *hf = NULL;
-	hf = fopen(LogFile, "a");
-#ifdef LOG_TIME_TICK
-	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
-#else
-	__time64_t long_time;
-	_time64( &long_time ); 
-	struct tm *newtime;
-	newtime = localtime(&long_time);
-	char buff[256];
-	memset(buff,0,256);
-	strcpy(buff,asctime(newtime));
-	for (unsigned int i=0;i<strlen(buff);i++){
-		if (buff[i]<=13)
-			buff[i] = 0;
-	}
-	fprintf(hf,"[%s] [%s] ", buff, Event);
-#endif
-	va_start(ap, Format);
-	vfprintf(hf, Format, ap);
-	va_end(ap);
-	fprintf(hf,"\n");
-	fclose(hf);
-}
-
-void ToggleLog( bool _Enabled )
-{
-	Enabled = _Enabled;
-}
-
 CNodeObject::CNodeObject()
 {
 	next = prev = NULL;
@@ -375,15 +285,6 @@ CObjectList::CObjectList()
 
 CObjectList::~CObjectList()
 {
-/*	if (first == NULL) 
-		return;
-	CNodeObject *that = first, *next = NULL;
-	while (that != NULL)
-	{
-		next = that->next;
-		delete that;
-		that = next;
-	}*/
 	Clear();
 }
 
@@ -391,13 +292,7 @@ bool CObjectList::AddObject(CObject *object)
 {
 	if (object == NULL)
 		return false;
-//	CNodeObject *prev = NULL, **next = &first;
-//	while ((*next) != NULL)
-//	{
-//		prev = *next;
-//		next = &((*next)->next);
-//	}
-//	last = *next = new CNodeObject;
+
 	CNodeObject *tmp = new CNodeObject();
 	tmp->prev = last;
 	if (last == NULL)
@@ -406,8 +301,6 @@ bool CObjectList::AddObject(CObject *object)
 		last->next = tmp;
 	last = tmp;
 	tmp->SetData(object);
-/*	(*next)->SetData(object);
-	(*next)->prev = prev;*/
 	Reset();
 	return true;
 }
@@ -445,13 +338,6 @@ CObject* CObjectList::GetObject(string objectname)
 	}
 	Log("WARNING", "Object with name %s requested from GetObject() not found in %s", objectname.c_str(), name.c_str());
 	return NULL;
-	//Reset();
-	//CObject *result = Next();
-	//while (result->name != objectname)
-	//{
-	//	result = Next();
-	//}
-	//return result;
 }
 
 CNodeObject* CObjectList::GetNodeObject(string objectname)
@@ -626,8 +512,136 @@ CPSingleTone::~CPSingleTone()
 CPSingleTone* CPSingleTone::_instance = 0;
 int CPSingleTone::_refcount = 0;
 
+
+//----------------------------------//
+//			Log Stuff				//
+//----------------------------------//
+void SetScreenParams(int Width, int Height){
+	___w=Width;
+	___h=Height;
+}
+
+void GetScreenParams(int &Width, int &Height){
+	Width=___w;
+	Height=___h;
+}
+
+int ScreenW()
+{
+	return ___w;
+}
+int ScreenH()
+{
+	return ___h;
+}
+
+
+char LogFile[2048];
+int __l=0;
+char _day[7][4];
+char _mon[12][4];
+CDummy InitLog = CDummy();
+
 #ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#endif 
+
+
+void CreateLogFile(char *fname)
+{
+	memset(LogFile,0,2048);//(LogFile,2048);
+	memcpy(LogFile,fname,strlen(fname));
+	FILE *hf = NULL;
+
+#ifdef WIN32
+	char *MainDir = new char[MAX_PATH], *LastDir = new char[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, LastDir);
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DeleteFileNameFromEndOfPathToFile(MainDir);
+	SetCurrentDirectory(MainDir);
+#endif WIN32 
+
+
+	hf = fopen(LogFile, "w");
+#ifdef LOG_TIME_TICK
+	fprintf(hf, "[0]%c%c[INFO] Log file \"%s\" created\n", 9,9,fname);
+#else
+	__time64_t long_time;
+	_time64( &long_time ); 
+	struct tm *newtime;
+	newtime = localtime(&long_time);
+	char buff[256];
+	memset(buff,0,256);
+	strcpy(buff,asctime(newtime));
+	for (unsigned int i=0;i<strlen(buff);i++){
+		if (buff[i]<=13)
+			buff[i] = 0;
+	}
+	fprintf(hf, "[%s] [INFO] Log file \"%s\" created\n", buff,fname);
+#endif
+	fclose(hf);
+
+#ifdef WIN32
+	SetCurrentDirectory(LastDir);
+	delete [] MainDir;
+	delete [] LastDir;
+#endif
+
+}
+void Log(char* Event,char* Format,...)
+{
+	if (!Enabled)
+		return;
+
+#ifdef WIN32
+	char *MainDir = new char[MAX_PATH], *LastDir = new char[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, LastDir);
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DeleteFileNameFromEndOfPathToFile(MainDir);
+	SetCurrentDirectory(MainDir);
+#endif WIN32 
+
+	va_list ap;
+	FILE *hf = NULL;
+	hf = fopen(LogFile, "a");
+#ifdef LOG_TIME_TICK
+	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
+#else
+	__time64_t long_time;
+	_time64( &long_time ); 
+	struct tm *newtime;
+	newtime = localtime(&long_time);
+	char buff[256];
+	memset(buff,0,256);
+	strcpy(buff,asctime(newtime));
+	for (unsigned int i=0;i<strlen(buff);i++){
+		if (buff[i]<=13)
+			buff[i] = 0;
+	}
+	fprintf(hf,"[%s] [%s] ", buff, Event);
+#endif
+	va_start(ap, Format);
+	vfprintf(hf, Format, ap);
+	va_end(ap);
+	fprintf(hf,"\n");
+	fclose(hf);
+
+#ifdef WIN32
+	SetCurrentDirectory(LastDir);
+	delete [] MainDir;
+	delete [] LastDir;
+#endif
+
+}
+
+void ToggleLog( bool _Enabled )
+{
+	Enabled = _Enabled;
+}
+
+
+#ifdef WIN32
 
 _CrtMemState *MemState1 = NULL, *MemState2 = NULL, *MemState3 = NULL;
 
@@ -671,3 +685,19 @@ void MemCheck()
 }
 
 #endif
+
+void DeleteFileNameFromEndOfPathToFile(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] != '/' && src[i] != '\\' && src[i] != ':')
+		i--;
+	src[i+1] = 0;
+}
+
+void DeleteExtFromFilename(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] != '.')
+		i--;
+	src[i] = 0;
+}

@@ -1,6 +1,8 @@
 #ifndef CORE_UTILS_H
 #define CORE_UTILS_H
 
+#define _CRT_SECURE_NO_DEPRECATE
+
 #pragma warning (disable  : 4996) 
 #pragma warning (disable  : 4312) 
 
@@ -295,5 +297,8 @@ public:
 		CreateLogFile("System.log");
 	}
 };
+
+void DeleteFileNameFromEndOfPathToFile(char *src);
+void DeleteExtFromFilename(char *src);
 
 #endif CORE_UTILS_H	

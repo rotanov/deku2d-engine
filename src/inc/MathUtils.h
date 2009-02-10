@@ -26,6 +26,10 @@
 	#define __INLINE inline
 #endif
 
+
+class Vector2;
+union Matrix2;
+
 #define SQR(x) ((x)*(x))
 #define CUBE(x) ((x)*(x)*(x))
 #define PI   3.1415926535897932
@@ -84,7 +88,8 @@ public:
 public:
 	__INLINE Vector2(void){}
 	__INLINE Vector2( scalar Ix, scalar Iy) : x(Ix), y(Iy){}
-	__INLINE  Vector2 operator + (const Vector2 &V)const
+	
+		__INLINE  Vector2 operator + (const Vector2 &V)const
 	{ 
 		return Vector2(x + V.x, y + V.y);
 	}
@@ -153,6 +158,15 @@ public:
 		return x * V.y - y * V.x;
 	}
 
+
+	Vector2 operator * (const Matrix2& M) const;
+
+	Vector2 operator ^ (const Matrix2& M) const;
+
+	Vector2& operator *=(const Matrix2& M);
+
+	Vector2& operator ^=(const Matrix2& M);
+
 	__INLINE scalar Length(void) const
 	{ 
 		#ifdef OPTIMIZE_V2L
@@ -188,12 +202,13 @@ public:
 		Vector2 t = (*this) * ( 1.0f / l );	 
 		return t;
 	}
-	__INLINE void Normalize(void) 
+	__INLINE float Normalize(void) 
 	{
 		scalar l = Length();
 		if ( l == 0.0f )
-			return;
+			return 0.0f;
 		(*this) *= ( 1.0f / l );	 
+		return l;
 	}
 
 };
@@ -424,7 +439,7 @@ public:
 		x = temp.x;
 		z = temp.z;
 	}
-// if that vector is normal so this funtion will reutrn euler angle to axes
+// if that vector is normal so this function will return Euler angle to axes
 
 __INLINE Vector3 GetEulerAnglesFromNormal(Vector3 n)
 {
@@ -746,7 +761,7 @@ public:
 		Vector3 co = Vector3(cofac(1, 1, 2, 2), cofac(1, 2, 2, 0), cofac(1, 0, 2, 1));
 		scalar det = m[0]*co;
 		if (det == 0.0f)
-			return Matrix3(0, 0, 0,0 ,0, 0,0 ,0, 0);
+			return Matrix3(0, 0, 0, 0 ,0, 0, 0 ,0, 0);
 		scalar s = 1.0f / det;
 		return Matrix3(co.x * s, cofac(0, 2, 2, 1) * s, cofac(0, 1, 1, 2) * s,
 						 co.y * s, cofac(0, 0, 2, 2) * s, cofac(0, 2, 1, 0) * s,
@@ -771,8 +786,145 @@ scalar	e11, e12, e13, e14,
 		e31, e32, e33, e34,
 		e41, e42, e43, e44;
 };
-class Matrix2x2
-{};
+union Matrix2
+{
+	struct
+	{
+		float e11;
+		float e12;
+		float e21;
+		float e22;
+	};
+
+	float e[2][2];
+	Matrix2(float _e11, float _e12, float _e21, float _e22) : e11(_e11), e12(_e12), e21(_e21), e22(_e22)
+	{}
+
+	Matrix2()
+	{}
+
+	Matrix2(float angle)
+	{
+		float c = cos(angle);
+		float s = sin(angle);
+
+		e11 = c; e12 = s;
+		e21 =-s; e22 = c;
+	}
+
+	float  operator()(int i, int j) const 
+	{
+		return e[i][j];
+	}
+	float& operator()(int i, int j)       
+	{
+		return e[i][j]; 
+	}
+
+
+	const Vector2& operator[](int i) const
+	{
+		return reinterpret_cast<const Vector2&>(e[i][0]);
+	}
+
+	Vector2& operator[](int i)
+	{
+		return reinterpret_cast<Vector2&>(e[i][0]);
+	}		
+
+	static Matrix2 Identity()
+	{
+		static const Matrix2 T(1.0f, 0.0f, 0.0f, 1.0f);
+
+		return T;
+	}
+
+	static Matrix2 Zer0()
+	{
+		static const Matrix2 T(0.0f, 0.0f, 0.0f, 0.0f);
+
+		return T;
+	}
+
+
+	Matrix2 Tranpose() const
+	{
+		Matrix2 T;
+
+		T.e11 = e11;
+		T.e21 = e12;
+		T.e12 = e21;
+		T.e22 = e22;
+
+		return T;
+	}
+
+	__INLINE Matrix2 operator - (void) const
+	{
+		Matrix2 T;
+		T.e11 = -e11;
+		T.e12 = -e12;
+		T.e21 = -e21;
+		T.e22 = -e22;
+		return T;
+	}
+
+	Matrix2 operator * (const Matrix2& M) const 
+	{
+		Matrix2 T;
+
+		T.e11 = e11 * M.e11 + e12 * M.e21;
+		T.e21 = e21 * M.e11 + e22 * M.e21;
+		T.e12 = e11 * M.e12 + e12 * M.e22;
+		T.e22 = e21 * M.e12 + e22 * M.e22;
+
+		return T;
+	}
+
+	Matrix2 operator ^ (const Matrix2& M) const 
+	{
+		Matrix2 T;
+
+		T.e11 = e11 * M.e11 + e12 * M.e12;
+		T.e21 = e21 * M.e11 + e22 * M.e12;
+		T.e12 = e11 * M.e21 + e12 * M.e22;
+		T.e22 = e21 * M.e21 + e22 * M.e22;
+
+		return T;
+	}
+
+	__INLINE Matrix2 operator * (float s) const
+	{
+		Matrix2 T;
+
+		T.e11 = e11 * s;
+		T.e21 = e21 * s;
+		T.e12 = e12 * s;
+		T.e22 = e22 * s;
+
+		return T;
+	}
+
+	__INLINE Matrix2 operator + (const Matrix2 &M) const
+	{
+		Matrix2 T;
+		T.e11 = e11 + M.e11;
+		T.e12 = e12 + M.e12;
+		T.e21 = e21 + M.e21;
+		T.e22 = e22 + M.e22;
+		return T;
+	}
+
+	__INLINE Matrix2 operator - (const Matrix2 &M) const
+	{
+		Matrix2 T;
+		T.e11 = e11 - M.e11;
+		T.e12 = e12 - M.e12;
+		T.e21 = e21 - M.e21;
+		T.e22 = e22 - M.e22;
+		return T;
+	}
+};
 
 union Vector4
 {
@@ -898,21 +1050,71 @@ union Vector4
 typedef Vector4 Quaternion;
 typedef Vector4 RGBAf;
 
-bool SqareEq( scalar a, scalar b, scalar c, scalar &t0, scalar &t1);
+/**
+*	MatrixNM - произвольная матрица. M строк, N столбцов
+*/ 
 
-__INLINE void Swap(scalar &a, scalar &b)
+class MatrixNM
 {
-	scalar t = a;
-	a = b;
-	b = a;
-}
+public:
+	int n, m;
+	scalar **e;
 
-__INLINE void Swapv(Vector3 &a, Vector3 &b)
-{
-	Vector3 t = a;
-	a = b;
-	b = a;
-}
+	MatrixNM():n(0), m(0), e(NULL){}
+	MatrixNM(int _n, int _m) : n(_n), m(_m)
+	{
+		e = new scalar* [m];
+		for(int i=0; i< m; e[i++] = new scalar [n]);
+	}
+
+	float  operator()(int i, int j) const 
+	{
+		return e[i][j];
+	}
+	float& operator()(int i, int j)       
+	{
+		return e[i][j]; 
+	}
+
+	void SwapC(int c0, int c1)
+	{
+		for(int i=0; i < m; ++i)
+			std::swap(e[i][c0], e[i][c1]);
+	}
+
+	void SwapR(int r0, int r1)
+	{
+		for(int i=0; i < n; ++i)
+			std::swap(e[r0][i], e[r1][i]);
+	}
+
+	scalar Determinant(int k)
+	{
+		if (n != m)
+			return -0.0f;
+		if (k == 2)
+		{
+			return e[0][0]*e[1][1] - e[0][1]*e[1][0];
+		}
+		scalar r = 0, t = 0;
+		for(int i = 0; i< k ; i++)
+		{
+			if (i%2 == 0) t = 1.0f; else t = -1.0f;
+			t *= e[0][i];
+			for (int j = i; j < k-1; j++)
+				SwapC(j, j+1);
+			for (int j = 0; j < k-1; j++)
+				SwapR(j, j+1);
+			r += t*Determinant(k-1); 
+			for (int j = k-1; j > 0; j--)
+				SwapR(j, j-1);
+			for (int j = k-1; j > i; j--)
+				SwapC(j, j-1);
+			t = 0.0f;
+		}
+		return r;
+	}
+};
 
 
 
@@ -930,36 +1132,81 @@ __INLINE void clampv3(Vector3& x, const Vector3 xmin, const Vector3 xmax)
 	x.z = clampf(x.z, xmin.z, xmax.z);
 }
 
+/**
+*	SqareEq(...) Эта детка решает нам квдратное уравнение.
+*	И запихивает корни в t0 и t1
+*	a b c - соответствующие коэффициенты квадратного уравнения
+*/
 
+bool SqareEq( scalar a, scalar b, scalar c, scalar &t0, scalar &t1);
 
-void CalcCameraVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar,
-						Vector3 cpos, Vector3 cat,Vector3 cup, Vector3 v[8]);
+/**
+*	CalcFrustumVertices(...) - функция вычисляет координаты вершин
+*	усеченной пирамиды, образуемой пиромидой камеры и 2мя плоскостями отсечения.
+*/
 
-// Эта (PointsPlaneSide) фунция проверяет лежат ли все точки
-// по одну сторону от плоскост или нет. если нет то возвращает 0
-// если да - то знак полуплоскости
+void CalcFrustumVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar, Vector3 cpos, Vector3 cat,Vector3 cup, Vector3 v[8]);
+
+/**
+*	PointsPlaneSide(...) - фунция проверяет лежат ли все точки
+*	по одну сторону от плоскост или нет. если нет то возвращает 0
+*	если да - то знак полуплоскости
+*/
+
 int PointsPlaneSide(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
 int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth);
 int PointPlanesSideEx(Vector3 *a, Vector3 *n, WORD *iV, Vector3 offset, Matrix3 R, Vector3 point,int  fnum, Vector3 &normal, float &depth, Vector3 scaling);
-scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
- bool CullBox(Vector3 _min, Vector3 _max,Vector3 pos, Vector3 scaling, Matrix3 R,
-                        scalar fovy, scalar aspect, scalar znear, scalar zfar,
-                        Vector3 cpos, Vector3 cat, Vector3 cup);
 
- // непонятная функция. походу я её откуда-то рипанул, надо разобраться
- int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
-//void M3MtoD3DM(D3DXMATRIX *m,Matrix3 res);
+
+scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
+bool CullBox(Vector3 _min, Vector3 _max, Vector3 pos, Vector3 scaling, Matrix3 R,
+				scalar fovy, scalar aspect, scalar znear, scalar zfar,
+				Vector3 cpos, Vector3 cat, Vector3 cup);
+
+// непонятная функция. походу я её откуда-то рипанул, надо разобраться
+int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
+
+
 
  //**// Geometry //**//
 
- class CGeometry : public CObject
+ class CGeometry
  {
  public:
-	 Vector2 *vertices;
-	 virtual void Inside();
-	 virtual void Intersect();
-	 virtual void Distance();
+	 int type;
+	 CBBox box;
+	 CGeometry()
+	 {
+		box  = CBBox(0.0f, 0.0f, 0.0f, 0.0f);
+		type = 0;
+	 }
+	 virtual void CalcBBOX(){}
  };
+
+class CCircle : public CGeometry
+{
+	scalar Radius;
+};
+
+class CPolygon : public CGeometry
+{
+public:
+	int numV;		// кол-во вершин
+	Vector2 *V;	// указатель на массив вершин
+	CPolygon(): numV(0), V(NULL){ }
+	CPolygon(int _numV):numV(_numV)
+	{
+		V = new Vector2 [numV];
+		memset(V, 0, sizeof(V[0])*numV);
+	}
+	void Reset(int _numV);
+	void CalcBBOX();
+
+	static bool	Collide	(const CPolygon* A, const Vector2& Apos, const Vector2& Avel, const Matrix2& Aorient,
+						const CPolygon* B, const Vector2& Bpos, const Vector2& Bvel, const Matrix2& Borient,
+						Vector2& n, float& depth);
+
+};
 
 #endif _MATH_H
 

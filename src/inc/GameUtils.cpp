@@ -1,4 +1,5 @@
 #include "GameUtils.h"
+#include "Ninja.h"
 
 //-------------------------------------------//
 //			CTileSet functions				 //
@@ -94,7 +95,9 @@ bool CLevelMap::Render()
 		LoadFromFile();
 	
 	CMapCellInfo *t;
+	glPushAttrib(GL_TEXTURE);
 	glEnable(GL_TEXTURE);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	TileSet->Texture->Bind();
 	glBegin(GL_QUADS);
 	for(int i=0;i<numCellsVer;i++)
@@ -115,6 +118,7 @@ bool CLevelMap::Render()
 			glVertex3f(t->pos[3].x,	t->pos[3].y, t->z);
 		}
 	glEnd();
+	glPopAttrib();
 	return true;
 }
 
@@ -236,4 +240,34 @@ bool CCollisionInfo::SaveToFile()
 	file.Write(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CBBox));
 
 	return true;
+}
+
+bool CCompas::Render()
+{
+		Vector2 v1, n;
+		CNinja *Ninja = CNinja::Instance();
+		v1 = Ninja->RenderManager.Camera.Point;
+		n = (-v1).Normalized();
+		float depth = v1.Length()/40.0f;
+		depth = clampf(depth, 0.0f, 90.0f);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		glEnable(GL_LINE_WIDTH);
+		glLineWidth(3.0f);
+		gRenderCircle(Vector2(100,100), depth, &RGBAf(0.6f, 0.9f, 0.7f, 0.9f));
+		gRenderSegment(&Vector2(100, 100), &(Vector2(100, 100) + n*depth), &RGBAf(0.6f, 0.9f, 0.7f, 0.9f));
+		glLineWidth(10.0f);
+		gRenderCircle(Vector2(100,100), depth, &RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));
+		gRenderSegment(&Vector2(100, 100), &(Vector2(100, 100) + n*depth), &RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		Ninja->FreeInst();
+		return true;
+}
+
+CCompas::CCompas()
+{
+	name = "Visual Compas";
+	CNinja *Ninja = CNinja::Instance();
+	Ninja->RenderManager.AddObject(this);
+	Ninja->FreeInst();	
 }

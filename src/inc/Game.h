@@ -24,7 +24,7 @@ public:
 	{
 		v = Vector2(0.0f, 0.0f);
 		Health  = 100;
-		Gift = CBBox(274, GROUND, 260 + 102 , GROUND + 59 );
+		Gift = CBBox(274, GROUND, 260 + 51 , GROUND + 29 );
 	}
 	bool Update(float dt)
 	{
@@ -124,8 +124,8 @@ public:
 
 		snowballs->name = "snowballs";
 		snowballs->Init();
-		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snwbl")))->Load();
-		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snwbl")))->GetTexID();
+		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snowb_br")))->Load();
+		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snowb_br")))->GetTexID();
 
 		snowballs->info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 		snowballs->info.ec = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);

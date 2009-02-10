@@ -1,34 +1,44 @@
 #include "MathUtils.h"
 
-/*
-void M3MtoD3DM(D3DXMATRIX *m,Matrix3 res){
-    for (int i=0;i<3;i++)
-    {
-        m->m[0][i] = res.m[i].x;
-        m->m[1][i] = res.m[i].y;
-        m->m[2][i] = res.m[i].z;
-    }
+Vector2 Vector2::operator * (const Matrix2& M) const
+{
+	Vector2 T;
+	T.x = x * M.e11 + y * M.e12;
+	T.y = x * M.e21 + y * M.e22;
+	return T;
 }
-*/
 
-void CalcCameraVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar,
-						Vector3 cpos, Vector3 cat, Vector3 cup, Vector3 v[8])
+Vector2 Vector2::operator ^ (const Matrix2& M) const
+{
+	Vector2 T;
+	T.x = x * M.e11 + y * M.e21;
+	T.y = x * M.e12 + y * M.e22;
+	return T;
+}
+
+Vector2& Vector2::operator *=(const Matrix2& M)
+{
+	Vector2 T = *this;
+	x = T.x * M.e11 + T.y * M.e12;
+	y = T.x * M.e21 + T.y * M.e22;
+	return *this;
+}
+
+Vector2& Vector2::operator ^=(const Matrix2& M)
+{
+	Vector2 T = *this;
+	x = T.x * M.e11 + T.y * M.e21;
+	y = T.x * M.e12 + T.y * M.e22;
+	return *this;
+}
+
+void CalcFrustumVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar, Vector3 cpos, Vector3 cat, Vector3 cup, Vector3 v[8])
 {
 	scalar y1 = znear * tan(fovy*0.5f);
 	scalar x1 = y1 * aspect;
 
 	scalar y2 = zfar * tan(fovy*0.5f);
 	scalar x2 = y2 * aspect;
-
-	/*v[0] = Vector3(-x1,-y1,znear);
-	v[1] = Vector3( x1,-y1,znear);
-	v[2] = Vector3( x1, y1,znear);
-	v[3] = Vector3(-x1, y1,znear);
-
-	v[4] = Vector3(-x2,-y2,zfar);
-	v[5] = Vector3( x2,-y2,zfar);
-	v[6] = Vector3( x2, y2,zfar);
-	v[7] = Vector3(-x2, y2,zfar);*/
 
 	Vector3 nz = cat - cpos, ny = cup, nx;
 	nz.Normalise();
@@ -51,23 +61,13 @@ void CalcCameraVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar,
 	v[2] = nc + Y * y1 + X * x1;
 	v[3] = nc + Y * y1 - X * x1;
 	
-	
-
 	// compute the 4 corners of the frustum on the far plane
 	v[4] = fc - Y * y2 - X * x2;
 	v[5] = fc - Y * y2 + X * x2;
 	v[6] = fc + Y * y2 + X * x2;
 	v[7] = fc + Y * y2 - X * x2;
 	
-	
-//	for(int i=0;i<8;i++)
-//		v[i] = v[i] - cpos;
-
-
-
 }
-
-
 
 int PointsPlaneSide(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum)
 {
@@ -158,7 +158,7 @@ scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, i
     p[6] = Vector3(_max.x, _max.y, _max.z);
     p[7] = Vector3(_min.x, _max.y, _max.z);
     
-    CalcCameraVertices(fovy, aspect, znear, zfar, cpos, cat, cup, v);
+    CalcFrustumVertices(fovy, aspect, znear, zfar, cpos, cat, cup, v);
     scalar sign[6];
     sign[0] = PointsPlaneSide(v[0], CalcNorm(v[0], v[1], v[2]), pos, //Vector3(0,0,0)
                                 R ,p, 8);
@@ -251,7 +251,7 @@ return OUTSIDE;
 int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q) {
 // P is the set of vertices of the mesh
 // nFaces is the number of triangles of the mesh
-// iV is the indices of every triangle, using -1 as separator of faces
+// iV is the indices of every triangle, using -1 as seAposrator of faces
 // q is the point to study
 
 long int j=0; 
@@ -330,3 +330,250 @@ float fSini(int index){return sintable[index%sincostable_dim];}
 float fCosr(float angle){return costable[(int)(angle*radanglem)%sincostable_dim];}
 float fCosd(float angle){return costable[(int)(angle*deganglem)%sincostable_dim];}
 float fCosi(int index){return costable[index%sincostable_dim];}
+
+
+// Polygons collision stuff will be here
+
+void GetInterval(const Vector2 *axVertices, int iNumVertices, 
+				 const Vector2& xAxis, float& min, float& max);
+
+bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t);
+
+bool IntervalIntersect(const CPolygon* A,
+					   const CPolygon* B,
+					   const Vector2& xAxis, 
+					   const Vector2& xOffset, const Vector2& xVel, const Matrix2& xOrient,
+					   float& taxis, float tmax);
+
+bool CPolygon::Collide(const CPolygon* A, const Vector2& Apos, const Vector2& Avel, const Matrix2& Aorient,
+						const CPolygon* B, const Vector2& Bpos, const Vector2& Bvel, const Matrix2& Borient,
+						Vector2& n, float& depth)
+{
+	if (!A || !B)
+		return false;
+
+	Matrix2 xOrient = Aorient ^ Borient;
+	Vector2 xOffset = (Apos - Bpos) ^ Borient;
+	Vector2 xVel    = (Avel - Bvel) ^ Borient;
+
+	Vector2 xAxis[64]; // note : a maximum of 32 vertices per poly is supported
+	float  taxis[64];
+	int    iNumAxes=0;
+
+	float fVel2 = xVel * xVel;
+
+	if (fVel2 > 0.00001f)
+	{
+		xAxis[iNumAxes] = Vector2(-xVel.y, xVel.x);
+
+		if (!IntervalIntersect(	A, 
+			B, 
+			xAxis[iNumAxes], 
+			xOffset, xVel, xOrient,
+			taxis[iNumAxes], depth))
+		{
+			return false;
+		}
+		iNumAxes++;
+	}
+
+	for(int j = A->numV-1, i = 0; i < A->numV; j = i, i ++)
+	{
+		Vector2 E0 = A->V[j];
+		Vector2 E1 = A->V[i];
+		Vector2 E  = E1 - E0;
+		xAxis[iNumAxes] = Vector2(-E.y, E.x) * xOrient;
+
+		if (!IntervalIntersect(	A, 
+			B,  
+			xAxis[iNumAxes], 
+			xOffset, xVel, xOrient,
+			taxis[iNumAxes], depth))
+		{
+			return false;
+		}
+
+		iNumAxes++;
+	}
+
+	for(int j = B->numV-1, i = 0; i < B->numV; j = i, i ++)
+	{
+		Vector2 E0 = B->V[j];
+		Vector2 E1 = B->V[i];
+		Vector2 E  = E1 - E0;
+		xAxis[iNumAxes] = Vector2(-E.y, E.x);
+
+		if (!IntervalIntersect(	A,
+			B,
+			xAxis[iNumAxes], 
+			xOffset, xVel, xOrient,
+			taxis[iNumAxes], depth))
+		{
+			return false;
+		}
+
+		iNumAxes++;
+	}
+
+	if (B->numV == 2)
+	{
+		Vector2 E  = B->V[1] - B->V[0];
+		xAxis[iNumAxes] = E;
+
+		if (!IntervalIntersect(	A,  
+			B, 
+			xAxis[iNumAxes], 
+			xOffset, xVel, xOrient,
+			taxis[iNumAxes], depth))
+		{
+			return false;
+		}
+
+		iNumAxes++;
+	}
+
+	if (A->numV == 2)
+	{
+		Vector2 E  = A->V[1] - A->V[0];
+		xAxis[iNumAxes] = E * xOrient;
+
+		if (!IntervalIntersect(	A, 
+			B,
+			xAxis[iNumAxes], 
+			xOffset, xVel, xOrient,
+			taxis[iNumAxes], depth))
+		{
+			return false;
+		}
+
+		iNumAxes++;
+	}
+
+	if (!FindMTD(xAxis, taxis, iNumAxes, n, depth))
+		return false;
+
+	if (n * xOffset < 0.0f)
+		n = -n;
+
+	n *= Borient;
+
+	return true;
+}
+
+void CPolygon::Reset( int _numV )
+{
+	if (V != NULL)
+		delete [] V;
+	V = new Vector2 [numV];
+	memset(V, 0, sizeof(V[0])*numV);
+}
+
+void CPolygon::CalcBBOX()
+{
+	if (numV == 0)
+		return;
+	if (V == NULL)
+		return;
+	box.vMin.x = 0xffffff;
+	box.vMin.y = 0xffffff;
+	box.vMax.x = -0xffffff;
+	box.vMax.x = -0xffffff;
+	for(int i = 0; i< numV; i++)
+	{
+		box.Add(V[i]);
+	}
+}
+
+void GetInterval(const Vector2 *axVertices, int iNumVertices, const Vector2& xAxis, float& min, float& max)
+{
+	min = max = (axVertices[0] * xAxis);
+
+	for(int i = 1; i < iNumVertices; i ++)
+	{
+		float d = (axVertices[i] * xAxis);
+		if (d < min) min = d; else if (d > max) max = d;
+	}
+}
+
+bool IntervalIntersect(const CPolygon* A,
+					   const CPolygon* B,
+					   const Vector2& xAxis, 
+					   const Vector2& xOffset, const Vector2& xVel, const Matrix2& xOrient,
+					   float& taxis, float tmax)
+{
+	float min0, max0;
+	float min1, max1;
+	GetInterval(A->V, A->numV, xAxis ^ xOrient, min0, max0);
+	GetInterval(B->V, B->numV, xAxis, min1, max1);
+
+	float h = xOffset * xAxis;
+	min0 += h;
+	max0 += h;
+
+	float d0 = min0 - max1;
+	float d1 = min1 - max0;
+
+	if (d0 > 0.0f || d1 > 0.0f) 
+	{
+		float v = xVel * xAxis;
+
+		if (fabs(v) < 0.0000001f)
+			return false;
+
+		float t0 =-d0 / v;
+		float t1 = d1 / v;
+
+		if (t0 > t1) { float temp = t0; t0 = t1; t1 = temp; }
+		taxis  = (t0 > 0.0f)? t0 : t1;
+
+		if (taxis < 0.0f || taxis > tmax)
+			return false;
+
+		return true;
+	}
+	else
+	{
+		taxis = (d0 > d1)? d0 : d1;
+		return true;
+	}
+}
+bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
+{
+	int mini = -1;
+	t = 0.0f;
+	for(int i = 0; i < iNumAxes; i ++)
+	{	
+		if (taxis[i] > 0)
+		{
+			if (taxis[i] > t)
+			{
+				mini = i;
+				t = taxis[i];
+				N = xAxis[i];
+				N.Normalize();
+			}
+		}
+	}
+
+	if (mini != -1)
+		return true; 
+
+	mini = -1;
+	for(int i = 0; i < iNumAxes; i ++)
+	{
+		float n = xAxis[i].Normalize();
+		taxis[i] /= n;
+
+		if (taxis[i] > t || mini == -1)
+		{
+			mini = i;
+			t = taxis[i];
+			N = xAxis[i];
+		}
+	}
+
+	if (mini == -1)
+		printf("Error\n");
+
+	return (mini != -1);
+}

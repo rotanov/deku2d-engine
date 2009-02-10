@@ -105,6 +105,11 @@ private:
 
 };
 
-
+class CCompas : public CRenderObject
+{
+public:
+	CCompas();
+	bool Render();	
+};
 
 #endif
