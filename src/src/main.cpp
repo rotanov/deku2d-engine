@@ -53,59 +53,63 @@ void tempMakeMap()
 bool Init()
 {	
 	CFactory *Factory = CFactory::Instance();
-// 	guidummy = new CGUIScheme("Data\\main.gui", "Data\\maingui.bmp");
-// 	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
-// 		//Edit creation sample
-// 		Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
-// 		//создание едита с именем нью едит
-// 		guidummy->CopyWidget(2, Edit);
-// 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
-// 		FormAddWidget(Edit, NULL);
-// 		//добавление едита на форму, если нулл то добавляется на форму окна
-// 		//--- Всякий стафф
-// 		Edit->Enabled = true;
-// 		Edit->Visible = true;
-// 		Edit->Left = 10;
-// 		Edit->Top = 345;
-// 		Edit->Height = 30;
-// 		Edit->Width = 400;
-// 		Edit->Caption = "Fuck";
-// 		Edit->SelStart = 1;
-// 		Edit->SelLength = -3;
+ 	guidummy = new CGUIScheme("Data\\main.gui", "Data\\maingui.bmp");
+ 	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
+ 		//Edit creation sample
+ 		Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
+ 		//создание едита с именем нью едит
+ 		guidummy->CopyWidget(2, Edit);
+ 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
+ 		FormAddWidget(Edit, NULL);
+ 		//добавление едита на форму, если нулл то добавляется на форму окна
+ 		//--- Всякий стафф
+ 		Edit->Enabled = true;
+ 		Edit->Visible = true;
+ 		Edit->Left = 10;
+ 		Edit->Top = 345;
+ 		Edit->Height = 30;
+ 		Edit->Width = 400;
+ 		Edit->Caption = "Fuck";
+ 		Edit->SelStart = 1;
+ 		Edit->SelLength = -3;
 
-// 		//Edit creation sample
-// 		Edit1 = dynamic_cast<CEdit*>(newWidget("NewEdit1", STYLE_OBJEDIT));
-// 		//создание едита с именем нью едит
-// 		guidummy->CopyWidget(2, Edit1);
-// 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
-// 		FormAddWidget(Edit1, NULL);
-// 		//добавление едита на форму, если нулл то добавляется на форму окна
-// 		//--- Всякий стафф
-// 		Edit1->Enabled = true;
-// 		Edit1->Visible = true;
-// 		Edit1->Left = 10;
-// 		Edit1->Top = 380;
-// 		Edit1->Height = 30;
-// 		Edit1->Width = 400;
-// 		Edit1->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
-// 		Edit1->SelStart = 0;
-// 		Edit1->SelLength = 0;
+ 		//Edit creation sample
+ 		Edit1 = dynamic_cast<CEdit*>(newWidget("NewEdit1", STYLE_OBJEDIT));
+ 		//создание едита с именем нью едит
+ 		guidummy->CopyWidget(2, Edit1);
+ 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
+ 		FormAddWidget(Edit1, NULL);
+ 		//добавление едита на форму, если нулл то добавляется на форму окна
+ 		//--- Всякий стафф
+ 		Edit1->Enabled = true;
+ 		Edit1->Visible = true;
+ 		Edit1->Left = 10;
+ 		Edit1->Top = 380;
+ 		Edit1->Height = 30;
+ 		Edit1->Width = 400;
+ 		Edit1->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
+ 		Edit1->SelStart = 0;
+ 		Edit1->SelLength = 0;
 
-// 		//Button creation sample
-// 		Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));
-// 		//создание буттона с именем нью буттон
-// 		guidummy->CopyWidget(1, Button);
-// 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
-// 		FormAddWidget(Button, NULL);
-// 		//добавление буттона на форму, если нулл то добавляется на форму окна
-// 		//--- Всякий стафф
-// 		Button->Enabled = true;
-// 		Button->Visible = true;
-// 		Button->Left = 415;
-// 		Button->Top = 345;
-// 		Button->Height = 65;
-// 		Button->Width = 200;
-// 		Button->Caption = "<--Grats-->";
+ 		//Button creation sample
+ 		Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));
+ 		//создание буттона с именем нью буттон
+ 		guidummy->CopyWidget(1, Button);
+ 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
+ 		FormAddWidget(Button, NULL);
+ 		//добавление буттона на форму, если нулл то добавляется на форму окна
+ 		//--- Всякий стафф
+ 		Button->Enabled = true;
+ 		Button->Visible = true;
+ 		Button->Left = 415;
+ 		Button->Top = 345;
+ 		Button->Height = 65;
+ 		Button->Width = 200;
+ 		Button->Caption = "<--Grats-->";
+
+		Edit->SetFont("Font");
+		Edit1->SetFont("Font");
+		Button->SetFont("Font");
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
 		return false;

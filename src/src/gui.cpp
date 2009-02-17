@@ -98,10 +98,13 @@ void						clearWidget(PWidget res)
 	res->Enabled = 1;
 	res->Height = 0;
 	res->Left = 0;
+	res->fnt = NULL;
 	res->MinHeight = 0;
 	res->MinWidth = 0;
 	res->name="";
+	ToggleLog(0);
 	res->Parent = dynamic_cast<PWidget>(Objects.GetObject("ScreenForm"));
+	ToggleLog(1);
 	res->Top = 0;
 	memset(res->type, 0, 100);
 	res->Visible = 0;
@@ -244,6 +247,12 @@ int CGraphObj::GetTop()
 	return t;
 }
 
+bool CGraphObj::SetFont( string FontName )
+{
+	Font = FontName;
+	fnt = FontManager->GetFontEx(FontName);
+	return (fnt!=NULL);
+}
 /*void BeginUI()
 {
 	szBind=false;
@@ -787,7 +796,8 @@ void CForm::DrawText()
 {
 	CObject *tmp;
 	Items.Reset();
-	fnt = FontManager->GetFontEx(Font);
+	if (Font != "")
+		fnt = FontManager->GetFontEx(Font);
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
@@ -945,7 +955,7 @@ void CEdit::Draw()
 
 void CEdit::DrawText()
 {
-	fnt = FontManager->GetFontEx("FFont");
+	fnt = FontManager->GetFontEx(Font);
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
@@ -965,6 +975,11 @@ void CEdit::MouseProcess(byte btn, byte event)
 {
 	if (!Enabled)
 		return;
+	if (fnt == NULL)
+		fnt = FontManager->GetFontEx(Font);
+	if (fnt == NULL)
+		return;
+
 	if (event==GUI_MBCLICK)
 	{
 		if (MouseInObjRect(this))
@@ -1251,7 +1266,10 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 
 bool CEdit::Update( float dt )
 {
-	fnt = FontManager->GetFontEx("FFont");
+	if (fnt == NULL)
+		fnt = FontManager->GetFontEx(Font);
+	if (fnt == NULL)
+		return 1;
 	//int sw = ;
 	//int cw = ;
 	while (fnt->GetStringWidthEx(offset, SelStart, (char*)Caption.data()) > GUIScheme->GetCWidth(ThisStyle, Width) - 10 && offset < Caption.length() - 1)

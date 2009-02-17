@@ -161,6 +161,7 @@ public:
 	float					ZDepth;
 	int						GetLeft();
 	int						GetTop();
+	bool					SetFont(string FontName);
 protected:
 	unsigned int			Style;					
 };
