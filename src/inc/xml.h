@@ -19,7 +19,7 @@
 #define XML_NODE_BEGIN				0x0001
 #define XML_NODE_ATTRIBUTE			0x0002
 #define XML_NODE_END				0x0003
-#define XML_EMPTY_STRING			0x0003
+#define XML_EMPTY_STRING			0x0004
 #define XML_ERROR_STRING			0x000f
 
 #define XML_ERROR
