@@ -253,11 +253,12 @@ bool CCompas::Render()
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 		glEnable(GL_LINE_WIDTH);
 		glLineWidth(3.0f);
-		gRenderCircle(Vector2(100,100), depth, &RGBAf(0.6f, 0.9f, 0.7f, 0.9f));
-		gRenderSegment(&Vector2(100, 100), &(Vector2(100, 100) + n*depth), &RGBAf(0.6f, 0.9f, 0.7f, 0.9f));
+		CPrimitiveRender pr;
+		pr.gRenderCircle(Vector2(100,100), depth, &RGBAf(0.6f, 0.9f, 0.7f, 0.9f));
+		pr.gRenderSegment(&Vector2(100, 100), &(Vector2(100, 100) + n*depth), &RGBAf(0.6f, 0.9f, 0.7f, 0.9f));
 		glLineWidth(10.0f);
-		gRenderCircle(Vector2(100,100), depth, &RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));
-		gRenderSegment(&Vector2(100, 100), &(Vector2(100, 100) + n*depth), &RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
+		pr.gRenderCircle(Vector2(100,100), depth, &RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));
+		pr.gRenderSegment(&Vector2(100, 100), &(Vector2(100, 100) + n*depth), &RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Ninja->FreeInst();

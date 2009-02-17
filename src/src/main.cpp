@@ -306,12 +306,12 @@ bool Draw()
 		depth = 0;
 	}
 	
-	
-	gRenderPolygon(&apos, angle, &a, &Vector4(0.9f, 0.7f, 0.7f, 0.5f), &Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-	gRenderPolygon(&bpos, 0.0f, &b, &Vector4(0.6f, 0.9f, 0.6f, 0.6f),  &Vector4(0.9f, 0.7f, 0.7f, 0.5f));
+	CPrimitiveRender pr;
+	pr.gRenderPolygon(&apos, angle, &a, &Vector4(0.9f, 0.7f, 0.7f, 0.5f), &Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	pr.gRenderPolygon(&bpos, 0.0f, &b, &Vector4(0.6f, 0.9f, 0.6f, 0.6f),  &Vector4(0.9f, 0.7f, 0.7f, 0.5f));
 	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
-	gRenderArrowEx(Vector2(100, 100), Vector2(400, 300), RGBAf(0.7f, 0.8f, 0.6f, 0.9f));
-	gRenderSegment(&bpos, &(bpos + norm*depth), &Vector4(1.0f, 1.0f, 1.0f, 0.8f));
+	pr.gRenderArrowEx(Vector2(100, 100), Vector2(400, 300), RGBAf(0.7f, 0.8f, 0.6f, 0.9f));
+	pr.gRenderSegment(&bpos, &(bpos + norm*depth), &Vector4(1.0f, 1.0f, 1.0f, 0.8f));
 	
 	angle += 1;
 	if (angle > 360.0f) angle -= 360;

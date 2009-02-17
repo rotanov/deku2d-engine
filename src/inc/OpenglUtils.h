@@ -507,26 +507,30 @@ void gBeginFrame();
 *	Should be called after each frame
 */
 void gEndFrame();
-/**
-*	Draws Rectangles
-*/
 
 #define G_PRIM_BLEND_OPT
 #define G_POLY_TEX_CELL_SIZE 20
-
-void gLineRect(float x, float y, float width, float height);
-void gSolidRect(float x, float y, float width, float height, glRGBAub* color);
-void gSolidRectEx(float x, float y, float width, float height, float depth, glRGBAub* color);
-void gRenderSegment(Vector2 *v0, Vector2 *v1, RGBAf *col);
-void gRenderCircle(const Vector2 &pos, float Radius, RGBAf *col);
-
 #define G_POLY_OUTLINE_ENABLE
 #define G_POLY_TEXTURE_ENABLE
+// TODO: in class settings
 
-void gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly, RGBAf *col, RGBAf *lcol);
-void gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGBAf &lcol );
-void gRenderArrowEx(Vector2 &v0, Vector2 &v1, RGBAf &c);
-void gDrawBBox(CBBox box);
+class CPrimitiveRender
+{
+public:
+
+	void gLineRect(float x, float y, float width, float height);
+	void gSolidRect(float x, float y, float width, float height, glRGBAub* color);
+	void gSolidRectEx(float x, float y, float width, float height, float depth, glRGBAub* color);
+	void gRenderSegment(Vector2 *v0, Vector2 *v1, RGBAf *col);
+	void gRenderCircle(const Vector2 &pos, float Radius, RGBAf *col);
+	void gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly, RGBAf *col, RGBAf *lcol);
+	void gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGBAf &lcol );
+	void gRenderArrow(const Vector2& P, const Vector2& D, float length, int uARGB);
+	void gRenderArrowEx(Vector2 &v0, Vector2 &v1, RGBAf &c);
+	void gDrawBBox(CBBox box);
+};
+
+
 /**
 *	Controls scissor test
 */
