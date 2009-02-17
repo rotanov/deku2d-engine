@@ -270,48 +270,6 @@ bool Init()
 	b.V[4] = Vector2(40, 50);
 	b.V[5] = Vector2(0, 80);
 
-// ИДЗ по матрицам >.>
-//  	Matrix3 T;
-//  	T[0] = Vector3(-6, -2, 7);
-//  	T[1] = Vector3(-17, -15, 21);
-//  	T[2] = Vector3(26, 17, -30);
-// 
-// 	float a1 = T.cofac(1, 0, 2, 1);
-// 	float a2 = T.cofac(1, 1, 2, 2);
-// 	float a3 = T.cofac(1, 0, 2, 2);
-// 	Log("A=", "%f", a1);
-// 	Log("A=", "%f", a2);
-// 	Log("A=", "%f", a3);
-// 
- //= T[0][2]*a1 + T[0][0] * a2 - T[0][1] * a3;
-// 
-// 	Log("Det=", "%f", det);
-
-
-	MatrixNM T(4, 4);
-
-// 	  	T.e[0][0] = -6;		T.e[0][1] = -2;		T.e[0][2] = 3;
-// 	  	T.e[1][0] = -17;	T.e[1][1] = -15;	T.e[1][2] = -9;
-// 	  	T.e[2][0] =  26;	T.e[2][1] =	 17;	T.e[2][2] = 4;
-// 
-// 		T.e[0][0] = -6;		T.e[1][0] = -2;		T.e[2][0] = 3;
-// 		T.e[0][1] = -17;	T.e[1][1] = -15;	T.e[2][1] = -9;
-// 		T.e[0][2] =  26;	T.e[1][2] =	 17;	T.e[2][2] = 4;
-
-
-	  	T.e[0][0] = 3;		T.e[0][1] = -3;		T.e[0][2] = -5;		T.e[0][3] = 8;
-	  	T.e[1][0] = 1;		T.e[1][1] = 1;		T.e[1][2] = 4;		T.e[1][3] = -6;
-	  	T.e[2][0] =  2;		T.e[2][1] = 0;		T.e[2][2] = -7;		T.e[2][3] = 5;
-		T.e[3][0] =  -4;	T.e[3][1] = 3;		T.e[3][2] = 5;		T.e[3][3] = -6;
-
-// 		T.e[0][0] = 1;		T.e[0][1] = 1;		T.e[0][2] = 1;		T.e[0][3] = 1;
-// 		T.e[1][0] = 2;		T.e[1][1] = 3;		T.e[1][2] = -1;		T.e[1][3] = -2;
-// 		T.e[2][0] =  3;		T.e[2][1] = 3;		T.e[2][2] = 7;		T.e[2][3] = 5;
-// 		T.e[3][0] =  4;		T.e[3][1] = 4;		T.e[3][2] = 4;		T.e[3][3] = 9;
-
-
-	float det = T.Determinant(T.n); // Работает. Протестриовано.
-	Log("Matrix T det = ", "%f", det);
 
 	return true;
 }
@@ -329,9 +287,15 @@ bool Draw()
 	static Vector2 bpos(300, 300);
 	static Vector2 norm;
 	static float depth;
+	
+	static int angle = 0;
 
-	a.Collide(&a, apos, Vector2(0.0f, 0.0f), Matrix2(0.0f),
-				&b, bpos, Vector2(0.0f, 0.0f), Matrix2(0.0f), norm, depth);
+	if (!a.Collide(&a, apos, Vector2(0.0f, 0.0f), Matrix2(DegToRad(angle)),
+				&b, bpos, Vector2(0.0f, 0.0f), Matrix2(0.0f), norm, depth))
+	{
+		norm = Vector2(0.0f, 0.0f);
+		depth = 0.0f;
+	}
 	
 	
 
@@ -341,10 +305,16 @@ bool Draw()
 		bpos += norm*depth/2.0f;
 		depth = 0;
 	}
-
-	gRenderPolygon(&apos, &Matrix2(), &a, &Vector4(0.9f, 0.7f, 0.7f, 0.5f));
-	gRenderPolygon(&bpos, &Matrix2(), &b, &Vector4(0.6f, 0.9f, 0.6f, 0.6f));
+	
+	
+	gRenderPolygon(&apos, angle, &a, &Vector4(0.9f, 0.7f, 0.7f, 0.5f), &Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	gRenderPolygon(&bpos, 0.0f, &b, &Vector4(0.6f, 0.9f, 0.6f, 0.6f),  &Vector4(0.9f, 0.7f, 0.7f, 0.5f));
+	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
+	gRenderArrowEx(Vector2(100, 100), Vector2(400, 300), RGBAf(0.7f, 0.8f, 0.6f, 0.9f));
 	gRenderSegment(&bpos, &(bpos + norm*depth), &Vector4(1.0f, 1.0f, 1.0f, 0.8f));
+	
+	angle += 1;
+	if (angle > 360.0f) angle -= 360;
 
 	if (Ninja->keys[SDLK_j])
 		apos.x -= 5;

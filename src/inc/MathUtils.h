@@ -797,6 +797,7 @@ union Matrix2
 	};
 
 	float e[2][2];
+
 	Matrix2(float _e11, float _e12, float _e21, float _e22) : e11(_e11), e12(_e12), e21(_e21), e22(_e22)
 	{}
 
@@ -816,11 +817,11 @@ union Matrix2
 	{
 		return e[i][j];
 	}
+
 	float& operator()(int i, int j)       
 	{
 		return e[i][j]; 
 	}
-
 
 	const Vector2& operator[](int i) const
 	{
@@ -847,7 +848,13 @@ union Matrix2
 	}
 
 
-	Matrix2 Tranpose() const
+	Matrix2 Tranpose()
+	{
+		std::swap(e12, e21);		
+		return *this;
+	}
+
+	Matrix2 Tranposed() const
 	{
 		Matrix2 T;
 
@@ -1113,6 +1120,32 @@ public:
 			t = 0.0f;
 		}
 		return r;
+	}
+
+	__INLINE MatrixNM operator *(const MatrixNM& M) const
+	{
+		if (n != M.m)
+			return *this;
+		MatrixNM R = MatrixNM(M.n, m);
+		for(int i = 0; i < m; i++)
+			for(int j = 0; j < M.n; j++)
+			{
+				R.e[i][j] = 0;
+				for(int k = 0; k < n ; k++)
+				{
+					R.e[i][j] += e[i][k]*M.e[k][j];
+				}
+			}
+		return R;
+	}
+
+	__INLINE MatrixNM operator * (scalar s) const
+	{
+		MatrixNM R = *this;
+		for(int i =0; i < R.n; ++i)
+			for(int j = 0; j < R.m; ++j)
+				R.e[i][j] *= s;
+		return R;
 	}
 };
 

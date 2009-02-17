@@ -887,6 +887,7 @@ bool CRenderManager::DrawObjects()
 {
 	Reset();
 	CRenderObject *data = dynamic_cast<CRenderObject*>(Next());
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
 	Camera.Update();
 	
@@ -1061,15 +1062,47 @@ void gSolidRectEx(float x, float y, float width, float height, float depth, glRG
 	glPopMatrix();
 }
 
-void gRenderPolygon(Vector2 *pos, Matrix2 *rot, CPolygon *poly, RGBAf *col)
+void gRenderArrow(const Vector2& P, const Vector2& D, float length, int uARGB)
+{
+	float fAngle = atan2(D.y, D.x);
+	glPushAttrib(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(P.x, P.y, 0.0f);
+	glRotatef(RadToDeg(fAngle), 0.0f, 0.0f, 1.0f);
+	glScalef(length, length, 1.0f);
+
+	// color set
+
+	glBegin(GL_LINES);
+	glVertex2f(0.0f, 0.0f);
+	glVertex2f(1.0f, 0.0f);
+	glVertex2f(1.0f, 0.0f);
+	glVertex2f(0.75f, 0.2f);
+	glVertex2f(1.0f, 0.0f);
+	glVertex2f(0.75f,-0.2f);
+	glEnd();
+
+	glPopMatrix();
+	glPopAttrib();
+}
+
+void gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly, RGBAf *col, RGBAf * lcol)
 {
 	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
+	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
-	//glLoadIdentity();
+	glEnable(GL_BLEND);
+#ifdef G_PRIM_BLEND_OPT
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	glDisable(GL_DEPTH_TEST);
+#else
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#endif
 	glTranslatef(pos->x, pos->y, 0.0f);
-	//glRotatef(rot->); TODO!
+	glRotatef(angle, 0.0f, 0.0f, -1.0f);
 	glColor4fv(&(col->r));
+
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
@@ -1077,12 +1110,13 @@ void gRenderPolygon(Vector2 *pos, Matrix2 *rot, CPolygon *poly, RGBAf *col)
 	Tman->FreeInst();
 	cells->Bind();
 #endif 
+
 	glBegin(GL_TRIANGLE_FAN);
 		for(int i = 0; i < poly->numV; i++)
 		{
-#ifdef G_POLY_TEXTURE_ENABLE
-			glTexCoord2f(poly->V[i].x/20, poly->V[i].y/20);
-#endif 
+		#ifdef G_POLY_TEXTURE_ENABLE
+			glTexCoord2f(poly->V[i].x/G_POLY_TEX_CELL_SIZE, poly->V[i].y/G_POLY_TEX_CELL_SIZE);
+		#endif 
 			glVertex2fv(&(poly->V[i].x));
 		}
 	glEnd();
@@ -1091,7 +1125,7 @@ void gRenderPolygon(Vector2 *pos, Matrix2 *rot, CPolygon *poly, RGBAf *col)
 
 	glEnable(GL_LINE_WIDTH);
 	glLineWidth(1.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	glColor4fv(&(lcol->r));
 	glBegin(GL_LINE_LOOP);
 	for(int i = 0; i < poly->numV; i++)
 	{
@@ -1100,12 +1134,93 @@ void gRenderPolygon(Vector2 *pos, Matrix2 *rot, CPolygon *poly, RGBAf *col)
 	glEnd();
 
 #endif 
-
 	glPopAttrib();
 	glPopMatrix();
 }
 
+void gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGBAf &lcol )
+{
+	static int glList = -1;
+	if (!glIsList(glList))
+	{
+		glList = glGenLists(1);
 
+		glNewList(glList, GL_COMPILE_AND_EXECUTE);
+
+		glBegin(GL_TRIANGLE_STRIP);
+
+		for(int i = 0; i < 64 + 1; i ++)
+		{
+			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+			glVertex2f(P.x, P.y);
+			P = Vector2(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+			glVertex2f(P.x*0.7f, P.y*0.7f); // TODO! MAGIC NUMBERS
+		}
+
+		glEnd();
+
+		glEndList();
+	}
+
+	glPopAttrib();
+	glPopMatrix();
+	glPushMatrix();
+	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+#ifdef G_PRIM_BLEND_OPT
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	glDisable(GL_DEPTH_TEST);
+#else
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#endif
+ 	glTranslatef(pos.x, pos.y, 0.0f);
+// 	glColor4fv(&(col.r));
+
+#ifdef G_POLY_TEXTURE_ENABLE
+// 	glEnable(GL_TEXTURE_2D);
+// 	CTextureManager *Tman = CTextureManager::Instance();
+// 	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+// 	Tman->FreeInst();
+// 	cells->Bind();
+#endif 
+
+// 	glBegin(GL_TRIANGLE_FAN);
+// 	for(int i = 0; i < poly->numV; i++)
+// 	{
+// #ifdef G_POLY_TEXTURE_ENABLE
+// 		glTexCoord2f(poly->V[i].x/G_POLY_TEX_CELL_SIZE, poly->V[i].y/G_POLY_TEX_CELL_SIZE);
+// #endif 
+// 		glVertex2fv(&(poly->V[i].x));
+// 	}
+// 	glEnd();
+	glScalef(Radius, Radius, 0.0f);
+	glCallList(glList);
+
+
+// #ifdef G_POLY_OUTLINE_ENABLE
+// 
+// 	glEnable(GL_LINE_WIDTH);
+// 	glLineWidth(1.0f);
+// 	glColor4fv(&(lcol.r));
+// 	glBegin(GL_LINE_LOOP);
+// 	for(int i = 0; i < poly.numV; i++)
+// 	{
+// 		glVertex2fv(&(poly.V[i].x));
+// 	}
+// 	glEnd();
+// 
+// #endif 
+	glPopAttrib();
+	glPopMatrix();
+	gRenderCircle(pos, Radius*0.3, &col);
+}
+
+void gRenderArrowEx(Vector2 &v0, Vector2 &v1, RGBAf &c)
+{
+	gRenderRing(v0, 20, c, RGBAf());
+	gRenderArrow(v0, v1, (v1-v0).Length(), 1);
+}
 
 void SDLGLExit(int code)
 {
