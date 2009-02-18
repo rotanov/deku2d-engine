@@ -823,13 +823,17 @@ void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int o
 	if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
 	{
 		int selw = GetStringWidthEx(max(s1, offset), s2, text);
-		CPrimitiveRender().gSolidRectEx(selx, ypos, selw, sheight, depth, &glRGBAub(10, 50, 200, 150));
+		CPrimitiveRender pr;
+		pr.sClr = &RGBAf(10, 50, 200, 150);
+		pr.depth = depth;
+		pr.grRectS(Vector2(selx, ypos), selw, sheight);
 	}
 	CPrimitiveRender pr;
-	pr.gSolidRectEx(selx - 1, ypos, 1, min(sheight, GetStringHeight("!\0")), depth, &glRGBAub(10, 10, 10, 200));
-	pr.gSolidRectEx(selx - 3, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
+	pr.depth = depth;
+	pr.grRectS(Vector2(selx - 1, ypos), 1, min(sheight, GetStringHeight("!\0"))); //  glRGBAub(10, 10, 10, 200)
+	pr.grRectS(Vector2(selx - 3, ypos), 5, 1); // glRGBAub(10, 10, 10, 200)
 //	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
-	pr.gSolidRectEx(selx - 3, ypos + min(sheight, GetStringHeight("!\0")), 5, 1, depth, &glRGBAub(10, 10, 10, 200));
+	pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), 5, 1); // glRGBAub(10, 10, 10, 200)
 	Print(xpos, ypos, depth, text+offset);
 	glDisable(GL_SCISSOR_TEST);
 	glPopAttrib();
@@ -1561,141 +1565,117 @@ void CCamera::gTranslate()
 /* Primitive Render Section                                             */
 /************************************************************************/
 
-void CPrimitiveRender::gLineRect(float x, float y, float width, float height)
+void CPrimitiveRender::grRectL(const Vector2 &p, scalar width, scalar height)
 {
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
+	BeforeRndr();
+	glColor4fv(&(lClr->r));
 	glBegin(GL_LINE_LOOP);
-	glVertex2f(x, y);
-	glVertex2f(x + width, y);
-	glVertex2f(x + width, y + height);
-	glVertex2f(x, y + height);
-	glVertex2f(x, y);
+		glVertex2f(p.x,			p.y);
+		glVertex2f(p.x + width, p.y);
+		glVertex2f(p.x + width, p.y + height);
+		glVertex2f(p.x,			p.y + height);
+		//glVertex2f(x, y);
 	glEnd();
-	glPopAttrib();
-	glPopMatrix();
+	AfterRndr();
 }
 
-void CPrimitiveRender::gRenderSegment(Vector2 *v0, Vector2 *v1, RGBAf *col)
+void CPrimitiveRender::grSegment(const Vector2 &v0, const Vector2 &v1)
 {
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
-	glLoadIdentity();
-
-	glColor4fv(&(col->r));
-
+	BeforeRndr();
+	glColor4fv(&(lClr->r));
 	glBegin(GL_LINES);
-	glVertex2fv(&(v0->x));
-	glVertex2fv(&(v1->x));
+		glVertex2fv(&(v0.x));
+		glVertex2fv(&(v1.x));
 	glEnd();
-
-	glPopAttrib();
-	glPopMatrix();
+	if (pClr)
+		glColor4fv(&(pClr->r));
+	glBegin(GL_POINTS);
+		glVertex2fv(&(v0.x));
+		glVertex2fv(&(v1.x));
+	glEnd();
+	AfterRndr();
 }
 
-void CPrimitiveRender::gRenderCircle(const Vector2 &pos, float Radius, RGBAf *col)
+void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
 {
-	static int glList = -1;
-	if (!glIsList(glList))
-	{
-		glList = glGenLists(1);
+	BeforeRndr();
+	AfterRndr();
+}
 
-		glNewList(glList, GL_COMPILE_AND_EXECUTE);
 
-		glBegin(GL_LINE_LOOP);
-
-		for(int i = 0; i < 64 + 1; i ++)
-		{
-			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-
-			glVertex2f(P.x, P.y);
-		}
-
-		glEnd();
-
-		glEndList();
-	}
-
+void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
+{
+	if (!glIsList(glListCircle))
+		return;
 	glPushMatrix();
 	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
 	glLoadIdentity();
-
-	glColor4fv(&(col->r));
-
-	glTranslatef(pos.x, pos.y, 0.0f);
+	glColor4fv(&(lClr->r));
+	glTranslatef(p.x, p.y, 0.0f);
 	glScalef(Radius, Radius, 0.0f);
-	glCallList(glList);
-
-
+	glCallList(glListCircle);
 	glPopAttrib();
 	glPopMatrix();
 }
 
+void CPrimitiveRender::grCircleS(const Vector2 &p, scalar Radius)
+{
 
-void CPrimitiveRender::gSolidRect(float x, float y, float width, float height, glRGBAub* color)
+}
+
+void CPrimitiveRender::grCircleC(const Vector2 &p, scalar Radius)
+{
+
+}
+
+void CPrimitiveRender::grRectS(const Vector2 &p, scalar width, scalar height)
 {
 	glPushMatrix();
 	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
-	color->glSet();
+	if (sClr)
+		glColor4fv(&(sClr->r));
 	glBegin(GL_QUADS);
-	glVertex2f(x, y);
-	glVertex2f(x + width, y);
-	glVertex2f(x + width, y + height);
-	glVertex2f(x, y + height);
+		glVertex2f(p.x, p.y);
+		glVertex2f(p.x + width, p.y);
+		glVertex2f(p.x + width, p.y + height);
+		glVertex2f(p.x, p.y + height);
 	glEnd();
 	glPopAttrib();
 	glPopMatrix();
 }
 
-void CPrimitiveRender::gSolidRectEx(float x, float y, float width, float height, float depth, glRGBAub* color)
-{
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
-	color->glSet();
-	glBegin(GL_QUADS);
-	glVertex3f(x, y, depth);
-	glVertex3f(x + width, y, depth);
-	glVertex3f(x + width, y + height, depth);
-	glVertex3f(x, y + height, depth);
-	glEnd();
-	glPopAttrib();
-	glPopMatrix();
-}
 
-void CPrimitiveRender::gRenderArrow(const Vector2& P, const Vector2& D, float length, int uARGB)
+void CPrimitiveRender::gRenderArrow(const Vector2& v0, const Vector2& v1)
 {
-	float fAngle = atan2(D.y, D.x);
+	float fAngle = atan2(v1.y, v1.x);
 	glPushAttrib(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_2D);
 	glPushMatrix();
-	glTranslatef(P.x, P.y, 0.0f);
+	glTranslatef(v0.x, v0.y, 0.0f);
 	glRotatef(RadToDeg(fAngle), 0.0f, 0.0f, 1.0f);
-	glScalef(length, length, 1.0f);
+	//glScalef(length, length, 1.0f);
 
 	// color set
 
 	glBegin(GL_LINES);
-	glVertex2f(0.0f, 0.0f);
-	glVertex2f(1.0f, 0.0f);
-	glVertex2f(1.0f, 0.0f);
-	glVertex2f(0.75f, 0.2f);
-	glVertex2f(1.0f, 0.0f);
-	glVertex2f(0.75f,-0.2f);
+		glVertex2f(0.0f, 0.0f);
+		glVertex2f(1.0f, 0.0f);
+		glVertex2f(1.0f, 0.0f);
+		glVertex2f(0.75f, 0.2f);
+		glVertex2f(1.0f, 0.0f);
+		glVertex2f(0.75f,-0.2f);
 	glEnd();
 
 	glPopMatrix();
 	glPopAttrib();
 }
 
-void CPrimitiveRender::gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly, RGBAf *col, RGBAf * lcol)
+void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 {
 	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_BLEND);
+	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 #ifdef G_PRIM_BLEND_OPT
@@ -1704,9 +1684,9 @@ void CPrimitiveRender::gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly
 #else
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #endif
-	glTranslatef(pos->x, pos->y, 0.0f);
+	glTranslatef(p.x, p.y, 0.0f);
 	glRotatef(angle, 0.0f, 0.0f, -1.0f);
-	glColor4fv(&(col->r));
+	glColor4fv(&(sClr->r));
 
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
@@ -1730,7 +1710,7 @@ void CPrimitiveRender::gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly
 
 	glEnable(GL_LINE_WIDTH);
 	glLineWidth(1.0f);
-	glColor4fv(&(lcol->r));
+	glColor4fv(&(lClr->r));
 	glBegin(GL_LINE_LOOP);
 	for(int i = 0; i < poly->numV; i++)
 	{
@@ -1743,7 +1723,7 @@ void CPrimitiveRender::gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly
 	glPopMatrix();
 }
 
-void CPrimitiveRender::gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGBAf &lcol )
+void CPrimitiveRender::grRingS(const Vector2 &p, scalar Radius)
 {
 	static int glList = -1;
 	if (!glIsList(glList))
@@ -1770,7 +1750,7 @@ void CPrimitiveRender::gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGB
 	glPopAttrib();
 	glPopMatrix();
 	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_BLEND);
+	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 #ifdef G_PRIM_BLEND_OPT
@@ -1779,7 +1759,7 @@ void CPrimitiveRender::gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGB
 #else
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #endif
-	glTranslatef(pos.x, pos.y, 0.0f);
+	glTranslatef(p.x, p.y, 0.0f);
 	// 	glColor4fv(&(col.r));
 
 #ifdef G_POLY_TEXTURE_ENABLE
@@ -1818,15 +1798,70 @@ void CPrimitiveRender::gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGB
 	// #endif 
 	glPopAttrib();
 	glPopMatrix();
-	gRenderCircle(pos, Radius*0.3, &col);
+	grCircleL(p, Radius*0.3);
 }
 
-void CPrimitiveRender::gRenderArrowEx(Vector2 &v0, Vector2 &v1, RGBAf &c)
+void CPrimitiveRender::gRenderArrowEx(const Vector2 &v0,const Vector2 &v1)
 {
-	gRenderRing(v0, 20, c, RGBAf());
-	gRenderArrow(v0, v1, (v1-v0).Length(), 1);
+	grRingS(v0, 20);
+	gRenderArrow(v0, v1);
 }
 
+void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
+{
+	glPushMatrix();
+	glPushAttrib(GL_TEXTURE_2D | GL_DEPTH_TEST | GL_BLEND);
+	glColor4fv(&(lClr->r));
+	glBegin(GL_LINES);
+		glVertex2fv(&(v0.x));
+		glVertex2fv(&(v1.x));
+	glEnd();
+	glPopAttrib();
+	glPopMatrix();
+}
+
+
+
+
+void CPrimitiveRender::BeforeRndr()
+{
+	glPushMatrix();
+	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND | GL_LINE_WIDTH | GL_POINT_SIZE);
+	glEnable(GL_POINT_SIZE);
+	glEnable(GL_LINE_WIDTH);
+	glDisable(GL_TEXTURE_2D);
+}
+
+void CPrimitiveRender::AfterRndr()
+{
+	glPopAttrib();
+	glPopMatrix();
+}
+
+void CPrimitiveRender::CheckBlend()
+{
+	if (BlendingOption == PRM_RNDR_OPT_BLEND_ONE)
+	{
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);		
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	}
+	else
+	{
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);		
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+}
+
+void CPrimitiveRender::CheckTexture()
+{
+	glEnable(GL_TEXTURE_2D);
+	CTextureManager *Tman = CTextureManager::Instance();
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	Tman->FreeInst();
+	cells->Bind();
+}
 
 #ifdef WIN32
 

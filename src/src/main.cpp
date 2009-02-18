@@ -311,11 +311,13 @@ bool Draw()
 	}
 	
 	CPrimitiveRender pr;
-	pr.gRenderPolygon(&apos, angle, &a, &Vector4(0.9f, 0.7f, 0.7f, 0.5f), &Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-	pr.gRenderPolygon(&bpos, 0.0f, &b, &Vector4(0.6f, 0.9f, 0.6f, 0.6f),  &Vector4(0.9f, 0.7f, 0.7f, 0.5f));
+	pr.lClr = &Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pr.sClr = &Vector4(0.9f, 0.7f, 0.7f, 0.5f);
+	pr.grPolyC(apos, angle, &a);
+	pr.grPolyC(bpos, 0.0f, &b);
 	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
-	pr.gRenderArrowEx(Vector2(100, 100), Vector2(400, 300), RGBAf(0.7f, 0.8f, 0.6f, 0.9f));
-	pr.gRenderSegment(&bpos, &(bpos + norm*depth), &Vector4(1.0f, 1.0f, 1.0f, 0.8f));
+	pr.gRenderArrowEx(Vector2(100, 100), Vector2(400, 300));
+	pr.grSegment(bpos, (bpos + norm*depth));
 	
 	angle += 1;
 	if (angle > 360.0f) angle -= 360;

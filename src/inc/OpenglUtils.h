@@ -512,22 +512,74 @@ void gEndFrame();
 #define G_POLY_TEX_CELL_SIZE 20
 #define G_POLY_OUTLINE_ENABLE
 #define G_POLY_TEXTURE_ENABLE
-// TODO: in class settings
+#define PRM_RNDR_OPT_BLEND_ONE 0x01
 
 class CPrimitiveRender
 {
 public:
+	int BlendingOption, CheckerCellSize;
+	bool OutlineEnabled, TextureEnabled, DashedLines;
+	int glListCircle, glListRing;
+	Vector2 *wh;
+	scalar Radius, Angle, lwidth, depth;
+	int dash;
+	RGBAf *lClr, *sClr, *pClr;
 
-	void gLineRect(float x, float y, float width, float height);
-	void gSolidRect(float x, float y, float width, float height, glRGBAub* color);
-	void gSolidRectEx(float x, float y, float width, float height, float depth, glRGBAub* color);
-	void gRenderSegment(Vector2 *v0, Vector2 *v1, RGBAf *col);
-	void gRenderCircle(const Vector2 &pos, float Radius, RGBAf *col);
-	void gRenderPolygon(Vector2 *pos, scalar angle, CPolygon *poly, RGBAf *col, RGBAf *lcol);
-	void gRenderRing( Vector2 &pos, scalar Radius, RGBAf &col, RGBAf &lcol );
-	void gRenderArrow(const Vector2& P, const Vector2& D, float length, int uARGB);
-	void gRenderArrowEx(Vector2 &v0, Vector2 &v1, RGBAf &c);
+	CPrimitiveRender()
+	{
+			pClr = sClr = lClr = NULL;
+			
+			glListCircle = glGenLists(1);
+			glNewList(glListCircle, GL_COMPILE_AND_EXECUTE);
+			glBegin(GL_LINE_LOOP);
+			for(int i = 0; i < 64 + 1; i ++)
+			{
+				Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+				glVertex2f(P.x, P.y);
+			}
+			glEnd();
+			glEndList();
+
+			glListRing = glGenLists(1);
+			glNewList(glListRing, GL_COMPILE_AND_EXECUTE);
+			glBegin(GL_LINE_LOOP);
+			for(int i = 0; i < 64 + 1; i ++)
+			{
+				Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+				glVertex2f(P.x, P.y);
+				P = Vector2(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+				glVertex2f(P.x*0.7f, P.y*0.7f);
+			}
+			glEnd();
+			glEndList();
+	}
+
+	void grLine(const Vector2 &v0, const Vector2 &v1);
+	void grSegment(const Vector2 &v0, const Vector2 &v1);
+	void grSegmentC(const Vector2 &v0, const Vector2 &v1);
+
+	void grRectL(const Vector2 &p, scalar width, scalar height);
+	void grRectS(const Vector2 &p, scalar width, scalar height);
+	
+	void grCircleL(const Vector2 &p, scalar Radius);
+	void grCircleS(const Vector2 &p, scalar Radius);
+	void grCircleC(const Vector2 &p, scalar Radius);
+
+	void grPolyC(const Vector2 &p, scalar angle, CPolygon *poly);
+
+	void grRingL(const Vector2 &p, scalar Radius);
+	void grRingS(const Vector2 &p, scalar Radius);
+
+	void gRenderArrow(const Vector2& v0, const Vector2& v1);
+	void gRenderArrowEx(const Vector2 &v0,const Vector2 &v1);
+
 	void gDrawBBox(CBBox box);
+	void grInYan(scalar Radius);
+private:
+	void BeforeRndr();
+	void AfterRndr();
+	void CheckBlend();
+	void CheckTexture();
 };
 
 
