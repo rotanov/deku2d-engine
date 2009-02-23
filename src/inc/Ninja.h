@@ -1,10 +1,7 @@
 #ifndef NINJA_H
 #define NINJA_H
 
-//#pragma warning (disable  : 4312)
-//#pragma warning (disable  : 4311)
-#pragma warning (disable : 4267)
-#define _CRT_SECURE_NO_DEPRECATE
+#include "CoreUtils.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,7 +13,6 @@
 #include <gl\gl.h>
 #include <gl\glu.h>
 
-#include "CoreUtils.h"
 #include "OpenglUtils.h"
 #include "Gui.h"
 #include "Xml.h"

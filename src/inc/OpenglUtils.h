@@ -110,7 +110,7 @@ public:
 	*	Ends Drawing procedure.
 	*/
 	bool EndDraw();
-	virtual GLuint& GetTexID();
+	virtual GLuint GetTexID();
 
 private:
 	bool isDrawing;
@@ -143,7 +143,7 @@ public:
 		return new CTexture;
 	}
 	bool Load();
-	GLuint& GetTexID();
+	GLuint GetTexID();
 };
 
 class CTextureManager : public CObjectList
@@ -519,9 +519,9 @@ class CPrimitiveRender
 public:
 	int BlendingOption, CheckerCellSize;
 	bool OutlineEnabled, TextureEnabled, DashedLines;
-	int glListCircle, glListRing;
+	int glListCircleL, glListCircleS, glListRingS;
 	Vector2 *wh;
-	scalar Radius, Angle, lwidth, depth;
+	scalar Radius, Angle, lwidth, depth, psize;
 	int dash;
 	RGBAf *lClr, *sClr, *pClr;
 
@@ -529,8 +529,8 @@ public:
 	{
 			pClr = sClr = lClr = NULL;
 			
-			glListCircle = glGenLists(1);
-			glNewList(glListCircle, GL_COMPILE_AND_EXECUTE);
+			glListCircleL = glGenLists(1);
+			glNewList(glListCircleL, GL_COMPILE_AND_EXECUTE);
 			glBegin(GL_LINE_LOOP);
 			for(int i = 0; i < 64 + 1; i ++)
 			{
@@ -540,8 +540,19 @@ public:
 			glEnd();
 			glEndList();
 
-			glListRing = glGenLists(1);
-			glNewList(glListRing, GL_COMPILE_AND_EXECUTE);
+			glListCircleS = glGenLists(1);
+			glNewList(glListCircleL, GL_COMPILE_AND_EXECUTE);
+			glBegin(GL_TRIANGLE_FAN);
+			for(int i = 0; i < 64 + 1; i ++)
+			{
+				Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+				glVertex2f(P.x, P.y);
+			}
+			glEnd();
+			glEndList();
+
+			glListRingS = glGenLists(1);
+			glNewList(glListRingS, GL_COMPILE_AND_EXECUTE);
 			glBegin(GL_LINE_LOOP);
 			for(int i = 0; i < 64 + 1; i ++)
 			{

@@ -251,8 +251,9 @@ bool Init()
 	lm->visible = true;
 	lm->z = -0.6f;
 	
-	Ninja->RenderManager.SortByZ();
 	Ninja->RenderManager.SortByAlpha();
+	Ninja->RenderManager.SortByZ();
+	
 	
 	
 
@@ -345,12 +346,19 @@ bool Draw()
 	return true;
 }
 
+bool Init2()
+{
+	return true;
+}
 
-
+bool Draw2()
+{
+	return true;
+}
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
-	Ninja->SetState(STATE_USER_INIT, &Init);
+	Ninja->SetState(STATE_RENDER_FUNC, &Draw2);
+	Ninja->SetState(STATE_USER_INIT, &Init2);
 	
 	Ninja->Run();
 	Ninja->FreeInst();

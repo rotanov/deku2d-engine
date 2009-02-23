@@ -2,7 +2,7 @@
 	WindowWidth		= "640"
 	WindowHeight		= "480"
 	WindowBpp		= "32"
-	WindowCaption		= "Ninja!"
+	WindowCaption		= "Our team 2d engine testbed"
 	DoCalcFps		= "true"
 	DoLimitFps		= "false"
 	FpsLimit			= "20" // он пиздит, это не фпс лимит, а кол-во миллисекунд между кадрами

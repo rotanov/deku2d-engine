@@ -11,10 +11,6 @@
 *		basic math functions, Matrices etc. 
 */
 
-#pragma warning( disable : 4305 ) 
-#pragma warning( disable : 4244 ) 
-//#pragma warning( disable : 4996 ) 
-#pragma warning( disable : 4172 )
 
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
@@ -32,8 +28,10 @@ union Matrix2;
 
 #define SQR(x) ((x)*(x))
 #define CUBE(x) ((x)*(x)*(x))
-#define PI   3.1415926535897932
-#define OOPI 0.3183098861837906
+#define HI_PI   3.1415926535897932
+#define HI_OOPI 0.3183098861837906
+#define PI   3.1415f
+#define OOPI 0.3183f
 #define sincostable_dim 8192 
 #define ABS(A) { A = (A < 0) ? -A : A; }
 #define repeat(A, B) for(A=0;  A<B;  A++)

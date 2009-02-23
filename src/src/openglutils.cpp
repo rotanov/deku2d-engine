@@ -192,7 +192,7 @@ bool CGLImageData::EndDraw()
 	return true;
 }
 
-GLuint& CGLImageData::GetTexID()
+GLuint CGLImageData::GetTexID()
 {
 	if (TexID == 0)
 		Log("WARNING", "GLImageData. Trying to access TexID but it is 0");
@@ -509,6 +509,11 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,		8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,		16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,	1);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,		8);
+// 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+// 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1);
+// 
+// 	glEnable(0x809D);
 
 	int flags = SDL_OPENGL;
 	if(fullscreen == true)
@@ -584,9 +589,15 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);	
 
-	 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_POINT_SMOOTH);
+		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_LINE_SMOOTH);
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_POLYGON_SMOOTH);
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	 	
+	 	
+	 	
 
 
 	//strstr(WGL_EXT_swap_control);
@@ -949,6 +960,7 @@ void gBeginFrame()
 
 void gEndFrame()
 {
+	glFinish();
 	SDL_GL_SwapBuffers();
 }
 
@@ -1476,7 +1488,7 @@ bool CTexture::Load()
 	return loaded;
 }
 
-GLuint& CTexture::GetTexID()
+GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
@@ -1565,16 +1577,13 @@ void CCamera::gTranslate()
 /* Primitive Render Section                                             */
 /************************************************************************/
 
-void CPrimitiveRender::grRectL(const Vector2 &p, scalar width, scalar height)
+void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
 	glColor4fv(&(lClr->r));
-	glBegin(GL_LINE_LOOP);
-		glVertex2f(p.x,			p.y);
-		glVertex2f(p.x + width, p.y);
-		glVertex2f(p.x + width, p.y + height);
-		glVertex2f(p.x,			p.y + height);
-		//glVertex2f(x, y);
+	glBegin(GL_LINES);
+		glVertex2fv(&(v0.x));
+		glVertex2fv(&(v1.x));
 	glEnd();
 	AfterRndr();
 }
@@ -1605,7 +1614,7 @@ void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
 
 void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
 {
-	if (!glIsList(glListCircle))
+	if (!glIsList(glListCircleL))
 		return;
 	glPushMatrix();
 	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
@@ -1614,7 +1623,7 @@ void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
 	glColor4fv(&(lClr->r));
 	glTranslatef(p.x, p.y, 0.0f);
 	glScalef(Radius, Radius, 0.0f);
-	glCallList(glListCircle);
+	glCallList(glListCircleL);
 	glPopAttrib();
 	glPopMatrix();
 }
@@ -1628,7 +1637,19 @@ void CPrimitiveRender::grCircleC(const Vector2 &p, scalar Radius)
 {
 
 }
-
+void CPrimitiveRender::grRectL(const Vector2 &p, scalar width, scalar height)
+{
+	BeforeRndr();
+	glColor4fv(&(lClr->r));
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(p.x,			p.y);
+	glVertex2f(p.x + width, p.y);
+	glVertex2f(p.x + width, p.y + height);
+	glVertex2f(p.x,			p.y + height);
+	//glVertex2f(x, y);
+	glEnd();
+	AfterRndr();
+}
 void CPrimitiveRender::grRectS(const Vector2 &p, scalar width, scalar height)
 {
 	glPushMatrix();
@@ -1807,27 +1828,13 @@ void CPrimitiveRender::gRenderArrowEx(const Vector2 &v0,const Vector2 &v1)
 	gRenderArrow(v0, v1);
 }
 
-void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
-{
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_2D | GL_DEPTH_TEST | GL_BLEND);
-	glColor4fv(&(lClr->r));
-	glBegin(GL_LINES);
-		glVertex2fv(&(v0.x));
-		glVertex2fv(&(v1.x));
-	glEnd();
-	glPopAttrib();
-	glPopMatrix();
-}
-
-
-
-
 void CPrimitiveRender::BeforeRndr()
 {
 	glPushMatrix();
 	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND | GL_LINE_WIDTH | GL_POINT_SIZE);
 	glEnable(GL_POINT_SIZE);
+	glLineWidth(lwidth);
+	glPointSize(psize);
 	glEnable(GL_LINE_WIDTH);
 	glDisable(GL_TEXTURE_2D);
 }
