@@ -312,8 +312,8 @@ bool Draw()
 	}
 	
 	CPrimitiveRender pr;
-	pr.lClr = &Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	pr.sClr = &Vector4(0.9f, 0.7f, 0.7f, 0.5f);
+	pr.plClr = &Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pr.psClr = &Vector4(0.9f, 0.7f, 0.7f, 0.5f);
 	pr.grPolyC(apos, angle, &a);
 	pr.grPolyC(bpos, 0.0f, &b);
 	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
@@ -346,15 +346,29 @@ bool Draw()
 	return true;
 }
 
+CPrimitiveRender p;
+
 bool Init2()
 {
+	p.Angle = 0.0f;
+	p.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
+	p.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
+	p.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
+
 	return true;
 }
 
 bool Draw2()
 {
+	glLoadIdentity();
+	glTranslatef(256.0f, 256.0f, 0.0f);
+	p.grCircleS(V2Zero, 128.0f);
+	p.grCircleL(V2Zero, 256.0f);
+	p.Angle++;
+	p.grCircleC(Vector2(100.0f, 0.0f), 64.0f);
 	return true;
 }
+
 int	main(int argc, char *argv[])
 {
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw2);

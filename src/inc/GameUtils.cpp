@@ -254,7 +254,7 @@ bool CCompas::Render()
 		glEnable(GL_LINE_WIDTH);
 		glLineWidth(3.0f);
 		CPrimitiveRender pr;
-		pr.lClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f);
+		pr.plClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f);
 		pr.grCircleL(Vector2(100,100), depth);;
 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth));
 

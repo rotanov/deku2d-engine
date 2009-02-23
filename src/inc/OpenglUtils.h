@@ -518,52 +518,26 @@ class CPrimitiveRender
 {
 public:
 	int BlendingOption, CheckerCellSize;
-	bool OutlineEnabled, TextureEnabled, DashedLines;
-	int glListCircleL, glListCircleS, glListRingS;
+	bool OutlineEnabled, TextureEnabled, DashedLines, doUseCurrentCoordSystem;
+	static int glListCircleL;
+	static int glListCircleS;
+	static int glListRingS;
 	Vector2 *wh;
 	scalar Radius, Angle, lwidth, depth, psize;
 	int dash;
-	RGBAf *lClr, *sClr, *pClr;
-
+	RGBAf *plClr, *psClr, *ppClr;
+	RGBAf lClr, sClr, pClr; 
 	CPrimitiveRender()
 	{
-			pClr = sClr = lClr = NULL;
-			
-			glListCircleL = glGenLists(1);
-			glNewList(glListCircleL, GL_COMPILE_AND_EXECUTE);
-			glBegin(GL_LINE_LOOP);
-			for(int i = 0; i < 64 + 1; i ++)
-			{
-				Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-				glVertex2f(P.x, P.y);
-			}
-			glEnd();
-			glEndList();
-
-			glListCircleS = glGenLists(1);
-			glNewList(glListCircleL, GL_COMPILE_AND_EXECUTE);
-			glBegin(GL_TRIANGLE_FAN);
-			for(int i = 0; i < 64 + 1; i ++)
-			{
-				Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-				glVertex2f(P.x, P.y);
-			}
-			glEnd();
-			glEndList();
-
-			glListRingS = glGenLists(1);
-			glNewList(glListRingS, GL_COMPILE_AND_EXECUTE);
-			glBegin(GL_LINE_LOOP);
-			for(int i = 0; i < 64 + 1; i ++)
-			{
-				Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-				glVertex2f(P.x, P.y);
-				P = Vector2(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-				glVertex2f(P.x*0.7f, P.y*0.7f);
-			}
-			glEnd();
-			glEndList();
+			lClr = sClr = pClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+			plClr = &lClr;
+			psClr = &sClr;
+			ppClr = &pClr;
+			depth = 0.0f;
+			doUseCurrentCoordSystem = false;			
 	}
+
+	void Init();
 
 	void grLine(const Vector2 &v0, const Vector2 &v1);
 	void grSegment(const Vector2 &v0, const Vector2 &v1);

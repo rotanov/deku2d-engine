@@ -87,7 +87,7 @@ public:
 	__INLINE Vector2(void){}
 	__INLINE Vector2( scalar Ix, scalar Iy) : x(Ix), y(Iy){}
 	
-		__INLINE  Vector2 operator + (const Vector2 &V)const
+	__INLINE  Vector2 operator + (const Vector2 &V)const
 	{ 
 		return Vector2(x + V.x, y + V.y);
 	}
@@ -211,7 +211,6 @@ public:
 
 };
 
-
 /**
 *	Расстояние от точки до прямой вычисляет эта функция.
 *	v1, v2 - координаты любых двух (возможно не совпадающих)
@@ -228,6 +227,9 @@ __INLINE scalar PointLineDistance(Vector2 v1, Vector2 v2, Vector2 p)
 	D = dx * (p.y - v1.y) - dy * ( p.x - v1.x );
 	return  abs( D / sqrt( dx * dx + dy * dy));
 }
+
+static Vector2 V2Zero = Vector2(0.0f, 0.0f);
+
 
 union Vector3{
 public:
@@ -949,10 +951,18 @@ union Vector4
 		Vector4(){x=y=z=0.0f;w=1.0f;}
 		Vector4(scalar xv, scalar yv, scalar zv, scalar wv){x=xv;y=yv;z=zv;w=wv;}
 		Vector4(Vector3 v){x=v.x;y=v.y;z=v.z;w=0;};
-		void operator=(const Vector4 &q){x=q.x;y=q.y;z=q.z;w=q.w;}
+		//void operator=(const Vector4 &q){x=q.x;y=q.y;z=q.z;w=q.w;}
 		__INLINE Vector4 operator+(Vector4 q){return Vector4( x + q.x , y + q.y, z + q.z, w + q.w );}
 		__INLINE Vector4 operator-(Vector4 q){return Vector4( x - q.x , y - q.y, z - q.z, w - q.w );}
 		__INLINE Vector4 operator*(scalar s){return Vector4(x * s, y * s, z * s, w * s);}
+		__INLINE Vector4 operator=(const Vector4& V)
+		{
+			x = V.x;
+			y = V.y;
+			z = V.z;
+			w = V.w;
+			return *this;
+		}
 		__INLINE Vector4 operator/(scalar s)
 		{
 			if (s == 0.0f)
@@ -1223,7 +1233,7 @@ class CPolygon : public CGeometry
 {
 public:
 	int numV;		// кол-во вершин
-	Vector2 *V;	// указатель на массив вершин
+	Vector2 *V;		// указатель на массив вершин
 	CPolygon(): numV(0), V(NULL){ }
 	CPolygon(int _numV):numV(_numV)
 	{
