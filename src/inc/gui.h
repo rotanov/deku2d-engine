@@ -122,7 +122,7 @@ public:
 };
 
 
-class CGraphObj : public CUpdateObject
+class CGraphObj : public CObject//Update
 {
 public:
 	CGraphObj()
@@ -134,6 +134,12 @@ public:
 		Caption = "";
 		fnt = NULL;
 	}
+/*	static CObject*	NewWidget()
+	{
+		CRenderObject *res = newWidget();
+		//		res->type = T_RENDERABLE|T_UPDATABLE;
+		return res;
+	}*/
 	virtual void			Draw(){}
 	virtual void			Step(){}
 	virtual void			DrawText(){}
@@ -162,6 +168,13 @@ public:
 	int						GetLeft();
 	int						GetTop();
 	bool					SetFont(string FontName);
+	virtual bool			Update(float dt){return 1;};
+	static CObject*	NewRenderer()
+	{
+		CRenderObject *res = new CGUIRenderer;
+		//		res->type = T_RENDERABLE|T_UPDATABLE;
+		return res;
+	}
 protected:
 	unsigned int			Style;					
 };

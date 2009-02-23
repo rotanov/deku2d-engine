@@ -71,7 +71,7 @@ bool Init()
  		Edit->Width = 400;
  		Edit->Caption = "Fuck";
  		Edit->SelStart = 1;
- 		Edit->SelLength = -3;
+ 		Edit->SelLength = 0;
 
  		//Edit creation sample
  		Edit1 = dynamic_cast<CEdit*>(newWidget("NewEdit1", STYLE_OBJEDIT));
