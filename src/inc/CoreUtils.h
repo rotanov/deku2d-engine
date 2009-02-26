@@ -1,6 +1,8 @@
 #ifndef CORE_UTILS_H
 #define CORE_UTILS_H
 
+#pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы знать...знать...
+
 #pragma warning (disable	:	4312)
 #pragma warning (disable	:	4311)
 #pragma warning (disable	:	4267)

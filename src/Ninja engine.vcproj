@@ -307,76 +307,8 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="libs"
+			Name="libpng"
 			>
-			<File
-				RelativePath=".\zlib\adler32.c"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\begin_code.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\close_code.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crc32.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crc32.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crypt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\deflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffixed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\ioapi.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\ioapi.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\png.c"
-				>
-			</File>
 			<File
 				RelativePath=".\libpng\png.h"
 				>
@@ -385,68 +317,16 @@
 				RelativePath=".\libpng\pngconf.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="SDL"
+			>
 			<File
-				RelativePath=".\libpng\pngerror.c"
+				RelativePath=".\SDL\begin_code.h"
 				>
 			</File>
 			<File
-				RelativePath=".\libpng\pnggccrd.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngget.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngmem.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngpread.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngread.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngrio.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngrtran.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngrutil.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngset.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngtrans.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngvcrd.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngwio.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngwrite.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngwtran.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngwutil.c"
+				RelativePath=".\SDL\close_code.h"
 				>
 			</File>
 			<File
@@ -467,6 +347,46 @@
 			</File>
 			<File
 				RelativePath=".\SDL\SDL_cdrom.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_amiga.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_dreamcast.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_macos.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_macosx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_minimal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_nds.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_os2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_symbian.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_config_win32.h"
 				>
 			</File>
 			<File
@@ -530,11 +450,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SDL\SDL_platform.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SDL\SDL_quit.h"
 				>
 			</File>
 			<File
 				RelativePath=".\SDL\SDL_rwops.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SDL\SDL_stdinc.h"
 				>
 			</File>
 			<File
@@ -561,20 +489,40 @@
 				RelativePath=".\SDL\SDL_video.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="zlib"
+			>
 			<File
-				RelativePath=".\zlib\trees.c"
+				RelativePath=".\zlib\crypt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\deflate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inffast.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inffixed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inflate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\inftrees.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\ioapi.h"
 				>
 			</File>
 			<File
 				RelativePath=".\zlib\trees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\uncompr.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\unzip.c"
 				>
 			</File>
 			<File
@@ -595,10 +543,6 @@
 			</File>
 			<File
 				RelativePath=".\zlib\zlib.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zutil.c"
 				>
 			</File>
 			<File
