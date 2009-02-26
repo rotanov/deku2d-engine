@@ -365,7 +365,7 @@ bool Draw2()
 	glLoadIdentity();
 	glTranslatef(640 - 25 - 4, 480 - 25 - 4, 0.0f);
 	if(k < 5)
-	p.Angle += k;
+		p.Angle += k;
 	else
 		p.Angle -= k;
 	

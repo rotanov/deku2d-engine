@@ -31,49 +31,66 @@
 #endif
 #define _begin_code_h
 
-/* Make sure the correct platform symbols are defined */
-#if !defined(WIN32) && defined(_WIN32)
-#define WIN32
-#endif /* Windows */
-
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
-# ifdef __BEOS__
+# if defined(__BEOS__)
 #  if defined(__GNUC__)
 #   define DECLSPEC	__declspec(dllexport)
 #  else
 #   define DECLSPEC	__declspec(export)
 #  endif
-# else
-# ifdef WIN32
+# elif defined(__WIN32__)
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC 
 #   else
-#    define DECLSPEC __declspec(dllimport)
+#    define DECLSPEC	__declspec(dllimport)
 #   endif
 #  else
 #   define DECLSPEC	__declspec(dllexport)
 #  endif
+# elif defined(__OS2__)
+#  ifdef __WATCOMC__
+#   ifdef BUILD_SDL
+#    define DECLSPEC	__declspec(dllexport)
+#   else
+#    define DECLSPEC
+#   endif
+#  else
+#   define DECLSPEC
+#  endif
 # else
-#  define DECLSPEC
-# endif
+#  if defined(__GNUC__) && __GNUC__ >= 4
+#   define DECLSPEC	__attribute__ ((visibility("default")))
+#  else
+#   define DECLSPEC
+#  endif
 # endif
 #endif
 
 /* By default SDL uses the C calling convention */
 #ifndef SDLCALL
-#if defined(WIN32) && !defined(__GNUC__)
+#if defined(__WIN32__) && !defined(__GNUC__)
 #define SDLCALL __cdecl
+#else
+#ifdef __OS2__
+/* But on OS/2, we use the _System calling convention */
+/* to be compatible with every compiler */
+#define SDLCALL _System
 #else
 #define SDLCALL
 #endif
+#endif
 #endif /* SDLCALL */
 
-/* Removed DECLSPEC on Symbian OS because SDL cannot be a DLL in EPOC */
 #ifdef __SYMBIAN32__ 
+#ifndef EKA2 
 #undef DECLSPEC
 #define DECLSPEC
+#elif !defined(__WINS__)
+#undef DECLSPEC
+#define DECLSPEC __declspec(dllexport)
+#endif /* !EKA2 */
 #endif /* __SYMBIAN32__ */
 
 /* Force structure packing at 4 byte alignment.
@@ -89,7 +106,7 @@
 #pragma nopackwarning
 #endif
 #pragma pack(push,4)
-#elif (defined(__MWERKS__) && defined(macintosh))
+#elif (defined(__MWERKS__) && defined(__MACOS__))
 #pragma options align=mac68k4byte
 #pragma enumsalwaysint on
 #endif /* Compiler needs structure packing set */
@@ -103,14 +120,16 @@
 #if defined(_MSC_VER) || defined(__BORLANDC__) || \
     defined(__DMC__) || defined(__SC__) || \
     defined(__WATCOMC__) || defined(__LCC__) || \
-    defined(__DECC)
+    defined(__DECC) || defined(__EABI__)
 #ifndef __inline__
 #define __inline__	__inline
 #endif
 #define SDL_INLINE_OKAY
 #else
 #if !defined(__MRC__) && !defined(_SGI_SOURCE)
+#ifndef __inline__
 #define __inline__ inline
+#endif
 #define SDL_INLINE_OKAY
 #endif /* Not a funky compiler */
 #endif /* Visual C++ */
@@ -134,4 +153,4 @@
 #define NULL ((void *)0)
 #endif
 #endif /* NULL */
-#endif /* ! MacOS X - breaks precompiled headers */
+#endif /* ! Mac OS X - breaks precompiled headers */
