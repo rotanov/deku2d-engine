@@ -12,6 +12,18 @@ public:
 	virtual ~CPhysicalObject(){};
 };
 
+class CStaticBody : public CPhysicalObject
+{
+public:
+	Vector2 p;
+};
+
+class CDynamicBody : public CPhysicalObject
+{
+public:
+	Vector2 v;
+};
+
 class CRigidBody : public CPhysicalObject
 {
 public:

@@ -408,9 +408,10 @@ public:
 };
 
 
-/**
-*	Here goes particle system stuff
-*/
+//////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/*				CparticleSystem & stuff									*/
+/************************************************************************/
 
 int Random_Int(int min, int max);
 float Random_Float(float min, float max);
@@ -488,7 +489,7 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
-// OpenGl interface
+// OpenGl interface// Херня какая-то передумать и переделать нахуй...
 //////////////////////////////////////////////////////////////////////////
 
 /**
@@ -508,6 +509,11 @@ void gBeginFrame();
 */
 void gEndFrame();
 
+//////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/*			CPrimitiveRender & stuff									*/
+/************************************************************************/
+
 #define G_PRIM_BLEND_OPT
 #define G_POLY_TEX_CELL_SIZE 20
 #define G_POLY_OUTLINE_ENABLE
@@ -522,6 +528,7 @@ public:
 	static int glListCircleL;
 	static int glListCircleS;
 	static int glListRingS;
+	static int glListHalfCircle;
 	Vector2 *wh;
 	scalar Radius, Angle, lwidth, depth, psize;
 	int dash;
@@ -539,27 +546,37 @@ public:
 
 	void Init();
 
+	/**
+	*	Внизу функции для отображения примитивов.
+	*	Суффикс L - примитив рисуется линиями
+	*	S - solid
+	*	C - complete
+	*	Последнее - по разному для каждого примитива.
+	*	Обычно - вращение + линии + заливка + ещё что-то
+	*/
+
 	void grLine(const Vector2 &v0, const Vector2 &v1);
 	void grSegment(const Vector2 &v0, const Vector2 &v1);
 	void grSegmentC(const Vector2 &v0, const Vector2 &v1);
 
-	void grRectL(const Vector2 &p, scalar width, scalar height);
-	void grRectS(const Vector2 &p, scalar width, scalar height);
+	void grRectL(const Vector2 &v0, const Vector2 &v1);
+	void grRectS(const Vector2 &v0, const Vector2 &v1);
+	void grRectC(const Vector2 &v0, const Vector2 &v1);
 	
 	void grCircleL(const Vector2 &p, scalar Radius);
 	void grCircleS(const Vector2 &p, scalar Radius);
 	void grCircleC(const Vector2 &p, scalar Radius);
 
 	void grPolyC(const Vector2 &p, scalar angle, CPolygon *poly);
-
-	void grRingL(const Vector2 &p, scalar Radius);
+	
 	void grRingS(const Vector2 &p, scalar Radius);
+	void grRingC(const Vector2 &p, scalar Radius);
 
-	void gRenderArrow(const Vector2& v0, const Vector2& v1);
-	void gRenderArrowEx(const Vector2 &v0,const Vector2 &v1);
+	void grArrowL(const Vector2& v0, const Vector2& v1);
+	void grArrowC(const Vector2 &v0,const Vector2 &v1);
 
 	void gDrawBBox(CBBox box);
-	void grInYan(scalar Radius);
+	void grInYan(const Vector2 &p, scalar Radius);
 private:
 	void BeforeRndr();
 	void AfterRndr();
@@ -571,12 +588,11 @@ private:
 /**
 *	Controls scissor test
 */
+typedef BOOL (__stdcall *PFNWGLSWAPINTERVALFARPROC)(int);
+
 void gToggleScissor(bool State);
 void gScissor(int x, int y, int width, int height);
 void gSetColor(RGBAf color);
-
-typedef BOOL (__stdcall *PFNWGLSWAPINTERVALFARPROC)( int );
-
 
 void setVSync(int interval=1);
 

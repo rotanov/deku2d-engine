@@ -317,7 +317,7 @@ bool Draw()
 	pr.grPolyC(apos, angle, &a);
 	pr.grPolyC(bpos, 0.0f, &b);
 	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
-	pr.gRenderArrowEx(Vector2(100, 100), Vector2(400, 300));
+	pr.grArrowC(Vector2(100, 100), Vector2(400, 300));
 	pr.grSegment(bpos, (bpos + norm*depth));
 	
 	angle += 1;
@@ -354,18 +354,24 @@ bool Init2()
 	p.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
 	p.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
 	p.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
-
+	p.psize = 10.0f;
+	p.lwidth = 4.0f;
 	return true;
 }
+int k = 0;
 
 bool Draw2()
 {
 	glLoadIdentity();
-	glTranslatef(256.0f, 256.0f, 0.0f);
-	p.grCircleS(V2Zero, 128.0f);
-	p.grCircleL(V2Zero, 256.0f);
-	p.Angle++;
-	p.grCircleC(Vector2(100.0f, 0.0f), 64.0f);
+	glTranslatef(640 - 25 - 4, 480 - 25 - 4, 0.0f);
+	if(k < 5)
+	p.Angle += k;
+	else
+		p.Angle -= k;
+	
+	if(k > 5) k--;
+	else k++;
+	p.grInYan(V2Zero, 25);
 	return true;
 }
 

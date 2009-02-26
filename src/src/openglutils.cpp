@@ -592,12 +592,12 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);	
 
-// 		glEnable(GL_POINT_SMOOTH);
-// 		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-// 		glEnable(GL_LINE_SMOOTH);
-// 		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-// 		glEnable(GL_POLYGON_SMOOTH);
-// 		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_POINT_SMOOTH);
+		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_LINE_SMOOTH);
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_POLYGON_SMOOTH);
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	 	
 	 	
 	 	
@@ -840,14 +840,18 @@ void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int o
 		CPrimitiveRender pr;
 		pr.psClr = &RGBAf(10, 50, 200, 150);
 		pr.depth = depth;
-		pr.grRectS(Vector2(selx, ypos), selw, sheight);
+		pr.grRectS(Vector2(selx, ypos), Vector2(selx + selw, ypos + sheight));
 	}
 	CPrimitiveRender pr;
 	pr.depth = depth;
-	pr.grRectS(Vector2(selx - 1, ypos), 1, min(sheight, GetStringHeight("!\0"))); //  glRGBAub(10, 10, 10, 200)
-	pr.grRectS(Vector2(selx - 3, ypos), 5, 1); // glRGBAub(10, 10, 10, 200)
+	pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
+	pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
+	pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
+
+	pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
+	pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
 //	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
-	pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), 5, 1); // glRGBAub(10, 10, 10, 200)
+	pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
 	Print(xpos, ypos, depth, text+offset);
 	glDisable(GL_SCISSOR_TEST);
 	glPopAttrib();
@@ -1583,6 +1587,7 @@ void CCamera::gTranslate()
 int CPrimitiveRender::glListCircleL = 0;
 int CPrimitiveRender::glListCircleS = 0;
 int CPrimitiveRender::glListRingS = 0;
+int CPrimitiveRender::glListHalfCircle = 0;
 
 
 void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
@@ -1633,7 +1638,6 @@ void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
 	AfterRndr();
 }
 
-
 void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
 {
 	if (!glIsList(glListCircleL))
@@ -1665,49 +1669,73 @@ void CPrimitiveRender::grCircleC(const Vector2 &p, scalar Radius)
 	grSegmentC(p, p + Vector2(Radius, 0.0f));
 }
 
-void CPrimitiveRender::grRectL(const Vector2 &p, scalar width, scalar height)
+void CPrimitiveRender::grRectL(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
 	glColor4fv(&(plClr->r));
 	glBegin(GL_LINE_LOOP);
-	glVertex2f(p.x,			p.y);
-	glVertex2f(p.x + width, p.y);
-	glVertex2f(p.x + width, p.y + height);
-	glVertex2f(p.x,			p.y + height);
-	//glVertex2f(x, y);
+		glVertex2f(v0.x, v0.y);
+		glVertex2f(v1.x, v0.y);
+		glVertex2f(v1.x, v1.y);
+		glVertex2f(v0.x, v1.y);
 	glEnd();
 	AfterRndr();
 }
-void CPrimitiveRender::grRectS(const Vector2 &p, scalar width, scalar height)
+void CPrimitiveRender::grRectS(const Vector2 &v0, const Vector2 &v1)
 {
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
-	if (psClr)
-		glColor4fv(&(psClr->r));
+	BeforeRndr();
+	glColor4fv(&(psClr->r));
 	glBegin(GL_QUADS);
-		glVertex2f(p.x, p.y);
-		glVertex2f(p.x + width, p.y);
-		glVertex2f(p.x + width, p.y + height);
-		glVertex2f(p.x, p.y + height);
+		glVertex2f(v0.x, v0.y);
+		glVertex2f(v1.x, v0.y);
+		glVertex2f(v1.x, v1.y);
+		glVertex2f(v0.x, v1.y);
 	glEnd();
-	glPopAttrib();
-	glPopMatrix();
+	AfterRndr();
+}
+
+void CPrimitiveRender::grRectC(const Vector2 &v0, const Vector2 &v1)
+{
+	BeforeRndr();
+	float hy = (v1.y+v0.y)*0.5f;
+	float hx = (v1.x+v0.x)*0.5f;
+	glTranslatef(hx, hy, 0.0f);
+		glRotatef(Angle, 0.0f, 0.0f, -1.0f);
+	glTranslatef(-hx, -hy, 0.0f);
+	glColor4fv(&(psClr->r));
+	glBegin(GL_QUADS);
+		glVertex2f(v0.x, v0.y);
+		glVertex2f(v1.x, v0.y);
+		glVertex2f(v1.x, v1.y);
+		glVertex2f(v0.x, v1.y);
+	glEnd();
+	glColor4fv(&(plClr->r));
+	glBegin(GL_LINE_LOOP);
+		glVertex2f(v0.x, v0.y);
+		glVertex2f(v1.x, v0.y);
+		glVertex2f(v1.x, v1.y);
+		glVertex2f(v0.x, v1.y);
+	glEnd();
+	glColor4fv(&(ppClr->r));
+	glBegin(GL_POINTS);
+		glVertex2f(v0.x, v0.y);
+		glVertex2f(v1.x, v0.y);
+		glVertex2f(v1.x, v1.y);
+		glVertex2f(v0.x, v1.y);
+	glEnd();
+	AfterRndr();
 }
 
 
-void CPrimitiveRender::gRenderArrow(const Vector2& v0, const Vector2& v1)
+void CPrimitiveRender::grArrowL(const Vector2& v0, const Vector2& v1)
 {
-	float fAngle = atan2(v1.y, v1.x);
-	glPushAttrib(GL_TEXTURE_2D);
-	glDisable(GL_TEXTURE_2D);
-	glPushMatrix();
+	BeforeRndr();
+	float fAngle = atan2(v1.y-v0.y, v1.x-v0.x);
 	glTranslatef(v0.x, v0.y, 0.0f);
 	glRotatef(RadToDeg(fAngle), 0.0f, 0.0f, 1.0f);
-	//glScalef(length, length, 1.0f);
+	glScalef((v1-v0).Length(), (v1-v0).Length(), 1.0f);
 
-	// color set
-
+	glColor4fv(&(plClr->r));
 	glBegin(GL_LINES);
 		glVertex2f(0.0f, 0.0f);
 		glVertex2f(1.0f, 0.0f);
@@ -1716,9 +1744,26 @@ void CPrimitiveRender::gRenderArrow(const Vector2& v0, const Vector2& v1)
 		glVertex2f(1.0f, 0.0f);
 		glVertex2f(0.75f,-0.2f);
 	glEnd();
+	glColor4fv(&(ppClr->r));
 
-	glPopMatrix();
-	glPopAttrib();
+	glBegin(GL_POINTS);
+		glVertex2f(0.0f, 0.0f);
+		glVertex2f(1.0f, 0.0f);
+		glVertex2f(0.75f, 0.2f);
+		glVertex2f(0.75f, -0.2f);
+	glEnd();
+
+AfterRndr();
+}
+
+void CPrimitiveRender::grArrowC(const Vector2 &v0,const Vector2 &v1)
+{
+	// TODO: complete fnctn
+	//grCircleS()
+	grRingS(v0, 20);
+	grCircleL(v0, Radius);
+	grCircleL(v0, Radius*0.7f); // MAGIC NUMBER!
+	grArrowL(v0, v1);
 }
 
 void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
@@ -1774,92 +1819,32 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 
 void CPrimitiveRender::grRingS(const Vector2 &p, scalar Radius)
 {
-	static int glList = -1;
-	if (!glIsList(glList))
-	{
-		glList = glGenLists(1);
-
-		glNewList(glList, GL_COMPILE_AND_EXECUTE);
-
-		glBegin(GL_TRIANGLE_STRIP);
-
-		for(int i = 0; i < 64 + 1; i ++)
-		{
-			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-			glVertex2f(P.x, P.y);
-			P = Vector2(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
-			glVertex2f(P.x*0.7f, P.y*0.7f); // TODO! MAGIC NUMBERS
-		}
-
-		glEnd();
-
-		glEndList();
-	}
-
-	glPopAttrib();
-	glPopMatrix();
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-#ifdef G_PRIM_BLEND_OPT
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	glDisable(GL_DEPTH_TEST);
-#else
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#endif
+	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
-	// 	glColor4fv(&(col.r));
-
-#ifdef G_POLY_TEXTURE_ENABLE
-	// 	glEnable(GL_TEXTURE_2D);
-	// 	CTextureManager *Tman = CTextureManager::Instance();
-	// 	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
-	// 	Tman->FreeInst();
-	// 	cells->Bind();
-#endif 
-
-	// 	glBegin(GL_TRIANGLE_FAN);
-	// 	for(int i = 0; i < poly->numV; i++)
-	// 	{
-	// #ifdef G_POLY_TEXTURE_ENABLE
-	// 		glTexCoord2f(poly->V[i].x/G_POLY_TEX_CELL_SIZE, poly->V[i].y/G_POLY_TEX_CELL_SIZE);
-	// #endif 
-	// 		glVertex2fv(&(poly->V[i].x));
-	// 	}
-	// 	glEnd();
+	glColor4fv(&(psClr->r));
 	glScalef(Radius, Radius, 0.0f);
-	glCallList(glList);
-
-
-	// #ifdef G_POLY_OUTLINE_ENABLE
-	// 
-	// 	glEnable(GL_LINE_WIDTH);
-	// 	glLineWidth(1.0f);
-	// 	glColor4fv(&(lcol.r));
-	// 	glBegin(GL_LINE_LOOP);
-	// 	for(int i = 0; i < poly.numV; i++)
-	// 	{
-	// 		glVertex2fv(&(poly.V[i].x));
-	// 	}
-	// 	glEnd();
-	// 
-	// #endif 
-	glPopAttrib();
-	glPopMatrix();
-	grCircleL(p, Radius*0.3);
+	glCallList(glListRingS);
+	AfterRndr();
 }
 
-void CPrimitiveRender::gRenderArrowEx(const Vector2 &v0,const Vector2 &v1)
+void CPrimitiveRender::grRingC( const Vector2 &p, scalar Radius )
 {
-	grRingS(v0, 20);
-	gRenderArrow(v0, v1);
+	BeforeRndr();
+	glTranslatef(p.x, p.y, 0.0f);
+	glScalef(Radius, Radius, 0.0f);
+	glColor4fv(&(psClr->r));
+	glCallList(glListRingS);
+	glScalef(1.0f/Radius, 1.0f/Radius, 0.0f);
+	glTranslatef(-p.x, -p.y, 0.0f);
+	grCircleL(p, Radius);
+	grCircleL(p, Radius*0.7f); // MAGIC NUMBER!
+	AfterRndr();
 }
 
 void CPrimitiveRender::BeforeRndr()
 {
 	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND | GL_LINE_WIDTH | GL_POINT_SIZE);
+	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT | GL_BLEND | GL_LINE_BIT | GL_POINT_BIT);
 	glEnable(GL_POINT_SIZE);
 	glLineWidth(lwidth);
 	glPointSize(psize);
@@ -1946,6 +1931,54 @@ void CPrimitiveRender::Init()
 		glEndList();
 	}
 
+	if (!glIsList(glListHalfCircle))
+	{
+		glListHalfCircle = glGenLists(1);
+		glNewList(glListHalfCircle, GL_COMPILE);
+		glBegin(GL_TRIANGLE_FAN);
+		for(int i = 0; i < 32 + 1; i ++)
+		{
+			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+			glVertex2f(P.x, P.y);
+		}
+		glEnd();
+		glEndList();
+	}
+	
+
+}
+
+void CPrimitiveRender::grInYan(const Vector2 &p, scalar Radius)
+{
+	BeforeRndr();
+	glTranslatef(p.x, p.y, 0.0f);
+	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
+	sClr = lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	glColor4fv(&(psClr->r));
+	glScalef(Radius, Radius, 0.0f);
+	glTranslatef(0.0f, 0.0f, 0.01f);
+	glCallList(glListHalfCircle);
+	glRotatef(180.0f, 0.0f, 0.0f, -1.0f);
+	sClr = lClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	glColor4fv(&(psClr->r));
+	glCallList(glListHalfCircle);
+	AfterRndr();
+
+	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
+	sClr = lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	grCircleS(Vector2(p.x - Radius*0.5f, p.y), Radius*0.5f);
+	sClr = lClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	grCircleS(Vector2(p.x - Radius*0.5f, p.y), Radius*0.125f);
+
+	sClr = lClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	grCircleS(Vector2(p.x + Radius*0.5f, p.y), Radius*0.5f);
+	sClr = lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	grCircleS(Vector2(p.x + Radius*0.5f, p.y), Radius*0.125f);
+
+	lClr = RGBAf(0.3f, 0.4f, 0.6f, 0.9f);
+	//lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	depth = 0.001f;
+	grCircleL(p, Radius/*+lwidth/2.0f*/);
 }
 
 #ifdef WIN32
@@ -1956,15 +1989,18 @@ PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
 void setVSync(int interval)
 {
-	const char *extensions = (const char *)glGetString( GL_EXTENSIONS );
+	const char *extensions = (const char *)glGetString(GL_EXTENSIONS);
 
 	if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
-		return; // Error: WGL_EXT_swap_control extension not supported on your computer.\n");
+	{
+		Log("Error", "WGL_EXT_swap_control extension not supported on your computer.");
+		return;  
+	}
 	else
 	{
-		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
+		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
 
-		if( wglSwapIntervalEXT )
+		if(wglSwapIntervalEXT)
 			wglSwapIntervalEXT(interval);
 	}
 }

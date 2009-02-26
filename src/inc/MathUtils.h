@@ -1157,8 +1157,6 @@ public:
 	}
 };
 
-
-
 __INLINE Vector3 CalcNorm(const Vector3 v1,const Vector3 v2,const Vector3 v3)
 {
    Vector3 t = (v3-v2)^(v2-v1);
@@ -1166,7 +1164,14 @@ __INLINE Vector3 CalcNorm(const Vector3 v1,const Vector3 v2,const Vector3 v3)
    return t;
 }
 
-__INLINE void clampv3(Vector3& x, const Vector3 xmin, const Vector3 xmax)
+__INLINE void СlampV(Vector2& x, const Vector2 xmin, const Vector2 xmax)
+{
+	x.x = clampf(x.x, xmin.x, xmax.x);
+	x.y = clampf(x.y, xmin.y, xmax.y);
+}
+
+
+__INLINE void СlampV(Vector3& x, const Vector3 xmin, const Vector3 xmax)
 {
 	x.x = clampf(x.x, xmin.x, xmax.x);
 	x.y = clampf(x.y, xmin.y, xmax.y);
@@ -1183,7 +1188,7 @@ bool SqareEq( scalar a, scalar b, scalar c, scalar &t0, scalar &t1);
 
 /**
 *	CalcFrustumVertices(...) - функция вычисляет координаты вершин
-*	усеченной пирамиды, образуемой пиромидой камеры и 2мя плоскостями отсечения.
+*	усеченной пирамиды, образуемой пирамидой камеры и 2мя плоскостями отсечения.
 */
 
 void CalcFrustumVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar, Vector3 cpos, Vector3 cat,Vector3 cup, Vector3 v[8]);
@@ -1211,18 +1216,18 @@ int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
 
  //**// Geometry //**//
 
- class CGeometry
- {
- public:
-	 int type;
-	 CBBox box;
-	 CGeometry()
-	 {
+class CGeometry
+{
+public:
+	int type;
+	CBBox box;
+	CGeometry()
+	{
 		box  = CBBox(0.0f, 0.0f, 0.0f, 0.0f);
 		type = 0;
-	 }
-	 virtual void CalcBBOX(){}
- };
+	}
+	virtual void CalcBBOX(){}
+};
 
 class CCircle : public CGeometry
 {
