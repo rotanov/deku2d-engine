@@ -1768,16 +1768,7 @@ void CPrimitiveRender::grArrowC(const Vector2 &v0,const Vector2 &v1)
 
 void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 {
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-#ifdef G_PRIM_BLEND_OPT
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	glDisable(GL_DEPTH_TEST);
-#else
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#endif
+	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
 	glRotatef(angle, 0.0f, 0.0f, -1.0f);
 	glColor4fv(&(psClr->r));
@@ -1813,8 +1804,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 	glEnd();
 
 #endif 
-	glPopAttrib();
-	glPopMatrix();
+	AfterRndr();
 }
 
 void CPrimitiveRender::grRingS(const Vector2 &p, scalar Radius)
@@ -1850,6 +1840,14 @@ void CPrimitiveRender::BeforeRndr()
 	glPointSize(psize);
 	glEnable(GL_LINE_WIDTH);
 	glDisable(GL_TEXTURE_2D);
+	if (LineStippleEnabled)
+	{
+		glEnable(GL_LINE_STIPPLE);
+		glLineStipple(lwidth*4, 0xAAAA);
+	}
+	else
+		glDisable(GL_LINE_STIPPLE);
+	CheckBlend();
 	if (doUseCurrentCoordSystem)
 		glLoadIdentity();
 }

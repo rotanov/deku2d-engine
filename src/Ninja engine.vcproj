@@ -62,10 +62,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="libpng13d.lib zlib1d.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
+				AdditionalDependencies="libpng.lib zlib1d.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib\"
+				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -102,6 +103,7 @@
 			IntermediateDirectory="$(SolutionDir)\..\obj\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
+			ManagedExtensions="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -146,6 +148,7 @@
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				AdditionalLibraryDirectories="..\lib\"
+				GenerateManifest="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

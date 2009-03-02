@@ -524,7 +524,7 @@ class CPrimitiveRender
 {
 public:
 	int BlendingOption, CheckerCellSize;
-	bool OutlineEnabled, TextureEnabled, DashedLines, doUseCurrentCoordSystem;
+	bool OutlineEnabled, TextureEnabled, DashedLines, doUseCurrentCoordSystem, LineStippleEnabled;
 	static int glListCircleL;
 	static int glListCircleS;
 	static int glListRingS;
@@ -541,7 +541,9 @@ public:
 			psClr = &sClr;
 			ppClr = &pClr;
 			depth = 0.0f;
-			doUseCurrentCoordSystem = false;			
+			lwidth = 1.0f;
+			psize = 8.0f;
+			LineStippleEnabled = doUseCurrentCoordSystem = false;			
 	}
 
 	void Init();

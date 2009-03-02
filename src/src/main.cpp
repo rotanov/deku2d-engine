@@ -312,14 +312,16 @@ bool Draw()
 	}
 	
 	CPrimitiveRender pr;
-	pr.plClr = &Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	pr.psClr = &Vector4(0.9f, 0.7f, 0.7f, 0.5f);
+	pr.lClr = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pr.sClr = Vector4(0.9f, 0.7f, 0.7f, 0.5f);
+	pr.BlendingOption = PRM_RNDR_OPT_BLEND_ONE+1;
+	pr.LineStippleEnabled = true;
+
 	pr.grPolyC(apos, angle, &a);
 	pr.grPolyC(bpos, 0.0f, &b);
 	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
 	pr.grArrowC(Vector2(100, 100), Vector2(400, 300));
 	pr.grSegment(bpos, (bpos + norm*depth));
-	
 	angle += 1;
 	if (angle > 360.0f) angle -= 360;
 
@@ -377,8 +379,8 @@ bool Draw2()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw2);
-	Ninja->SetState(STATE_USER_INIT, &Init2);
+	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
+	Ninja->SetState(STATE_USER_INIT, &Init);
 	
 	Ninja->Run();
 	Ninja->FreeInst();
