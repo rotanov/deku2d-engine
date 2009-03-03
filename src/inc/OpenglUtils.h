@@ -16,6 +16,8 @@
 // #define _DEBUG_DISABLE_PARTICLES_DRAW
 // #define _DEBUG_DISABLE_PARTICLES_UPDATE
 
+class CPrimitiveRender;
+
 class CRenderObject : public virtual CObject
 {
 public:
@@ -31,6 +33,85 @@ public:
 	virtual bool Render() = 0;
 	virtual ~CRenderObject(){};
 };
+
+//////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/*			CPrimitiveRender & stuff									*/
+/************************************************************************/
+
+#define G_PRIM_BLEND_OPT
+#define G_POLY_TEX_CELL_SIZE 20
+#define G_POLY_OUTLINE_ENABLE
+#define G_POLY_TEXTURE_ENABLE
+
+#define PRM_RNDR_OPT_BLEND_ONE		0x01
+#define PRM_RNDR_OPT_BLEND_OTHER	0x02
+
+class CPrimitiveRender
+{
+public:
+	int BlendingOption, CheckerCellSize;
+	bool OutlineEnabled, TextureEnabled, DashedLines, doUseCurrentCoordSystem, LineStippleEnabled;
+	static int glListCircleL;
+	static int glListCircleS;
+	static int glListRingS;
+	static int glListHalfCircle;
+	scalar Angle, lwidth, depth, psize;
+	int dash;
+	RGBAf *plClr, *psClr, *ppClr;
+	RGBAf lClr, sClr, pClr; 
+	CPrimitiveRender()
+	{
+		lClr = sClr = pClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+		plClr = &lClr;
+		psClr = &sClr;
+		ppClr = &pClr;
+		depth = 0.0f;
+		lwidth = 1.0f;
+		psize = 8.0f;
+		LineStippleEnabled = doUseCurrentCoordSystem = false;			
+	}
+
+	void Init();
+
+	/**
+	*	Внизу функции для отображения примитивов.
+	*	Суффикс L - примитив рисуется линиями
+	*	S - solid
+	*	C - complete
+	*	Последнее - по разному для каждого примитива.
+	*	Обычно - вращение + линии + заливка + ещё что-то
+	*/
+
+	void grLine(const Vector2 &v0, const Vector2 &v1);
+	void grSegment(const Vector2 &v0, const Vector2 &v1);
+	void grSegmentC(const Vector2 &v0, const Vector2 &v1);
+
+	void grRectL(const Vector2 &v0, const Vector2 &v1);
+	void grRectS(const Vector2 &v0, const Vector2 &v1);
+	void grRectC(const Vector2 &v0, const Vector2 &v1);
+
+	void grCircleL(const Vector2 &p, scalar Radius);
+	void grCircleS(const Vector2 &p, scalar Radius);
+	void grCircleC(const Vector2 &p, scalar Radius);
+
+	void grPolyC(const Vector2 &p, scalar angle, CPolygon *poly);
+
+	void grRingS(const Vector2 &p, scalar Radius);
+	void grRingC(const Vector2 &p, scalar Radius);
+
+	void grArrowL(const Vector2& v0, const Vector2& v1);
+	void grArrowC(const Vector2 &v0,const Vector2 &v1);
+
+	void gDrawBBox(CBBox box);
+	void grInYan(const Vector2 &p, scalar Radius);
+private:
+	void BeforeRndr();
+	void AfterRndr();
+	void CheckBlend();
+	void CheckTexture();
+};
+
 
 
 
@@ -306,25 +387,25 @@ public:
 	~CFont();
 	
 	// TODO!
-	byte		dist;	// Расстояние между символами
-	float		depth;
-	Vector2		*pp;
-	Vector2		p;
-	Vector2		wh;
-	int			offset;
-	byte		align;
-	int			s1, s2;
-	bool		isRect;
-	bool		isSelected;
+	byte				dist;					//	Расстояние между символами		
+	Vector2				p;						//	координты текста, для присваивания, указатель по дефолту указывает на них
+	Vector2				wh;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
+	int					offset;					//	Смещение, с которого надо выводить в боксе, если мы выводим со смещением
+	byte				align;					//	Флаги выравнивания
+	int					s1, s2;					//	Номера первого и последнего символов выделенного текста
+	bool				isRect;					//	Надо ли выводить текст в прямоугольник
+	bool				isSelected;				//	Выделен ли кусок текста
+	bool				doUseGlobalCoordSystem;	//	Использовать ли для вывода глобальную систему коодинат	
+	CPrimitiveRender	Prndr;					//	Настройки линий и прочей хуеты связаной с рамкой.
 
 	bool		LoadFromFile(char* filename);
 	bool		SaveToFile(char* filename);
 
-	void		Print(int x, int y, float depth, char *text);
-	void		PrintEx(int x, int y, float depth, char *text, ...);
-	void		PrintRect(int x, int y, float depth, int width, int height, int offset, char *text);
-	void		PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text);
-	void		PrintSelRect(int x, int y, float depth, int width, int height, int offset, byte align, char *text, int s1, int s2);
+	void		Print(const char *text, ...);
+	void		Print(int x, int y, const char *text, ...);
+	void		Print(const Vector2& pos, const char *text, ...);
+
+	void		SetDepth(float _depth);
 
 	int			GetStringWidth(char *text);
 	int			GetStringWidthEx(int t1, int t2, char *text);
@@ -332,12 +413,18 @@ public:
 	int			GetStringHeightEx(int t1, int t2, char *text);
 
 private:
+	float				x, y;					//	Фактические координаты для отрисовки в _Print
+	float				depth;					//	Глубина по Z
+	Vector2				*pp;					//	Указатель на вектор с координатами текста
+
 	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
 	byte		width[256];		// Ширина каждого символа
 	byte		height[256];	// Высота каждого символа
 	char		*FontImageName;	// Имя файла текстуры
 	GLuint		font;			// Font texture ID
 	GLuint		base;			// Base List of 256 glLists for font
+
+	void		_Print(const char *text);
 };
 typedef CFont*	PFont;
 
@@ -478,85 +565,6 @@ void gBeginFrame();
 *	Should be called after each frame
 */
 void gEndFrame();
-
-//////////////////////////////////////////////////////////////////////////
-/************************************************************************/
-/*			CPrimitiveRender & stuff									*/
-/************************************************************************/
-
-#define G_PRIM_BLEND_OPT
-#define G_POLY_TEX_CELL_SIZE 20
-#define G_POLY_OUTLINE_ENABLE
-#define G_POLY_TEXTURE_ENABLE
-
-#define PRM_RNDR_OPT_BLEND_ONE		0x01
-#define PRM_RNDR_OPT_BLEND_OTHER	0x02
-
-class CPrimitiveRender
-{
-public:
-	int BlendingOption, CheckerCellSize;
-	bool OutlineEnabled, TextureEnabled, DashedLines, doUseCurrentCoordSystem, LineStippleEnabled;
-	static int glListCircleL;
-	static int glListCircleS;
-	static int glListRingS;
-	static int glListHalfCircle;
-	scalar Angle, lwidth, depth, psize;
-	int dash;
-	RGBAf *plClr, *psClr, *ppClr;
-	RGBAf lClr, sClr, pClr; 
-	CPrimitiveRender()
-	{
-			lClr = sClr = pClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-			plClr = &lClr;
-			psClr = &sClr;
-			ppClr = &pClr;
-			depth = 0.0f;
-			lwidth = 1.0f;
-			psize = 8.0f;
-			LineStippleEnabled = doUseCurrentCoordSystem = false;			
-	}
-
-	void Init();
-
-	/**
-	*	Внизу функции для отображения примитивов.
-	*	Суффикс L - примитив рисуется линиями
-	*	S - solid
-	*	C - complete
-	*	Последнее - по разному для каждого примитива.
-	*	Обычно - вращение + линии + заливка + ещё что-то
-	*/
-
-	void grLine(const Vector2 &v0, const Vector2 &v1);
-	void grSegment(const Vector2 &v0, const Vector2 &v1);
-	void grSegmentC(const Vector2 &v0, const Vector2 &v1);
-
-	void grRectL(const Vector2 &v0, const Vector2 &v1);
-	void grRectS(const Vector2 &v0, const Vector2 &v1);
-	void grRectC(const Vector2 &v0, const Vector2 &v1);
-	
-	void grCircleL(const Vector2 &p, scalar Radius);
-	void grCircleS(const Vector2 &p, scalar Radius);
-	void grCircleC(const Vector2 &p, scalar Radius);
-
-	void grPolyC(const Vector2 &p, scalar angle, CPolygon *poly);
-	
-	void grRingS(const Vector2 &p, scalar Radius);
-	void grRingC(const Vector2 &p, scalar Radius);
-
-	void grArrowL(const Vector2& v0, const Vector2& v1);
-	void grArrowC(const Vector2 &v0,const Vector2 &v1);
-
-	void gDrawBBox(CBBox box);
-	void grInYan(const Vector2 &p, scalar Radius);
-private:
-	void BeforeRndr();
-	void AfterRndr();
-	void CheckBlend();
-	void CheckTexture();
-};
-
 
 /**
 *	Controls scissor test

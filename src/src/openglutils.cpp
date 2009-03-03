@@ -43,14 +43,14 @@ bool CGLImageData::LoadTexture(const char *filename)
 	if (!LoadBMP(filename))
 		if(!LoadPNG(filename))
 		{
-			Log("AHTUNG", "Can't load image->");
+			Log("WARNING", "Can't load image->");
 			return false;
 		}
 		else
 		{
 			if (!MakeTexture())
 			{
-				Log("AHTUNG", "Can't load texture in video adapter.");
+				Log("WARNING", "Can't load texture in video adapter.");
 				return false;
 			}
 		}
@@ -58,12 +58,12 @@ bool CGLImageData::LoadTexture(const char *filename)
 	{
 		if(!MakeRGBA())
 		{
-				Log("AHTUNG", "Can't load texture.");
+				Log("WARNING", "Can't load texture.");
 				return false;
 		}
 		if (!MakeTexture())
 		{
-			Log("AHTUNG", "Can't load texture in videoadapter.");
+			Log("WARNING", "Can't load texture in video memory.");
 			return false;
 		}
 	}
@@ -79,7 +79,7 @@ bool CGLImageData::RenderWhole(int zoom)
 {
 	if (TexID == 0)
 	{
-		Log("AHTUNG", "Trying render, while texture has not been loaded.");
+		Log("WARNING", "Trying render, while texture has not been loaded.");
 		return false;
 	}
 	glPushAttrib(GL_TEXTURE_2D);
@@ -98,12 +98,12 @@ bool CGLImageData::BeginDraw()
 {
 	if (isDrawing)
 	{
-		Log("AHTUNG", "Illegal BeginDraw() method call. EndDraw() should be called before.");
+		Log("WARNING", "Illegal BeginDraw() method call. EndDraw() should be called before.");
 		return false;
 	}
 	if (TexID == 0)
 	{
-		Log("AHTUNG", "Trying render, while texture has not been loaded.");
+		Log("WARNING", "Trying render, while texture has not been loaded.");
 		return false;
 	}
 	isDrawing = true;
@@ -119,7 +119,7 @@ bool CGLImageData::PushQuad(float x0, float y0, float z0, float _width, float _h
 {
 	if (!isDrawing)
 	{
-		Log("AHTUNG", "Illegal PushQuad method call. BeginDraw() should be called before.");
+		Log("WARNING", "Illegal PushQuad method call. BeginDraw() should be called before.");
 		return false;
 	}
 	glTexCoord2f((float)s0/width, (float)t0/height); glVertex3f(x0, y0, z0);
@@ -133,7 +133,7 @@ bool CGLImageData::PushQuadEx(float x0, float y0, float z0, float _width, float 
 {
 	if (!isDrawing)
 	{
-		Log("AHTUNG", "Illegal PushQuadEx method call. BeginDraw() should be called before.");
+		Log("WARNING", "Illegal PushQuadEx method call. BeginDraw() should be called before.");
 		return false;
 	}
 
@@ -160,7 +160,7 @@ bool CGLImageData::EndDraw()
 {
 	if (!isDrawing)
 	{
-		Log("AHTUNG", "Illegal EndDraw() method call. BeginDraw() should be called before.");
+		Log("WARNING", "Illegal EndDraw() method call. BeginDraw() should be called before.");
 		return false;
 	}
 	isDrawing = false;
@@ -454,8 +454,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 {
 	if( SDL_Init(SDL_INIT_VIDEO ) < 0 )
 	{
-		Log("AHTUNG", "Video initialization failed: %s\n", SDL_GetError());
-		Log("AHTUNG", "Last AHTUNG was critical. Now exiting...");
+		Log("WARNING", "Video initialization failed: %s\n", SDL_GetError());
+		Log("WARNING", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -474,8 +474,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 
 	if (info == NULL)
 	{
-		Log("AHTUNG", "Aaaa! SDL AHTUNG: %s", SDL_GetError());
-		Log("AHTUNG", "Last AHTUNG was critical. Now exiting...");
+		Log("WARNING", "Aaaa! SDL WARNING: %s", SDL_GetError());
+		Log("WARNING", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -501,8 +501,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	SDL_Surface * screen = SDL_SetVideoMode(width, height, bpp, flags);
 	if (screen == NULL)
 	{
-		Log("AHTUNG", "Setting video mode failed: %s\n", SDL_GetError());
-		Log("AHTUNG", "Last AHTUNG was critical. Now exiting...");
+		Log("WARNING", "Setting video mode failed: %s\n", SDL_GetError());
+		Log("WARNING", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);		
 	}
 
@@ -611,7 +611,7 @@ bool CFont::LoadFromFile(char* filename)
 	CGLImageData	*image;
 	if (!file.Open(filename, CFILE_READ))
 	{
-		Log("AHTUNG","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
+		Log("WARNING","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
 		return false;
 	}
 	
@@ -663,184 +663,225 @@ bool CFont::SaveToFile(char * filename)
 	return true;
 }
 
-void CFont::Print(int x, int y, float depth, char *text)
+// void CFont::Print(int x, int y, float depth, char *text)
+// {
+// 	if (text == NULL)
+// 		return;
+// 	glPushAttrib(GL_TEXTURE_2D);
+// 	glPushMatrix();
+// 	glEnable(GL_TEXTURE_2D);
+// 	glBindTexture(GL_TEXTURE_2D, font);
+// 	glTranslatef(x, y, depth);
+// 	glListBase(base-32);
+// 	glCallLists((GLsizei)strlen(text), GL_BYTE, text);
+// 	glPopAttrib();
+// 	glPopMatrix();
+// }
+void CFont::_Print(const char *text)
 {
-	if (text == NULL)
-		return;
-	glPushAttrib(GL_TEXTURE_2D);
+	glPushAttrib(GL_TEXTURE_BIT);
 	glPushMatrix();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, font);
-	glTranslatef(x, y, depth);
+	glTranslatef(pp->x, pp->y, depth);
 	glListBase(base-32);
 	glCallLists((GLsizei)strlen(text), GL_BYTE, text);
-	glPopAttrib();
 	glPopMatrix();
+	glPopAttrib();
 }
 
-void CFont::PrintEx(int x, int y, float depth, char *text, ...)
+// void CFont::PrintEx(int x, int y, float depth, char *text, ...)
+// {
+// 	if (text == NULL)
+// 		return;
+// 	char	temp[256];
+// 	va_list	ap;
+// 	va_start(ap, text);
+// 	vsprintf(temp, text, ap);
+// 	va_end(ap);
+// 
+// 	glPushMatrix();
+// 	glPushAttrib(GL_LIST_BIT | GL_TEXTURE_2D);
+// 	glEnable(GL_TEXTURE_2D);
+// 
+// 	glBindTexture(GL_TEXTURE_2D, font);
+// 	glTranslatef(x, y, depth);
+// 
+// 	glListBase(base - 32);
+// 	glCallLists((GLsizei)strlen(temp), GL_UNSIGNED_BYTE, temp);
+// 
+// 	glPopAttrib();
+// 	glPopMatrix();
+// }
+
+// void CFont::PrintRect(int x, int y, float depth, int width, int height, int offset, char *text)
+// {
+// 	if (text == NULL)
+// 		return;
+// 	glPushAttrib(GL_SCISSOR_TEST);
+// 	glEnable(GL_SCISSOR_TEST);
+// 	glScissor(x, y, width, height);
+// 	Print(x, y, depth, text+offset);
+// 	glDisable(GL_SCISSOR_TEST);
+// 	glPopAttrib();
+// }
+
+// void	CFont::PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text)
+// {
+// 	if (text == NULL)
+// 		return;
+// 	if ((uInt)offset >= strlen(text) || offset < 0)
+// 		return;
+// 	int xpos, ypos, swidth, sheight;
+// 	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
+// 	swidth = GetStringWidth(text + offset);
+// 	sheight = GetStringHeight(text + offset);
+// 	
+// 	if (tempV == CFONT_VALIGN_TOP)
+// 	{
+// 		ypos = y + height - sheight;
+// 	}
+// 	if (tempV == CFONT_VALIGN_BOTTOM)
+// 	{
+// 		ypos = y;
+// 	}
+// 	if (tempV == CFONT_VALIGN_CENTER)
+// 	{
+// 		ypos = y + height/2 - sheight/2;
+// 	}
+// 
+// 	if (tempH == CFONT_HALIGN_LEFT)
+// 	{
+// 		xpos = x;
+// 	}
+// 	if (tempH == CFONT_HALIGN_RIGHT)
+// 	{
+// 		xpos = x + width - swidth;
+// 	}
+// 
+// 	if (tempH == CFONT_HALIGN_CENTER)
+// 	{
+// 		xpos = x + width/2 - swidth/2;
+// 	}
+// 
+// 	glPushAttrib(GL_SCISSOR_TEST);
+// 	glEnable(GL_SCISSOR_TEST);
+// 	glScissor(x, y, width, height);
+// 	Print(xpos, ypos, depth, text+offset);
+// 	glDisable(GL_SCISSOR_TEST);
+// 	glPopAttrib();
+// }
+
+// void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int offset, byte align, char *text, int s1, int s2)
+// {
+// 	if (text == NULL)
+// 		return;
+// 	if ((uint)offset >= strlen(text) || offset < 0)
+// 		return;
+// 
+// 	if (s1 > s2+1)
+// 	{
+// 		swap(s1, s2);
+// 		s1++;
+// 		s2--;
+// 	}
+// 	int xpos, ypos, swidth, sheight;
+// 	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
+// 	swidth = GetStringWidth(text + offset);
+// 	sheight = GetStringHeight(text + offset);
+// 	
+// 	if (tempV == CFONT_VALIGN_TOP)
+// 	{
+// 		ypos = y + height - sheight;
+// 	}
+// 	if (tempV == CFONT_VALIGN_BOTTOM)
+// 	{
+// 		ypos = y;
+// 	}
+// 	if (tempV == CFONT_VALIGN_CENTER)
+// 	{
+// 		ypos = y + height/2 - sheight/2;
+// 	}
+// 
+// 	if (tempH == CFONT_HALIGN_LEFT)
+// 	{
+// 		xpos = x;
+// 	}
+// 	if (tempH == CFONT_HALIGN_RIGHT)
+// 	{
+// 		xpos = x + width - swidth;
+// 	}
+// 
+// 	if (tempH == CFONT_HALIGN_CENTER)
+// 	{
+// 		xpos = x + width/2 - swidth/2;
+// 	}
+// 
+// 	glPushAttrib(GL_SCISSOR_TEST);
+// 	glEnable(GL_SCISSOR_TEST);
+// 	glScissor(x, y, width, height);
+// 	int selx = xpos + GetStringWidthEx(0, s1-1-offset, text+offset);
+// 	if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
+// 	{
+// 		int selw = GetStringWidthEx(max(s1, offset), s2, text);
+// 		CPrimitiveRender pr;
+// 		pr.psClr = &RGBAf(10, 50, 200, 150);
+// 		pr.depth = depth;
+// 		pr.grRectS(Vector2(selx, ypos), Vector2(selx + selw, ypos + sheight));
+// 	}
+// 	CPrimitiveRender pr;
+// 	pr.depth = depth;
+// 	pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
+// 	pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
+// 	pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
+// 
+// 	pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
+// 	pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
+// //	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
+// 	pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
+// 	Print(xpos, ypos, depth, text+offset);
+// 	glDisable(GL_SCISSOR_TEST);
+// 	glPopAttrib();
+// }
+
+void CFont::Print(int x, int y, const char* text, ...)
 {
 	if (text == NULL)
 		return;
+	if ((uint)offset >= strlen(text) || offset < 0)
+		return;
+	if (isSelected)
+	{
+
+	}
+	if (isRect)
+	{
+
+	}
 	char	temp[256];
 	va_list	ap;
 	va_start(ap, text);
 	vsprintf(temp, text, ap);
 	va_end(ap);
-
-	glPushMatrix();
-	glPushAttrib(GL_LIST_BIT | GL_TEXTURE_2D);
-	glEnable(GL_TEXTURE_2D);
-
-	glBindTexture(GL_TEXTURE_2D, font);
-	glTranslatef(x, y, depth);
-
-	glListBase(base - 32);
-	glCallLists((GLsizei)strlen(temp), GL_UNSIGNED_BYTE, temp);
-
-	glPopAttrib();
-	glPopMatrix();
+	_Print(temp);
 }
 
-void CFont::PrintRect(int x, int y, float depth, int width, int height, int offset, char *text)
+void CFont::Print( const char *text, ... )
 {
-	if (text == NULL)
-		return;
-	glPushAttrib(GL_SCISSOR_TEST);
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(x, y, width, height);
-	Print(x, y, depth, text+offset);
-	glDisable(GL_SCISSOR_TEST);
-	glPopAttrib();
+
 }
 
-void	CFont::PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text)
+void CFont::Print( const Vector2& pos, const char *text, ... )
 {
-	if (text == NULL)
-		return;
-	if ((uInt)offset >= strlen(text) || offset < 0)
-		return;
-	int xpos, ypos, swidth, sheight;
-	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
-	swidth = GetStringWidth(text + offset);
-	sheight = GetStringHeight(text + offset);
-	
-	if (tempV == CFONT_VALIGN_TOP)
-	{
-		ypos = y + height - sheight;
-	}
-	if (tempV == CFONT_VALIGN_BOTTOM)
-	{
-		ypos = y;
-	}
-	if (tempV == CFONT_VALIGN_CENTER)
-	{
-		ypos = y + height/2 - sheight/2;
-	}
 
-	if (tempH == CFONT_HALIGN_LEFT)
-	{
-		xpos = x;
-	}
-	if (tempH == CFONT_HALIGN_RIGHT)
-	{
-		xpos = x + width - swidth;
-	}
-
-	if (tempH == CFONT_HALIGN_CENTER)
-	{
-		xpos = x + width/2 - swidth/2;
-	}
-
-	glPushAttrib(GL_SCISSOR_TEST);
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(x, y, width, height);
-	Print(xpos, ypos, depth, text+offset);
-	glDisable(GL_SCISSOR_TEST);
-	glPopAttrib();
 }
-
-void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int offset, byte align, char *text, int s1, int s2)
-{
-	if (text == NULL)
-		return;
-	if ((uInt)offset >= strlen(text) || offset < 0)
-		return;
-	/*if (s1 > s2)
-		swap(s1, s2);*/
-	if (s1 > s2+1)
-	{
-		swap(s1, s2);
-		s1++;
-		s2--;
-		
-	}
-	int xpos, ypos, swidth, sheight;
-	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
-	swidth = GetStringWidth(text + offset);
-	sheight = GetStringHeight(text + offset);
-	
-	if (tempV == CFONT_VALIGN_TOP)
-	{
-		ypos = y + height - sheight;
-	}
-	if (tempV == CFONT_VALIGN_BOTTOM)
-	{
-		ypos = y;
-	}
-	if (tempV == CFONT_VALIGN_CENTER)
-	{
-		ypos = y + height/2 - sheight/2;
-	}
-
-	if (tempH == CFONT_HALIGN_LEFT)
-	{
-		xpos = x;
-	}
-	if (tempH == CFONT_HALIGN_RIGHT)
-	{
-		xpos = x + width - swidth;
-	}
-
-	if (tempH == CFONT_HALIGN_CENTER)
-	{
-		xpos = x + width/2 - swidth/2;
-	}
-
-	glPushAttrib(GL_SCISSOR_TEST);
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(x, y, width, height);
-	int selx = xpos + GetStringWidthEx(0, s1-1-offset, text+offset);
-	if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
-	{
-		int selw = GetStringWidthEx(max(s1, offset), s2, text);
-		CPrimitiveRender pr;
-		pr.psClr = &RGBAf(10, 50, 200, 150);
-		pr.depth = depth;
-		pr.grRectS(Vector2(selx, ypos), Vector2(selx + selw, ypos + sheight));
-	}
-	CPrimitiveRender pr;
-	pr.depth = depth;
-	pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
-	pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
-	pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
-
-	pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
-	pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
-//	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
-	pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
-	Print(xpos, ypos, depth, text+offset);
-	glDisable(GL_SCISSOR_TEST);
-	glPopAttrib();
-}
-
 int	CFont::GetStringWidth(char *text)
 {
 	if (text == NULL)
 		return -1;
 	int r = 0, l = (int)strlen(text);
 	for (int i=0;i<l;i++)
-		r += width[text[i]-32]+dist;
+		r += width[text[i]-32] + dist;
 	return r;
 }
 
@@ -848,12 +889,12 @@ int CFont::GetStringWidthEx(int t1, int t2, char *text)
 {
 	if (text == NULL)
 		return -1;
-	if (t1 > t2 || t1 < 0)
+	if (t1 > t2 || t2 < 0)
 		return -1;
-	if ((uInt)t2 >= strlen(text))
-		t2 = strlen(text) - 1;
+	if ((uint)t2 >= strlen(text))
+		return -1;
 	int r = 0;
-	for (int i=t1;i<=t2;i++)
+	for (uint i = t1; i <= t2; i++)
 		r += width[text[i]-32]+dist;
 	return r;
 }
@@ -872,11 +913,21 @@ int CFont::GetStringHeightEx( int t1, int t2, char *text )
 {
 	if (text == NULL)
 		return -1;
-	int r = 0, l = (uInt)strlen(text);
-	for (uInt i=0; i<l; i++)
+	if (t1 > t2 || t2 < 0)
+		return -1;
+	if ((uint)t2 >= strlen(text))
+		return -1;
+	int r = 0, l = (uint)strlen(text);
+	for (uint i=0; i<l; i++)
 		r = Max(height[text[i]-32], r);
 	return r;
 }
+
+void CFont::SetDepth( float _depth )
+{
+	depth = _depth;
+}
+
 //-------------------------------------------//
 //				CRenderManager				 //
 //-------------------------------------------//
@@ -1364,7 +1415,8 @@ bool CFontManager::Print( int x, int y, float depth, char* text, ... )
 	if (!CurrentFont)
 		return false;
 
-	CurrentFont->PrintEx(x, y, depth, text);
+	CurrentFont->SetDepth(depth);
+	CurrentFont->Print(x, y, text);
 	return true;
 }
 
@@ -1379,7 +1431,8 @@ bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 	vsprintf(temp, text, ap);
 	va_end(ap);
 
-	CurrentFont->PrintEx(x, y, depth, temp);
+	CurrentFont->SetDepth(depth);
+	CurrentFont->Print(x, y, temp);
 	return true;
 }
 

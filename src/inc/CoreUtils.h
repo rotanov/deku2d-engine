@@ -26,6 +26,7 @@ typedef unsigned short      WORD;
 typedef float               FLOAT;
 typedef char				CHAR;
 typedef short				SHORT;
+typedef unsigned			uint;
 typedef long				LONG;
 
 //#define _DEBUG

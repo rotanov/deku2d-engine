@@ -379,8 +379,8 @@ bool Draw2()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
-	Ninja->SetState(STATE_USER_INIT, &Init);
+	Ninja->SetState(STATE_RENDER_FUNC, &Draw2);
+	Ninja->SetState(STATE_USER_INIT, &Init2);
 	
 	Ninja->Run();
 	Ninja->FreeInst();

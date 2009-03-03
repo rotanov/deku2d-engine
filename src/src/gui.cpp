@@ -84,12 +84,13 @@ bool GUIMbUp(int x, int y, byte btn)
 	_Mbt[btn] = 0;
 	return 1;
 }
-/*bool GUIMbMove(int x, int y, byte btn)
-{
-//	_mx = x;
-//	_my = y;
-//	return 1;
-}*/
+
+// bool GUIMbMove(int x, int y, byte btn)
+// {
+// 	_mx = x;
+// 	_my = y;
+// 	return 1;
+// }
 
 void						clearWidget(PWidget res)
 {
