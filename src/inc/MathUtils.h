@@ -43,6 +43,12 @@ static const scalar d180_PI = 180.0f / PI;
 
 #include <math.h>
 
+#define USING_OPENGL
+#ifdef USING_OPENGL
+#include <gl/gl.h>
+#include <gl/glu.h>
+#endif
+
 #include "CoreUtils.h"
 
 void GenSinTable();
@@ -1058,7 +1064,12 @@ union Vector4
 			m.m[1].z = yz + wx;
 			m.m[2].z = 1.0f - (xx + yy);
     }
-
+#ifdef USING_OPENGL
+		__INLINE void glSet()
+		{
+			glColor4fv(&r);
+		}
+#endif
 
 };
 

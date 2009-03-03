@@ -1,27 +1,4 @@
 #include "OpenglUtils.h"
-//-------------------------------------------//
-//				Colors stuff				 //
-//-------------------------------------------//
-glRGBAub::glRGBAub(byte _r, byte _g, byte _b, byte _a)
-{
-	r = _r;
-	g = _g;
-	b = _b;
-	a = _a;
-}
-
-glRGBAub::glRGBAub()
-{
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 255;
-}
-
-void glRGBAub::glSet()
-{
-	glColor4ubv(&r);
-}
 
 void CRenderObject::SetColor( byte _r, byte _g, byte _b, byte _a )
 {
@@ -204,7 +181,7 @@ GLuint CGLImageData::GetTexID()
 CSprite::CSprite()
 {
 	m_bFirstRendering = true;
-	color = glRGBAub(255, 255, 255, 255);
+	color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 	animations = NULL;
 	anim = NULL;
 	numAnimations = 0;
@@ -887,6 +864,16 @@ int	CFont::GetStringHeight(char *text)
 		return -1;
 	int r = 0, l = (uInt)strlen(text);
 	for (int i=0;i<l;i++)
+		r = Max(height[text[i]-32], r);
+	return r;
+}
+
+int CFont::GetStringHeightEx( int t1, int t2, char *text )
+{
+	if (text == NULL)
+		return -1;
+	int r = 0, l = (uInt)strlen(text);
+	for (uInt i=0; i<l; i++)
 		r = Max(height[text[i]-32], r);
 	return r;
 }
@@ -1758,11 +1745,11 @@ AfterRndr();
 
 void CPrimitiveRender::grArrowC(const Vector2 &v0,const Vector2 &v1)
 {
-	// TODO: complete fnctn
+	// TODO: complete function
 	//grCircleS()
 	grRingS(v0, 20);
-	grCircleL(v0, Radius);
-	grCircleL(v0, Radius*0.7f); // MAGIC NUMBER!
+	grCircleL(v0, 20);
+	grCircleL(v0, 20*0.7f); // MAGIC NUMBERS ARRR!
 	grArrowL(v0, v1);
 }
 

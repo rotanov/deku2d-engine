@@ -16,20 +16,12 @@
 // #define _DEBUG_DISABLE_PARTICLES_DRAW
 // #define _DEBUG_DISABLE_PARTICLES_UPDATE
 
-class glRGBAub : public RGBAub
-{
-public:
-	glRGBAub();
-	glRGBAub(byte _r, byte _g, byte _b, byte _a);
-	void glSet();
-};
-
 class CRenderObject : public virtual CObject
 {
 public:
 	float				x, y, z;
 	bool				visible;
-	glRGBAub			color;
+	RGBAf				color;
 	CRenderObject() : x(0), y(0), z(0), visible(true), color(255, 255, 255, 255)
 	{
 		name += "CRenderObject ";
@@ -192,7 +184,7 @@ class CSprite : public CRenderObject
 public:
 	int			m_nTextureWidth,		// ширина текстуры в пикселях
 				m_nTextureHeight;		// тоже, но длина
-	glRGBAub	color;					// цвет
+	RGBAf		color;					// цвет
 	GLuint		m_textureID;			// опенгловская хрень идентиф. текстуру
 
 	DWORD		ellapsedtime, lasttime;	// херь чтобы делать время между кадрами
@@ -286,7 +278,7 @@ public:
 	void glInit(GLsizei Width, GLsizei Height);
 };
 
-#define CFONT_DEFAULT_DISTANCE 1
+#define CFONT_DEFAULT_DISTANCE	1
 #define CFONT_VALIGN_TOP		0x00
 #define CFONT_VALIGN_BOTTOM		0x01
 #define CFONT_VALIGN_CENTER		0x02
@@ -312,62 +304,40 @@ class CFont : public CObject
 public:
 	CFont();
 	~CFont();
-	/**
-	*	Loads font configuration from *.fif file.
-	*/
-	bool			LoadFromFile(char* filename);
-	/**
-	*	Saves font configuration to file.
-	*/
-	bool			SaveToFile(char* filename);
-	/**
-	*	Print() simply prints string at (x, y) coordinates
-	*/
-	void			Print(int x, int y, float depth, char *text);
-	/**
-	*	PrintEx() prints string at (x, y) coordinates with parameters
-	*/
-	void			PrintEx(int x, int y, float depth, char *text, ...);
-	/**
-	*	PrintRect() prints string at (x, y) from offset in text
-	*	Printed text is cut within rectangle(x, y, x+width, y+height) 
-	*/
-	void			PrintRect(int x, int y, float depth, int width, int height, int offset, char *text);
-	/**
-	*	PrintRectEx() prints string at (x, y) from offset in text
-	*	Printed text is cut within rectangle(x, y, x+width, y+height) 
-	*	align is bitwise "or" combination of align constants like CFONT_HALIGN_CENTER
-	*/
-	void			PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text);
-	/**
-	*	PrintSelRect() prints string at (x, y) from offset in text
-	*	Printed text is cut within rectangle(x, y, x+width, y+height) 
-	*	align is bitwise "or" combination of align constants like CFONT_HALIGN_CENTER
-	*	text is selected with currently blue rect from s1 to s2 symbol
-	*/
-	void			PrintSelRect(int x, int y, float depth, int width, int height, int offset, byte align, char *text, int s1, int s2);
-	/**
-	*	GetStringWidth() returns width of text in pixels
-	*/
-	int				GetStringWidth(char *text);
-	/**
-	*	GetStringWidthEx() returns width of substring in text
-	*	from t1 to t2 char in text in Pixels
-	*/
-	int				GetStringWidthEx(int t1, int t2, char *text);
-	/**
-	*	GetStringHeight() returns height of text in pixels
-	*/
-	int				GetStringHeight(char *text);
+	
+	// TODO!
+	byte		dist;	// Расстояние между символами
+	float		depth;
+	Vector2		*pp;
+	Vector2		p;
+	Vector2		wh;
+	int			offset;
+	byte		align;
+	int			s1, s2;
+	bool		isRect;
+	bool		isSelected;
+
+	bool		LoadFromFile(char* filename);
+	bool		SaveToFile(char* filename);
+
+	void		Print(int x, int y, float depth, char *text);
+	void		PrintEx(int x, int y, float depth, char *text, ...);
+	void		PrintRect(int x, int y, float depth, int width, int height, int offset, char *text);
+	void		PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text);
+	void		PrintSelRect(int x, int y, float depth, int width, int height, int offset, byte align, char *text, int s1, int s2);
+
+	int			GetStringWidth(char *text);
+	int			GetStringWidthEx(int t1, int t2, char *text);
+	int			GetStringHeight(char *text);
+	int			GetStringHeightEx(int t1, int t2, char *text);
 
 private:
-	CRecti		bbox[256];		// Bounding boxes for each symbol in coordinates of font texture
-	byte		width[256];		// Width of Each symbol used to do something. >.>
-	byte		height[256];	// Height of Each symbol used to do something. >.>
-	char		*FontImageName;	// Name of the file of the font texture
+	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
+	byte		width[256];		// Ширина каждого символа
+	byte		height[256];	// Высота каждого символа
+	char		*FontImageName;	// Имя файла текстуры
 	GLuint		font;			// Font texture ID
 	GLuint		base;			// Base List of 256 glLists for font
-	byte		dist;			// Distance between symbols
 };
 typedef CFont*	PFont;
 
@@ -518,7 +488,9 @@ void gEndFrame();
 #define G_POLY_TEX_CELL_SIZE 20
 #define G_POLY_OUTLINE_ENABLE
 #define G_POLY_TEXTURE_ENABLE
-#define PRM_RNDR_OPT_BLEND_ONE 0x01
+
+#define PRM_RNDR_OPT_BLEND_ONE		0x01
+#define PRM_RNDR_OPT_BLEND_OTHER	0x02
 
 class CPrimitiveRender
 {
@@ -529,8 +501,7 @@ public:
 	static int glListCircleS;
 	static int glListRingS;
 	static int glListHalfCircle;
-	Vector2 *wh;
-	scalar Radius, Angle, lwidth, depth, psize;
+	scalar Angle, lwidth, depth, psize;
 	int dash;
 	RGBAf *plClr, *psClr, *ppClr;
 	RGBAf lClr, sClr, pClr; 
