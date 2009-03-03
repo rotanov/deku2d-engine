@@ -75,7 +75,6 @@ bool GUIMbUp(int x, int y, byte btn)
 {
 	_mx = x;
 	_my = y;
-	Log("GGGOOOOOODDD!", "jihieufh %d %d %d", x, y, btn);
 	if (_Mbt[btn]!=0)
 		if (MouseFocus!=NULL)
 			MouseFocus->MouseProcess(btn, GUI_MBCLICK);
