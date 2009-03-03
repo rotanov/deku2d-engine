@@ -75,6 +75,7 @@ bool GUIMbUp(int x, int y, byte btn)
 {
 	_mx = x;
 	_my = y;
+	Log("GGGOOOOOODDD!", "jihieufh %d %d %d", x, y, btn);
 	if (_Mbt[btn]!=0)
 		if (MouseFocus!=NULL)
 			MouseFocus->MouseProcess(btn, GUI_MBCLICK);
@@ -844,6 +845,7 @@ void CButton::Draw()
 }
 void CButton::DrawText()
 {
+//	return;
 	if (!Visible)
 		return;
 	fnt = FontManager->GetFontEx(Font);
@@ -909,7 +911,7 @@ void CButton::MouseProcess(byte btn, byte event)
 	{
 		if (MouseIn(Left, Top, Width, Height))
 		{
-			SAFECALL(onClick, this);
+			//SAFECALL(onClick, this);
 			Focus = this;
 		}
 	}
@@ -984,7 +986,7 @@ void CEdit::MouseProcess(byte btn, byte event)
 	{
 		if (MouseInObjRect(this))
 		{
-			SAFECALL(onClick, this);
+			//SAFECALL(onClick, this);
 			KeyState = 0;
 			if (Focus)
 			{

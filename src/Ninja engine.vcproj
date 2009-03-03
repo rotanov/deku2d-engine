@@ -39,16 +39,17 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="1"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="zlib\;libpng\;inc\;SDL\;gl\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
+				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -67,7 +68,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib\"
 				GenerateManifest="true"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(intDir)$(TargetName).pdb"
 				SubSystem="1"
 				TargetMachine="1"
