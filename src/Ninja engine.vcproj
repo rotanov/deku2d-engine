@@ -39,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="1"
-				WholeProgramOptimization="true"
+				Optimization="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="zlib\;libpng\;inc\;SDL\;gl\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
