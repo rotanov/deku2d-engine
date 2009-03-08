@@ -157,7 +157,7 @@ public:
 	string					Caption;
 	void					ReadComponent(CFile f);
 	void					SetStyle(unsigned int style);
-	PFont					fnt;
+	CFont					*fnt;
 	int						Tag;
 	int						Cursor;
 	string					Font;

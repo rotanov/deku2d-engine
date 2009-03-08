@@ -376,9 +376,11 @@ private:
 	{
 			
 	}
-//public:
-
 };
+
+#define CFONT_DEPTH_HIGH		1.0f
+#define CFONT_DEPTH_LOW			0.0f
+#define CFONT_MAX_STRING_LENGTH	256
 
 class CFont : public CObject
 {
@@ -386,12 +388,10 @@ public:
 	CFont();
 	~CFont();
 	
-	// TODO!
 	byte				dist;					//	Расстояние между символами		
 	Vector2				p;						//	координты текста, для присваивания, указатель по дефолту указывает на них
 	Vector2				wh;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
 	int					offset;					//	Смещение, с которого надо выводить в боксе, если мы выводим со смещением
-	byte				align;					//	Флаги выравнивания
 	int					s1, s2;					//	Номера первого и последнего символов выделенного текста
 	bool				isRect;					//	Надо ли выводить текст в прямоугольник
 	bool				isSelected;				//	Выделен ли кусок текста
@@ -406,6 +406,9 @@ public:
 	void		Print(const Vector2& pos, const char *text, ...);
 
 	void		SetDepth(float _depth);
+	void		PointTo(const Vector2 *_p);
+	void		PointBack();
+	void		SetAlign(const byte _Halign, const byte _Valign);
 
 	int			GetStringWidth(char *text);
 	int			GetStringWidthEx(int t1, int t2, char *text);
@@ -415,7 +418,8 @@ public:
 private:
 	float				x, y;					//	Фактические координаты для отрисовки в _Print
 	float				depth;					//	Глубина по Z
-	Vector2				*pp;					//	Указатель на вектор с координатами текста
+	(const Vector2)		*pp;					//	Указатель на вектор с координатами текста
+	byte				align;					//	Флаги выравнивания
 
 	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
 	byte		width[256];		// Ширина каждого символа
@@ -425,8 +429,9 @@ private:
 	GLuint		base;			// Base List of 256 glLists for font
 
 	void		_Print(const char *text);
+	byte		GetHalign();
+	byte		GetValign();
 };
-typedef CFont*	PFont;
 
 class CFontManager : public CObjectList
 {

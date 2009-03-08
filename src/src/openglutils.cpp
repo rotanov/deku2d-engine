@@ -592,6 +592,7 @@ CFont::CFont()
 	FontImageName = NULL;
 	base = 0;
 	dist = CFONT_DEFAULT_DISTANCE;
+	pp = &p;
 }
 
 CFont::~CFont()
@@ -663,20 +664,6 @@ bool CFont::SaveToFile(char * filename)
 	return true;
 }
 
-// void CFont::Print(int x, int y, float depth, char *text)
-// {
-// 	if (text == NULL)
-// 		return;
-// 	glPushAttrib(GL_TEXTURE_2D);
-// 	glPushMatrix();
-// 	glEnable(GL_TEXTURE_2D);
-// 	glBindTexture(GL_TEXTURE_2D, font);
-// 	glTranslatef(x, y, depth);
-// 	glListBase(base-32);
-// 	glCallLists((GLsizei)strlen(text), GL_BYTE, text);
-// 	glPopAttrib();
-// 	glPopMatrix();
-// }
 void CFont::_Print(const char *text)
 {
 	glPushAttrib(GL_TEXTURE_BIT);
@@ -690,29 +677,6 @@ void CFont::_Print(const char *text)
 	glPopAttrib();
 }
 
-// void CFont::PrintEx(int x, int y, float depth, char *text, ...)
-// {
-// 	if (text == NULL)
-// 		return;
-// 	char	temp[256];
-// 	va_list	ap;
-// 	va_start(ap, text);
-// 	vsprintf(temp, text, ap);
-// 	va_end(ap);
-// 
-// 	glPushMatrix();
-// 	glPushAttrib(GL_LIST_BIT | GL_TEXTURE_2D);
-// 	glEnable(GL_TEXTURE_2D);
-// 
-// 	glBindTexture(GL_TEXTURE_2D, font);
-// 	glTranslatef(x, y, depth);
-// 
-// 	glListBase(base - 32);
-// 	glCallLists((GLsizei)strlen(temp), GL_UNSIGNED_BYTE, temp);
-// 
-// 	glPopAttrib();
-// 	glPopMatrix();
-// }
 
 // void CFont::PrintRect(int x, int y, float depth, int width, int height, int offset, char *text)
 // {
@@ -858,7 +822,7 @@ void CFont::Print(int x, int y, const char* text, ...)
 	{
 
 	}
-	char	temp[256];
+	char	temp[CFONT_MAX_STRING_LENGTH];
 	va_list	ap;
 	va_start(ap, text);
 	vsprintf(temp, text, ap);
@@ -873,8 +837,11 @@ void CFont::Print( const char *text, ... )
 
 void CFont::Print( const Vector2& pos, const char *text, ... )
 {
+	PointTo(&pos);
 
+	PointBack();
 }
+
 int	CFont::GetStringWidth(char *text)
 {
 	if (text == NULL)
@@ -926,8 +893,35 @@ int CFont::GetStringHeightEx( int t1, int t2, char *text )
 void CFont::SetDepth( float _depth )
 {
 	depth = _depth;
+	depth = clampf(depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
 }
 
+void CFont::PointTo(const Vector2 *_p)
+{
+	if (!_p)
+		return;
+	pp = _p;
+}
+
+void CFont::PointBack()
+{
+	pp = &p;
+}
+
+void CFont::SetAlign( const byte _Halign, const byte _Valign )
+{
+	align = _Valign || _Halign;
+}
+
+byte CFont::GetHalign()
+{
+	return align & CFONT_HALIGN_MASK;
+}
+
+byte CFont::GetValign()
+{
+	return align & CFONT_VALIGN_MASK;
+}
 //-------------------------------------------//
 //				CRenderManager				 //
 //-------------------------------------------//
