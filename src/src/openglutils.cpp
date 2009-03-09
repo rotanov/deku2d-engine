@@ -677,19 +677,6 @@ void CFont::_Print(const char *text)
 	glPopAttrib();
 }
 
-
-// void CFont::PrintRect(int x, int y, float depth, int width, int height, int offset, char *text)
-// {
-// 	if (text == NULL)
-// 		return;
-// 	glPushAttrib(GL_SCISSOR_TEST);
-// 	glEnable(GL_SCISSOR_TEST);
-// 	glScissor(x, y, width, height);
-// 	Print(x, y, depth, text+offset);
-// 	glDisable(GL_SCISSOR_TEST);
-// 	glPopAttrib();
-// }
-
 // void	CFont::PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text)
 // {
 // 	if (text == NULL)
@@ -808,7 +795,7 @@ void CFont::_Print(const char *text)
 // 	glPopAttrib();
 // }
 
-void CFont::Print(int x, int y, const char* text, ...)
+void CFont::Print(const char* text, ...)
 {
 	if (text == NULL)
 		return;
@@ -828,18 +815,6 @@ void CFont::Print(int x, int y, const char* text, ...)
 	vsprintf(temp, text, ap);
 	va_end(ap);
 	_Print(temp);
-}
-
-void CFont::Print( const char *text, ... )
-{
-
-}
-
-void CFont::Print( const Vector2& pos, const char *text, ... )
-{
-	PointTo(&pos);
-
-	PointBack();
 }
 
 int	CFont::GetStringWidth(char *text)
@@ -953,7 +928,7 @@ bool CRenderManager::DrawObjects()
 		{
 			glLoadIdentity();
 				Camera.gTranslate();
-			glTranslatef((int)data->x,(int) data->y, data->z);
+			glTranslatef(data->p.x, data->p.y, data->depth);
 			data->Render();
 		}
 		data = dynamic_cast<CRenderObject*>(Next());
@@ -974,7 +949,7 @@ bool CompAlpha(CObject *a, CObject *b)
 
 bool CompZ(CObject *a, CObject *b)
 {
-	return (dynamic_cast<CRenderObject*>(a))->z <= (dynamic_cast<CRenderObject*>(b)->z);
+	return (dynamic_cast<CRenderObject*>(a))->depth <= (dynamic_cast<CRenderObject*>(b)->depth);
 }
 
 
@@ -1410,7 +1385,8 @@ bool CFontManager::Print( int x, int y, float depth, char* text, ... )
 		return false;
 
 	CurrentFont->SetDepth(depth);
-	CurrentFont->Print(x, y, text);
+	CurrentFont->p.In(x, y);
+	CurrentFont->Print(text);
 	return true;
 }
 
@@ -1426,7 +1402,8 @@ bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 	va_end(ap);
 
 	CurrentFont->SetDepth(depth);
-	CurrentFont->Print(x, y, temp);
+	CurrentFont->p.In(x, y);
+	CurrentFont->Print(temp);
 	return true;
 }
 

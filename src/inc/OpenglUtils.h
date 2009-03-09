@@ -21,10 +21,11 @@ class CPrimitiveRender;
 class CRenderObject : public virtual CObject
 {
 public:
-	float				x, y, z;
+	Vector2				p;
+	float				depth;
 	bool				visible;
 	RGBAf				color;
-	CRenderObject() : x(0), y(0), z(0), visible(true), color(255, 255, 255, 255)
+	CRenderObject() : p(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
 	{
 		name += "CRenderObject ";
 		type |= T_RENDERABLE;
@@ -402,8 +403,6 @@ public:
 	bool		SaveToFile(char* filename);
 
 	void		Print(const char *text, ...);
-	void		Print(int x, int y, const char *text, ...);
-	void		Print(const Vector2& pos, const char *text, ...);
 
 	void		SetDepth(float _depth);
 	void		PointTo(const Vector2 *_p);

@@ -215,6 +215,12 @@ public:
 		return l;
 	}
 
+	__INLINE void In(const float _x, const float _y)
+	{
+		x = _x;
+		y = _y;
+	}
+
 };
 
 /**

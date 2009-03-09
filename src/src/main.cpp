@@ -119,8 +119,7 @@ bool Init()
 	
 
 	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
-	Hero->x = 200;
-	Hero->y = 200;//GROUND;
+	Hero->p.In(200.0f, 200.0f);
 	
 
 	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Hero_r1")))->GetTexID();
@@ -134,9 +133,9 @@ bool Init()
 	Hero->spra.m_nTextureWidth = 32;
 	Hero->spra.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->spra.SetAnimation(1);
-	Hero->spra.z = -0.5f;
-	Hero->sprb.z = -0.5f;
-	Hero->z = -0.5f;
+	Hero->spra.depth = -0.5f;
+	Hero->sprb.depth = -0.5f;
+	Hero->depth = -0.5f;
 
 	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Hero_b1")))->GetTexID();
 	Hero->sprb.m_nTextureHeight = 32;
@@ -191,9 +190,8 @@ bool Init()
 	Spr->AddAnimation(true, 1, 52, 49, 1, 1, 1, 52, 49, 2, 15, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "GftSpr";
-	Spr->x = 260; 
-	Spr->y = GROUND; 
-	Spr->z = -0.01f; 
+	Spr->p.In(260.0f, GROUND);
+	Spr->depth = -0.01f; 
 	Spr->visible = true;
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
@@ -203,9 +201,8 @@ bool Init()
 	Spr->AddAnimation(true, 1, 256, 256, 1, 1, 1, 256, 256, 0, 0, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "BgrSpr";
-	Spr->x = 0; 
-	Spr->y = 0; 
-	Spr->z = -0.9f; 
+	Spr->p = V2Zero;
+	Spr->depth = -0.9f; 
 	Spr->visible = true;
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
@@ -215,9 +212,8 @@ bool Init()
 	Spr->AddAnimation(true, 1, 256, 16, 1, 1, 1, 256, 16, 0, 0, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "grSpr";
-	Spr->x = 0; 
-	Spr->y = 0; 
-	Spr->z = -0.3f; 
+	Spr->p = V2Zero;
+	Spr->depth = -0.3f; 
 	Spr->visible = true;
 
 
@@ -228,13 +224,12 @@ bool Init()
 	Spr->AddAnimation(true, 100, 32, 32, 3, 2, 6, 32, 32, 0, 0, 1, true);
 	Spr->SetAnimation(1);
 	Spr->name = "BatSpr";
-	Spr->x = 0; 
-	Spr->y = 0; 
-	Spr->z = -0.5f; 
+	Spr->p = V2Zero;
+	Spr->depth = -0.5f; 
 	Spr->visible = true;
 	
 	//Ninja->RenderManager.Camera.Assign(&Hero->x, &Hero->y);
-	Ninja->RenderManager.Camera.Assign(&Spr->x, &Spr->y);
+	Ninja->RenderManager.Camera.Assign(&Spr->p.x, &Spr->p.y);
 
 	glEnable(GL_DEPTH_TEST); // Dis
 	glDisable(GL_LINE_WIDTH);
@@ -249,7 +244,7 @@ bool Init()
 	CLevelMap *lm;
 	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("Levels", "Level02", CLevelMap::NewLevelMap));
 	lm->visible = true;
-	lm->z = -0.6f;
+	lm->depth = -0.6f;
 	
 	Ninja->RenderManager.SortByAlpha();
 	Ninja->RenderManager.SortByZ();
@@ -336,14 +331,14 @@ bool Draw()
 
 	CRenderObject *tmp = dynamic_cast<CRenderObject*>(Ninja->RenderManager.GetObject("BatSpr"));
 	if (Ninja->keys[SDLK_w])
-		tmp->y += 10;
+		tmp->p.y += 10;
 	if (Ninja->keys[SDLK_s])
-		tmp->y -= 10;
+		tmp->p.y -= 10;
 
 	if (Ninja->keys[SDLK_d])
-		tmp->x += 10;
+		tmp->p.x += 10;
 	if (Ninja->keys[SDLK_a])
-		tmp->x -= 10;
+		tmp->p.x -= 10;
 
 	return true;
 }

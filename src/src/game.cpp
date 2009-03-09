@@ -171,12 +171,12 @@ bool CHero::Update( float dt )
 //					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 			for (int i=0; i< ps->info.ParticlesActive; i++)
 			{
-				n = (ps->particles[i].p - Vector2(x+C1, y+C2)).Normalized();
-				if (((ps->particles[i].p-Vector2(x, y)).Length())<= 200)
+				n = (ps->particles[i].p - Vector2(p.x+C1, p.y+C2)).Normalized();
+				if (((ps->particles[i].p-Vector2(p.x, p.y)).Length())<= 200)
 					if (DegToRad(tangle+ 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 					{
-						ps->particles[i].p += (Vector2(x, y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(x, y)).Length()*0.15f);
-						if (((ps->particles[i].p-Vector2(x+C1, y+C2)).Length())<= 35)
+						ps->particles[i].p += (Vector2(p.x, p.y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(p.x, p.y)).Length()*0.15f);
+						if (((ps->particles[i].p-Vector2(p.x+C1, p.y+C2)).Length())<= 35)
 						{
 							Snow += 1;
 							ps->particles[i].age = 0xffffff;
@@ -192,7 +192,7 @@ bool CHero::Update( float dt )
 			prt->v = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*500.01f;
 
 			Vector2 pos = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*32;
-			pos += Vector2(C1-16+x, C2-16+y);
+			pos += Vector2(C1-16+p.x, C2-16+p.y);
 
 			prt->p = pos;
 			sballlaunched = true;
@@ -229,24 +229,24 @@ bool CHero::Update( float dt )
 	CBBox tmp  = BBox;
 
 
-	x += v.x*dt;
-	tmp.Offset(x, y);
+	p.x += v.x*dt;
+	tmp.Offset(p.x, p.y);
 	if (tmp.Intersect(Gift))
 	{	
 		if (v.x > 0)
-			x = Gift.vMin.x  - 56;
+			p.x = Gift.vMin.x  - 56;
 		else
-			x = Gift.vMax.x;
+			p.x = Gift.vMax.x;
 		v.x = -v.x*0.1f;
 	}
 
 
 	tmp = BBox;
-	y += v.y*dt;
-	tmp.Offset(x, y);
+	p.y += v.y*dt;
+	tmp.Offset(p.x, p.y);
 	if (tmp.Intersect(Gift))
 	{
-		y = GROUND+60;
+		p.y = GROUND+60;
 		v.y = 0;
 		onPlane = true;
 	}
@@ -259,9 +259,9 @@ bool CHero::Update( float dt )
 		v.x *= 0.999f;
 
 	//		if(Gift.)
-	if (y <= GROUND)
+	if (p.y <= GROUND)
 	{
-		y = GROUND;
+		p.y = GROUND;
 		v.y = 0 ;
 		onPlane = true;
 	}
