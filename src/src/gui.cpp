@@ -797,18 +797,26 @@ void CForm::DrawText()
 {
 	CObject *tmp;
 	Items.Reset();
-	if (Font != "")
-		fnt = FontManager->GetFontEx(Font);
+		//fnt = FontManager->GetFontEx(Font);
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
 		glColor4f(0,0,1,1);
-		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(HeaderStyle)
+		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
+		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
+		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(HeaderStyle);
+		fnt->p.y = ScreenH()-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
+		fnt->isRect = true;
+		fnt->wh.x = GUIScheme->GetCWidth(HeaderStyle, Width);
+		fnt->wh.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
+		fnt->Print(str(Caption));
+		fnt->isRect = false;
+/*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(HeaderStyle)
 			,ScreenH()-GetTop() + GUIScheme->GetYOffset(HeaderStyle)
 			,ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(HeaderStyle, Width)///_szGUIScheme->GetCWidth(Styles[StyleInd], Width)//GUIScheme->GetCWidth(HeaderStyle, Width)
 			,GUIScheme->GetCWidth(HeaderStyle, HeaderHeight)//_szGUIScheme->GetCWidth(Styles[StyleInd], Height)//GUIScheme->GetCWidth(HeaderStyle, HeaderHeight)
-			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_CENTER, (char*)Caption.data());
+			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_CENTER, (char*)Caption.data());*/
 		glColor4f(1,1,1,1);
 	}
 	while (Items.Enum(tmp))
@@ -848,17 +856,25 @@ void CButton::DrawText()
 //	return;
 	if (!Visible)
 		return;
-	fnt = FontManager->GetFontEx(Font);
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
 		glColor4f(0,0,1,1);
-		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd])
+		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
+		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
+		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd]);
+		fnt->p.y = ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
+		fnt->isRect = true;
+		fnt->wh.x = GUIScheme->GetCWidth(Styles[StyleInd], Width);
+		fnt->wh.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
+		fnt->Print(str(Caption));
+		fnt->isRect = false;
+/*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd])
 			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd])
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(Styles[StyleInd], Width)//ClientWidth
 			,GUIScheme->GetCWidth(Styles[StyleInd], Height)//ClientHeight_sz
-			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_CENTER, (char*)Caption.data());
+			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_CENTER, (char*)Caption.data());*/
 		glColor4f(1,1,1,1);
 	}
 }
@@ -957,18 +973,29 @@ void CEdit::Draw()
 
 void CEdit::DrawText()
 {
-	fnt = FontManager->GetFontEx(Font);
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
 		glColor4f(0,0,1,1);
 		int l = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-		fnt->PrintSelRect(l
+		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
+		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
+		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
+		fnt->p.y = ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
+		fnt->isRect = true;
+		fnt->isSelected = true;
+		fnt->s1 = SelStart;
+		fnt->s1 = SelStart + SelLength - 1;
+		fnt->wh.x = GUIScheme->GetCWidth(ThisStyle, Width);
+		fnt->wh.y = GUIScheme->GetCHeight(ThisStyle, Height);
+		fnt->Print(str(Caption));
+		fnt->isRect = false;
+/*		fnt->PrintSelRect(l
 			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
 			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
-			,offset,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);
+			,offset,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);*/
 		glColor4f(1,1,1,1);
 	}
 }
@@ -1268,8 +1295,6 @@ void CEdit::KeyProcess(SDLKey &btn, byte event)
 
 bool CEdit::Update( float dt )
 {
-	if (fnt == NULL)
-		fnt = FontManager->GetFontEx(Font);
 	if (fnt == NULL)
 		return 1;
 	//int sw = ;
