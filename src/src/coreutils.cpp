@@ -324,7 +324,7 @@ bool CObjectList::DelObject(string objectname)
 	return false;
 }
 
-CObject* CObjectList::GetObject(string objectname)
+CObject* CObjectList::GetObjectByName(string objectname)
 {
 	CNodeObject *tmp = first;
 	while (tmp != NULL)
@@ -541,12 +541,6 @@ int __l=0;
 char _day[7][4];
 char _mon[12][4];
 CDummy InitLog = CDummy();
-
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#endif 
-
 
 void CreateLogFile(char *fname)
 {

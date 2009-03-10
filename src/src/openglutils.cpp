@@ -618,8 +618,8 @@ bool CFont::LoadFromFile(char* filename)
 	
 	file.ReadLine(FontImageName);	
 	CTextureManager *TexMan = CTextureManager ::Instance();
-	(dynamic_cast<CTexture*>(TexMan->GetObject(FontImageName)))->Load();
-	image = dynamic_cast<CTexture*>((TexMan->GetObject(FontImageName)));
+	(dynamic_cast<CTexture*>(TexMan->GetObjectByName(FontImageName)))->Load();
+	image = dynamic_cast<CTexture*>((TexMan->GetObjectByName(FontImageName)));
 	TexMan->FreeInst();
 	//image->LoadTexture(FontImageName);
 	font = image->GetTexID();
@@ -677,147 +677,111 @@ void CFont::_Print(const char *text)
 	glPopAttrib();
 }
 
-// void	CFont::PrintRectEx(int x, int y, float depth, int width, int height, int offset, byte align, char *text)
-// {
-// 	if (text == NULL)
-// 		return;
-// 	if ((uInt)offset >= strlen(text) || offset < 0)
-// 		return;
-// 	int xpos, ypos, swidth, sheight;
-// 	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
-// 	swidth = GetStringWidth(text + offset);
-// 	sheight = GetStringHeight(text + offset);
-// 	
-// 	if (tempV == CFONT_VALIGN_TOP)
-// 	{
-// 		ypos = y + height - sheight;
-// 	}
-// 	if (tempV == CFONT_VALIGN_BOTTOM)
-// 	{
-// 		ypos = y;
-// 	}
-// 	if (tempV == CFONT_VALIGN_CENTER)
-// 	{
-// 		ypos = y + height/2 - sheight/2;
-// 	}
-// 
-// 	if (tempH == CFONT_HALIGN_LEFT)
-// 	{
-// 		xpos = x;
-// 	}
-// 	if (tempH == CFONT_HALIGN_RIGHT)
-// 	{
-// 		xpos = x + width - swidth;
-// 	}
-// 
-// 	if (tempH == CFONT_HALIGN_CENTER)
-// 	{
-// 		xpos = x + width/2 - swidth/2;
-// 	}
-// 
-// 	glPushAttrib(GL_SCISSOR_TEST);
-// 	glEnable(GL_SCISSOR_TEST);
-// 	glScissor(x, y, width, height);
-// 	Print(xpos, ypos, depth, text+offset);
-// 	glDisable(GL_SCISSOR_TEST);
-// 	glPopAttrib();
-// }
 
-// void CFont::PrintSelRect(int x, int y, float depth, int width, int height, int offset, byte align, char *text, int s1, int s2)
-// {
-// 	if (text == NULL)
-// 		return;
-// 	if ((uint)offset >= strlen(text) || offset < 0)
-// 		return;
-// 
-// 	if (s1 > s2+1)
-// 	{
-// 		swap(s1, s2);
-// 		s1++;
-// 		s2--;
-// 	}
-// 	int xpos, ypos, swidth, sheight;
-// 	byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
-// 	swidth = GetStringWidth(text + offset);
-// 	sheight = GetStringHeight(text + offset);
-// 	
-// 	if (tempV == CFONT_VALIGN_TOP)
-// 	{
-// 		ypos = y + height - sheight;
-// 	}
-// 	if (tempV == CFONT_VALIGN_BOTTOM)
-// 	{
-// 		ypos = y;
-// 	}
-// 	if (tempV == CFONT_VALIGN_CENTER)
-// 	{
-// 		ypos = y + height/2 - sheight/2;
-// 	}
-// 
-// 	if (tempH == CFONT_HALIGN_LEFT)
-// 	{
-// 		xpos = x;
-// 	}
-// 	if (tempH == CFONT_HALIGN_RIGHT)
-// 	{
-// 		xpos = x + width - swidth;
-// 	}
-// 
-// 	if (tempH == CFONT_HALIGN_CENTER)
-// 	{
-// 		xpos = x + width/2 - swidth/2;
-// 	}
-// 
-// 	glPushAttrib(GL_SCISSOR_TEST);
-// 	glEnable(GL_SCISSOR_TEST);
-// 	glScissor(x, y, width, height);
-// 	int selx = xpos + GetStringWidthEx(0, s1-1-offset, text+offset);
-// 	if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
-// 	{
-// 		int selw = GetStringWidthEx(max(s1, offset), s2, text);
-// 		CPrimitiveRender pr;
-// 		pr.psClr = &RGBAf(10, 50, 200, 150);
-// 		pr.depth = depth;
-// 		pr.grRectS(Vector2(selx, ypos), Vector2(selx + selw, ypos + sheight));
-// 	}
-// 	CPrimitiveRender pr;
-// 	pr.depth = depth;
-// 	pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
-// 	pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
-// 	pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
-// 
-// 	pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
-// 	pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
-// //	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
-// 	pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
-// 	Print(xpos, ypos, depth, text+offset);
-// 	glDisable(GL_SCISSOR_TEST);
-// 	glPopAttrib();
-// }
 
-void CFont::Print(const char* text, ...)
+
+void CFont::Print( const char *text, ... )
 {
 	if (text == NULL)
 		return;
 	if ((uint)offset >= strlen(text) || offset < 0)
 		return;
+
+	int swidth, sheight;
 	if (isSelected)
 	{
+		if (s1 > s2+1)
+		{
+			swap(s1, s2);
+			s1++;
+			s2--;
+		}
+		
+		swidth = GetStringWidth(text + offset);
+		sheight = GetStringHeight(text + offset);
+		int selx = p.x + GetStringWidthEx(0, s1-1-offset, text+offset);
+
+
+		if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
+		{
+			int selw = GetStringWidthEx(max(s1, offset), s2, text);
+			CPrimitiveRender pr;
+			pr.psClr = &RGBAf(10, 50, 200, 150);
+			pr.depth = depth;
+			pr.grRectS(Vector2(selx, p.y), Vector2(selx + selw, p.y + sheight));
+		}
+
 
 	}
+
+
 	if (isRect)
 	{
+		int xpos, ypos;
+		byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
+
+		if (tempV == CFONT_VALIGN_TOP)
+		{
+			ypos = p.y + wh.y - sheight;
+		}
+		if (tempV == CFONT_VALIGN_BOTTOM)
+		{
+			ypos = p.y;
+		}
+		if (tempV == CFONT_VALIGN_CENTER)
+		{
+			ypos = p.y + wh.y/2 - sheight/2;
+		}
+
+		if (tempH == CFONT_HALIGN_LEFT)
+		{
+			xpos = p.x;
+		}
+		if (tempH == CFONT_HALIGN_RIGHT)
+		{
+			xpos = p.x + wh.x - swidth;
+		}
+
+		if (tempH == CFONT_HALIGN_CENTER)
+		{
+			xpos = p.x + wh.x/2 - swidth/2;
+		}
+
+		glPushAttrib(GL_SCISSOR_TEST);
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(p.x, p.y, wh.x, wh.y);
+
+
+		CPrimitiveRender pr;
+		pr.depth = depth;
+		pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
+		pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
+		pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
+
+// 		pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
+// 		pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
+// 		//	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
+// 		pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
 
 	}
+
+
 	char	temp[CFONT_MAX_STRING_LENGTH];
 	va_list	ap;
 	va_start(ap, text);
 	vsprintf(temp, text, ap);
 	va_end(ap);
 	_Print(temp);
+
+	if (isRect)
+	{
+		// 	glDisable(GL_SCISSOR_TEST);
+		// 	glPopAttrib();
+	}
 }
 
-int	CFont::GetStringWidth(char *text)
+
+int	CFont::GetStringWidth(const char *text)
 {
 	if (text == NULL)
 		return -1;
@@ -827,7 +791,7 @@ int	CFont::GetStringWidth(char *text)
 	return r;
 }
 
-int CFont::GetStringWidthEx(int t1, int t2, char *text)
+int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 {
 	if (text == NULL)
 		return -1;
@@ -841,7 +805,7 @@ int CFont::GetStringWidthEx(int t1, int t2, char *text)
 	return r;
 }
 
-int	CFont::GetStringHeight(char *text)
+int	CFont::GetStringHeight(const char *text)
 {
 	if (text == NULL)
 		return -1;
@@ -851,7 +815,7 @@ int	CFont::GetStringHeight(char *text)
 	return r;
 }
 
-int CFont::GetStringHeightEx( int t1, int t2, char *text )
+int CFont::GetStringHeightEx( int t1, int t2, const char *text )
 {
 	if (text == NULL)
 		return -1;
@@ -1366,12 +1330,12 @@ int CFontManager::_refcount = 0;
 
 CFont* CFontManager::GetFont( char* fontname )	
 {
-	return (CFont*)GetObject(fontname);
+	return (CFont*)GetObjectByName(fontname);
 }
 
 CFont* CFontManager::GetFontEx( string fontname )
 {
-	return (CFont*)GetObject(fontname);
+	return (CFont*)GetObjectByName(fontname);
 }
 
 bool CFontManager::SetCurrentFont( char* fontname )
@@ -1462,7 +1426,7 @@ bool CTextureManager::AddTexture( char* filename, bool load)
 bool CTextureManager::LoadTextureByName(char *TextureName)
 {
 	CTexture *tmp = NULL;
-	tmp = dynamic_cast<CTexture*>(GetObject(TextureName));
+	tmp = dynamic_cast<CTexture*>(GetObjectByName(TextureName));
 	if (tmp == NULL)
 	{
 		Log("WARNING", "Can't load find texture with name %s", TextureName);
@@ -1787,7 +1751,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObjectByName("cells"));
 	Tman->FreeInst();
 	cells->Bind();
 #endif 
@@ -1889,7 +1853,7 @@ void CPrimitiveRender::CheckTexture()
 {
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObjectByName("cells"));
 	Tman->FreeInst();
 	cells->Bind();
 }

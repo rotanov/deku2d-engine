@@ -55,7 +55,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	CObject *tmp = NULL;
 	switch(ObjectId)
 	{	
-	case OBJ_FONT:
+	case OBJ_FONT_M:
 		{
 			CFont *creation = new CFont;
 			FontManager->AddObject(creation);
@@ -213,7 +213,7 @@ bool CResourceManager::LoadFonts()
 	CFont *Font;
 	while (x->Enum(key, val, Result))
 	{
-		Font = (CFont*)Factory->Create(OBJ_FONT, NULL);
+		Font = (CFont*)Factory->Create(OBJ_FONT_M, NULL);
 		if (Font == NULL)
 			return false;
 		Font->name = key;

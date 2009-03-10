@@ -17,7 +17,7 @@ bool CTileSet::LoadFromFile()
 
 	file.ReadLine(TextureName);
 
-	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
+	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObjectByName(TextureName));
 
 
 	file.Read(&Info, sizeof(Info));
@@ -135,7 +135,7 @@ bool CLevelMap::LoadFromFile()
 	File.ReadLine(TileSetName);
 
 	TileSet = NULL;
-	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
+	TileSet = dynamic_cast<CTileSet*>(Factory->GetObjectByName(TileSetName));
 	if (TileSet == NULL)
 	{
 		TileSet = dynamic_cast<CTileSet*>(Factory->Create(OBJ_USER_DEFINED, CTileSet::NewTileSet));		
@@ -216,7 +216,7 @@ bool CCollisionInfo::LoadFromFile()
 
 	file.ReadLine(TileSetName);
 	CFactory *Factory = CFactory::Instance();
-	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
+	TileSet = dynamic_cast<CTileSet*>(Factory->GetObjectByName(TileSetName));
 	Factory->FreeInst();
 	if (TileSet == NULL)
 		return false;

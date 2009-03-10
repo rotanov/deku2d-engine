@@ -9,8 +9,8 @@ RGBAub CImageData::Pixel(int x, int y)
 bool CImageData::LoadBMP(const char * name)
 {
 	DWORD dwDIBSize;
-	BITMAPFILEHEADERm bfh ;
-	BITMAPINFOm bi;
+	BITMAPFILEHEADER bfh ;
+	BITMAPINFO bi;
 	CFile file;
 	pbyte R, G, B;
 	byte temp;
@@ -21,14 +21,14 @@ bool CImageData::LoadBMP(const char * name)
 		return false;
 	}
   
-	file.Read(&bfh, sizeof(BITMAPFILEHEADERm));
+	file.Read(&bfh, sizeof(BITMAPFILEHEADER));
 
 	if (bfh.bfType != 0x4d42)
 	{
 		Log("AHTUNG", "Cant load bmp file: \"%s\" is not a BMP file", name);
 		return false;
 	}
-	file.Read(&bi, sizeof(BITMAPINFOHEADERm));
+	file.Read(&bi, sizeof(BITMAPINFOHEADER));
 	if (bi.bmiHeader.biBitCount != 24)
 	{
 		Log("AHTUNG", "Cant load bmp file: \"%s\" only 24 bits per pixel supported", name);

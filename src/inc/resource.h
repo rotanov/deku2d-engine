@@ -1,6 +1,8 @@
 #ifndef _RES_H
 #define _RES_H
 
+#pragma message("Compiling resource.h")
+
 #include "CoreUtils.h"
 #include "OpenglUtils.h"
 #include "xml.h"
@@ -19,12 +21,12 @@
 #define CRESOURCE_TYPE_USER_DEFINED		0x06
 
 // Ещё типы ресурсов. Какого хрена?!
-enum EResType {RT_FONT, RT_IMAGE, RT_PSYSTEM, RT_ANIMATION, RT_XML};
+enum EResType {RT_FONTRES, RT_IMAGE, RT_PSYSTEM, RT_ANIMATION, RT_XML};
 
 // Типы объектов. Это для CFactory
 #define OBJ_SPRITE			0x01
 #define OBJ_PSYSTEM			0x02
-#define OBJ_FONT			0x03
+#define OBJ_FONT_M			0x03
 #define	OBJ_USER_DEFINED	0x04
 #define OBJ_TEXTURE_RES		0x05
 

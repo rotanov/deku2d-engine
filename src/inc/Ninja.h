@@ -1,6 +1,8 @@
 #ifndef NINJA_H
 #define NINJA_H
 
+#pragma message("Compiling Ninja.h")
+
 #include "CoreUtils.h"
 
 #include <stdlib.h>
@@ -10,8 +12,6 @@
 #include <tchar.h>
 #include <math.h>
 #include <SDL.h>
-#include <gl\gl.h>
-#include <gl\glu.h>
 
 #include "OpenglUtils.h"
 #include "Gui.h"

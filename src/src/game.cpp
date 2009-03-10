@@ -80,7 +80,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 		p->p.y = 0;
 	}
 	CNinja *Ninja = CNinja::Instance();
-	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObject("snowballs"));
+	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObjectByName("snowballs"));
 	Ninja->FreeInst();
 
 	CBBox Gift = CBBox(274, GROUND, 260 + 51 , GROUND + 29 );
@@ -166,7 +166,7 @@ bool CHero::Update( float dt )
 	{
 		if (abs(Snow - 100.0f) > 0.001f)
 		{
-			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("psys"));
+			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("psys"));
 			Vector2 n;
 //					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 			for (int i=0; i< ps->info.ParticlesActive; i++)
@@ -205,7 +205,7 @@ bool CHero::Update( float dt )
 		tangle = - 180 - tangle;
 
 
-	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("enemy_l"));
+	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("enemy_l"));
 	for (int i=0; i< ps->info.ParticlesActive; i++)
 	{
 		CBBox tmp = CBBox(ps->particles[i].p, ps->particles[i].p + Vector2(ps->particles[i].size, ps->particles[i].size));
@@ -218,8 +218,8 @@ bool CHero::Update( float dt )
 	Health= clampf(Health, 0.0f, 100.0f);
 	if (Health <= 0.001f)
 	{
-		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->Load();
-		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObject("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->GetTexID();
+		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("giftd")))->Load();
+		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObjectByName("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("giftd")))->GetTexID();
 	}
 
 

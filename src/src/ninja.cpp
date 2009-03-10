@@ -323,7 +323,7 @@ bool CNinja::Run()
 
 
 
-	for EVER
+	Forever
 	{
 		if (isHaveFocus)
 		{	

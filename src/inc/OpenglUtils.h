@@ -3,9 +3,16 @@
 
 #include <stdarg.h>
 #include <SDL.h>
-#include <gl\gl.h>
-#include <gl\glu.h>
+
 #include "CoreUtils.h"
+
+#ifdef USE_SDL_OPENGL
+	#include "SDL_opengl.h"
+#else
+	#include <gl\gl.h>
+	#include <gl\glu.h>
+#endif
+
 #include "ImageUtils.h"
 #include "MathUtils.h"
 #define LOWBYTE(bt) (bt&0xff)
@@ -218,6 +225,11 @@ public:
 	}
 	bool Load();
 	GLuint GetTexID();
+protected:
+	void Unload()
+	{
+		glDeleteTextures(1, &TexID);
+	}
 };
 
 class CTextureManager : public CObjectList
@@ -409,10 +421,10 @@ public:
 	void		PointBack();
 	void		SetAlign(const byte _Halign, const byte _Valign);
 
-	int			GetStringWidth(char *text);
-	int			GetStringWidthEx(int t1, int t2, char *text);
-	int			GetStringHeight(char *text);
-	int			GetStringHeightEx(int t1, int t2, char *text);
+	int			GetStringWidth(const char *text);
+	int			GetStringWidthEx(int t1, int t2, const char *text);
+	int			GetStringHeight(const char *text);
+	int			GetStringHeightEx(int t1, int t2, const char *text);
 
 private:
 	float				x, y;					//	Фактические координаты для отрисовки в _Print

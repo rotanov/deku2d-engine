@@ -10,25 +10,51 @@
 #define IMAGE_UTILS_H
 
 #include <stdlib.h>
-#include <SDL.h>
 #include <png.h>
-#include <gl\gl.h>
+
 #include "CoreUtils.h"
 
 #define PNG_SIG_BYTES 8
 
-#include <pshpack2.h>
-typedef struct tagBITMAPFILEHEADERm {
+#ifndef WIN32
+
+#if ! (defined(lint) || defined(RC_INVOKED))
+#if ( _MSC_VER >= 800 && !defined(_M_I86)) || defined(_PUSHPOP_SUPPORTED)
+#pragma warning(disable:4103)
+#if !(defined( MIDL_PASS )) || defined( __midl )
+#pragma pack(push,2)
+#else
+#pragma pack(2)
+#endif
+#else
+#pragma pack(2)
+#endif
+#endif // ! (defined(lint) || defined(RC_INVOKED))
+
+typedef struct tagBITMAPFILEHEADER {
         WORD    bfType;
         DWORD   bfSize;
         WORD    bfReserved1;
         WORD    bfReserved2;
         DWORD   bfOffBits;
-} BITMAPFILEHEADERm, FAR *LPBITMAPFILEHEADERm, *PBITMAPFILEHEADERm;
-#include <poppack.h>
+} BITMAPFILEHEADER, FAR *LPBITMAPFILEHEADER, *PBITMAPFILEHEADER;
 
 
-struct RGBQUADm
+#if ! (defined(lint) || defined(RC_INVOKED))
+#if ( _MSC_VER >= 800 && !defined(_M_I86)) || defined(_PUSHPOP_SUPPORTED)
+#pragma warning(disable:4103)
+#if !(defined( MIDL_PASS )) || defined( __midl )
+#pragma pack(pop)
+#else
+#pragma pack()
+#endif
+#else
+#pragma pack()
+#endif
+#endif // ! (defined(lint) || defined(RC_INVOKED))
+
+
+struct RGBQUAD
 {
 	BYTE	rgbBlue;
 	BYTE	rgbGreen;
@@ -37,7 +63,7 @@ struct RGBQUADm
 };
 
 
-struct BITMAPINFOHEADERm
+struct BITMAPINFOHEADER
 {
 	DWORD	biSize;
 	LONG	biWidth;
@@ -52,11 +78,13 @@ struct BITMAPINFOHEADERm
 	DWORD	biClrImportant;
 };
 
-struct BITMAPINFOm
+struct BITMAPINFO
 {
-	BITMAPINFOHEADERm	bmiHeader;
-	RGBQUADm				bmiColors[1];
+	BITMAPINFOHEADER	bmiHeader;
+	RGBQUAD				bmiColors[1];
 };
+
+#endif
 
 class CImageData
 {

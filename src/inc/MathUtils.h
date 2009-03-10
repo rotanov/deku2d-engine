@@ -1,6 +1,8 @@
 #ifndef _MATH_H
 #define _MATH_H
 
+#pragma message("Compiling MathUtils.h")
+
 /**
 *	File    : MathUtils.h
 *	Author  : Dreamcatcher
@@ -22,7 +24,6 @@
 	#define __INLINE inline
 #endif
 
-
 class Vector2;
 union Matrix2;
 
@@ -43,13 +44,18 @@ static const scalar d180_PI = 180.0f / PI;
 
 #include <math.h>
 
-#define USING_OPENGL
-#ifdef USING_OPENGL
-#include <gl/gl.h>
-#include <gl/glu.h>
-#endif
-
 #include "CoreUtils.h"
+
+#define USING_OPENGL
+
+#ifdef USING_OPENGL
+	#ifdef USE_SDL_OPENGL
+		#include "SDL_opengl.h"
+	#else
+		#include <gl\gl.h>
+		#include <gl\glu.h>
+	#endif
+#endif
 
 void GenSinTable();
 scalar fSinr(scalar angle);

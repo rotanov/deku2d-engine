@@ -124,8 +124,8 @@ public:
 
 		snowballs->name = "snowballs";
 		snowballs->Init();
-		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snowb_br")))->Load();
-		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("snowb_br")))->GetTexID();
+		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("snowb_br")))->Load();
+		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("snowb_br")))->GetTexID();
 
 		snowballs->info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 		snowballs->info.ec = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);

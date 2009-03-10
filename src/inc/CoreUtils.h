@@ -49,13 +49,21 @@ typedef long				LONG;
 #include <time.h>
 using namespace std;
 
+#ifdef WIN32
+	#define	WIN32_LEAN_AND_MEAN
+	#include <Windows.h>
+#endif
+
 inline char *str(string Str)
 {
 	return (char*)Str.c_str();
 }
 
+#define USE_SDL_OPENGL
+
 // Это для улучшения читабельности дефайн. Тоесть мы хотим бесконечный цикл: for(;;). А можно for EVER.
 #define EVER (;;)
+#define Forever for(;;)
 
 // Это дефайны для флагов свойств объекта
 #define T_COBJECT		0x01
@@ -165,7 +173,7 @@ public:
 	virtual bool AddObject(CObject *object);						// Добавить объект в конец списка.
 	bool DelObject(string objectname);						// удалить объект с именем objectname
 	bool DelObj(int ind);									// удалить объект рукоодствуясь непонятнвым параметром 
-	CObject* GetObject(string objectname);					// получить указатель на объект по имени
+	CObject* GetObjectByName(string objectname);					// получить указатель на объект по имени
 };
 
 /**

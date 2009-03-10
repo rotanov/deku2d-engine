@@ -122,13 +122,13 @@ bool Init()
 	Hero->p.In(200.0f, 200.0f);
 	
 
-	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Hero_r1")))->GetTexID();
+	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_r1")))->GetTexID();
 	Hero->sprite.m_nTextureHeight = 32;
 	Hero->sprite.m_nTextureWidth = 32;
 	Hero->sprite.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
 	Hero->sprite.SetAnimation(1);
 
-	Hero->spra.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Hero_a1")))->GetTexID();
+	Hero->spra.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_a1")))->GetTexID();
 	Hero->spra.m_nTextureHeight = 32;
 	Hero->spra.m_nTextureWidth = 32;
 	Hero->spra.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
@@ -137,7 +137,7 @@ bool Init()
 	Hero->sprb.depth = -0.5f;
 	Hero->depth = -0.5f;
 
-	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Hero_b1")))->GetTexID();
+	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_b1")))->GetTexID();
 	Hero->sprb.m_nTextureHeight = 32;
 	Hero->sprb.m_nTextureWidth = 32;
 	Hero->sprb.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
@@ -157,7 +157,7 @@ bool Init()
 	// debug //
 	ps->info.sizevar = 8;
 	ps->info.isSnow = true; // костыль
-	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Particle")))->GetTexID();
+	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
 	ps->SetGeometry(pnts, 2);
 
 	int i;
@@ -181,10 +181,10 @@ bool Init()
 	enemyc = dynamic_cast<CEnemyController*>(Factory->Create(OBJ_USER_DEFINED, &(CEnemyController::NewController)));
 	enemyc->AssignPS(ps);
 
-	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Enemy_r")))->GetTexID();
+	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Enemy_r")))->GetTexID();
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
-	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Gift_r")))->GetTexID();
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Gift_r")))->GetTexID();
 	Spr->m_nTextureHeight = 64;
 	Spr->m_nTextureWidth = 64;
 	Spr->AddAnimation(true, 1, 52, 49, 1, 1, 1, 52, 49, 2, 15, 1, true);
@@ -195,7 +195,7 @@ bool Init()
 	Spr->visible = true;
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
-	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("bg_b")))->GetTexID();
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("bg_b")))->GetTexID();
 	Spr->m_nTextureHeight = 256;
 	Spr->m_nTextureWidth = 256;
 	Spr->AddAnimation(true, 1, 256, 256, 1, 1, 1, 256, 256, 0, 0, 1, true);
@@ -206,7 +206,7 @@ bool Init()
 	Spr->visible = true;
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
-	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("Ground")))->GetTexID();
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Ground")))->GetTexID();
 	Spr->m_nTextureHeight = 16;
 	Spr->m_nTextureWidth = 256;
 	Spr->AddAnimation(true, 1, 256, 16, 1, 1, 1, 256, 16, 0, 0, 1, true);
@@ -218,7 +218,7 @@ bool Init()
 
 
 	Spr = dynamic_cast<CSprite*>(Factory->Create(OBJ_SPRITE, NULL));
-	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("bat2_scetch_col2")))->GetTexID();
+	Spr->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("bat2_scetch_col2")))->GetTexID();
 	Spr->m_nTextureHeight = 64;
 	Spr->m_nTextureWidth = 128;
 	Spr->AddAnimation(true, 100, 32, 32, 3, 2, 6, 32, 32, 0, 0, 1, true);
@@ -329,7 +329,7 @@ bool Draw()
 	if (Ninja->keys[SDLK_k])
 		apos.y -= 5;
 
-	CRenderObject *tmp = dynamic_cast<CRenderObject*>(Ninja->RenderManager.GetObject("BatSpr"));
+	CRenderObject *tmp = dynamic_cast<CRenderObject*>(Ninja->RenderManager.GetObjectByName("BatSpr"));
 	if (Ninja->keys[SDLK_w])
 		tmp->p.y += 10;
 	if (Ninja->keys[SDLK_s])
@@ -374,8 +374,8 @@ bool Draw2()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw2);
-	Ninja->SetState(STATE_USER_INIT, &Init2);
+	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
+	Ninja->SetState(STATE_USER_INIT, &Init);
 	
 	Ninja->Run();
 	Ninja->FreeInst();

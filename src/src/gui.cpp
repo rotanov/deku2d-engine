@@ -104,7 +104,7 @@ void						clearWidget(PWidget res)
 	res->MinWidth = 0;
 	res->name="";
 	ToggleLog(0);
-	res->Parent = dynamic_cast<PWidget>(Objects.GetObject("ScreenForm"));
+	res->Parent = dynamic_cast<PWidget>(Objects.GetObjectByName("ScreenForm"));
 	ToggleLog(1);
 	res->Top = 0;
 	memset(res->type, 0, 100);
@@ -166,7 +166,7 @@ void		FormAddWidget(PWidget obj, PWidget form){
 		return;
 	if (form == NULL)
 	{
-		CForm *__form = dynamic_cast<CForm*>(Objects.GetObject("ScreenForm"));
+		CForm *__form = dynamic_cast<CForm*>(Objects.GetObjectByName("ScreenForm"));
 		if (__form != NULL)
 		{
 			__form->Items.AddObject(obj);
@@ -201,7 +201,7 @@ void		setWidgetStyle(PWidget obj, unsigned int Style){
 	obj->setStyle(Style);
 }
 PWidget		getWidget(char *name){
-	return dynamic_cast<PWidget>(Objects.GetObject(name));
+	return dynamic_cast<PWidget>(Objects.GetObjectByName(name));
 }
 
 void CGraphObj::setStyle(unsigned int _Style)
