@@ -61,7 +61,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON2               ICON                    "icon_snw.ico"
+IDI_ICON2               ICON                    "D:\\Projects\\Ninja Story\\ico\\Earth.ico"
 #endif    // Russian resources
 /////////////////////////////////////////////////////////////////////////////
 
