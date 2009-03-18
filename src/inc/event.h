@@ -29,9 +29,9 @@ __forceinline  void  SAFECALL(CEvent X, CObject *Sender){
 	else
 	{
 		if (Sender!=NULL)
-			Log("AHTUNG", "Undefined event for object %s!", Sender->name);
+			Log("WARNING", "Undefined event for object %s!", Sender->name);
 		else
-			Log("AHTUNG", "Undefined event for non existing object!");
+			Log("WARNING", "Undefined event for non existing object!");
 	}
 }
 __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
@@ -42,9 +42,9 @@ __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 	else
 	{
 		if (Sender!=NULL)
-			Log("AHTUNG", "Undefined event for object %s!", Sender->name);
+			Log("WARNING", "Undefined event for object %s!", Sender->name);
 		else
-			Log("AHTUNG", "Undefined event for non existing object!");
+			Log("WARNING", "Undefined event for non existing object!");
 	}
 }
 

@@ -24,6 +24,7 @@
 // #define _DEBUG_DISABLE_PARTICLES_UPDATE
 
 class CPrimitiveRender;
+class CParticleSystem;
 
 class CRenderObject : public virtual CObject
 {
@@ -39,6 +40,10 @@ public:
 	};
 	void SetColor(byte _r, byte _g, byte _b, byte _a);
 	virtual bool Render() = 0;
+	virtual bool RenderByParticleSystem(const Vector2 &p, const CParticleSystem &ps)
+	{
+		return true;
+	};
 	virtual ~CRenderObject(){};
 };
 
@@ -401,6 +406,7 @@ public:
 	CFont();
 	~CFont();
 	
+	RGBAf				tClr;					//	Цвет.
 	byte				dist;					//	Расстояние между символами		
 	Vector2				p;						//	координты текста, для присваивания, указатель по дефолту указывает на них
 	Vector2				wh;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
@@ -491,61 +497,72 @@ float Random_Float(float min, float max);
 
 struct CParticle
 {
-	Vector2			p;			// position of particle
-	Vector2			v;			// velocity of particle
-	RGBAf			c;			// current color
-	RGBAf			dc;			// color delta
-	float			size;		// current size of particle
-	float			dsize;		// delta size i.e add this to size every step 0 means nothing
-	float			life;		// lifetime of the particle -1 means particle is immortal
-	float			age;		// current age of the particle
-	float			Period;					// Yep... a ha... ha ha ha
+	Vector2			p;			//	позиция частицы
+	Vector2			v;			//	скорость 
+	RGBAf			c;			//	текущий цвет
+	RGBAf			dc;			//	приращение цвета на каждом шаге
+	float			size;		//	текущий размер
+	float			dsize;		//	приращение размера
+	float			life;		//	время жизни частицы; -1 значит бесконечность
+	float			age;		//	возраст частицы, то есть сколько она уже просуществовала
+	float			Period;		//	хуй знает, чо это. я не помню
 };
 
 struct CPsysteminfo
 {
-	Vector2			p;						// particle system position
+	Vector2			p;						//	позиция системы частиц
 
-	RGBAf			sc;						// desired start color of each particle
-	RGBAf			ec;						// desired end color of each particle
-	RGBAf			vc;						// color variability
+	RGBAf			sc;						//	начальный цвет каждой частицы
+	RGBAf			ec;						//	конечный цвет каждой частицы
+	RGBAf			vc;						//	фактор случайности при выборе цвета
 
-	int				MaxParticles;			// number of possible maximum number particles in the system
-	int				ParticlesActive;		// current number of active particles
-	int				lifemin;				// minimum life of particle
-	int				lifemax;				// maximum life of particle
+	int				MaxParticles;			//	максимально возможно число частиц
+	int				ParticlesActive;		//	сколько частиц активно сейчас
+	int				lifemin;				//	минимальное время жизни частицы
+	int				lifemax;				//	максимальное время жизни частицы
 
-	float			startsize;				// startsize of each particle
-	float			endsize;				// end size
-	float			sizevar;				// size variability
+	float			startsize;				//	начальный размер каждой частицы
+	float			endsize;				//	конечный размер
+	float			sizevar;				//	фактор случайности при выборе размера частицы
 
-	float			plife;					// desired particle life. -1 is ever
-	int				plifevar;				// desired particle life variability
+	float			plife;					//	авотхуйегознает
+	int				plifevar;				//	авотхуйегознает
 
-	float			life;					// life of the system -1 means immortal
-	int				age;					// current age of the system. inc only if mortal
+	float			life;					//	время жизни системы; -1 значит бесонечность
+	int				age;					//	текущий возраст системы
 
-	int				emission;				// emission means emission :3
-	int				notcreated;				// the number of particle left to be created in next step for may be some reason
-	Vector2			*geom;					// array of points for particle generation
-	int				GeomNumPoints;			// number of them
-	bool			isSnow;					// temporary
+	int				emission;				//	фактор, определяющий сколько частиц вылетит за раз
+	int				notcreated;				//	количество частиц, которые мы не смогли выпустить в этом кадре по каким-то причинам
+	Vector2			*geom;					//	массив точек, для генерации частиц
+	int				GeomNumPoints;			//	число этих точек
+	bool			isSnow;					//	костыль для снега. TODO! убрать нахуй
 };
 
 typedef void (*FCreateFunc)(CParticle *);
 typedef void (*FUpdateFunc)(CParticle *, float);
 
+/**
+*	TODO:
+*		1. Добавить интерполяцию покруче, окоромя линейной
+*		2. Добавить установку экзмепляра объекта для рендера
+*		3. Добавить ещё что-нибуть
+*/
+
 class CParticleSystem :  public CResource, public CRenderObject, public CUpdateObject
 {
 public:
 	CPsysteminfo			info;
+	CRenderObject			*UserRenderSample;
 	CParticle				*particles;
 	GLuint					TexID;
 	bool					user_create;
 	bool					user_update;
+	bool					user_render;
 	void					(*procUserCreate)(CParticle *);
 	void					(*procUserUpdate)(CParticle *, float);
 
+							CParticleSystem();
+							~CParticleSystem();
 	void					Init();	
 	bool					Update(float dt);
 	bool					Render();

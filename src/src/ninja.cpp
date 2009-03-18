@@ -178,7 +178,7 @@ bool CNinja::Init()
 	XMLTable Config;
 	if (!Config.LoadFromFile(CONFIG_FILE_NAME))
 	{
-		Log("AHTUNG", "Can't load XMLTable %s", CONFIG_FILE_NAME);
+		Log("WARNING", "Can't load XMLTable %s", CONFIG_FILE_NAME);
 		return false;
 	}
 	
@@ -194,6 +194,8 @@ bool CNinja::Init()
 	ResourceManager.TexturesFldr= (Config.First->Get("TexturesFldr"))->GetValue();
 	ResourceManager.FontsFldr	= (Config.First->Get("FontsFldr"))->GetValue();
 
+	CDataLister DataLister;
+	DataLister.List();
 
 	SetState(STATE_SCREEN_WIDTH, (void*)wwidth);
 	SetState(STATE_SCREEN_HEIGHT, (void*)wheight);
@@ -211,7 +213,7 @@ bool CNinja::Init()
 	window.bpp = 32;
 	if (!window.gCreateWindow())
 	{
-		Log("AHTUNG", "Window creation failed");
+		Log("WARNING", "Window creation failed");
 		return false;
 	}
 
@@ -228,7 +230,7 @@ bool CNinja::Init()
 	if (procUserInit != NULL)
 		if (!procUserInit())
 		{
-			Log("AHTUNG", "User init failed.");
+			Log("WARNING", "User init failed.");
 			return false;
 		}
 

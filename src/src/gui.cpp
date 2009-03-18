@@ -265,6 +265,8 @@ void EndUI()
 CGUIScheme::CGUIScheme(char *fname, char *tname)
 {
 	//creating new form( - main form)
+	for (int i = 0; i < 200 ; i++) // блять я бы тебе уебал реально. Вот хуле ты 200 отпизды взял, и хуле ты не догадался инициализацию делать и проверки потом
+		objects[i] = NULL;
 	CForm *frm = (CForm*)newWidget("ScreenForm", STYLE_OBJFORM);
 	frm->Width = ScreenW();
 	frm->Height = ScreenH();
@@ -280,7 +282,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 	GUIScheme = this;
 	if (fname==NULL||tname==NULL)
 	{
-		Log("AHTUNG","Specified pointer has NULL value!",fname);
+		Log("WARNING","Specified pointer has NULL value!",fname);
 		return;
 	}
 	if (f.Open(fname,CFILE_READ))
@@ -290,21 +292,21 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 		f.Read(&b, 1);
 		if (b!='D')
 		{
-			Log("AHTUNG","File %s has unknown format or damaged.",fname);
+			Log("WARNING","File %s has unknown format or damaged.",fname);
 			f.Close();
 			return;
 		}
 		f.Read(&b, 1);
 		if (b!='G')
 		{
-			Log("AHTUNG","File %s has unknown format or damaged.",fname);
+			Log("WARNING","File %s has unknown format or damaged.",fname);
 			f.Close();
 			return;
 		}
 		f.Read(&b, 1);
 		if (b!='K')
 		{
-			Log("AHTUNG","File %s has unknown format or damaged.",fname);
+			Log("WARNING","File %s has unknown format or damaged.",fname);
 			f.Close();
 			return;
 		}
@@ -382,7 +384,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 					//f.Read(&obj->Cursor, 4);
 					break;
 				}
-			case 3:
+			case 3: // lol
 				{
 					//edit
 					CEdit *obj = (CEdit*)newWidget("noname", STYLE_OBJEDIT|STYLE_DONOTADD);
@@ -406,7 +408,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 	}
 	else
 	{
-		Log("AHTUNG","Cannot load GUI Scheme from file %s .",fname);
+		Log("WARNING","Cannot load GUI Scheme from file %s .",fname);
 	}
 }
 int	CGUIScheme::GetXOffset(int StInd)
@@ -432,7 +434,7 @@ void CGUIScheme::BeginUI()
 //	szBind = true;
 /*	else
 	{
-		Log("AHTUNG", "Cannot bind GUI scheme %s!", name);
+		Log("WARNING", "Cannot bind GUI scheme %s!", name);
 		return;
 	}*/
 	Drawing = 1;
@@ -555,6 +557,8 @@ PWidget CGUIScheme::CreateWidget( int kind )
 void CGUIScheme::CopyWidget( int kind, PWidget wdg )
 {
 	if (wdg == NULL)
+		return;
+	if (objects[kind] == NULL) // И кто блять будет проверять, а? Вот здесь падало. Косяк то не здесь, но если бы не это, то прога бы нормально завершилась
 		return;
 	string _tmp = typeid(*objects[kind]).name();
 	if (_tmp == "class CButton")
@@ -681,21 +685,21 @@ bool CForm::LoadForm(char *Fname)
 	if (b != 'D')
 	{
 		file->Close();
-		Log("AHTUNG", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
+		Log("WARNING", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
 		return 0;
 	}
 	file->Read(&b, 1);
 	if (b != 'F')
 	{
 		file->Close();
-		Log("AHTUNG", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
+		Log("WARNING", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
 		return 0;
 	}
 	file->Read(&b, 1);
 	if (b != 'M')
 	{
 		file->Close();
-		Log("AHTUNG", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
+		Log("WARNING", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
 		return 0;
 	}
 	file->ReadString(name);
@@ -976,7 +980,8 @@ void CEdit::DrawText()
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
-		glColor4f(0,0,1,1);
+		//glColor4f(0,0,1,1); > БЛЯТЬ!
+		fnt->tClr = RGBAf(0.1f, 0.2f, 1.0f, 1.0f);
 		int l = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
@@ -985,7 +990,7 @@ void CEdit::DrawText()
 		fnt->isRect = true;
 		fnt->isSelected = true;
 		fnt->s1 = SelStart;
-		fnt->s1 = SelStart + SelLength - 1;
+		fnt->s2 = SelStart + SelLength - 1;
 		fnt->wh.x = GUIScheme->GetCWidth(ThisStyle, Width);
 		fnt->wh.y = GUIScheme->GetCHeight(ThisStyle, Height);
 		fnt->Print(str(Caption));
@@ -996,7 +1001,7 @@ void CEdit::DrawText()
 			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
 			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
 			,offset,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);*/
-		glColor4f(1,1,1,1);
+		
 	}
 }
 

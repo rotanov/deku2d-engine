@@ -593,6 +593,10 @@ CFont::CFont()
 	base = 0;
 	dist = CFONT_DEFAULT_DISTANCE;
 	pp = &p;
+	offset = 0;
+	isSelected = isRect = false;
+	s1 = s2 =0;
+	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 CFont::~CFont()
@@ -668,6 +672,7 @@ void CFont::_Print(const char *text)
 {
 	glPushAttrib(GL_TEXTURE_BIT);
 	glPushMatrix();
+	glColor4fv(&(tClr.r));
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, font);
 	glTranslatef(pp->x, pp->y, depth);
@@ -766,17 +771,19 @@ void CFont::Print( const char *text, ... )
 	}
 
 
-	char	temp[CFONT_MAX_STRING_LENGTH];
+	static char	*temp;//[CFONT_MAX_STRING_LENGTH];
+	temp = new char [strlen(text)+CFONT_MAX_STRING_LENGTH];
 	va_list	ap;
 	va_start(ap, text);
 	vsprintf(temp, text, ap);
 	va_end(ap);
 	_Print(temp);
+	delete [] temp;
 
 	if (isRect)
 	{
-		// 	glDisable(GL_SCISSOR_TEST);
-		// 	glPopAttrib();
+		 	glDisable(GL_SCISSOR_TEST);
+		 	glPopAttrib();
 	}
 }
 
@@ -1284,6 +1291,18 @@ void CParticleSystem::SetUserCreate( FCreateFunc func )
 		return;
 	user_create = true;
 	procUserCreate = func;
+}
+
+CParticleSystem::CParticleSystem()
+{
+	particles = NULL;
+	user_create = user_update = user_render = false;
+}
+
+
+CParticleSystem::~CParticleSystem()
+{
+	SAFE_DELETE(particles);
 }
 //////////////////////////////////////////////////////////////////////////
 //			Font Manager

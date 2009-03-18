@@ -17,7 +17,7 @@ bool CImageData::LoadBMP(const char * name)
 	
 	if (!file.Open(name, CFILE_READ))
 	{
-		Log("AHTUNG", "Cant load bmp file: \"%s\" file doesnt exist or can't open", name);
+		Log("WARNING", "Cant load bmp file: \"%s\" file doesnt exist or can't open", name);
 		return false;
 	}
   
@@ -25,13 +25,13 @@ bool CImageData::LoadBMP(const char * name)
 
 	if (bfh.bfType != 0x4d42)
 	{
-		Log("AHTUNG", "Cant load bmp file: \"%s\" is not a BMP file", name);
+		Log("WARNING", "Cant load bmp file: \"%s\" is not a BMP file", name);
 		return false;
 	}
 	file.Read(&bi, sizeof(BITMAPINFOHEADER));
 	if (bi.bmiHeader.biBitCount != 24)
 	{
-		Log("AHTUNG", "Cant load bmp file: \"%s\" only 24 bits per pixel supported", name);
+		Log("WARNING", "Cant load bmp file: \"%s\" only 24 bits per pixel supported", name);
 		return false;
 	}
 
@@ -96,7 +96,7 @@ bool CImageData::LoadPNG(const char * filename)
 	FILE *png_file = fopen(filename, "rb");
 	if (png_file == NULL)
 	{
-		Log("AHTUNG", "Can't Load PNG file: \"%s\" can't open or doesn't exist", filename);
+		Log("WARNING", "Can't Load PNG file: \"%s\" can't open or doesn't exist", filename);
 		return false;
 	}
 
@@ -105,7 +105,7 @@ bool CImageData::LoadPNG(const char * filename)
 	fread(header, 1, PNG_SIG_BYTES, png_file);
 	if (png_sig_cmp(header, 0, PNG_SIG_BYTES))
 	{
-		Log("AHTUNG", "Can't load PNG file: \"%s\" is not a PNG file.", filename);
+		Log("WARNING", "Can't load PNG file: \"%s\" is not a PNG file.", filename);
 		return false;
 	}
 
@@ -115,7 +115,7 @@ bool CImageData::LoadPNG(const char * filename)
 
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
-		Log("AHTUNG", "Can't load PNG file: \"%s\". Some error occured.", filename);
+		Log("WARNING", "Can't load PNG file: \"%s\". Some error occured.", filename);
 		return false;
 	}
 	png_init_io(png_ptr, png_file);

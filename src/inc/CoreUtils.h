@@ -185,7 +185,7 @@ class CBaseResource
 {
 public:
 	bool loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
-	string filename;	// Полный путь к файлу.
+	string filename;	// Полный^W хоть-какой-нибуть путь к файлу.
 	virtual bool LoadFromFile()
 	{
 		return false;

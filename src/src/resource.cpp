@@ -127,12 +127,12 @@ bool CFactory::InitManagers( CUpdateManager *vUpdateManager, CRenderManager *vRe
 {
 	if ((UpdateManager = vUpdateManager) == NULL)
 	{
-		Log("AHTUNG", "Error, UpdateManager has not been initialized");
+		Log("WARNING", "Error, UpdateManager has not been initialized");
 		return false;
 	}
 	if ((RenderManager = vRenderManager) == NULL)
 	{
-		Log("AHTUNG", "Error, RenderManager has not been initialized");
+		Log("WARNING", "Error, RenderManager has not been initialized");
 			return false;
 	}
 
@@ -257,8 +257,104 @@ bool CResourceManager::OpenResourceList(char *_ResourceListFileName)
 	ResourceListFileName = _ResourceListFileName;
 	if (!ResourceList->LoadFromFile(ResourceListFileName))
 	{
-		Log("AHTUNG", "Error while loading %s Resource list", ResourceListFileName);
+		Log("WARNING", "Error while loading %s Resource list", ResourceListFileName);
 		return false;
 	}
 	return true;
 }
+
+#ifdef WIN32
+
+void CDataLister::DelLastDirFromPath( char* src )
+{
+	int i = strlen(src)-1;
+	while(src[i] == '\\' || src[i] == '/')
+		i--;
+	while(src[i] != '\\' && src[i] != '/')
+		i--;
+	src[i+1] = 0;
+}
+
+bool CDataLister::List()
+{
+	HANDLE hfile;
+	char TempDir[MAX_PATH];
+	TempDir[0] = 0;
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DeleteFileNameFromEndOfPathToFile(MainDir);
+	strcat(TempDir, MainDir);
+	MainDirL = strlen(MainDir);
+	strcat(MainDir, "data\\");
+	SetCurrentDirectory(MainDir);
+
+	table.First->Name = "Data";
+
+	CurrDir[0] = 0;
+	strcat(CurrDir, MainDir);
+	cNode = table.First;
+
+	Log("----------", "");
+	hfile = FindFirstFile("*.*", &fdata);
+	ExploreDir(hfile);
+	Log("----------", "");
+
+	SetCurrentDirectory(MainDir);
+
+	table.SaveToFile("..\\Config\\Resources.xml");
+
+	SetCurrentDirectory(TempDir);	// Ебано как-то, но таки хуй с ним.
+
+	return 0x0;
+}
+
+// void CDataLister::AddDataToTable( char *section, char *name )
+// {
+// 	char *_value = new char[MAX_PATH];
+// 
+// 	_value[0] = 0;
+// 	strcat(_value, section);
+// 	strcat(_value, "/");
+// 	strcat(_value, name);
+// 
+// 
+// 	DeleteExtFromFilename(name);
+// 	table.First->Add(name, _value);
+// }
+
+void CDataLister::ExploreDir( HANDLE hfile )
+{
+	while (FindNextFile(hfile, &fdata))
+	{
+		if (fdata.cFileName[0] == '.' || fdata.cFileName[0] == '_')
+			continue;
+		if (fdata.dwFileAttributes == 16)
+		{
+			//Log("FOLDER", "%s", fdata.cFileName);			
+			strcat(CurrDir, (string(fdata.cFileName)+string("\\")).c_str());
+			SetCurrentDirectory(CurrDir);
+
+			_XMLNode *tmp = cNode;
+			cNode = cNode->Add(fdata.cFileName, fdata.cFileName);
+
+			HANDLE thandle = FindFirstFile("*.*", &fdata);
+			ExploreDir(thandle);
+
+			cNode = tmp;
+
+			DelLastDirFromPath(CurrDir);
+		}
+		else
+		{
+			//Log("FILE", "%s", fdata.cFileName);
+			char *tmp = new char [MAX_PATH];
+			tmp[0] = 0;
+			strcat(tmp, fdata.cFileName);
+			DeleteExtFromFilename(tmp);
+			if (strnicmp(tmp, "thumbs", MAX_PATH) != 0)
+				cNode->Add(tmp , (string(CurrDir+MainDirL) + string(fdata.cFileName)).c_str() );
+			delete [] tmp;
+		}
+	}
+}
+
+#endif WIN32

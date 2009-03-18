@@ -84,6 +84,36 @@ protected:
 	static int		_refcount;
 };
 
+#ifdef WIN32
+
+class CDataLister
+{
+public:
+	XMLTable table;
+	_XMLNode *cNode;
+	char *MainDir;
+	char *CurrDir;
+	int MainDirL;
+	WIN32_FIND_DATA fdata;
+
+	CDataLister()
+	{
+		MainDirL = 0;
+		MainDir = new char[MAX_PATH];
+		CurrDir = new char[MAX_PATH];
+	}
+	~CDataLister()
+	{
+		delete [] MainDir;
+		delete [] CurrDir;
+	}
+	void DelLastDirFromPath(char* src);
+	bool List();
+	//void AddDataToTable(char *section, char *name);
+	void ExploreDir(HANDLE hfile);
+};
+
+#endif WIN32
 
 class CResourceManager
 {
@@ -98,7 +128,7 @@ public:
 		ResourceList = new XMLTable;
 		if (!ResourceList->LoadFromFile(ResourceListFileName))
 		{
-			Log("AHTUNG", "Error while loading %s Resource list", ResourceListFileName);
+			Log("WARNING", "Error while loading %s Resource list", ResourceListFileName);
 		}
 	}
 	~CResourceManager()

@@ -186,7 +186,7 @@ typedef CGraphObj *PWidget;
 //CGObj List
 
 
-struct Style
+struct Style	// Структура, это класс со всеми членами в паблик по дефолту. Где префикс С блять?!?!
 {
 	unsigned short int Data[10];
 };
@@ -197,9 +197,9 @@ public:
 	CGUIScheme(char* fname, char* tname);
 	~CGUIScheme();
 	void					Release();
-	PWidget					objects[200];
+	PWidget					objects[200]; // с маленькой буквы
 	int						ObjCount;
-	Style					Styles[200];
+	Style					Styles[200]; // а тут с большой, блять, Петя, что за хуйня. Хотя это мелочи, но ты же сам понимаешь. О какой тут архитектуре речь, если ты...
 	int						StyleCount;
 	void					BeginUI();
 	void					EndUI();
@@ -224,7 +224,7 @@ bool						LoadGUI(char *fname);
 //void EndUI();
 
 //////////////////////////////////////////////////////////////////////////
-// !!!! BAD !!! __forceinline is microsoft specific
+// !!!! BAD !!! __forceinline is Microsoft specific
 // делай как в mathutils.h
 //////////////////////////////////////////////////////////////////////////
 

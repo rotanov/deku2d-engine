@@ -32,12 +32,12 @@ _XMLNode::_XMLNode()
 _XMLNode *_XMLNode::Get(PCHAR Str)
 {
 	if (Str==NULL){
-		Log("AHTUNG", "Cannot get XML node for because string pointer has NULL value", Str);
+		Log("WARNING", "Cannot get XML node for because string pointer has NULL value", Str);
 		return NULL;
 	}
 	_XMLNode *ptr = this->Child;
 	if (ptr==NULL){
-		Log("AHTUNG", "Cannot get XML node for \"%s\"", Str);
+		Log("WARNING", "Cannot get XML node for \"%s\"", Str);
 		return NULL;
 	}
 	while ((ptr->Name!=Str)&&(ptr->Next != NULL))

@@ -13,7 +13,7 @@ CFile::CFile(char *filename, int mode)
 		else
 		{
 			file = NULL;
-			Log("AHTUNG", "Can't open file %s", filename);
+			Log("WARNING", "Can't open file %s", filename);
 		}
 }
 
@@ -21,12 +21,12 @@ bool CFile::Open(const char *filename, int mode)
 {
 	if (filename == NULL)
 	{
-		Log("AHTUNG", "Can't open file. Invalid filename");
+		Log("WARNING", "Can't open file. Invalid filename");
 		return false;
 	}
 	if (file != NULL)
 	{
-		Log("AHTUNG", "Can't open file %s: another file is already opened.", filename);
+		Log("WARNING", "Can't open file %s: another file is already opened.", filename);
 		return false;
 	}
 	if (mode == CFILE_READ)
@@ -34,7 +34,7 @@ bool CFile::Open(const char *filename, int mode)
 		file = fopen(filename, "rb");
 		if (file == NULL)
 		{
-			Log("AHTUNG", "Can't open file %s.", filename);
+			Log("WARNING", "Can't open file %s.", filename);
 			return false;
 		}
 		return true;
@@ -44,14 +44,14 @@ bool CFile::Open(const char *filename, int mode)
 		file = fopen(filename, "wb");
 		if ( file == NULL )
 		{
-			Log("AHTUNG", "Can't open file %s.", filename);
+			Log("WARNING", "Can't open file %s.", filename);
 			return false;
 		}
 		return true;
 	}
 	if (mode!=CFILE_READ && mode!=CFILE_WRITE)
 	{
-		Log("AHTUNG", "Can't open file %s: invalid mode.", filename);
+		Log("WARNING", "Can't open file %s: invalid mode.", filename);
 		return false;
 	}
 	return true;
@@ -74,7 +74,7 @@ bool CFile::ReadByte(pbyte buffer)
 	if (fread(buffer, 1, 1, file) != 1)
 	{
 		if (!Eof())
-			Log("AHTUNG", "FILE IO Error. Can't read byte.");
+			Log("WARNING", "FILE IO Error. Can't read byte.");
 		return false;
 	}
 	return true;
@@ -91,7 +91,7 @@ bool CFile::Write(const void* buffer, DWORD nbytes)
 	if (fwrite(buffer, 1, nbytes, file) != nbytes)
 	{
 		if (!Eof())
-			Log("AHTUNG", "FILE IO Error. Can't write data.");
+			Log("WARNING", "FILE IO Error. Can't write data.");
 		return false;
 	}
 	return true;
@@ -106,7 +106,7 @@ bool CFile::WriteByte(pbyte buffer)
 	if (fwrite(buffer, 1, 1, file) != 1)
 	{
 		if (!Eof())
-			Log("AHTUNG", "FILE IO Error. Can't write byte.");
+			Log("WARNING", "FILE IO Error. Can't write byte.");
 		return false;
 	}
 	return true;
@@ -119,7 +119,7 @@ bool CFile::WriteByte(byte buffer)
 	if (fwrite(&buffer, 1, 1, file) != 1)
 	{
 		if (!Eof())
-			Log("AHTUNG", "FILE IO Error. Can't write byte.");
+			Log("WARNING", "FILE IO Error. Can't write byte.");
 		return false;
 	}
 	return true;
@@ -136,7 +136,7 @@ bool CFile::Read(void* buffer, DWORD nbytes)
 	if (fread(buffer, 1, nbytes, file) != nbytes)
 	{
 		if (!Eof())
-			Log("AHTUNG", "FILE IO Error. Can't read data.");
+			Log("WARNING", "FILE IO Error. Can't read data.");
 		return false;
 	}
 	return true;

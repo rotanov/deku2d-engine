@@ -276,12 +276,8 @@ bool Init()
 
 bool Draw()
 {	
-	//glLoadIdentity();
+	glLoadIdentity();
 	Ninja->FontManager->PrintEx(560, 460, 1, "Fps: %d", Ninja->GetFps());
-//	char buff[1024];
-//	memset(buff, 0, sizeof(buff));
-//	sprintf(buff, "%d %d %d %d", Edit->KeyState, SDL_GetTicks() - Edit->KeyTime, Edit->Shift, Edit->SelLength);
-//	Button->Caption = buff;
 
 	static Vector2 apos(200, 300);
 	static Vector2 bpos(300, 300);
@@ -307,6 +303,7 @@ bool Draw()
 	}
 	
 	CPrimitiveRender pr;
+	pr.doUseCurrentCoordSystem = false;
 	pr.lClr = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	pr.sClr = Vector4(0.9f, 0.7f, 0.7f, 0.5f);
 	pr.BlendingOption = PRM_RNDR_OPT_BLEND_ONE+1;
@@ -314,7 +311,6 @@ bool Draw()
 
 	pr.grPolyC(apos, angle, &a);
 	pr.grPolyC(bpos, 0.0f, &b);
-	//gRenderRing(Vector2(110, 110), 50, RGBAf(0.9f, 0.8f, 0.7f, 1.0f), RGBAf(0.9f, 0.8f, 0.7f, 1.0f));
 	pr.grArrowC(Vector2(100, 100), Vector2(400, 300));
 	pr.grSegment(bpos, (bpos + norm*depth));
 	angle += 1;
