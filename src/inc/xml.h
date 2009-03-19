@@ -111,8 +111,8 @@ class XMLTable
 public :
 	XMLTable();
 	~XMLTable(){First->Clear();}
-	bool					LoadFromFile(char *fname);
-	bool					SaveToFile(char *fname);
+	bool					LoadFromFile(const char *fname);
+	bool					SaveToFile(const char *fname);
 	XMLNode					First;
 private:
 };

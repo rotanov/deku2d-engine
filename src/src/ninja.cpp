@@ -30,6 +30,8 @@ CNinja::CNinja()
 	FontManager = CFontManager::Instance("ninja.cpp");
 	_instance = NULL;
 	_refcount = 0;
+	ConfigFileName = CONFIG_FILE_NAME;
+	ConfigFileName += "configuration.xml";
 }
 CNinja::~CNinja(){}
 
@@ -151,14 +153,24 @@ void CNinja::SetState(int state, void* value)
 				break;
 			case STATE_GUI_KEY_DOWN:
 				procGUIGetKeyDown = (KeyFunc)value;
+				break;
 			case STATE_GUI_MOUSE_DOWN:
 				procGUIGetMouseDown = (MouseFunc)value;
+				break;
 			case STATE_GUI_KEY_UP:
 				procGUIGetKeyUp = (KeyFunc)value;
+				break;
 			case STATE_GUI_MOUSE_UP:
 				procGUIGetMouseUp = (MouseFunc)value;
+				break;
 			case STATE_GUI_MOUSE_MOVE:
 				procGUIGetMouseMove = (MouseFunc)value;
+				break;
+			case STATE_CONFIG_NAME:
+				{
+					ConfigFileName = CONFIG_FILE_NAME;
+					ConfigFileName += (char*)value;
+				}
 		}
 	}
 
@@ -172,11 +184,18 @@ bool CNinja::Init()
 		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
 		delete [] pathexe;
 		ShowWindow(hwnd, 0);
+
+		char *MainDir = new char[MAX_PATH];
+		GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+		DeleteFileNameFromEndOfPathToFile(MainDir);
+		SetCurrentDirectory(MainDir);
+		delete [] MainDir;
+
 	#endif
 	
 
-	XMLTable Config;
-	if (!Config.LoadFromFile(CONFIG_FILE_NAME))
+	//XMLTable Config;
+	if (!Config.LoadFromFile(ConfigFileName.c_str()))
 	{
 		Log("WARNING", "Can't load XMLTable %s", CONFIG_FILE_NAME);
 		return false;
@@ -285,6 +304,7 @@ bool CNinja::ProcessEvents()
 				{
 					if (procGUIGetMouseMove)
 						procGUIGetMouseMove(event.motion.x, event.motion.y, 0);
+					MousePos = Vector2(event.motion.x, window.height - event.motion.y);
 					break;
 				}
 			case SDL_KEYUP:
@@ -364,6 +384,31 @@ bool CNinja::MidInit()
 	return true;
 }
 
+void CNinja::GetState( int state, void* value )
+{
+	switch (state)
+	{
+	case STATE_SCREEN_WIDTH:
+		*(int*)value = window.width;
+		break;
+	case STATE_SCREEN_HEIGHT:
+		*(int*)value = window.height;
+		break;
+	case STATE_MOUSE_X:
+		*(float*)value = MousePos.x;
+		break;
+	case STATE_MOUSE_Y:
+		*(float*)value = MousePos.y;
+		break;
+	case STATE_MOUSE_XY:
+		*(Vector2*)value = MousePos;
+		break;
+
+	default:
+		value = NULL;
+		break;
+	}
+}
 CNinja* CNinja::_instance = 0;
 int CNinja::_refcount = 0;
 

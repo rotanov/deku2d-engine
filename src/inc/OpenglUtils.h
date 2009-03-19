@@ -79,7 +79,7 @@ public:
 		plClr = &lClr;
 		psClr = &sClr;
 		ppClr = &pClr;
-		depth = 0.0f;
+		Angle = depth = 0.0f;
 		lwidth = 1.0f;
 		psize = 8.0f;
 		LineStippleEnabled = doUseCurrentCoordSystem = false;			

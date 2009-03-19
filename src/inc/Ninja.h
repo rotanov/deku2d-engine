@@ -27,6 +27,10 @@
 #define STATE_DO_LIMIT_FPS		0x05
 #define STATE_DO_CALC_FPS		0x06
 #define STATE_FPS_LIMIT			0x07
+#define STATE_CONFIG_NAME		0x08
+#define STATE_MOUSE_X			0x09
+#define STATE_MOUSE_Y			0x0A
+#define STATE_MOUSE_XY			0x0B
 
 #define STATE_USER_INIT			0x81
 #define STATE_UPDATE_FUNC		0x82
@@ -51,8 +55,10 @@ public:
 	CRenderManager				RenderManager;
 	CFontManager				*FontManager;
 	CUpdateManager				UpdateManager;
-	
+	XMLTable					Config;
 	BOOL						keys[SDLK_LAST];
+	Vector2						MousePos;
+
 
 	CFactory					*Factory;
 	static CNinja*				Instance();
@@ -68,6 +74,7 @@ public:
 	char						*ResourceListPath;
 	
 private:
+	string						ConfigFileName;
 	bool						doLimitFps;
 	unsigned int				Fps;
 	unsigned int				FpsLimit;

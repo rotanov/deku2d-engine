@@ -297,15 +297,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\cursor1.cur"
-				>
-			</File>
-			<File
-				RelativePath=".\icon2.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\icon_snw.ico"
+				RelativePath="..\ico\Gift.ico"
 				>
 			</File>
 			<File
@@ -557,6 +549,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\resource.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

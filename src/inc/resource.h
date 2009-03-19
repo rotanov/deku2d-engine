@@ -8,7 +8,7 @@
 #include "xml.h"
 
 // зашитые в код названия файлов и секций, todo: подумать как избаиться от зашития в код
-#define CONFIG_FILE_NAME "config/configuration.xml"
+#define CONFIG_FILE_NAME "config/"
 #define CRESOURCE_SECTION_FONTS "Fonts"
 #define CRESOURCE_SECTION_TEXTURES "Textures"
 

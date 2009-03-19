@@ -301,7 +301,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Ninja engine.rc"
+				RelativePath=".\Level Editor.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\resourceLE.h"
 				>
 			</File>
 		</Filter>
@@ -549,10 +553,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\resource.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

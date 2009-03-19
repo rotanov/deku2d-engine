@@ -399,7 +399,7 @@ XMLTable::XMLTable()
 *	it blocket from reading and also can be failed
 *	on parse error.
 */
-bool XMLTable::LoadFromFile(char *fname)
+bool XMLTable::LoadFromFile(const char *fname)
 {
 	CFile f;
 	if (!f.Open(fname, CFILE_READ))
@@ -514,7 +514,7 @@ bool XMLTable::LoadFromFile(char *fname)
 *	Can be failed only if file blocked from 
 *	writing.
 */
-bool XMLTable::SaveToFile(char *fname)
+bool XMLTable::SaveToFile(const char *fname)
 {
 	CFile f;
 	if (!f.Open(fname, CFILE_WRITE)){

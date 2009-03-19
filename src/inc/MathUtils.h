@@ -981,6 +981,8 @@ union Vector4
 			w = V.w;
 			return *this;
 		}
+
+
 		__INLINE Vector4 operator/(scalar s)
 		{
 			if (s == 0.0f)

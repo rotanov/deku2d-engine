@@ -597,6 +597,7 @@ CFont::CFont()
 	isSelected = isRect = false;
 	s1 = s2 =0;
 	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	SetDepth(0.0f);
 }
 
 CFont::~CFont()

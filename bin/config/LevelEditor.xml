@@ -1,0 +1,12 @@
+<configuration>
+	WindowWidth		= "1000"
+	WindowHeight		= "700"
+	WindowBpp		= "32"
+	WindowCaption		= "Level editor"
+	DoCalcFps		= "true"
+	DoLimitFps		= "false"
+	DefaultCellSize		= "16"
+	FpsLimit			= "20" // он пиздит, это не фпс лимит, а кол-во миллисекунд между кадрами
+	XMLResourcesFilename    	= "config/resources.xml"
+     	DataPath               	= "Data/"
+</configuration>
