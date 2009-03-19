@@ -42,19 +42,17 @@ void CTileSet::RenderTileSet()
 
 	CPrimitiveRender p;
 	p.doUseCurrentCoordSystem = false;
-	p.BlendingOption = 1;
-	p.lClr = RGBAf(0.0f, 0.0f, 1.0f, 1.0f);
-	p.pClr = RGBAf(0.0f, 0.0f, 1.0f, 1.0f);
-	p.lwidth = 0.2f;
+	p.BlendingOption = PRM_RNDR_OPT_BLEND_NOONE;
+	p.lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	p.pClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	p.lwidth = 0.1f;
 	
-	for (int i = 0; i <= Info.HorNumTiles; i ++)
-	{
-		p.grSegment(Vector2(i*Info.TileWidth, 0.0f), Vector2(i*Info.TileWidth, Texture->height));
-	}
-	for (int i = 0; i <= Info.VerNumTiles; i ++)
-	{
-		p.grSegment(Vector2(0.0f, i*Info.TileHeight), Vector2(Texture->width, i*Info.TileHeight));
-	}
+	for (int i = 0; i <= Info.HorNumTiles; i++)
+		p.grSegment(Vector2(i*Info.TileWidth, 0.0f),
+			Vector2(i*Info.TileWidth, Texture->height));
+	for (int i = 0; i <= Info.VerNumTiles; i++)
+		p.grSegment(Vector2(0.0f, i*Info.TileHeight),
+			Vector2(Texture->width, i*Info.TileHeight));
 }
 
 bool CTileSet::SaveToFile()

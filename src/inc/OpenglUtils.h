@@ -59,6 +59,7 @@ public:
 
 #define PRM_RNDR_OPT_BLEND_ONE		0x01
 #define PRM_RNDR_OPT_BLEND_OTHER	0x02
+#define PRM_RNDR_OPT_BLEND_NOONE	0x03
 
 class CPrimitiveRender
 {

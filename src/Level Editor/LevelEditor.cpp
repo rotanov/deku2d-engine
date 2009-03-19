@@ -9,6 +9,8 @@ float Zoom = 16.0f;
 CTileSet *TileSet = NULL;
 Vector2 Mp;
 CFont* f;
+Vector2 oMp = V2Zero, Offset = V2Zero;
+Vector2 CellOffset;
 
 void DrawGrid()
 {
@@ -19,30 +21,31 @@ void DrawGrid()
 	(m /= Zoom)++;
 	glLoadIdentity();
 	CPrimitiveRender p;
-	p.doUseCurrentCoordSystem = true;
-	p.BlendingOption = 1;
+	glTranslatef((int)Offset.x % (int)Zoom,(int)Offset.y % (int)Zoom, 0.0f);
+	p.doUseCurrentCoordSystem = false;
+	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
 	p.lClr = RGBAf(1.0f, 1.0f, 1.0f, 0.6f);
 	p.pClr = RGBAf(1.0f, 1.0f, 1.0f, 0.6f);
 	p.lwidth = 0.2f;
 
-	for (int i = 0; i < n; i ++)
+	for (int i = -2; i <= n+2; i ++)
 	{
-		p.grSegment(Vector2(i*Zoom, 0.0f), Vector2(i*Zoom, 768));
+		p.grSegment(Vector2(i*Zoom, -2*Zoom), Vector2(i*Zoom, (m+2)*Zoom));
 	}
-	for (int i = 0; i < m; i ++)
+	for (int i = -2; i <= m+2; i ++)
 	{
-		p.grSegment(Vector2(0.0f, i*Zoom), Vector2(1024.0f, i*Zoom));
+		p.grSegment(Vector2(-2*Zoom, i*Zoom), Vector2((n+2)*Zoom, i*Zoom));
 	}
 
-	p.lClr = RGBAf(0.5f, 0.1f, 0.8f, 0.6f);
+	p.lClr = RGBAf(0.4f, 0.1f, 0.8f, 0.6f);
 	p.lwidth = 3.0f;
-	for (int i = 0; i < n; i+=GAME_HTILES)
+	for (int i = (int)CellOffset.x; i <= n+2; i+=GAME_HTILES)
 	{
-		p.grSegment(Vector2(i*Zoom, 0.0f), Vector2(i*Zoom, 768));
+		p.grSegment(Vector2(i*Zoom, -2*Zoom), Vector2(i*Zoom, (m+2)*Zoom));
 	}
-	for (int i = 0; i < m; i+=GAME_VTILES)
+	for (int i = (int)CellOffset.y; i <= m+2; i+=GAME_VTILES)
 	{
-		p.grSegment(Vector2(0.0f, i*Zoom), Vector2(1024.0f, i*Zoom));
+		p.grSegment(Vector2(-2*Zoom, i*Zoom), Vector2((n+2)*Zoom, i*Zoom));
 	}
 
 
@@ -57,7 +60,7 @@ bool Init()
 
 	Zoom = atoi((Ninja->Config.First->Get("DefaultCellSize"))->GetValue());
 	
-	
+	SDL_ShowCursor(0);
 	Ninja->RenderManager.SortByAlpha();
 	Ninja->RenderManager.SortByZ();
 	TileSet = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("Tilesets", "TileSet02-Snow01", CTileSet::NewTileSet));
@@ -80,6 +83,7 @@ bool Draw()
 
 	Ninja->GetState(STATE_MOUSE_XY, &Mp);
 	CPrimitiveRender p;
+	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
 	p.doUseCurrentCoordSystem = true;
 	p.lClr = RGBAf(0.1f, 0.7f, 0.3f, 0.7f);
 	p.pClr = RGBAf(0.1f, 0.7f, 0.3f, 0.7f);
@@ -92,16 +96,27 @@ bool Draw()
 		glTranslatef(vx*Zoom, vy*Zoom, 0.0f);
 		TileSet->RenderTileSet();
 	}
-
-	p.grRectC(Vector2(vx*Zoom, vy*Zoom),
-			  Vector2((vx+1)*Zoom, (vy+1)*Zoom));
+	
+	Vector2 mOffset;
+	mOffset.x = (int)Offset.x % (int)Zoom;
+	mOffset.y = (int)Offset.y % (int)Zoom;
+	p.grRectC(Vector2(vx*Zoom, vy*Zoom)+mOffset,
+			  Vector2((vx+1)*Zoom, (vy+1)*Zoom)+mOffset);
 
 
 	glLoadIdentity();
 	f->p = Vector2((vx+1)*Zoom, vy*Zoom);
-	f->Print(" x:%d y:%d", (int)vx, (int)vy);
+	f->Print(" x:%d y:%d", (int)(vx - CellOffset.x), (int)(vy - CellOffset.y));
 
-	
+	if (Ninja->keys[SDLK_g])
+	{
+		Offset += Mp - oMp;
+	}
+	CellOffset.x = (int)Offset.x / (int)Zoom;
+	CellOffset.y = (int)Offset.y / (int)Zoom;
+
+	oMp = Mp;
+
 	return true;
 }
 int	main(int argc, char *argv[])

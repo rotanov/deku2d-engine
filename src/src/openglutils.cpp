@@ -1855,17 +1855,21 @@ void CPrimitiveRender::AfterRndr()
 
 void CPrimitiveRender::CheckBlend()
 {
-	if (BlendingOption == PRM_RNDR_OPT_BLEND_ONE)
+	switch(BlendingOption)
 	{
+	case PRM_RNDR_OPT_BLEND_ONE:
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);		
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	}
-	else
-	{
+		break;
+	case PRM_RNDR_OPT_BLEND_OTHER:
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);		
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case PRM_RNDR_OPT_BLEND_NOONE:
+		glDisable(GL_BLEND);
+		break;
 	}
 }
 
