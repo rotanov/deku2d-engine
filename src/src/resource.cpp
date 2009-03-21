@@ -155,20 +155,43 @@ CResourceManager::CResourceManager()
 	ResourceList = NULL;
 }
 
-bool CResourceManager::LoadSection(char *SectionName)
+bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 {
-
+	if (ResourceList == NULL)
+	{
+		Log("WARNING", "Trying to load section %s while Resource list has not been loaded", SectionName);
+		return false;
+	}
+	XMLNode x = ResourceList->First->Get(SectionName);
+	if (x == NULL)
+	{
+		Log("WARNING", "Section %s has not been found", SectionName);
+		return false;
+	}
+	string key, val;
+	int Result;
+	CFactory *Factory = CFactory::Instance(); 
+	CResource *Resource;
+	while (x->Enum(key, val, Result))
+	{
+		Resource = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
+		if (Resource == NULL) 
+			return false;
+		Resource->name = key;
+		Resource->filename = val;
+	}
+	Factory->FreeInst();
 	return true;
 }
 
 bool CResourceManager::LoadResources()
 {
-	if (!LoadTextures())
+	if (!LoadSection(CRESOURCE_SECTION_TEXTURES, CTexture::NewTexture))
 	{
 		Log("ERROR","Error loading textures");
 		return false;
 	}
-	if (!LoadFonts())
+	if (!LoadSection(CRESOURCE_SECTION_FONTS, CFont::NewFont))
 	{
 		Log("ERROR", "ERROR loading fonts");
 		return false;
@@ -196,58 +219,6 @@ CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc cr
 	Factory->FreeInst();
 	return result;
 }
-
-bool CResourceManager::LoadFonts()
-{
-	if (ResourceList == NULL)
-	{
-		Log("WARNING", "Trying to load fonts while Resource list has not been loaded");
-		return false;
-	}
-	XMLNode x = ResourceList->First->Get(CRESOURCE_SECTION_FONTS);
-	if (x == NULL)
-		return false;
-	string key, val;
-	int Result;
-	CFactory *Factory = CFactory::Instance();
-	CFont *Font;
-	while (x->Enum(key, val, Result))
-	{
-		Font = (CFont*)Factory->Create(OBJ_FONT_M, NULL);
-		if (Font == NULL)
-			return false;
-		Font->name = key;
-		Font->LoadFromFile((char*)(val).data()); // DataPath+FontsFldr+ // debug here
-	}
-	Factory->FreeInst();
-	return true;
-}
-
-bool CResourceManager::LoadTextures()
-{
-	if (ResourceList == NULL)
-	{
-		Log("WARNING", "Trying to load textures while Resource list has not been loaded");
-		return false;
-	}
-	XMLNode x = ResourceList->First->Get(CRESOURCE_SECTION_TEXTURES);
-	if (x == NULL)
-		return false;
-	string key, val;
-	int Result;
-	CFactory *Factory = CFactory::Instance(); 
-	CTexture *TextureRes;
-	while (x->Enum(key, val, Result))
-	{
-		TextureRes = dynamic_cast<CTexture*>(Factory->Create(OBJ_TEXTURE_RES, CTexture::NewTextureRes));
-		if (TextureRes == NULL) 
-			return false;
-		TextureRes->name = key;
-		TextureRes->filename = val; // DataPath + TexturesFldr + // debug here
-	}
-	Factory->FreeInst();
-	return true;
-};
 
 bool CResourceManager::OpenResourceList(char *_ResourceListFileName)
 {
@@ -306,20 +277,6 @@ bool CDataLister::List()
 
 	return 0x0;
 }
-
-// void CDataLister::AddDataToTable( char *section, char *name )
-// {
-// 	char *_value = new char[MAX_PATH];
-// 
-// 	_value[0] = 0;
-// 	strcat(_value, section);
-// 	strcat(_value, "/");
-// 	strcat(_value, name);
-// 
-// 
-// 	DeleteExtFromFilename(name);
-// 	table.First->Add(name, _value);
-// }
 
 void CDataLister::ExploreDir( HANDLE hfile )
 {

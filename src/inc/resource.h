@@ -136,12 +136,10 @@ public:
 		if (ResourceList != NULL)
 			delete ResourceList;
 	}
-	bool OpenResourceList(char *_ResourceListFileName);
-	bool LoadSection(char *SectionName);
-	CObject* LoadResource(char* section, char *name, CreateFunc creator);
-	bool LoadResources();
-	bool LoadFonts();
-	bool LoadTextures();
+	bool		OpenResourceList(char *_ResourceListFileName);
+	bool		LoadSection(char *SectionName, CreateFunc creator);
+	CObject*	LoadResource(char* section, char *name, CreateFunc creator);
+	bool		LoadResources();
 private:
 };
 

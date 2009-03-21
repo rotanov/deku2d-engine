@@ -5,8 +5,13 @@
 	WindowCaption		= "Level editor"
 	DoCalcFps		= "true"
 	DoLimitFps		= "false"
-	DefaultCellSize		= "16"
-	FpsLimit			= "20" // он пиздит, это не фпс лимит, а кол-во миллисекунд между кадрами
-	XMLResourcesFilename    	= "config/resources.xml"
+	FpsLimit		= "20" // он пиздит, это не фпс лимит, а кол-во миллисекунд между кадрами
+	XMLResourcesFilename    = "config/resources.xml"
      	DataPath               	= "Data/"
+
+	DefaultCellSize		= "32"
+	GameVTiles		= "15"
+	GameHTiles		= "20"
+	LeftPanel 		= "196"
+	BottomPanel 		= "196"
 </configuration>

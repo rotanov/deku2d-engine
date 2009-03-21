@@ -205,37 +205,22 @@ protected:
 	GLuint TexID;
 };
 
-class CTexture : public CGLImageData, public CResource, public CRenderObject
+class CTexture : public CGLImageData, public CResource
 {
 public:
-	CTexture(char * vfilename)
-	{
-		filename = vfilename;
-		name = "CTexture";
-		this->type = T_RENDERABLE;
-	}
-	void Bind()
-	{
-		glBindTexture(GL_TEXTURE_2D, GetTexID());
-	}
-	bool Render()
-	{
-		return true;
-	}
-	CTexture()
-	{
-	};
-	static CObject* NewTextureRes()
+
+	CTexture();
+	CTexture(char * vfilename);
+	static CObject* NewTexture()
 	{
 		return new CTexture;
 	}
+
+	void Bind();
 	bool Load();
 	GLuint GetTexID();
 protected:
-	void Unload()
-	{
-		glDeleteTextures(1, &TexID);
-	}
+	void Unload();
 };
 
 class CTextureManager : public CObjectList
@@ -401,7 +386,7 @@ private:
 #define CFONT_DEPTH_LOW			0.0f
 #define CFONT_MAX_STRING_LENGTH	256
 
-class CFont : public CObject
+class CFont : public CResource
 {
 public:
 	CFont();
@@ -418,6 +403,10 @@ public:
 	bool				doUseGlobalCoordSystem;	//	Использовать ли для вывода глобальную систему коодинат	
 	CPrimitiveRender	Prndr;					//	Настройки линий и прочей хуеты связаной с рамкой.
 
+	static CObject* NewFont()
+	{
+		return new CFont;
+	}
 	bool		LoadFromFile(char* filename);
 	bool		SaveToFile(char* filename);
 

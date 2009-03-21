@@ -234,17 +234,17 @@ bool Init()
 	glEnable(GL_DEPTH_TEST); // Dis
 	glDisable(GL_LINE_WIDTH);
 
-	tempMakeTileSet();
-	tempMakeMap();
+	//tempMakeTileSet();
+	//tempMakeMap();
 
 	CTileSet *ts;
 	//ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("tileset", "TileSet01", CTileSet::NewTileSet));
 	ts = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("Tileset", "TileSet02-Snow01", CTileSet::NewTileSet));
 	
-	CLevelMap *lm;
-	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("Levels", "Level02", CLevelMap::NewLevelMap));
-	lm->visible = true;
-	lm->depth = -0.6f;
+// 	CLevelMap *lm;
+// 	lm = dynamic_cast<CLevelMap*>(Ninja->ResourceManager.LoadResource("Levels", "Level02", CLevelMap::NewLevelMap));
+// 	lm->visible = true;
+// 	lm->depth = -0.6f;
 	
 	Ninja->RenderManager.SortByAlpha();
 	Ninja->RenderManager.SortByZ();

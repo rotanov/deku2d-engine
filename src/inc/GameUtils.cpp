@@ -151,10 +151,10 @@ bool CLevelMap::LoadFromFile()
 	TileSet = dynamic_cast<CTileSet*>(Factory->GetObjectByName(TileSetName));
 	if (TileSet == NULL)
 	{
-		TileSet = dynamic_cast<CTileSet*>(Factory->Create(OBJ_USER_DEFINED, CTileSet::NewTileSet));		
-		//TileSet->LoadFromFile(tilesetname);
+		Log("Error", "Tileset %s for map %s not found in resources", this->name, TileSetName);
+		return false;
 	}
-	TileSet->Texture->Load();
+	//TileSet->Texture->Load();
 
 	File.Read(&numCellsHor, sizeof(numCellsHor));
 	File.Read(&numCellsVer, sizeof(numCellsVer));

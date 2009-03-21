@@ -598,6 +598,10 @@ CFont::CFont()
 	s1 = s2 =0;
 	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 	SetDepth(0.0f);
+
+	CFontManager* FntMan = CFontManager::Instance("OpenglUtils.cpp");
+	FntMan->AddObject(this);
+	FntMan->FreeInst("OpenGLutils.cpcpc");
 }
 
 CFont::~CFont()
@@ -1350,12 +1354,12 @@ int CFontManager::_refcount = 0;
 
 CFont* CFontManager::GetFont( char* fontname )	
 {
-	return (CFont*)GetObjectByName(fontname);
+	return dynamic_cast<CFont*>(GetObjectByName(fontname));
 }
 
 CFont* CFontManager::GetFontEx( string fontname )
 {
-	return (CFont*)GetObjectByName(fontname);
+	return dynamic_cast<CFont*>(GetObjectByName(fontname));
 }
 
 bool CFontManager::SetCurrentFont( char* fontname )
@@ -1395,7 +1399,7 @@ bool CFontManager::AddObject( CObject *object )
 {
 	CObjectList::AddObject(object);
 	if (CurrentFont == NULL)
-		CurrentFont = (CFont*)object;
+		CurrentFont = dynamic_cast<CFont*>(object);
 	return true;
 }
 
@@ -1501,6 +1505,33 @@ GLuint CTexture::GetTexID()
 		}		
 	}
 	return TexID;
+}
+
+CTexture::CTexture(char * vfilename)
+{	
+	filename = vfilename;
+	name = "CTexture";
+	CTextureManager *TexMan = CTextureManager::Instance();
+		TexMan->AddObject(this);
+	TexMan->FreeInst();
+}
+
+CTexture::CTexture()
+{
+	name = "CTexture";
+	CTextureManager *TexMan = CTextureManager::Instance();
+	TexMan->AddObject(this);
+	TexMan->FreeInst();
+}
+
+void CTexture::Bind()
+{
+	glBindTexture(GL_TEXTURE_2D, GetTexID());
+}
+
+void CTexture::Unload()
+{
+	glDeleteTextures(1, &TexID);
 }
 
 void CCamera::Assign(scalar *x, scalar *y)
