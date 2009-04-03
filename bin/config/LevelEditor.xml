@@ -9,7 +9,7 @@
 	XMLResourcesFilename    = "config/resources.xml"
      	DataPath               	= "Data/"
 
-	DefaultCellSize		= "32"
+	DefaultCellSize		= "4"
 	GameVTiles		= "15"
 	GameHTiles		= "20"
 	LeftPanel 		= "196"

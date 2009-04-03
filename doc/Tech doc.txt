@@ -1,0 +1,71 @@
+This is first piece:
+
+A place to write the requirements. 
+A place to write an overview of how objects/functions/data interact. 
+A place to specify coding conventions such as variable naming and commenting. 
+A place to list all the technologies the game uses, and how the game benefits from them. 
+A place to list all the classes/structures/variables, and what they are to contain. 
+A place to list all the functions/routines and what they are to do. 
+A place to list in what order modules will be written. 
+A place to list file types, data layout, etc. 
+A place to give considerations to future additions, and "what if"s. 
+A place to list projected system requirements and dependencies.
+
+
+And here goes second:
+
+Technical Document 
+
+Requirements: 
+The program must be able to run on any Win9x/Me/2000/XP system. 
+The program must not require any additional files/dependencies, and it needs to be small. 
+It needs to run on any computer with a Pentium class CPU, and as little as 16 megabytes of memory. 
+It should be controlled exclusively by the mouse. No other input device should be required. 
+The game is for two human players. 
+Note: Simple eh? Your projects will require more then a point form outline, but that doesn't mean you can't KISS. (KISS - Keep It Simple Stupid.)
+
+Overview Of Design: 
+
+The game will be written using a C++/WIN32 solution. It's will consist of a few small classes which define the entire game. The windows code will be in straight structured style, while the game module will be forged object orientated style. We considered using DirectX, but not all systems have the capacity or drivers, so the standard windows gdi drawing functions are the choice. 
+
+Drawing: 
+The game will use the standard shape drawing functions of windows. There is no art, everything is to be drawn as geometric shapes. The game board will be drawn as lines, and the X's will be lines, and finally O's will be circles. (No, that wasn't obvious =) 
+
+Note: Information on colours and font types should be in the design document! You might cross reference what these are by referring to the design document, so you know what you need to support, but not here. 
+
+Input: 
+The mouse will be used for input. The menu and item in the client area of the window can be dragged, clicked, and double clicked. 
+The mouse will be used for both human players. 
+No mouse operations need more then two buttons. 
+
+Note: Cursor colours/art should be in the design document! 
+
+Logic: 
+The game data is essentially kept in a array that holds the marking pieces of the game. 
+
+Note: There is more you could add here, but I'm sure you get the idea by now ;-) 
+
+Project Break Down: 
+
+The project has a total of four files. Two header files, and two source files. One set will contain all game related code, and the other will contain all window specific code ( although the drawing and sound code will be encapsulated to some degree in the game code.) 
+
+Game Module: 
+Class TicTacToe 
+Properties: 
+Current players turn 
+Board array 
+(etc…) 
+
+Methods: 
+Initialize - Clears variables, sets game states all to beginning values. 
+GetInput - is called and passed mouse position and button states. Uses this information to check to see if user has placed a game pieces (X or 0) 
+Draw - is passed a window DC and draws board in client area. 
+(etc…) 
+
+Window Module: 
+(Same format as above…)
+Note: Usually, each function would have a description of everything it does, but I'm assured as an experienced programmer you can do that yourself ;-()
+
+Future Considerations: 
+
+In the future, the game might need the addition of an AI component. The class's ability to handle it's own input will allow us the addition of an AI component quite easily with out changing much of the existing code. (Note: Not there was much to begin with, but don't be too cynical =)

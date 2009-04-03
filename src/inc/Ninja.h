@@ -18,7 +18,9 @@
 #include "Xml.h"
 #include "resource.h"
 
-#define NINJA_VERSION 0x100
+#define FIXED_DELTA_TIME		0.02f
+#define NINJA_VERSION			0x100
+#define MAX_EVENT_FUNCTIONS		10
 
 #define STATE_SCREEN_WIDTH		0x01
 #define STATE_DO_CALCFPS		0x02
@@ -44,6 +46,8 @@
 typedef bool (*Callback)();
 typedef bool (*KeyFunc)(char, SDLKey);
 typedef bool (*MouseFunc)(int, int, unsigned char);
+typedef bool (*InputFunc)(SDL_MouseButtonEvent&, SDL_MouseMotionEvent&, SDL_KeyboardEvent&);
+typedef bool (*EventFunc)(SDL_Event&);
 
 
 
@@ -70,6 +74,8 @@ public:
 	int							GetWindowWidth();
 	void						SetState(int state, void* value);
 	void						GetState(int state, void* value);
+	bool						AddEventFunction(EventFunc func);
+	int							CfgGetInt(char* ParamName);
 	bool						Run();
 	char						*ResourceListPath;
 	
@@ -81,6 +87,7 @@ private:
 	float						dt;
 	bool						isHaveFocus;
 	bool						doCalcFps;
+	int							EventFuncCount;
 	CGLWindow					window;
 
 
@@ -91,6 +98,7 @@ private:
 	bool						Suicide();
 	bool						ProcessEvents();
 
+	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];
 	bool						(*procUserInit)();
 	bool						(*procUserSuicide)();
 	bool						(*procFocusLostFunc)();

@@ -186,16 +186,14 @@ bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 
 bool CResourceManager::LoadResources()
 {
-	if (!LoadSection(CRESOURCE_SECTION_TEXTURES, CTexture::NewTexture))
-	{
-		Log("ERROR","Error loading textures");
-		return false;
-	}
-	if (!LoadSection(CRESOURCE_SECTION_FONTS, CFont::NewFont))
-	{
-		Log("ERROR", "ERROR loading fonts");
-		return false;
-	}
+	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
+		if (!LoadSection(strSections[i], fncInitializers[i]))
+		{
+			Log("ERROR","Error loading section %s", strSections[i]);
+			return false;
+		}
+		else
+			Log("INFO", "Default section %s loaded", strSections[i]);
 	return true;
 }
 
@@ -211,9 +209,9 @@ CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc cr
 	CResource *result;
 	val = x->Get(name)->GetValue();
 
-	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator)); // May be not safe, be careful here: creator sholud return class derived from CResource
+	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
 	result->name = name;
-	result->filename = val; // DataPath + // debug here
+	result->filename = val;
 	result->LoadFromFile();
 
 	Factory->FreeInst();

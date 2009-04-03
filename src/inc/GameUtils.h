@@ -93,6 +93,7 @@ public:
 	{
 		return true;
 	}
+	bool GenCells();
 	bool LoadFromFile();
 	bool SaveToFile();
 	bool Render();

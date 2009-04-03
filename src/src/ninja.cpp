@@ -32,6 +32,7 @@ CNinja::CNinja()
 	_refcount = 0;
 	ConfigFileName = CONFIG_FILE_NAME;
 	ConfigFileName += "configuration.xml";
+	EventFuncCount = 0;
 }
 CNinja::~CNinja(){}
 
@@ -266,11 +267,20 @@ bool CNinja::Suicide()
 	return true;
 }
 
+#define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
+
 bool CNinja::ProcessEvents()
 {
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
+		
+		switch(event.type)
+		{
+			INPUT_FILTER
+				for(int i=0;i<EventFuncCount;i++)
+					(*EventFunctions[i])(event);
+		}
 		switch(event.type)
 		{
 			case SDL_KEYDOWN:
@@ -286,6 +296,7 @@ bool CNinja::ProcessEvents()
 					return false;
 				}
 				keys[sym] = 1;
+
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
@@ -322,7 +333,7 @@ bool CNinja::ProcessEvents()
 				}
 			case SDL_QUIT:
 				SDLGLExit(1);
-			break;
+				break;
 			default:
 			{
 				break;
@@ -338,12 +349,10 @@ bool CNinja::Run()
 	//#######################//
 	if(!Init())
 	{
-		Log("PIZDEC", "Init failed");
+		Log("ERROR", "Initialization failed");
 		SDLGLExit(-1);
 		return false;
 	}
-
-
 
 	Forever
 	{
@@ -409,6 +418,21 @@ void CNinja::GetState( int state, void* value )
 		break;
 	}
 }
+
+bool CNinja::AddEventFunction(EventFunc func)
+{
+	if (EventFuncCount >= MAX_EVENT_FUNCTIONS)
+		return false;
+	EventFunctions[EventFuncCount] = func;
+	EventFuncCount++;
+	return true;
+}
+
+int CNinja::CfgGetInt( char* ParamName )
+{
+	return atoi((Config.First->Get(ParamName))->GetValue());
+}
+
 CNinja* CNinja::_instance = 0;
 int CNinja::_refcount = 0;
 
@@ -419,7 +443,7 @@ bool CUpdateManager::UpdateObjects()
 	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
 	while (data)
 	{
-		data->Update(0.02f); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
+		data->Update(FIXED_DELTA_TIME); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 		data = dynamic_cast<CUpdateObject*>(Next());
 	}
 	engine->FreeInst();

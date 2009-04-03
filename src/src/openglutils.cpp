@@ -94,6 +94,8 @@ bool CGLImageData::RenderWhole(int zoom)
 	return true;
 }
 
+
+// В жоа такие ф-ии. Убрать нахуй
 bool CGLImageData::BeginDraw()
 {
 	if (isDrawing)

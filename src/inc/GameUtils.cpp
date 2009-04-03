@@ -18,6 +18,7 @@ bool CTileSet::LoadFromFile()
 	file.ReadLine(TextureName);
 
 	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObjectByName(TextureName));
+	Texture->GetTexID();
 
 
 	file.Read(&Info, sizeof(Info));
@@ -108,8 +109,9 @@ bool CLevelMap::Render()
 		LoadFromFile();
 	
 	CMapCellInfo *t;
-	glPushAttrib(GL_TEXTURE);
+	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
 	glEnable(GL_TEXTURE);
+	glDisable(GL_BLEND);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	TileSet->Texture->Bind();
 	glBegin(GL_QUADS);
@@ -163,6 +165,33 @@ bool CLevelMap::LoadFromFile()
 	Cells = new CMapCellInfo [numCellsVer*numCellsHor];
 	File.Read(Cells, numCellsVer*numCellsHor*sizeof(CMapCellInfo));
 
+	GenCells();
+
+	File.Close();
+	Factory->FreeInst();
+	loaded = true;
+	return true;
+}
+
+
+bool CLevelMap::SaveToFile()
+{
+	CFile file;
+	if (!file.Open(filename.c_str(), CFILE_WRITE))
+	{
+		Log("WARNING", "Can't open file %s to save the map", filename);
+		return false;
+	}
+	
+	file.Write(TileSetName, strlen(TileSetName)+1);
+	file.Write(&numCellsHor, sizeof(numCellsHor));
+	file.Write(&numCellsVer, sizeof(numCellsVer));
+	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
+	file.Close();
+}
+
+bool CLevelMap::GenCells()
+{
 	for(int i=0;i<numCellsVer;i++)
 		for(int j=0;j<numCellsHor;j++)
 		{
@@ -191,28 +220,7 @@ bool CLevelMap::LoadFromFile()
 			t->pos[3].x = (j + 0)*TileSet->Info.TileWidth;
 			t->pos[3].y = (i + 1)*TileSet->Info.TileHeight;
 		}
-
-	File.Close();
-	Factory->FreeInst();
-	loaded = true;
 	return true;
-}
-
-
-bool CLevelMap::SaveToFile()
-{
-	CFile file;
-	if (!file.Open(filename.c_str(), CFILE_WRITE))
-	{
-		Log("WARNING", "Can't open file %s to save the map", filename);
-		return false;
-	}
-	
-	file.Write(TileSetName, strlen(TileSetName)+1);
-	file.Write(&numCellsHor, sizeof(numCellsHor));
-	file.Write(&numCellsVer, sizeof(numCellsVer));
-	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
-	file.Close();
 }
 
 bool CCollisionInfo::LoadFromFile()

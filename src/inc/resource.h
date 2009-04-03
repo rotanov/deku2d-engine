@@ -9,8 +9,13 @@
 
 // зашитые в код названия файлов и секций, todo: подумать как избаиться от зашития в код
 #define CONFIG_FILE_NAME "config/"
-#define CRESOURCE_SECTION_FONTS "Fonts"
-#define CRESOURCE_SECTION_TEXTURES "Textures"
+
+#define DEFAULT_SECTION_COUNT	2
+#define CR_SECTION_FONTS		"Fonts"
+#define CR_SECTION_TEXTURES		"Textures"
+
+static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture};
+static char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES};
 
 // типы ресурсов
 #define CRESOURCE_TYPE_FONT				0x01
@@ -109,7 +114,6 @@ public:
 	}
 	void DelLastDirFromPath(char* src);
 	bool List();
-	//void AddDataToTable(char *section, char *name);
 	void ExploreDir(HANDLE hfile);
 };
 
