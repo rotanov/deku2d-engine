@@ -28,6 +28,7 @@ public:
 	}
 	
 
+	Vector2* GetCellTC(int CellIndex);
 	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData);
 	bool LoadFromFile();
 	bool SaveToFile();
@@ -62,7 +63,7 @@ struct CMapCellInfo
 	int index;
 	int interaction;
 	float z; // if 0 then - check for collision; else z.0f = 1/256.0f;
-	Vector2 tc[4];
+	Vector2 *tc; // Его размер тем не менее должен быть 4
 	Vector2 pos[4];
 };
 

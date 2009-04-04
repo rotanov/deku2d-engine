@@ -22,6 +22,7 @@ CFont* f;
 int ScrnWidth;
 int ScrnHeight;
 
+int CurrTileIndex = 0;
 Vector2 MousePos;
 Vector2 oMp = V2Zero;
 Vector2 Offset = V2Zero;
@@ -35,6 +36,73 @@ Vector2 TileSelPos = V2Zero;
 #define ST_ENTITY_SET		0x03
 
 int State = ST_DRAW_TILES; 
+
+struct CCellNode
+{
+	CMapCellInfo info;
+	CCellNode *next;
+	CCellNode()
+	{
+		next = NULL;
+	}
+};
+
+CCellNode root;
+
+void AddTile(int TileIndex, int x, int y)
+{
+	CCellNode* next = &root;
+	while (next->next)
+		next = next->next;
+	next->next = new CCellNode;
+	next = next->next;
+	next->info.z = 0.0f;
+	next->info.tc = TileSet->GetCellTC(TileIndex);
+	Vector2 ji = Vector2(x, y);
+	scalar w = TileSet->Info.TileWidth;
+	scalar h = TileSet->Info.TileHeight;
+	for(int k = 0; k < 4; k++)
+	{
+		next->info.pos[k] = (ji + V2QuadBin[k]);
+		next->info.pos[k].x *= w;
+		next->info.pos[k].y *= h;
+	}
+}
+
+void RenderTileList()
+{
+	CCellNode *next = root.next;
+	glLoadIdentity();
+	glTranslatef(Offset.x, Offset.y, 0.0f);
+	glScalef((float)Zoom / (float)TileSet->Info.TileWidth , (float)Zoom / (float)TileSet->Info.TileHeight , 0.0f);
+	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
+	glEnable(GL_TEXTURE);
+	glDisable(GL_BLEND);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	TileSet->Texture->Bind();
+	glBegin(GL_QUADS);
+	CMapCellInfo *t;
+	while (next)
+	{
+		t = &next->info;
+
+		glTexCoord2f(t->tc[0].x, t->tc[0].y);
+		glVertex3f(t->pos[0].x,	t->pos[0].y, t->z);
+
+		glTexCoord2f(t->tc[1].x, t->tc[1].y); 
+		glVertex3f(t->pos[1].x,	t->pos[1].y, t->z);
+
+		glTexCoord2f(t->tc[2].x, t->tc[2].y); 
+		glVertex3f(t->pos[2].x,	t->pos[2].y, t->z);
+
+		glTexCoord2f(t->tc[3].x, t->tc[3].y); 
+		glVertex3f(t->pos[3].x,	t->pos[3].y, t->z);
+		next = next->next;
+	}
+	glEnd();
+	glPopAttrib();
+
+}
 
 
 void SetZoom(int _Zoom)
@@ -88,6 +156,9 @@ bool ProcessInput(SDL_Event& event)
 			{
 				if (event.motion.x < LeftPanel)
 					State = ST_OVERLEFTPANEL;
+				else
+					if (State == ST_OVERLEFTPANEL)
+						State = ST_DRAW_TILES;
 			}
 			break;
 		case SDL_MOUSEBUTTONUP:
@@ -96,6 +167,18 @@ bool ProcessInput(SDL_Event& event)
 					SetZoom(Zoom+ZoomDt);
 				if (event.button.button == SDL_BUTTON_WHEELDOWN)
 					SetZoom(Zoom-ZoomDt);
+			}
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			{
+				if (event.button.button == SDL_BUTTON_LEFT && State == ST_DRAW_TILES)
+				{
+					AddTile(CurrTileIndex, (MousePos.x-Offset.x) / Zoom, (MousePos.y-Offset.y) / Zoom);
+				}
+				if (event.button.button == SDL_BUTTON_LEFT && State == ST_SELECT_TILE)
+				{
+					CurrTileIndex = ((int)(MousePos.y - TileSelPos.y)/(int)TileSet->Info.TileHeight)*TileSet->Info.HorNumTiles + (int)(MousePos.x - TileSelPos.x)/(int)TileSet->Info.TileWidth; 
+				}
 			}
 			break;
 	}
@@ -134,7 +217,7 @@ bool Init()
 	Level.TileSet = TileSet;
 	for (int i=0;i<20*10;i++)
 	{
-		Level.Cells[i].index = Random_Int(0, 15);
+		Level.Cells[i].index = Random_Int(2, 2);
 		Level.Cells[i].z = -0.0f;
 		Level.Cells[i].interaction = 0;
 
@@ -220,7 +303,7 @@ bool Draw()
  	gToggleScissor(true);
  	gScissor(LeftPanel, 0.0f, ScrnWidth-LeftPanel, ScrnHeight);
 	DrawGrid();
-
+	RenderTileList();
 
 
 	gToggleScissor(false);
@@ -241,7 +324,7 @@ bool Draw()
 		glLoadIdentity();
 		glTranslatef(TileSelPos.x, TileSelPos.y, 0.0f);
 		
-		Level.Render();
+		//Level.Render();
 		TileSet->RenderTileSet();
 		Vector2 vt0 = Vector2(((int)(MousePos.x - TileSelPos.x)/(int) TileSet->Info.TileWidth) * TileSet->Info.TileWidth,
 						((int)(MousePos.y - TileSelPos.y)/(int) TileSet->Info.TileHeight) * TileSet->Info.TileHeight) + TileSelPos;

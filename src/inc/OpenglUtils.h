@@ -20,6 +20,13 @@
 #define _GetGValue(rgb)      (LOWBYTE(((WORD)(rgb)) >> 8))
 #define _GetBValue(rgb)      (LOWBYTE((rgb)>>16))
 
+const Vector2 V2QuadBin[4] = {
+							Vector2(0.0f, 0.0f),
+							Vector2(1.0f, 0.0f),
+							Vector2(1.0f, 1.0f),
+							Vector2(0.0f, 1.0f)
+						};
+
 // #define _DEBUG_DISABLE_PARTICLES_DRAW
 // #define _DEBUG_DISABLE_PARTICLES_UPDATE
 

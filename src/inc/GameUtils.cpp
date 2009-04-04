@@ -93,6 +93,25 @@ void CTileSet::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 		BBox[i] = CBBox(0, 0, Info.TileHeight, Info.TileWidth);
 }
 
+Vector2* CTileSet::GetCellTC(int CellIndex)
+{
+	if (Texture->width == 0 || Texture->height == 0)
+		if (!loaded || !Texture->Load())
+			Log("ERROR", "Using unloaded texture in Tileset %s", name);
+
+	Vector2 *tc, t;
+	tc = new Vector2[4];
+	t.x = CellIndex % Info.HorNumTiles;
+	t.y = CellIndex / Info.HorNumTiles;
+	for (int i = 0; i < 4; i++)
+	{
+		tc[i] = (t + V2QuadBin[i]);
+		tc[i].x *= (float)Info.TileWidth/Texture->width;
+		tc[i].y *= (float)Info.TileHeight/Texture->height;
+	}
+	return tc;
+}
+
 //-------------------------------------------//
 //				CMap functions				 //
 //-------------------------------------------//
@@ -109,6 +128,7 @@ bool CLevelMap::Render()
 		LoadFromFile();
 	
 	CMapCellInfo *t;
+	
 	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
 	glEnable(GL_TEXTURE);
 	glDisable(GL_BLEND);
@@ -196,29 +216,16 @@ bool CLevelMap::GenCells()
 		for(int j=0;j<numCellsHor;j++)
 		{
 			CMapCellInfo *t = &(Cells[_Cell(j, i)]);
-			int th, tv;
-			th = t->index % TileSet->Info.HorNumTiles;
-			tv = (t->index) / TileSet->Info.HorNumTiles;
-
-			t->tc[0].x = (float)(th + 0)*TileSet->Info.TileWidth/TileSet->Texture->width;
-			t->tc[0].y = (float)(tv + 0)*TileSet->Info.TileHeight/TileSet->Texture->height;
-			t->pos[0].x = (j + 0)*TileSet->Info.TileWidth;
-			t->pos[0].y = (i + 0)*TileSet->Info.TileHeight;
-
-			t->tc[1].x = (float)(th + 1)*TileSet->Info.TileWidth/TileSet->Texture->width;
-			t->tc[1].y = (float)(tv + 0)*TileSet->Info.TileHeight/TileSet->Texture->height;
-			t->pos[1].x = (j + 1)*TileSet->Info.TileWidth;
-			t->pos[1].y = (i + 0)*TileSet->Info.TileHeight;
-
-			t->tc[2].x = (float)(th + 1)*TileSet->Info.TileWidth/TileSet->Texture->width;
-			t->tc[2].y = (float)(tv + 1)*TileSet->Info.TileHeight/TileSet->Texture->height;
-			t->pos[2].x = (j + 1)*TileSet->Info.TileWidth;
-			t->pos[2].y = (i + 1)*TileSet->Info.TileHeight;	
-
-			t->tc[3].x = (float)(th + 0)*TileSet->Info.TileWidth/TileSet->Texture->width;
-			t->tc[3].y = (float)(tv + 1)*TileSet->Info.TileHeight/TileSet->Texture->height;
-			t->pos[3].x = (j + 0)*TileSet->Info.TileWidth;
-			t->pos[3].y = (i + 1)*TileSet->Info.TileHeight;
+			Vector2 ji = Vector2(j, i);
+			scalar w = TileSet->Info.TileWidth;
+			scalar h = TileSet->Info.TileHeight;
+			for(int k = 0; k < 4; k++)
+			{
+				t->pos[k] = (ji + V2QuadBin[k]);
+				t->pos[k].x *= w;
+				t->pos[k].y *= h;
+			}
+			t->tc = TileSet->GetCellTC(t->index);
 		}
 	return true;
 }
