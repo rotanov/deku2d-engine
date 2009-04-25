@@ -265,7 +265,7 @@ void EndUI()
 CGUIScheme::CGUIScheme(char *fname, char *tname)
 {
 	//creating new form( - main form)
-	for (int i = 0; i < 200 ; i++) // бл€ть € бы тебе уебал реально. ¬от хуле ты 200 отпизды вз€л, и хуле ты не догадалс€ инициализацию делать и проверки потом
+	for (int i = 0; i < 200 ; i++) //!
 		objects[i] = NULL;
 	CForm *frm = (CForm*)newWidget("ScreenForm", STYLE_OBJFORM);
 	frm->Width = ScreenW();
@@ -813,7 +813,7 @@ void CForm::DrawText()
 		fnt->isRect = true;
 		fnt->wh.x = GUIScheme->GetCWidth(HeaderStyle, Width);
 		fnt->wh.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
-		fnt->Print(str(Caption));
+		fnt->Print(Caption.c_str());
 		fnt->isRect = false;
 /*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(HeaderStyle)
 			,ScreenH()-GetTop() + GUIScheme->GetYOffset(HeaderStyle)
@@ -860,6 +860,8 @@ void CButton::DrawText()
 //	return;
 	if (!Visible)
 		return;
+	if (fnt == NULL)
+		fnt = FontManager->GetFontEx(Font);
 	if (fnt!=NULL)
 	{
 		//fnt->PrintEx(
@@ -871,7 +873,7 @@ void CButton::DrawText()
 		fnt->isRect = true;
 		fnt->wh.x = GUIScheme->GetCWidth(Styles[StyleInd], Width);
 		fnt->wh.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
-		fnt->Print(str(Caption));
+		fnt->Print(Caption.c_str());
 		fnt->isRect = false;
 /*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd])
 			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd])
@@ -977,7 +979,9 @@ void CEdit::Draw()
 
 void CEdit::DrawText()
 {
-	if (fnt!=NULL)
+	if (fnt == NULL)
+		fnt = FontManager->GetFontEx(Font);
+	if (fnt!=NULL || !Visible)
 	{
 		//fnt->PrintEx(
 		//glColor4f(0,0,1,1); > ЅЋя“№!
@@ -993,8 +997,9 @@ void CEdit::DrawText()
 		fnt->s2 = SelStart + SelLength - 1;
 		fnt->wh.x = GUIScheme->GetCWidth(ThisStyle, Width);
 		fnt->wh.y = GUIScheme->GetCHeight(ThisStyle, Height);
-		fnt->Print(str(Caption));
+		fnt->Print(Caption.c_str());
 		fnt->isRect = false;
+		fnt->isSelected = false;
 /*		fnt->PrintSelRect(l
 			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
