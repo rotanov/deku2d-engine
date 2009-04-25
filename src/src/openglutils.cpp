@@ -615,13 +615,13 @@ CFont::~CFont()
 }
 
 
-bool CFont::LoadFromFile(char* filename)
+bool CFont::LoadFromFile()
 {
-	if (filename == NULL)
+	if (filename == "")
 		return false;
 	CFile			file;
 	CGLImageData	*image;
-	if (!file.Open(filename, CFILE_READ))
+	if (!file.Open(filename.c_str(), CFILE_READ))
 	{
 		Log("WARNING","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
 		return false;
@@ -662,12 +662,12 @@ bool CFont::LoadFromFile(char* filename)
 	return true;
 }
 
-bool CFont::SaveToFile(char * filename)
+bool CFont::SaveToFile()
 {
-	if (filename == NULL)
+	if (filename == "")
 		return false;
 	CFile			file;
-	file.Open(filename, CFILE_WRITE);
+	file.Open(filename.c_str(), CFILE_WRITE);
 	file.Write(FontImageName, (DWORD)strlen(FontImageName));
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
@@ -1366,12 +1366,16 @@ CFont* CFontManager::GetFontEx( string fontname )
 
 bool CFontManager::SetCurrentFont( char* fontname )
 {
-	return !!(CurrentFont = GetFont(fontname));
+	CurrentFont = GetFont(fontname);
+	if (!CurrentFont->loaded)
+		CurrentFont->LoadFromFile();
+	return !!CurrentFont;
 }
 
 bool CFontManager::Print( int x, int y, float depth, char* text, ... )
 {
 	if (!CurrentFont)
+
 		return false;
 
 	CurrentFont->SetDepth(depth);
@@ -2005,8 +2009,8 @@ void CPrimitiveRender::grInYan(const Vector2 &p, scalar Radius)
 	sClr = lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	grCircleS(Vector2(p.x + Radius*0.5f, p.y), Radius*0.125f);
 
-	lClr = RGBAf(0.3f, 0.4f, 0.6f, 0.9f);
-	//lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
+	//lClr = RGBAf(0.3f, 0.4f, 0.6f, 0.9f);
+	lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	depth = 0.001f;
 	grCircleL(p, Radius/*+lwidth/2.0f*/);
 }

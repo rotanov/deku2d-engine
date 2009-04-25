@@ -343,12 +343,21 @@ CPrimitiveRender p;
 
 bool Init2()
 {
+	Ninja->SetState(STATE_GL_BG_COLOR, (void*)(&RGBAf(1.0f, 1.0f, 1.0f, 0.0f)));
+	SDL_ShowCursor(0);
 	p.Angle = 0.0f;
 	p.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
 	p.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
 	p.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
 	p.psize = 10.0f;
 	p.lwidth = 4.0f;
+	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
+		return false;
+	if (!Ninja->ResourceManager.LoadResources())
+		return false;
+
+	Ninja->FontManager->SetCurrentFont("Font");
+	Ninja->FontManager->CurrentFont->tClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	return true;
 }
 int k = 0;
@@ -356,22 +365,40 @@ int k = 0;
 bool Draw2()
 {
 	glLoadIdentity();
-	glTranslatef(640 - 25 - 4, 480 - 25 - 4, 0.0f);
-	if(k < 5)
-		p.Angle += k;
-	else
-		p.Angle -= k;
-	
-	if(k > 5) k--;
-	else k++;
+	Ninja->FontManager->Print(10.0f, 460.0f, 0.0f, "Press SPACE to randomize motion");
+	Ninja->FontManager->Print(10.0f, 440.0f, 0.0f, "Press left CTRL to assign motion to mouse");
+	static float dx = Random_Float(-10.0f, 10.0f), dy = Random_Float(-10.0f, 10.0f);
+	static float x = 0, y = 0;
+	glTranslatef(x, y, 0.0f);
+
+
+	k < 5?p.Angle += k:p.Angle -= k;
+	k > 5?k--:k++;
+	x += dx;
+	y += dy;
+
+	if (Ninja->keys[SDLK_LCTRL])
+	{
+		Vector2 MousePos;
+		Ninja->GetState(STATE_MOUSE_XY, (void*)&MousePos);
+		x = MousePos.x;
+		y = MousePos.y;
+	}
+
+	x-25<0?x = 25, dx = -dx:1==1;
+	y-25<0?y = 25, dy = -dy:1==1;
+	x+25>ScreenW()?x = ScreenW() - 25, dx = -dx:1==1;
+	y+25>ScreenH()?y = ScreenH() - 25, dy = -dy:1==1;
+	if (Ninja->keys[SDLK_SPACE])
+		dx = Random_Float(-10.0f, 10.0f), dy = Random_Float(-10.0f, 10.0f);
 	p.grInYan(V2Zero, 25);
 	return true;
 }
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
-	Ninja->SetState(STATE_USER_INIT, &Init);
+	Ninja->SetState(STATE_RENDER_FUNC, &Draw2);
+	Ninja->SetState(STATE_USER_INIT, &Init2);
 	
 	Ninja->Run();
 	Ninja->FreeInst();

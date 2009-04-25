@@ -414,8 +414,8 @@ public:
 	{
 		return new CFont;
 	}
-	bool		LoadFromFile(char* filename);
-	bool		SaveToFile(char* filename);
+	bool		LoadFromFile();
+	bool		SaveToFile();
 
 	void		Print(const char *text, ...);
 

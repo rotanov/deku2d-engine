@@ -43,6 +43,8 @@
 #define STATE_GUI_MOUSE_UP		0x87
 #define STATE_GUI_MOUSE_MOVE	0x88
 
+#define STATE_GL_BG_COLOR		0xA0
+
 typedef bool (*Callback)();
 typedef bool (*KeyFunc)(char, SDLKey);
 typedef bool (*MouseFunc)(int, int, unsigned char);

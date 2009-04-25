@@ -1,8 +1,8 @@
 file message
 0 bytes in 0 Free Blocks.
-47789 bytes in 516 Normal Blocks.
+8032 bytes in 100 Normal Blocks.
 9328 bytes in 7 CRT Blocks.
 0 bytes in 0 Ignore Blocks.
 0 bytes in 0 Client Blocks.
-Largest number used: 158253 bytes.
-Total allocations: 1265473 bytes.
+Largest number used: 501749 bytes.
+Total allocations: 1149681 bytes.

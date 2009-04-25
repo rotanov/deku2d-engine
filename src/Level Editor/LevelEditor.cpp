@@ -6,7 +6,7 @@ CNinja* Ninja = CNinja::Instance();
 #define MIN_ZOOM 4
 #define MAX_ZOOM 128
 
-int	GameVTiles =  20; 
+int	GameVTiles = 20; 
 int	GameHTiles = 15;
 int Zoom = 16;
 int ZoomDt = 2;
@@ -77,7 +77,7 @@ void RenderTileList()
 	glScalef((float)Zoom / (float)TileSet->Info.TileWidth , (float)Zoom / (float)TileSet->Info.TileHeight , 0.0f);
 	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
 	glEnable(GL_TEXTURE);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	TileSet->Texture->Bind();
 	glBegin(GL_QUADS);

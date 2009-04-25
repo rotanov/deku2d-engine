@@ -170,7 +170,12 @@ void CNinja::SetState(int state, void* value)
 			case STATE_CONFIG_NAME:
 				{
 					ConfigFileName = CONFIG_FILE_NAME;
-					ConfigFileName += (char*)value;
+					ConfigFileName += (char*)value; // BAD!!! 
+				}
+			case STATE_GL_BG_COLOR:
+				{
+					RGBAf *t = (RGBAf*)value;
+					glClearColor(t->r, t->g, t->b, t->a); // BAD!!!  TODO: INcapsulate
 				}
 		}
 	}
@@ -290,8 +295,7 @@ bool CNinja::ProcessEvents()
 					if ((event.key.keysym.unicode & 0xFF00) == 0 )
 						ch = event.key.keysym.unicode & 0xFF;
 					if (procGUIGetKeyDown)
-						procGUIGetKeyDown(ch, sym);
-				if(sym == SDLK_ESCAPE)
+				if(sym == SDLK_ESCAPE)	
 				{
 					return false;
 				}
