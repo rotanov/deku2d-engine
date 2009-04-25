@@ -295,6 +295,7 @@ bool CNinja::ProcessEvents()
 					if ((event.key.keysym.unicode & 0xFF00) == 0 )
 						ch = event.key.keysym.unicode & 0xFF;
 					if (procGUIGetKeyDown)
+						procGUIGetKeyDown(ch, sym);
 				if(sym == SDLK_ESCAPE)	
 				{
 					return false;

@@ -603,7 +603,7 @@ CFont::CFont()
 
 	CFontManager* FntMan = CFontManager::Instance("OpenglUtils.cpp");
 	FntMan->AddObject(this);
-	FntMan->FreeInst("OpenGLutils.cpcpc");
+	FntMan->FreeInst("OpenGLutils.cpp");
 }
 
 CFont::~CFont()
@@ -632,7 +632,6 @@ bool CFont::LoadFromFile()
 	(dynamic_cast<CTexture*>(TexMan->GetObjectByName(FontImageName)))->Load();
 	image = dynamic_cast<CTexture*>((TexMan->GetObjectByName(FontImageName)));
 	TexMan->FreeInst();
-	//image->LoadTexture(FontImageName);
 	font = image->GetTexID();
 	file.Read(bbox, sizeof(bbox));
 	file.Close();
