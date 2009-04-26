@@ -21,19 +21,15 @@ typedef void (*CKeyEvent)(CHandle, int);
 // делай как в mathutils.h
 //////////////////////////////////////////////////////////////////////////
 
-__forceinline  void  SAFECALL(CEvent X, CObject *Sender){
-	if (X != NULL && Sender != NULL) 
-	{
-		(X)((CHandle)Sender);
-	}
-	else
-	{
-		if (Sender!=NULL)
-			Log("WARNING", "Undefined event for object %s!", Sender->name);
-		else
-			Log("WARNING", "Undefined event for non existing object!");
-	}
-}
+#define  SAFECALL(X, Sender) if (X != NULL) {(X)((CHandle)Sender);}
+//	else
+//	{
+		//if (Sender!=NULL)
+		//	Log("WARNING", "Undefined event for object %s!", Sender->name);
+		//else
+		//	Log("WARNING", "Undefined event for non existing object!");
+//	}
+//}
 __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 	if (X != NULL && Sender != NULL) 
 	{

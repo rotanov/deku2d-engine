@@ -160,9 +160,11 @@ private:
 	void SwapObjs(CNodeObject *obj1, CNodeObject *obj2);	// Скорей всего ф-я меняет в списке местами 2 объекта. 
 protected:
 	CNodeObject *first, *last, *current;					// указатели на соответсвенно первый, последний и текущий объект в списке.
+	int	count;												// кол-во эл-тов
 public:
 	CObjectList();
 	~CObjectList();
+	int	GetCount();											// кол-во эл-тов
 	CObject* Next();										// current переместить на следующий элемент
 	bool Enum(CObject* &result);							// адрес текущего элемента с переводом указателя на следующий
 															// короче вначале указывает на один объект, вызвали енум, она вернула содержимое(адрес) в результ, и сдвинула указатель на следующий

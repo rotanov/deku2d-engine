@@ -133,6 +133,7 @@ public:
 		Enabled = true;
 		Caption = "";
 		fnt = NULL;
+		isControl = false;
 	}
 /*	static CObject*	NewWidget()
 	{
@@ -143,8 +144,8 @@ public:
 	virtual void			Draw(){}
 	virtual void			Step(){}
 	virtual void			DrawText(){}
-	virtual void			MouseProcess(byte btn, byte event){}
-	virtual void			KeyProcess(SDLKey &btn, byte event){}
+	virtual void			MouseProcess(byte btn, byte event);
+	virtual void			KeyProcess(SDLKey &btn, byte event);
 	unsigned int			getStyle(){return Style;}
 	void					setStyle(unsigned int _Style);
 	bool					Visible;
@@ -163,13 +164,20 @@ public:
 	string					Font;
 	int						Valign, Halign;
 	int						Kind;
+	bool					isControl;
 	void					ApplyStyle(CGraphObj *wdg);
 	float					ZDepth;
 	int						GetLeft();
 	int						GetTop();
 	bool					SetFont(string FontName);
+	virtual void			SetCaption(string _caption);
 	virtual bool			Update(float dt){return 1;};
-	static CObject*	NewRenderer()
+	virtual void			SetFocus();
+	//events
+	CKeyEvent				onKeyPress;
+	CEvent					onClick, onAccept, onDecline;
+
+	static CObject*			NewRenderer()
 	{
 		CRenderObject *res = new CGUIRenderer;
 		//		res->type = T_RENDERABLE|T_UPDATABLE;
@@ -256,6 +264,7 @@ public:
 	CControl();
 	~CControl(){};
 	CObjectList				Items;
+	virtual void			Next();
 	virtual void			Draw(){};
 	virtual void			Step(){};
 };
@@ -297,7 +306,6 @@ public:
 	virtual bool			Update(float dt);
 	virtual void			MouseProcess(byte btn, byte event);
 	unsigned int			Styles[4];//0 - normal, 1 - mouseon, 2 - clicked, 3 - not enabled
-	CEvent					onClick;
 	void					DrawText();
 	byte					StyleInd;
 };
@@ -315,10 +323,9 @@ public:
 	virtual bool			Update(float dt);
 	// сорри, нехуй в аське не отвечать
 	virtual void			Step();
+	virtual void			SetCaption(string _caption);
 	virtual void			MouseProcess(byte btn, byte event);
 	virtual void			KeyProcess(SDLKey &btn, byte event);
-	CKeyEvent				onKeyPress;
-	CEvent					onClick;
 	int						SelStart, SelLength;
 	int						_Style;
 	void					DrawText();

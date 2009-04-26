@@ -50,6 +50,14 @@ void tempMakeMap()
 	m.SaveToFile();
 }
 
+void AcceptCall(CHandle tmp)
+{
+	if (tmp != NULL)
+	{
+		((PWidget)(tmp))->SetCaption("Accepted!");
+	}
+}
+
 bool Init()
 {	
 	CFactory *Factory = CFactory::Instance();
@@ -69,9 +77,10 @@ bool Init()
  		Edit->Top = 345;
  		Edit->Height = 30;
  		Edit->Width = 400;
- 		Edit->Caption = "Fuck";
+ 		Edit->SetCaption("Fuck");
  		Edit->SelStart = 1;
  		Edit->SelLength = 0;
+		Edit->onAccept = AcceptCall;
 
  		//Edit creation sample
  		Edit1 = dynamic_cast<CEdit*>(newWidget("NewEdit1", STYLE_OBJEDIT));
@@ -87,7 +96,7 @@ bool Init()
  		Edit1->Top = 380;
  		Edit1->Height = 30;
  		Edit1->Width = 400;
- 		Edit1->Caption = "Fuckkk!!rehtyjktyfjnkbrehofhhrohviurebhire";
+		Edit->SetCaption("Fuckwefjweoifjewiofjwe efewfjweiojfewfjew jf ie");
  		Edit1->SelStart = 0;
  		Edit1->SelLength = 0;
 

@@ -11,6 +11,20 @@ int						CTag = 0;
 CFontManager			*FontManager = NULL;
 char					_key = 0;
 
+bool FormSort(CObject *obj1, CObject *obj2)
+{
+	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	return (dynamic_cast<PWidget>(obj1))->Tag <= (dynamic_cast<PWidget>(obj2))->Tag;
+}
+
+bool InvFormSort(CObject *obj1, CObject *obj2)
+{
+	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
+	return (dynamic_cast<PWidget>(obj1))->Tag >= (dynamic_cast<PWidget>(obj2))->Tag;
+}
+
 bool MouseIn(int l, int t, int w, int h)
 {
 	int r = l + w;
@@ -253,6 +267,58 @@ bool CGraphObj::SetFont( string FontName )
 	Font = FontName;
 	fnt = FontManager->GetFontEx(FontName);
 	return (fnt!=NULL);
+}
+
+void CGraphObj::SetCaption( string _caption )
+{
+	Caption = _caption;
+}
+
+void CGraphObj::MouseProcess( byte btn, byte event )
+{
+	if (event==GUI_MBDOWN && btn < 3)
+	{
+		if (MouseInObjRect(this))
+		{
+			//SAFECALL(onClick, this);
+//			KeyState = 0;
+//			if (Focus)
+//			{
+////				if (typeid(*Focus).name() == "class CEdit")
+////				{
+////				if (!dynamic_cast<PWidget>(Focus)->mbpr)
+//					SetFocus();
+////				}
+////				else
+////					Focus = this;
+//			}
+//			else
+			SetFocus();
+		}
+	}
+}
+
+void CGraphObj::SetFocus()
+{
+	Focus = this;
+}
+
+void CGraphObj::KeyProcess( SDLKey &btn, byte event )
+{
+	if (btn == SDLK_TAB && event == GUI_KEYUP)
+	{
+		if (Focus != NULL && Focus->Parent != NULL)
+		{
+			dynamic_cast<CControl*>(Focus->Parent)->Next();
+		}
+	}
+	if (btn == SDLK_RETURN && event == GUI_KEYUP)
+	{
+		if (Focus != NULL)
+		{
+			SAFECALL(Focus->onAccept, this);
+		}
+	}
 }
 /*void BeginUI()
 {
@@ -624,11 +690,49 @@ CGUIScheme::~CGUIScheme()
 CControl::CControl()
 {
 //	Style=_Style;
+	CGraphObj::CGraphObj();
 	name = "";
+	isControl = true;
 }
 
+void CControl::Next()
+{
+	Items.Sort(FormSort);
+	CObject *tmp;
+	bool hitfocus = Items.GetCount()==0;
+	for (int i = 0; i < 2; i++)
+	{
+		Items.Reset();
+		while (Items.Enum(tmp))
+		{
+			PWidget obj = dynamic_cast<PWidget>(tmp);
+			if (hitfocus && obj->Enabled)
+			{
+				if (obj->isControl)
+				{
+					PWidget tmpfocus = Focus;
+					Focus = NULL;
+					dynamic_cast<CControl*>(obj)->Next();
+					if (Focus != NULL)
+					{
+						return;
+					}
+					Focus = tmpfocus;
+				}
+				else
+				{
+					Focus = dynamic_cast<PWidget>(tmp);
+					return;
+				}
+
+			}
+			hitfocus = tmp==Focus;
+		}
+	}
+}
 CForm::CForm(unsigned int _Style)
 {
+	CControl::CControl();
 	Style=_Style;
 	name = "";
 }
@@ -785,7 +889,7 @@ bool CForm::Update( float dt )
 			break;
 		}
 	}
-	if (Focus)
+	if (Focus && Focus != this)
 		Focus->Update(dt);
 	
 	if (MouseFocus != NULL)
@@ -833,6 +937,7 @@ void CForm::DrawText()
 CButton::CButton(unsigned int _Style)
 {
 	//Zero(name,sizeof(name));
+	CGraphObj::CGraphObj();
 	Style = _Style;
 	StyleInd = 0;
 	onClick = NULL;
@@ -929,11 +1034,12 @@ void CButton::MouseProcess(byte btn, byte event)
 {
 	if (!Enabled)
 		return;
+	CGraphObj::MouseProcess(btn, event);
 	if (event==GUI_MBCLICK)
 	{
 		if (MouseIn(Left, Top, Width, Height))
 		{
-			//SAFECALL(onClick, this);
+			SAFECALL(onClick, this);
 			Focus = this;
 		}
 	}
@@ -941,6 +1047,7 @@ void CButton::MouseProcess(byte btn, byte event)
 
 CEdit::CEdit(unsigned int _Style)
 {
+	CGraphObj::CGraphObj();
 	Style = _Style;
 	onKeyPress = NULL;
 	onClick = NULL;
@@ -1014,31 +1121,32 @@ void CEdit::MouseProcess(byte btn, byte event)
 {
 	if (!Enabled)
 		return;
+	CGraphObj::MouseProcess(btn, event);
 	if (fnt == NULL)
 		fnt = FontManager->GetFontEx(Font);
 	if (fnt == NULL)
 		return;
 
-	if (event==GUI_MBCLICK)
-	{
-		if (MouseInObjRect(this))
-		{
-			//SAFECALL(onClick, this);
-			KeyState = 0;
-			if (Focus)
-			{
-				if (typeid(*Focus).name() == "class CEdit")
-				{
-					if (!dynamic_cast<CEdit*>(Focus)->mbpr)
-						Focus = this;
-				}
-				else
-					Focus = this;
-			}
-			else
-				Focus = this;
-		}
-	}
+	//if (event==GUI_MBCLICK)
+	//{
+	//	if (MouseInObjRect(this))
+	//	{
+	//		//SAFECALL(onClick, this);
+	//		KeyState = 0;
+	//		if (Focus)
+	//		{
+	//			if (typeid(*Focus).name() == "class CEdit")
+	//			{
+	//				if (!dynamic_cast<CEdit*>(Focus)->mbpr)
+	//					Focus = this;
+	//			}
+	//			else
+	//				Focus = this;
+	//		}
+	//		else
+	//			Focus = this;
+	//	}
+	//}
 	if (event==GUI_MBDOWN&&btn==1)
 	{
 		//getting position
@@ -1077,6 +1185,7 @@ void CEdit::MouseProcess(byte btn, byte event)
 }
 void CEdit::KeyProcess(SDLKey &btn, byte event)
 {
+	CGraphObj::KeyProcess(btn, event);
 	if (event == GUI_KEYDOWN)
 	{
 		switch (btn)
@@ -1474,18 +1583,6 @@ bool CEdit::Update( float dt )
 	}
 	return true;
 }
-bool FormSort(CObject *obj1, CObject *obj2)
-{
-	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	return (dynamic_cast<PWidget>(obj1))->Tag <= (dynamic_cast<PWidget>(obj2))->Tag;
-}
-bool InvFormSort(CObject *obj1, CObject *obj2)
-{
-	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	return (dynamic_cast<PWidget>(obj1))->Tag >= (dynamic_cast<PWidget>(obj2))->Tag;
-}
 
 bool CGUIRenderer::Render()
 {
@@ -1554,4 +1651,11 @@ CGUIRenderer::CGUIRenderer()
 CGUIRenderer::~CGUIRenderer()
 {
 	FontManager->FreeInst("gui.cpp");
+}
+
+void CEdit::SetCaption( string _caption )
+{
+	CGraphObj::SetCaption(_caption);
+	SelStart = 0;
+	SelLength = _caption.length();
 }

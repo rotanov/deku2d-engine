@@ -281,6 +281,7 @@ void CNodeObject::SetData(CObject *object)
 CObjectList::CObjectList()
 {
 	first = last = current = NULL;
+	count = 0;
 }
 
 CObjectList::~CObjectList()
@@ -302,6 +303,7 @@ bool CObjectList::AddObject(CObject *object)
 	last = tmp;
 	tmp->SetData(object);
 	Reset();
+	count++;
 	return true;
 }
 
@@ -319,6 +321,7 @@ bool CObjectList::DelObject(string objectname)
 		else
 			last = tmp->prev;
 		delete tmp;
+		count--;
 		return true;
 	}
 	return false;
@@ -391,6 +394,7 @@ void CObjectList::Clear()
 		first = first->next;
 		delete tmp;
 	}
+	count = 0;
 	first = NULL;
 	last = NULL;
 	current = NULL;
@@ -473,10 +477,16 @@ bool CObjectList::DelObj( int ind )
 			tmp->next->prev = tmp->prev;
 		else
 			last = tmp->prev;
+		count--;
 		delete tmp;
 		return true;
 	}
 	return false;
+}
+
+int CObjectList::GetCount()
+{
+	return count;
 }
 CPSingleTone* CPSingleTone::Instance()
 {
