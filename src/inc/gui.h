@@ -134,6 +134,8 @@ public:
 		Caption = "";
 		fnt = NULL;
 		isControl = false;
+		onKeyPress = NULL;
+		onClick = onAccept = onDecline = NULL;
 	}
 /*	static CObject*	NewWidget()
 	{
