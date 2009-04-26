@@ -12,7 +12,9 @@ CEnemyController *enemyc;
 CGUIScheme *guidummy = NULL;
 CEdit *Edit = NULL, *Edit1 = NULL;
 CButton *Button = NULL;
-CCompas compas;
+//CCompas compas; 
+bool InitDemoChoose();
+bool DrawDemoChoose();
 
 void tempMakeTileSet()
 {
@@ -50,75 +52,14 @@ void tempMakeMap()
 	m.SaveToFile();
 }
 
-void AcceptCall(CHandle tmp)
-{
-	if (tmp != NULL)
-	{
-		((PWidget)(tmp))->SetCaption("Accepted!");
-	}
-}
 
 bool Init()
 {	
 	CFactory *Factory = CFactory::Instance();
- 	guidummy = new CGUIScheme("Data\\main.gui", "Data\\maingui.bmp");
  	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
- 		//Edit creation sample
- 		Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
- 		//создание едита с именем нью едит
- 		guidummy->CopyWidget(2, Edit);
- 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
- 		FormAddWidget(Edit, NULL);
- 		//добавление едита на форму, если нулл то добавляется на форму окна
- 		//--- Всякий стафф
- 		Edit->Enabled = true;
- 		Edit->Visible = true;
- 		Edit->Left = 10;
- 		Edit->Top = 345;
- 		Edit->Height = 30;
- 		Edit->Width = 400;
- 		Edit->SetCaption("Fuck");
- 		Edit->SelStart = 1;
- 		Edit->SelLength = 0;
-		Edit->onAccept = AcceptCall;
+ 
+ 	
 
- 		//Edit creation sample
- 		Edit1 = dynamic_cast<CEdit*>(newWidget("NewEdit1", STYLE_OBJEDIT));
- 		//создание едита с именем нью едит
- 		guidummy->CopyWidget(2, Edit1);
- 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
- 		FormAddWidget(Edit1, NULL);
- 		//добавление едита на форму, если нулл то добавляется на форму окна
- 		//--- Всякий стафф
- 		Edit1->Enabled = true;
- 		Edit1->Visible = true;
- 		Edit1->Left = 10;
- 		Edit1->Top = 380;
- 		Edit1->Height = 30;
- 		Edit1->Width = 400;
-		Edit->SetCaption("Fuckwefjweoifjewiofjwe efewfjweiojfewfjew jf ie");
- 		Edit1->SelStart = 0;
- 		Edit1->SelLength = 0;
-
- 		//Button creation sample
- 		Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));
- 		//создание буттона с именем нью буттон
- 		guidummy->CopyWidget(1, Button);
- 		//заполнение его свойств из уже загруженных эл-тов(по индексу)
- 		FormAddWidget(Button, NULL);
- 		//добавление буттона на форму, если нулл то добавляется на форму окна
- 		//--- Всякий стафф
- 		Button->Enabled = true;
- 		Button->Visible = true;
- 		Button->Left = 415;
- 		Button->Top = 345;
- 		Button->Height = 65;
- 		Button->Width = 200;
- 		Button->Caption = "<--Grats-->";
-
-		Edit->SetFont("Font");
-		Edit1->SetFont("Font");
-		Button->SetFont("Font");
 	gSetBlendingMode();
 	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
 		return false;
@@ -302,7 +243,11 @@ bool Draw()
 		depth = 0.0f;
 	}
 	
-	
+	if (Ninja->keys[SDLK_F1])
+	{
+		Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
+		Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);
+	}	
 
 	if (Ninja->keys[SDLK_SPACE])
 	{
@@ -394,6 +339,12 @@ bool Draw2()
 		y = MousePos.y;
 	}
 
+	if (Ninja->keys[SDLK_F1])
+	{
+		Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
+		Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);
+	}
+
 	x-25<0?x = 25, dx = -dx:1==1;
 	y-25<0?y = 25, dy = -dy:1==1;
 	x+25>ScreenW()?x = ScreenW() - 25, dx = -dx:1==1;
@@ -404,13 +355,109 @@ bool Draw2()
 	return true;
 }
 
+bool InitMapLoadDemo()
+{
+
+	return true;
+}
+
+bool DrawMapLoadDemo()
+{
+	if (Ninja->keys[SDLK_F1])
+	{
+		Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
+		Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);
+	}
+	return true;
+}
+
+
+void AcceptCall(CHandle tmp)
+{
+	if (tmp != NULL)
+	{
+		((PWidget)(tmp))->SetCaption("Accepted!");
+		int IndDemo = atoi(Edit->Caption.c_str());
+		switch(IndDemo)
+		{
+			case 1:
+				Ninja->SetState(STATE_USER_INIT, &Init);
+				Ninja->SetState(STATE_RENDER_FUNC, &Draw);					
+				break;
+			case 2:
+				Ninja->SetState(STATE_USER_INIT, &Init2);
+				Ninja->SetState(STATE_RENDER_FUNC, &Draw2);	
+				break;
+			case 3:
+				Ninja->SetState(STATE_USER_INIT, &InitMapLoadDemo);
+				Ninja->SetState(STATE_RENDER_FUNC, &DrawMapLoadDemo);	
+				break;
+			default:
+				Edit->SetCaption("Invalid number");
+		}
+	}
+}
+
+
+bool InitDemoChoose()
+{
+	CFactory *Factory = CFactory::Instance();
+	guidummy = new CGUIScheme("Data\\main.gui", "Data\\maingui.bmp");
+	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
+
+	Edit = dynamic_cast<CEdit*>(newWidget("NewEdit", STYLE_OBJEDIT));
+	guidummy->CopyWidget(2, Edit);
+	FormAddWidget(Edit, NULL);
+	Edit->Enabled = true;
+	Edit->Visible = true;
+	Edit->Left = 240 + 32;
+	Edit->Top = 300;
+	Edit->Height = 32;
+	Edit->Width = 64;
+	Edit->SetCaption("1");
+	Edit->SelStart = 1;
+	Edit->SelLength = 0;
+	Edit->onAccept = NULL;
+
+
+	Button = dynamic_cast<CButton*>(newWidget("NewButton", STYLE_OBJBUTTON));
+	guidummy->CopyWidget(1, Button);
+	FormAddWidget(Button, NULL);
+	Button->Enabled = true;
+	Button->Visible = true;
+	Button->Left = 240 + 32;
+	Button->Top = 345;
+	Button->Height = 64;
+	Button->Width = 64;
+	Button->Caption = "Ok";
+	Button->onAccept = AcceptCall;
+
+	Edit->SetFont("Font");
+	Button->SetFont("Font");
+
+	gSetBlendingMode();
+
+	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
+		return false;
+	if (!Ninja->ResourceManager.LoadResources())
+		return false;
+	Ninja->FontManager->SetCurrentFont("Font");
+	Factory->FreeInst();
+	SDL_ShowCursor(1);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	return true;
+}
+
+bool DrawDemoChoose()
+{
+	return true;
+}
+
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
-	Ninja->SetState(STATE_USER_INIT, &Init);
-	
+	Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
+	Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);	
 	Ninja->Run();
 	Ninja->FreeInst();
-
 	return 0x0;
 }

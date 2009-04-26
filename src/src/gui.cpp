@@ -1099,7 +1099,7 @@ void CEdit::DrawText()
 		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
 		fnt->p.y = ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
 		fnt->isRect = true;
-		fnt->isSelected = true;
+		fnt->isSelected = SelLength != 0;
 		fnt->s1 = SelStart;
 		fnt->s2 = SelStart + SelLength - 1;
 		fnt->wh.x = GUIScheme->GetCWidth(ThisStyle, Width);

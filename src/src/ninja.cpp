@@ -33,6 +33,8 @@ CNinja::CNinja()
 	ConfigFileName = CONFIG_FILE_NAME;
 	ConfigFileName += "configuration.xml";
 	EventFuncCount = 0;
+	userReInit = false;
+	Initialized = false;
 }
 CNinja::~CNinja(){}
 
@@ -127,6 +129,12 @@ void CNinja::SetState(int state, void* value)
 		{
 			case STATE_USER_INIT:
 				procUserInit = (Callback) value;
+				if (Initialized && procUserInit != NULL)
+				{
+					ClearLists();
+					if (!(Initialized = procUserInit()))
+						Log("WARNING", "User init failed.");
+				}
 				break;
 			case STATE_UPDATE_FUNC:
 				procUpdateFunc = (Callback) value;
@@ -259,6 +267,7 @@ bool CNinja::Init()
 			return false;
 		}
 
+	Initialized = true;
 	Log("INFO","Initialization success");
 	return true;
 }
@@ -352,7 +361,7 @@ bool CNinja::Run()
 {
 	MemChp1();
 	//#######################//
-	if(!Init())
+	if(!(Initialized = Init()))
 	{
 		Log("ERROR", "Initialization failed");
 		SDLGLExit(-1);
@@ -436,6 +445,36 @@ bool CNinja::AddEventFunction(EventFunc func)
 int CNinja::CfgGetInt( char* ParamName )
 {
 	return atoi((Config.First->Get(ParamName))->GetValue());
+}
+
+bool CNinja::ClearLists()
+{
+	CObject *data = (RenderManager.Next());
+	while (data)
+	{
+		if (data)
+		{
+			delete data;
+			//RenderManager.current->data = NULL;
+		}
+		
+		data = (RenderManager.Next());
+	}	
+	data = (UpdateManager.Next());
+	while (data)
+	{
+		if (data)
+		{
+			//delete data;
+			//UpdateManager.current.data = NULL;
+		}
+			
+		data = (UpdateManager.Next());
+	}	
+	RenderManager.Clear();
+	UpdateManager.Clear();
+
+	return true;
 }
 
 CNinja* CNinja::_instance = 0;

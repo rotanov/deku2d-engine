@@ -88,11 +88,14 @@ private:
 	unsigned int				FpsLimit;
 	float						dt;
 	bool						isHaveFocus;
+	bool						userReInit;
+	bool						Initialized;
 	bool						doCalcFps;
 	int							EventFuncCount;
 	CGLWindow					window;
 
 
+	bool						ClearLists();
 	bool						Init();
 	bool						MidInit();
 	void						CalcFps();

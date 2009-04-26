@@ -550,6 +550,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\VTune\Ninja engine.vpj"
+			>
+		</File>
+		<File
 			RelativePath=".\resource.h"
 			>
 		</File>

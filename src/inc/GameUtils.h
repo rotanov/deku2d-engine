@@ -111,6 +111,7 @@ class CCompas : public CRenderObject
 {
 public:
 	CCompas();
+	~CCompas();
 	bool Render();	
 };
 

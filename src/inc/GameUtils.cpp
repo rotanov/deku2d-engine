@@ -301,3 +301,8 @@ CCompas::CCompas()
 	Ninja->RenderManager.AddObject(this);
 	Ninja->FreeInst();	
 }
+
+CCompas::~CCompas()
+{
+	
+}

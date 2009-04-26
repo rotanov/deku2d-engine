@@ -698,7 +698,7 @@ void CFont::Print( const char *text, ... )
 	if ((uint)offset >= strlen(text) || offset < 0)
 		return;
 
-	int swidth, sheight;
+	int swidth = 0, sheight = 0, selx = 0;
 	if (isSelected)
 	{
 		if (s1 > s2+1)
@@ -710,7 +710,7 @@ void CFont::Print( const char *text, ... )
 		
 		swidth = GetStringWidth(text + offset);
 		sheight = GetStringHeight(text + offset);
-		int selx = p.x + GetStringWidthEx(0, s1-1-offset, text+offset);
+		selx = p.x + GetStringWidthEx(0, s1-1-offset, text+offset);
 
 
 		if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
@@ -725,10 +725,10 @@ void CFont::Print( const char *text, ... )
 
 	}
 
-
+		int xpos, ypos;
 	if (isRect)
 	{
-		int xpos, ypos;
+		
 		byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
 
 		if (tempV == CFONT_VALIGN_TOP)
@@ -769,10 +769,10 @@ void CFont::Print( const char *text, ... )
 		pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
 		pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
 
-// 		pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
-// 		pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
-// 		//	gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
-// 		pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
+ 		pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
+		pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
+ 			//gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
+ 		pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
 
 	}
 
