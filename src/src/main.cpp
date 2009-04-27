@@ -12,7 +12,7 @@ CEnemyController *enemyc;
 CGUIScheme *guidummy = NULL;
 CEdit *Edit = NULL, *Edit1 = NULL;
 CButton *Button = NULL;
-//CCompas compas; 
+CCompas compas; 
 bool InitDemoChoose();
 bool DrawDemoChoose();
 
@@ -56,7 +56,7 @@ void tempMakeMap()
 bool Init()
 {	
 	CFactory *Factory = CFactory::Instance();
- 	Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
+ 	//Factory->Create(OBJ_USER_DEFINED, &(CGUIRenderer::NewRenderer));
  
  	
 
@@ -68,30 +68,30 @@ bool Init()
 	
 	
 
-	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
-	Hero->p.In(200.0f, 200.0f);
-	
-
-	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_r1")))->GetTexID();
-	Hero->sprite.m_nTextureHeight = 32;
-	Hero->sprite.m_nTextureWidth = 32;
-	Hero->sprite.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
-	Hero->sprite.SetAnimation(1);
-
-	Hero->spra.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_a1")))->GetTexID();
-	Hero->spra.m_nTextureHeight = 32;
-	Hero->spra.m_nTextureWidth = 32;
-	Hero->spra.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
-	Hero->spra.SetAnimation(1);
-	Hero->spra.depth = -0.5f;
-	Hero->sprb.depth = -0.5f;
-	Hero->depth = -0.5f;
-
-	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_b1")))->GetTexID();
-	Hero->sprb.m_nTextureHeight = 32;
-	Hero->sprb.m_nTextureWidth = 32;
-	Hero->sprb.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
-	Hero->sprb.SetAnimation(1);
+// 	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
+// 	Hero->p.In(200.0f, 200.0f);
+// 	
+// 
+// 	Hero->sprite.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_r1")))->GetTexID();
+// 	Hero->sprite.m_nTextureHeight = 32;
+// 	Hero->sprite.m_nTextureWidth = 32;
+// 	Hero->sprite.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
+// 	Hero->sprite.SetAnimation(1);
+// 
+// 	Hero->spra.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_a1")))->GetTexID();
+// 	Hero->spra.m_nTextureHeight = 32;
+// 	Hero->spra.m_nTextureWidth = 32;
+// 	Hero->spra.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
+// 	Hero->spra.SetAnimation(1);
+// 	Hero->spra.depth = -0.5f;
+// 	Hero->sprb.depth = -0.5f;
+// 	Hero->depth = -0.5f;
+// 
+// 	Hero->sprb.m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Hero_b1")))->GetTexID();
+// 	Hero->sprb.m_nTextureHeight = 32;
+// 	Hero->sprb.m_nTextureWidth = 32;
+// 	Hero->sprb.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
+// 	Hero->sprb.SetAnimation(1);
 
 	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 	ps->name = "psys";
@@ -243,11 +243,11 @@ bool Draw()
 		depth = 0.0f;
 	}
 	
-	if (Ninja->keys[SDLK_F1])
-	{
-		Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
-		Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);
-	}	
+// 	if (Ninja->keys[SDLK_F1])
+// 	{
+// 		Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
+// 		Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);
+// 	}	
 
 	if (Ninja->keys[SDLK_SPACE])
 	{
@@ -455,8 +455,8 @@ bool DrawDemoChoose()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_USER_INIT, &InitDemoChoose);
-	Ninja->SetState(STATE_RENDER_FUNC, &DrawDemoChoose);	
+	Ninja->SetState(STATE_USER_INIT, &Init);
+	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
 	Ninja->FreeInst();
 	return 0x0;

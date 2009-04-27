@@ -282,12 +282,13 @@ bool CCompas::Render()
 		glEnable(GL_LINE_WIDTH);
 		glLineWidth(3.0f);
 		CPrimitiveRender pr;
+		pr.doUseCurrentCoordSystem = true;
 		pr.plClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f);
 		pr.grCircleL(Vector2(100,100), depth);;
 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth));
 
-// 		pr.grCircleL(Vector2(100,100), depth, RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));
-// 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth), 1.0f, RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
+//  		pr.grCircleL(Vector2(100,100), depth, RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));
+//  		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth), 1.0f, RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Ninja->FreeInst();
