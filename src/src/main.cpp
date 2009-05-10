@@ -1,5 +1,9 @@
 #include "Ninja.h"
 #include "Game.h"
+#include "LuaUtils.h"
+
+
+GlobalLuaState* globalLuaState = 0;
 
 CNinja* Ninja = CNinja::Instance();
 
@@ -65,7 +69,13 @@ bool Init()
 		return false;
 	if (!Ninja->ResourceManager.LoadResources())
 		return false;
-	
+// 	
+ 	globalLuaState = new GlobalLuaState("./button1.lua");
+// 	globalLuaState->outerFunction1();
+// 	globalLuaState->outerFunction2();
+// 	globalLuaState->outerFunction3();
+ 	delete globalLuaState;
+// 
 	
 
 // 	Hero = dynamic_cast<CHero*>(Factory->Create(OBJ_USER_DEFINED, &(CHero::NewHero)));
@@ -93,28 +103,28 @@ bool Init()
 // 	Hero->sprb.AddAnimation(true, 1, 28, 24, 1, 1, 1, 28, 24, 2, 7, 1, true);
 // 	Hero->sprb.SetAnimation(1);
 
-	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
-	ps->name = "psys";
-	ps->Init();
-	ps->info.sc = RGBAf(1.0f, 0.5f, 0.5f, 1.0f);
-	ps->info.ec = RGBAf(0.5f, 0.5f, 1.0f, 0.5f);
-	ps->visible = true;	
-	pnts[0] = Vector2(0, 480);
-	pnts[1] = Vector2(640, 480);
-	ps->info.plife = 3;
-	ps->info.emission = 500;///*debug 1 */ 3000;
-	ps->info.startsize = 32;
-	// debug //
-	ps->info.sizevar = 8;
-	ps->info.isSnow = true; // костыль
-	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
-	ps->SetGeometry(pnts, 2);
-
-	int i;
-	repeat(i, 201)
-	{
-		ps->Update(0.02f);
-	}
+// 	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
+// 	ps->name = "psys";
+// 	ps->Init();
+// 	ps->info.sc = RGBAf(1.0f, 0.5f, 0.5f, 1.0f);
+// 	ps->info.ec = RGBAf(0.5f, 0.5f, 1.0f, 0.5f);
+// 	ps->visible = true;	
+// 	pnts[0] = Vector2(0, 480);
+// 	pnts[1] = Vector2(640, 480);
+// 	ps->info.plife = 3;
+// 	ps->info.emission = 500;///*debug 1 */ 3000;
+// 	ps->info.startsize = 32;
+// 	// debug //
+// 	ps->info.sizevar = 8;
+// 	ps->info.isSnow = true; // костыль
+// 	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
+// 	ps->SetGeometry(pnts, 2);
+// 
+// 	int i;
+// 	repeat(i, 201)
+// 	{
+// 		ps->Update(0.02f);
+// 	}
 
 	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 	ps->name = "enemy_l";
@@ -455,6 +465,8 @@ bool DrawDemoChoose()
 
 int	main(int argc, char *argv[])
 {
+	void* fls = NULL;
+	Ninja->SetState(STATE_HIDE_CONSOLE_WINDOW, (fls));
 	Ninja->SetState(STATE_USER_INIT, &Init);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();

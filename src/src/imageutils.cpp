@@ -67,7 +67,7 @@ bool  CImageData::MakeRGBA()
 	_data = new byte [width*height*4];
 	if (_data == NULL)
 		return false;
-	pbyte Rs,Gs,Bs,Ap,Rp,Gp,Bp ;
+	pbyte Rs,Gs,Bs,Ap,Rp,Gp,Bp;
 	for(int i = 0;i < height*width; i++)
 	{
 		Rs = data + i*3;

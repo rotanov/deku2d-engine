@@ -35,6 +35,7 @@ CNinja::CNinja()
 	EventFuncCount = 0;
 	userReInit = false;
 	Initialized = false;
+	doHideConsoleWindow = true;
 }
 CNinja::~CNinja(){}
 
@@ -185,6 +186,10 @@ void CNinja::SetState(int state, void* value)
 					RGBAf *t = (RGBAf*)value;
 					glClearColor(t->r, t->g, t->b, t->a); // BAD!!!  TODO: INcapsulate
 				}
+			case STATE_HIDE_CONSOLE_WINDOW:
+				{
+					doHideConsoleWindow = (bool)(value);
+				}
 		}
 	}
 
@@ -192,6 +197,8 @@ bool CNinja::Init()
 {
 	#ifdef WIN32
 		#define WIN32_LEAN_AND_MEAN		
+	if (doHideConsoleWindow)
+	{
 		HMODULE hmodule = GetModuleHandle("Ninja Engine.exe");
  		char * pathexe = new char[1024];
 		GetModuleFileName(hmodule, pathexe, 256);
@@ -204,7 +211,7 @@ bool CNinja::Init()
 		DeleteFileNameFromEndOfPathToFile(MainDir);
 		SetCurrentDirectory(MainDir);
 		delete [] MainDir;
-
+	}
 	#endif
 	
 

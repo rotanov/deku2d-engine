@@ -33,6 +33,7 @@
 #define STATE_MOUSE_X			0x09
 #define STATE_MOUSE_Y			0x0A
 #define STATE_MOUSE_XY			0x0B
+#define STATE_HIDE_CONSOLE_WINDOW	0x0C
 
 #define STATE_USER_INIT			0x81
 #define STATE_UPDATE_FUNC		0x82
@@ -84,6 +85,7 @@ public:
 private:
 	string						ConfigFileName;
 	bool						doLimitFps;
+	bool						doHideConsoleWindow;
 	unsigned int				Fps;
 	unsigned int				FpsLimit;
 	float						dt;
@@ -93,8 +95,7 @@ private:
 	bool						doCalcFps;
 	int							EventFuncCount;
 	CGLWindow					window;
-
-
+	
 	bool						ClearLists();
 	bool						Init();
 	bool						MidInit();
