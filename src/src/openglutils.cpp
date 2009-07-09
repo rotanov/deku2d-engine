@@ -583,7 +583,7 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 
 	//strstr(WGL_EXT_swap_control);
-	setVSync(1);
+	setVSync(0);
 }
 
 //-------------------------------------------//
