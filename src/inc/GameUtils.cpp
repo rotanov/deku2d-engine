@@ -273,7 +273,7 @@ bool CCollisionInfo::SaveToFile()
 bool CCompas::Render()
 {
 		Vector2 v1, n;
-		CNinja *Ninja = CNinja::Instance();
+		CEngine *Ninja = CEngine::Instance();
 		v1 = Ninja->RenderManager.Camera.Point;
 		n = (-v1).Normalized();
 		float depth = v1.Length()/40.0f;
@@ -298,7 +298,7 @@ bool CCompas::Render()
 CCompas::CCompas()
 {
 	name = "Visual compass";
-	CNinja *Ninja = CNinja::Instance();
+	CEngine *Ninja = CEngine::Instance();
 	Ninja->RenderManager.AddObject(this);
 	Ninja->FreeInst();	
 }

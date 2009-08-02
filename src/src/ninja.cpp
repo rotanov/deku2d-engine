@@ -9,7 +9,7 @@
 //				Ninja stuff					 //
 //-------------------------------------------//
 
-CNinja::CNinja()
+CEngine::CEngine()
 {
 	memset(keys, 0, sizeof(keys));
 	doLimitFps = false; 
@@ -37,19 +37,19 @@ CNinja::CNinja()
 	Initialized = false;
 	doHideConsoleWindow = true;
 }
-CNinja::~CNinja(){}
+CEngine::~CEngine(){}
 
-CNinja* CNinja::Instance()
+CEngine* CEngine::Instance()
 {
 	if (_instance == NULL)
 	{
-		_instance = new CNinja;
+		_instance = new CEngine;
 	}
 	_refcount++;
 	return _instance;
 }
 
-void CNinja::FreeInst()
+void CEngine::FreeInst()
 {
 	_refcount--;
 	if (!_refcount)
@@ -60,26 +60,26 @@ void CNinja::FreeInst()
 	}
 }
 
-int	CNinja::GetWindowHeight()
+int	CEngine::GetWindowHeight()
 {
 	return window.height;
 }
-int CNinja::GetWindowWidth()
+int CEngine::GetWindowWidth()
 {
 	return window.width;
 }
 
-unsigned int CNinja::GetFps()
+unsigned int CEngine::GetFps()
 {
 	return Fps;
 }
 
-float CNinja::Getdt()
+float CEngine::Getdt()
 {
 	return dt;
 }
 
-void CNinja::CalcFps()
+void CEngine::CalcFps()
 {
 	static DWORD DTime, _llt, lt, fr;
 	
@@ -96,7 +96,7 @@ void CNinja::CalcFps()
 	fr++;
 }
 
-bool CNinja::LimitFps()
+bool CEngine::LimitFps()
 {
 	if (!doLimitFps)
 		return true;
@@ -111,7 +111,7 @@ bool CNinja::LimitFps()
 	return false;
 }
 
-void CNinja::appFocusChange(bool x_isHaveFocus)
+void CEngine::appFocusChange(bool x_isHaveFocus)
 {
 	isHaveFocus = x_isHaveFocus;
 	if (isHaveFocus)
@@ -124,7 +124,7 @@ void CNinja::appFocusChange(bool x_isHaveFocus)
 	}
 }
 
-void CNinja::SetState(int state, void* value)
+void CEngine::SetState(int state, void* value)
 	{
 		switch(state)
 		{
@@ -193,7 +193,7 @@ void CNinja::SetState(int state, void* value)
 		}
 	}
 
-bool CNinja::Init()
+bool CEngine::Init()
 {
 	#ifdef WIN32
 		#define WIN32_LEAN_AND_MEAN		
@@ -279,7 +279,7 @@ bool CNinja::Init()
 	return true;
 }
 
-bool CNinja::Suicide()
+bool CEngine::Suicide()
 {
 	FontManager->FreeInst("Ninja.cpp");
 	TextureManager->FreeInst();
@@ -290,7 +290,7 @@ bool CNinja::Suicide()
 
 #define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
 
-bool CNinja::ProcessEvents()
+bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
@@ -364,7 +364,7 @@ bool CNinja::ProcessEvents()
 	return true;
 }
 
-bool CNinja::Run()
+bool CEngine::Run()
 {
 	MemChp1();
 	//#######################//
@@ -409,12 +409,12 @@ bool CNinja::Run()
 	return true;
 }
 
-bool CNinja::MidInit()
+bool CEngine::MidInit()
 {
 	return true;
 }
 
-void CNinja::GetState( int state, void* value )
+void CEngine::GetState( int state, void* value )
 {
 	switch (state)
 	{
@@ -440,7 +440,7 @@ void CNinja::GetState( int state, void* value )
 	}
 }
 
-bool CNinja::AddEventFunction(EventFunc func)
+bool CEngine::AddEventFunction(EventFunc func)
 {
 	if (EventFuncCount >= MAX_EVENT_FUNCTIONS)
 		return false;
@@ -449,12 +449,12 @@ bool CNinja::AddEventFunction(EventFunc func)
 	return true;
 }
 
-int CNinja::CfgGetInt( char* ParamName )
+int CEngine::CfgGetInt( char* ParamName )
 {
 	return atoi((Config.First->Get(ParamName))->GetValue());
 }
 
-bool CNinja::ClearLists()
+bool CEngine::ClearLists()
 {
 	CObject *data = (RenderManager.Next());
 	while (data)
@@ -484,13 +484,13 @@ bool CNinja::ClearLists()
 	return true;
 }
 
-CNinja* CNinja::_instance = 0;
-int CNinja::_refcount = 0;
+CEngine* CEngine::_instance = 0;
+int CEngine::_refcount = 0;
 
 bool CUpdateManager::UpdateObjects()
 {
 	Reset();
-	CNinja *engine = CNinja::Instance();
+	CEngine *engine = CEngine::Instance();
 	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
 	while (data)
 	{

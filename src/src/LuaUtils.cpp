@@ -163,7 +163,7 @@ Vector2 pnts2[2];
 
 void GlobalLuaState::innerFunction1()
 {
-	CNinja* Ninja = CNinja::Instance();
+	CEngine* Ninja = CEngine::Instance();
 	CFactory *Factory = CFactory::Instance();
 
 	CParticleSystem *ps;

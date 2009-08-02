@@ -1,7 +1,7 @@
 #include "Ninja.h"
 #include "GameUtils.h"
 
-CNinja* Ninja = CNinja::Instance();
+CEngine* Ninja = CEngine::Instance();
 
 #define MIN_ZOOM 4
 #define MAX_ZOOM 128

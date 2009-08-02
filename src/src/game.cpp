@@ -53,7 +53,7 @@ bool CHero::Render()
 		glVertex2f(012.0f, 394.0f);
 
 	glEnd();
-	CNinja *Ninja  = CNinja::Instance();
+	CEngine *Ninja  = CEngine::Instance();
 	gSetColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 	if (Health <= 0.001f)
 	{	
@@ -79,7 +79,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 		p->v.y = 0;
 		p->p.y = 0;
 	}
-	CNinja *Ninja = CNinja::Instance();
+	CEngine *Ninja = CEngine::Instance();
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObjectByName("snowballs"));
 	Ninja->FreeInst();
 
@@ -108,7 +108,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 
 bool CHero::Update( float dt )
 {
-	CNinja *Ninja = CNinja::Instance();
+	CEngine *Ninja = CEngine::Instance();
 
 	if (Ninja->keys[SDLK_LEFT])
 	{			

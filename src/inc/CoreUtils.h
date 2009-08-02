@@ -54,16 +54,12 @@ using namespace std;
 	#include <Windows.h>
 #endif
 
-inline char *str(string Str)
-{
-	return (char*)Str.c_str();
-}
-
 #define USE_SDL_OPENGL
 
 // Это для улучшения читабельности дефайн. Тоесть мы хотим бесконечный цикл: for(;;). А можно for EVER.
+// Хотя выглядит как выебон.
 #define EVER (;;)
-#define Forever for(;;)
+#define Forever for EVER
 
 // Это дефайны для флагов свойств объекта
 #define T_COBJECT		0x01
@@ -74,7 +70,6 @@ inline char *str(string Str)
 #define T_RIGHT_MASK	0xf0
 
 /**
-*	Есть такая вещь как паттерны. Есть паттерн синглтон. Этот класс демонстрирует как его делать.
 *	Суть синглотона в том, что в памяти всегда присутствует только один экзмепляр класса.
 *	Этот класс реально нигде не используется и лежит здесь, чтобы не забыть как делать синглтон.
 */ 

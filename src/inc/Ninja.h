@@ -54,7 +54,7 @@ typedef bool (*EventFunc)(SDL_Event&);
 
 
 
-class CNinja
+class CEngine
 {
 public:
 	CResourceManager			ResourceManager;
@@ -68,7 +68,7 @@ public:
 
 
 	CFactory					*Factory;
-	static CNinja*				Instance();
+	static CEngine*				Instance();
 	void						FreeInst();
 	void						appFocusChange(bool x_isHaveFocus);
 	unsigned int				GetFps();
@@ -118,11 +118,11 @@ private:
 	bool						(*procGUIGetMouseMove)(int x, int y, unsigned char button);
 
 protected:
-	static CNinja* _instance;
+	static CEngine* _instance;
 	static int _refcount;
 
-	CNinja();
-	~CNinja();
+	CEngine();
+	~CEngine();
 };
 
 #endif NINJA_H

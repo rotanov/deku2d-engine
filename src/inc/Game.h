@@ -117,7 +117,7 @@ public:
 		relj = true;
 
 
-		CNinja *Ninja = CNinja::Instance();
+		CEngine *Ninja = CEngine::Instance();
 		CFactory  *Factory  = CFactory::Instance();
 		snowballs = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 		Factory->FreeInst();

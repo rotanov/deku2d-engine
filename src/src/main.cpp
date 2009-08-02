@@ -5,7 +5,7 @@
 
 GlobalLuaState* globalLuaState = 0;
 
-CNinja* Ninja = CNinja::Instance();
+CEngine* Ninja = CEngine::Instance();
 
 CParticleSystem *ps;
 CSprite *Spr;
