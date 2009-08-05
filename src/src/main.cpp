@@ -391,6 +391,7 @@ void AcceptCall(CHandle tmp)
 		switch(IndDemo)
 		{
 			case 1:
+				//Ninja->ClearLists();
 				Ninja->SetState(STATE_USER_INIT, &Init);
 				Ninja->SetState(STATE_RENDER_FUNC, &Draw);					
 				break;
@@ -465,8 +466,6 @@ bool DrawDemoChoose()
 
 int	main(int argc, char *argv[])
 {
-	void* fls = NULL;
-	Ninja->SetState(STATE_HIDE_CONSOLE_WINDOW, (fls));
 	Ninja->SetState(STATE_USER_INIT, &Init);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();

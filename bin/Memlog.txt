@@ -5,4 +5,4 @@ file message
 0 bytes in 0 Ignore Blocks.
 0 bytes in 0 Client Blocks.
 Largest number used: 1867422 bytes.
-Total allocations: 5257504 bytes.
+Total allocations: 3154606 bytes.

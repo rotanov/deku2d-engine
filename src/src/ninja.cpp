@@ -204,7 +204,7 @@ bool CEngine::Init()
 		GetModuleFileName(hmodule, pathexe, 256);
 		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
 		delete [] pathexe;
-		ShowWindow(hwnd, 0);
+		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // В ранней версии SDL всегда вылазило окно консоли, потом этот косяк убрали, а мой фикс тут остался
 
 		char *MainDir = new char[MAX_PATH];
 		GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
