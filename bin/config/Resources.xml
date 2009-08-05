@@ -2,6 +2,16 @@
 	1maingui = "data\1maingui.bmp"
 	Art = "data\Art.rar"
 	data = "data\data.rar"
+	<Font resources>
+		Beta = "data\Font resources\Beta.fif"
+		bg1 = "data\Font resources\bg1.png"
+		Font = "data\Font resources\Font.bmp"
+		Font = "data\Font resources\Font.fif"
+		font1 = "data\Font resources\font1.png"
+		Font10 = "data\Font resources\Font10.bmp"
+		Font10ok = "data\Font resources\Font10ok.bmp"
+		hge = "data\Font resources\hge.fif"
+	</Font resources>
 	<Fonts>
 		Beta = "data\Fonts\Beta.fif"
 		Font = "data\Fonts\Font.fif"

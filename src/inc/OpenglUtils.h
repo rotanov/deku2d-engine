@@ -575,6 +575,102 @@ protected:
 	void					_swap(int i, int j);
 };
 
+
+class CMiniInput					// Временный класс для обработки ввода с клавиатуры. Пока Пётор не сделает систему GUI. Или пока я не наложу на Пётора и заюзаю GUI-chan
+{
+public:
+	char *text;
+	int symbols;
+	int xpos, ypos;
+	int width, height;
+	int cp;
+	bool havefocus;
+	CFont *font;
+
+	CMiniInput(int x, int y, char * fontname):xpos(x), ypos(y)
+	{
+		text = NULL;
+		symbols = 0;
+		height = 19;
+		width = 0;
+		cp = 0;
+		havefocus = false;
+	}
+
+	CMiniInput(){}
+
+	void DelChar()
+	{
+		if (symbols == 0)
+			return;
+		width -= font->width[text[cp-1]-32] + 1;
+		symbols--;
+		char *temp = new char[symbols+1];
+		for(int i=0;i<cp;i++)
+			temp[i] = text[i];
+		//temp[cp] = t;
+		for(int i=cp;i<symbols;i++)
+			temp[i] = text[i];
+		cp--;
+		if (text != NULL)
+			delete [] text;
+		temp[symbols] = 0;
+		text = temp;
+	}
+
+	void AddChar(char t)
+	{
+		symbols++;
+		char *temp = new char[symbols+1];
+		for(int i=0;i<cp;i++)
+			temp[i] = text[i];
+		temp[cp] = t;
+		for(int i=cp+1;i<symbols;i++)
+			temp[i] = text[i-1];
+		cp++;
+		if (text != NULL)
+			delete [] text;
+		temp[symbols] = 0;
+		text = temp;
+
+		width += font->width[t-32] + 1;
+	}
+
+
+	bool Update(int x, int y, Uint8 mstate)
+	{
+		if (mstate&SDL_BUTTON(1))
+			if (x >= xpos && y >= ypos)
+				if (x <= xpos+width && y <= ypos+height)
+				{
+					//cp = (x - xpos)/10; Fix
+				}
+
+				glDisable(GL_TEXTURE_2D);
+				glLoadIdentity();
+				glColor3f(0.6f, 0.7f, 0.8f);
+				if (havefocus)
+					glColor3f(0.9f, 0.8f, 0.2f);
+				glBegin(GL_LINE_LOOP);
+				glVertex2i(xpos, ypos);
+				glVertex2i(xpos + width + 2, ypos);
+				glVertex2i(xpos + width + 2, ypos + height);
+				glVertex2i(xpos, ypos + height);
+				glVertex2i(xpos, ypos);
+				glEnd();
+				glBegin(GL_LINES);
+				glVertex2i(xpos + cp * 10 + 1, ypos - 5);
+				glVertex2i(xpos + cp * 10 + 1, ypos + height + 5);
+				glEnd();
+				font->Print(xpos+2, ypos+2, text);
+				glColor3f(1.0f, 1.0f, 1.0f);
+
+
+				return true;
+	}
+};
+
+
 //////////////////////////////////////////////////////////////////////////
 // OpenGl interface// Херня какая-то передумать и переделать нахуй...
 //////////////////////////////////////////////////////////////////////////
