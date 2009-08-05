@@ -188,6 +188,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\Engine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\event.h"
 				>
 			</File>
@@ -220,10 +224,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Ninja.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\OpenglUtils.h"
 				>
 			</File>
@@ -248,6 +248,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Engine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Font editor\Font editor.cpp"
 				>
 			</File>
@@ -269,10 +273,6 @@
 			</File>
 			<File
 				RelativePath=".\src\mathutils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ninja.cpp"
 				>
 			</File>
 			<File

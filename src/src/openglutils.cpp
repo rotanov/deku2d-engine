@@ -1013,7 +1013,7 @@ void gSetColor( RGBAf color )
 	//glColor4f(color.r, color.g, color.b, color.a);
 }
 
-void gDrawBBox( CBBox box )
+void gDrawBBox( CAABB box )
 {
 	glPushMatrix();
 	glPushAttrib(GL_TEXTURE_2D);

@@ -1,5 +1,5 @@
 #include "GameUtils.h"
-#include "Ninja.h"
+#include "Engine.h"
 
 //-------------------------------------------//
 //			CTileSet functions				 //
@@ -24,7 +24,7 @@ bool CTileSet::LoadFromFile()
 	file.Read(&Info, sizeof(Info));
 	if (BBox != NULL)
 		delete [] BBox;
-	file.Read(BBox, sizeof(CBBox)*Info.HorNumTiles*Info.VerNumTiles);
+	file.Read(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
 
 	file.Close();
 }
@@ -67,7 +67,7 @@ bool CTileSet::SaveToFile()
 
 	file.Write(TextureName, strlen(TextureName)+1);
 	file.Write(&Info, sizeof(Info));
-	file.Write(BBox, sizeof(CBBox)*Info.HorNumTiles*Info.VerNumTiles);
+	file.Write(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
 
 	file.Close();
 }
@@ -88,9 +88,9 @@ void CTileSet::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 	Info.TileHeight = _TileHeight;
 	if (BBox != NULL)
 		delete [] BBox;
-	BBox = new CBBox [Info.HorNumTiles*Info.VerNumTiles];
+	BBox = new CAABB [Info.HorNumTiles*Info.VerNumTiles];
 	for(int i=0; i<Info.HorNumTiles*Info.VerNumTiles; i++)
-		BBox[i] = CBBox(0, 0, Info.TileHeight, Info.TileWidth);
+		BBox[i] = CAABB(0, 0, Info.TileHeight, Info.TileWidth);
 }
 
 Vector2* CTileSet::GetCellTC(int CellIndex)
@@ -250,8 +250,8 @@ bool CCollisionInfo::LoadFromFile()
 		return false;
 	TileSet->Texture->Load();
 
-	boxes = new CBBox [TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles];
-	file.Read(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CBBox));
+	boxes = new CAABB [TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles];
+	file.Read(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CAABB));
 
 	loaded = true;
 	return true;
@@ -265,7 +265,7 @@ bool CCollisionInfo::SaveToFile()
 	file.Write(TileSetName, strlen(TileSetName)+1);
 	if (TileSet == NULL)
 		return false;
-	file.Write(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CBBox));
+	file.Write(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CAABB));
 
 	return true;
 }

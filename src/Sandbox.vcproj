@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="Ninja engine"
+	Name="Sandbox"
 	ProjectGUID="{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
-	RootNamespace="Ninjaengine"
+	RootNamespace="Sandbox"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Engine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\game.cpp"
 				>
 			</File>
@@ -223,10 +227,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ninja.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\openglutils.cpp"
 				>
 			</File>
@@ -248,6 +248,10 @@
 			>
 			<File
 				RelativePath=".\inc\CoreUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Engine.h"
 				>
 			</File>
 			<File
@@ -279,10 +283,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Ninja.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\OpenglUtils.h"
 				>
 			</File>
@@ -309,7 +309,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Ninja engine.rc"
+				RelativePath=".\Sandbox.rc"
 				>
 			</File>
 		</Filter>
@@ -558,7 +558,7 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\VTune\Ninja engine.vpj"
+			RelativePath=".\VTune\Sandbox.vpj"
 			>
 		</File>
 		<File

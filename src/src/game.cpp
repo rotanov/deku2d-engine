@@ -83,7 +83,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObjectByName("snowballs"));
 	Ninja->FreeInst();
 
-	CBBox Gift = CBBox(274, GROUND, 260 + 51 , GROUND + 29 );
+	CAABB Gift = CAABB(274, GROUND, 260 + 51 , GROUND + 29 );
 
 	Vector2 n;
 	float delta;
@@ -208,7 +208,7 @@ bool CHero::Update( float dt )
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("enemy_l"));
 	for (int i=0; i< ps->info.ParticlesActive; i++)
 	{
-		CBBox tmp = CBBox(ps->particles[i].p, ps->particles[i].p + Vector2(ps->particles[i].size, ps->particles[i].size));
+		CAABB tmp = CAABB(ps->particles[i].p, ps->particles[i].p + Vector2(ps->particles[i].size, ps->particles[i].size));
 		if (tmp.Intersect(Gift))
 		{
 			Health -= ps->particles[i].size / 4.0f;
@@ -226,7 +226,7 @@ bool CHero::Update( float dt )
 
 
 
-	CBBox tmp  = BBox;
+	CAABB tmp  = BBox;
 
 
 	p.x += v.x*dt;

@@ -493,16 +493,16 @@ __INLINE float AngleBeetweenVectors(Vector3 a, Vector3 b)
 
 typedef Vector3 RGBf;
 
-class CBBox
+class CAABB
 {
 public:
 	Vector2 vMin, vMax;
-	CBBox()
+	CAABB()
 	{
 		vMax = vMin = Vector2::Blank();
 	}
-	CBBox(Vector2 _min, Vector2 _max) : vMin(_min), vMax(_max){}
-	CBBox(scalar xmin, scalar ymin, scalar xmax, scalar ymax)
+	CAABB(Vector2 _min, Vector2 _max) : vMin(_min), vMax(_max){}
+	CAABB(scalar xmin, scalar ymin, scalar xmax, scalar ymax)
 	{
 		vMin.x = xmin;
 		vMin.y = ymin;
@@ -530,9 +530,9 @@ public:
 		vMax.y += dy;
 	}
 
-	CBBox Offsetted(scalar dx, scalar dy)
+	CAABB Offsetted(scalar dx, scalar dy)
 	{
-		CBBox tmp;
+		CAABB tmp;
 		tmp.vMin.x = vMin.x + dx;
 		tmp.vMax.x = vMax.x + dx;
 		tmp.vMin.y = vMin.y + dy;
@@ -631,7 +631,7 @@ public:
 		return true;
 	}
 
-	bool Intersect(CBBox box)
+	bool Intersect(CAABB box)
 	{
 		if (box.vMin.x >= vMax.x)
 			return false;
@@ -645,7 +645,7 @@ public:
 		return true;
 	}
 
-	void Union(CBBox other)
+	void Union(CAABB other)
 	{
 		Add(other.vMax);
 		Add(other.vMin);
@@ -1245,10 +1245,10 @@ class CGeometry
 {
 public:
 	int type;
-	CBBox box;
+	CAABB box;
 	CGeometry()
 	{
-		box  = CBBox(0.0f, 0.0f, 0.0f, 0.0f);
+		box  = CAABB(0.0f, 0.0f, 0.0f, 0.0f);
 		type = 0;
 	}
 	virtual void CalcBBOX(){}

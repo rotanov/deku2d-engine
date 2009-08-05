@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "Ninja.h"
+#include "Engine.h"
 #include "GameUtils.h"
 #include "MathUtils.h"
 
@@ -14,17 +14,17 @@ class CUnit : public CRenderObject, public CUpdateObject
 public:
 	int Health;
 	CSprite sprite;
-	CBBox BBox;
+	CAABB BBox;
 	bool dead;
 	CLevelMap *map;
-	CBBox Gift;
+	CAABB Gift;
 	Vector2 v; //скорость
 
 	CUnit ()
 	{
 		v = Vector2(0.0f, 0.0f);
 		Health  = 100;
-		Gift = CBBox(274, GROUND, 260 + 51 , GROUND + 29 );
+		Gift = CAABB(274, GROUND, 260 + 51 , GROUND + 29 );
 	}
 	bool Update(float dt)
 	{
@@ -113,7 +113,7 @@ public:
 
 		Snow = 0;
 		onPlane = true;
-		BBox = CBBox(0, 0, 56, 48);
+		BBox = CAABB(0, 0, 56, 48);
 		relj = true;
 
 

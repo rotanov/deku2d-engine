@@ -7,7 +7,7 @@
 class CPhysicalObject : public CUpdateObject
 {
 public:
-	CBBox *box;
+	CAABB *box;
 	CPhysicalObject(){};
 	virtual ~CPhysicalObject(){};
 };

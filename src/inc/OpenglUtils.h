@@ -124,7 +124,7 @@ public:
 	void grArrowL(const Vector2& v0, const Vector2& v1);
 	void grArrowC(const Vector2 &v0,const Vector2 &v1);
 
-	void gDrawBBox(CBBox box);
+	void gDrawBBox(CAABB box);
 	void grInYan(const Vector2 &p, scalar Radius);
 private:
 	void BeforeRndr();
@@ -141,7 +141,7 @@ class CCamera : public CObject
 {
 public:
 	Vector2 Point;	// point to which translation is made.
-	CBBox view, outer, world;		// inner screen bbox
+	CAABB view, outer, world;		// inner screen bbox
 	bool Assigned;
 	scalar *Atx, *Aty;
 	scalar dx, dy;
@@ -151,8 +151,8 @@ public:
 	CCamera()
 	{
 		name = "Camera";
-		view = world = CBBox(100, 100, 540, 380);
-		outer = CBBox(-1024, 0, 2048, 512);
+		view = world = CAABB(100, 100, 540, 380);
+		outer = CAABB(-1024, 0, 2048, 512);
 		Point = p = v = Vector2::Blank();
 		Atx = Aty = NULL;
 		Assigned = false;
@@ -409,6 +409,9 @@ public:
 	bool				isSelected;				//	Выделен ли кусок текста
 	bool				doUseGlobalCoordSystem;	//	Использовать ли для вывода глобальную систему коодинат	
 	CPrimitiveRender	Prndr;					//	Настройки линий и прочей хуеты связаной с рамкой.
+	byte		width[256];		// Ширина каждого символа
+	byte		height[256];	// Высота каждого символа
+
 
 	static CObject* NewFont()
 	{
@@ -436,8 +439,6 @@ private:
 	byte				align;					//	Флаги выравнивания
 
 	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
-	byte		width[256];		// Ширина каждого символа
-	byte		height[256];	// Высота каждого символа
 	char		*FontImageName;	// Имя файла текстуры
 	GLuint		font;			// Font texture ID
 	GLuint		base;			// Base List of 256 glLists for font
@@ -662,7 +663,8 @@ public:
 				glVertex2i(xpos + cp * 10 + 1, ypos - 5);
 				glVertex2i(xpos + cp * 10 + 1, ypos + height + 5);
 				glEnd();
-				font->Print(xpos+2, ypos+2, text);
+				font->p = Vector2(xpos+2, ypos+2);
+				font->Print(text);
 				glColor3f(1.0f, 1.0f, 1.0f);
 
 

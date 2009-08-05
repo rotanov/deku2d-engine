@@ -4,7 +4,7 @@
 	Version="8,00"
 	Name="Level Editor"
 	ProjectGUID="{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
-	RootNamespace="Ninjaengine"
+	RootNamespace="LevelEditor"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Engine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\game.cpp"
 				>
 			</File>
@@ -216,10 +220,6 @@
 			</File>
 			<File
 				RelativePath=".\src\mathutils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ninja.cpp"
 				>
 			</File>
 			<File
@@ -247,6 +247,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\Engine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\event.h"
 				>
 			</File>
@@ -268,10 +272,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MathUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\Ninja.h"
 				>
 			</File>
 			<File

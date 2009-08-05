@@ -1,4 +1,4 @@
-#include "Ninja.h"
+#include "Engine.h"
 #include "GameUtils.h"
 
 CEngine* Ninja = CEngine::Instance();

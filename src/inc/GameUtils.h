@@ -19,7 +19,7 @@ public:
 	char *TextureName;
 	CTexture *Texture;
 	CTileSetInfo Info;
-	CBBox *BBox;
+	CAABB *BBox;
 
 	CTileSet ();
 	static CObject* NewTileSet()
@@ -41,7 +41,7 @@ class CCollisionInfo : public CResource
 public:
 	char *TileSetName;
 	CTileSet *TileSet;
-	CBBox *boxes;
+	CAABB *boxes;
 
 	CCollisionInfo()
 	{

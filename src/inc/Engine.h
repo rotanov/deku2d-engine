@@ -1,7 +1,7 @@
 #ifndef NINJA_H
 #define NINJA_H
 
-#pragma message("Compiling Ninja.h")
+#pragma message("Compiling Engine.h")
 
 #include "CoreUtils.h"
 
