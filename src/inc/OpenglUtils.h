@@ -72,7 +72,7 @@ class CPrimitiveRender
 {
 public:
 	int BlendingOption, CheckerCellSize;
-	bool OutlineEnabled, TextureEnabled, DashedLines, doUseCurrentCoordSystem, LineStippleEnabled;
+	bool OutlineEnabled, TextureEnabled, DashedLines, doUseGlobalCoordSystem, LineStippleEnabled;
 	static int glListCircleL;
 	static int glListCircleS;
 	static int glListRingS;
@@ -90,7 +90,7 @@ public:
 		Angle = depth = 0.0f;
 		lwidth = 1.0f;
 		psize = 8.0f;
-		LineStippleEnabled = doUseCurrentCoordSystem = false;			
+		LineStippleEnabled = doUseGlobalCoordSystem = false;			
 	}
 
 	void Init();

@@ -1,13 +1,12 @@
 <configuration>
-	WindowWidth		= "640"
-	WindowHeight		= "480"
-	WindowBpp		= "32"
-	WindowCaption		= "Our team 2d engine testbed"
-	DoCalcFps		= "true"
-	DoLimitFps		= "false"
-	FpsLimit			= "20" // он пиздит, это не фпс лимит, а кол-во миллисекунд между кадрами
-	XMLResourcesFilename    	= "config/resources.xml"
-     	DataPath               	= "Data/"
-	TexturesFldr		= "Textures/"
-	FontsFldr		= "Fonts/"
+	WindowWidth					= "640"
+	WindowHeight				= "480"
+	WindowBpp					= "32"
+	WindowCaption				= "Sandbox"
+	DoCalcFps					= "true"
+	DoLimitFps					= "false"
+	FpsLimit					= "60"
+	XMLResourcesFilename		= "config/resources.xml"
+	DataPath					= "Data/"
+	doLoadDefaultResourceList	= "true"
 </configuration>

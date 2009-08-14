@@ -1,5 +1,5 @@
 #include "LuaUtils.h"
-#include "Ninja.h"
+#include "Engine.h"
 #include "OpenglUtils.h"
 
 namespace

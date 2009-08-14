@@ -1,4 +1,4 @@
-		#include "Engine.h"
+#include "Engine.h"
 
 #ifdef WIN32
 	#define WIN32_LEAN_AND_MEAN
@@ -33,9 +33,9 @@ CEngine::CEngine()
 	ConfigFileName = CONFIG_FILE_NAME;
 	ConfigFileName += "configuration.xml";
 	EventFuncCount = 0;
+	isHaveFocus = 1;
 	userReInit = false;
 	Initialized = false;
-	doHideConsoleWindow = true;
 }
 CEngine::~CEngine(){}
 
@@ -60,36 +60,19 @@ void CEngine::FreeInst()
 	}
 }
 
-int	CEngine::GetWindowHeight()
-{
-	return window.height;
-}
-int CEngine::GetWindowWidth()
-{
-	return window.width;
-}
 
-unsigned int CEngine::GetFps()
-{
-	return Fps;
-}
-
-float CEngine::Getdt()
-{
-	return dt;
-}
 
 void CEngine::CalcFps()
 {
-	static DWORD DTime, _llt, lt, fr;
+	static DWORD DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
 	
 	DWORD ct = SDL_GetTicks();
 	DTime = ct-_llt;
-	dt = (float)DTime / 1000.0f;
+	dt = (float)DTime * 0.001f;
 	_llt = ct;
 	if (ct-lt >= 1000)
 	{
-		Fps = ((fr)*1000)/(ct-lt);
+		FpsCount = fr*1000/(ct-lt);
 		lt = ct;
 		fr = 0;
 	}		
@@ -101,7 +84,6 @@ bool CEngine::LimitFps()
 	if (!doLimitFps)
 		return true;
 	static DWORD _lt = 0, _llt = 0;
-
 	_lt = SDL_GetTicks();
 	if (_lt - _llt >= FpsLimit)
 	{				
@@ -111,30 +93,21 @@ bool CEngine::LimitFps()
 	return false;
 }
 
-void CEngine::appFocusChange(bool x_isHaveFocus)
-{
-	isHaveFocus = x_isHaveFocus;
-	if (isHaveFocus)
-	{
-		
-	}
-	else
-	{
-
-	}
-}
 
 void CEngine::SetState(int state, void* value)
 	{
 		switch(state)
 		{
-			case STATE_USER_INIT:
+			case STATE_USER_INIT_FUNC:
 				procUserInit = (Callback) value;
 				if (Initialized && procUserInit != NULL)
 				{
-					ClearLists();
+					// “ак как минимум один раз пользовательска€ инициализаци€ уже была установлена,
+					// а следовательно вызвана, то здесь надо вообще всЄ остановить и подчистить.
+					// » потом переинициализировать всЄ что нужно и пользовательскую инициализацию
+					ClearLists();  
 					if (!(Initialized = procUserInit()))
-						Log("WARNING", "User init failed.");
+						Log("ERROR", "ѕопытка выполнить пользовательскую инициализацию заново провалилась.");
 				}
 				break;
 			case STATE_UPDATE_FUNC:
@@ -150,7 +123,7 @@ void CEngine::SetState(int state, void* value)
 				doCalcFps = !!value;
 				break;
 			case STATE_FPS_LIMIT:
-				FpsLimit = (unsigned int)value;
+				FpsLimit = 1000 / (DWORD)value;
 				break;
 			case STATE_SCREEN_WIDTH:
 				window.width = (int)value;
@@ -186,18 +159,13 @@ void CEngine::SetState(int state, void* value)
 					RGBAf *t = (RGBAf*)value;
 					glClearColor(t->r, t->g, t->b, t->a); // BAD!!!  TODO: INcapsulate
 				}
-			case STATE_HIDE_CONSOLE_WINDOW:
-				{
-					doHideConsoleWindow = (bool)(value);
-				}
 		}
 	}
 
 bool CEngine::Init()
 {
-	#ifdef WIN32
-		#define WIN32_LEAN_AND_MEAN		
-	if (doHideConsoleWindow)
+#ifdef WIN32
+	#define WIN32_LEAN_AND_MEAN		
 	{
 		HMODULE hmodule = GetModuleHandle("Ninja Engine.exe");
  		char * pathexe = new char[1024];
@@ -211,28 +179,26 @@ bool CEngine::Init()
 		DeleteFileNameFromEndOfPathToFile(MainDir);
 		SetCurrentDirectory(MainDir);
 		delete [] MainDir;
-	}
-	#endif
-	
+	}	
+#endif
 
-	//XMLTable Config;
 	if (!Config.LoadFromFile(ConfigFileName.c_str()))
 	{
-		Log("WARNING", "Can't load XMLTable %s", CONFIG_FILE_NAME);
+		Log("WARNING", "Can't load main configuration %s", CONFIG_FILE_NAME);
 		return false;
 	}
 	
+	// looks like shit
 	int				wwidth		= atoi((Config.First->Get("WindowWidth"))->GetValue());
 	int				wheight		= atoi((Config.First->Get("WindowHeight"))->GetValue());
 	int				wbpp		= atoi((Config.First->Get("WindowBpp"))->GetValue());
 	char			*wcaption	= (Config.First->Get("WindowCaption"))->GetValue();
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
-					FpsLimit	= atoi((Config.First->Get("FpsLimit"))->GetValue());
+	SetState(STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
 	ResourceListPath			= (Config.First->Get("XMLResourcesFilename"))->GetValue();
 	ResourceManager.DataPath	= (Config.First->Get("DataPath"))->GetValue();
-	ResourceManager.TexturesFldr= (Config.First->Get("TexturesFldr"))->GetValue();
-	ResourceManager.FontsFldr	= (Config.First->Get("FontsFldr"))->GetValue();
+	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
 
 	CDataLister DataLister;
 	DataLister.List();
@@ -265,6 +231,14 @@ bool CEngine::Init()
 	Factory->InitManagers(&UpdateManager, &RenderManager);
 
 //	if (ResourceListPath != NULL && ResourceManager.DataPath != "")
+
+	if (doLoadDefaultResourceList)
+	{
+		if (!ResourceManager.OpenResourceList(ResourceListPath)) 
+			return false;
+		if (!ResourceManager.LoadResources())
+			return false;
+	}
 
 
 	if (procUserInit != NULL)
@@ -347,6 +321,12 @@ bool CEngine::ProcessEvents()
 					GUIKeyUp(event.key.keysym.unicode & 0xFF, sym);
 				break;
 			}
+			case SDL_ACTIVEEVENT:
+				{
+					if (event.active.state != SDL_APPMOUSEFOCUS)
+						isHaveFocus = !!event.active.gain;
+					break;
+				}
 			case SDL_VIDEORESIZE:
 				{
 					window.glResize(event.resize.w, event.resize.h);
@@ -366,8 +346,6 @@ bool CEngine::ProcessEvents()
 
 bool CEngine::Run()
 {
-	MemChp1();
-	//#######################//
 	if(!(Initialized = Init()))
 	{
 		Log("ERROR", "Initialization failed");
@@ -377,13 +355,12 @@ bool CEngine::Run()
 
 	Forever
 	{
+		if (ProcessEvents() == false) 
+			break;
 		if (isHaveFocus)
-		{	
-			if (ProcessEvents() == false) 
-					break;
-			
+		{
 			if (LimitFps())
-			{				
+			{		
 				if (doCalcFps)
 					CalcFps();
 				gBeginFrame();
@@ -391,30 +368,27 @@ bool CEngine::Run()
 				if (procRenderFunc != NULL)
 					procRenderFunc();
 				gEndFrame();	
-				//##//
 				UpdateManager.UpdateObjects();
 				if (procUpdateFunc != NULL)
 					procUpdateFunc();
-				//##//
 			}
-
+		}
+		else
+		{
+			WaitMessage();
 		}
 	}	
-
 	Suicide();
-	//##########################//
-	MemChp2();
-	MemCheck();
-	SDLGLExit(0);
+	SDLGLExit(0); // ≈сли мы попадаем сюда, то в место после вызова Run() мы уже не попадЄм. Ёто проблема, € думаю, надо что-то другое придумать.
 	return true;
 }
 
-bool CEngine::MidInit()
+bool CEngine::MidInit() // ƒл€ чего эта ф-€?
 {
 	return true;
 }
 
-void CEngine::GetState( int state, void* value )
+void CEngine::GetState(int state, void* value)
 {
 	switch (state)
 	{
@@ -433,7 +407,15 @@ void CEngine::GetState( int state, void* value )
 	case STATE_MOUSE_XY:
 		*(Vector2*)value = MousePos;
 		break;
-
+	case STATE_FPS_LIMIT:
+		*(DWORD*)value = FpsLimit;
+		break;
+	case STATE_FPS_COUNT:
+		*(DWORD*)value = FpsCount;
+		break;
+	case STATE_DELTA_TIME:
+		*(float*)value = dt;
+		break;
 	default:
 		value = NULL;
 		break;

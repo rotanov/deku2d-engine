@@ -448,7 +448,7 @@ CGLWindow::CGLWindow()
 	height = 480;
 	fullscreen = false;
 	bpp = 32;
-	caption = NULL;
+	caption = "Warning: CGLWindow class instance have not been initialized";
 }
 CGLWindow::~CGLWindow(){}
 
@@ -1879,7 +1879,7 @@ void CPrimitiveRender::BeforeRndr()
 	else
 		glDisable(GL_LINE_STIPPLE);
 	CheckBlend();
-	if (doUseCurrentCoordSystem)
+	if (doUseGlobalCoordSystem)
 		glLoadIdentity();
 }
 

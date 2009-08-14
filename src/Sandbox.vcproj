@@ -309,6 +309,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Sandbox.rc"
 				>
 			</File>
@@ -557,14 +561,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\VTune\Sandbox.vpj"
-			>
-		</File>
-		<File
-			RelativePath=".\resource.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

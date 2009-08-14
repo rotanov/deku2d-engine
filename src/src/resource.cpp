@@ -149,8 +149,6 @@ int CFactory::_refcount = 0;
 CResourceManager::CResourceManager()
 {
 	DataPath = "";
-	TexturesFldr = "";
-	FontsFldr = "";
 	ResourceListFileName = NULL;
 	ResourceList = NULL;
 }

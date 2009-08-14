@@ -42,7 +42,7 @@ void CTileSet::RenderTileSet()
 	glEnd();
 
 	CPrimitiveRender p;
-	p.doUseCurrentCoordSystem = false;
+	p.doUseGlobalCoordSystem = false;
 	p.BlendingOption = PRM_RNDR_OPT_BLEND_NOONE;
 	p.lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	p.pClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
@@ -282,7 +282,7 @@ bool CCompas::Render()
 		glEnable(GL_LINE_WIDTH);
 		glLineWidth(3.0f);
 		CPrimitiveRender pr;
-		pr.doUseCurrentCoordSystem = true;
+		pr.doUseGlobalCoordSystem = true;
 		pr.plClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f);
 		pr.grCircleL(Vector2(100,100), depth);;
 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth));

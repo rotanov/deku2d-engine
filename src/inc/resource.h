@@ -17,6 +17,19 @@
 static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture};
 static char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES};
 
+class CExtResRelation : public CObject
+{
+public:
+	char* Extension;
+	CreateFunc Function;
+	CExtResRelation(char * AExtension, CreateFunc AFunction):Extension(AExtension), Function(AFunction)
+	{
+		name = "Extension Resource Relation";
+	}
+};
+
+static CObjectList ExtResRelationList;
+
 // типы ресурсов
 #define CRESOURCE_TYPE_FONT				0x01
 #define CRESOURCE_TYPE_IMAGE			0x02
@@ -25,8 +38,7 @@ static char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_
 #define CRESOURCE_TYPE_XML				0x05
 #define CRESOURCE_TYPE_USER_DEFINED		0x06
 
-// Ещё типы ресурсов. Какого хрена?!
-enum EResType {RT_FONTRES, RT_IMAGE, RT_PSYSTEM, RT_ANIMATION, RT_XML};
+
 
 // Типы объектов. Это для CFactory
 #define OBJ_SPRITE			0x01
@@ -122,7 +134,7 @@ public:
 class CResourceManager
 {
 public:
-	string DataPath, TexturesFldr, FontsFldr;
+	string DataPath;
 	char* ResourceListFileName;
 	XMLTable *ResourceList;
 

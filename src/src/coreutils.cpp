@@ -338,7 +338,7 @@ CObject* CObjectList::GetObjectByName(string objectname)
 			return dat;
 		}
 		tmp = tmp->next;
-	}
+	}	
 	Log("WARNING", "Object with name %s requested from GetObject() not found in %s", objectname.c_str(), name.c_str());
 	return NULL;
 }
