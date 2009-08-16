@@ -1,4 +1,5 @@
 #include "OpenglUtils.h"
+#include "Engine.h"
 
 void CRenderObject::SetColor( byte _r, byte _g, byte _b, byte _a )
 {
@@ -8,6 +9,29 @@ void CRenderObject::SetColor( byte _r, byte _g, byte _b, byte _a )
 	color.a = _a;
 }
 
+CRenderObject::CRenderObject() : p(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f), checked(false)
+{
+	name += "CRenderObject ";
+	type |= T_RENDERABLE;
+};
+
+bool CRenderObject::Render()
+{
+	if (!checked)
+	{
+		if (CEngine::Instance()->Factory->GetObjectByName(name) == NULL)
+		{
+			Log("ERROR", "Instance of CRenderObject that was not created using CFactory detected; Probably it is Peter who guilty And it's name: %s and id: %d", name.c_str(), id);
+#ifdef CRITICAL_ERRORS_MESSAGE_BOXES
+#ifdef WIN32
+			MessageBoxA(0, "Instance of CRenderObject that was not created using CFactory detected; Probably it is Peter who guilty", "ERROR", MB_OK);
+#endif WIN32
+#endif CRITICAL_ERRORS_MESSAGE_BOXES
+		}
+		checked = true;
+	}
+	return true;
+}
 //-------------------------------------------//
 //			CGLImageData stuff				 //
 //-------------------------------------------//
@@ -43,14 +67,14 @@ bool CGLImageData::LoadTexture(const char *filename)
 	if (!LoadBMP(filename))
 		if(!LoadPNG(filename))
 		{
-			Log("WARNING", "Can't load image->");
+			Log("ERROR", "Can't load image->");
 			return false;
 		}
 		else
 		{
 			if (!MakeTexture())
 			{
-				Log("WARNING", "Can't load texture in video adapter.");
+				Log("ERROR", "Can't load texture in video adapter.");
 				return false;
 			}
 		}
@@ -58,12 +82,12 @@ bool CGLImageData::LoadTexture(const char *filename)
 	{
 		if(!MakeRGBA())
 		{
-				Log("WARNING", "Can't load texture.");
+				Log("ERROR", "Can't load texture.");
 				return false;
 		}
 		if (!MakeTexture())
 		{
-			Log("WARNING", "Can't load texture in video memory.");
+			Log("ERROR", "Can't load texture in video memory.");
 			return false;
 		}
 	}
@@ -79,7 +103,7 @@ bool CGLImageData::RenderWhole(int zoom)
 {
 	if (TexID == 0)
 	{
-		Log("WARNING", "Trying render, while texture has not been loaded.");
+		Log("ERROR", "Trying render, while texture has not been loaded.");
 		return false;
 	}
 	glPushAttrib(GL_TEXTURE_2D);
@@ -100,12 +124,12 @@ bool CGLImageData::BeginDraw()
 {
 	if (isDrawing)
 	{
-		Log("WARNING", "Illegal BeginDraw() method call. EndDraw() should be called before.");
+		Log("ERROR", "Illegal BeginDraw() method call. EndDraw() should be called before.");
 		return false;
 	}
 	if (TexID == 0)
 	{
-		Log("WARNING", "Trying render, while texture has not been loaded.");
+		Log("ERROR", "Trying render, while texture has not been loaded.");
 		return false;
 	}
 	isDrawing = true;
@@ -121,7 +145,7 @@ bool CGLImageData::PushQuad(float x0, float y0, float z0, float _width, float _h
 {
 	if (!isDrawing)
 	{
-		Log("WARNING", "Illegal PushQuad method call. BeginDraw() should be called before.");
+		Log("ERROR", "Illegal PushQuad method call. BeginDraw() should be called before.");
 		return false;
 	}
 	glTexCoord2f((float)s0/width, (float)t0/height); glVertex3f(x0, y0, z0);
@@ -135,24 +159,24 @@ bool CGLImageData::PushQuadEx(float x0, float y0, float z0, float _width, float 
 {
 	if (!isDrawing)
 	{
-		Log("WARNING", "Illegal PushQuadEx method call. BeginDraw() should be called before.");
+		Log("ERROR", "Illegal PushQuadEx method call. BeginDraw() should be called before.");
 		return false;
 	}
 
 	glTexCoord2f((float)s0/width, (float)(height-t0)/height); 
-	glVertex3f(x0, ScreenH()-y0, z0);
+//	glVertex3f(x0, scrheight-y0, z0);
 
 
 	glTexCoord2f((float)(s1 + s0)/width, (float)(height-t0)/height); 
-	glVertex3f(x0+_width,  ScreenH()-y0, z0);
+//	glVertex3f(x0+_width,  scrheight-y0, z0);
 
 
 	glTexCoord2f((float)(s1 + s0)/width, (float)(height-t1-t0)/height); 
-	glVertex3f(x0+_width,  ScreenH()-(y0+_height), z0);
+//	glVertex3f(x0+_width,  scrheight-(y0+_height), z0);
 
 
 	glTexCoord2f((float)s0/width, (float)(height-t1-t0)/height); 
-	glVertex3f(x0,  ScreenH()-(y0+_height), z0);
+//	glVertex3f(x0,  scrheight-(y0+_height), z0);
 
 
 	return true;
@@ -162,7 +186,7 @@ bool CGLImageData::EndDraw()
 {
 	if (!isDrawing)
 	{
-		Log("WARNING", "Illegal EndDraw() method call. BeginDraw() should be called before.");
+		Log("ERROR", "Illegal EndDraw() method call. BeginDraw() should be called before.");
 		return false;
 	}
 	isDrawing = false;
@@ -174,7 +198,7 @@ bool CGLImageData::EndDraw()
 GLuint CGLImageData::GetTexID()
 {
 	if (TexID == 0)
-		Log("WARNING", "GLImageData. Trying to access TexID but it is 0");
+		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
 	return TexID;
 }
 //-------------------------------------------//
@@ -456,8 +480,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 {
 	if( SDL_Init(SDL_INIT_VIDEO ) < 0 )
 	{
-		Log("WARNING", "Video initialization failed: %s\n", SDL_GetError());
-		Log("WARNING", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
+		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -476,8 +500,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 
 	if (info == NULL)
 	{
-		Log("WARNING", "Aaaa! SDL WARNING: %s", SDL_GetError());
-		Log("WARNING", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
+		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -503,8 +527,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	SDL_Surface * screen = SDL_SetVideoMode(width, height, bpp, flags);
 	if (screen == NULL)
 	{
-		Log("WARNING", "Setting video mode failed: %s\n", SDL_GetError());
-		Log("WARNING", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
+		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);		
 	}
 
@@ -513,7 +537,6 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	resizeEvent.resize.w=width;
 	resizeEvent.resize.h=height;
 	SDL_PushEvent(&resizeEvent);
-	SetScreenParams(width, height);
 	
 	glInit(width, height);
 
@@ -545,7 +568,6 @@ void CGLWindow::glResize(GLsizei Width, GLsizei Height)
 	glLoadIdentity();			
 	gluOrtho2D(0.0f, Width-1, 0.0f, Height-1);
 	glMatrixMode(GL_MODELVIEW);	
-	SetScreenParams(width, height);
 }
 
 void CGLWindow::glInit(GLsizei Width, GLsizei Height)	
@@ -623,7 +645,7 @@ bool CFont::LoadFromFile()
 	CGLImageData	*image;
 	if (!file.Open(filename.c_str(), CFILE_READ))
 	{
-		Log("WARNING","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
+		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
 		return false;
 	}
 	
@@ -796,6 +818,7 @@ void CFont::Print( const char *text, ... )
 
 int	CFont::GetStringWidth(const char *text)
 {
+	
 	if (text == NULL)
 		return -1;
 	int r = 0, l = (int)strlen(text);
@@ -973,20 +996,6 @@ void SDLGLExit(int code)
 //-------------------------------------------//
 //			Particle system stuff			 //
 //-------------------------------------------//
-unsigned int g_seed = 152406923;
-
-int Random_Int(int min, int max)
-{
-	g_seed = 214013*g_seed + 2531011;
-	return min + (g_seed^g_seed>>15) % (max - min + 1);
-}
-
-float Random_Float(float min, float max)
-{
-	g_seed=214013*g_seed+2531011;
-	//return min+g_seed*(1.0f/4294967295.0f)*(max-min);
-	return min+(g_seed>>16)*(1.0f/65535.0f)*(max-min);
-}
 
 void gToggleScissor( bool State )
 {
@@ -1355,7 +1364,11 @@ int CFontManager::_refcount = 0;
 
 CFont* CFontManager::GetFont( char* fontname )	
 {
-	return dynamic_cast<CFont*>(GetObjectByName(fontname));
+	CFont *TempFont = NULL;
+	TempFont = dynamic_cast<CFont*>(GetObjectByName(fontname));
+	if (TempFont)
+		TempFont->CheckLoad();
+	return TempFont;
 }
 
 CFont* CFontManager::GetFontEx( string fontname )
@@ -1458,7 +1471,7 @@ bool CTextureManager::LoadTextureByName(char *TextureName)
 	tmp = dynamic_cast<CTexture*>(GetObjectByName(TextureName));
 	if (tmp == NULL)
 	{
-		Log("WARNING", "Can't load find texture with name %s", TextureName);
+		Log("ERROR", "Can't load find texture with name %s", TextureName);
 		return false;
 	}
 	return tmp->Load();
@@ -1472,7 +1485,7 @@ bool CTextureManager::LoadAllTextures()
 	{	
 		if (tmp == NULL)
 		{
-			Log("WARNING", "Can't find some texture");
+			Log("ERROR", "Can't find some texture");
 			return false;
 		}
 		tmp->Load();
@@ -1503,7 +1516,7 @@ GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
-		Log("WARNING", "CTextuere named %s. Trying to access TexID but it is 0", name.c_str());
+		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", name.c_str());
 		if (!loaded)
 		{
 			Load();
@@ -1541,7 +1554,10 @@ void CTexture::Unload()
 
 void CCamera::Assign(scalar *x, scalar *y)
 {
-	GetScreenParams(w, h);
+	CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
+	engine->GetState(STATE_SCREEN_HEIGHT, &h);
+	engine->GetState(STATE_SCREEN_HEIGHT, &w);
+	engine->FreeInst();
 	Atx = x;
 	Aty = y;
 	dx = *x;
@@ -2014,6 +2030,17 @@ void CPrimitiveRender::grInYan(const Vector2 &p, scalar Radius)
 	grCircleL(p, Radius/*+lwidth/2.0f*/);
 }
 
+void CPrimitiveRender::gDrawBBox( CAABB box )
+{
+	BeforeRndr();
+	float x0 = box.x0, x1 = box.x1, y0 = box.y0, y1 = box.y1; 
+	grSegmentC(Vector2(x0, y0), Vector2(x1, y0));
+	grSegmentC(Vector2(x1, y0), Vector2(x1, y1));
+	grSegmentC(Vector2(x1, y1), Vector2(x0, y1));
+	grSegmentC(Vector2(x0, y1), Vector2(x0, y0));
+	AfterRndr();
+}
+
 #ifdef WIN32
 
 #include <windows.h>
@@ -2040,3 +2067,44 @@ void setVSync(int interval)
 
 #endif
 
+CMiniInput::CMiniInput(int x, int y, char * fontname):xpos(x), ypos(y)
+{
+	text = NULL;
+	symbols = 0;
+	height = 19;
+	width = 0;
+	cp = 0;
+	havefocus = false;
+	font = CEngine::Instance()->FontManager->GetFont(fontname);
+}
+
+CMiniButton::CMiniButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
+	rect(ARect), text(AText), color(AColor), OnClick(AOnClick)
+{
+	font = CEngine::Instance()->FontManager->GetFont("Font");
+	CEngine::Instance()->RenderManager.AddObject(this);
+	CEngine::Instance()->UpdateManager.AddObject(this);
+}
+
+bool CMiniButton::Render()
+{
+	font = CEngine::Instance()->FontManager->GetFont("Font");
+	glLoadIdentity();
+	CPrimitiveRender pr;
+	pr.lClr = color;
+	pr.gDrawBBox(rect);
+	font->Print(text.c_str());
+	return true;
+}
+
+bool CMiniButton::Update(float dt)
+{
+	Vector2 mouse;
+	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
+	if (rect.Inside(mouse))
+	{
+		color = color + RGBAf(0.1, 0,0, 1);
+		//OnClick();
+	}
+	return true;
+}

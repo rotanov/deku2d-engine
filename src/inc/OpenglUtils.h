@@ -40,18 +40,16 @@ public:
 	float				depth;
 	bool				visible;
 	RGBAf				color;
-	CRenderObject() : p(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
-	{
-		name += "CRenderObject ";
-		type |= T_RENDERABLE;
-	};
+	CRenderObject();
 	void SetColor(byte _r, byte _g, byte _b, byte _a);
-	virtual bool Render() = 0;
+	virtual bool Render();
 	virtual bool RenderByParticleSystem(const Vector2 &p, const CParticleSystem &ps)
 	{
 		return true;
 	};
 	virtual ~CRenderObject(){};
+private:
+	bool				checked; // Проверили ли мы, что этот объект добавлен был с помощью фактори или нет. Проверка в Draw()	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -68,7 +66,7 @@ public:
 #define PRM_RNDR_OPT_BLEND_OTHER	0x02
 #define PRM_RNDR_OPT_BLEND_NOONE	0x03
 
-class CPrimitiveRender
+class CPrimitiveRender // Унсаследовать?
 {
 public:
 	int BlendingOption, CheckerCellSize;
@@ -490,8 +488,6 @@ public:
 /*				CparticleSystem & stuff									*/
 /************************************************************************/
 
-int Random_Int(int min, int max);
-float Random_Float(float min, float max);
 
 struct CParticle
 {
@@ -588,15 +584,7 @@ public:
 	bool havefocus;
 	CFont *font;
 
-	CMiniInput(int x, int y, char * fontname):xpos(x), ypos(y)
-	{
-		text = NULL;
-		symbols = 0;
-		height = 19;
-		width = 0;
-		cp = 0;
-		havefocus = false;
-	}
+	CMiniInput(int x, int y, char * fontname);
 
 	CMiniInput(){}
 
@@ -670,6 +658,26 @@ public:
 
 				return true;
 	}
+	void SetText(char* AText)
+	{
+		text = AText;
+		width = font->GetStringWidth(text);
+	}	
+};
+
+class CMiniButton : public CRenderObject, public CUpdateObject
+{
+public:
+	CFont* font;
+	CAABB rect;
+	RGBAf color;
+	string text;
+	bool (*OnClick)(); // Callback
+
+	CMiniButton(){}
+	CMiniButton(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
+	bool Render();
+	bool Update(float dt);
 };
 
 

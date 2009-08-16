@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "engine.h"
 //GUI scheme or may be it is "skin"
 CGUIScheme				*GUIScheme=NULL;
 bool					szBind=true;
@@ -10,6 +11,10 @@ CGraphObj				*MouseFocus = NULL, *Focus = NULL;
 int						CTag = 0;
 CFontManager			*FontManager = NULL;
 char					_key = 0;
+CEngine*				engine = NULL;
+int						scrheight, scrwidth;
+
+
 
 bool FormSort(CObject *obj1, CObject *obj2)
 {
@@ -334,8 +339,8 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 	for (int i = 0; i < 200 ; i++) //!
 		objects[i] = NULL;
 	CForm *frm = (CForm*)newWidget("ScreenForm", STYLE_OBJFORM);
-	frm->Width = ScreenW();
-	frm->Height = ScreenH();
+	frm->Width = scrwidth;
+	frm->Height = scrheight;
 	frm->Left = 0;
 	frm->Top = 0;
 	frm->Properties[GUI_DRAWFORMHEADER] = 0;
@@ -348,7 +353,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 	GUIScheme = this;
 	if (fname==NULL||tname==NULL)
 	{
-		Log("WARNING","Specified pointer has NULL value!",fname);
+		Log("ERROR","Specified pointer has NULL value!",fname);
 		return;
 	}
 	if (f.Open(fname,CFILE_READ))
@@ -358,21 +363,21 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 		f.Read(&b, 1);
 		if (b!='D')
 		{
-			Log("WARNING","File %s has unknown format or damaged.",fname);
+			Log("ERROR","File %s has unknown format or damaged.",fname);
 			f.Close();
 			return;
 		}
 		f.Read(&b, 1);
 		if (b!='G')
 		{
-			Log("WARNING","File %s has unknown format or damaged.",fname);
+			Log("ERROR","File %s has unknown format or damaged.",fname);
 			f.Close();
 			return;
 		}
 		f.Read(&b, 1);
 		if (b!='K')
 		{
-			Log("WARNING","File %s has unknown format or damaged.",fname);
+			Log("ERROR","File %s has unknown format or damaged.",fname);
 			f.Close();
 			return;
 		}
@@ -474,7 +479,7 @@ CGUIScheme::CGUIScheme(char *fname, char *tname)
 	}
 	else
 	{
-		Log("WARNING","Cannot load GUI Scheme from file %s .",fname);
+		Log("ERROR","Cannot load GUI Scheme from file %s .",fname);
 	}
 }
 int	CGUIScheme::GetXOffset(int StInd)
@@ -500,7 +505,7 @@ void CGUIScheme::BeginUI()
 //	szBind = true;
 /*	else
 	{
-		Log("WARNING", "Cannot bind GUI scheme %s!", name);
+		Log("ERROR", "Cannot bind GUI scheme %s!", name);
 		return;
 	}*/
 	Drawing = 1;
@@ -789,21 +794,21 @@ bool CForm::LoadForm(char *Fname)
 	if (b != 'D')
 	{
 		file->Close();
-		Log("WARNING", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
+		Log("ERROR", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
 		return 0;
 	}
 	file->Read(&b, 1);
 	if (b != 'F')
 	{
 		file->Close();
-		Log("WARNING", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
+		Log("ERROR", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
 		return 0;
 	}
 	file->Read(&b, 1);
 	if (b != 'M')
 	{
 		file->Close();
-		Log("WARNING", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
+		Log("ERROR", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
 		return 0;
 	}
 	file->ReadString(name);
@@ -913,14 +918,14 @@ void CForm::DrawText()
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
 		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(HeaderStyle);
-		fnt->p.y = ScreenH()-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
+		fnt->p.y = scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
 		fnt->isRect = true;
 		fnt->wh.x = GUIScheme->GetCWidth(HeaderStyle, Width);
 		fnt->wh.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
 		fnt->Print(Caption.c_str());
 		fnt->isRect = false;
 /*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(HeaderStyle)
-			,ScreenH()-GetTop() + GUIScheme->GetYOffset(HeaderStyle)
+			,scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle)
 			,ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(HeaderStyle, Width)///_szGUIScheme->GetCWidth(Styles[StyleInd], Width)//GUIScheme->GetCWidth(HeaderStyle, Width)
 			,GUIScheme->GetCWidth(HeaderStyle, HeaderHeight)//_szGUIScheme->GetCWidth(Styles[StyleInd], Height)//GUIScheme->GetCWidth(HeaderStyle, HeaderHeight)
@@ -974,14 +979,14 @@ void CButton::DrawText()
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
 		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd]);
-		fnt->p.y = ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
+		fnt->p.y = scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
 		fnt->isRect = true;
 		fnt->wh.x = GUIScheme->GetCWidth(Styles[StyleInd], Width);
 		fnt->wh.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
 		fnt->Print(Caption.c_str());
 		fnt->isRect = false;
 /*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd])
-			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd])
+			,scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd])
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(Styles[StyleInd], Width)//ClientWidth
 			,GUIScheme->GetCWidth(Styles[StyleInd], Height)//ClientHeight_sz
@@ -1097,7 +1102,8 @@ void CEdit::DrawText()
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
 		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-		fnt->p.y = ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
+		fnt->p.y = scrheight - GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
+		engine->FreeInst();
 		fnt->isRect = true;
 		fnt->isSelected = SelLength != 0;
 		fnt->s1 = SelStart;
@@ -1108,7 +1114,7 @@ void CEdit::DrawText()
 		fnt->isRect = false;
 		fnt->isSelected = false;
 /*		fnt->PrintSelRect(l
-			,ScreenH()-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
+			,scrheight-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
 			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
 			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
@@ -1646,11 +1652,15 @@ bool CGUIRenderer::Update( float dt )
 CGUIRenderer::CGUIRenderer()
 {
 	FontManager = CFontManager::Instance("gui.cpp");
+	engine = CEngine::Instance();
+	engine->GetState(STATE_SCREEN_HEIGHT, &scrheight);
+	engine->GetState(STATE_SCREEN_HEIGHT, &scrwidth);
 }
 
 CGUIRenderer::~CGUIRenderer()
 {
 	FontManager->FreeInst("gui.cpp");
+	engine->FreeInst();
 }
 
 void CEdit::SetCaption( string _caption )

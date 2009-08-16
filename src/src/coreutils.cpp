@@ -13,7 +13,7 @@ CFile::CFile(char *filename, int mode)
 		else
 		{
 			file = NULL;
-			Log("WARNING", "Can't open file %s", filename);
+			Log("ERROR", "Can't open file %s", filename);
 		}
 }
 
@@ -21,12 +21,12 @@ bool CFile::Open(const char *filename, int mode)
 {
 	if (filename == NULL)
 	{
-		Log("WARNING", "Can't open file. Invalid filename");
+		Log("ERROR", "Can't open file. Invalid filename");
 		return false;
 	}
 	if (file != NULL)
 	{
-		Log("WARNING", "Can't open file %s: another file is already opened.", filename);
+		Log("ERROR", "Can't open file %s: another file is already opened.", filename);
 		return false;
 	}
 	if (mode == CFILE_READ)
@@ -34,7 +34,7 @@ bool CFile::Open(const char *filename, int mode)
 		file = fopen(filename, "rb");
 		if (file == NULL)
 		{
-			Log("WARNING", "Can't open file %s.", filename);
+			Log("ERROR", "Can't open file %s.", filename);
 			return false;
 		}
 		return true;
@@ -44,14 +44,14 @@ bool CFile::Open(const char *filename, int mode)
 		file = fopen(filename, "wb");
 		if ( file == NULL )
 		{
-			Log("WARNING", "Can't open file %s.", filename);
+			Log("ERROR", "Can't open file %s.", filename);
 			return false;
 		}
 		return true;
 	}
 	if (mode!=CFILE_READ && mode!=CFILE_WRITE)
 	{
-		Log("WARNING", "Can't open file %s: invalid mode.", filename);
+		Log("ERROR", "Can't open file %s: invalid mode.", filename);
 		return false;
 	}
 	return true;
@@ -74,7 +74,7 @@ bool CFile::ReadByte(pbyte buffer)
 	if (fread(buffer, 1, 1, file) != 1)
 	{
 		if (!Eof())
-			Log("WARNING", "FILE IO Error. Can't read byte.");
+			Log("ERROR", "FILE IO Error. Can't read byte.");
 		return false;
 	}
 	return true;
@@ -91,7 +91,7 @@ bool CFile::Write(const void* buffer, DWORD nbytes)
 	if (fwrite(buffer, 1, nbytes, file) != nbytes)
 	{
 		if (!Eof())
-			Log("WARNING", "FILE IO Error. Can't write data.");
+			Log("ERROR", "FILE IO Error. Can't write data.");
 		return false;
 	}
 	return true;
@@ -106,7 +106,7 @@ bool CFile::WriteByte(pbyte buffer)
 	if (fwrite(buffer, 1, 1, file) != 1)
 	{
 		if (!Eof())
-			Log("WARNING", "FILE IO Error. Can't write byte.");
+			Log("ERROR", "FILE IO Error. Can't write byte.");
 		return false;
 	}
 	return true;
@@ -119,7 +119,7 @@ bool CFile::WriteByte(byte buffer)
 	if (fwrite(&buffer, 1, 1, file) != 1)
 	{
 		if (!Eof())
-			Log("WARNING", "FILE IO Error. Can't write byte.");
+			Log("ERROR", "FILE IO Error. Can't write byte.");
 		return false;
 	}
 	return true;
@@ -136,7 +136,7 @@ bool CFile::Read(void* buffer, DWORD nbytes)
 	if (fread(buffer, 1, nbytes, file) != nbytes)
 	{
 		if (!Eof())
-			Log("WARNING", "FILE IO Error. Can't read data.");
+			Log("ERROR", "FILE IO Error. Can't read data.");
 		return false;
 	}
 	return true;
@@ -339,7 +339,7 @@ CObject* CObjectList::GetObjectByName(string objectname)
 		}
 		tmp = tmp->next;
 	}	
-	Log("WARNING", "Object with name %s requested from GetObject() not found in %s", objectname.c_str(), name.c_str());
+	Log("ERROR", "Object with name %s requested from GetObject() not found in %s", objectname.c_str(), name.c_str());
 	return NULL;
 }
 
@@ -488,6 +488,17 @@ int CObjectList::GetCount()
 {
 	return count;
 }
+
+void CObjectList::DumpToLog()
+{
+	Reset();
+	CObject *Temp = Next();
+	while (Temp)
+	{
+		Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->name.c_str(), Temp->id);
+		Temp = Next();
+	}
+}
 CPSingleTone* CPSingleTone::Instance()
 {
 	if (_instance == NULL)
@@ -526,31 +537,10 @@ int CPSingleTone::_refcount = 0;
 //----------------------------------//
 //			Log Stuff				//
 //----------------------------------//
-void SetScreenParams(int Width, int Height){
-	___w=Width;
-	___h=Height;
-}
-
-void GetScreenParams(int &Width, int &Height){
-	Width=___w;
-	Height=___h;
-}
-
-int ScreenW()
-{
-	return ___w;
-}
-int ScreenH()
-{
-	return ___h;
-}
-
-
 char LogFile[2048];
 int __l=0;
 char _day[7][4];
 char _mon[12][4];
-CDummy InitLog = CDummy();
 
 void CreateLogFile(char *fname)
 {
@@ -562,7 +552,7 @@ void CreateLogFile(char *fname)
 	char *MainDir = new char[MAX_PATH], *LastDir = new char[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, LastDir);
 	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DeleteFileNameFromEndOfPathToFile(MainDir);
+	DelFNameFromFPath(MainDir);
 	SetCurrentDirectory(MainDir);
 #endif WIN32 
 
@@ -602,7 +592,7 @@ void Log(char* Event,char* Format,...)
 	char *MainDir = new char[MAX_PATH], *LastDir = new char[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, LastDir);
 	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DeleteFileNameFromEndOfPathToFile(MainDir);
+	DelFNameFromFPath(MainDir);
 	SetCurrentDirectory(MainDir);
 #endif WIN32 
 
@@ -642,6 +632,32 @@ void Log(char* Event,char* Format,...)
 void ToggleLog( bool _Enabled )
 {
 	Enabled = _Enabled;
+}
+
+void DelFNameFromFPath(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] != '/' && src[i] != '\\' && src[i] != ':')
+		i--;
+	src[i+1] = 0;
+}
+
+void DelExtFromFName(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] != '.')
+		i--;
+	src[i] = 0;
+}
+
+void DelLastDirFromPath( char* src )
+{
+	int i = strlen(src)-1;
+	while(src[i] == '\\' || src[i] == '/')
+		i--;
+	while(src[i] != '\\' && src[i] != '/')
+		i--;
+	src[i+1] = 0;
 }
 
 
@@ -688,20 +704,79 @@ void MemCheck()
 	CloseHandle(hLogFile);
 }
 
-#endif
+#ifdef WIN32
 
-void DeleteFileNameFromEndOfPathToFile(char *src)
+bool CDirectoryWalk::List()
 {
-	int i = strlen(src)-1;
-	while(src[i] != '/' && src[i] != '\\' && src[i] != ':')
-		i--;
-	src[i+1] = 0;
+	HANDLE hfile;
+	char TempDir[MAX_PATH];
+	TempDir[0] = 0;
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DelFNameFromFPath(MainDir);
+	strcat(TempDir, MainDir);
+	MainDirL = strlen(MainDir);
+	strcat(MainDir, "data\\");
+	SetCurrentDirectory(MainDir);
+
+
+
+	CurrDir[0] = 0;
+	strcat(CurrDir, MainDir);
+
+
+//	Log("----------", "");
+	hfile = FindFirstFile("*.*", &fdata);
+	ExploreDir(hfile);
+//	Log("----------", "");
+
+	SetCurrentDirectory(MainDir);
+
+
+	SetCurrentDirectory(TempDir);	// Ебано как-то, но таки хуй с ним.
+
+	return 0x0;
 }
 
-void DeleteExtFromFilename(char *src)
+void CDirectoryWalk::ExploreDir( HANDLE hfile )
 {
-	int i = strlen(src)-1;
-	while(src[i] != '.')
-		i--;
-	src[i] = 0;
+	while (FindNextFile(hfile, &fdata))
+	{
+		if (fdata.cFileName[0] == '.' || fdata.cFileName[0] == '_')
+			continue;
+		if (fdata.dwFileAttributes == 16)
+		{
+			//Log("FOLDER", "%s", fdata.cFileName);			
+			strcat(CurrDir, (string(fdata.cFileName)+string("\\")).c_str());
+			SetCurrentDirectory(CurrDir);
+			UserExploreFunc(fdata.cFileName, DIRWALK_STATE_FOLDER);			
+			HANDLE thandle = FindFirstFile("*.*", &fdata);
+			ExploreDir(thandle);
+			UserExploreFunc(fdata.cFileName, DIRWALK_STATE_FILE | DIRWALK_STATE_HIGHER);			
+			DelLastDirFromPath(CurrDir);
+		}
+		else
+		{
+			//Log("FILE", "%s", fdata.cFileName);
+			UserExploreFunc(fdata.cFileName, DIRWALK_STATE_FOLDER);			
+		}
+	}
+}
+
+#endif WIN32
+
+#endif
+
+CObjectList CObjectManager; // Ultimate!!!!111!!11
+
+CObject::CObject()
+{
+	static int CObjectCount = 0;
+	CObjectCount++;
+	type = 0;
+	char * tmp = new char[16];
+	itoa(CObjectCount, tmp, 10);
+	name += /*(string)tmp +*/  " CObject ";
+	delete [] tmp;
+	id = CObjectCount;
+	CObjectManager.AddObject(this);
 }

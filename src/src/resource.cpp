@@ -48,7 +48,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 {
 	if (!initialized)
 	{
-		Log("WARNING", "Trying to create object while factory has not been initialized");
+		Log("ERROR", "Trying to create object while factory has not been initialized");
 		return NULL;
 	}
 
@@ -127,12 +127,12 @@ bool CFactory::InitManagers( CUpdateManager *vUpdateManager, CRenderManager *vRe
 {
 	if ((UpdateManager = vUpdateManager) == NULL)
 	{
-		Log("WARNING", "Error, UpdateManager has not been initialized");
+		Log("ERROR", "Error, UpdateManager has not been initialized");
 		return false;
 	}
 	if ((RenderManager = vRenderManager) == NULL)
 	{
-		Log("WARNING", "Error, RenderManager has not been initialized");
+		Log("ERROR", "Error, RenderManager has not been initialized");
 			return false;
 	}
 
@@ -157,13 +157,13 @@ bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 {
 	if (ResourceList == NULL)
 	{
-		Log("WARNING", "Trying to load section %s while Resource list has not been loaded", SectionName);
+		Log("ERROR", "Trying to load section %s while Resource list has not been loaded", SectionName);
 		return false;
 	}
 	XMLNode x = ResourceList->First->Get(SectionName);
 	if (x == NULL)
 	{
-		Log("WARNING", "Section %s has not been found", SectionName);
+		Log("ERROR", "Section %s has not been found", SectionName);
 		return false;
 	}
 	string key, val;
@@ -184,6 +184,29 @@ bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 
 bool CResourceManager::LoadResources()
 {
+	table.First->Name = "Data";
+	cNode = table.First;
+
+	CDirectoryWalk ResLister;
+	ResLister.UserExploreFunc = ResourceListerFunc;
+	//if rescan directory
+		ResLister.List();
+
+	//if save to file
+		table.SaveToFile(RESOURCE_LIST_PATH); // пиздец. Заменить константу на нормальную переменную. и вообще. TODO
+
+		if (ResourceList != NULL)
+			delete ResourceList;
+		ResourceList = new XMLTable;
+		//ResourceListFileName = _ResourceListFileName;
+		if (!ResourceList->LoadFromFile(ResourceListFileName))
+		{
+			Log("ERROR", "Error while loading %s Resource list", ResourceListFileName);
+			return false;
+		}
+
+
+
 	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
 		if (!LoadSection(strSections[i], fncInitializers[i]))
 		{
@@ -216,98 +239,32 @@ CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc cr
 	return result;
 }
 
-bool CResourceManager::OpenResourceList(char *_ResourceListFileName)
+
+bool CResourceManager::ResourceListerFunc(char* AFileName, int AState)
 {
-	if (ResourceList != NULL)
-		delete ResourceList;
-	ResourceList = new XMLTable;
-	ResourceListFileName = _ResourceListFileName;
-	if (!ResourceList->LoadFromFile(ResourceListFileName))
+	switch(AState & DIRWALK_STATE_RIGHT_MASK)
 	{
-		Log("WARNING", "Error while loading %s Resource list", ResourceListFileName);
-		return false;
-	}
-	return true;
-}
-
-#ifdef WIN32
-
-void CDataLister::DelLastDirFromPath( char* src )
-{
-	int i = strlen(src)-1;
-	while(src[i] == '\\' || src[i] == '/')
-		i--;
-	while(src[i] != '\\' && src[i] != '/')
-		i--;
-	src[i+1] = 0;
-}
-
-bool CDataLister::List()
-{
-	HANDLE hfile;
-	char TempDir[MAX_PATH];
-	TempDir[0] = 0;
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DeleteFileNameFromEndOfPathToFile(MainDir);
-	strcat(TempDir, MainDir);
-	MainDirL = strlen(MainDir);
-	strcat(MainDir, "data\\");
-	SetCurrentDirectory(MainDir);
-
-	table.First->Name = "Data";
-
-	CurrDir[0] = 0;
-	strcat(CurrDir, MainDir);
-	cNode = table.First;
-
-	Log("----------", "");
-	hfile = FindFirstFile("*.*", &fdata);
-	ExploreDir(hfile);
-	Log("----------", "");
-
-	SetCurrentDirectory(MainDir);
-
-	table.SaveToFile("..\\Config\\Resources.xml");
-
-	SetCurrentDirectory(TempDir);	// Ебано как-то, но таки хуй с ним.
-
-	return 0x0;
-}
-
-void CDataLister::ExploreDir( HANDLE hfile )
-{
-	while (FindNextFile(hfile, &fdata))
-	{
-		if (fdata.cFileName[0] == '.' || fdata.cFileName[0] == '_')
-			continue;
-		if (fdata.dwFileAttributes == 16)
-		{
-			//Log("FOLDER", "%s", fdata.cFileName);			
-			strcat(CurrDir, (string(fdata.cFileName)+string("\\")).c_str());
-			SetCurrentDirectory(CurrDir);
-
-			_XMLNode *tmp = cNode;
-			cNode = cNode->Add(fdata.cFileName, fdata.cFileName);
-
-			HANDLE thandle = FindFirstFile("*.*", &fdata);
-			ExploreDir(thandle);
-
-			cNode = tmp;
-
-			DelLastDirFromPath(CurrDir);
-		}
-		else
-		{
-			//Log("FILE", "%s", fdata.cFileName);
+		case DIRWALK_STATE_FILE:
 			char *tmp = new char [MAX_PATH];
 			tmp[0] = 0;
 			strcat(tmp, fdata.cFileName);
-			DeleteExtFromFilename(tmp);
+			DelExtFromFName(tmp);
 			if (strnicmp(tmp, "thumbs", MAX_PATH) != 0)
 				cNode->Add(tmp , (string(CurrDir+MainDirL) + string(fdata.cFileName)).c_str() );
 			delete [] tmp;
-		}
-	}
-}
 
-#endif WIN32
+		break;
+		case DIRWALK_STATE_FOLDER:
+			_XMLNode *tmp = cNode;
+			cNode = cNode->Add(fdata.cFileName, fdata.cFileName);	
+			//...
+			cNode = tmp;
+
+		break;
+	}
+
+	if ((AState & DIRWALK_STATE_LEFT_MASK) == DIRWALK_STATE_HIGHER)
+	{
+	}
+	return true;
+}

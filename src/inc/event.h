@@ -25,9 +25,9 @@ typedef void (*CKeyEvent)(CHandle, int);
 //	else
 //	{
 		//if (Sender!=NULL)
-		//	Log("WARNING", "Undefined event for object %s!", Sender->name);
+		//	Log("ERROR", "Undefined event for object %s!", Sender->name);
 		//else
-		//	Log("WARNING", "Undefined event for non existing object!");
+		//	Log("ERROR", "Undefined event for non existing object!");
 //	}
 //}
 __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
@@ -38,9 +38,9 @@ __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 	else
 	{
 		if (Sender!=NULL)
-			Log("WARNING", "Undefined event for object %s!", Sender->name);
+			Log("ERROR", "Undefined event for object %s!", Sender->name);
 		else
-			Log("WARNING", "Undefined event for non existing object!");
+			Log("ERROR", "Undefined event for non existing object!");
 	}
 }
 

@@ -9,6 +9,7 @@
 
 // зашитые в код названия файлов и секций, todo: подумать как избаиться от зашития в код
 #define CONFIG_FILE_NAME "config/"
+#define RESOURCE_LIST_PATH "config/resources.xml"
 
 #define DEFAULT_SECTION_COUNT	2
 #define CR_SECTION_FONTS		"Fonts"
@@ -101,42 +102,15 @@ protected:
 	static int		_refcount;
 };
 
-#ifdef WIN32
-
-class CDataLister
-{
-public:
-	XMLTable table;
-	_XMLNode *cNode;
-	char *MainDir;
-	char *CurrDir;
-	int MainDirL;
-	WIN32_FIND_DATA fdata;
-
-	CDataLister()
-	{
-		MainDirL = 0;
-		MainDir = new char[MAX_PATH];
-		CurrDir = new char[MAX_PATH];
-	}
-	~CDataLister()
-	{
-		delete [] MainDir;
-		delete [] CurrDir;
-	}
-	void DelLastDirFromPath(char* src);
-	bool List();
-	void ExploreDir(HANDLE hfile);
-};
-
-#endif WIN32
-
 class CResourceManager
 {
 public:
 	string DataPath;
 	char* ResourceListFileName;
 	XMLTable *ResourceList;
+	XMLTable table;
+	_XMLNode *cNode;
+
 
 	CResourceManager();
 	CResourceManager(char *_ResourceListFileName) : ResourceListFileName(_ResourceListFileName)
@@ -144,7 +118,7 @@ public:
 		ResourceList = new XMLTable;
 		if (!ResourceList->LoadFromFile(ResourceListFileName))
 		{
-			Log("WARNING", "Error while loading %s Resource list", ResourceListFileName);
+			Log("ERROR", "Error while loading %s Resource list", ResourceListFileName);
 		}
 	}
 	~CResourceManager()
@@ -152,7 +126,7 @@ public:
 		if (ResourceList != NULL)
 			delete ResourceList;
 	}
-	bool		OpenResourceList(char *_ResourceListFileName);
+	static bool		ResourceListerFunc(char* AFileName, int AState);
 	bool		LoadSection(char *SectionName, CreateFunc creator);
 	CObject*	LoadResource(char* section, char *name, CreateFunc creator);
 	bool		LoadResources();

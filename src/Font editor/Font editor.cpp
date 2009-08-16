@@ -1,18 +1,19 @@
-#include"Engine.h"
+#include "Engine.h"
 #include "LuaUtils.h"
+#include "OpenglUtils.h"
+#include "GameUtils.h"
 
-GlobalLuaState* globalLuaState = 0;
 CEngine* Ninja = CEngine::Instance();
 
 #define		NUM_INPUTS 5
-#define		MY_SYSTEM_FONT "data\\Font.fif"
+#define		MY_SYSTEM_FONT "Font"
 
 byte			ZOOM  = 6;				// Zoom. That's All.
 bool			keys[322];				// Array of keyboard handling boolean variables.
 CGLWindow		window;					// Window class. All SDL GL Routines here.
 CFont*			font;					// That's temp font to draw numbers 0-9.
 CGLImageData	pic;					// That's font image.
-int				x, y;					// Integers for handling mouse coords.
+float			x, y;					// Integers for handling mouse coords.
 CRecti			rect[256];				// Rects for each symbol. Finally the most important data.
 int				offx = 129;				// Magic numbers here, initializing offsets
 int				offy = 0;				// ... same as before
@@ -22,6 +23,8 @@ char*			name = NULL;
 char			temp[3];
 int				focus;					// Index of input, having the focus
 CMiniInput		input[NUM_INPUTS];
+CMiniButton		test(CAABB(0, 0, 100, 100), "Wtf?", RGBAf(1,1,1,1), NULL);;
+CCompas			compass;
 
 void NextControl()
 {
@@ -75,14 +78,8 @@ void ProcessInput0(Uint16 unicode)
 
 }
 
-void SomeInit()
+bool Init()
 {
-// 	font->filename = MY_SYSTEM_FONT;
-// 	if (!font->LoadFromFile())
-// 	{
-// 		Log("AHTUNG", "Can't Load main font: %s", MY_SYSTEM_FONT);
-// 		printf("Warning: main font: %s have not been loaded\n", MY_SYSTEM_FONT);
-// 	}
 	font = Ninja->FontManager->GetFont("Font");
 
 	input[0] = CMiniInput(10, 240, MY_SYSTEM_FONT);
@@ -117,27 +114,17 @@ void SomeInit()
 	input[2].symbols  = strlen(input[2].text);
 	input[2].cp  = strlen(input[2].text);
 	input[2].width = input[2].font->GetStringWidth(input[2].text);
+	return true;
 }
 
 void LoadFromFile(char * filename)
 {
 	CFile file;
 
-	if (!file.Open(filename, CFILE_READ))
-	{
-		Log("AHTUNG", "Can't Open font file: %s for editing", filename);
-		printf("Can't Open font file: %s for editing\n", filename);
-		return;
-	}
-
-	file.ReadLine(input[4].text);
-	input[4].width = input[4].font->GetStringWidth(input[4].text);
-	if (!pic.LoadTexture(input[4].text))
-	{
-		Log("AHTUNG", "Can't Load image: %s, specified in fontfile %s", input[4].text, filename);
-		printf("Can't Load image: %s, specified in fontfile %s\n", input[4].text, filename);
-		return;
-	}
+	file.Open(filename, CFILE_READ);
+	char *tmp; // Texture name
+	file.ReadLine(tmp);
+	input[4].SetText(tmp);
 	offy = window.height - pic.height*ZOOM;
 	file.Read(rect, sizeof(rect[0])*256);
 
@@ -189,7 +176,8 @@ void PleaseSaveMyWork(char * filename)
 
 void Draw()
 {
-	SDL_GetMouseState(&x, &y);
+	Ninja->GetState(STATE_MOUSE_X, &x);
+	Ninja->GetState(STATE_MOUSE_Y, &y);
 	glDisable(GL_SCISSOR_TEST);
 
 	glDisable(GL_TEXTURE_2D);
@@ -251,7 +239,7 @@ void Draw()
 		glVertex2i(10,	50);
 
 		if (x >= 10 && x <= 118)
-			if (window.height-y >= 300 && window.height-y <= 330)
+			if (y >= 300 && y <= 330)
 				glColor3f(0.9f, 0.8f, 0.2f);
 			else
 				glColor3f(0.6f, 0.7f, 0.8f);
@@ -274,10 +262,10 @@ void Draw()
 
 
 	glEnable(GL_TEXTURE_2D);
-	SDL_GetMouseState(&x, &y);
+//	SDL_GetMouseState(&x, &y);
 
-	for(int i =0;i<NUM_INPUTS;i++)
-		input[i].Update(x, window.height-y, SDL_GetMouseState(&x, &y));
+//	for(int i =0;i<NUM_INPUTS;i++)
+//		input[i].Update(x, window.height-y, SDL_GetMouseState(&x, &y));
 
 	glColor3f(0.9f, 0.4f, 0.1f);
 	font->p = Vector2(20, 580);
@@ -295,7 +283,7 @@ void Draw()
 	font->Print("Image file:");
 
 			if (x >= 10 && x <= 118)
-				if (window.height-y >= 10 && window.height-y <= 40)
+				if (y >= 10 && y <= 40)
 				glColor3f(0.9f, 0.8f, 0.2f);
 			else
 				glColor3f(0.6f, 0.7f, 0.8f);
@@ -306,7 +294,7 @@ void Draw()
 	font->Print("Save");
 
 			if (x >= 10 && x <= 118)
-			if (window.height-y >= 50 && window.height-y <= 80)
+			if (y >= 50 && y <= 80)
 				glColor3f(0.9f, 0.8f, 0.2f);
 			else
 				glColor3f(0.6f, 0.7f, 0.8f);
@@ -316,7 +304,7 @@ void Draw()
 	font->Print("Load");
 
 		if (x >= 10 && x <= 118)
-			if (window.height-y >= 300 && window.height-y <= 330)
+			if (y >= 300 && y <= 330)
 				glColor3f(0.9f, 0.8f, 0.2f);
 			else
 				glColor3f(0.6f, 0.7f, 0.8f);
@@ -331,10 +319,10 @@ void Draw()
 	glScissor(128, 0, window.width-128, window.height);
 	
 	if (x > 128)
-		if (SDL_GetRelativeMouseState(&x, &y)&SDL_BUTTON(2))
+//		if (SDL_GetRelativeMouseState(&x, &y)&SDL_BUTTON(2))
 		{
-			offx += x;
-			offy -= y;
+		//	offx += x;
+		//	offy -= y;
 		}
 
 		glEnable(GL_TEXTURE_2D);
@@ -351,18 +339,18 @@ void Draw()
 	
 	glDisable(GL_TEXTURE_2D);
 
-	if (SDL_GetMouseState(&x, &y)&SDL_BUTTON(1))
+	//if (SDL_GetMouseState(&x, &y)&SDL_BUTTON(1))
 	{if (x > 128)
 	{
 		rect[rndex].x1 = x/ZOOM*ZOOM - offx/ZOOM*ZOOM;
-		rect[rndex].y1 = (window.height - y)/ZOOM*ZOOM - offy/ZOOM*ZOOM;
+		rect[rndex].y1 = (y)/ZOOM*ZOOM - offy/ZOOM*ZOOM;
 	}
 	}
-	if (SDL_GetMouseState(&x, &y)&SDL_BUTTON(3))
+	//if (SDL_GetMouseState(&x, &y)&SDL_BUTTON(3))
 	{if (x > 128)
 	{
 		rect[rndex].x0 = (x/ZOOM)*ZOOM - offx/ZOOM*ZOOM;
-		rect[rndex].y0 = ((window.height - y)/ZOOM)*ZOOM - offy/ZOOM*ZOOM;
+		rect[rndex].y0 = (y/ZOOM)*ZOOM - offy/ZOOM*ZOOM;
 	}
 	}
 
@@ -537,7 +525,8 @@ bool ProcessEvents()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_USER_INIT, &SomeInit);
+	Ninja->SetState(STATE_CONFIG_NAME, "FontEditor.xml");
+	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
 	Ninja->FreeInst();

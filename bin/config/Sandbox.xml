@@ -6,7 +6,6 @@
 	DoCalcFps					= "true"
 	DoLimitFps					= "false"
 	FpsLimit					= "60"
-	XMLResourcesFilename		= "config/resources.xml"
 	DataPath					= "Data/"
-	doLoadDefaultResourceList	= "true"
+	doLoadDefaultResourceList	= "true" // temp
 </configuration>

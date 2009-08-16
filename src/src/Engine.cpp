@@ -11,6 +11,7 @@
 
 CEngine::CEngine()
 {
+	CreateLogFile("System.log");
 	memset(keys, 0, sizeof(keys));
 	doLimitFps = false; 
 	isHaveFocus = true;
@@ -176,7 +177,7 @@ bool CEngine::Init()
 
 		char *MainDir = new char[MAX_PATH];
 		GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-		DeleteFileNameFromEndOfPathToFile(MainDir);
+		DelFNameFromFPath(MainDir);
 		SetCurrentDirectory(MainDir);
 		delete [] MainDir;
 	}	
@@ -184,7 +185,7 @@ bool CEngine::Init()
 
 	if (!Config.LoadFromFile(ConfigFileName.c_str()))
 	{
-		Log("WARNING", "Can't load main configuration %s", CONFIG_FILE_NAME);
+		Log("ERROR", "Can't load main configuration %s", CONFIG_FILE_NAME);
 		return false;
 	}
 	
@@ -199,9 +200,6 @@ bool CEngine::Init()
 	ResourceListPath			= (Config.First->Get("XMLResourcesFilename"))->GetValue();
 	ResourceManager.DataPath	= (Config.First->Get("DataPath"))->GetValue();
 	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
-
-	CDataLister DataLister;
-	DataLister.List();
 
 	SetState(STATE_SCREEN_WIDTH, (void*)wwidth);
 	SetState(STATE_SCREEN_HEIGHT, (void*)wheight);
@@ -219,7 +217,7 @@ bool CEngine::Init()
 	window.bpp = 32;
 	if (!window.gCreateWindow())
 	{
-		Log("WARNING", "Window creation failed");
+		Log("ERROR", "Window creation failed");
 		return false;
 	}
 
@@ -230,12 +228,8 @@ bool CEngine::Init()
 	TextureManager = CTextureManager::Instance();
 	Factory->InitManagers(&UpdateManager, &RenderManager);
 
-//	if (ResourceListPath != NULL && ResourceManager.DataPath != "")
-
 	if (doLoadDefaultResourceList)
 	{
-		if (!ResourceManager.OpenResourceList(ResourceListPath)) 
-			return false;
 		if (!ResourceManager.LoadResources())
 			return false;
 	}
@@ -244,7 +238,7 @@ bool CEngine::Init()
 	if (procUserInit != NULL)
 		if (!procUserInit())
 		{
-			Log("WARNING", "User init failed.");
+			Log("ERROR", "User init failed.");
 			return false;
 		}
 
@@ -378,6 +372,9 @@ bool CEngine::Run()
 			WaitMessage();
 		}
 	}	
+#ifdef _DEBUG
+	CObjectManager.DumpToLog();
+#endif
 	Suicide();
 	SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
 	return true;

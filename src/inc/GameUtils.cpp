@@ -11,7 +11,7 @@ bool CTileSet::LoadFromFile()
 	CFile file;
 	if (!file.Open(filename.c_str(), CFILE_READ))
 	{
-		Log("WARNING", "Can't open TileSet file %s", filename);
+		Log("ERROR", "Can't open TileSet file %s", filename);
 		return false;
 	}
 
@@ -61,7 +61,7 @@ bool CTileSet::SaveToFile()
 	CFile file;
 	if (!file.Open(filename.c_str(), CFILE_WRITE))
 	{
-		Log("WARNING", "Can't open TileSet file %s", filename);
+		Log("ERROR", "Can't open TileSet file %s", filename);
 		return false;
 	}
 
@@ -163,7 +163,7 @@ bool CLevelMap::LoadFromFile()
 	CFactory *Factory = CFactory::Instance();
 	if (!File.Open(filename.c_str(), CFILE_READ))
 	{
-		Log("WARNING", "Can't load level %s", filename.c_str());
+		Log("ERROR", "Can't load level %s", filename.c_str());
 		return false;
 	}
 
@@ -199,7 +199,7 @@ bool CLevelMap::SaveToFile()
 	CFile file;
 	if (!file.Open(filename.c_str(), CFILE_WRITE))
 	{
-		Log("WARNING", "Can't open file %s to save the map", filename);
+		Log("ERROR", "Can't open file %s to save the map", filename);
 		return false;
 	}
 	
@@ -234,7 +234,7 @@ bool CCollisionInfo::LoadFromFile()
 {
 	if (loaded)
 	{
-		Log("Warning", "Resource %s already loaded", name);
+		Log("ERROR", "Resource %s already loaded", name);
 		return false;
 	}
 

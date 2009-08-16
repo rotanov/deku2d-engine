@@ -16,6 +16,37 @@
 #pragma warning (disable	:	4018) 
 #pragma warning (disable	:	4715) 
 
+//#define _DEBUG
+#define CRITICAL_ERRORS_MESSAGE_BOXES // Будут ли выскакивать MessageBoxы под виндой в случае критических ошибок или нет. #undef если чо
+#define VC_LEANMEAN
+#define _CRT_SECURE_NO_DEPRECATE
+
+#define CFILE_READ				0x01
+#define CFILE_WRITE				0x02
+#define CFILE_MAX_STRING_LENGTH	1024
+
+#define LOG_TIME_TICK_
+#define SAFE_DELETE(obj){if (obj) {delete obj; obj = NULL;}}
+
+#include <SDL.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string>
+#include <iostream>
+#include <time.h>
+
+
+using namespace std;
+
+#ifdef WIN32
+	#define	WIN32_LEAN_AND_MEAN
+	#include <Windows.h>
+#endif
+
+#define USE_SDL_OPENGL
+
 typedef unsigned char		byte;
 typedef byte*				pbyte;
 typedef char*				PCHAR;
@@ -29,37 +60,20 @@ typedef short				SHORT;
 typedef unsigned			uint;
 typedef long				LONG;
 
-//#define _DEBUG
-#define VC_LEANMEAN
-#define _CRT_SECURE_NO_DEPRECATE
-
-#define CFILE_READ				0x01
-#define CFILE_WRITE				0x02
-#define CFILE_MAX_STRING_LENGTH	1024
-
-#define LOG_TIME_TICK_
-#define SAFE_DELETE(obj){if (obj) {delete obj; obj = NULL;}}
-
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string>
-#include <iostream>
-#include <time.h>
-using namespace std;
-
 #ifdef WIN32
-	#define	WIN32_LEAN_AND_MEAN
-	#include <Windows.h>
-#endif
-
-#define USE_SDL_OPENGL
+typedef bool (*DirectoryWalkFunc)(char*, int); // name and state State may be Folder in, File in, File after folder out, Folder after folder out
+#endif WIN32
+typedef bool (*Callback)();
+typedef bool (*KeyFunc)(char, SDLKey);
+typedef bool (*MouseFunc)(int, int, unsigned char);
+typedef bool (*InputFunc)(SDL_MouseButtonEvent&, SDL_MouseMotionEvent&, SDL_KeyboardEvent&);
+typedef bool (*EventFunc)(SDL_Event&);
 
 // Это для улучшения читабельности дефайн. Тоесть мы хотим бесконечный цикл: for(;;). А можно for EVER.
 // Хотя выглядит как выебон.
 #define EVER (;;)
 #define Forever for EVER
+
 
 // Это дефайны для флагов свойств объекта
 #define T_COBJECT		0x01
@@ -90,18 +104,15 @@ protected:
 *	CObject - самый базовый класс. Всё наследовать от него.
 */
 
+
+
 class CObject
 {
 public:
 	unsigned int type, id;	// type - флаги свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
 	string name;			// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
 	virtual ~CObject(){};
-	CObject()
-	{
-		type = 0;
-		name += "CObject ";
-		id = 0;
-	};
+	CObject();
 };
 
 class CUpdateObject : public virtual CObject
@@ -171,6 +182,41 @@ public:
 	bool DelObject(string objectname);						// удалить объект с именем objectname
 	bool DelObj(int ind);									// удалить объект рукоодствуясь непонятнвым параметром 
 	CObject* GetObjectByName(string objectname);					// получить указатель на объект по имени
+	void DumpToLog();
+};
+
+extern CObjectList CObjectManager;
+
+/**
+*	Стэк объектов.
+*/
+
+const int MAX_STACK_ELEMENTS_COUNT = 16;
+
+class CObjectStack : public CObject
+{
+public:
+	CObjectStack() : last(-1){}
+	bool Push(CObject* AObject)
+	{
+		if (++last >= MAX_STACK_ELEMENTS_COUNT)
+			return false;
+		Objects[last] = AObject;
+		return true;
+	}
+	CObject* Pop()
+	{
+		if (last >= 0)
+			return Objects[last--];
+		return NULL;
+	}
+	bool Empty()
+	{
+		return last == -1;
+	}
+private:
+	CObject *Objects[MAX_STACK_ELEMENTS_COUNT];
+	int last;
 };
 
 /**
@@ -191,13 +237,20 @@ public:
 	{
 		return false;
 	};
+	bool CheckLoad()
+	{
+		return !loaded?LoadFromFile():true;
+	}
 	CBaseResource():loaded(false), filename(""){}
 };
 
 class CResource : public CBaseResource, virtual public CObject
 {
 public:
-	//CResource(){}
+	CResource()
+	{
+		name += "CResource";
+	}
 };
 
 /**
@@ -208,6 +261,10 @@ public:
 class CUpdateManager : public CObjectList
 {
 public:
+	CUpdateManager()
+	{
+		name += "CUpdateManager";
+	}
 	bool UpdateObjects();
 };
 
@@ -230,22 +287,11 @@ public:
 };
 
 /**
-*	Затем что эта поебня с инстансами, конечно вещь крутая, но жутко волосатая.
-*	Надеюсь из названий все понятно(для особо умных) - получить высоту/ширину экрана(или все вместе)
-*	или поменять их.
-*/
-
-void SetScreenParams(int Width, int Height);
-void GetScreenParams(int &Width, int &Height);
-int ScreenW();
-int ScreenH();
-
-/**
 *	CFile - класс для работы с файлом. Названия ф-ий интуитивны.
 *	Как с ним работать я думаю тоже интуитивно понятно.
 */
 
-class CFile
+class CFile // унаследовать 
 {
 public:
 	FILE *file;
@@ -266,55 +312,70 @@ public:
 	bool WriteString(const string buffer);
 	bool Writeln(string buffer);
 	DWORD Size();
-	/**
-	*	Reads characters until reaching 0x00
-	*	data - is a pointer to a char passed by
-	*	link(&) i.e. the function changes the value
-	*	of data. If data is pointing to something,
-	*	funtion realeses the memory using delete []
-	*	then allocates new meory using new.
-	*/
-	// Вверху бесполезный комментарий на ломаном английском. Впрочем такой же бесполезный как и этот.
 	bool ReadLine(char* &data);
 	bool Eof();
 	bool Seek(unsigned int offset, byte kind);
 };
 
 /**
-*	Не вижу ниче непонятного... ну да ладно...
-*	void CreateLogFile(char *fname) - создание лог файла(хз зачем нужно - можно прощще хР)
-*	void Log(char* Event, char* Format, ...) - вывод в лог сообщений формата
-*									"[Date] [$Event] $Format ted string\n"
-*	void ToggleLog(bool _Enabled) - отключение/включение лога.
+*	void CreateLogFile(char *fname) - создание лог файла(хз зачем нужно - можно прощще хР) (Ага, жду твоего предложения.)
+*	void Log(char* Event, char* Format, ...) - вывод в лог сообщений формата "[Date] [$Event] $Format ted string\n"
+*	void ToggleLog(bool _Enabled) - отключение/включение лога. - нахуй это вообще надо, а?
 */
 
 void CreateLogFile(char *fname);
 void Log(char* Event, char* Format, ...);
 void ToggleLog(bool _Enabled);
 
+#ifdef WIN32
+
+const int DIRWALK_STATE_FILE		=	0x01;	// файл
+const int DIRWALK_STATE_FOLDER		=	0x02;	// папка
+const int DIRWALK_STATE_HIGHER		=	0x20;	// на предыдущем шаге рекурсии мы были на каталог ниже, т.е. вернулись
+const int DIRWALK_STATE_RIGHT_MASK	=	0x0F;
+const int DIRWALK_STATE_LEFT_MASK	=	0xF0;
+
+class CDirectoryWalk
+{
+public:
+	char *MainDir;
+	char *CurrDir;
+	int MainDirL;
+	WIN32_FIND_DATA fdata;
+	DirectoryWalkFunc UserExploreFunc;
+	CDirectoryWalk()
+	{
+		MainDirL = 0;
+		MainDir = new char[MAX_PATH];
+		CurrDir = new char[MAX_PATH];
+	}
+	~CDirectoryWalk()
+	{
+		delete [] MainDir;
+		delete [] CurrDir;
+	}
+	
+	bool List();
+	void ExploreDir(HANDLE hfile);
+};
+
+#endif WIN32
+
+// Ф-ии для работы со строками, в частности именами файлов и так далее
+
+void DelFNameFromFPath(char *src);
+void DelExtFromFName(char *src);
+void DelLastDirFromPath(char* src);
+
 /**
-*	Внизу временные ф-ии для отлова утечек памяти. TODO!
+*	Внизу временные ф-ии для отлова утечек памяти.
+*	То что внизу - либо убрать нахуй, либо сделать нормально.
+*	Но это мелочи, так что пока пусть будет как есть, всё равно теперь не используется
 */
 
 void MemChp1();
 void MemChp2();
 void MemCheck();
 
-/**
-*	хитрый план создавать лог. мне не нравится. TODO!
-*	то то и оно проще запхать все в ф-ю Log и на первом вызове создавать логфаель.
-*/
-
-class CDummy
-{
-public:
-	CDummy(void)
-	{
-		CreateLogFile("System.log");
-	}
-};
-
-void DeleteFileNameFromEndOfPathToFile(char *src);
-void DeleteExtFromFilename(char *src);
 
 #endif CORE_UTILS_H	

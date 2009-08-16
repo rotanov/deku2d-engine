@@ -6,13 +6,6 @@
 	DoCalcFps				= "true"
 	DoLimitFps				= "false"
 	FpsLimit				= "60"
-	XMLResourcesFilename    = "config/resources.xml"
     DataPath               	= "Data/"
-	doLoadDefaultResourceList	= "true"	
-
-	DefaultCellSize			= "4"
-	GameVTiles				= "15"
-	GameHTiles				= "20"
-	LeftPanel 				= "196"
-	BottomPanel 			= "196"
+	doLoadDefaultResourceList	= "true"	// temp
 </configuration>

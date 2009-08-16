@@ -11,7 +11,6 @@
 #include <memory.h>
 #include <tchar.h>
 #include <math.h>
-#include <SDL.h>
 
 #include "OpenglUtils.h"
 #include "Gui.h"
@@ -52,11 +51,6 @@
 
 #define STATE_GL_BG_COLOR			0xA0
 
-typedef bool (*Callback)();
-typedef bool (*KeyFunc)(char, SDLKey);
-typedef bool (*MouseFunc)(int, int, unsigned char);
-typedef bool (*InputFunc)(SDL_MouseButtonEvent&, SDL_MouseMotionEvent&, SDL_KeyboardEvent&);
-typedef bool (*EventFunc)(SDL_Event&);
 
 
 

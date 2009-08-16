@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "OpenglUtils.h"
 
+GlobalLuaState* globalLuaState = 0; // todo remove
+
 namespace
 {
 	// маленький помощник, чтобы самим не считать количество lua_push...() и lua_pop()
@@ -187,11 +189,7 @@ void GlobalLuaState::innerFunction1()
 	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
 	ps->SetGeometry(pnts2, 2);
 
-	int i;
-	repeat(i, 201)
-	{
-		ps->Update(0.02f);
-	}
+
 
 
 	Factory->FreeInst();

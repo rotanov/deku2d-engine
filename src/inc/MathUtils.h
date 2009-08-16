@@ -27,23 +27,19 @@
 class Vector2;
 union Matrix2;
 
-#define SQR(x) ((x)*(x))
-#define CUBE(x) ((x)*(x)*(x))
-#define HI_PI   3.1415926535897932
-#define HI_OOPI 0.3183098861837906
-#define PI   3.1415f
-#define OOPI 0.3183f
-#define sincostable_dim 8192 
-#define ABS(A) { A = (A < 0) ? -A : A; }
-#define repeat(A, B) for(A=0;  A<B;  A++)
 typedef float scalar;
-static const scalar deganglem = 1.0f / ( 360.0f / (scalar)sincostable_dim);
-static const scalar radanglem = 1.0f / ( (scalar)PI*2 / (scalar)sincostable_dim);
-static const scalar PI_d180 = PI / 180.0f;
-static const scalar d180_PI = 180.0f / PI;
+const float epsilon = 0.00001f;
+const double HI_PI = 3.1415926535897932;
+const double HI_OOPI = 0.3183098861837906;
+const float PI = 3.1415926f;
+const float OOPI = 0.3183f;
+const int sincostable_dim = 8192;
+static const scalar deganglem = 1.0f/(360.0f/(scalar)sincostable_dim);
+static const scalar radanglem = 1.0f/(PI*2.0f/(scalar)sincostable_dim);
+static const scalar PI_d180 = PI/180.0f;
+static const scalar d180_PI = 180.0f/PI;
 
 #include <math.h>
-
 #include "CoreUtils.h"
 
 #define USING_OPENGL
@@ -65,6 +61,10 @@ scalar fCosr(scalar angle);
 scalar fCosd(scalar angle);
 scalar fCosi(int index);
 
+
+int Random_Int(int min, int max);
+float Random_Float(float min, float max);
+
 __INLINE scalar Max(scalar a, scalar b)
 {
 	return a>=b?a:b;
@@ -85,7 +85,61 @@ __INLINE scalar RadToDeg(scalar radian)
 {
 	return (scalar)(radian * d180_PI);
 }
+__INLINE scalar Sqr(const scalar x)
+{
+	return x*x;
+}
+__INLINE scalar Cube(const scalar x)
+{
+	return x*x*x;
+}
+// __INLINE scalar Abs(const scalar x)
+// {
+// 	return x<0?-x:x;
+// }
+__INLINE float Abs(const float x)
+{
+	*(int *)&x &= 0x7fffffff;
+	return x;
+}
+__INLINE bool Equal(const float a, const float b)
+{
+	return Abs(a-b)<epsilon;
+}
+__INLINE unsigned int sign(const float x)
+{	
+	return (((unsigned int)x) & 0x80000000);
+}
 
+
+// / quickly determine the sign of a floating point number.
+// 
+// inline unsigned int sign(const float& v)
+// {	
+// 	return (((unsigned int&)v) & 0x80000000);
+// }
+// 
+// / fast floating point absolute value.
+// 
+// inline float abs(float v)
+// {
+// 	*(int *)&v &= 0x7fffffff;
+// 	return v;
+// }
+// 
+// / interpolate between interval [a,b] with t in [0,1].
+// 
+// inline float lerp(float a, float b, float t)
+// {
+// 	return a + (b - a) * t;
+// }
+// 
+// / snap floating point number to grid.
+// 
+// inline float snap(float p, float grid)
+// {
+// 	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
+// }
 
 class Vector2{
 public:
@@ -243,7 +297,7 @@ __INLINE scalar PointLineDistance(Vector2 v1, Vector2 v2, Vector2 p)
 	dx = v1.x - v2.x;
 	dy = v1.y - v2.y;
 	D = dx * (p.y - v1.y) - dy * ( p.x - v1.x );
-	return  abs( D / sqrt( dx * dx + dy * dy));
+	return  Abs( D / sqrt( dx * dx + dy * dy));
 }
 
 static Vector2 V2Zero = Vector2(0.0f, 0.0f);
@@ -493,10 +547,11 @@ __INLINE float AngleBeetweenVectors(Vector3 a, Vector3 b)
 
 typedef Vector3 RGBf;
 
-class CAABB
+union CAABB
 {
 public:
-	Vector2 vMin, vMax;
+	struct {Vector2 vMin, vMax;};
+	struct {float x0, y0, x1, y1;};
 	CAABB()
 	{
 		vMax = vMin = Vector2::Blank();
@@ -796,14 +851,20 @@ public:
 
 };
 
-class Matrix4x4
+union Matrix4
 {
 public:
-scalar	e11, e12, e13, e14,
-		e21, e22, e23, e24,
-		e31, e32, e33, e34,
-		e41, e42, e43, e44;
+	struct
+	{
+		scalar	e11, e12, e13, e14,
+				e21, e22, e23, e24,
+				e31, e32, e33, e34,
+				e41, e42, e43, e44;
+	};
+
+	scalar e[4][4];
 };
+
 union Matrix2
 {
 	struct
