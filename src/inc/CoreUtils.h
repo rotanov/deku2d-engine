@@ -1,7 +1,7 @@
 #ifndef CORE_UTILS_H
 #define CORE_UTILS_H
 
-#pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы знать...знать...
+#pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется.
 
 #pragma warning (disable	:	4312)
 #pragma warning (disable	:	4311)
@@ -16,17 +16,9 @@
 #pragma warning (disable	:	4018) 
 #pragma warning (disable	:	4715) 
 
-//#define _DEBUG
-#define CRITICAL_ERRORS_MESSAGE_BOXES // Будут ли выскакивать MessageBoxы под виндой в случае критических ошибок или нет. #undef если чо
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
 
-#define CFILE_READ				0x01
-#define CFILE_WRITE				0x02
-#define CFILE_MAX_STRING_LENGTH	1024
-
-#define LOG_TIME_TICK_
-#define SAFE_DELETE(obj){if (obj) {delete obj; obj = NULL;}}
 
 #include <SDL.h>
 #include <iostream>
@@ -46,6 +38,31 @@ using namespace std;
 #endif
 
 #define USE_SDL_OPENGL
+#define USING_OPENGL
+
+#ifdef WIN32
+#define __INLINE __forceinline
+#else
+#define __INLINE inline
+#endif
+
+// Отладка, вся хуйня... При сборке дебаг конфигурации проекта оно заранее где-то там дефайнится, так что это для релиза, ручное управление так сказать.
+// А вообще это слишком большой комментарий для одной, такой короткой и самоочевидно строчки, мне следует избегать написания таких комментарие в будущем.
+//#define _DEBUG
+
+// Будут ли выскакивать MessageBoxы под виндой в случае критических ошибок или нет. #undef если чо
+#define CRITICAL_ERRORS_MESSAGE_BOXES
+
+__INLINE void SAFE_DELETE(void* obj)
+{
+	if (obj)
+		delete obj;
+	obj = NULL;
+};
+
+#define CFILE_READ				0x01
+#define CFILE_WRITE				0x02
+#define CFILE_MAX_STRING_LENGTH	1024
 
 typedef unsigned char		byte;
 typedef byte*				pbyte;
@@ -60,14 +77,18 @@ typedef short				SHORT;
 typedef unsigned			uint;
 typedef long				LONG;
 
+typedef float scalar;
+
 #ifdef WIN32
-typedef bool (*DirectoryWalkFunc)(char*, int); // name and state State may be Folder in, File in, File after folder out, Folder after folder out
+// Второй параметр - состояние. Эта система ещё не доделана, и если не потребуется в будуещем - я от неё откажусь.
+typedef bool (*DirectoryWalkFunc)(char*, int); 
 #endif WIN32
+
 typedef bool (*Callback)();
-typedef bool (*KeyFunc)(char, SDLKey);
-typedef bool (*MouseFunc)(int, int, unsigned char);
-typedef bool (*InputFunc)(SDL_MouseButtonEvent&, SDL_MouseMotionEvent&, SDL_KeyboardEvent&);
 typedef bool (*EventFunc)(SDL_Event&);
+
+#define KEY_PRESSED		0x00
+#define KEY_RELEASED	0x01
 
 // Это для улучшения читабельности дефайн. Тоесть мы хотим бесконечный цикл: for(;;). А можно for EVER.
 // Хотя выглядит как выебон.
@@ -113,7 +134,21 @@ public:
 	string name;			// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
 	virtual ~CObject(){};
 	CObject();
+	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 };
+
+/**
+*	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
+*	Первый параметр - произошло ли событие KEY_PRESSED или KEY_RELEASED
+*	Второй - какая клавиша была нажата; одновременно принимает значения мыши и клавиатуры: sdl_keysym.h, sdl_mouse.h - списки констант
+*	Третий параметр - модификатор, т.е. зажат ли Shift, Ctrl, Alt итд
+*	И четвёртый параметр - ASCII код.
+*/
+typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);
+// 1й и 2й параметры - х и у соответственно
+// кстати довольнo бесполезная штука в отличие от той, что выше. Неудобно, я считаю.
+typedef bool (*MouseInputFunc)(scalar, scalar); 
+
 
 class CUpdateObject : public virtual CObject
 {
@@ -135,9 +170,8 @@ typedef CObject* (*CreateFunc)();
 
 class CNodeObject
 {
-private:
-	CObject *data;
 public:
+	CObject *data;
 	CNodeObject *next, *prev;
 	CNodeObject();
 	CObject* GetData();
@@ -239,7 +273,7 @@ public:
 	};
 	bool CheckLoad()
 	{
-		return !loaded?LoadFromFile():true;
+		return loaded = !loaded?LoadFromFile():true;
 	}
 	CBaseResource():loaded(false), filename(""){}
 };

@@ -478,7 +478,7 @@ CGLWindow::~CGLWindow(){}
 
 bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption)
 {
-	if( SDL_Init(SDL_INIT_VIDEO ) < 0 )
+	if( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 )
 	{
 		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
 		Log("ERROR", "Last WARNING was critical. Now exiting...");
@@ -651,8 +651,7 @@ bool CFont::LoadFromFile()
 	
 	file.ReadLine(FontImageName);	
 	CTextureManager *TexMan = CTextureManager ::Instance();
-	(dynamic_cast<CTexture*>(TexMan->GetObjectByName(FontImageName)))->Load();
-	image = dynamic_cast<CTexture*>((TexMan->GetObjectByName(FontImageName)));
+	image = TexMan->GetTextureByName(FontImageName);
 	TexMan->FreeInst();
 	font = image->GetTexID();
 	file.Read(bbox, sizeof(bbox));
@@ -1492,6 +1491,15 @@ bool CTextureManager::LoadAllTextures()
 		tmp = NULL;
 	}
 }
+
+CTexture* CTextureManager::GetTextureByName( const string &TextureName )
+{
+	CTexture *TempTexture = NULL;
+	TempTexture = dynamic_cast<CTexture*>(GetObjectByName(TextureName));
+	if (TempTexture)
+		TempTexture->CheckLoad();
+	return TempTexture;
+}
 CTextureManager* CTextureManager::_instance = 0;
 int CTextureManager::_refcount = 0;
 
@@ -1552,6 +1560,11 @@ void CTexture::Unload()
 	glDeleteTextures(1, &TexID);
 }
 
+bool CTexture::LoadFromFile()
+{
+	Load();
+	return true;
+}
 void CCamera::Assign(scalar *x, scalar *y)
 {
 	CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
@@ -1890,7 +1903,7 @@ void CPrimitiveRender::BeforeRndr()
 	if (LineStippleEnabled)
 	{
 		glEnable(GL_LINE_STIPPLE);
-		glLineStipple(lwidth*4, 0xAAAA);
+		glLineStipple(lwidth*4, 0x0F); // TODO Magic number
 	}
 	else
 		glDisable(GL_LINE_STIPPLE);
@@ -2067,44 +2080,192 @@ void setVSync(int interval)
 
 #endif
 
-CMiniInput::CMiniInput(int x, int y, char * fontname):xpos(x), ypos(y)
+CMiniGuiObject::CMiniGuiObject()
 {
-	text = NULL;
-	symbols = 0;
-	height = 19;
-	width = 0;
-	cp = 0;
-	havefocus = false;
-	font = CEngine::Instance()->FontManager->GetFont(fontname);
+	CEngine::Instance()->RenderManager.AddObject(this);
+	CEngine::Instance()->UpdateManager.AddObject(this);	
+	GuiManager.AddObject(this);
+	// Mohawk!!!!
+	// TODO
 }
 
+
 CMiniButton::CMiniButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
-	rect(ARect), text(AText), color(AColor), OnClick(AOnClick)
+	OnClick(AOnClick), state(bsOutside)
 {
-	font = CEngine::Instance()->FontManager->GetFont("Font");
-	CEngine::Instance()->RenderManager.AddObject(this);
-	CEngine::Instance()->UpdateManager.AddObject(this);
+	aabb = ARect;
+	color = AColor;
+	text = AText;
+	font = CEngine::Instance()->FontManager->GetFont("Font"); // Это конструкто же, а что если конструируется до инициализации движка? втф...
+	PRender = new CPrimitiveRender;
+	PRender->plClr = &color;
+	PRender->psClr = &color;
+	PRender->ppClr = &color;
+	PRender->DashedLines = true;
+	PRender->dash = 0x0001;
 }
 
 bool CMiniButton::Render()
-{
-	font = CEngine::Instance()->FontManager->GetFont("Font");
+{	
+	CEngine *engine = CEngine::Instance();
+	font = engine->FontManager->GetFont("Font");
+	engine->FreeInst();
+	font->p = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
+	font->tClr = color;
 	glLoadIdentity();
-	CPrimitiveRender pr;
-	pr.lClr = color;
-	pr.gDrawBBox(rect);
+	PRender->gDrawBBox(aabb);
+	glEnable(GL_TEXTURE_2D);
 	font->Print(text.c_str());
 	return true;
 }
+
+#define Dclr RGBAf(0.1f, 0.1f, 0.1f, 0.0f)
 
 bool CMiniButton::Update(float dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
-	if (rect.Inside(mouse))
+
+	switch (state)
 	{
-		color = color + RGBAf(0.1, 0,0, 1);
-		//OnClick();
+		case bsOutside:
+			if (aabb.Inside(mouse))
+				state = bsHovered;
+			break;
+		case bsHovered:
+			color += Dclr;
+			state = bsInside;
+			break;
+		case bsInside:
+			if (!aabb.Inside(mouse))
+			{
+				state = bsLost;
+				break;
+			}
+			if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
+			{
+				color += Dclr;
+				if (OnClick)
+					OnClick();
+				state = bsClicked;
+			}
+			break;
+		case bsLost:
+			color -= Dclr;
+			state = bsOutside;
+			break;
+		case bsClicked:
+			if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
+				state = bsReleased;
+			break;
+		case bsReleased:
+				color -= Dclr;
+				if (aabb.Inside(mouse))
+					state = bsInside;
+				else
+					state = bsOutside;
+			break;
+
 	}
 	return true;
 }
+
+CMiniGuiManager::CMiniGuiManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
+{
+	FocusedOn = NULL;
+	CEngine::Instance()->UpdateManager.AddObject(this);
+	CEngine::Instance()->RenderManager.AddObject(this);
+	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+}
+
+bool CMiniGuiManager::Update( scalar dt )
+{
+	if (tabholded)
+	{
+		TimerAccum += dt*1000;
+		if (!repeatstarted)
+		{
+			if (TimerAccum > KeyHoldRepeatDelay)
+			{
+				TimerAccum = 0;
+				repeatstarted = true;
+			}
+		}
+		else
+		{
+			if (TimerAccum > KeyHoldRepeatInterval)
+			{
+				TimerAccum = 0;
+				InputHandling(KEY_PRESSED, SDLK_TAB, SDLMod(0), 0);
+			}
+		}
+	}
+	else
+	{
+		TimerAccum = 0;
+		repeatstarted = false;
+	}
+	return true;
+}
+
+bool CMiniGuiManager::Render()
+{
+	glLoadIdentity();
+	if (FocusedOn)
+	{
+		FocusedOn->PRender->LineStippleEnabled = true;
+		FocusedOn->PRender->lwidth = 0.5f;
+		FocusedOn->PRender->grRectL(FocusedOn->aabb.Inflated(5, 5).vMin, FocusedOn->aabb.Inflated(5, 5).vMax);	
+		FocusedOn->PRender->LineStippleEnabled = false;
+		FocusedOn->PRender->lwidth = 1.0f;
+	}
+		//FocusedOn->PRender->gDrawBBox(FocusedOn->aabb.Inflated(5, 5));
+	return true;
+}
+
+bool CMiniGuiManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
+{
+	switch(state)
+	{
+	case KEY_PRESSED:
+		tabholded = true;
+		switch(key)
+		{
+		case SDLK_TAB:
+			if (FocusedOnListNode == NULL)
+			{
+				FocusedOnListNode = first;
+				if (first)
+					FocusedOn = dynamic_cast<CMiniGuiObject*>(first->data);
+			}
+			else
+			{
+				FocusedOnListNode = FocusedOnListNode->next;
+				if (FocusedOnListNode)
+					FocusedOn = dynamic_cast<CMiniGuiObject*>(FocusedOnListNode->data);
+
+			}
+
+			if (FocusedOnListNode == NULL)
+			{
+				FocusedOnListNode = first;
+				if (first)
+					FocusedOn = dynamic_cast<CMiniGuiObject*>(first->data);
+			}
+		//SDL_EnableKeyRepeat(0, 0);
+		break;
+		}
+	break;
+	case KEY_RELEASED:
+		switch(key)
+		{
+		case SDLK_TAB:
+			tabholded =  false;
+			break;
+		}
+	break;
+	}
+	return true;
+}
+
+CMiniGuiManager GuiManager;

@@ -302,7 +302,6 @@ bool CObjectList::AddObject(CObject *object)
 		last->next = tmp;
 	last = tmp;
 	tmp->SetData(object);
-	Reset();
 	count++;
 	return true;
 }
@@ -779,4 +778,9 @@ CObject::CObject()
 	delete [] tmp;
 	id = CObjectCount;
 	CObjectManager.AddObject(this);
+}
+
+bool CObject::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
+{
+	return true;
 }

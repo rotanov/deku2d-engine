@@ -9,7 +9,7 @@
 
 // зашитые в код названия файлов и секций, todo: подумать как избаиться от зашития в код
 #define CONFIG_FILE_NAME "config/"
-#define RESOURCE_LIST_PATH "config/resources.xml"
+#define DEFUALT_RESOURCE_LIST_PATH "config/resources.xml"
 
 #define DEFAULT_SECTION_COUNT	2
 #define CR_SECTION_FONTS		"Fonts"
@@ -106,27 +106,24 @@ class CResourceManager
 {
 public:
 	string DataPath;
-	char* ResourceListFileName;
+	//char* ResourceListFileName;
 	XMLTable *ResourceList;
 	XMLTable table;
 	_XMLNode *cNode;
 
-
-	CResourceManager();
-	CResourceManager(char *_ResourceListFileName) : ResourceListFileName(_ResourceListFileName)
+	CResourceManager()
 	{
+			DataPath = "";
+		//ResourceListFileName = NULL;
+		//ResourceList = NULL;
+
 		ResourceList = new XMLTable;
-		if (!ResourceList->LoadFromFile(ResourceListFileName))
-		{
-			Log("ERROR", "Error while loading %s Resource list", ResourceListFileName);
-		}
 	}
 	~CResourceManager()
 	{
 		if (ResourceList != NULL)
 			delete ResourceList;
 	}
-	static bool		ResourceListerFunc(char* AFileName, int AState);
 	bool		LoadSection(char *SectionName, CreateFunc creator);
 	CObject*	LoadResource(char* section, char *name, CreateFunc creator);
 	bool		LoadResources();

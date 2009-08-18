@@ -1,33 +1,26 @@
-#ifndef _MATH_H
-#define _MATH_H
-
-#pragma message("Compiling MathUtils.h")
 
 /**
 *	File    : MathUtils.h
 *	Author  : Dreamcatcher
 *	Started : 6.11.2007 2:03
-*	________________________
-*	Description:
-*		Vector class Implementation,
-*		basic math functions, Matrices etc. 
 */
 
+#ifndef _MATH_H
+#define _MATH_H
+
+#pragma message("Compiling MathUtils.h")
+
+#include <math.h>
+#include "CoreUtils.h"
 
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
 //#define OPTIMIZE_V2L
 
-#ifdef WIN32
-	#define __INLINE __forceinline
-#else
-	#define __INLINE inline
-#endif
 
 class Vector2;
 union Matrix2;
 
-typedef float scalar;
 const float epsilon = 0.00001f;
 const double HI_PI = 3.1415926535897932;
 const double HI_OOPI = 0.3183098861837906;
@@ -39,18 +32,13 @@ static const scalar radanglem = 1.0f/(PI*2.0f/(scalar)sincostable_dim);
 static const scalar PI_d180 = PI/180.0f;
 static const scalar d180_PI = 180.0f/PI;
 
-#include <math.h>
-#include "CoreUtils.h"
-
-#define USING_OPENGL
-
 #ifdef USING_OPENGL
-	#ifdef USE_SDL_OPENGL
-		#include "SDL_opengl.h"
-	#else
-		#include <gl\gl.h>
-		#include <gl\glu.h>
-	#endif
+#ifdef USE_SDL_OPENGL
+#include "SDL_opengl.h"
+#else
+#include <gl\gl.h>
+#include <gl\glu.h>
+#endif
 #endif
 
 void GenSinTable();
@@ -564,6 +552,15 @@ public:
 		vMax.x = xmax;
 		vMax.y = ymax;
 	}
+	// Если используется для кнопок и прочей еботы в экранных координатах, то этот конструктор удобнее для человеческого существа
+	CAABB(int x, int y, int width, int height)  
+	{
+		vMin.x = x;
+		vMin.y = y;
+		vMax.x = x + width;
+		vMax.y = y + height;
+	}
+
 
 	void Add(Vector2 point)
 	{
@@ -606,6 +603,12 @@ public:
 		vMax.x +=x;
 		vMin.y -=y;
 		vMax.y +=y;		
+	}
+
+	CAABB Inflated(scalar x, scalar y)
+	{
+		CAABB Result(x0-x, y0-y, x1+x, y1+y);
+		return Result;
 	}
 
 	bool Inside(Vector2 point)
@@ -1052,6 +1055,7 @@ union Vector4
 			return (*this)*is;
 		}
 		__INLINE Vector4 operator+=(Vector4 q){(*this) = (*this)+q; return *this;}
+		__INLINE Vector4 operator-=(Vector4 q){(*this) = (*this)-q; return *this;}
 		scalar Norm()const{return x * x + y * y + z * z + w * w;}
 		scalar Length( void ){return sqrt(x * x + y * y + z * z + w * w );}	
 		Vector4 Conjugate(){ return Vector4(-x,-y,-z,w);}

@@ -36,8 +36,19 @@ class CParticleSystem;
 class CRenderObject : public virtual CObject
 {
 public:
-	Vector2				p;
-	float				depth;
+	union	// Здесь немного усложнил, но думаю, так будет удобнее пользоваться.
+	{
+		struct
+		{
+			Vector2				p;
+			float				depth;
+		};
+		struct  
+		{
+			scalar x, y, z;
+		};
+	};
+	CAABB				aabb;	// Axis Aligned Bounding Box
 	bool				visible;
 	RGBAf				color;
 	CRenderObject();
@@ -49,7 +60,11 @@ public:
 	};
 	virtual ~CRenderObject(){};
 private:
-	bool				checked; // Проверили ли мы, что этот объект добавлен был с помощью фактори или нет. Проверка в Draw()	
+	// Проверили ли мы, что этот объект добавлен был с помощью фактори или нет. Проверка в Draw()	 TODO: проверить, работает ли оно при наследовании
+	// хотя не, убрать нахуй и добавить добавление в конструкторе...
+	// а тогда зачем фабрика?!
+	// дак это ж, ядрён батон, как всё упростить можно!1!111!
+	bool				checked; 
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -223,6 +238,7 @@ public:
 
 	void Bind();
 	bool Load();
+	bool LoadFromFile();
 	GLuint GetTexID();
 protected:
 	void Unload();
@@ -231,6 +247,7 @@ protected:
 class CTextureManager : public CObjectList
 {
 public:
+	CTexture* GetTextureByName(const string &TextureName);
 	bool AddTexture(char* filename, bool load = false);
 	bool LoadTextureByName(char *TextureName);
 	bool LoadAllTextures();
@@ -573,112 +590,68 @@ protected:
 };
 
 
-class CMiniInput					// Временный класс для обработки ввода с клавиатуры. Пока Пётор не сделает систему GUI. Или пока я не наложу на Пётора и заюзаю GUI-chan
+/**
+*	Поскольку Gui петра хуй попользуешься, так как он развёз какую-то еботу 
+*	и не может доделать её уже год (сейчас август 09го), то тут будет мини гуи;
+*	это будет маленький и удобный и я надеюсь, что временный набор классов. Пока что
+*	будет Edit, Button и менеджер. Если будет пиздец, то буду его расширять, появятся табы
+*	и всякие свистоперделки жизнено необходимые.
+*/
+
+class CMiniGuiObject : public CRenderObject, public CUpdateObject
 {
 public:
-	char *text;
-	int symbols;
-	int xpos, ypos;
-	int width, height;
+	CFont* font;
+	CPrimitiveRender* PRender;	// Указатель
+	RGBAf color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
+	string text;				// Это понятно, текст.
+	CMiniGuiObject *Parent;		// Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+
+	CMiniGuiObject();
+};
+
+class CMiniEdit : public CMiniGuiObject
+{
+public:
 	int cp;
 	bool havefocus;
 	CFont *font;
 
-	CMiniInput(int x, int y, char * fontname);
-
-	CMiniInput(){}
-
-	void DelChar()
-	{
-		if (symbols == 0)
-			return;
-		width -= font->width[text[cp-1]-32] + 1;
-		symbols--;
-		char *temp = new char[symbols+1];
-		for(int i=0;i<cp;i++)
-			temp[i] = text[i];
-		//temp[cp] = t;
-		for(int i=cp;i<symbols;i++)
-			temp[i] = text[i];
-		cp--;
-		if (text != NULL)
-			delete [] text;
-		temp[symbols] = 0;
-		text = temp;
-	}
-
-	void AddChar(char t)
-	{
-		symbols++;
-		char *temp = new char[symbols+1];
-		for(int i=0;i<cp;i++)
-			temp[i] = text[i];
-		temp[cp] = t;
-		for(int i=cp+1;i<symbols;i++)
-			temp[i] = text[i-1];
-		cp++;
-		if (text != NULL)
-			delete [] text;
-		temp[symbols] = 0;
-		text = temp;
-
-		width += font->width[t-32] + 1;
-	}
-
-
-	bool Update(int x, int y, Uint8 mstate)
-	{
-		if (mstate&SDL_BUTTON(1))
-			if (x >= xpos && y >= ypos)
-				if (x <= xpos+width && y <= ypos+height)
-				{
-					//cp = (x - xpos)/10; Fix
-				}
-
-				glDisable(GL_TEXTURE_2D);
-				glLoadIdentity();
-				glColor3f(0.6f, 0.7f, 0.8f);
-				if (havefocus)
-					glColor3f(0.9f, 0.8f, 0.2f);
-				glBegin(GL_LINE_LOOP);
-				glVertex2i(xpos, ypos);
-				glVertex2i(xpos + width + 2, ypos);
-				glVertex2i(xpos + width + 2, ypos + height);
-				glVertex2i(xpos, ypos + height);
-				glVertex2i(xpos, ypos);
-				glEnd();
-				glBegin(GL_LINES);
-				glVertex2i(xpos + cp * 10 + 1, ypos - 5);
-				glVertex2i(xpos + cp * 10 + 1, ypos + height + 5);
-				glEnd();
-				font->p = Vector2(xpos+2, ypos+2);
-				font->Print(text);
-				glColor3f(1.0f, 1.0f, 1.0f);
-
-
-				return true;
-	}
-	void SetText(char* AText)
-	{
-		text = AText;
-		width = font->GetStringWidth(text);
-	}	
+	CMiniEdit(){}
 };
 
-class CMiniButton : public CRenderObject, public CUpdateObject
+enum ButtonState {bsInside, bsOutside, bsLost, bsHovered, bsClicked, bsReleased};
+
+class CMiniButton : public CMiniGuiObject
 {
 public:
-	CFont* font;
-	CAABB rect;
-	RGBAf color;
-	string text;
+	ButtonState state;
 	bool (*OnClick)(); // Callback
 
-	CMiniButton(){}
+	CMiniButton();
 	CMiniButton(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
 	bool Render();
 	bool Update(float dt);
 };
+
+class CMiniGuiManager : public CObjectList, public CUpdateObject, public CRenderObject
+{
+public:
+	CMiniGuiManager();
+	CMiniGuiObject *FocusedOn;
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool Update(scalar dt);
+	bool Render();
+private:
+	int KeyHoldRepeatDelay;				// Костыль! TODO: fix
+	int KeyHoldRepeatInterval;
+	int TimerAccum;
+	bool tabholded;
+	bool repeatstarted;
+	CNodeObject *FocusedOnListNode;
+};
+
+extern CMiniGuiManager GuiManager;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -686,7 +659,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 /**
-*	Terminates the program under SDL & Opengl.
+*	Terminates the program under SDL & OpenGl.
 */
 void SDLGLExit(int code);
 /**

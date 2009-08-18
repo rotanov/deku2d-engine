@@ -22,11 +22,11 @@ CEngine::CEngine()
 	procFocusGainFunc = NULL;
 	procUpdateFunc = NULL;
 	procRenderFunc = NULL;
-	procGUIGetKeyDown = NULL;
-	procGUIGetKeyUp = NULL;
-	procGUIGetMouseDown = NULL;
-	procGUIGetMouseUp = NULL;
-	procGUIGetMouseMove = NULL;
+// 	procGUIGetKeyDown = NULL;
+// 	procGUIGetKeyUp = NULL;
+// 	procGUIGetMouseDown = NULL;
+// 	procGUIGetMouseUp = NULL;
+// 	procGUIGetMouseMove = NULL;
 	Factory = CFactory::Instance();
 	FontManager = CFontManager::Instance("ninja.cpp");
 	_instance = NULL;
@@ -34,6 +34,7 @@ CEngine::CEngine()
 	ConfigFileName = CONFIG_FILE_NAME;
 	ConfigFileName += "configuration.xml";
 	EventFuncCount = 0;
+	KeyInputFuncCount = 0;
 	isHaveFocus = 1;
 	userReInit = false;
 	Initialized = false;
@@ -135,21 +136,21 @@ void CEngine::SetState(int state, void* value)
 			case STATE_WINDOW_CAPTION:
 				window.caption = (char*)value;
 				break;
-			case STATE_GUI_KEY_DOWN:
-				procGUIGetKeyDown = (KeyFunc)value;
-				break;
-			case STATE_GUI_MOUSE_DOWN:
-				procGUIGetMouseDown = (MouseFunc)value;
-				break;
-			case STATE_GUI_KEY_UP:
-				procGUIGetKeyUp = (KeyFunc)value;
-				break;
-			case STATE_GUI_MOUSE_UP:
-				procGUIGetMouseUp = (MouseFunc)value;
-				break;
-			case STATE_GUI_MOUSE_MOVE:
-				procGUIGetMouseMove = (MouseFunc)value;
-				break;
+// 			case STATE_GUI_KEY_DOWN:
+// 				procGUIGetKeyDown = (KeyFunc)value;
+// 				break;
+// 			case STATE_GUI_MOUSE_DOWN:
+// 				procGUIGetMouseDown = (MouseFunc)value;
+// 				break;
+// 			case STATE_GUI_KEY_UP:
+// 				procGUIGetKeyUp = (KeyFunc)value;
+// 				break;
+// 			case STATE_GUI_MOUSE_UP:
+// 				procGUIGetMouseUp = (MouseFunc)value;
+// 				break;
+// 			case STATE_GUI_MOUSE_MOVE:
+// 				procGUIGetMouseMove = (MouseFunc)value;
+// 				break;
 			case STATE_CONFIG_NAME:
 				{
 					ConfigFileName = CONFIG_FILE_NAME;
@@ -258,6 +259,20 @@ bool CEngine::Suicide()
 
 #define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
 
+char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
+{
+	SDLKey sym = event.key.keysym.sym;
+	char TempChar;
+#ifdef WIN32
+	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
+	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
+#else
+	if ((event.key.keysym.unicode & 0xFF80) == 0 )  // только английский
+		TempChar = event.key.keysym.unicode & 0x7F;
+#endif WIN32
+	return TempChar;
+}
+
 bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
@@ -274,58 +289,66 @@ bool CEngine::ProcessEvents()
 		{
 			case SDL_KEYDOWN:
 			{
-				SDLKey sym = event.key.keysym.sym;
-				char ch;
-					if ((event.key.keysym.unicode & 0xFF00) == 0 )
-						ch = event.key.keysym.unicode & 0xFF;
-					if (procGUIGetKeyDown)
-						procGUIGetKeyDown(ch, sym);
-				if(sym == SDLK_ESCAPE)	
-				{
-					return false;
-				}
-				keys[sym] = 1;
-
+				char TempChar = TranslateKeyFromUnicodeToChar(event);
+				SDL_keysym keysym = event.key.keysym;
+				for(int i = 0; i < KeyInputFuncCount; i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);				
+				// Глобальная рекция на escape! Слишком категорично, но пока сойдёт. Потом - либо вывести в опцию, либо убрать и предоставить программисту право выбора
+				if(keysym.sym == SDLK_ESCAPE)	
+						return false;
+				keys[keysym.sym] = 1;
+				break;
+			}
+			case SDL_KEYUP:
+			{
+				char TempChar = TranslateKeyFromUnicodeToChar(event);
+				SDL_keysym keysym = event.key.keysym;				
+				for(int i=0;i<KeyInputFuncCount;i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, keysym.sym, keysym.mod, TempChar);				
+				keys[keysym.sym] = 0;
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
-				{
-					if (procGUIGetMouseDown)
-						procGUIGetMouseDown(event.button.x, event.button.y, event.button.button);
-					break;
-				}
-			case SDL_MOUSEBUTTONUP:
-				{
-					if (procGUIGetMouseUp)
-						procGUIGetMouseUp(event.button.x, event.button.y, event.button.button);
-					break;
-				}
-			case SDL_MOUSEMOTION:
-				{
-					if (procGUIGetMouseMove)
-						procGUIGetMouseMove(event.motion.x, event.motion.y, 0);
-					MousePos = Vector2(event.motion.x, window.height - event.motion.y);
-					break;
-				}
-			case SDL_KEYUP:
 			{
-				SDLKey sym = event.key.keysym.sym;
-				keys[sym] = 0;
-				if (procGUIGetKeyUp)
-					GUIKeyUp(event.key.keysym.unicode & 0xFF, sym);
+				for(int i=0;i<KeyInputFuncCount;i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, event.button.button, SDL_GetModState(), 0);				
+				break;
+			}
+			case SDL_MOUSEBUTTONUP:
+			{
+				for(int i=0;i<KeyInputFuncCount;i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, event.button.button, SDL_GetModState(), 0);				
+				break;
+			}
+			case SDL_MOUSEMOTION:
+			{
+				// Здесь можно раздавать позицию мыши всем попросившим.
+				MousePos = Vector2(event.motion.x, window.height - event.motion.y);
 				break;
 			}
 			case SDL_ACTIVEEVENT:
+			{
+				if (event.active.state != SDL_APPMOUSEFOCUS)
 				{
-					if (event.active.state != SDL_APPMOUSEFOCUS)
-						isHaveFocus = !!event.active.gain;
-					break;
+					if (isHaveFocus != !!event.active.gain)
+					{
+						if (!!event.active.gain)
+							if (procFocusGainFunc)
+								procFocusGainFunc();
+							else;
+						else
+							if (procFocusLostFunc)
+								procFocusLostFunc();
+					}
+					isHaveFocus = !!event.active.gain;
 				}
+				break;
+			}
 			case SDL_VIDEORESIZE:
-				{
-					window.glResize(event.resize.w, event.resize.h);
-					break;
-				}
+			{
+				window.glResize(event.resize.w, event.resize.h);
+				break;
+			}
 			case SDL_QUIT:
 				SDLGLExit(1);
 				break;
@@ -463,6 +486,15 @@ bool CEngine::ClearLists()
 	return true;
 }
 
+bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller)
+{
+	if (KeyInputFuncCount >= MAX_KEY_INPUT_FUNCTIONS)
+		return false;
+	KeyInputFunctions[KeyInputFuncCount] = AKeyInputFunction;
+	KeyFuncCallers[KeyInputFuncCount] = AKeyFuncCaller;
+	KeyInputFuncCount++;
+	return true;
+}
 CEngine* CEngine::_instance = 0;
 int CEngine::_refcount = 0;
 
@@ -473,7 +505,10 @@ bool CUpdateManager::UpdateObjects()
 	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
 	while (data)
 	{
-		data->Update(FIXED_DELTA_TIME); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
+		// FIXED_DELTA_TIME
+		float dt = 0;
+		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
+		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 		data = dynamic_cast<CUpdateObject*>(Next());
 	}
 	engine->FreeInst();

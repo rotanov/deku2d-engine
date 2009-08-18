@@ -1,5 +1,5 @@
-#ifndef NINJA_H
-#define NINJA_H
+#ifndef _ENGINE_H_
+#define _ENGINE_H_
 
 #pragma message("Compiling Engine.h")
 
@@ -21,7 +21,8 @@
 
 #define FIXED_DELTA_TIME			0.02f
 #define ENGINE_VERSION				0x001
-#define MAX_EVENT_FUNCTIONS			10
+#define MAX_EVENT_FUNCTIONS			8
+#define MAX_KEY_INPUT_FUNCTIONS		8
 
 // Состояния переменных движка, для Set/Get State
 // пока что тут неполный набор.
@@ -72,6 +73,7 @@ public:
 	void						SetState(int state, void* value);
 	void						GetState(int state, void* value);
 	bool						AddEventFunction(EventFunc func);
+	bool						AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
 	int							CfgGetInt(char* ParamName);
 	bool						Run();
 	
@@ -88,6 +90,8 @@ private:
 	bool						Initialized;
 	bool						doCalcFps;
 	int							EventFuncCount;
+	int							KeyInputFuncCount;
+	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
 	CGLWindow					window;
 	
 	bool						ClearLists();
@@ -98,18 +102,21 @@ private:
 	bool						Suicide();
 	bool						ProcessEvents();
 
+	// TODO: либо подумать ещё раз, либо избавиться от констант и перейти на списки. И да, ебал я ваш реаллок.
 	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];
+	KeyInputFunc				KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
 	bool						(*procUserInit)();
 	bool						(*procUserSuicide)();
 	bool						(*procFocusLostFunc)();
 	bool						(*procFocusGainFunc)();
 	bool						(*procUpdateFunc)();
 	bool						(*procRenderFunc)();
-	bool						(*procGUIGetKeyDown)(char k, SDLKey sym);
-	bool						(*procGUIGetKeyUp)(char k, SDLKey sym);
-	bool						(*procGUIGetMouseDown)(int x, int y, unsigned char button);
-	bool						(*procGUIGetMouseUp)(int x, int y, unsigned char button);
-	bool						(*procGUIGetMouseMove)(int x, int y, unsigned char button);
+
+// 	bool						(*procGUIGetKeyDown)(char k, SDLKey sym);
+// 	bool						(*procGUIGetKeyUp)(char k, SDLKey sym);
+// 	bool						(*procGUIGetMouseDown)(int x, int y, unsigned char button);
+// 	bool						(*procGUIGetMouseUp)(int x, int y, unsigned char button);
+// 	bool						(*procGUIGetMouseMove)(int x, int y, unsigned char button);
 
 protected:
 	static CEngine* _instance;
@@ -119,4 +126,4 @@ protected:
 	~CEngine();
 };
 
-#endif NINJA_H
+#endif _ENGINE_H_
