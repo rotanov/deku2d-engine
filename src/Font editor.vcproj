@@ -144,7 +144,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="OpenGl32.lib Glu32.lib"
-				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
+				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\lib\"

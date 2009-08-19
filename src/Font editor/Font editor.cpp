@@ -13,10 +13,14 @@ byte					GridCellSize = 16;
 
 bool Init()
 {
-	CMiniButton *btn = new CMiniButton(CAABB(20, 20, 100, 50), "1", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
-	btn = new CMiniButton(CAABB(20, 100, 100, 50), "2", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
-	btn = new CMiniButton(CAABB(20, 200, 100, 50), "3", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
-	btn = new CMiniButton(CAABB(20, 300, 100, 50), "4", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
+	CButtonMini *btn = new CButtonMini(CAABB(20, 20, 100, 50), "1", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
+	btn = new CButtonMini(CAABB(20, 100, 100, 50), "2", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
+	btn = new CButtonMini(CAABB(20, 200, 100, 50), "3", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
+	btn = new CButtonMini(CAABB(20, 300, 100, 50), "4", RGBAf(0.7f, 0.8f, 0.9f, 1.0f), NULL);
+	CEditMini *edit = new CEditMini();
+	edit->aabb = CAABB(450, 350, 96, 32);
+	edit->text = "Edit demo";
+	edit->color = btn->color;
 	return true;
 }
 

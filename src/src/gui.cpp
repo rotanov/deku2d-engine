@@ -917,13 +917,13 @@ void CForm::DrawText()
 		glColor4f(0,0,1,1);
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
-		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(HeaderStyle);
-		fnt->p.y = scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
-		fnt->isRect = true;
-		fnt->wh.x = GUIScheme->GetCWidth(HeaderStyle, Width);
-		fnt->wh.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
+		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(HeaderStyle);
+		fnt->Pos.y = scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
+		fnt->doRenderToRect = true;
+		//fnt->aabb.x = GUIScheme->GetCWidth(HeaderStyle, Width); —амый простой способ избавитьс€ от ошибки при компил€ции неиспользуемого кода - закомментировать строку с ошибкой ^^
+		//fnt->aabb.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
 		fnt->Print(Caption.c_str());
-		fnt->isRect = false;
+		fnt->doRenderToRect = false;
 /*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(HeaderStyle)
 			,scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle)
 			,ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
@@ -978,13 +978,14 @@ void CButton::DrawText()
 		glColor4f(0,0,1,1);
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
-		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd]);
-		fnt->p.y = scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
-		fnt->isRect = true;
-		fnt->wh.x = GUIScheme->GetCWidth(Styles[StyleInd], Width);
-		fnt->wh.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
+		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd]);
+		fnt->Pos.y = scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
+		fnt->doRenderToRect = true;
+//		—амый простой способ избавитьс€ от ошибки при компил€ции неиспользуемого кода - закомментировать строку с ошибкой ^^
+//		fnt->aabb.x = GUIScheme->GetCWidth(Styles[StyleInd], Width); 
+//		fnt->aabb.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
 		fnt->Print(Caption.c_str());
-		fnt->isRect = false;
+		fnt->doRenderToRect = false;
 /*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd])
 			,scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd])
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
@@ -1101,18 +1102,18 @@ void CEdit::DrawText()
 		int l = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
-		fnt->p.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-		fnt->p.y = scrheight - GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
+		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
+		fnt->Pos.y = scrheight - GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
 		engine->FreeInst();
-		fnt->isRect = true;
-		fnt->isSelected = SelLength != 0;
-		fnt->s1 = SelStart;
-		fnt->s2 = SelStart + SelLength - 1;
-		fnt->wh.x = GUIScheme->GetCWidth(ThisStyle, Width);
-		fnt->wh.y = GUIScheme->GetCHeight(ThisStyle, Height);
+		fnt->doRenderToRect = true;
+		fnt->isTextSelected = SelLength != 0;
+		fnt->Sel0 = SelStart;
+		fnt->Sel1 = SelStart + SelLength - 1;
+//		fnt->aabb.x = GUIScheme->GetCWidth(ThisStyle, Width);
+//		fnt->aabb.y = GUIScheme->GetCHeight(ThisStyle, Height);
 		fnt->Print(Caption.c_str());
-		fnt->isRect = false;
-		fnt->isSelected = false;
+		fnt->doRenderToRect = false;
+		fnt->isTextSelected = false;
 /*		fnt->PrintSelRect(l
 			,scrheight-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
 			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)

@@ -216,6 +216,7 @@ public:
 	bool DelObject(string objectname);						// удалить объект с именем objectname
 	bool DelObj(int ind);									// удалить объект рукоодству€сь непон€тнвым параметром 
 	CObject* GetObjectByName(string objectname);					// получить указатель на объект по имени
+	CNodeObject* GetObjectNodeByPointer(const CObject* AObject) const;	// “ут мы хотим получить указатель на узел, содержащий объект, зна€ адрес собственно объекта. Ћинейный перебор.
 	void DumpToLog();
 };
 

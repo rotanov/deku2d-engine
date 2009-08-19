@@ -404,9 +404,10 @@ private:
 	}
 };
 
-#define CFONT_DEPTH_HIGH		1.0f
-#define CFONT_DEPTH_LOW			0.0f
-#define CFONT_MAX_STRING_LENGTH	256
+#define CFONT_DEPTH_HIGH			1.0f
+#define CFONT_DEPTH_LOW				0.0f
+#define CFONT_MAX_STRING_LENGTH		256
+#define CFONT_MAX_SYMBOLS			256
 
 class CFont : public CResource
 {
@@ -414,18 +415,19 @@ public:
 	CFont();
 	~CFont();
 	
-	RGBAf				tClr;					//	Цвет.
-	byte				dist;					//	Расстояние между символами		
-	Vector2				p;						//	координты текста, для присваивания, указатель по дефолту указывает на них
-	Vector2				wh;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
-	int					offset;					//	Смещение, с которого надо выводить в боксе, если мы выводим со смещением
-	int					s1, s2;					//	Номера первого и последнего символов выделенного текста
-	bool				isRect;					//	Надо ли выводить текст в прямоугольник
-	bool				isSelected;				//	Выделен ли кусок текста
-	bool				doUseGlobalCoordSystem;	//	Использовать ли для вывода глобальную систему коодинат	
-	CPrimitiveRender	Prndr;					//	Настройки линий и прочей хуеты связаной с рамкой.
-	byte		width[256];		// Ширина каждого символа
-	byte		height[256];	// Высота каждого символа
+	RGBAf				tClr;						//	Цвет. Или указатель на цвет? Указатель!!! Или цвет? Блядь... ДА!
+													//	Пусть будут и цвет и указатель, причём по дефолту указатель будет указывать на этот цвет. Но добавить ф-ю реэссайн колор
+	scalar				Distance;					//	Расстояние между символами		
+	Vector2				Pos;						//	координты текста, для присваивания, указатель по дефолту указывает на них
+	CAABB				aabb;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
+	int					offset;						//	Смещение, с которого надо выводить в боксе, если мы выводим со смещением
+	int					Sel0, Sel1;					//	Номера первого и последнего символов выделенного текста
+	bool				doRenderToRect;				//	Надо ли выводить текст в прямоугольник
+	bool				isTextSelected;				//	Выделен ли кусок текста
+	bool				doUseGlobalCoordSystem;		//	Использовать ли для вывода глобальную систему коодинат	
+	CPrimitiveRender	*PRender;					//	Настройки линий и прочей хуеты связаной с рамкой.
+	int					width[CFONT_MAX_SYMBOLS];	//	Ширина символа
+	int					height[CFONT_MAX_SYMBOLS];	//	Высота символа
 
 
 	static CObject* NewFont()
@@ -437,7 +439,7 @@ public:
 
 	void		Print(const char *text, ...);
 
-	void		SetDepth(float _depth);
+	void		SetDepth(float ADepth);
 	void		PointTo(const Vector2 *_p);
 	void		PointBack();
 	void		SetAlign(const byte _Halign, const byte _Valign);
@@ -449,13 +451,11 @@ public:
 
 private:
 	float				x, y;					//	Фактические координаты для отрисовки в _Print
-	float				depth;					//	Глубина по Z
+	float				Depth;					//	Глубина по Z
 	(const Vector2)		*pp;					//	Указатель на вектор с координатами текста
 	byte				align;					//	Флаги выравнивания
-
+	CTexture*			Texture;				//	Указатель на текстуру шрфита. Очевидно же, да?
 	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
-	char		*FontImageName;	// Имя файла текстуры
-	GLuint		font;			// Font texture ID
 	GLuint		base;			// Base List of 256 glLists for font
 
 	void		_Print(const char *text);
@@ -598,60 +598,63 @@ protected:
 *	и всякие свистоперделки жизнено необходимые.
 */
 
-class CMiniGuiObject : public CRenderObject, public CUpdateObject
+class CGUIObjectMini : public CRenderObject, public CUpdateObject
 {
 public:
-	CFont* font;
-	CPrimitiveRender* PRender;	// Указатель
+	CFont* font;				// Указатель на шрифт.
+	CPrimitiveRender* PRender;	// Указатель на рендер примитивов.
 	RGBAf color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
 	string text;				// Это понятно, текст.
-	CMiniGuiObject *Parent;		// Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+	CGUIObjectMini *Parent;		// Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+	// Очевидные комментарии такие очевидные, что даже надо удалить.
 
-	CMiniGuiObject();
+	CGUIObjectMini();
 };
-
-class CMiniEdit : public CMiniGuiObject
-{
-public:
-	int cp;
-	bool havefocus;
-	CFont *font;
-
-	CMiniEdit(){}
-};
-
 enum ButtonState {bsInside, bsOutside, bsLost, bsHovered, bsClicked, bsReleased};
 
-class CMiniButton : public CMiniGuiObject
+class CEditMini : public CGUIObjectMini
+{
+public:
+	ButtonState state;
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	CEditMini();
+	bool Render();
+	bool Update(scalar dt);
+};
+
+
+
+class CButtonMini : public CGUIObjectMini
 {
 public:
 	ButtonState state;
 	bool (*OnClick)(); // Callback
 
-	CMiniButton();
-	CMiniButton(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
+	CButtonMini();
+	CButtonMini(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
 	bool Render();
 	bool Update(float dt);
 };
 
-class CMiniGuiManager : public CObjectList, public CUpdateObject, public CRenderObject
+class CGUIManagerMini : public CObjectList, public CUpdateObject, public CRenderObject
 {
 public:
-	CMiniGuiManager();
-	CMiniGuiObject *FocusedOn;
+	CGUIManagerMini();
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool Update(scalar dt);
 	bool Render();
+	void SetFocusedNodeTo(CNodeObject* AFocusedNode);
 private:
-	int KeyHoldRepeatDelay;				// Костыль! TODO: fix
+	int KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
+	CNodeObject *FocusedOnListNode;
+	CGUIObjectMini *FocusedOn;
 	int KeyHoldRepeatInterval;
 	int TimerAccum;
 	bool tabholded;
 	bool repeatstarted;
-	CNodeObject *FocusedOnListNode;
 };
 
-extern CMiniGuiManager GuiManager;
+extern CGUIManagerMini GuiManager;
 
 
 //////////////////////////////////////////////////////////////////////////

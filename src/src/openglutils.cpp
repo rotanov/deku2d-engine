@@ -613,16 +613,14 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 //-------------------------------------------//
 CFont::CFont()
 {
-	FontImageName = NULL;
 	base = 0;
-	dist = CFONT_DEFAULT_DISTANCE;
-	pp = &p;
+	Distance = CFONT_DEFAULT_DISTANCE; // Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение. Пользователь потом сам попроавит, если надо.
+	pp = &Pos;
 	offset = 0;
-	isSelected = isRect = false;
-	s1 = s2 =0;
-	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	isTextSelected = doRenderToRect = false;
+	Sel0 = Sel1 = 0;
+	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);	// MAGIC NUMBER
 	SetDepth(0.0f);
-
 	CFontManager* FntMan = CFontManager::Instance("OpenglUtils.cpp");
 	FntMan->AddObject(this);
 	FntMan->FreeInst("OpenGLutils.cpp");
@@ -630,10 +628,8 @@ CFont::CFont()
 
 CFont::~CFont()
 {
-	if (base != 0)
+	if (!base)
 		glDeleteLists(base, 256);
-	if (FontImageName != NULL)
-		delete [] FontImageName;
 }
 
 
@@ -642,39 +638,38 @@ bool CFont::LoadFromFile()
 	if (filename == "")
 		return false;
 	CFile			file;
-	CGLImageData	*image;
 	if (!file.Open(filename.c_str(), CFILE_READ))
 	{
 		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
 		return false;
 	}
-	
+	char *FontImageName = NULL;
 	file.ReadLine(FontImageName);	
 	CTextureManager *TexMan = CTextureManager ::Instance();
-	image = TexMan->GetTextureByName(FontImageName);
+	Texture = TexMan->GetTextureByName(FontImageName);
 	TexMan->FreeInst();
-	font = image->GetTexID();
 	file.Read(bbox, sizeof(bbox));
 	file.Close();
 	base = glGenLists(256);
-	glBindTexture(GL_TEXTURE_2D, font);
+	glBindTexture(GL_TEXTURE_2D, Texture->GetTexID());
+	float TmpOOWdth = 1.0f/Texture->width, TmpOOHght = 1.0f/Texture->height;
 	for(int i=0;i<256;i++)
 	{
 		glNewList(base+i, GL_COMPILE);
 		glBegin(GL_QUADS);		
-			glTexCoord2f( (float)bbox[i].x0/image->width, (float)bbox[i].y0/image->height);
+			glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
 			glVertex2i(0, 0);
 
-			glTexCoord2f( (float)bbox[i].x1/image->width, (float)bbox[i].y0/image->height);
+			glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
 			glVertex2i(bbox[i].x1 - bbox[i].x0, 0);
 
-			glTexCoord2f( (float)bbox[i].x1/image->width, (float)bbox[i].y1/image->height);
+			glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
 			glVertex2i(bbox[i].x1 - bbox[i].x0, bbox[i].y1 - bbox[i].y0);
 
-			glTexCoord2f( (float)bbox[i].x0/image->width, (float)bbox[i].y1/image->height);
+			glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
 			glVertex2i(0, bbox[i].y1 - bbox[i].y0);
 		glEnd();
-		glTranslated(bbox[i].x1 - bbox[i].x0 + dist, 0, 0);
+		glTranslated(bbox[i].x1 - bbox[i].x0 + Distance, 0, 0);
 		glEndList();
 		width[i] = (bbox[i].x1 - bbox[i].x0);
 		height[i] = (bbox[i].y1 - bbox[i].y0);
@@ -686,9 +681,11 @@ bool CFont::SaveToFile()
 {
 	if (filename == "")
 		return false;
-	CFile			file;
+	if (!Texture)
+		return false;
+	CFile file;
 	file.Open(filename.c_str(), CFILE_WRITE);
-	file.Write(FontImageName, (DWORD)strlen(FontImageName));
+	file.Write(Texture->name.c_str(), (DWORD)Texture->name.length());
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
 	file.Close();
@@ -699,14 +696,15 @@ void CFont::_Print(const char *text)
 {
 	glPushAttrib(GL_TEXTURE_BIT);
 	glPushMatrix();
-	glColor4fv(&(tClr.r));
+	tClr.glSet();
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, font);
-	glTranslatef(pp->x, pp->y, depth);
+	glBindTexture(GL_TEXTURE_2D, Texture->GetTexID());
+	glTranslatef(pp->x, pp->y, Depth);
 	glListBase(base-32);
 	glCallLists((GLsizei)strlen(text), GL_BYTE, text);
 	glPopMatrix();
-	glPopAttrib();
+	glPopAttrib(); 
+	//GLenum err = glGetError() ;
 }
 
 
@@ -720,72 +718,72 @@ void CFont::Print( const char *text, ... )
 		return;
 
 	int swidth = 0, sheight = 0, selx = 0;
-	if (isSelected)
+	if (isTextSelected)
 	{
-		if (s1 > s2+1)
+		if (Sel0 > Sel1+1)
 		{
-			swap(s1, s2);
-			s1++;
-			s2--;
+			swap(Sel0, Sel1);
+			Sel0++;
+			Sel1--;
 		}
 		
 		swidth = GetStringWidth(text + offset);
 		sheight = GetStringHeight(text + offset);
-		selx = p.x + GetStringWidthEx(0, s1-1-offset, text+offset);
+		selx = Pos.x + GetStringWidthEx(0, Sel0-1-offset, text+offset);
 
 
-		if (!(s1 > s2 || s1 < 0 || (uInt)s2 >= strlen(text)))
+		if (!(Sel0 > Sel1 || Sel0 < 0 || (uInt)Sel1 >= strlen(text)))
 		{
-			int selw = GetStringWidthEx(max(s1, offset), s2, text);
+			int selw = GetStringWidthEx(max(Sel0, offset), Sel1, text);
 			CPrimitiveRender pr;
 			pr.psClr = &RGBAf(10, 50, 200, 150);
-			pr.depth = depth;
-			pr.grRectS(Vector2(selx, p.y), Vector2(selx + selw, p.y + sheight));
+			pr.depth = Depth;
+			pr.grRectS(Vector2(selx, Pos.y), Vector2(selx + selw, Pos.y + sheight));
 		}
 
 
 	}
 
 		int xpos, ypos;
-	if (isRect)
+	if (doRenderToRect)
 	{
 		
 		byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
 
 		if (tempV == CFONT_VALIGN_TOP)
 		{
-			ypos = p.y + wh.y - sheight;
+			ypos = Pos.y + aabb.y0 - sheight;
 		}
 		if (tempV == CFONT_VALIGN_BOTTOM)
 		{
-			ypos = p.y;
+			ypos = Pos.y;
 		}
 		if (tempV == CFONT_VALIGN_CENTER)
 		{
-			ypos = p.y + wh.y/2 - sheight/2;
+			ypos = Pos.y + aabb.y0/2 - sheight/2;
 		}
 
 		if (tempH == CFONT_HALIGN_LEFT)
 		{
-			xpos = p.x;
+			xpos = Pos.x;
 		}
 		if (tempH == CFONT_HALIGN_RIGHT)
 		{
-			xpos = p.x + wh.x - swidth;
+			xpos = Pos.x + aabb.x0 - swidth;
 		}
 
 		if (tempH == CFONT_HALIGN_CENTER)
 		{
-			xpos = p.x + wh.x/2 - swidth/2;
+			xpos = Pos.x + aabb.x0/2 - swidth/2;
 		}
 
 		glPushAttrib(GL_SCISSOR_TEST);
 		glEnable(GL_SCISSOR_TEST);
-		glScissor(p.x, p.y, wh.x, wh.y);
+		glScissor(Pos.x, Pos.y, aabb.x0, aabb.y0);
 
 
 		CPrimitiveRender pr;
-		pr.depth = depth;
+		pr.depth = Depth;
 		pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
 		pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
 		pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
@@ -807,7 +805,7 @@ void CFont::Print( const char *text, ... )
 	_Print(temp);
 	delete [] temp;
 
-	if (isRect)
+	if (doRenderToRect)
 	{
 		 	glDisable(GL_SCISSOR_TEST);
 		 	glPopAttrib();
@@ -822,7 +820,7 @@ int	CFont::GetStringWidth(const char *text)
 		return -1;
 	int r = 0, l = (int)strlen(text);
 	for (int i=0;i<l;i++)
-		r += width[text[i]-32] + dist;
+		r += width[text[i]-32] + Distance;
 	return r;
 }
 
@@ -836,7 +834,7 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 		return -1;
 	int r = 0;
 	for (uint i = t1; i <= t2; i++)
-		r += width[text[i]-32]+dist;
+		r += width[text[i]-32]+Distance;
 	return r;
 }
 
@@ -866,8 +864,8 @@ int CFont::GetStringHeightEx( int t1, int t2, const char *text )
 
 void CFont::SetDepth( float _depth )
 {
-	depth = _depth;
-	depth = clampf(depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
+	Depth = _depth;
+	Depth = clampf(Depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
 }
 
 void CFont::PointTo(const Vector2 *_p)
@@ -879,7 +877,7 @@ void CFont::PointTo(const Vector2 *_p)
 
 void CFont::PointBack()
 {
-	pp = &p;
+	pp = &Pos;
 }
 
 void CFont::SetAlign( const byte _Halign, const byte _Valign )
@@ -1390,7 +1388,7 @@ bool CFontManager::Print( int x, int y, float depth, char* text, ... )
 		return false;
 
 	CurrentFont->SetDepth(depth);
-	CurrentFont->p.In(x, y);
+	CurrentFont->Pos.In(x, y);
 	CurrentFont->Print(text);
 	return true;
 }
@@ -1407,7 +1405,7 @@ bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 	va_end(ap);
 
 	CurrentFont->SetDepth(depth);
-	CurrentFont->p.In(x, y);
+	CurrentFont->Pos.In(x, y);
 	CurrentFont->Print(temp);
 	return true;
 }
@@ -2080,37 +2078,38 @@ void setVSync(int interval)
 
 #endif
 
-CMiniGuiObject::CMiniGuiObject()
+CGUIObjectMini::CGUIObjectMini()
 {
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
 	GuiManager.AddObject(this);
-	// Mohawk!!!!
-	// TODO
-}
-
-
-CMiniButton::CMiniButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
-	OnClick(AOnClick), state(bsOutside)
-{
-	aabb = ARect;
-	color = AColor;
-	text = AText;
 	font = CEngine::Instance()->FontManager->GetFont("Font"); // Это конструкто же, а что если конструируется до инициализации движка? втф...
 	PRender = new CPrimitiveRender;
 	PRender->plClr = &color;
 	PRender->psClr = &color;
 	PRender->ppClr = &color;
+	// Mohawk!!!!
+	// TODO
+}
+
+
+CButtonMini::CButtonMini( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
+	OnClick(AOnClick), state(bsOutside)
+{
+	aabb = ARect;
+	color = AColor;
+	text = AText;
+
 	PRender->DashedLines = true;
 	PRender->dash = 0x0001;
 }
 
-bool CMiniButton::Render()
+bool CButtonMini::Render()
 {	
 	CEngine *engine = CEngine::Instance();
 	font = engine->FontManager->GetFont("Font");
 	engine->FreeInst();
-	font->p = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
+	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
 	font->tClr = color;
 	glLoadIdentity();
 	PRender->gDrawBBox(aabb);
@@ -2121,7 +2120,7 @@ bool CMiniButton::Render()
 
 #define Dclr RGBAf(0.1f, 0.1f, 0.1f, 0.0f)
 
-bool CMiniButton::Update(float dt)
+bool CButtonMini::Update(float dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
@@ -2145,6 +2144,7 @@ bool CMiniButton::Update(float dt)
 			if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
 			{
 				color += Dclr;
+				GuiManager.SetFocusedNodeTo(GuiManager.GetObjectNodeByPointer(this));
 				if (OnClick)
 					OnClick();
 				state = bsClicked;
@@ -2170,7 +2170,7 @@ bool CMiniButton::Update(float dt)
 	return true;
 }
 
-CMiniGuiManager::CMiniGuiManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
+CGUIManagerMini::CGUIManagerMini(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
 {
 	FocusedOn = NULL;
 	CEngine::Instance()->UpdateManager.AddObject(this);
@@ -2178,7 +2178,7 @@ CMiniGuiManager::CMiniGuiManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDela
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
-bool CMiniGuiManager::Update( scalar dt )
+bool CGUIManagerMini::Update( scalar dt )
 {
 	if (tabholded)
 	{
@@ -2208,7 +2208,7 @@ bool CMiniGuiManager::Update( scalar dt )
 	return true;
 }
 
-bool CMiniGuiManager::Render()
+bool CGUIManagerMini::Render()
 {
 	glLoadIdentity();
 	if (FocusedOn)
@@ -2223,26 +2223,26 @@ bool CMiniGuiManager::Render()
 	return true;
 }
 
-bool CMiniGuiManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
+bool CGUIManagerMini::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
 {
 	switch(state)
 	{
 	case KEY_PRESSED:
-		tabholded = true;
 		switch(key)
 		{
 		case SDLK_TAB:
+			tabholded = true;
 			if (FocusedOnListNode == NULL)
 			{
 				FocusedOnListNode = first;
 				if (first)
-					FocusedOn = dynamic_cast<CMiniGuiObject*>(first->data);
+					FocusedOn = dynamic_cast<CGUIObjectMini*>(first->data);
 			}
 			else
 			{
 				FocusedOnListNode = FocusedOnListNode->next;
 				if (FocusedOnListNode)
-					FocusedOn = dynamic_cast<CMiniGuiObject*>(FocusedOnListNode->data);
+					FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->data);
 
 			}
 
@@ -2250,9 +2250,12 @@ bool CMiniGuiManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char l
 			{
 				FocusedOnListNode = first;
 				if (first)
-					FocusedOn = dynamic_cast<CMiniGuiObject*>(first->data);
+					FocusedOn = dynamic_cast<CGUIObjectMini*>(first->data);
 			}
-		//SDL_EnableKeyRepeat(0, 0);
+		break;
+		default:
+			if(FocusedOnListNode)
+				FocusedOn->InputHandling(state, key, mod, letter);
 		break;
 		}
 	break;
@@ -2268,4 +2271,102 @@ bool CMiniGuiManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char l
 	return true;
 }
 
-CMiniGuiManager GuiManager;
+void CGUIManagerMini::SetFocusedNodeTo(CNodeObject* AFocusedNode)
+{
+	FocusedOnListNode = AFocusedNode;
+	if (FocusedOnListNode)
+		FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->data);
+}
+
+CGUIManagerMini GuiManager;
+
+bool CEditMini::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
+{
+	switch(state)
+	{
+	case KEY_PRESSED:
+		switch(key)
+		{
+		default:
+			if (letter > 31)
+				text += letter;
+		}
+		break;
+	case KEY_RELEASED:
+		switch(key)
+		{
+
+		}
+		break;
+	}
+	return true;
+
+}
+
+bool CEditMini::Render()
+{
+	CEngine *engine = CEngine::Instance();
+	font = engine->FontManager->GetFont("Font");
+	engine->FreeInst();
+	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
+	font->tClr = color;
+	glLoadIdentity();
+	PRender->gDrawBBox(aabb);
+	glEnable(GL_TEXTURE_2D);
+	font->Print(text.c_str());
+	return true;
+}
+
+bool CEditMini::Update( scalar dt )
+{
+	Vector2 mouse;
+	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
+
+	switch (state)
+	{
+	case bsOutside:
+		if (aabb.Inside(mouse))
+			state = bsHovered;
+		break;
+	case bsHovered:
+		color += Dclr;
+		state = bsInside;
+		break;
+	case bsInside:
+		if (!aabb.Inside(mouse))
+		{
+			state = bsLost;
+			break;
+		}
+		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
+		{
+			color += Dclr;
+			state = bsClicked;
+		}
+		break;
+	case bsLost:
+		color -= Dclr;
+		state = bsOutside;
+		break;
+	case bsClicked:
+		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
+			state = bsReleased;
+		break;
+	case bsReleased:
+		color -= Dclr;
+		if (aabb.Inside(mouse))
+			state = bsInside;
+		else
+			state = bsOutside;
+		break;
+
+	}
+	return true;
+
+	return true;
+}
+
+CEditMini::CEditMini()
+{
+
+}

@@ -498,6 +498,25 @@ void CObjectList::DumpToLog()
 		Temp = Next();
 	}
 }
+
+CNodeObject* CObjectList::GetObjectNodeByPointer( const CObject* AObject )const
+{
+	if (!AObject)
+	{
+		Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; Trying to find object with NULL adress in %s", name);
+		return NULL;
+	}
+	CNodeObject* TempNode = first;
+	while (TempNode)
+	{
+		if (TempNode->data == AObject)
+			return TempNode;
+		TempNode = TempNode->next;
+	}
+	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s", AObject->name, name);
+	return NULL;
+}
+
 CPSingleTone* CPSingleTone::Instance()
 {
 	if (_instance == NULL)
