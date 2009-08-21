@@ -605,7 +605,7 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 
 	//strstr(WGL_EXT_swap_control);
-	setVSync(0);
+	setVSync(1);
 }
 
 //-------------------------------------------//
@@ -613,6 +613,7 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 //-------------------------------------------//
 CFont::CFont()
 {
+	scale = Vector2(1.0f, 1.0f);
 	base = 0;
 	Distance = CFONT_DEFAULT_DISTANCE; // Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение. Пользователь потом сам попроавит, если надо.
 	pp = &Pos;
@@ -700,6 +701,7 @@ void CFont::_Print(const char *text)
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, Texture->GetTexID());
 	glTranslatef(pp->x, pp->y, Depth);
+	scale.glScale();
 	glListBase(base-32);
 	glCallLists((GLsizei)strlen(text), GL_BYTE, text);
 	glPopMatrix();
@@ -893,6 +895,12 @@ byte CFont::GetHalign()
 byte CFont::GetValign()
 {
 	return align & CFONT_VALIGN_MASK;
+}
+
+void CFont::AssignTexture(CTexture* AFontTexture)
+{
+	if (AFontTexture)
+		Texture = AFontTexture;
 }
 //-------------------------------------------//
 //				CRenderManager				 //
@@ -1359,7 +1367,7 @@ CFontManager* CFontManager::_instance = 0;
 int CFontManager::_refcount = 0;
 
 
-CFont* CFontManager::GetFont( char* fontname )	
+CFont* CFontManager::GetFont(const char* fontname )	
 {
 	CFont *TempFont = NULL;
 	TempFont = dynamic_cast<CFont*>(GetObjectByName(fontname));
@@ -1643,6 +1651,7 @@ void CCamera::gTranslate()
 /************************************************************************/
 
 int CPrimitiveRender::glListCircleL = 0;
+int CPrimitiveRender::glListQuarterCircle =0;
 int CPrimitiveRender::glListCircleS = 0;
 int CPrimitiveRender::glListRingS = 0;
 int CPrimitiveRender::glListHalfCircle = 0;
@@ -1930,7 +1939,7 @@ void CPrimitiveRender::CheckBlend()
 		glEnable(GL_BLEND);		
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		break;
-	case PRM_RNDR_OPT_BLEND_NOONE:
+	case PRM_RNDR_OPT_BLEND_NO_ONE:
 		glDisable(GL_BLEND);
 		break;
 	}
@@ -1945,7 +1954,7 @@ void CPrimitiveRender::CheckTexture()
 	cells->Bind();
 }
 
-void CPrimitiveRender::Init()
+void CPrimitiveRender::Init()  // TODO: вынести качество генерации хотя бы в константу.
 {
 	if (!glIsList(glListCircleL))
 	{
@@ -1955,6 +1964,22 @@ void CPrimitiveRender::Init()
 		for(int i = 0; i < 64 + 1; i ++)
 		{
 			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+			glVertex2f(P.x, P.y);
+		}
+		glEnd();
+		glEndList();
+	}
+
+	if (!glIsList(glListQuarterCircle))
+	{
+		glListQuarterCircle = glGenLists(1);
+		glNewList(glListQuarterCircle, GL_COMPILE);
+		glBegin(GL_LINES);
+		for(int i = 0; i < 16; i ++)
+		{
+			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
+			glVertex2f(P.x, P.y);
+			P = Vector2(cos(PI * ((i+1) / 32.0f)), sin(PI * ((i+1) / 32.0f)));
 			glVertex2f(P.x, P.y);
 		}
 		glEnd();
@@ -2052,6 +2077,18 @@ void CPrimitiveRender::gDrawBBox( CAABB box )
 	AfterRndr();
 }
 
+void CPrimitiveRender::grQuarterCircle(const Vector2 &v0, scalar Radius)
+{
+if (!glIsList(glListQuarterCircle))
+return;
+BeforeRndr();
+glColor4fv(&(plClr->r));
+glTranslatef(v0.x, v0.y, depth);
+glRotatef(Angle, 0.0f, 0.0f, -1.0f);
+glScalef(Radius, Radius, 1.0f);
+glCallList(glListQuarterCircle);
+AfterRndr();
+}
 #ifdef WIN32
 
 #include <windows.h>
@@ -2112,7 +2149,7 @@ bool CButtonMini::Render()
 	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
 	font->tClr = color;
 	glLoadIdentity();
-	PRender->gDrawBBox(aabb);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
 	font->Print(text.c_str());
 	return true;
@@ -2287,15 +2324,34 @@ bool CEditMini::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
 	case KEY_PRESSED:
 		switch(key)
 		{
+		case SDLK_BACKSPACE:
+			DelInterval(&text, CursorPos, CursorPos);
+			break;
+		case SDLK_DELETE:
+			DelInterval(&text, CursorPos+1, CursorPos+1);
+			break;
+		case SDLK_LEFT:				
+			if (--CursorPos <= -1)
+				CursorPos++;
+			break;
+		case SDLK_RIGHT:
+			if (++CursorPos >= text.length())
+				CursorPos--;
+			break;
 		default:
 			if (letter > 31)
-				text += letter;
+			{
+				text.insert(CursorPos, &letter, 1);
+				CursorPos++;
+			}
 		}
 		break;
 	case KEY_RELEASED:
 		switch(key)
 		{
-
+		case SDLK_AMPERSAND:
+			break;
+		default:;
 		}
 		break;
 	}
@@ -2311,7 +2367,7 @@ bool CEditMini::Render()
 	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
 	font->tClr = color;
 	glLoadIdentity();
-	PRender->gDrawBBox(aabb);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
 	font->Print(text.c_str());
 	return true;
@@ -2359,14 +2415,12 @@ bool CEditMini::Update( scalar dt )
 		else
 			state = bsOutside;
 		break;
-
 	}
 	return true;
 
 	return true;
 }
 
-CEditMini::CEditMini()
+CEditMini::CEditMini() : CursorPos(0)
 {
-
 }

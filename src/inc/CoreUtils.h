@@ -401,6 +401,7 @@ public:
 void DelFNameFromFPath(char *src);
 void DelExtFromFName(char *src);
 void DelLastDirFromPath(char* src);
+void DelInterval(string *src, const int s0, const int s1);
 
 /**
 *	Внизу временные ф-ии для отлова утечек памяти.

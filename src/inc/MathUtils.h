@@ -209,6 +209,10 @@ public:
 	{
 		return x * V.y - y * V.x;
 	}
+	__INLINE bool operator ==(const Vector2 &V) const
+	{
+		return Equal(x, V.x) && Equal(y, V.y);
+	}
 
 
 	Vector2 operator * (const Matrix2& M) const;
@@ -268,6 +272,35 @@ public:
 		x = _x;
 		y = _y;
 	}
+
+#ifdef USING_OPENGL
+
+		__INLINE void glTranslate()
+		{
+			glTranslatef(x, y, 0.0f);
+		}
+
+		__INLINE void glScale()
+		{
+			glScalef(x, y, 1.0f);
+		}
+
+
+		__INLINE void glVertex()
+		{
+			glVertex2f(x, y);
+		}
+
+
+		__INLINE void glTexCoord()
+		{
+			glTexCoord2f(x, y);
+		}
+
+
+#endif
+
+
 
 };
 

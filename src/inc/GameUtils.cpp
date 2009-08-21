@@ -43,7 +43,7 @@ void CTileSet::RenderTileSet()
 
 	CPrimitiveRender p;
 	p.doUseGlobalCoordSystem = false;
-	p.BlendingOption = PRM_RNDR_OPT_BLEND_NOONE;
+	p.BlendingOption = PRM_RNDR_OPT_BLEND_NO_ONE;
 	p.lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	p.pClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	p.lwidth = 0.1f;

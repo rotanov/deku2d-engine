@@ -79,15 +79,16 @@ private:
 
 #define PRM_RNDR_OPT_BLEND_ONE		0x01
 #define PRM_RNDR_OPT_BLEND_OTHER	0x02
-#define PRM_RNDR_OPT_BLEND_NOONE	0x03
+#define PRM_RNDR_OPT_BLEND_NO_ONE	0x03
 
-class CPrimitiveRender // Унсаследовать?
+class CPrimitiveRender // Унсаследовать? Но зачем?
 {
 public:
 	int BlendingOption, CheckerCellSize;
 	bool OutlineEnabled, TextureEnabled, DashedLines, doUseGlobalCoordSystem, LineStippleEnabled;
 	static int glListCircleL;
 	static int glListCircleS;
+	static int glListQuarterCircle;
 	static int glListRingS;
 	static int glListHalfCircle;
 	scalar Angle, lwidth, depth, psize;
@@ -124,6 +125,8 @@ public:
 	void grRectL(const Vector2 &v0, const Vector2 &v1);
 	void grRectS(const Vector2 &v0, const Vector2 &v1);
 	void grRectC(const Vector2 &v0, const Vector2 &v1);
+
+	void grQuarterCircle(const Vector2 &v0, scalar Radius);
 
 	void grCircleL(const Vector2 &p, scalar Radius);
 	void grCircleS(const Vector2 &p, scalar Radius);
@@ -417,6 +420,7 @@ public:
 	
 	RGBAf				tClr;						//	Цвет. Или указатель на цвет? Указатель!!! Или цвет? Блядь... ДА!
 													//	Пусть будут и цвет и указатель, причём по дефолту указатель будет указывать на этот цвет. Но добавить ф-ю реэссайн колор
+	RGBAf*				ptClr;						//	Вот он и есть указатель
 	scalar				Distance;					//	Расстояние между символами		
 	Vector2				Pos;						//	координты текста, для присваивания, указатель по дефолту указывает на них
 	CAABB				aabb;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
@@ -428,7 +432,8 @@ public:
 	CPrimitiveRender	*PRender;					//	Настройки линий и прочей хуеты связаной с рамкой.
 	int					width[CFONT_MAX_SYMBOLS];	//	Ширина символа
 	int					height[CFONT_MAX_SYMBOLS];	//	Высота символа
-
+	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
+	Vector2				scale;
 
 	static CObject* NewFont()
 	{
@@ -440,6 +445,7 @@ public:
 	void		Print(const char *text, ...);
 
 	void		SetDepth(float ADepth);
+	void		AssignTexture(CTexture* AFontTexture);
 	void		PointTo(const Vector2 *_p);
 	void		PointBack();
 	void		SetAlign(const byte _Halign, const byte _Valign);
@@ -455,7 +461,6 @@ private:
 	(const Vector2)		*pp;					//	Указатель на вектор с координатами текста
 	byte				align;					//	Флаги выравнивания
 	CTexture*			Texture;				//	Указатель на текстуру шрфита. Очевидно же, да?
-	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
 	GLuint		base;			// Base List of 256 glLists for font
 
 	void		_Print(const char *text);
@@ -472,7 +477,7 @@ public:
 	bool			SetCurrentFont(char* fontname);
 	bool			PrintEx(int x, int y, float depth, char* text, ...);
 	bool			Print(int x, int y, float depth, char* text, ...);
-	CFont*			GetFont(char* fontname);
+	CFont*			GetFont(const char* fontname);
 	CFont*			GetFontEx(string fontname);
 	bool			AddObject(CObject *object);
 
@@ -615,6 +620,7 @@ enum ButtonState {bsInside, bsOutside, bsLost, bsHovered, bsClicked, bsReleased}
 class CEditMini : public CGUIObjectMini
 {
 public:
+	int CursorPos;
 	ButtonState state;
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 	CEditMini();

@@ -722,6 +722,18 @@ void MemCheck()
 	CloseHandle(hLogFile);
 }
 
+void DelInterval(string *src, const int s0, const int s1)
+{
+	if (s1 < s0)
+		return;
+	if (s0 < 0 || s1 >= src->length())
+		return;
+	char *Temp0 = new char [s0+1], *Temp1 = new char [src->length() - s1];
+	Temp0[s0] = 0, Temp1[src->length() - s1 - 1] = 0;
+	src->copy(Temp0, s0, 0);
+	src->copy(Temp1, src->length() - s1 - 1, s1+1);
+	*src = (string)Temp0 + Temp1;
+}
 #ifdef WIN32
 
 bool CDirectoryWalk::List()
