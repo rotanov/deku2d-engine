@@ -9,29 +9,12 @@ void CRenderObject::SetColor( byte _r, byte _g, byte _b, byte _a )
 	color.a = _a;
 }
 
-CRenderObject::CRenderObject() : p(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f), checked(false)
+CRenderObject::CRenderObject() : p(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
 {
 	name += "CRenderObject ";
 	type |= T_RENDERABLE;
 };
 
-bool CRenderObject::Render()
-{
-	if (!checked)
-	{
-		if (CEngine::Instance()->Factory->GetObjectByName(name) == NULL)
-		{
-			Log("ERROR", "Instance of CRenderObject that was not created using CFactory detected; Probably it is Peter who guilty And it's name: %s and id: %d", name.c_str(), id);
-#ifdef CRITICAL_ERRORS_MESSAGE_BOXES
-#ifdef WIN32
-			MessageBoxA(0, "Instance of CRenderObject that was not created using CFactory detected; Probably it is Peter who guilty", "ERROR", MB_OK);
-#endif WIN32
-#endif CRITICAL_ERRORS_MESSAGE_BOXES
-		}
-		checked = true;
-	}
-	return true;
-}
 //-------------------------------------------//
 //			CGLImageData stuff				 //
 //-------------------------------------------//
@@ -699,7 +682,7 @@ void CFont::_Print(const char *text)
 	glPushMatrix();
 	tClr.glSet();
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, Texture->GetTexID());
+	Texture->Bind();
 	glTranslatef(pp->x, pp->y, Depth);
 	scale.glScale();
 	glListBase(base-32);
@@ -921,13 +904,13 @@ CRenderManager::~CRenderManager()
 bool CRenderManager::DrawObjects()
 {
 	Reset();
-	CRenderObject *data = dynamic_cast<CRenderObject*>(Next());
+	CRenderObject *data = NULL;//dynamic_cast<CRenderObject*>(Next());
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
 	Camera.Update();
 	
 	
-	while (data)
+	while (Enum((CObject*&)data))
 	{
 		if (data->visible)
 		{
@@ -936,7 +919,7 @@ bool CRenderManager::DrawObjects()
 			glTranslatef(data->p.x, data->p.y, data->depth);
 			data->Render();
 		}
-		data = dynamic_cast<CRenderObject*>(Next());
+		//data = dynamic_cast<CRenderObject*>(Next());
 	}
 	glPopMatrix();
 
@@ -1055,26 +1038,26 @@ void CParticleSystem::_swap(int i, int j)
 
 void CParticleSystem::Init()
 {
-	memset(&info, 0, sizeof(info));
+	memset(&Info, 0, sizeof(Info));
 
-	this->info.ParticlesActive = 0;
-	this->info.MaxParticles = 10000;
-	this->particles = new CParticle [info.MaxParticles];
-	info.emission = 500;
-	info.age = 0;
-	info.sizevar = 1;
-	info.plifevar = 1;
-	info.life = -1;
-	info.plife = 1;
+	this->Info.ParticlesActive = 0;
+	this->Info.MaxParticles = 10000;
+	this->particles = new CParticle [Info.MaxParticles];
+	Info.emission = 500;
+	Info.age = 0;
+	Info.sizevar = 1;
+	Info.plifevar = 1;
+	Info.life = -1;
+	Info.plife = 1;
 
 	user_create = false;
 	user_update = false;
 
-	TexID = 0;
+	Texture = NULL;
 
-	info.sc = RGBAf(1.0,0.0,0.0,0.5);
-	info.ec = RGBAf(0.0,0.0,1.0,0.5);
-	info.vc = RGBAf(0.0f,0.0f,0.0f,0.0f);
+	Info.sc = RGBAf(1.0,0.0,0.0,0.5);
+	Info.ec = RGBAf(0.0,0.0,1.0,0.5);
+	Info.vc = RGBAf(0.0f,0.0f,0.0f,0.0f);
 }
 
 bool CParticleSystem::Update(scalar dt)
@@ -1083,7 +1066,7 @@ bool CParticleSystem::Update(scalar dt)
 		return false;
 	#endif
 	// Here integrating and updating values of active particles
-	for(int i=0; i < info.ParticlesActive; i++)
+	for(int i=0; i < Info.ParticlesActive; i++)
 	{
 		if (!user_update)
 		{
@@ -1091,8 +1074,8 @@ bool CParticleSystem::Update(scalar dt)
 			if (particles[i].age >= particles[i].life
 				)
 			{
-				_swap(i, info.ParticlesActive-1);
-				info.ParticlesActive--;
+				_swap(i, Info.ParticlesActive-1);
+				Info.ParticlesActive--;
 				i--;
 				continue;
 			}
@@ -1100,11 +1083,6 @@ bool CParticleSystem::Update(scalar dt)
 			particles[i].c += (particles[i].dc*dt);
 			particles[i].size += particles[i].dsize;
 
-			if (info.isSnow)
-				particles[i].p.x += cos(particles[i].Period)*1;
-
-			particles[i].Period += 0.001f;
-			if (particles[i].Period>PI*2) particles[i].Period = 0.0f;
 		}
 		else
 		{
@@ -1113,16 +1091,16 @@ bool CParticleSystem::Update(scalar dt)
 	}
 
 
-	float np = info.emission * dt;	// + uncreated;
+	float np = Info.emission * dt;	// + uncreated;
 
-	if (info.life != -1)
+	if (Info.life != -1)
 	{
-		info.age += dt;
-		if (info.age >= info.life)
+		Info.age += dt;
+		if (Info.age >= Info.life)
 			return true;
 	}
 
-	int t = info.ParticlesActive;
+	int t = Info.ParticlesActive;
 	for (int i = t; i < t + np; i++)
 	{
 		CreateParticle();
@@ -1174,14 +1152,14 @@ bool CParticleSystem::Render()
 	#ifdef _DEBUG_DISABLE_PARTICLES_DRAW
 		return false;
 	#endif
-	if (TexID == 0)
+	if (!Texture)
 	{
 		glPushAttrib(GL_TEXTURE_BIT | GL_POINTS);
 		glEnable(GL_POINTS);
 		glDisable(GL_TEXTURE_2D);
 		glPointSize(particles[0].size);
 		glBegin(GL_POINTS);
-		for(int i=0;i<info.ParticlesActive;i++)
+		for(int i=0;i<Info.ParticlesActive;i++)
 		{
 			gSetColor(particles[i].c);
 			glVertex2f(particles[i].p.x, particles[i].p.y);			
@@ -1199,10 +1177,10 @@ bool CParticleSystem::Render()
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 		
 
-		glBindTexture(GL_TEXTURE_2D, TexID);
+		Texture->Bind();
 		
 		glBegin(GL_QUADS);
-		for(int i=0;i<info.ParticlesActive;i++)
+		for(int i=0;i<Info.ParticlesActive;i++)
 		{
 			gSetColor(particles[i].c);
 			glTexCoord2f(0.0f, 0.0f); glVertex2f(particles[i].p.x,						particles[i].p.y					);			
@@ -1222,7 +1200,7 @@ bool CParticleSystem::SaveToFile()
 {
 	CFile file;
 	file.Open(filename.c_str(), CFILE_WRITE);
-	file.Write(&info, sizeof(CPsysteminfo));
+	file.Write(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
 }
@@ -1231,63 +1209,62 @@ bool CParticleSystem::LoadFromFile()
 {
 	CFile file;
 	file.Open(filename.c_str(), CFILE_READ);
-	file.Read(&info, sizeof(CPsysteminfo));
+	file.Read(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
 }
 
 void CParticleSystem::SetGeometry( Vector2 * points, int numPoints )
 {
-	info.geom = points;
-	info.GeomNumPoints = numPoints;
+	Info.geom = points;
+	Info.GeomNumPoints = numPoints;
 }
 
 CParticle	*CParticleSystem::CreateParticle()
 {
-	int t = info.ParticlesActive;
+	int t = Info.ParticlesActive;
 	int i = t;
 	{
-		if (i >= info.MaxParticles)
+		if (i >= Info.MaxParticles)
 			return NULL;
-		if (info.ParticlesActive >= info.MaxParticles)
+		if (Info.ParticlesActive >= Info.MaxParticles)
 			return NULL;
-		info.ParticlesActive++;
+		Info.ParticlesActive++;
 		
 		if (!user_create)
 		{
-			particles[i].life  = Random_Float(info.plife ,info.plife + info.plifevar);
+			particles[i].life  = Random_Float(Info.plife ,Info.plife + Info.plifevar);
 			if (particles[i].life < 0 )
-				particles[i].life = info.plife;
+				particles[i].life = Info.plife;
 			particles[i].age = 0;
 
-			if (info.GeomNumPoints == 1)
+			if (Info.GeomNumPoints == 1)
 			{
-				particles[i].p = info.geom[0];
+				particles[i].p = Info.geom[0];
 				particles[i].v = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
 			}
 			else
-				if (info.geom != NULL)
+				if (Info.geom != NULL)
 				{
-					int sr = Random_Int(0, info.GeomNumPoints-2);
-					particles[i].p = info.geom[sr] + (info.geom[sr+1]-info.geom[sr])*Random_Float(0.0f, 1.0f);
-					particles[i].v = ((info.geom[sr]-info.geom[sr+1]).GetPerp().Normalized())/0.01f; 
+					int sr = Random_Int(0, Info.GeomNumPoints-2);
+					particles[i].p = Info.geom[sr] + (Info.geom[sr+1]-Info.geom[sr])*Random_Float(0.0f, 1.0f);
+					particles[i].v = ((Info.geom[sr]-Info.geom[sr+1]).GetPerp().Normalized())/0.01f; 
 				}
 				else
 				{
-					particles[i].p = info.p;
+					particles[i].p = Info.p;
 					particles[i].v = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
 				}
-				particles[i].Period = Random_Float(0.0f, 2*PI);
+				
+				particles[i].size = Random_Int(Info.startsize, Info.startsize + Info.sizevar);
+				particles[i].dsize = (Info.endsize - Info.endsize) / particles[i].life;
 
-				particles[i].size = Random_Int(info.startsize, info.startsize + info.sizevar);
-				particles[i].dsize = (info.endsize - info.endsize) / particles[i].life;
+				particles[i].c.a = Random_Float(Info.sc.a ,Info.sc.a + Info.vc.a);
+				particles[i].c.r = Random_Float(Info.sc.r ,Info.sc.r + Info.vc.r);
+				particles[i].c.g = Random_Float(Info.sc.g ,Info.sc.g + Info.vc.g);
+				particles[i].c.b = Random_Float(Info.sc.b ,Info.sc.b + Info.vc.b);
 
-				particles[i].c.a = Random_Float(info.sc.a ,info.sc.a + info.vc.a);
-				particles[i].c.r = Random_Float(info.sc.r ,info.sc.r + info.vc.r);
-				particles[i].c.g = Random_Float(info.sc.g ,info.sc.g + info.vc.g);
-				particles[i].c.b = Random_Float(info.sc.b ,info.sc.b + info.vc.b);
-
-				particles[i].dc = (info.ec - particles[i].c)/particles[i].life;
+				particles[i].dc = (Info.ec - particles[i].c)/particles[i].life;
 		}
 		else
 		{
@@ -1315,6 +1292,7 @@ void CParticleSystem::SetUserCreate( FCreateFunc func )
 
 CParticleSystem::CParticleSystem()
 {
+	Texture = NULL;
 	particles = NULL;
 	user_create = user_update = user_render = false;
 }
@@ -1378,7 +1356,7 @@ CFont* CFontManager::GetFont(const char* fontname )
 
 CFont* CFontManager::GetFontEx( string fontname )
 {
-	return dynamic_cast<CFont*>(GetObjectByName(fontname));
+	return dynamic_cast<CFont*>(GetObjectByName(fontname.c_str()));
 }
 
 bool CFontManager::SetCurrentFont( char* fontname )
@@ -1420,7 +1398,7 @@ bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 
 bool CFontManager::AddObject( CObject *object )
 {
-	CObjectList::AddObject(object);
+	CList::AddObject(object);
 	if (CurrentFont == NULL)
 		CurrentFont = dynamic_cast<CFont*>(object);
 	return true;
@@ -1501,7 +1479,7 @@ bool CTextureManager::LoadAllTextures()
 CTexture* CTextureManager::GetTextureByName( const string &TextureName )
 {
 	CTexture *TempTexture = NULL;
-	TempTexture = dynamic_cast<CTexture*>(GetObjectByName(TextureName));
+	TempTexture = dynamic_cast<CTexture*>(GetObjectByName(TextureName.c_str()));
 	if (TempTexture)
 		TempTexture->CheckLoad();
 	return TempTexture;
@@ -2181,7 +2159,7 @@ bool CButtonMini::Update(float dt)
 			if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
 			{
 				color += Dclr;
-				GuiManager.SetFocusedNodeTo(GuiManager.GetObjectNodeByPointer(this));
+				GuiManager.SetFocusedNodeTo(GuiManager.GetListNodeByPointerToObject(this));
 				if (OnClick)
 					OnClick();
 				state = bsClicked;
@@ -2209,6 +2187,7 @@ bool CButtonMini::Update(float dt)
 
 CGUIManagerMini::CGUIManagerMini(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
 {
+	name = "Mini GUI manager";
 	FocusedOn = NULL;
 	CEngine::Instance()->UpdateManager.AddObject(this);
 	CEngine::Instance()->RenderManager.AddObject(this);
@@ -2271,23 +2250,23 @@ bool CGUIManagerMini::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char l
 			tabholded = true;
 			if (FocusedOnListNode == NULL)
 			{
-				FocusedOnListNode = first;
-				if (first)
-					FocusedOn = dynamic_cast<CGUIObjectMini*>(first->data);
+				FocusedOnListNode = GetFirst();
+				if (GetFirst())
+					FocusedOn = dynamic_cast<CGUIObjectMini*>(GetFirst()->GetData());
 			}
 			else
 			{
 				FocusedOnListNode = FocusedOnListNode->next;
 				if (FocusedOnListNode)
-					FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->data);
+					FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->GetData());
 
 			}
 
 			if (FocusedOnListNode == NULL)
 			{
-				FocusedOnListNode = first;
-				if (first)
-					FocusedOn = dynamic_cast<CGUIObjectMini*>(first->data);
+				FocusedOnListNode = GetFirst();
+				if (GetFirst())
+					FocusedOn = dynamic_cast<CGUIObjectMini*>(GetFirst()->GetData());
 			}
 		break;
 		default:
@@ -2308,11 +2287,11 @@ bool CGUIManagerMini::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char l
 	return true;
 }
 
-void CGUIManagerMini::SetFocusedNodeTo(CNodeObject* AFocusedNode)
+void CGUIManagerMini::SetFocusedNodeTo(CListNode* AFocusedNode)
 {
 	FocusedOnListNode = AFocusedNode;
 	if (FocusedOnListNode)
-		FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->data);
+		FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->GetData());
 }
 
 CGUIManagerMini GuiManager;

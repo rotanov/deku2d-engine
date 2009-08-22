@@ -66,7 +66,7 @@ public:
 	}
 };
 
-class CPhysicsManager : public CObjectList
+class CPhysicsManager : public CList
 {
 //	... 
 };

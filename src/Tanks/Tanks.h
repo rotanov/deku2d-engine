@@ -162,7 +162,7 @@ public:
 	bool Update(scalar dt);
 };
 
-class CTankManager : public CObjectList, public CUpdateObject, public CRenderObject
+class CTankManager : public CList, public CUpdateObject, public CRenderObject
 {
 public:	
 	RGBAf COLOR_P1;

@@ -53,18 +53,8 @@ public:
 	RGBAf				color;
 	CRenderObject();
 	void SetColor(byte _r, byte _g, byte _b, byte _a);
-	virtual bool Render();
-	virtual bool RenderByParticleSystem(const Vector2 &p, const CParticleSystem &ps)
-	{
-		return true;
-	};
+	virtual bool Render() = 0;
 	virtual ~CRenderObject(){};
-private:
-	// ѕроверили ли мы, что этот объект добавлен был с помощью фактори или нет. ѕроверка в Draw()	 TODO: проверить, работает ли оно при наследовании
-	// хот€ не, убрать нахуй и добавить добавление в конструкторе...
-	// а тогда зачем фабрика?!
-	// дак это ж, €дрЄн батон, как всЄ упростить можно!1!111!
-	bool				checked; 
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -247,7 +237,7 @@ protected:
 	void Unload();
 };
 
-class CTextureManager : public CObjectList
+class CTextureManager : public CList
 {
 public:
 	CTexture* GetTextureByName(const string &TextureName);
@@ -468,7 +458,7 @@ private:
 	byte		GetValign();
 };
 
-class CFontManager : public CObjectList
+class CFontManager : public CList
 {
 public:
 	static			CFontManager* Instance(char *byWho);
@@ -488,7 +478,7 @@ protected:
 	static int		_refcount;
 };
 
-class CRenderManager : public CObjectList
+class CRenderManager : public CList
 {
 private:
 	Vector2	*v2Dots, *v2Lines, *v2Quads, *v2Triangles;
@@ -509,8 +499,6 @@ public:
 /************************************************************************/
 /*				CparticleSystem & stuff									*/
 /************************************************************************/
-
-
 struct CParticle
 {
 	Vector2			p;			//	позици€ частицы
@@ -521,7 +509,6 @@ struct CParticle
 	float			dsize;		//	приращение размера
 	float			life;		//	врем€ жизни частицы; -1 значит бесконечность
 	float			age;		//	возраст частицы, то есть сколько она уже просуществовала
-	float			Period;		//	хуй знает, чо это. € не помню
 };
 
 struct CPsysteminfo
@@ -551,7 +538,6 @@ struct CPsysteminfo
 	int				notcreated;				//	количество частиц, которые мы не смогли выпустить в этом кадре по каким-то причинам
 	Vector2			*geom;					//	массив точек, дл€ генерации частиц
 	int				GeomNumPoints;			//	число этих точек
-	bool			isSnow;					//	костыль дл€ снега. TODO! убрать нахуй
 };
 
 typedef void (*FCreateFunc)(CParticle *);
@@ -567,13 +553,15 @@ typedef void (*FUpdateFunc)(CParticle *, float);
 class CParticleSystem :  public CResource, public CRenderObject, public CUpdateObject
 {
 public:
-	CPsysteminfo			info;
-	CRenderObject			*UserRenderSample;
-	CParticle				*particles;
-	GLuint					TexID;
+	CPsysteminfo			Info;
+	CParticle*				particles;
+	CTexture*				Texture;
+
+	CRenderObject*			UserRenderSample;
 	bool					user_create;
 	bool					user_update;
 	bool					user_render;
+
 	void					(*procUserCreate)(CParticle *);
 	void					(*procUserUpdate)(CParticle *, float);
 
@@ -582,7 +570,8 @@ public:
 	void					Init();	
 	bool					Update(float dt);
 	bool					Render();
-	CParticle				*CreateParticle();
+
+	CParticle*				CreateParticle();
 	void					SetGeometry(Vector2 * points, int numPoints);
 	void					SetUserUpdate(FUpdateFunc func);
 	void					SetUserCreate(FCreateFunc func);
@@ -642,17 +631,17 @@ public:
 	bool Update(float dt);
 };
 
-class CGUIManagerMini : public CObjectList, public CUpdateObject, public CRenderObject
+class CGUIManagerMini : public CList, public CUpdateObject, public CRenderObject
 {
 public:
 	CGUIManagerMini();
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool Update(scalar dt);
 	bool Render();
-	void SetFocusedNodeTo(CNodeObject* AFocusedNode);
+	void SetFocusedNodeTo(CListNode* AFocusedNode);
 private:
 	int KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
-	CNodeObject *FocusedOnListNode;
+	CListNode *FocusedOnListNode;
 	CGUIObjectMini *FocusedOn;
 	int KeyHoldRepeatInterval;
 	int TimerAccum;

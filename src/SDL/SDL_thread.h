@@ -82,11 +82,11 @@ typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
 extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread);
 
 #ifdef __OS2__
-#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthread, _endthread)
+#define SDL_CreateThread(fn, Data) SDL_CreateThread(fn, Data, _beginthread, _endthread)
 #elif defined(_WIN32_WCE)
-#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, NULL, NULL)
+#define SDL_CreateThread(fn, Data) SDL_CreateThread(fn, Data, NULL, NULL)
 #else
-#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthreadex, _endthreadex)
+#define SDL_CreateThread(fn, Data) SDL_CreateThread(fn, Data, _beginthreadex, _endthreadex)
 #endif
 #else
 extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data);

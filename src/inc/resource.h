@@ -29,7 +29,7 @@ public:
 	}
 };
 
-static CObjectList ExtResRelationList;
+static CList ExtResRelationList;
 
 // типы ресурсов
 #define CRESOURCE_TYPE_FONT				0x01
@@ -55,19 +55,16 @@ static CObjectList ExtResRelationList;
 
 /**
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
-*
-*
-*
 */
 
-class CFactory : public CObjectList
+class CFactory : public CList
 {
 public:
 	static			CFactory* Instance();
 	void			FreeInst();
 	CObject*		Create(int ObjectId, CreateFunc creator);
 	bool			InitManagers(CUpdateManager *vUpdateManager, CRenderManager *vRenderManager);
-	CObjectList*	GetManager(int mantype)
+	CList*	GetManager(int mantype)
 	{
 		switch (mantype)
 		{

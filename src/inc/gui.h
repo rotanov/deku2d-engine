@@ -265,7 +265,7 @@ class CControl : public CGraphObj
 public:
 	CControl();
 	~CControl(){};
-	CObjectList				Items;
+	CList				Items;
 	virtual void			Next();
 	virtual void			Draw(){};
 	virtual void			Step(){};

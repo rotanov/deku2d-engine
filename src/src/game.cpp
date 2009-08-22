@@ -93,7 +93,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 		p->v = Vector2(0,0);
 	}
 
-	for (int i = 0; i<ps->info.ParticlesActive; ++i)
+	for (int i = 0; i<ps->Info.ParticlesActive; ++i)
 	{
 		if (&(ps->particles[i]) == p)
 			break;
@@ -169,7 +169,7 @@ bool CHero::Update( float dt )
 			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("psys"));
 			Vector2 n;
 //					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
-			for (int i=0; i< ps->info.ParticlesActive; i++)
+			for (int i=0; i< ps->Info.ParticlesActive; i++)
 			{
 				n = (ps->particles[i].p - Vector2(p.x+C1, p.y+C2)).Normalized();
 				if (((ps->particles[i].p-Vector2(p.x, p.y)).Length())<= 200)
@@ -206,7 +206,7 @@ bool CHero::Update( float dt )
 
 
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("enemy_l"));
-	for (int i=0; i< ps->info.ParticlesActive; i++)
+	for (int i=0; i< ps->Info.ParticlesActive; i++)
 	{
 		CAABB tmp = CAABB(ps->particles[i].p, ps->particles[i].p + Vector2(ps->particles[i].size, ps->particles[i].size));
 		if (tmp.Intersect(Gift))
@@ -335,7 +335,7 @@ bool CEnemyController::Update( float dt )
 	while (enems.Enum(obj))
 	{
 		bool flag = false;
-		for (int i = 0; i < ps->info.ParticlesActive; i++)
+		for (int i = 0; i < ps->Info.ParticlesActive; i++)
 		{
 			if ((dynamic_cast<CEnemy*>(obj))->EnemyPos == &ps->particles[i])
 			{
@@ -345,7 +345,7 @@ bool CEnemyController::Update( float dt )
 		}
 		if (!flag)
 		{
-			enems.DelObj(ind);
+			enems.DelObject(ind);
 			ind--;
 		}
 		ind++;
@@ -355,7 +355,7 @@ bool CEnemyController::Update( float dt )
 
 CEnemy * CEnemyController::SpawnEnemy()
 {
-	if (ps->info.ParticlesActive >= ps->info.MaxParticles)
+	if (ps->Info.ParticlesActive >= ps->Info.MaxParticles)
 		return NULL;
 	CEnemy *enemy = dynamic_cast<CEnemy*>(factory->Create(OBJ_USER_DEFINED, &(CEnemy::NewEnemy)));
 	enemy->AssignParticle(ps->CreateParticle());

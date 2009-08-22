@@ -26,8 +26,7 @@ void CFactory::FreeInst()
 
 CFactory::CFactory():initialized(false), UpdateManager(NULL), RenderManager(NULL), FontManager(NULL)
 {
-	//...
-	//this->AddObject(this);
+	name = "Factory";
 }
 
 CFactory::~CFactory()

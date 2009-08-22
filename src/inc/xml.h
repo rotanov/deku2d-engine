@@ -88,7 +88,7 @@ public:
 	int						depth;
 	_XMLNode				*Add(string name, string value);
 	void					Clear();
-	_XMLNode*				Get(PCHAR Str);
+	_XMLNode*				Get(pchar Str);
 	char					*GetValue(){return (char*)Value.data();}
 	void					Write(CFile f, int depth);
 	bool					GetPair(string &Key, string &Value);

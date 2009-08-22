@@ -109,7 +109,7 @@ private:
 	bool						(*procUserSuicide)();
 	bool						(*procFocusLostFunc)();
 	bool						(*procFocusGainFunc)();
-	bool						(*procUpdateFunc)();
+	bool						(*procUpdateFunc)(scalar);
 	bool						(*procRenderFunc)();
 
 // 	bool						(*procGUIGetKeyDown)(char k, SDLKey sym);

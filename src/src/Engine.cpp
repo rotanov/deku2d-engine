@@ -107,13 +107,13 @@ void CEngine::SetState(int state, void* value)
 					// Так как минимум один раз пользовательская инициализация уже была установлена,
 					// а следовательно вызвана, то здесь надо вообще всё остановить и подчистить.
 					// И потом переинициализировать всё что нужно и пользовательскую инициализацию
-					ClearLists();  
+//					ClearLists();  
 					if (!(Initialized = procUserInit()))
 						Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
 				}
 				break;
 			case STATE_UPDATE_FUNC:
-				procUpdateFunc = (Callback) value;
+				procUpdateFunc = (UpdateProc) value;
 				break;
 			case STATE_RENDER_FUNC:
 				procRenderFunc = (Callback) value;
@@ -387,7 +387,7 @@ bool CEngine::Run()
 				gEndFrame();	
 				UpdateManager.UpdateObjects();
 				if (procUpdateFunc != NULL)
-					procUpdateFunc();
+					procUpdateFunc(dt);
 			}
 		}
 		else
@@ -458,30 +458,29 @@ int CEngine::CfgGetInt( char* ParamName )
 
 bool CEngine::ClearLists()
 {
-	CObject *data = (RenderManager.Next());
-	while (data)
-	{
-		if (data)
-		{
-			delete data;
-			//RenderManager.current->data = NULL;
-		}
-		
-		data = (RenderManager.Next());
-	}	
-	data = (UpdateManager.Next());
-	while (data)
-	{
-		if (data)
-		{
-			//delete data;
-			//UpdateManager.current.data = NULL;
-		}
-			
-		data = (UpdateManager.Next());
-	}	
-	RenderManager.Clear();
-	UpdateManager.Clear();
+// 	CObject *data = (RenderManager.Next());
+// 	while (data)
+// 	{
+// 		if (data)
+// 		{
+// 			SAFE_DELETE(data);
+// 		}
+// 		
+// 		data = (RenderManager.Next());
+// 	}	
+// 	data = (UpdateManager.Next());
+// 	while (data)
+// 	{
+// 		if (data)
+// 		{
+// 			//delete data;
+// 			//UpdateManager.current.data = NULL;
+// 		}
+// 			
+// 		data = (UpdateManager.Next());
+// 	}	
+// 	RenderManager.Clear();
+// 	UpdateManager.Clear();
 
 	return true;
 }
@@ -502,14 +501,14 @@ bool CUpdateManager::UpdateObjects()
 {
 	Reset();
 	CEngine *engine = CEngine::Instance();
-	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
-	while (data)
+	CUpdateObject *data = NULL;//dynamic_cast<CUpdateObject*>(Next());
+	while (Enum((CObject*&)data))
 	{
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
 		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
-		data = dynamic_cast<CUpdateObject*>(Next());
+//		data = dynamic_cast<CUpdateObject*>(Next());
 	}
 	engine->FreeInst();
 	return true;

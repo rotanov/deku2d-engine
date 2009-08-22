@@ -30,6 +30,7 @@
 	test = "data\test.df"
 	<Textures>
 		1ball = "data\Textures\1ball.bmp"
+		2d2g5z7 = "data\Textures\2d2g5z7.png"
 		2jb1def = "data\Textures\2jb1def.png"
 		bat2_scetch_col2 = "data\Textures\bat2_scetch_col2.bmp"
 		bg1 = "data\Textures\bg1.png"

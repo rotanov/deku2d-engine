@@ -139,10 +139,10 @@ bool CTankManager::Render()
 bool CTankManager::Update(scalar dt)
 {
 	CTank* T1 = NULL, *T2 = NULL;
-	if (first && first->data)
-		T1 = dynamic_cast<CTank*>(first->data);
-	if (first && first->next && first->next->data)
-		T2 = dynamic_cast<CTank*>(first->next->data);
+// 	if (first && first->Data)
+// 		T1 = dynamic_cast<CTank*>(first->GetData());
+// 	if (first && first->next && first->next->GetData())
+// 		T2 = dynamic_cast<CTank*>(first->next->GetData());
 // 	if (CAABB(T1->Position.x, T1->Position.y, T1->Position.x + 32, T1->Position.y + 32).Intersect(CAABB(T2->Position.x, T2->Position.y, T2->Position.x + 32, T2->Position.y + 32)))
 // 	{
 // 		Log("A", "Intersectuion");

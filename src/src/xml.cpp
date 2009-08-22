@@ -29,7 +29,7 @@ _XMLNode::_XMLNode()
 ------------------------------------------------
 *	Returns pointer if success, NULL if failed.
 */
-_XMLNode *_XMLNode::Get(PCHAR Str)
+_XMLNode *_XMLNode::Get(pchar Str)
 {
 	if (Str==NULL){
 		Log("ERROR", "Cannot get XML node for because string pointer has NULL value", Str);

@@ -3,7 +3,7 @@
 //GUI scheme or may be it is "skin"
 CGUIScheme				*GUIScheme=NULL;
 bool					szBind=true;
-CObjectList				Objects, Forms;
+CList				Objects, Forms;
 int						_mx, _my;
 bool					GUICreated=false;
 bool					_Mbt[10];
@@ -704,7 +704,7 @@ void CControl::Next()
 {
 	Items.Sort(FormSort);
 	CObject *tmp;
-	bool hitfocus = Items.GetCount()==0;
+	bool hitfocus = Items.GetObjectsCount()==0;
 	for (int i = 0; i < 2; i++)
 	{
 		Items.Reset();

@@ -46,19 +46,14 @@ using namespace std;
 #define __INLINE inline
 #endif
 
-// Отладка, вся хуйня... При сборке дебаг конфигурации проекта оно заранее где-то там дефайнится, так что это для релиза, ручное управление так сказать.
+// Отладка. При сборке дебаг конфигурации проекта оно заранее где-то там дефайнится, так что это для релиза, ручное управление так сказать.
 // А вообще это слишком большой комментарий для одной, такой короткой и самоочевидно строчки, мне следует избегать написания таких комментарие в будущем.
 //#define _DEBUG
 
 // Будут ли выскакивать MessageBoxы под виндой в случае критических ошибок или нет. #undef если чо
+#ifdef WIN32
 #define CRITICAL_ERRORS_MESSAGE_BOXES
-
-__INLINE void SAFE_DELETE(void* obj)
-{
-	if (obj)
-		delete obj;
-	obj = NULL;
-};
+#endif WIN32
 
 #define CFILE_READ				0x01
 #define CFILE_WRITE				0x02
@@ -66,7 +61,7 @@ __INLINE void SAFE_DELETE(void* obj)
 
 typedef unsigned char		byte;
 typedef byte*				pbyte;
-typedef char*				PCHAR;
+typedef char*				pchar;
 typedef unsigned long       DWORD;
 typedef int                 BOOL;
 typedef unsigned char       BYTE;
@@ -85,6 +80,7 @@ typedef bool (*DirectoryWalkFunc)(char*, int);
 #endif WIN32
 
 typedef bool (*Callback)();
+typedef bool (*UpdateProc)(scalar);
 typedef bool (*EventFunc)(SDL_Event&);
 
 #define KEY_PRESSED		0x00
@@ -104,37 +100,30 @@ typedef bool (*EventFunc)(SDL_Event&);
 #define T_LEFT_MASK		0x0f
 #define T_RIGHT_MASK	0xf0
 
-/**
-*	Суть синглотона в том, что в памяти всегда присутствует только один экзмепляр класса.
-*	Этот класс реально нигде не используется и лежит здесь, чтобы не забыть как делать синглтон.
-*/ 
-
-class CPSingleTone
+__INLINE void SAFE_DELETE(void* obj)
 {
-public:
-	static CPSingleTone* Instance();
-	void FreeInst();
-protected:
-	CPSingleTone();
-	~CPSingleTone();
-	static CPSingleTone * _instance;
-	static int _refcount;
+	if (obj)
+		delete obj;
+	obj = NULL;
 };
 
 /**
-*	CObject - самый базовый класс. Всё наследовать от него.
+*	CObject - базовый класс. Всё наследовать от него.
 */
-
-
 
 class CObject
 {
 public:
-	unsigned int type, id;	// type - флаги свойств объекта. id - идентификационный номер объекта. Пока не используется. TODO!
-	string name;			// name - имя объекта. Удобно обращаться к объектам по именам. И в лог писать удобно.
+	unsigned int	type;	// type - флаги свойств объекта. 
+	uint			id;
+	string			name;
 	virtual ~CObject(){};
 	CObject();
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void IncListRefCount();
+	void DecListRefCount();
+private:
+	int ListRefCount;
 };
 
 /**
@@ -145,37 +134,25 @@ public:
 *	И четвёртый параметр - ASCII код.
 */
 typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);
-// 1й и 2й параметры - х и у соответственно
-// кстати довольнo бесполезная штука в отличие от той, что выше. Неудобно, я считаю.
+/** 
+*	1й и 2й параметры - х и у соответственно
+*	кстати довольнo бесполезная штука в отличие от той, что выше. Неудобно, я считаю.
+*/
 typedef bool (*MouseInputFunc)(scalar, scalar); 
-
-
-class CUpdateObject : public virtual CObject
-{
-public:
-	CUpdateObject()
-	{
-		type |= T_UPDATABLE;
-		name += "CUdateObject ";
-		id = 0;
-	}
-	virtual bool Update(float dt) = 0;
-};
-
-typedef CObject* (*CreateFunc)();
 
 /**
 *	CNodeObject - это узел списка.
 */
 
-class CNodeObject
+class CListNode
 {
 public:
-	CObject *data;
-	CNodeObject *next, *prev;
-	CNodeObject();
+	CListNode *next, *prev;
+	CListNode();
 	CObject* GetData();
-	void SetData(CObject *object);
+	void SetData(CObject *AData);
+private:
+	CObject *Data;					// Содержимое узла.
 };
 
 /**
@@ -193,34 +170,39 @@ typedef bool (*ObjCall)(CObject*);
 *	CObjectList - список объектов. Двусвязный.
 */
 
-class CObjectList : public virtual CObject
+class CList : public virtual CObject
 {
-private:
-	CNodeObject* GetNodeObject(string objectname);			// указатель на нодобжект по имени
-	void SwapObjs(CNodeObject *obj1, CNodeObject *obj2);	// Скорей всего ф-я меняет в списке местами 2 объекта. 
-protected:
-	CNodeObject *first, *last, *current;					// указатели на соответсвенно первый, последний и текущий объект в списке.
-	int	count;												// кол-во эл-тов
 public:
-	CObjectList();
-	~CObjectList();
-	int	GetCount();											// кол-во эл-тов
-	CObject* Next();										// current переместить на следующий элемент
-	bool Enum(CObject* &result);							// адрес текущего элемента с переводом указателя на следующий
-															// короче вначале указывает на один объект, вызвали енум, она вернула содержимое(адрес) в результ, и сдвинула указатель на следующий
-	void Reset();											// скидывает текущий указатель(помоему current) на первый эл-т
-	void Clear();											// очищает список НЕ удаляя элементы...
-	bool Call(ObjCall callproc);							// для всех объектов списька вызвать callproc
-	void Sort(ObjCompCall comp);							// Сортировка. В парметр принимает ф-ю сравнения 2х объектов. Пока квадратичная.
-	virtual bool AddObject(CObject *object);						// Добавить объект в конец списка.
-	bool DelObject(string objectname);						// удалить объект с именем objectname
-	bool DelObj(int ind);									// удалить объект рукоодствуясь непонятнвым параметром 
-	CObject* GetObjectByName(string objectname);					// получить указатель на объект по имени
-	CNodeObject* GetObjectNodeByPointer(const CObject* AObject) const;	// Тут мы хотим получить указатель на узел, содержащий объект, зная адрес собственно объекта. Линейный перебор.
-	void DumpToLog();
+					CList();
+					~CList();
+	bool			AddObject(CObject *AObject);
+	bool			DelObject(CObject *AObject);
+	bool			DelObject(char *AObjectName);
+	bool			DelObject(int AId);			
+	void			Reset();
+	bool			Enum(CObject* &result);
+	void			Clear();
+	CObject*		GetObjectByName(const char* AObjectName);					
+	CObject*		GetObjectById(int AId);
+	CListNode*		GetListNodeByPointerToObject(const CObject* AObject);
+	CListNode*		GetListNodeByObjectName(const char* AObjectName);
+	CListNode*		GetListNodeByObjectId(int AId);	
+	int				GetObjectsCount();
+	CListNode*		GetFirst();
+	CListNode*		GetLast();																	
+	bool			Call(ObjCall callproc);							
+	void			Sort(ObjCompCall comp);							
+	void			DumpToLog();
+private:
+	CListNode	*first;					
+	CListNode	*last;					
+	CListNode	*current;					
+	int			NodeCount;
+	void			DelNode(CListNode* AListNode);
+	void			SwapNodes(CListNode *Node0, CListNode *Node1);
 };
 
-extern CObjectList CObjectManager;
+extern CList CObjectManager;
 
 /**
 *	Стэк объектов.
@@ -231,28 +213,37 @@ const int MAX_STACK_ELEMENTS_COUNT = 16;
 class CObjectStack : public CObject
 {
 public:
-	CObjectStack() : last(-1){}
-	bool Push(CObject* AObject)
-	{
-		if (++last >= MAX_STACK_ELEMENTS_COUNT)
-			return false;
-		Objects[last] = AObject;
-		return true;
-	}
-	CObject* Pop()
-	{
-		if (last >= 0)
-			return Objects[last--];
-		return NULL;
-	}
-	bool Empty()
-	{
-		return last == -1;
-	}
+	CObjectStack();
+	bool Push(CObject* AObject);
+	CObject* Pop();
+	bool Empty();
 private:
 	CObject *Objects[MAX_STACK_ELEMENTS_COUNT];
 	int last;
 };
+
+class CUpdateObject : public virtual CObject
+{
+public:
+	CUpdateObject();
+	virtual bool Update(float dt) = 0;
+};
+
+typedef CObject* (*CreateFunc)();
+
+
+/**
+*	CUpdateManager - менеджер объектов, который следует обновлять. Такие дела.
+*	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
+*/
+
+class CUpdateManager : public CList
+{
+public:
+	CUpdateManager();
+	bool UpdateObjects();
+};
+
 
 /**
 *	Все загружаемые из файла объекты следует наследовать от
@@ -264,44 +255,18 @@ class CBaseResource
 public:
 	bool loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
 	string filename;	// Полный^W хоть-какой-нибуть путь к файлу.
-	virtual bool LoadFromFile()
-	{
-		return false;
-	};
-	virtual bool SaveToFile()
-	{
-		return false;
-	};
-	bool CheckLoad()
-	{
-		return loaded = !loaded?LoadFromFile():true;
-	}
-	CBaseResource():loaded(false), filename(""){}
+	virtual bool LoadFromFile();;
+	virtual bool SaveToFile();;
+	bool CheckLoad();
+	CBaseResource();
 };
 
 class CResource : public CBaseResource, virtual public CObject
 {
 public:
-	CResource()
-	{
-		name += "CResource";
-	}
+	CResource();
 };
 
-/**
-*	CUpdateManager - менеджер объектов, который следует обновлять. Такие дела.
-*	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
-*/
-
-class CUpdateManager : public CObjectList
-{
-public:
-	CUpdateManager()
-	{
-		name += "CUpdateManager";
-	}
-	bool UpdateObjects();
-};
 
 struct CRectub
 {
@@ -378,17 +343,8 @@ public:
 	int MainDirL;
 	WIN32_FIND_DATA fdata;
 	DirectoryWalkFunc UserExploreFunc;
-	CDirectoryWalk()
-	{
-		MainDirL = 0;
-		MainDir = new char[MAX_PATH];
-		CurrDir = new char[MAX_PATH];
-	}
-	~CDirectoryWalk()
-	{
-		delete [] MainDir;
-		delete [] CurrDir;
-	}
+	CDirectoryWalk();
+	~CDirectoryWalk();
 	
 	bool List();
 	void ExploreDir(HANDLE hfile);
@@ -412,6 +368,24 @@ void DelInterval(string *src, const int s0, const int s1);
 void MemChp1();
 void MemChp2();
 void MemCheck();
+
+/**
+*	Суть синглотона в том, что в памяти всегда присутствует только один экзмепляр класса.
+*	Этот класс реально нигде не используется и лежит здесь, чтобы не забыть как делать синглтон.
+*/ 
+
+class CPSingleTone
+{
+public:
+	static CPSingleTone* Instance();
+	void FreeInst();
+protected:
+	CPSingleTone();
+	~CPSingleTone();
+	static CPSingleTone * _instance;
+	static int _refcount;
+};
+
 
 
 #endif CORE_UTILS_H	

@@ -187,11 +187,11 @@ extern DECLSPEC void SDLCALL SDL_free(void *mem);
 # endif
 #endif
 #ifdef HAVE_ALLOCA
-#define SDL_stack_alloc(type, count)    (type*)alloca(sizeof(type)*(count))
-#define SDL_stack_free(data)
+#define SDL_stack_alloc(type, NodeCount)    (type*)alloca(sizeof(type)*(NodeCount))
+#define SDL_stack_free(Data)
 #else
-#define SDL_stack_alloc(type, count)    (type*)SDL_malloc(sizeof(type)*(count))
-#define SDL_stack_free(data)            SDL_free(data)
+#define SDL_stack_alloc(type, NodeCount)    (type*)SDL_malloc(sizeof(type)*(NodeCount))
+#define SDL_stack_free(Data)            SDL_free(Data)
 #endif
 
 #ifdef HAVE_GETENV

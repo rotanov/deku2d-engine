@@ -71,7 +71,7 @@ struct CMapCellInfo
 * Cells: ^>
 */
 
-class CLevelMap : public CResource, public CRenderObject, public CUpdateObject, public CObjectList
+class CLevelMap : public CResource, public CRenderObject, public CUpdateObject, public CList
 {
 public:
 	int				numCellsHor, numCellsVer;

@@ -87,7 +87,7 @@ public:
 	CEnemy *SpawnEnemy();
 protected:
 	CParticleSystem *ps;
-	CObjectList enems;
+	CList enems;
 	CFactory *factory;
 	bool spawned;
 	DWORD lt;
@@ -125,15 +125,15 @@ public:
 		snowballs->name = "snowballs";
 		snowballs->Init();
 		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("snowb_br")))->Load();
-		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("snowb_br")))->GetTexID();
+//		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("snowb_br")))->GetTexID();
 
-		snowballs->info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-		snowballs->info.ec = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+		snowballs->Info.sc = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+		snowballs->Info.ec = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 		snowballs->visible = true;	
-		snowballs->info.plife = -1;
-		snowballs->info.emission = 0;
-		snowballs->info.startsize = 32;
-		snowballs->info.sizevar = 0;
+		snowballs->Info.plife = -1;
+		snowballs->Info.emission = 0;
+		snowballs->Info.startsize = 32;
+		snowballs->Info.sizevar = 0;
 
 		snowballs->SetUserUpdate(UpdateSnowballs);
 

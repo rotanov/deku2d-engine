@@ -175,18 +175,18 @@ void GlobalLuaState::innerFunction1()
 	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 	ps->name = "psysaaaa";
 	ps->Init();
-	ps->info.sc = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
-	ps->info.ec = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);
+	ps->Info.sc = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
+	ps->Info.ec = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);
 	ps->visible = true;	
 	pnts2[0] = Vector2(0, 480);
 	pnts2[1] = Vector2(640, 480);
-	ps->info.plife = 3;
-	ps->info.emission = 500;///*debug 1 */ 3000;
-	ps->info.startsize = 32;
+	ps->Info.plife = 3;
+	ps->Info.emission = 500;///*debug 1 */ 3000;
+	ps->Info.startsize = 32;
 	// debug //
-	ps->info.sizevar = 8;
-	ps->info.isSnow = true; // костыль
-	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
+	ps->Info.sizevar = 8;
+	
+//	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
 	ps->SetGeometry(pnts2, 2);
 
 
