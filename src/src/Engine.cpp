@@ -501,14 +501,14 @@ bool CUpdateManager::UpdateObjects()
 {
 	Reset();
 	CEngine *engine = CEngine::Instance();
-	CUpdateObject *data = NULL;//dynamic_cast<CUpdateObject*>(Next());
-	while (Enum((CObject*&)data))
+	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
+	while (data)
 	{
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
 		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
-//		data = dynamic_cast<CUpdateObject*>(Next());
+		data = dynamic_cast<CUpdateObject*>(Next());
 	}
 	engine->FreeInst();
 	return true;

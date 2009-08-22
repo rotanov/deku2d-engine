@@ -399,6 +399,13 @@ bool CList::Enum(CObject* &result)
 	return result;
 }
 
+CObject* CList::Next()
+{
+	if (!current)
+		return (current = first)->GetData();
+	return (current = current->next)?current->GetData():NULL;
+}
+
 void CList::Clear()
 {
 	while (first != NULL)

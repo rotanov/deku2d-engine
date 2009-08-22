@@ -904,13 +904,13 @@ CRenderManager::~CRenderManager()
 bool CRenderManager::DrawObjects()
 {
 	Reset();
-	CRenderObject *data = NULL;//dynamic_cast<CRenderObject*>(Next());
+	CRenderObject *data = dynamic_cast<CRenderObject*>(Next());
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
 	Camera.Update();
 	
 	
-	while (Enum((CObject*&)data))
+	while (data)
 	{
 		if (data->visible)
 		{
@@ -919,13 +919,13 @@ bool CRenderManager::DrawObjects()
 			glTranslatef(data->p.x, data->p.y, data->depth);
 			data->Render();
 		}
-		//data = dynamic_cast<CRenderObject*>(Next());
+		data = dynamic_cast<CRenderObject*>(Next());
 	}
 	glPopMatrix();
 
-	#ifdef _DEBUG
-	//Camera.DrawDebug();
-	#endif 
+#ifdef _DEBUG
+//	Camera.DrawDebug();
+#endif 
 
 	return true;
 }

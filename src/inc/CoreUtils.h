@@ -181,6 +181,7 @@ public:
 	bool			DelObject(int AId);			
 	void			Reset();
 	bool			Enum(CObject* &result);
+	CObject*		Next();
 	void			Clear();
 	CObject*		GetObjectByName(const char* AObjectName);					
 	CObject*		GetObjectById(int AId);
