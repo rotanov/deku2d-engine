@@ -16,7 +16,6 @@ struct CTileSetInfo
 class CTileSet : public CResource
 {
 public:
-	char *TextureName;
 	CTexture *Texture;
 	CTileSetInfo Info;
 	CAABB *BBox;

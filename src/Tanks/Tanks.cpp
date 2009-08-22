@@ -46,16 +46,54 @@ void CTank::SetPlayerControls(SDLKey ALeft, SDLKey ARight, SDLKey AUp, SDLKey AD
 
 bool CTank::Update(scalar dt)
 {
-	CAABB AABB;
+	CAABB AABB = CAABB(0, 0, 32, 32);
 	if (isWalking)
 		Position += Direction*Velocity;
+	AABB.Offset(Position.x, Position.y);
+	Vector2 BottomLeft = AABB.vMin, TopRight = AABB.vMax, BottomRight = Vector2(AABB.x1, AABB.y0), TopLeft = Vector2(AABB.x0, AABB.y1);
+	CAABB Pot1, Pot2;
 
-		//AABB = Map->IsFPTWA(SelDir(Direction), Position);
+	switch(SelDir(Direction))
+	{
+	case akLeft:
+		Pot1 = Map->GetCellAABB(TopLeft);
+		Pot2 = Map->GetCellAABB(BottomLeft);
+		if (Pot1.Intersect(AABB))
+			Position.x = Pot1.x1;
+		if (Pot2.Intersect(AABB))
+			Position.x = Pot2.x1;
+		break;
+	case akRight:
+		Pot1 = Map->GetCellAABB(TopRight);
+		Pot2 = Map->GetCellAABB(BottomRight);
+		if (Pot1.Intersect(AABB))
+			Position.x = Pot1.x0 - 32;
+		if (Pot2.Intersect(AABB))
+			Position.x = Pot2.x0 - 32;
+		break;
+	case akUp:
+		Pot1 = Map->GetCellAABB(TopLeft);
+		Pot2 = Map->GetCellAABB(TopRight);
+		if (Pot1.Intersect(AABB))
+			Position.y = Pot1.y0 - 32;
+		if (Pot2.Intersect(AABB))
+			Position.y = Pot2.y0 - 32;
+		break;
+	case akDown:
+		Pot1 = Map->GetCellAABB(BottomLeft);
+		Pot2 = Map->GetCellAABB(BottomRight);
+		if (Pot1.Intersect(AABB))
+			Position.y = Pot1.y1;
+		if (Pot2.Intersect(AABB))
+			Position.y = Pot2.y1;
+		break;
+	}
 
-	if (States[ACTION_FIRE])
+
+	if (States[akFire])
 	{
 		// Kill it with fire here
-		States[ACTION_FIRE] = false;
+		States[akFire] = false;
 	}
 	return true;
 }
@@ -206,8 +244,11 @@ bool CTankMap::Update(scalar dt)
 
 CAABB CTankMap::GetCellAABB(Vector2& V)
 {
-	return CAABB(      (((int)V.x/(int)CellSize)) * CellSize, (((int)V.y/(int)CellSize)) * CellSize, 
-		CellSize, CellSize);
+	if (Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize] != csFree)
+		return CAABB(      (((int)V.x/(int)CellSize)) * CellSize, (((int)V.y/(int)CellSize)) * CellSize, 
+			CellSize, CellSize);
+	else 
+		return CAABB(-1, -1, -1, -1);
 }
 
 scalar CTankMap::IsFPTWA(int ADir, Vector2 Position)

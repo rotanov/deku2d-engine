@@ -7,26 +7,21 @@ class CTank;
 class CTankMap;
 class CTankManager;
 class CTankAI;
-
-const int ACTION_LEFT	= 0;
-const int ACTION_RIGHT	= 1;
-const int ACTION_UP		= 2;
-const int ACTION_DOWN	= 3;
-const int ACTION_FIRE	= 4;
-const int ACTION_ITEM	= 5;
+enum EActionKind {akLeft=0, akRight=1, akUp=2, akDown=3, akFire=4, akItem=5};
 
 const SDLKey P1_LEFT	= SDLK_LEFT;
 const SDLKey P1_RIGHT	= SDLK_RIGHT;
 const SDLKey P1_UP		= SDLK_UP;
 const SDLKey P1_DOWN	= SDLK_DOWN;
 const SDLKey P1_FIRE	= SDLK_LCTRL;
+const SDLKey P1_ITEM	= SDLK_LSHIFT;
 
 const SDLKey P2_LEFT	= SDLK_a;
 const SDLKey P2_RIGHT	= SDLK_d;
 const SDLKey P2_UP		= SDLK_w;
 const SDLKey P2_DOWN	= SDLK_s;
 const SDLKey P2_FIRE	= SDLK_f;
-
+const SDLKey P2_ITEM	= SDLK_c;
 
 const Vector2 TANK_DIR_LEFT		= Vector2(-1.0f, 0.0f);
 const Vector2 TANK_DIR_RIGHT	= Vector2(1.0f, 0.0f);
@@ -42,20 +37,20 @@ const scalar DEFAULT_TANK_VELOCITY = 5;
 __INLINE int SelDir(Vector2& V)
 {
 	if (V == TANK_DIR_LEFT)
-		return  ACTION_LEFT;
+		return  akLeft;
 	if (V == TANK_DIR_RIGHT)
-		return  ACTION_RIGHT;
+		return  akRight;
 	if (V == TANK_DIR_UP)
-		return  ACTION_UP;
+		return  akUp;
 	if (V == TANK_DIR_DOWN)
-		return  ACTION_DOWN;
+		return  akDown;
 }
 
 const int MAP_SIZE_X = 20;
 const int MAP_SIZE_Y = 15;
 const int DEFAULT_CELL_SIZE = 32;
 
-enum TankMapCellState {csFree=0, csTank=1, csBlock=2, csDestr=3};
+enum TankMapCellState {csFree=0, csBlock=1, csDestr=2};
 
 #define DEFAULT_BLOCK_TEXTURE "Block"
 #define DEFAULT_DESTR_TEXTURE "Destr"
@@ -140,10 +135,15 @@ public:
 				if (i==0 || i == MAP_SIZE_X-1 || j==0 || j== MAP_SIZE_Y-1)
 					Cells[j][i] = csBlock;
 				else
-				{
-					Cells[j][i] = csFree;
-					if (j%2 == 0 && i%2 == 0)
-						Cells[j][i] = TankMapCellState(Random_Int(0, 3));
+				{	
+					int prob = TankMapCellState(Random_Int(0, 10));
+					if (prob == 0)
+						Cells[j][i] = csBlock;
+					else
+					if (prob == 1)
+						Cells[j][i] = csDestr;
+					else
+						Cells[j][i] = csFree;
 				}
 			}
 	}
@@ -173,6 +173,7 @@ public:
 		Map = new CTankMap(this);
 		AddPlayer();	// First
 		AddPlayer();	// Second
+		dynamic_cast<CTank*>(GetLast()->GetData())->Velocity = 1;
 	}
 
 	bool Render();

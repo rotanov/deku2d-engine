@@ -15,11 +15,10 @@ bool CTileSet::LoadFromFile()
 		return false;
 	}
 
+	char * TextureName = NULL;
 	file.ReadLine(TextureName);
-
-	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
-	Texture->GetTexID();
-
+	//Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
+	Texture = CEngine::Instance()->TextureManager->GetTextureByName(TextureName);
 
 	file.Read(&Info, sizeof(Info));
 	if (BBox != NULL)
@@ -65,7 +64,7 @@ bool CTileSet::SaveToFile()
 		return false;
 	}
 
-	file.Write(TextureName, strlen(TextureName)+1);
+	file.Write(Texture->name.c_str(), Texture->name.length()+1);
 	file.Write(&Info, sizeof(Info));
 	file.Write(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
 
@@ -75,7 +74,6 @@ bool CTileSet::SaveToFile()
 CTileSet::CTileSet()
 {
 	BBox = NULL;
-	TextureName = NULL;
 	Texture = NULL;
 	memset(&Info, 0, sizeof(Info));
 }

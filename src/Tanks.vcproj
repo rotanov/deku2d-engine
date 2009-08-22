@@ -199,10 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\game.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\GameUtils.cpp"
 				>
 			</File>
@@ -252,10 +248,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\event.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\Game.h"
 				>
 			</File>
 			<File

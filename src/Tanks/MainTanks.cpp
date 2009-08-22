@@ -145,6 +145,28 @@ bool Init()
 
 	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = true;
 	GuiManager.SetFocus(MenuRoot);
+
+
+
+// 	CTileSet TanksTiles;
+// 	TanksTiles.Info.HorNumTiles = 4;
+// 	TanksTiles.Info.VerNumTiles = 2;
+// 	TanksTiles.Info.TileWidth = TanksTiles.Info.TileHeight = 32;
+// 	TanksTiles.Texture = Ninja->TextureManager->GetTextureByName("TanksTiles");
+// 	TanksTiles.BBox = new CAABB [8];
+// 	TanksTiles.BBox[0] = CAABB(14, 46, 4, 4);
+// 	TanksTiles.BBox[1] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.BBox[2] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.BBox[3] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.BBox[4] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.BBox[5] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.BBox[6] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.BBox[7] = CAABB(0, 0, 32, 32);
+// 	TanksTiles.filename = "Data/Tilesets/TanksTileset.tls";
+// 	TanksTiles.SaveToFile();
+
+	//CTileSet * Tileset = Ninja->ResourceManager.;
+
 	
 	return true;
 }

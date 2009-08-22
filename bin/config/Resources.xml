@@ -33,9 +33,12 @@
 		Particle = "data\Textures\Particle.bmp"
 		PrtOside = "data\Textures\PrtOside.bmp"
 		SnowyTileSet = "data\Textures\SnowyTileSet.bmp"
-		Tank3 = "data\Textures\Tank3.bmp"
+		Tank3 = "data\Textures\Tank3.png"
+		TanksTiles = "data\Textures\TanksTiles.bmp"
+		TanksTiles = "data\Textures\TanksTiles.png"
 	</Textures>
 	<Tilesets>
+		TanksTileset = "data\Tilesets\TanksTileset.tls"
 		TileSet01 = "data\Tilesets\TileSet01.tls"
 		TileSet02-Snow01 = "data\Tilesets\TileSet02-Snow01.tls"
 		TileSet02 = "data\Tilesets\TileSet02.tls"
