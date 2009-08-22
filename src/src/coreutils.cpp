@@ -359,7 +359,7 @@ bool CList::DelObject(CObject *AObject)
 	return true;
 }
 
-bool CList::DelObject(char *AObjectName)
+bool CList::DelObject(const char *AObjectName)
 {
 	CListNode *ListNode = GetListNodeByObjectName(AObjectName);
 	if (!ListNode)

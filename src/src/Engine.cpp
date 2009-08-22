@@ -396,7 +396,7 @@ bool CEngine::Run()
 		}
 	}	
 #ifdef _DEBUG
-	CObjectManager.DumpToLog();
+	//CObjectManager.DumpToLog();
 #endif
 	Suicide();
 	SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.

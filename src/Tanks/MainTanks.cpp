@@ -30,10 +30,11 @@ public:
 	CTitleScreen()
 	{
 		Ninja->RenderManager.AddObject(this);
+		name = "Title screen tanks";
 	}
 	~CTitleScreen()
 	{
-		//Ninja->RenderManager.DelObject(name.c_str());
+		
 		StartGame();
 	}
 	bool Render()
@@ -85,6 +86,8 @@ bool Init()
 
 	GuiManager.visible = false;
 	TitleScreen = new CTitleScreen;
+	Ninja->RenderManager.DelObject("Title screen tanks");
+	SAFE_DELETE(TitleScreen);
 	return true;
 }
 
@@ -94,7 +97,8 @@ bool UpdateTitle(scalar dt)
 	FadeClr -= RGBAf(0.01, 0.01, 0.01, 0.01);
 	if (TimeOut >= TimeLimit)
 	{
-//		SAFE_DELETE(TitleScreen);
+		Ninja->RenderManager.DelObject("Title screen tanks");
+		SAFE_DELETE(TitleScreen);
 	}
 	FontEffect->Update(dt);
 	return true;
@@ -104,7 +108,7 @@ int	main(int argc, char *argv[])
 {
 	Ninja->SetState(STATE_CONFIG_NAME, "Tanks.xml");
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(STATE_UPDATE_FUNC, &UpdateTitle);	
+	//Ninja->SetState(STATE_UPDATE_FUNC, &UpdateTitle);	
 	Ninja->Run();
 	Ninja->FreeInst();
 	return 0x1;

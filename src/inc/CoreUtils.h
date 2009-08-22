@@ -177,7 +177,7 @@ public:
 					~CList();
 	bool			AddObject(CObject *AObject);
 	bool			DelObject(CObject *AObject);
-	bool			DelObject(char *AObjectName);
+	bool			DelObject(const char *AObjectName);
 	bool			DelObject(int AId);			
 	void			Reset();
 	bool			Enum(CObject* &result);
