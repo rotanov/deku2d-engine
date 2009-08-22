@@ -40,7 +40,7 @@ public:
 	{
 		struct
 		{
-			Vector2				p;
+			Vector2				Position;
 			float				depth;
 		};
 		struct  
@@ -604,6 +604,20 @@ public:
 
 	CGUIObjectMini();
 };
+
+class CMenuItem : public CGUIObjectMini, public CList
+{
+public:
+	CMenuItem* FocusedOnItem;
+	CListNode* FocusedOnListNode;
+	Callback	CallProc;
+	CMenuItem();
+	bool Render();
+	bool Update(scalar dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool AddObject(CObject *AObject);
+};
+
 enum ButtonState {bsInside, bsOutside, bsLost, bsHovered, bsClicked, bsReleased};
 
 class CEditMini : public CGUIObjectMini
@@ -639,6 +653,7 @@ public:
 	bool Update(scalar dt);
 	bool Render();
 	void SetFocusedNodeTo(CListNode* AFocusedNode);
+	void SetFocus(CObject* AObject);
 private:
 	int KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
 	CListNode *FocusedOnListNode;

@@ -51,12 +51,20 @@ __INLINE int SelDir(Vector2& V)
 		return  ACTION_DOWN;
 }
 
-//enum ETankState {tsIdle, tsGoLeft, tsGoRight, tsGoUp, tsGoDown, tsFire, tsDied};
+const int MAP_SIZE_X = 20;
+const int MAP_SIZE_Y = 15;
+const int DEFAULT_CELL_SIZE = 32;
+
+enum TankMapCellState {csFree=0, csTank=1, csBlock=2, csDestr=3};
+
+#define DEFAULT_BLOCK_TEXTURE "Block"
+#define DEFAULT_DESTR_TEXTURE "Destr"
+#define DEFAULT_FREE_TEXTURE "Free"
+
 
 class CTank : public CRenderObject, public CUpdateObject
 {
 public:
-	Vector2 Position;
 	scalar Health;
 	scalar Velocity;
 	scalar Damage;
@@ -107,21 +115,6 @@ public:
 	bool Render();
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 };
-
-const int MAP_SIZE_X = 20;
-const int MAP_SIZE_Y = 15;
-const int DEFAULT_CELL_SIZE = 64;
-
-enum TankMapCellState {csFree=0, csTank=1, csBlock=2, csDestr=3};
-
-class CMapCell
-{
-
-};
-
-#define DEFAULT_BLOCK_TEXTURE "Block"
-#define DEFAULT_DESTR_TEXTURE "Destr"
-#define DEFAULT_FREE_TEXTURE "Free"
 
 class CTankMap : public CRenderObject, public CUpdateObject
 {

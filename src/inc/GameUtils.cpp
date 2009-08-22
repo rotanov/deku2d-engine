@@ -17,7 +17,7 @@ bool CTileSet::LoadFromFile()
 
 	file.ReadLine(TextureName);
 
-	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObjectByName(TextureName));
+	Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
 	Texture->GetTexID();
 
 
@@ -170,7 +170,7 @@ bool CLevelMap::LoadFromFile()
 	File.ReadLine(TileSetName);
 
 	TileSet = NULL;
-	TileSet = dynamic_cast<CTileSet*>(Factory->GetObjectByName(TileSetName));
+	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
 	if (TileSet == NULL)
 	{
 		Log("Error", "Tileset %s for map %s not found in resources", this->name, TileSetName);
@@ -244,7 +244,7 @@ bool CCollisionInfo::LoadFromFile()
 
 	file.ReadLine(TileSetName);
 	CFactory *Factory = CFactory::Instance();
-	TileSet = dynamic_cast<CTileSet*>(Factory->GetObjectByName(TileSetName));
+	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
 	Factory->FreeInst();
 	if (TileSet == NULL)
 		return false;

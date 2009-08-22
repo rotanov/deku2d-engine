@@ -9,7 +9,7 @@ void CRenderObject::SetColor( byte _r, byte _g, byte _b, byte _a )
 	color.a = _a;
 }
 
-CRenderObject::CRenderObject() : p(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
+CRenderObject::CRenderObject() : Position(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
 {
 	name += "CRenderObject ";
 	type |= T_RENDERABLE;
@@ -916,7 +916,7 @@ bool CRenderManager::DrawObjects()
 		{
 			glLoadIdentity();
 				Camera.gTranslate();
-			glTranslatef(data->p.x, data->p.y, data->depth);
+			glTranslatef(data->Position.x, data->Position.y, data->depth);
 			data->Render();
 		}
 		data = dynamic_cast<CRenderObject*>(Next());
@@ -1348,7 +1348,7 @@ int CFontManager::_refcount = 0;
 CFont* CFontManager::GetFont(const char* fontname )	
 {
 	CFont *TempFont = NULL;
-	TempFont = dynamic_cast<CFont*>(GetObjectByName(fontname));
+	TempFont = dynamic_cast<CFont*>(GetObject(fontname));
 	if (TempFont)
 		TempFont->CheckLoad();
 	return TempFont;
@@ -1356,7 +1356,7 @@ CFont* CFontManager::GetFont(const char* fontname )
 
 CFont* CFontManager::GetFontEx( string fontname )
 {
-	return dynamic_cast<CFont*>(GetObjectByName(fontname.c_str()));
+	return dynamic_cast<CFont*>(GetObject(fontname.c_str()));
 }
 
 bool CFontManager::SetCurrentFont( char* fontname )
@@ -1451,7 +1451,7 @@ bool CTextureManager::AddTexture( char* filename, bool load)
 bool CTextureManager::LoadTextureByName(char *TextureName)
 {
 	CTexture *tmp = NULL;
-	tmp = dynamic_cast<CTexture*>(GetObjectByName(TextureName));
+	tmp = dynamic_cast<CTexture*>(GetObject(TextureName));
 	if (tmp == NULL)
 	{
 		Log("ERROR", "Can't load find texture with name %s", TextureName);
@@ -1479,7 +1479,7 @@ bool CTextureManager::LoadAllTextures()
 CTexture* CTextureManager::GetTextureByName( const string &TextureName )
 {
 	CTexture *TempTexture = NULL;
-	TempTexture = dynamic_cast<CTexture*>(GetObjectByName(TextureName.c_str()));
+	TempTexture = dynamic_cast<CTexture*>(GetObject(TextureName.c_str()));
 	if (TempTexture)
 		TempTexture->CheckLoad();
 	return TempTexture;
@@ -1821,7 +1821,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObjectByName("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
 	Tman->FreeInst();
 	cells->Bind();
 #endif 
@@ -1927,7 +1927,7 @@ void CPrimitiveRender::CheckTexture()
 {
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObjectByName("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
 	Tman->FreeInst();
 	cells->Bind();
 }
@@ -2159,7 +2159,7 @@ bool CButtonMini::Update(float dt)
 			if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
 			{
 				color += Dclr;
-				GuiManager.SetFocusedNodeTo(GuiManager.GetListNodeByPointerToObject(this));
+				GuiManager.SetFocusedNodeTo(GuiManager.GetListNode(this));
 				if (OnClick)
 					OnClick();
 				state = bsClicked;
@@ -2294,6 +2294,16 @@ void CGUIManagerMini::SetFocusedNodeTo(CListNode* AFocusedNode)
 		FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->GetData());
 }
 
+void CGUIManagerMini::SetFocus(CObject* AObject)
+{
+	CListNode* ListNode = GetListNode(AObject);
+	if (ListNode)
+	{
+		FocusedOnListNode = ListNode;
+		FocusedOn = dynamic_cast<CGUIObjectMini*>(FocusedOnListNode->GetData());
+	}
+}
+
 CGUIManagerMini GuiManager;
 
 bool CEditMini::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
@@ -2402,4 +2412,79 @@ bool CEditMini::Update( scalar dt )
 
 CEditMini::CEditMini() : CursorPos(0)
 {
+}
+
+CMenuItem::CMenuItem()
+{
+	CEngine::Instance()->RenderManager.AddObject(this);
+	CEngine::Instance()->UpdateManager.AddObject(this);
+	GuiManager.AddObject(this);
+	FocusedOnItem = NULL;
+	FocusedOnListNode = NULL;
+	visible = false;
+	CallProc = NULL;
+}
+
+bool CMenuItem::Render()
+{
+	Reset();
+	CMenuItem *ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
+	while (ChildMenuItem)
+	{
+		glLoadIdentity();
+		font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
+		font->scale = Vector2(1.0f, 1.0f);
+		font->Pos = ChildMenuItem->Position;
+		font->Print(ChildMenuItem->text.c_str());
+		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
+	}
+	glLoadIdentity();
+	color = COLOR_WHITE;
+	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
+	return true;
+}
+
+bool CMenuItem::Update(scalar dt)
+{
+	return true;
+}
+
+bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+{
+	if (!visible)
+		return false;
+	if (state == KEY_PRESSED)
+	{
+		switch(key)
+		{
+		case SDLK_UP:
+			FocusedOnListNode = RelativePrev(FocusedOnListNode);
+			if (FocusedOnListNode)
+				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+			break;
+		case SDLK_DOWN:
+			FocusedOnListNode = RelativeNext(FocusedOnListNode);
+			if (FocusedOnListNode)
+				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+			break;
+		case SDLK_RETURN:
+				if (FocusedOnItem->CallProc)
+					FocusedOnItem->CallProc();
+			break;
+		}
+	}
+	else
+	{
+
+	}
+	return true;
+}
+
+bool CMenuItem::AddObject(CObject *AObject)
+{
+	CList::AddObject(AObject);
+	FocusedOnListNode = GetFirst();
+	if (FocusedOnListNode)
+		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+	return true;
 }

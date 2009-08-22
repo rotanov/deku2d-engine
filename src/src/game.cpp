@@ -80,7 +80,7 @@ void UpdateSnowballs( CParticle *p, float dt )
 		p->p.y = 0;
 	}
 	CEngine *Ninja = CEngine::Instance();
-	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObjectByName("snowballs"));
+	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObject("snowballs"));
 	Ninja->FreeInst();
 
 	CAABB Gift = CAABB(274, GROUND, 260 + 51 , GROUND + 29 );
@@ -166,17 +166,17 @@ bool CHero::Update( float dt )
 	{
 		if (abs(Snow - 100.0f) > 0.001f)
 		{
-			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("psys"));
+			CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("psys"));
 			Vector2 n;
 //					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 			for (int i=0; i< ps->Info.ParticlesActive; i++)
 			{
-				n = (ps->particles[i].p - Vector2(p.x+C1, p.y+C2)).Normalized();
-				if (((ps->particles[i].p-Vector2(p.x, p.y)).Length())<= 200)
+				n = (ps->particles[i].p - Vector2(Position.x+C1, Position.y+C2)).Normalized();
+				if (((ps->particles[i].p-Vector2(Position.x, Position.y)).Length())<= 200)
 					if (DegToRad(tangle+ 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 					{
-						ps->particles[i].p += (Vector2(p.x, p.y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(p.x, p.y)).Length()*0.15f);
-						if (((ps->particles[i].p-Vector2(p.x+C1, p.y+C2)).Length())<= 35)
+						ps->particles[i].p += (Vector2(Position.x, Position.y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(Position.x, Position.y)).Length()*0.15f);
+						if (((ps->particles[i].p-Vector2(Position.x+C1, Position.y+C2)).Length())<= 35)
 						{
 							Snow += 1;
 							ps->particles[i].age = 0xffffff;
@@ -192,7 +192,7 @@ bool CHero::Update( float dt )
 			prt->v = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*500.01f;
 
 			Vector2 pos = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*32;
-			pos += Vector2(C1-16+p.x, C2-16+p.y);
+			pos += Vector2(C1-16+Position.x, C2-16+Position.y);
 
 			prt->p = pos;
 			sballlaunched = true;
@@ -205,7 +205,7 @@ bool CHero::Update( float dt )
 		tangle = - 180 - tangle;
 
 
-	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObjectByName("enemy_l"));
+	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->Factory->GetObject("enemy_l"));
 	for (int i=0; i< ps->Info.ParticlesActive; i++)
 	{
 		CAABB tmp = CAABB(ps->particles[i].p, ps->particles[i].p + Vector2(ps->particles[i].size, ps->particles[i].size));
@@ -218,8 +218,8 @@ bool CHero::Update( float dt )
 	Health= clampf(Health, 0.0f, 100.0f);
 	if (Health <= 0.001f)
 	{
-		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("giftd")))->Load();
-		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObjectByName("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("giftd")))->GetTexID();
+		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->Load();
+		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObject("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->GetTexID();
 	}
 
 
@@ -229,24 +229,24 @@ bool CHero::Update( float dt )
 	CAABB tmp  = BBox;
 
 
-	p.x += v.x*dt;
-	tmp.Offset(p.x, p.y);
+	Position.x += v.x*dt;
+	tmp.Offset(Position.x, Position.y);
 	if (tmp.Intersect(Gift))
 	{	
 		if (v.x > 0)
-			p.x = Gift.vMin.x  - 56;
+			Position.x = Gift.vMin.x  - 56;
 		else
-			p.x = Gift.vMax.x;
+			Position.x = Gift.vMax.x;
 		v.x = -v.x*0.1f;
 	}
 
 
 	tmp = BBox;
-	p.y += v.y*dt;
-	tmp.Offset(p.x, p.y);
+	Position.y += v.y*dt;
+	tmp.Offset(Position.x, Position.y);
 	if (tmp.Intersect(Gift))
 	{
-		p.y = GROUND+60;
+		Position.y = GROUND+60;
 		v.y = 0;
 		onPlane = true;
 	}
@@ -259,9 +259,9 @@ bool CHero::Update( float dt )
 		v.x *= 0.999f;
 
 	//		if(Gift.)
-	if (p.y <= GROUND)
+	if (Position.y <= GROUND)
 	{
-		p.y = GROUND;
+		Position.y = GROUND;
 		v.y = 0 ;
 		onPlane = true;
 	}

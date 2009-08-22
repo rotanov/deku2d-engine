@@ -181,7 +181,8 @@ bool CTankMap::Render()
 					FreeTexture->Bind();
 				glBegin(GL_QUADS);
 					glTexCoord2f(0.0f, 0.0f);
-					glVertex2f(i*CellSize, j*CellSize);
+					(Vector2(i, j)*CellSize).glVertex();
+					//glVertex2f(i*CellSize, j*CellSize);
 
 					glTexCoord2f(1.0f, 0.0f);
 					glVertex2f((i+1)*CellSize, j*CellSize);

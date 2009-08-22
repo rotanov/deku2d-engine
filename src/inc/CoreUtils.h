@@ -100,12 +100,18 @@ typedef bool (*EventFunc)(SDL_Event&);
 #define T_LEFT_MASK		0x0f
 #define T_RIGHT_MASK	0xf0
 
-__INLINE void SAFE_DELETE(void* obj)
+template<typename T>
+__INLINE void SAFE_DELETE(T*& a) 
 {
-	if (obj)
-		delete obj;
-	obj = NULL;
-};
+	delete a, a = NULL;
+}
+
+// Lulz!
+#define DEAD_BEEF 0xdeadbeef
+#define DEAD_FOOD 0xdeadf00d
+
+#define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
+#define COLOR_BLACK RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
 
 /**
 *	CObject - базовый класс. Всё наследовать от него.
@@ -175,32 +181,35 @@ class CList : public virtual CObject
 public:
 					CList();
 					~CList();
-	bool			AddObject(CObject *AObject);
-	bool			DelObject(CObject *AObject);
-	bool			DelObject(const char *AObjectName);
-	bool			DelObject(int AId);			
-	void			Reset();
-	bool			Enum(CObject* &result);
-	CObject*		Next();
-	void			Clear();
-	CObject*		GetObjectByName(const char* AObjectName);					
-	CObject*		GetObjectById(int AId);
-	CListNode*		GetListNodeByPointerToObject(const CObject* AObject);
-	CListNode*		GetListNodeByObjectName(const char* AObjectName);
-	CListNode*		GetListNodeByObjectId(int AId);	
-	int				GetObjectsCount();
-	CListNode*		GetFirst();
-	CListNode*		GetLast();																	
-	bool			Call(ObjCall callproc);							
-	void			Sort(ObjCompCall comp);							
-	void			DumpToLog();
+	virtual bool		AddObject(CObject *AObject);
+	bool				DelObject(CObject *AObject);
+	bool				DelObject(const char *AObjectName);
+	bool				DelObject(int AId);			
+	void				Reset();
+	bool				Enum(CObject* &result);
+	CObject*			Next();	
+	void				Clear();
+	CObject*			GetObject(const char* AObjectName);					
+	CObject*			GetObject(int AId);
+	CListNode*			GetListNode(const CObject* AObject);
+	CListNode*			GetListNode(const char* AObjectName);
+	CListNode*			GetListNode(int AId);	
+	int					GetObjectsCount();
+	CListNode*			GetFirst();
+	CListNode*			GetLast();																	
+	bool				Call(ObjCall callproc);							
+	void				Sort(ObjCompCall comp);							
+	void				DumpToLog();
 private:
-	CListNode	*first;					
-	CListNode	*last;					
-	CListNode	*current;					
-	int			NodeCount;
-	void			DelNode(CListNode* AListNode);
-	void			SwapNodes(CListNode *Node0, CListNode *Node1);
+	CListNode			*first;					
+	CListNode			*last;					
+	CListNode			*current;					
+	int					NodeCount;
+	void				DelNode(CListNode* AListNode);
+	void				SwapNodes(CListNode *Node0, CListNode *Node1);
+protected:
+	CListNode*			RelativeNext(CListNode* AListNode);
+	CListNode*			RelativePrev(CListNode* AListNode);
 };
 
 extern CList CObjectManager;
@@ -226,6 +235,7 @@ private:
 class CUpdateObject : public virtual CObject
 {
 public:
+	bool Active;
 	CUpdateObject();
 	virtual bool Update(float dt) = 0;
 };

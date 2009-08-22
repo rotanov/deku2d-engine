@@ -484,12 +484,12 @@ extern "C" {
 #ifndef PNG_NO_TYPECAST_NULL
 #define int_p_NULL                (int *)NULL
 #define png_bytep_NULL            (png_bytep)NULL
-#define png_bytepp_NULL           (png_bytepp)NULL
+#define png_bytepp_NULL           (png_bytepPosition)NULL
 #define png_doublep_NULL          (png_doublep)NULL
 #define png_error_ptr_NULL        (png_error_ptr)NULL
 #define png_flush_ptr_NULL        (png_flush_ptr)NULL
 #define png_free_ptr_NULL         (png_free_ptr)NULL
-#define png_infopp_NULL           (png_infopp)NULL
+#define png_infopp_NULL           (png_infopPosition)NULL
 #define png_malloc_ptr_NULL       (png_malloc_ptr)NULL
 #define png_read_status_ptr_NULL  (png_read_status_ptr)NULL
 #define png_rw_ptr_NULL           (png_rw_ptr)NULL

@@ -396,7 +396,7 @@ bool CEngine::Run()
 		}
 	}	
 #ifdef _DEBUG
-	//CObjectManager.DumpToLog();
+	CObjectManager.DumpToLog();
 #endif
 	Suicide();
 	SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
@@ -458,6 +458,7 @@ int CEngine::CfgGetInt( char* ParamName )
 
 bool CEngine::ClearLists()
 {
+	// Не так!!!1!адин!+!+!
 // 	CObject *data = (RenderManager.Next());
 // 	while (data)
 // 	{
@@ -504,6 +505,8 @@ bool CUpdateManager::UpdateObjects()
 	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
 	while (data)
 	{
+		if (!data->Active)
+			continue;
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
