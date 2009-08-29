@@ -21,6 +21,7 @@
 		Destr = "data\Textures\Destr.png"
 		Fire = "data\Textures\Fire.bmp"
 		Font = "data\Textures\Font.bmp"
+		Font = "data\Textures\Font.png"
 		font1 = "data\Textures\font1.png"
 		frames = "data\Textures\frames.bmp"
 		Free = "data\Textures\Free.png"
@@ -33,9 +34,12 @@
 		Particle = "data\Textures\Particle.bmp"
 		PrtOside = "data\Textures\PrtOside.bmp"
 		SnowyTileSet = "data\Textures\SnowyTileSet.bmp"
+		tahoma13 = "data\Textures\tahoma13.png"
+		tahoma13b = "data\Textures\tahoma13b.png"
 		Tank3 = "data\Textures\Tank3.png"
 		TanksTiles = "data\Textures\TanksTiles.bmp"
 		TanksTiles = "data\Textures\TanksTiles.png"
+		verdana9 = "data\Textures\verdana9.png"
 	</Textures>
 	<Tilesets>
 		TanksTileset = "data\Tilesets\TanksTileset.tls"

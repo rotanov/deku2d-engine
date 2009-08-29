@@ -359,9 +359,21 @@ bool CList::DelObject(CObject *AObject)
 	return true;
 }
 
-bool CList::DelObject(const char *AObjectName)
+bool CList::DelObject(const string *AObjectName)
 {
 	CListNode *ListNode = GetListNode(AObjectName);
+	if (!ListNode)
+	{
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, name, id);
+		return false;
+	}
+	DelNode(ListNode);
+	return true;
+}
+
+bool CList::DelObject(const char *AObjectName)
+{
+	CListNode *ListNode = GetListNode(&((string)AObjectName));
 	if (!ListNode)
 	{
 		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, name, id);
@@ -420,9 +432,15 @@ void CList::Clear()
 	current = NULL;
 }
 
-CObject* CList::GetObject(const char* AObjectName)
+CObject* CList::GetObject(const string* AObjectName)
 {
 	CListNode* ListNode = GetListNode(AObjectName);	
+	return ListNode?ListNode->GetData():NULL;
+}
+
+CObject* CList::GetObject(const char* AObjectName)
+{
+	CListNode* ListNode = GetListNode(&((string)AObjectName));	
 	return ListNode?ListNode->GetData():NULL;
 }
 
@@ -450,7 +468,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 	return NULL;
 }
 
-CListNode* CList::GetListNode(const char* AObjectName)
+CListNode* CList::GetListNode(const string* AObjectName)
 {
 	if (!AObjectName)
 	{
@@ -460,7 +478,7 @@ CListNode* CList::GetListNode(const char* AObjectName)
 	CListNode* TempNode = first;
 	while (TempNode)
 	{
-		if (TempNode->GetData()->name == AObjectName)
+		if ((TempNode->GetData()->name) == *(AObjectName))
 			return TempNode;
 		TempNode = TempNode->next;
 	}

@@ -5,7 +5,7 @@
 //			CTileSet functions				 //
 //-------------------------------------------//
 
-bool CTileSet::LoadFromFile()
+bool CTileset::LoadFromFile()
 {
 	CFactory *Factory = CFactory::Instance();
 	CFile file;
@@ -28,7 +28,7 @@ bool CTileSet::LoadFromFile()
 	file.Close();
 }
 
-void CTileSet::RenderTileSet()
+void CTileset::RenderTileSet()
 {
 	// encapsulate Opengl calls
 	glEnable(GL_TEXTURE_2D);
@@ -55,7 +55,7 @@ void CTileSet::RenderTileSet()
 			Vector2(Texture->width, i*Info.TileHeight));
 }
 
-bool CTileSet::SaveToFile()
+bool CTileset::SaveToFile()
 {
 	CFile file;
 	if (!file.Open(filename.c_str(), CFILE_WRITE))
@@ -71,14 +71,14 @@ bool CTileSet::SaveToFile()
 	file.Close();
 }
 
-CTileSet::CTileSet()
+CTileset::CTileset()
 {
 	BBox = NULL;
 	Texture = NULL;
 	memset(&Info, 0, sizeof(Info));
 }
 
-void CTileSet::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData )
+void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData )
 {
 	Info.HorNumTiles = _HorNumTiles;
 	Info.VerNumTiles = _VerNumTiles;
@@ -91,7 +91,7 @@ void CTileSet::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 		BBox[i] = CAABB(0, 0, Info.TileHeight, Info.TileWidth);
 }
 
-Vector2* CTileSet::GetCellTC(int CellIndex)
+Vector2* CTileset::GetCellTC(int CellIndex)
 {
 	if (Texture->width == 0 || Texture->height == 0)
 		if (!loaded || !Texture->Load())
@@ -165,10 +165,12 @@ bool CLevelMap::LoadFromFile()
 		return false;
 	}
 
+	char *TileSetName = NULL;
 	File.ReadLine(TileSetName);
-
+	if (TileSetName == NULL)
+		return false;
 	TileSet = NULL;
-	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
+	TileSet = dynamic_cast<CTileset*>(Factory->GetObject((string*)TileSetName));
 	if (TileSet == NULL)
 	{
 		Log("Error", "Tileset %s for map %s not found in resources", this->name, TileSetName);
@@ -201,7 +203,7 @@ bool CLevelMap::SaveToFile()
 		return false;
 	}
 	
-	file.Write(TileSetName, strlen(TileSetName)+1);
+	file.Write(TileSet->name.c_str(), TileSet->name.length()+1);
 	file.Write(&numCellsHor, sizeof(numCellsHor));
 	file.Write(&numCellsVer, sizeof(numCellsVer));
 	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
@@ -228,45 +230,6 @@ bool CLevelMap::GenCells()
 	return true;
 }
 
-bool CCollisionInfo::LoadFromFile()
-{
-	if (loaded)
-	{
-		Log("ERROR", "Resource %s already loaded", name);
-		return false;
-	}
-
-	CFile file;
-	if (!file.Open(filename.c_str(), CFILE_READ))
-		return false;
-
-	file.ReadLine(TileSetName);
-	CFactory *Factory = CFactory::Instance();
-	TileSet = dynamic_cast<CTileSet*>(Factory->GetObject(TileSetName));
-	Factory->FreeInst();
-	if (TileSet == NULL)
-		return false;
-	TileSet->Texture->Load();
-
-	boxes = new CAABB [TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles];
-	file.Read(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CAABB));
-
-	loaded = true;
-	return true;
-}
-
-bool CCollisionInfo::SaveToFile()
-{
-	CFile file;
-	if (!file.Open(filename.c_str(), CFILE_WRITE))
-		return false;
-	file.Write(TileSetName, strlen(TileSetName)+1);
-	if (TileSet == NULL)
-		return false;
-	file.Write(boxes, TileSet->Info.HorNumTiles*TileSet->Info.VerNumTiles*sizeof(CAABB));
-
-	return true;
-}
 
 bool CCompas::Render()
 {

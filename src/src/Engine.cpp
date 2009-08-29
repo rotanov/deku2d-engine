@@ -9,6 +9,8 @@
 //				Ninja stuff					 //
 //-------------------------------------------//
 
+//CEngine
+
 CEngine::CEngine()
 {
 	CreateLogFile("System.log");
@@ -29,8 +31,8 @@ CEngine::CEngine()
 // 	procGUIGetMouseMove = NULL;
 	Factory = CFactory::Instance();
 	FontManager = CFontManager::Instance("ninja.cpp");
-	_instance = NULL;
-	_refcount = 0;
+	//_instance = NULL;
+	//_refcount = 0;
 	ConfigFileName = CONFIG_FILE_NAME;
 	ConfigFileName += "configuration.xml";
 	EventFuncCount = 0;
@@ -43,23 +45,23 @@ CEngine::~CEngine(){}
 
 CEngine* CEngine::Instance()
 {
-	if (_instance == NULL)
-	{
-		_instance = new CEngine;
-	}
-	_refcount++;
-	return _instance;
+// 	if (_instance == NULL)
+// 	{
+// 		_instance = new CEngine;
+// 	}
+// 	_refcount++;
+	return &_instance;
 }
 
 void CEngine::FreeInst()
 {
-	_refcount--;
-	if (!_refcount)
-	{
-		delete this;
-		Log("INFO", "Ninja deleted from memory.");
-		_instance = NULL;
-	}
+// 	_refcount--;
+// 	if (!_refcount)
+// 	{
+// 		delete this;
+// 		Log("INFO", "Ninja deleted from memory.");
+// 		_instance = NULL;
+// 	}
 }
 
 
@@ -392,7 +394,8 @@ bool CEngine::Run()
 		}
 		else
 		{
-			WaitMessage();
+			//WaitMessage();
+			Sleep(1);
 		}
 	}	
 #ifdef _DEBUG
@@ -495,8 +498,8 @@ bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKey
 	KeyInputFuncCount++;
 	return true;
 }
-CEngine* CEngine::_instance = 0;
-int CEngine::_refcount = 0;
+CEngine CEngine::_instance; // =0
+//int CEngine::_refcount = 0;
 
 bool CUpdateManager::UpdateObjects()
 {

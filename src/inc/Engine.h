@@ -52,9 +52,6 @@
 
 #define STATE_GL_BG_COLOR			0xA0
 
-
-
-
 class CEngine
 {
 public:
@@ -64,7 +61,7 @@ public:
 	CRenderManager				RenderManager; // а тут инстанс!
 	CFontManager				*FontManager; // ...а тут опять указатель?! 
 	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
-	XMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
+	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
 	BOOL						keys[SDLK_LAST];  // FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;
 
@@ -111,19 +108,13 @@ private:
 	bool						(*procFocusGainFunc)();
 	bool						(*procUpdateFunc)(scalar);
 	bool						(*procRenderFunc)();
-
-// 	bool						(*procGUIGetKeyDown)(char k, SDLKey sym);
-// 	bool						(*procGUIGetKeyUp)(char k, SDLKey sym);
-// 	bool						(*procGUIGetMouseDown)(int x, int y, unsigned char button);
-// 	bool						(*procGUIGetMouseUp)(int x, int y, unsigned char button);
-// 	bool						(*procGUIGetMouseMove)(int x, int y, unsigned char button);
-
 protected:
-	static CEngine* _instance;
-	static int _refcount;
-
+	static CEngine _instance;
+	//static int _refcount;
 	CEngine();
 	~CEngine();
 };
+
+extern CEngine *ninja;
 
 #endif _ENGINE_H_

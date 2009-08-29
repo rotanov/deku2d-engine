@@ -13,17 +13,17 @@ struct CTileSetInfo
 	int VerNumTiles;
 };
 
-class CTileSet : public CResource
+class CTileset : public CResource
 {
 public:
 	CTexture *Texture;
 	CTileSetInfo Info;
 	CAABB *BBox;
 
-	CTileSet ();
+	CTileset ();
 	static CObject* NewTileSet()
 	{
-		return new CTileSet;
+		return new CTileset;
 	}
 	
 
@@ -35,26 +35,17 @@ public:
 
 };
 
-class CCollisionInfo : public CResource
+class CTileSetManager : public CList
 {
 public:
-	char *TileSetName;
-	CTileSet *TileSet;
-	CAABB *boxes;
-
-	CCollisionInfo()
+	CTileset* GetTileset(const string* ATilesetName)
 	{
-		TileSetName = NULL;
-		TileSet = NULL;
-		boxes = NULL;
+		CTileset *Tileset = NULL;
+		Tileset = dynamic_cast<CTileset*>(GetObject(ATilesetName));
+		if (Tileset)
+			Tileset->CheckLoad();
+		return Tileset;
 	}
-	static CObject* NewCollisionInfo()
-	{
-		return new CCollisionInfo;
-	}
-
-	bool LoadFromFile();
-	bool SaveToFile();
 };
 
 struct CMapCellInfo
@@ -75,8 +66,7 @@ class CLevelMap : public CResource, public CRenderObject, public CUpdateObject, 
 public:
 	int				numCellsHor, numCellsVer;
 	CMapCellInfo	*Cells;
-	CTileSet		*TileSet;
-	char			*TileSetName;
+	CTileset		*TileSet;
 
 	static CObject *NewLevelMap();
 	CLevelMap()
@@ -84,7 +74,6 @@ public:
 		numCellsHor = numCellsVer = 0;
 		Cells = NULL;
 		TileSet = NULL;
-		TileSetName = NULL;
 		name = "CLevelMap";		
 	}
 	~CLevelMap(){}

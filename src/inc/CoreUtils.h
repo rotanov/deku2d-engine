@@ -183,16 +183,18 @@ public:
 					~CList();
 	virtual bool		AddObject(CObject *AObject);
 	bool				DelObject(CObject *AObject);
+	bool				DelObject(const string *AObjectName);
 	bool				DelObject(const char *AObjectName);
 	bool				DelObject(int AId);			
 	void				Reset();
 	bool				Enum(CObject* &result);
 	CObject*			Next();	
 	void				Clear();
+	CObject*			GetObject(const string* AObjectName);					
 	CObject*			GetObject(const char* AObjectName);					
 	CObject*			GetObject(int AId);
 	CListNode*			GetListNode(const CObject* AObject);
-	CListNode*			GetListNode(const char* AObjectName);
+	CListNode*			GetListNode(const string* AObjectName);
 	CListNode*			GetListNode(int AId);	
 	int					GetObjectsCount();
 	CListNode*			GetFirst();
@@ -400,3 +402,20 @@ protected:
 
 
 #endif CORE_UTILS_H	
+
+
+// string itos(int i)	// convert int to string
+// {
+// 	stringstream s;
+// 	s << i;
+// 	return s.str();
+// }
+// 
+// int main()
+// {
+// 	int i = 127;
+// 	string ss = itos(i);
+// 	const char* p = ss.c_str();
+// 
+// 	cout << ss << " " << p << "\n";
+// }

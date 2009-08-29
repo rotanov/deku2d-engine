@@ -5,7 +5,7 @@
 *	Constructor for XMLNode
 *	Setting up all attributes to default
 */
-_XMLNode::_XMLNode()
+CXMLNode::CXMLNode()
 {
 	Value = "";
 	Child = NULL;
@@ -29,13 +29,13 @@ _XMLNode::_XMLNode()
 ------------------------------------------------
 *	Returns pointer if success, NULL if failed.
 */
-_XMLNode *_XMLNode::Get(pchar Str)
+CXMLNode *CXMLNode::Get(pchar Str)
 {
 	if (Str==NULL){
 		Log("ERROR", "Cannot get XML node for because string pointer has NULL value", Str);
 		return NULL;
 	}
-	_XMLNode *ptr = this->Child;
+	CXMLNode *ptr = this->Child;
 	if (ptr==NULL){
 		Log("ERROR", "Cannot get XML node for \"%s\"", Str);
 		return NULL;
@@ -53,7 +53,7 @@ _XMLNode *_XMLNode::Get(pchar Str)
 ------------------------------------------------
 *	Returns pointer to it.
 */
-_XMLNode *_XMLNode::Add(string name, string value)
+CXMLNode *CXMLNode::Add(string name, string value)
 {
 /*	if (name==NULL || value==NULL)
 	{
@@ -62,7 +62,7 @@ _XMLNode *_XMLNode::Add(string name, string value)
 	}*/
 	if (Child == NULL)
 	{
-		Child = new _XMLNode;
+		Child = new CXMLNode;
 		Last = Child;
 		Last->Name = name;
 		Last->Value = value;
@@ -74,7 +74,7 @@ _XMLNode *_XMLNode::Add(string name, string value)
 	else{
 		if (Last != NULL)
 		{
-			Last->Next = new _XMLNode;
+			Last->Next = new CXMLNode;
 			XMLNode TempLast = Last;
 			Last = Last->Next;
 			Last->Name = name;
@@ -96,17 +96,17 @@ _XMLNode *_XMLNode::Add(string name, string value)
 *	Clears all node data.
 ------------------------------------------------
 */
-void _XMLNode::Clear()
+void CXMLNode::Clear()
 {
 	Name="";
 	Value="";
 	if (Type == XML_ATTRIBUTE){
 		return;
 	}
-	_XMLNode *ptr = Child;
+	CXMLNode *ptr = Child;
 	while (ptr!=NULL)
 	{
-		_XMLNode *tmp=ptr;
+		CXMLNode *tmp=ptr;
 		ptr = ptr->Next;
 		tmp->Clear();
 		delete tmp;
@@ -118,7 +118,7 @@ void _XMLNode::Clear()
 *	Gets pair
 ------------------------------------------------
 */
-bool _XMLNode::GetPair(string &Key, string &Value)
+bool CXMLNode::GetPair(string &Key, string &Value)
 {
 	if (Pointer == NULL)
 		return false;
@@ -133,7 +133,7 @@ bool _XMLNode::GetPair(string &Key, string &Value)
 *	Resets pointer to the start position
 ------------------------------------------------
 */
-void _XMLNode::ResetPointer()
+void CXMLNode::ResetPointer()
 {
 	Pointer = Child;
 }
@@ -144,7 +144,7 @@ void _XMLNode::ResetPointer()
 *	Begins enumeration of children
 ------------------------------------------------
 */
-int _XMLNode::Enum(string &outKey, string &outValue, int &res)
+int CXMLNode::Enum(string &outKey, string &outValue, int &res)
 {
 	res = XMLENUM_END;
 	if (enumPtr == NULL)
@@ -189,7 +189,7 @@ int _XMLNode::Enum(string &outKey, string &outValue, int &res)
 *	Writes node data to file
 ------------------------------------------------
 */
-void _XMLNode::Write(CFile f, int depth)
+void CXMLNode::Write(CFile f, int depth)
 {
 	char b=9;
 	for (int i=0;i<depth;i++)
@@ -382,10 +382,10 @@ unsigned int XMLParse(string Str, string &Buff1, string &Buff2){
 *	Constructor for XMLTable
 *	Setting up all attributes to default
 */
-XMLTable::XMLTable()
+CXMLTable::CXMLTable()
 {
 	First = NULL;
-	First = new _XMLNode;
+	First = new CXMLNode;
 }
 /*
 ------------------------------------------------
@@ -399,7 +399,7 @@ XMLTable::XMLTable()
 *	it blocket from reading and also can be failed
 *	on parse error.
 */
-bool XMLTable::LoadFromFile(const char *fname)
+bool CXMLTable::LoadFromFile(const char *fname)
 {
 	CFile f;
 	if (!f.Open(fname, CFILE_READ))
@@ -414,7 +414,7 @@ bool XMLTable::LoadFromFile(const char *fname)
 	//Log("XML", "Preparing");
 	int strstart = 0;
 	First->Clear();
-	XMLNode _tmp = new _XMLNode;
+	XMLNode _tmp = new CXMLNode;
 	XMLNode ptr = _tmp;
 	int cnt=0;
 	while (!f.Eof())
@@ -514,7 +514,7 @@ bool XMLTable::LoadFromFile(const char *fname)
 *	Can be failed only if file blocked from 
 *	writing.
 */
-bool XMLTable::SaveToFile(const char *fname)
+bool CXMLTable::SaveToFile(const char *fname)
 {
 	CFile f;
 	if (!f.Open(fname, CFILE_WRITE)){

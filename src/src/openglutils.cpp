@@ -9,7 +9,7 @@ void CRenderObject::SetColor( byte _r, byte _g, byte _b, byte _a )
 	color.a = _a;
 }
 
-CRenderObject::CRenderObject() : Position(V2Zero), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
+CRenderObject::CRenderObject() : Position(V2_Z), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
 {
 	name += "CRenderObject ";
 	type |= T_RENDERABLE;
@@ -1348,7 +1348,7 @@ int CFontManager::_refcount = 0;
 CFont* CFontManager::GetFont(const char* fontname )	
 {
 	CFont *TempFont = NULL;
-	TempFont = dynamic_cast<CFont*>(GetObject(fontname));
+	TempFont = dynamic_cast<CFont*>(GetObject(&((string)fontname)));
 	if (TempFont)
 		TempFont->CheckLoad();
 	return TempFont;
@@ -1356,7 +1356,7 @@ CFont* CFontManager::GetFont(const char* fontname )
 
 CFont* CFontManager::GetFontEx( string fontname )
 {
-	return dynamic_cast<CFont*>(GetObject(fontname.c_str()));
+	return dynamic_cast<CFont*>(GetObject(&fontname));
 }
 
 bool CFontManager::SetCurrentFont( char* fontname )
@@ -1439,47 +1439,10 @@ CTextureManager::~CTextureManager()
 
 }
 
-bool CTextureManager::AddTexture( char* filename, bool load)
-{
-	CTexture *tempTRes = new CTexture(filename);
-	if (load)
-		tempTRes->Load();
-	AddObject(tempTRes);
-	return true;
-}
-
-bool CTextureManager::LoadTextureByName(char *TextureName)
-{
-	CTexture *tmp = NULL;
-	tmp = dynamic_cast<CTexture*>(GetObject(TextureName));
-	if (tmp == NULL)
-	{
-		Log("ERROR", "Can't load find texture with name %s", TextureName);
-		return false;
-	}
-	return tmp->Load();
-}
-
-bool CTextureManager::LoadAllTextures()
-{
-	CTexture *tmp = NULL;
-	this->Reset();
-	while (this->Enum((CObject*&)tmp))
-	{	
-		if (tmp == NULL)
-		{
-			Log("ERROR", "Can't find some texture");
-			return false;
-		}
-		tmp->Load();
-		tmp = NULL;
-	}
-}
-
 CTexture* CTextureManager::GetTextureByName( const string &TextureName )
 {
 	CTexture *TempTexture = NULL;
-	TempTexture = dynamic_cast<CTexture*>(GetObject(TextureName.c_str()));
+	TempTexture = dynamic_cast<CTexture*>(GetObject(&TextureName));
 	if (TempTexture)
 		TempTexture->CheckLoad();
 	return TempTexture;
@@ -1821,7 +1784,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject((string*)"cells"));
 	Tman->FreeInst();
 	cells->Bind();
 #endif 
@@ -1927,7 +1890,7 @@ void CPrimitiveRender::CheckTexture()
 {
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject((string*)"cells"));
 	Tman->FreeInst();
 	cells->Bind();
 }

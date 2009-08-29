@@ -4,8 +4,8 @@
 	WindowBpp					= "32"
 	WindowCaption				= "Tanks"
 	DoCalcFps					= "true"
-	DoLimitFps					= "false"
-	FpsLimit					= "60"
+	DoLimitFps					= "true"
+	FpsLimit					= "30"
 	DataPath					= "Data/"
 	doLoadDefaultResourceList	= "true" // temp
 </configuration>

@@ -8,10 +8,10 @@ CEngine* Ninja = CEngine::Instance();
 CFont* Font;
 int ScreenWidth = 0;
 int ScreenHeight = 0;
-Vector2 fPosition = V2Zero;
+Vector2 fPosition = V2_Z;
 CParticleSystem *FontEffect;
 bool begintimeout = false;
-float TimeOut = 0, TimeLimit = 2;
+float TimeOut = 0, TimeLimit = 2.0f;
 RGBAf FadeClr = RGBAf(1.0f, 1.0f, 1.0f ,1.0f);
 //////////////////////////////////////////////////////////////////////////
 CTankManager* Tanks;
@@ -49,13 +49,16 @@ public:
 		if (begintimeout)
 		{
 			TimeOut += dt;
-			FadeClr -= RGBAf(0.01, 0.01, 0.01, 0.01);
+			FadeClr -= RGBAf(0.02, 0.02, 0.02, 0.02);
 			if (TimeOut >= TimeLimit)
 			{
 				Ninja->RenderManager.DelObject("Title screen tanks");
 				Ninja->UpdateManager.DelObject("Title screen tanks");
 				dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
 				Tanks = new CTankManager;
+				//CTank *Tank = dynamic_cast<CTank*>(Tanks->GetLast()->GetData());
+				//Ninja->RenderManager.Camera.Assign(&(Tank->Position.x), &(Tank->Position.y));
+	
 			}
 		}
 		FontEffect->Update(dt);
@@ -76,7 +79,7 @@ bool EndGame()
 }
 bool Options()
 {
-	FadeClr = RGBAf(0.3f, 0.5f, 0.4f, 1.0f);
+	FadeClr = (Random_Int(0,1)==0)?COLOR_P1:COLOR_P2;
 	return true;
 }
 
@@ -84,6 +87,8 @@ CTitleScreen *TitleScreen;
 
 bool Init()
 {	
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LEQUAL);
 	Font = Ninja->FontManager->GetFont("Font");
 	Ninja->FontManager->SetCurrentFont("Font");
 	//////////////////////////////////////////////////////////////////////////
@@ -167,7 +172,6 @@ bool Init()
 
 	//CTileSet * Tileset = Ninja->ResourceManager.;
 
-	
 	return true;
 }
 

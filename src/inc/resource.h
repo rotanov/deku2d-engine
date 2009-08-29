@@ -7,7 +7,6 @@
 #include "OpenglUtils.h"
 #include "xml.h"
 
-// зашитые в код названия файлов и секций, todo: подумать как избаиться от зашития в код
 #define CONFIG_FILE_NAME "config/"
 #define DEFUALT_RESOURCE_LIST_PATH "config/resources.xml"
 
@@ -104,8 +103,8 @@ protected:
 class CDataLister
 {
 public:
-	XMLTable table;
-	_XMLNode *cNode;
+	CXMLTable table;
+	CXMLNode *cNode;
 	char *MainDir;
 	char *CurrDir;
 	int MainDirL;
@@ -133,12 +132,12 @@ class CResourceManager
 {
 public:
 	string DataPath;
-	XMLTable *ResourceList;
+	CXMLTable *ResourceList;
 
 
 	CResourceManager()
 	{
-		ResourceList = new XMLTable;
+		ResourceList = new CXMLTable;
 	}
 	~CResourceManager()
 	{
@@ -153,3 +152,39 @@ private:
 };
 
 #endif _RES_H
+
+// конфетка. Читать александреску.
+// namespace
+// {
+// 	// Счетчик значений
+// 	template <class C>
+// 	class CType2ValCounter
+// 	{
+// 	protected:
+// 		static C Counter;
+// 	};
+// 
+// 	template<class C> C CType2ValCounter<C>::Counter;
+// 
+// 	// Генератор значений
+// 	template<class T, class C>
+// 	class CType2ValGenerator : public CType2ValCounter<C>
+// 	{
+// 	public:
+// 		C ID;
+// 		CType2ValGenerator()
+// 		{
+// 			ID = Counter;
+// 			++Counter;
+// 		}
+// 	};
+// }; // namespace
+// 
+// /// Шаблонная функция получения идентификатора типа
+// template <class T, class C>
+// C Type2Val()
+// {
+// 	static CType2ValGenerator<T, C> ValueGenerator;
+// 
+// 	return ValueGenerator.ID;
+// }

@@ -269,7 +269,7 @@ void CDataLister::ExploreDir( HANDLE hfile )
 			strcat(CurrDir, (string(fdata.cFileName)+string("\\")).c_str());
 			SetCurrentDirectory(CurrDir);
 
-			_XMLNode *tmp = cNode;
+			CXMLNode *tmp = cNode;
 			cNode = cNode->Add(fdata.cFileName, fdata.cFileName);
 
 			HANDLE thandle = FindFirstFile("*.*", &fdata);

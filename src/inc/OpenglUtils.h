@@ -241,9 +241,6 @@ class CTextureManager : public CList
 {
 public:
 	CTexture* GetTextureByName(const string &TextureName);
-	bool AddTexture(char* filename, bool load = false);
-	bool LoadTextureByName(char *TextureName);
-	bool LoadAllTextures();
 	static CTextureManager* Instance();
 	void FreeInst();
 protected:

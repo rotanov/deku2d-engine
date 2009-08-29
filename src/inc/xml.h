@@ -1,5 +1,5 @@
-#ifndef XML_H
-#define XML_H
+#ifndef _XML_H_
+#define _XML_H_
 /*
 <-----------------Xml-Engine----------------->
 *	Developer : DekuTeam
@@ -10,11 +10,9 @@
 #include "CoreUtils.h"
 
 #define XML_DYNAMIC
-
 #ifndef XML_DYNAMIC
 #define MAX_NODES					0xffff
 #endif
-
 
 #define XML_NODE_BEGIN				0x0001
 #define XML_NODE_ATTRIBUTE			0x0002
@@ -60,35 +58,30 @@ struct Lexem
 //-------------------------------------
 #define XMLLEXEM_STRING				0xf
 
-
 //XML enumeration
 #define XMLENUM_ATTRSONLY			0x0
 //XML enumeration results
 #define XMLENUM_END					0x00
 #define XMLENUM_ATTRIBUTE			0x01
 
-
-
-
 //note : using only DataBase on XML Engine!!!!
-
-class _XMLNode
+class CXMLNode
 {
 public:
-	_XMLNode();
+	CXMLNode();
 	string					Name;
 	string					Value;
-	_XMLNode				*Child;
-	_XMLNode				*Parent;
-	_XMLNode				*Next;
-	_XMLNode				*Previous;
-	_XMLNode				*Last;
+	CXMLNode				*Child;
+	CXMLNode				*Parent;
+	CXMLNode				*Next;
+	CXMLNode				*Previous;
+	CXMLNode				*Last;
 	byte					Type;
 	unsigned int			count;
 	int						depth;
-	_XMLNode				*Add(string name, string value);
+	CXMLNode				*Add(string name, string value);
 	void					Clear();
-	_XMLNode*				Get(pchar Str);
+	CXMLNode*				Get(pchar Str);
 	char					*GetValue(){return (char*)Value.data();}
 	void					Write(CFile f, int depth);
 	bool					GetPair(string &Key, string &Value);
@@ -98,23 +91,23 @@ public:
 private:
 	int						enumKind;
 	bool					_last;
-	_XMLNode				*Pointer;
-	_XMLNode				*enumPtr;
+	CXMLNode				*Pointer;
+	CXMLNode				*enumPtr;
 };
 
-typedef _XMLNode *XMLNode;
+typedef CXMLNode *XMLNode;
 //Parse functions
 unsigned int XMLParse(string Str, string &Buff1, string &Buff2);
 
-class XMLTable
+class CXMLTable
 {
 public :
-	XMLTable();
-	~XMLTable(){First->Clear();}
+	CXMLTable();
+	~CXMLTable(){First->Clear();}
 	bool					LoadFromFile(const char *fname);
 	bool					SaveToFile(const char *fname);
 	XMLNode					First;
 private:
 };
 
-#endif
+#endif _XML_H_

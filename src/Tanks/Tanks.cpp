@@ -5,7 +5,7 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	if (state == KEY_PRESSED)
 	{
-		for(int i=0;i<5;i++)
+		for(int i = 0; i < CONTROLS_COUNT; i++)
 			if (key == Controls[i])
 			{
 				States[i] = true;
@@ -15,8 +15,8 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 					Direction = Directions[i];
 				}
 			}
-
-
+		if (key == Controls[akFire])
+			FiringTimeout = 0.21f;
 	}
 	else
 	{
@@ -27,33 +27,33 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			else 
 				if (i>=0 && i<=3 && States[i])
 					isWalking = true;
-
-
 	}
 	return true;
 }
 
-void CTank::SetPlayerControls(SDLKey ALeft, SDLKey ARight, SDLKey AUp, SDLKey ADown, SDLKey AFire)
+void CTank::SetPlayerControls(int PlayerIndex)
 {
 	if (AI != NULL)
 		return;
-	Controls[0] = ALeft;
-	Controls[1] = ARight;
-	Controls[2] = AUp;
-	Controls[3] = ADown;
-	Controls[4] = AFire;
+	for(int i =0;i<CONTROLS_COUNT;i++)
+		Controls[i] = AR_K_CONTRLS[i][PlayerIndex];
 }
 
 bool CTank::Update(scalar dt)
 {
 	CAABB AABB = CAABB(0, 0, 32, 32);
 	if (isWalking)
-		Position += Direction*Velocity;
+	{
+		Velocity += 0.5f;
+		Velocity = clampf(Velocity, 0.0f, 5.0f);
+	}
+	Position += Direction*Velocity;
+	Velocity*=0.9f;
 	AABB.Offset(Position.x, Position.y);
 	Vector2 BottomLeft = AABB.vMin, TopRight = AABB.vMax, BottomRight = Vector2(AABB.x1, AABB.y0), TopLeft = Vector2(AABB.x0, AABB.y1);
 	CAABB Pot1, Pot2;
 
-	switch(SelDir(Direction))
+	switch(Dir2AK(Direction))
 	{
 	case akLeft:
 		Pot1 = Map->GetCellAABB(TopLeft);
@@ -89,11 +89,42 @@ bool CTank::Update(scalar dt)
 		break;
 	}
 
-
 	if (States[akFire])
 	{
-		// Kill it with fire here
-		States[akFire] = false;
+		FiringTimeout += dt;
+		if (FiringTimeout >= FiringInterval && BulletsCount < MAX_BULLETS_PER_TANK)
+		{
+			FiringTimeout = 0;
+			BulletsCount++;
+			Bullets[BulletsCount-1].v = Direction*Velocity + Direction*10.0f;
+			Bullets[BulletsCount-1].p = GetCenter();
+		}
+	}
+	for (int i = 0;i<BulletsCount;i++)
+	{
+		Bullets[i].p += Bullets[i].v;
+		if (Map->GetCell(Bullets[i].p)->TileIndex == csDestr)
+		{
+			Map->GetCell(Bullets[i].p)->TileIndex = csFree1;
+			std::swap(Bullets[i], Bullets[--BulletsCount]);
+		}
+		if (Map->GetCell(Bullets[i].p)->TileIndex == csBlock)
+		{
+			std::swap(Bullets[i], Bullets[--BulletsCount]);
+		}
+
+
+		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(0)->Position.x, Host->GetPlayer(0)->Position.y)).Inside(Bullets[i].p) && (name != "TankPlayer1"))
+		{
+			Host->GetPlayer(0)->Health -= 10;
+			std::swap(Bullets[i], Bullets[--BulletsCount]);
+		}
+		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(1)->Position.x, Host->GetPlayer(1)->Position.y)).Inside(Bullets[i].p) && (name != "TankPlayer2"))
+		{
+			Host->GetPlayer(1)->Health -= 10;
+			std::swap(Bullets[i], Bullets[--BulletsCount]);
+		}
+
 	}
 	return true;
 }
@@ -102,11 +133,11 @@ bool CTank::Render()
 {
 	glLoadIdentity();
 	scalar Angle = 0;
-	if (Direction == TANK_DIR_RIGHT)
+	if (Direction == DIR_RIGHT)
 		Angle = 90;
-	if (Direction == TANK_DIR_DOWN)
+	if (Direction == DIR_DOWN)
 		Angle = 180;
-	if (Direction == TANK_DIR_LEFT)
+	if (Direction == DIR_LEFT)
 		Angle = 270;
 
 	glTranslatef(Position.x + 16, Position.y + 16, 0.0f);
@@ -129,6 +160,30 @@ bool CTank::Render()
 		glVertex2f(Position.x, Position.y + 32);
 	glEnd();
 	glLoadIdentity();
+
+	BulletTexture->Bind();
+	glColor4f(0.8f, 0.1f, 0.1f, 0.9f);
+	glBegin(GL_QUADS);
+	for(int i=0;i<BulletsCount;i++)
+	{
+		glTexCoord2f(0.4375f, 0.4375f);
+		Bullets[i].p.glVertex();
+
+		glTexCoord2f(0.5625f, 0.4375f);
+		(Bullets[i].p + Vector2(4,0)).glVertex();
+
+		glTexCoord2f(0.5625f, 0.5625f);
+		(Bullets[i].p + Vector2(4,4)).glVertex();
+
+		glTexCoord2f(0.4375f, 0.5625f);
+		(Bullets[i].p + Vector2(0,4)).glVertex();
+	}
+	glEnd();
+	
+	glLoadIdentity();
+	glDisable(GL_TEXTURE_2D);
+
+
 	glDisable(GL_TEXTURE_2D);
 	CPrimitiveRender PRender;
 	PRender.plClr = Color;
@@ -138,55 +193,67 @@ bool CTank::Render()
 
 CAABB CTank::GetAABB()
 {
-	return CAABB(Position.x, Position.y, Position.x + 32, Position.y + 32);
+	return CAABB(Position.x, Position.y, Position.x + DEFAULT_CELL_SIZE, Position.y + DEFAULT_CELL_SIZE);
 }
 
 Vector2 CTank::GetCenter()
 {
-	return (Position + Vector2(16, 16));
+	return (Position + Vector2(DEFAULT_CELL_SIZE/2, DEFAULT_CELL_SIZE/2));
 }
 void CTankManager::AddPlayer()
 {
-	if (PlayerCount > 2)
+	if (PlayerCount > MAX_PLAYERS_COUNT)
 		return;
 	CTank *Tank = new CTank(Map, this, NULL);
-	Tank->Init(PlayerCount==0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
-	if (PlayerCount == 0)
-		Tank->SetPlayerControls(P1_LEFT, P1_RIGHT, P1_UP, P1_DOWN, P1_FIRE);
-	else
-		Tank->SetPlayerControls(P2_LEFT, P2_RIGHT, P2_UP, P2_DOWN, P2_FIRE);
+	char * tmp = new char[16];
+	itoa(PlayerCount+1, tmp, 10);
+	Tank->name = (string)"TankPlayer" + tmp;	
+	delete [] tmp;
+	Tank->Init(PlayerCount == 0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
+	Tank->SetPlayerControls(PlayerCount);
 	AddObject(Tank);
 	PlayerCount++;
-	//Position = Map->GetNewTankLocation(this);
-	//	color = Host->GetNewTankColor(this);
+}
 
+CTank* CTankManager::GetPlayer(int PlayerIndex)
+{
+	char * tmp = new char[16];
+	itoa(PlayerIndex+1, tmp, 10);
+	CTank *res = dynamic_cast<CTank*>(GetObject(((string)"TankPlayer" + tmp).c_str()));;	 
+	delete [] tmp;
+	return res;
 }
 
 void CTankManager::AddAI()
 {
-	/// NOAUI
+	CTank *Tank;
+	CTankAI *AI = new CTankAI(this, Map, Tank);
+	Tank = new CTank(Map, this, AI);
+	Tank->name = "Tank";	
+	Tank->Init(&COLOR_AI, Map->GetNewTankLocation());
+	AddObject(Tank);
+	PlayerCount++;
 	return;
 }
 
 bool CTankManager::Render()
 {
-	CEngine::Instance()->FontManager->Print(10, 400, 0.0f, "haha");
+	glLoadIdentity();
+	gSetBlendingMode();	
+	CFont *Font = CEngine::Instance()->FontManager->GetFont("Font");
+	Font->tClr = COLOR_P1;
+	Font->SetDepth(0.5f);
+	Font->Pos.In(10, 460);
+	Font->Print("Player1 health: %d", GetPlayer(0)->Health);
+	Font->tClr = COLOR_P2;
+	Font->Pos.In(490, 460);
+	Font->Print("Player2 health: %d", GetPlayer(1)->Health);
+	COLOR_WHITE.glSet();
 	return true;
 }
 
 bool CTankManager::Update(scalar dt)
 {
-	CTank* T1 = NULL, *T2 = NULL;
-// 	if (first && first->Data)
-// 		T1 = dynamic_cast<CTank*>(first->GetData());
-// 	if (first && first->next && first->next->GetData())
-// 		T2 = dynamic_cast<CTank*>(first->next->GetData());
-// 	if (CAABB(T1->Position.x, T1->Position.y, T1->Position.x + 32, T1->Position.y + 32).Intersect(CAABB(T2->Position.x, T2->Position.y, T2->Position.x + 32, T2->Position.y + 32)))
-// 	{
-// 		Log("A", "Intersectuion");
-// 		T1->Position += T1->Direction*(-T1->Velocity*0.5);
-// 		T2->Position += T1->Direction*(T1->Velocity*0.5);
-// 	}
 	return true;
 }
 
@@ -195,45 +262,43 @@ Vector2 CTankMap::GetNewTankLocation()
 	for (int i=0;i<MAP_SIZE_X;i++)
 		for (int j=0;j<MAP_SIZE_Y;j++)
 		{
-			if (Cells[j][i] == csFree)
+			if (Cells[j][i].TileIndex == csFree1 && Random_Int(0, 4) == 2)
 				return Vector2(i*CellSize, j*CellSize);
 		}
-
 }
 
 bool CTankMap::Render()
 {
 	glLoadIdentity();
+	glScissor(0, 0, 640, 460);
+	gToggleScissor(true);
 	glEnable(GL_TEXTURE_2D);
 	CellSize = DEFAULT_CELL_SIZE;
 	for (int i=0;i<MAP_SIZE_X;i++)
 		for (int j=0;j<MAP_SIZE_Y;j++)
 		{
-			if (Cells[j][i] == csBlock || Cells[j][i] == csDestr || Cells[j][i] == csFree)
+			if (Cells[j][i].TileIndex == csBlock || Cells[j][i].TileIndex  == csDestr || Cells[j][i].TileIndex  == csFree1)
 			{
-				if (Cells[j][i] == csBlock)
+				if (Cells[j][i].TileIndex  == csBlock)
 					BlockTexture->Bind();
-				if (Cells[j][i] == csDestr)
+				if (Cells[j][i].TileIndex  == csDestr)
 					DestrTexture->Bind();
-				if (Cells[j][i] == csFree)
+				if (Cells[j][i].TileIndex  == csFree1)
 					FreeTexture->Bind();
 				glBegin(GL_QUADS);
 					glTexCoord2f(0.0f, 0.0f);
 					(Vector2(i, j)*CellSize).glVertex();
-					//glVertex2f(i*CellSize, j*CellSize);
-
 					glTexCoord2f(1.0f, 0.0f);
-					glVertex2f((i+1)*CellSize, j*CellSize);
-
+					(Vector2(i+1, j)*CellSize).glVertex();
 					glTexCoord2f(1.0f, 1.0f);
-					glVertex2f((i+1)*CellSize, (j+1)*CellSize);
-
+					(Vector2(i+1, j+1)*CellSize).glVertex();
 					glTexCoord2f(0.0f, 1.0f);
-					glVertex2f(i*CellSize, (j+1)*CellSize);
+					(Vector2(i, j+1)*CellSize).glVertex();
 				glEnd();
 			}
 		}
 	glDisable(GL_TEXTURE_2D);
+	gToggleScissor(false);
 	return true;
 }
 
@@ -244,14 +309,14 @@ bool CTankMap::Update(scalar dt)
 
 CAABB CTankMap::GetCellAABB(Vector2& V)
 {
-	if (Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize] != csFree)
+	if (Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize].TileIndex  != csFree1)
 		return CAABB(      (((int)V.x/(int)CellSize)) * CellSize, (((int)V.y/(int)CellSize)) * CellSize, 
 			CellSize, CellSize);
 	else 
 		return CAABB(-1, -1, -1, -1);
 }
 
-scalar CTankMap::IsFPTWA(int ADir, Vector2 Position)
+CTankMapCell* CTankMap::GetCell(Vector2& V)
 {
-	return 0;
+	return &(Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize]);
 }
