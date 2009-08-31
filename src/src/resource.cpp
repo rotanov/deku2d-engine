@@ -39,8 +39,6 @@ CFactory::~CFactory()
 		delete obj;
 	}
 
-	FontManager->FreeInst("resource.cpp");
-	TextureManager->FreeInst();
 }
 
 CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
@@ -135,7 +133,7 @@ bool CFactory::InitManagers( CUpdateManager *vUpdateManager, CRenderManager *vRe
 			return false;
 	}
 
-	FontManager = CFontManager::Instance("resource.cpp");
+	FontManager = CFontManager::Instance();
 	TextureManager = CTextureManager::Instance();
 	initialized = true;
 	return true;

@@ -76,6 +76,7 @@ CTileset::CTileset()
 	BBox = NULL;
 	Texture = NULL;
 	memset(&Info, 0, sizeof(Info));
+	CTileSetManager::Instance()->AddObject(this);
 }
 
 void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData )
@@ -93,9 +94,7 @@ void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 
 Vector2* CTileset::GetCellTC(int CellIndex)
 {
-	if (Texture->width == 0 || Texture->height == 0)
-		if (!loaded || !Texture->Load())
-			Log("ERROR", "Using unloaded texture in Tileset %s", name);
+	assert(Texture->width == 0 || Texture->height == 0);
 
 	Vector2 *tc, t;
 	tc = new Vector2[4];
@@ -252,7 +251,6 @@ bool CCompas::Render()
 //  		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth), 1.0f, RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		Ninja->FreeInst();
 		return true;
 }
 
@@ -261,10 +259,27 @@ CCompas::CCompas()
 	name = "Visual compass";
 	CEngine *Ninja = CEngine::Instance();
 	Ninja->RenderManager.AddObject(this);
-	Ninja->FreeInst();	
 }
 
 CCompas::~CCompas()
 {
 	
+}
+
+
+CTileSetManager* CTileSetManager::_instance = NULL;
+
+CTileSetManager* CTileSetManager::Instance()
+{
+	if (!_instance)
+	{
+		_instance = new CTileSetManager;
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
+}
+
+CTileSetManager::CTileSetManager()
+{
+
 }

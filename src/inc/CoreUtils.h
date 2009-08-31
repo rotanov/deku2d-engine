@@ -3,18 +3,18 @@
 
 #pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется.
 
-#pragma warning (disable	:	4312)
-#pragma warning (disable	:	4311)
-#pragma warning (disable	:	4267)
-#pragma warning (disable	:	4305) 
-#pragma warning (disable	:	4244) 
-#pragma warning (disable	:	4996) 
-#pragma warning (disable	:	4172)
-#pragma warning (disable	:	4996) 
-#pragma warning (disable	:	4312) 
-#pragma warning (disable	:	4800) 
-#pragma warning (disable	:	4018) 
-#pragma warning (disable	:	4715) 
+//#pragma warning (disable	:	4312)
+#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
+#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
+#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
+#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
+//#pragma warning (disable	:	4996)	
+#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
+#pragma warning (disable	:	4996)	//	rare
+#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
+#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
+#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
 
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
@@ -28,6 +28,7 @@
 #include <string>
 #include <iostream>
 #include <time.h>
+#include <assert.h>
 
 
 using namespace std;
@@ -398,6 +399,23 @@ protected:
 	static CPSingleTone * _instance;
 	static int _refcount;
 };
+
+
+class CGarbageCollector : public CList
+{
+public:
+	CGarbageCollector();
+	~CGarbageCollector()
+	{
+		CObject *data;
+		while(Enum(data))
+		{
+			delete data;
+		}
+	}
+};
+extern CGarbageCollector SingletoneKiller;
+typedef CGarbageCollector CSingletoneKiller;
 
 
 

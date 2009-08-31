@@ -403,11 +403,10 @@ void CList::Reset()
 bool CList::Enum(CObject* &result)
 {
 	result = NULL;
-	if (current)	
-	{
-		result = current->GetData();
-		current = current->next;
-	}
+	if (!current)
+		result = (current = first)?current->GetData():NULL;
+	else
+		result = (current = current->next)?current->GetData():NULL;
 	return result;
 }
 
@@ -973,4 +972,12 @@ CBaseResource::CBaseResource() :loaded(false), filename("")
 CResource::CResource()
 {
 	name += "CResource";
+}
+
+
+CGarbageCollector SingletoneKiller;
+
+CGarbageCollector::CGarbageCollector()
+{
+
 }

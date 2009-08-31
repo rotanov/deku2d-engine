@@ -181,6 +181,5 @@ int	main(int argc, char *argv[])
 	Ninja->SetState(STATE_CONFIG_NAME, "Tanks.xml");
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->Run();
-	Ninja->FreeInst();
 	return 0x1;
 }

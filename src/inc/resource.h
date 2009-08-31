@@ -3,6 +3,7 @@
 
 #pragma message("Compiling resource.h")
 
+#include "GameUtils.h"
 #include "CoreUtils.h"
 #include "OpenglUtils.h"
 #include "xml.h"
@@ -10,12 +11,13 @@
 #define CONFIG_FILE_NAME "config/"
 #define DEFUALT_RESOURCE_LIST_PATH "config/resources.xml"
 
-#define DEFAULT_SECTION_COUNT	2
+#define DEFAULT_SECTION_COUNT	3
 #define CR_SECTION_FONTS		"Fonts"
 #define CR_SECTION_TEXTURES		"Textures"
+#define CR_SECTION_TILESETS		"Tilesets"
 
-static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture};
-static char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES};
+static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture, CTileset::NewTileset};
+static char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES, CR_SECTION_TILESETS};
 
 class CExtResRelation : public CObject
 {
@@ -46,6 +48,7 @@ static CList ExtResRelationList;
 #define OBJ_FONT_M			0x03
 #define	OBJ_USER_DEFINED	0x04
 #define OBJ_TEXTURE_RES		0x05
+#define OBJ_TILESET_RES		0x06
 
 #define MANAGER_TYPE_REN 0x00
 #define MANAGER_TYPE_FNT 0x01

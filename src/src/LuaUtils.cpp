@@ -192,8 +192,8 @@ void GlobalLuaState::innerFunction1()
 
 
 
-	Factory->FreeInst();
-	Ninja->FreeInst();
+
+
 
 }
 

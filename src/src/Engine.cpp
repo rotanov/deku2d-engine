@@ -30,7 +30,7 @@ CEngine::CEngine()
 // 	procGUIGetMouseUp = NULL;
 // 	procGUIGetMouseMove = NULL;
 	Factory = CFactory::Instance();
-	FontManager = CFontManager::Instance("ninja.cpp");
+	FontManager = CFontManager::Instance();
 	//_instance = NULL;
 	//_refcount = 0;
 	ConfigFileName = CONFIG_FILE_NAME;
@@ -50,19 +50,14 @@ CEngine* CEngine::Instance()
 // 		_instance = new CEngine;
 // 	}
 // 	_refcount++;
-	return &_instance;
+	if(!_instance)
+	{
+		_instance = new CEngine;
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
 }
 
-void CEngine::FreeInst()
-{
-// 	_refcount--;
-// 	if (!_refcount)
-// 	{
-// 		delete this;
-// 		Log("INFO", "Ninja deleted from memory.");
-// 		_instance = NULL;
-// 	}
-}
 
 
 
@@ -252,9 +247,6 @@ bool CEngine::Init()
 
 bool CEngine::Suicide()
 {
-	FontManager->FreeInst("Ninja.cpp");
-	TextureManager->FreeInst();
-	Factory->FreeInst();
 	Log("INFO", "Suicide success");
 	return true;
 }
@@ -498,7 +490,7 @@ bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKey
 	KeyInputFuncCount++;
 	return true;
 }
-CEngine CEngine::_instance; // =0
+CEngine *CEngine::_instance = NULL;
 //int CEngine::_refcount = 0;
 
 bool CUpdateManager::UpdateObjects()
@@ -516,6 +508,5 @@ bool CUpdateManager::UpdateObjects()
 		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 		data = dynamic_cast<CUpdateObject*>(Next());
 	}
-	engine->FreeInst();
 	return true;
 }

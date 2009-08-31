@@ -230,11 +230,11 @@ public:
 	}
 
 	void Bind();
-	bool Load();
 	bool LoadFromFile();
-	GLuint GetTexID();
 protected:
 	void Unload();
+private:
+	GLuint GetTexID();
 };
 
 class CTextureManager : public CList
@@ -242,12 +242,10 @@ class CTextureManager : public CList
 public:
 	CTexture* GetTextureByName(const string &TextureName);
 	static CTextureManager* Instance();
-	void FreeInst();
 protected:
 	CTextureManager();
 	~CTextureManager();
 	static CTextureManager * _instance;
-	static int _refcount;
 };
 
 
@@ -458,21 +456,19 @@ private:
 class CFontManager : public CList
 {
 public:
-	static			CFontManager* Instance(char *byWho);
-	void			FreeInst(char *byWho);
-	CFont			*CurrentFont;
-	bool			SetCurrentFont(char* fontname);
-	bool			PrintEx(int x, int y, float depth, char* text, ...);
-	bool			Print(int x, int y, float depth, char* text, ...);
-	CFont*			GetFont(const char* fontname);
-	CFont*			GetFontEx(string fontname);
-	bool			AddObject(CObject *object);
+	static CFontManager*	Instance();
+	CFont					*CurrentFont;
+	bool					SetCurrentFont(char* fontname);
+	bool					PrintEx(int x, int y, float depth, char* text, ...);
+	bool					Print(int x, int y, float depth, char* text, ...);
+	CFont*					GetFont(const char* fontname);
+	CFont*					GetFontEx(string fontname);
+	bool					AddObject(CObject *object);
 
 protected:
 	CFontManager();
 	~CFontManager();
 	static			CFontManager* _instance;
-	static int		_refcount;
 };
 
 class CRenderManager : public CList

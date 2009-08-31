@@ -2,7 +2,7 @@
 #define _GAME_UTILS_H_
 
 #include "CoreUtils.h"
-#include "resource.h"
+//#include "resource.h"
 #include "OpenglUtils.h"
 
 struct CTileSetInfo 
@@ -21,7 +21,7 @@ public:
 	CAABB *BBox;
 
 	CTileset ();
-	static CObject* NewTileSet()
+	static CObject* NewTileset()
 	{
 		return new CTileset;
 	}
@@ -46,6 +46,10 @@ public:
 			Tileset->CheckLoad();
 		return Tileset;
 	}
+	static CTileSetManager* Instance();
+protected:
+	static CTileSetManager *_instance;
+	CTileSetManager();
 };
 
 struct CMapCellInfo

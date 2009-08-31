@@ -1104,7 +1104,6 @@ void CEdit::DrawText()
 		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
 		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
 		fnt->Pos.y = scrheight - GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
-		engine->FreeInst();
 		fnt->doRenderToRect = true;
 		fnt->isTextSelected = SelLength != 0;
 		fnt->Sel0 = SelStart;
@@ -1652,7 +1651,7 @@ bool CGUIRenderer::Update( float dt )
 
 CGUIRenderer::CGUIRenderer()
 {
-	FontManager = CFontManager::Instance("gui.cpp");
+	FontManager = CFontManager::Instance();
 	engine = CEngine::Instance();
 	engine->GetState(STATE_SCREEN_HEIGHT, &scrheight);
 	engine->GetState(STATE_SCREEN_HEIGHT, &scrwidth);
@@ -1660,8 +1659,7 @@ CGUIRenderer::CGUIRenderer()
 
 CGUIRenderer::~CGUIRenderer()
 {
-	FontManager->FreeInst("gui.cpp");
-	engine->FreeInst();
+	
 }
 
 void CEdit::SetCaption( string _caption )

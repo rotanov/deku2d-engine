@@ -52,7 +52,7 @@
 
 #define STATE_GL_BG_COLOR			0xA0
 
-class CEngine
+class CEngine : public CObject
 {
 public:
 	CFactory					*Factory; // Фабрика объектов. Синглтон.
@@ -62,11 +62,10 @@ public:
 	CFontManager				*FontManager; // ...а тут опять указатель?! 
 	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
 	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
-	BOOL						keys[SDLK_LAST];  // FFFFFFFFUUUUUUUUUU~ ?
+	BOOL						keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;
 
 	static CEngine*				Instance();
-	void						FreeInst();
 	void						SetState(int state, void* value);
 	void						GetState(int state, void* value);
 	bool						AddEventFunction(EventFunc func);
@@ -100,21 +99,21 @@ private:
 	bool						ProcessEvents();
 
 	// TODO: либо подумать ещё раз, либо избавиться от констант и перейти на списки. И да, ебал я ваш реаллок.
-	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];
+	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];	// Noes, dat is not wut we need
 	KeyInputFunc				KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
-	bool						(*procUserInit)();
-	bool						(*procUserSuicide)();
-	bool						(*procFocusLostFunc)();
-	bool						(*procFocusGainFunc)();
-	bool						(*procUpdateFunc)(scalar);
-	bool						(*procRenderFunc)();
+	bool						(*procUserInit)();			// ok
+	bool						(*procUserSuicide)();		// wrong design
+	bool						(*procFocusLostFunc)();		// ok
+	bool						(*procFocusGainFunc)();		// ok
+	bool						(*procUpdateFunc)(scalar);	// ok, yeah
+	bool						(*procRenderFunc)();		// ok
 protected:
-	static CEngine _instance;
-	//static int _refcount;
+	static CEngine *_instance;
 	CEngine();
 	~CEngine();
 };
 
-extern CEngine *ninja;
+//extern CEngine *engine;  // НАХУЙ подсчёт ссылок
+// Да, подсчёт ссылок конечно же нахуй, но тот факт что отслеживать ручками порядок вызова конструкторов - это великая боль в попе - никто не отменял.
 
 #endif _ENGINE_H_

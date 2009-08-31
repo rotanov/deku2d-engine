@@ -605,9 +605,7 @@ CFont::CFont()
 	Sel0 = Sel1 = 0;
 	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);	// MAGIC NUMBER
 	SetDepth(0.0f);
-	CFontManager* FntMan = CFontManager::Instance("OpenglUtils.cpp");
-	FntMan->AddObject(this);
-	FntMan->FreeInst("OpenGLutils.cpp");
+	CFontManager::Instance()->AddObject(this);
 }
 
 CFont::~CFont()
@@ -631,11 +629,11 @@ bool CFont::LoadFromFile()
 	file.ReadLine(FontImageName);	
 	CTextureManager *TexMan = CTextureManager ::Instance();
 	Texture = TexMan->GetTextureByName(FontImageName);
-	TexMan->FreeInst();
+
 	file.Read(bbox, sizeof(bbox));
 	file.Close();
 	base = glGenLists(256);
-	glBindTexture(GL_TEXTURE_2D, Texture->GetTexID());
+	Texture->Bind();
 	float TmpOOWdth = 1.0f/Texture->width, TmpOOHght = 1.0f/Texture->height;
 	for(int i=0;i<256;i++)
 	{
@@ -1316,33 +1314,17 @@ CFontManager::CFontManager()
 	CurrentFont = NULL;
 }
 
-CFontManager* CFontManager::Instance(char *byWho)
+CFontManager* CFontManager::Instance()
 {
-	if (_instance == NULL)
+	if (!_instance)
 	{
 		_instance = new CFontManager;
-		Log("INFO", "Memory allocated for FontManager");
+		SingletoneKiller.AddObject(_instance);
 	}
-	_refcount++;
-	Log("INFO", "Font manager instanced by %s", byWho);
 	return _instance;
 }
 
-
-void CFontManager::FreeInst(char* byWho)
-{
-	_refcount--;
-	if (!_refcount)
-	{		
-		delete this;
-		Log("INFO", "FontManager deleted from memory by %s.", byWho);
-		_instance = NULL;
-	}
-	Log("Info", "FontManager FreeInst by %s.", byWho);
-}
-
-CFontManager* CFontManager::_instance = 0;
-int CFontManager::_refcount = 0;
+CFontManager* CFontManager::_instance = NULL;
 
 
 CFont* CFontManager::GetFont(const char* fontname )	
@@ -1410,24 +1392,14 @@ bool CFontManager::AddObject( CObject *object )
 
 CTextureManager* CTextureManager::Instance()
 {
-	if (_instance == NULL)
+	if (!_instance)
 	{
 		_instance = new CTextureManager;
+		SingletoneKiller.AddObject(_instance);
 	}
-	_refcount++;
 	return _instance;
 }
 
-void CTextureManager::FreeInst()
-{
-	_refcount--;
-	if (!_refcount)
-	{
-		delete this;
-		Log("INFO", "TextureManager deleted from memory.");
-		_instance = NULL;
-	}
-}
 
 CTextureManager::CTextureManager()
 {
@@ -1448,25 +1420,11 @@ CTexture* CTextureManager::GetTextureByName( const string &TextureName )
 	return TempTexture;
 }
 CTextureManager* CTextureManager::_instance = 0;
-int CTextureManager::_refcount = 0;
 
 
 //////////////////////////////////////////////////////////////////////////
 //					CTexture
 //////////////////////////////////////////////////////////////////////////
-bool CTexture::Load()
-{
-	if (filename == "")
-	{
-		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", name);
-		return false;
-	}
-	if (!loaded)
-		if (LoadTexture(filename.c_str()))
-			loaded = true;
-	return loaded;
-}
-
 GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
@@ -1474,7 +1432,7 @@ GLuint CTexture::GetTexID()
 		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", name.c_str());
 		if (!loaded)
 		{
-			Load();
+			LoadFromFile();
 		}		
 	}
 	return TexID;
@@ -1486,15 +1444,12 @@ CTexture::CTexture(char * vfilename)
 	name = "CTexture";
 	CTextureManager *TexMan = CTextureManager::Instance();
 		TexMan->AddObject(this);
-	TexMan->FreeInst();
 }
 
 CTexture::CTexture()
 {
 	name = "CTexture";
-	CTextureManager *TexMan = CTextureManager::Instance();
-	TexMan->AddObject(this);
-	TexMan->FreeInst();
+	CTextureManager::Instance()->AddObject(this);
 }
 
 void CTexture::Bind()
@@ -1509,15 +1464,22 @@ void CTexture::Unload()
 
 bool CTexture::LoadFromFile()
 {
-	Load();
-	return true;
+	if (filename == "")
+	{
+		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", name);
+		return false;
+	}
+	if (!loaded)
+		if (LoadTexture(filename.c_str()))
+			loaded = true;
+	return loaded;
 }
 void CCamera::Assign(scalar *x, scalar *y)
 {
 	CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
 	engine->GetState(STATE_SCREEN_HEIGHT, &h);
 	engine->GetState(STATE_SCREEN_HEIGHT, &w);
-	engine->FreeInst();
+
 	Atx = x;
 	Aty = y;
 	dx = *x;
@@ -1785,7 +1747,6 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
 	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject((string*)"cells"));
-	Tman->FreeInst();
 	cells->Bind();
 #endif 
 
@@ -1891,7 +1852,6 @@ void CPrimitiveRender::CheckTexture()
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
 	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject((string*)"cells"));
-	Tman->FreeInst();
 	cells->Bind();
 }
 
@@ -2086,7 +2046,7 @@ bool CButtonMini::Render()
 {	
 	CEngine *engine = CEngine::Instance();
 	font = engine->FontManager->GetFont("Font");
-	engine->FreeInst();
+
 	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
 	font->tClr = color;
 	glLoadIdentity();
@@ -2315,7 +2275,7 @@ bool CEditMini::Render()
 {
 	CEngine *engine = CEngine::Instance();
 	font = engine->FontManager->GetFont("Font");
-	engine->FreeInst();
+
 	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
 	font->tClr = color;
 	glLoadIdentity();
