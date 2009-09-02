@@ -147,14 +147,14 @@ void CXMLNode::ResetPointer()
 int CXMLNode::Enum(string &outKey, string &outValue, int &res)
 {
 	res = XMLENUM_END;
-	if (enumPtr == NULL)
-		ResetEnum(XMLENUM_ATTRSONLY);
+	/*if (enumPtr == NULL)
+		ResetEnum(XMLENUM_ATTRSONLY);*/
 	switch (enumKind)
 	{
 	case XMLENUM_ATTRSONLY:
 		{
 
-			if (enumPtr->Next == NULL&&!_last)
+			if (enumPtr == NULL/*&&!_last*/)
 			{
 				_last = 0;
 				return XMLENUM_END;
@@ -168,14 +168,8 @@ int CXMLNode::Enum(string &outKey, string &outValue, int &res)
 			}
 			outKey = enumPtr->Name;
 			outValue = enumPtr->Value;
-			res = XMLENUM_ATTRIBUTE;
-			if (enumPtr->Next != NULL)
-			{
-				if (enumPtr->Next->Next == NULL){
-					_last = true;
-				}
-				enumPtr = enumPtr->Next;
-			}
+//			res = XMLENUM_ATTRIBUTE;
+			enumPtr = enumPtr->Next;
 			return XMLENUM_ATTRIBUTE;
 			break;
 		}

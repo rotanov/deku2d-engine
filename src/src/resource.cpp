@@ -161,6 +161,7 @@ bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 	int Result;
 	CFactory *Factory = CFactory::Instance(); 
 	CResource *Resource;
+	x->ResetEnum( XMLENUM_ATTRSONLY );
 	while (x->Enum(key, val, Result))
 	{
 		Resource = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
