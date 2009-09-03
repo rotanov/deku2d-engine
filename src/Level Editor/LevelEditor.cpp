@@ -15,7 +15,7 @@ int ZoomDt = 2;
 int LeftPanel = 196;
 int BottomPanel = 196;
 
-CTileSet *TileSet = NULL;
+CTileset *TileSet = NULL;
 CLevelMap Level;
 CFont* f;
 
@@ -24,11 +24,11 @@ int ScrnHeight;
 
 int CurrTileIndex = 0;
 Vector2 MousePos;
-Vector2 oMp = V2Zero;
-Vector2 Offset = V2Zero;
+Vector2 oMp = V2_Z;
+Vector2 Offset = V2_Z;
 Vector2 CellOffset;
 
-Vector2 TileSelPos = V2Zero;
+Vector2 TileSelPos = V2_Z;
 
 #define ST_SELECT_TILE		0x00
 #define ST_DRAW_TILES		0x01
@@ -187,10 +187,6 @@ bool ProcessInput(SDL_Event& event)
 
 bool Init()
 {	
-	if (!Ninja->ResourceManager.OpenResourceList(Ninja->ResourceListPath)) 
-		return false;
-	if (!Ninja->ResourceManager.LoadResources())
-		return false;
 	// Загружаем из конфига всякие разные параметры для редактора
 	SetZoom(Ninja->CfgGetInt("DefaultCellSize"));
 	GameVTiles	= Ninja->CfgGetInt("GameVTiles");
@@ -202,16 +198,15 @@ bool Init()
 	SDL_ShowCursor(0);
 	//Ninja->RenderManager.SortByAlpha();
 	//Ninja->RenderManager.SortByZ();	
-	TileSet = dynamic_cast<CTileSet*>(Ninja->ResourceManager.LoadResource("Tilesets", "TileSet02-Snow01", CTileSet::NewTileSet));
+	TileSet = dynamic_cast<CTileset*>(Ninja->ResourceManager.LoadResource("Tilesets", "TileSet02-Snow01", CTileset::NewTileset));
 	gSetBlendingMode();
 	Ninja->FontManager->SetCurrentFont("Font");
-	CFontManager* fm = CFontManager::Instance("Main");
+	CFontManager* fm = CFontManager::Instance();
 	f = fm->CurrentFont;
-	fm->FreeInst("main");
 	Ninja->AddEventFunction(ProcessInput);
 	Level.numCellsHor = 20;
 	Level.numCellsVer = 10;
-	Level.TileSetName = "TileSet02-Snow01";
+	//Level.TileSet->name = "TileSet02-Snow01";
 	Level.Cells = new CMapCellInfo [20*10];
 	memset(Level.Cells, 0, 20*10*(sizeof(CMapCellInfo)));
 	Level.TileSet = TileSet;
@@ -244,7 +239,7 @@ void DrawGrid()
 	glLoadIdentity();
 	CPrimitiveRender p;
 	glTranslatef((int)Offset.x % Zoom,(int)Offset.y % Zoom, 0.0f);
-	p.doUseCurrentCoordSystem = false;
+	p.doUseGlobalCoordSystem = false;
 	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
 	p.lClr = RGBAf(1.0f, 1.0f, 1.0f, 0.6f);
 	p.pClr = RGBAf(1.0f, 1.0f, 1.0f, 0.6f);
@@ -281,10 +276,10 @@ void DrawCursor()
 void DrawPanels()
 {
 	CPrimitiveRender p;
-	p.BlendingOption = PRM_RNDR_OPT_BLEND_NOONE;
+	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
 	p.sClr = RGBAf(0.3f, 0.4f, 0.5, 0.7f);
-	p.grRectL(V2Zero+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
-	p.grRectS(V2Zero+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
+	p.grRectL(V2_Z+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
+	p.grRectS(V2_Z+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
 }
 
 
@@ -313,7 +308,7 @@ bool Draw()
 	
 	CPrimitiveRender p;
 	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
-	p.doUseCurrentCoordSystem = true;
+	p.doUseGlobalCoordSystem = true;
 	p.lClr = RGBAf(0.1f, 0.7f, 0.3f, 0.7f);
 	p.pClr = RGBAf(0.1f, 0.7f, 0.3f, 0.7f);
 	p.sClr = RGBAf(0.0f, 0.0f, 0.0f, 0.0f);
@@ -346,7 +341,7 @@ bool Draw()
 	p.grCircleL(MousePos, 5.0f);
 
 	glLoadIdentity();
-	f->p = Vector2((vx+1)*Zoom, vy*Zoom);
+	f->Pos = Vector2((vx+1)*Zoom, vy*Zoom);
 	f->Print(" x:%d y:%d", (int)(vx - CellOffset.x), (int)(vy - CellOffset.y));
 
 
@@ -360,10 +355,9 @@ int	main(int argc, char *argv[])
 {
 	Ninja->SetState(STATE_CONFIG_NAME, "LevelEditor.xml");
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
-	Ninja->SetState(STATE_USER_INIT, &Init);
+	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 
 	Ninja->Run();
-	Ninja->FreeInst();
 
 	return 0x0;
 }

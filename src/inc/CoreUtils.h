@@ -422,7 +422,7 @@ typedef CGarbageCollector CSingletoneKiller;
 #endif CORE_UTILS_H	
 
 
-// string itos(int i)	// convert int to string
+// string itos(int i)	// convert int to stringw
 // {
 // 	stringstream s;
 // 	s << i;

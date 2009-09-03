@@ -145,38 +145,38 @@ bool CTank::Render()
 	glTranslatef(-Position.x - 16, -Position.y - 16, 0.0f);
 	Color->glSet();
 	glEnable(GL_TEXTURE_2D);
-	Texture->Bind();
+	Tileset->Texture->Bind();
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
+		Tileset->GetCellTC(csTank)[0].glTexCoord();
 		glVertex2f(Position.x, Position.y);
 
-		glTexCoord2f(1.0f, 0.0f);
+		Tileset->GetCellTC(csTank)[1].glTexCoord();
 		glVertex2f(Position.x + 32, Position.y);
 
-		glTexCoord2f(1.0f, 1.0f);
+		Tileset->GetCellTC(csTank)[2].glTexCoord();
 		glVertex2f(Position.x + 32, Position.y + 32);
 
-		glTexCoord2f(0.0f, 1.0f);
+		Tileset->GetCellTC(csTank)[3].glTexCoord();
 		glVertex2f(Position.x, Position.y + 32);
 	glEnd();
 	glLoadIdentity();
 
-	BulletTexture->Bind();
+	Tileset->Texture->Bind();
 	glColor4f(0.8f, 0.1f, 0.1f, 0.9f);
 	glBegin(GL_QUADS);
 	for(int i=0;i<BulletsCount;i++)
 	{
-		glTexCoord2f(0.4375f, 0.4375f);
+		Tileset->GetCellTC(csBullet)[0].glTexCoord();
 		Bullets[i].p.glVertex();
 
-		glTexCoord2f(0.5625f, 0.4375f);
-		(Bullets[i].p + Vector2(4,0)).glVertex();
+		Tileset->GetCellTC(csBullet)[1].glTexCoord();
+		(Bullets[i].p + Vector2(32,0)).glVertex();
 
-		glTexCoord2f(0.5625f, 0.5625f);
-		(Bullets[i].p + Vector2(4,4)).glVertex();
+		Tileset->GetCellTC(csBullet)[2].glTexCoord();
+		(Bullets[i].p + Vector2(32,32)).glVertex();
 
-		glTexCoord2f(0.4375f, 0.5625f);
-		(Bullets[i].p + Vector2(0,4)).glVertex();
+		Tileset->GetCellTC(csBullet)[3].glTexCoord();
+		(Bullets[i].p + Vector2(0,32)).glVertex();
 	}
 	glEnd();
 	
@@ -262,7 +262,7 @@ Vector2 CTankMap::GetNewTankLocation()
 	for (int i=0;i<MAP_SIZE_X;i++)
 		for (int j=0;j<MAP_SIZE_Y;j++)
 		{
-			if (Cells[j][i].TileIndex == csFree1 && Random_Int(0, 4) == 2)
+			if (Cells[j][i].TileIndex == csFree1)
 				return Vector2(i*CellSize, j*CellSize);
 		}
 }
@@ -272,31 +272,28 @@ bool CTankMap::Render()
 	glLoadIdentity();
 	glScissor(0, 0, 640, 460);
 	gToggleScissor(true);
+	Tileset->Texture->Bind();
 	glEnable(GL_TEXTURE_2D);
 	CellSize = DEFAULT_CELL_SIZE;
+	glBegin(GL_QUADS);
 	for (int i=0;i<MAP_SIZE_X;i++)
 		for (int j=0;j<MAP_SIZE_Y;j++)
 		{
-			if (Cells[j][i].TileIndex == csBlock || Cells[j][i].TileIndex  == csDestr || Cells[j][i].TileIndex  == csFree1)
+			//if (Cells[j][i].TileIndex == csBlock || Cells[j][i].TileIndex  == csDestr || Cells[j][i].TileIndex  == csFree1)
 			{
-				if (Cells[j][i].TileIndex  == csBlock)
-					BlockTexture->Bind();
-				if (Cells[j][i].TileIndex  == csDestr)
-					DestrTexture->Bind();
-				if (Cells[j][i].TileIndex  == csFree1)
-					FreeTexture->Bind();
-				glBegin(GL_QUADS);
-					glTexCoord2f(0.0f, 0.0f);
+				
+					Tileset->GetCellTC(Cells[j][i].TileIndex)[0].glTexCoord();
 					(Vector2(i, j)*CellSize).glVertex();
-					glTexCoord2f(1.0f, 0.0f);
+					Tileset->GetCellTC(Cells[j][i].TileIndex)[1].glTexCoord();
 					(Vector2(i+1, j)*CellSize).glVertex();
-					glTexCoord2f(1.0f, 1.0f);
+					Tileset->GetCellTC(Cells[j][i].TileIndex)[2].glTexCoord();
 					(Vector2(i+1, j+1)*CellSize).glVertex();
-					glTexCoord2f(0.0f, 1.0f);
+					Tileset->GetCellTC(Cells[j][i].TileIndex)[3].glTexCoord();
 					(Vector2(i, j+1)*CellSize).glVertex();
-				glEnd();
+				
 			}
 		}
+	glEnd();
 	glDisable(GL_TEXTURE_2D);
 	gToggleScissor(false);
 	return true;
@@ -309,7 +306,8 @@ bool CTankMap::Update(scalar dt)
 
 CAABB CTankMap::GetCellAABB(Vector2& V)
 {
-	if (Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize].TileIndex  != csFree1)
+	
+	if (!Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize].isFree())
 		return CAABB(      (((int)V.x/(int)CellSize)) * CellSize, (((int)V.y/(int)CellSize)) * CellSize, 
 			CellSize, CellSize);
 	else 

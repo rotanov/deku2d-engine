@@ -3,13 +3,15 @@
 
 #include "Engine.h"
 
+
+
 class CTank;
 class CTankMap;
 class CTankManager;
 class CTankAI;
 
 enum EActionKind {akLeft=0, akRight=1, akUp=2, akDown=3, akFire=4, akItem=5};
-enum ETanksTileIndex {csFree1=0, csFree2=1, csFree3=2, csFree4=3, csBlock=4, csDestr=5, csTank=6, csBullet=7};
+enum ETanksTileIndex {csFree1=7, csFree2=6, csFree3=3, csFree4=2, csBlock=5, csDestr=1, csTank=4, csBullet=0};
 
 const Vector2	Directions[4] = {DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN};
 const scalar	DEFAULT_TANK_HEALTH = 100;
@@ -22,65 +24,51 @@ const int		DEFAULT_CELL_SIZE = 32;
 const int		CONTROLS_COUNT = 6;
 const int		MAX_BULLETS_PER_TANK = 128;
 const scalar	DEFAULT_FIRING_INTERVAL = 0.2f;
+
 static RGBAf	COLOR_P1 = RGBAf(0.5f, 0.8f, 0.4f, 1.0f);
 static RGBAf	COLOR_P2 = RGBAf(0.9f, 0.9f, 0.4f, 1.0f);
 static RGBAf	COLOR_AI = RGBAf(0.9f, 0.5f, 0.4f, 1.0f);
 
-static SDLKey K_LEFT[MAX_PLAYERS_COUNT]	= {SDLK_LEFT,	SDLK_a};
+static SDLKey K_LEFT[MAX_PLAYERS_COUNT]		= {SDLK_LEFT,	SDLK_a};
 static SDLKey K_RIGHT[MAX_PLAYERS_COUNT]	= {SDLK_RIGHT,	SDLK_d};
-static SDLKey K_UP[MAX_PLAYERS_COUNT]	= {SDLK_UP,		SDLK_w};
-static SDLKey K_DOWN[MAX_PLAYERS_COUNT]	= {SDLK_DOWN,	SDLK_s};
-static SDLKey K_FIRE[MAX_PLAYERS_COUNT]	= {SDLK_RCTRL,	SDLK_f};
-static SDLKey K_ITEM[MAX_PLAYERS_COUNT]	= {SDLK_RSHIFT,	SDLK_c};
+static SDLKey K_UP[MAX_PLAYERS_COUNT]		= {SDLK_UP,		SDLK_w};
+static SDLKey K_DOWN[MAX_PLAYERS_COUNT]		= {SDLK_DOWN,	SDLK_s};
+static SDLKey K_FIRE[MAX_PLAYERS_COUNT]		= {SDLK_RCTRL,	SDLK_f};
+static SDLKey K_ITEM[MAX_PLAYERS_COUNT]		= {SDLK_RSHIFT,	SDLK_c};
 static const SDLKey *AR_K_CONTRLS[CONTROLS_COUNT] = {K_LEFT, K_RIGHT, K_UP, K_DOWN, K_FIRE, K_ITEM};
 
-#define TANK_TEXTURE_NAME  "Tank3"
-#define BULLET_TEXTURE_NAME  "Fire"
-#define DEFAULT_BLOCK_TEXTURE "Block"
-#define DEFAULT_DESTR_TEXTURE "Destr"
-#define DEFAULT_FREE_TEXTURE "Free"
-
-__INLINE int Dir2AK(Vector2& V)
+__INLINE int Dir2AK(Vector2& V) // Direction to action kind
 {
-	if (V == DIR_LEFT)
-		return  akLeft;
-	if (V == DIR_RIGHT)
-		return  akRight;
-	if (V == DIR_UP)
-		return  akUp;
-	if (V == DIR_DOWN)
-		return  akDown;
+	for (int i=0;i<4;i++)
+		if (V == Directions[i])
+			return EActionKind(i);
 }
 
 class CTank : public CRenderObject, public CUpdateObject
 {
 public:
-	Vector2 Direction;
-	int  Health;
-	scalar Velocity;
-	scalar Damage;
+	Vector2			Direction;
+	int				Health;
+	scalar			Velocity;
+	scalar			Damage;
 	//////////////////////////////////////////////////////////////////////////
-	CTankMap *Map;
-	CTankManager* Host;
-	CTankAI* AI;
-	CTexture* Texture;
-	CTexture* BulletTexture;
-	RGBAf* Color;
+	CTankMap*		Map;
+	CTankManager*	Host;
+	CTankAI*		AI;
+	CTileset*		Tileset;
+	RGBAf*			Color;
 	//////////////////////////////////////////////////////////////////////////
-	bool States[CONTROLS_COUNT];
-	bool isAlive;
-	bool isFiring;
-	bool isWalking;
-	SDLKey Controls[6];
+	bool			States[CONTROLS_COUNT];
+	bool			isAlive;
+	bool			isFiring;
+	bool			isWalking;
+	SDLKey			Controls[6];
 	//////////////////////////////////////////////////////////////////////////
-	struct  
-	{
-		Vector2 p, v;
-	}Bullets[MAX_BULLETS_PER_TANK];
+	struct {Vector2 p, v;}	Bullets[MAX_BULLETS_PER_TANK];
 	
-	int BulletsCount;
-	scalar FiringInterval;
-	scalar FiringTimeout;
+	int				BulletsCount;
+	scalar			FiringInterval;
+	scalar			FiringTimeout;
 
 	CTank(CTankMap* AMap, CTankManager* AHost, CTankAI* AAI) : Map(AMap), Host(AHost), AI(AAI)
 	{
@@ -88,6 +76,7 @@ public:
 		CEngine::Instance()->RenderManager.AddObject(this);
 		CEngine::Instance()->UpdateManager.AddObject(this);
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 		isAlive = true;
 		isFiring = false;			
 		for (int i=0;i<5;i++)
@@ -100,8 +89,6 @@ public:
 		Damage = DEFAULT_TANK_DAMAGE;
 		int RandomDirection = Random_Int(0, 3);
 		Direction = Directions[RandomDirection];
-		Texture = CEngine::Instance()->TextureManager->GetTextureByName(TANK_TEXTURE_NAME);  // No! Try to ask host for texture for instance of tank
-		BulletTexture = CEngine::Instance()->TextureManager->GetTextureByName(BULLET_TEXTURE_NAME); 
 
 		BulletsCount = 0;
 
@@ -137,16 +124,12 @@ public:
 	CTankMapCell Cells[MAP_SIZE_Y][MAP_SIZE_X];
 	int CellSize;
 	CTankManager* Host;
-	CTexture *BlockTexture;
-	CTexture *FreeTexture;
-	CTexture *DestrTexture;
+	CTileset* Tileset;
 	CTankMap(CTankManager* AHost) : Host(AHost)
 	{
 		CEngine::Instance()->RenderManager.AddObject(this);
 		CEngine::Instance()->UpdateManager.AddObject(this);
-		BlockTexture = CEngine::Instance()->TextureManager->GetTextureByName(DEFAULT_BLOCK_TEXTURE);
-		DestrTexture = CEngine::Instance()->TextureManager->GetTextureByName(DEFAULT_DESTR_TEXTURE);
-		FreeTexture = CEngine::Instance()->TextureManager->GetTextureByName(DEFAULT_FREE_TEXTURE);
+		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 
 		CellSize = DEFAULT_CELL_SIZE;
 		for (int i=0;i<MAP_SIZE_X;i++)
@@ -163,7 +146,18 @@ public:
 					if (prob == 1)
 						Cells[j][i].TileIndex = csDestr;
 					else
-						Cells[j][i].TileIndex = csFree1;
+					{
+						int freeind = Random_Int(0,20);
+						if (freeind == 0)
+							Cells[j][i].TileIndex = csFree1; else
+							if (freeind == 1)
+								Cells[j][i].TileIndex = csFree4; else
+								if (freeind == 2)
+									Cells[j][i].TileIndex = csFree3; else
+									
+										Cells[j][i].TileIndex = csFree2; 
+
+					}
 				}
 			}
 	}

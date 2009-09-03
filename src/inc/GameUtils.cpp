@@ -94,7 +94,7 @@ void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 
 Vector2* CTileset::GetCellTC(int CellIndex)
 {
-	assert(Texture->width == 0 || Texture->height == 0);
+	assert(Texture->width != 0 && Texture->height != 0);
 
 	Vector2 *tc, t;
 	tc = new Vector2[4];
@@ -137,17 +137,11 @@ bool CLevelMap::Render()
 		{
 			t = Cells + _Cell(j, i);
 
-			glTexCoord2f(t->tc[0].x, t->tc[0].y);
-			glVertex3f(t->pos[0].x,	t->pos[0].y, t->z);
-
-			glTexCoord2f(t->tc[1].x, t->tc[1].y); 
-			glVertex3f(t->pos[1].x,	t->pos[1].y, t->z);
-
-			glTexCoord2f(t->tc[2].x, t->tc[2].y); 
-			glVertex3f(t->pos[2].x,	t->pos[2].y, t->z);
-
-			glTexCoord2f(t->tc[3].x, t->tc[3].y); 
-			glVertex3f(t->pos[3].x,	t->pos[3].y, t->z);
+			for(int k=0;k<4;k++)
+			{
+				t->tc[k].glTexCoord();
+				glVertex3f(t->pos[k].x,	t->pos[k].y, t->z);
+			}
 		}
 	glEnd();
 	glPopAttrib();

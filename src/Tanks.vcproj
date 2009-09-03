@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="zlib\;libpng\;inc\;SDL\;gl\;Lua\;Tanks\"
+				AdditionalIncludeDirectories="zlib\;libpng\;inc\;SDL\;gl\;Lua\;Tanks\;tnl\;libtomcrypt\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,8 +62,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib"
+				AdditionalOptions="/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:msvcrt.lib"
+				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcryptd.lib tnld.lib wsock32.lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib\"
@@ -130,7 +130,7 @@
 				AdditionalOptions="/Zc:wchar_t-"
 				Optimization="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="zlib\;libpng\;inc\;SDL\;gl\;Lua\;Tanks\"
+				AdditionalIncludeDirectories="zlib\;libpng\;inc\;SDL\;gl\;Lua\;Tanks\;tnl\;libtomcrypt\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -149,7 +149,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib"
+				AdditionalOptions="/NODEFAULTLIB:LIBCMT.lib"
+				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcrypt.lib tnl.lib wsock32.lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				AdditionalLibraryDirectories="..\lib\"
 				GenerateManifest="true"
@@ -562,6 +563,246 @@
 			</File>
 			<File
 				RelativePath=".\Tanks\Tanks.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="tnl"
+			>
+			<File
+				RelativePath=".\tnl\assert.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\asymmetricKey.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\bitStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\byteBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\certificate.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\clientPuzzle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\connectionStringTable.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\dataChunker.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\eventConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\ghostConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\huffmanStringProcessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\journal.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\log.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\netBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\netConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\netInterface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\netObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\netStringTable.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\platform.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\random.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\rpc.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\symmetricCipher.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\thread.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlAssert.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlAsymmetricKey.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlBitSet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlBitStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlByteBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlCertificate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlClientPuzzle.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlConnectionStringTable.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlDataChunker.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlEndian.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlEventConnection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlGhostConnection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlHuffmanStringProcessor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlJournal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlLog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlMethodDispatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlMethodDispatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNetBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNetConnection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNetEvent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNetInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNetObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNetStringTable.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlNonce.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlPlatform.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlRandom.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlRPC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlString.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlSymmetricCipher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlThread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlTypes.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlUDP.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\tnlVector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\udp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tnl\vector.cpp"
 				>
 			</File>
 		</Filter>

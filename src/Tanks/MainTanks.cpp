@@ -3,6 +3,11 @@
 //#include "LuaUtils.h"
 #include "Tanks.h"
 
+#include "tnl.h"
+#include "tnlEventConnection.h"
+#include "tnlNetInterface.h"
+#include "tnlRPC.h"
+
 CEngine* Ninja = CEngine::Instance();
 //////////////////////////////////////////////////////////////////////////
 CFont* Font;

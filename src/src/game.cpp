@@ -65,7 +65,6 @@ bool CHero::Render()
 	Ninja->FontManager->PrintEx(15, 379, 1, "Snow");
 	if (Snow == 100)
 		Ninja->FontManager->PrintEx(65, 379, 1, "ready");
-	Ninja->FreeInst();
 	return true;
 }
 
@@ -81,7 +80,6 @@ void UpdateSnowballs( CParticle *p, float dt )
 	}
 	CEngine *Ninja = CEngine::Instance();
 	CParticleSystem *ps = dynamic_cast<CParticleSystem*>(Ninja->RenderManager.GetObject("snowballs"));
-	Ninja->FreeInst();
 
 	CAABB Gift = CAABB(274, GROUND, 260 + 51 , GROUND + 29 );
 
@@ -216,11 +214,11 @@ bool CHero::Update( float dt )
 		}
 	}
 	Health= clampf(Health, 0.0f, 100.0f);
-	if (Health <= 0.001f)
-	{
-		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->Load();
-		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObject("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->GetTexID();
-	}
+// 	if (Health <= 0.001f)
+// 	{
+// 		(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")));
+// 		(dynamic_cast<CSprite*>(Ninja->RenderManager.GetObject("GftSpr")))->m_textureID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject("giftd")))->GetTexID();
+// 	}
 
 
 
@@ -269,7 +267,7 @@ bool CHero::Update( float dt )
 		v.y -= 10;
 
 
-	Ninja->FreeInst();
+
 	return true;
 
 }

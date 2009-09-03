@@ -38,10 +38,10 @@ public:
 class CTileSetManager : public CList
 {
 public:
-	CTileset* GetTileset(const string* ATilesetName)
+	CTileset* GetTileset(const string &ATilesetName)
 	{
 		CTileset *Tileset = NULL;
-		Tileset = dynamic_cast<CTileset*>(GetObject(ATilesetName));
+		Tileset = dynamic_cast<CTileset*>(GetObject(&ATilesetName));
 		if (Tileset)
 			Tileset->CheckLoad();
 		return Tileset;
@@ -91,7 +91,6 @@ public:
 	bool SaveToFile();
 	bool Render();
 private:
-	// h от horizontal v от vertical
 	int _Cell(int h, int v)
 	{
 		return v*numCellsHor + h;
