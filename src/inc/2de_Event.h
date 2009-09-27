@@ -1,6 +1,6 @@
 #ifndef EVENT_H
 #define EVENT_H
-#include "coreutils.h"
+#include "2de_Core.h"
 
 /*
 Event library

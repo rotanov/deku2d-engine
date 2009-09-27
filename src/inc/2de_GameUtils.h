@@ -1,9 +1,9 @@
 #ifndef  _GAME_UTILS_H_
 #define _GAME_UTILS_H_
 
-#include "CoreUtils.h"
-//#include "resource.h"
-#include "OpenglUtils.h"
+#include "2de_Core.h"
+//#include "2de_resource.h"
+#include "2de_GraphicsLow.h"
 
 struct CTileSetInfo 
 {

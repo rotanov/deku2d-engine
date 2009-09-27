@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "2de_Engine.h"
 
 #ifdef WIN32
 	#define WIN32_LEAN_AND_MEAN
@@ -207,10 +207,6 @@ bool CEngine::Init()
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
 	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
 
-	SetState(STATE_GUI_KEY_UP, GUIKeyUp);
-	SetState(STATE_GUI_KEY_DOWN, GUIKeyDown);
-	SetState(STATE_GUI_MOUSE_DOWN, GUIMbDown);
-	SetState(STATE_GUI_MOUSE_UP, GUIMbUp);
 
 	window.bpp = 32;
 	if (!window.gCreateWindow())

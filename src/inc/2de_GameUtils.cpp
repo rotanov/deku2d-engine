@@ -1,5 +1,5 @@
-#include "GameUtils.h"
-#include "Engine.h"
+#include "2de_GameUtils.h"
+#include "2de_Engine.h"
 
 //-------------------------------------------//
 //			CTileSet functions				 //
@@ -102,7 +102,7 @@ Vector2* CTileset::GetCellTC(int CellIndex)
 	t.y = CellIndex / Info.HorNumTiles;
 	for (int i = 0; i < 4; i++)
 	{
-		tc[i] = (t + V2QuadBin[i]);
+		tc[i] = (t + V2_QuadBin[i]);
 		tc[i].x *= (float)Info.TileWidth/Texture->width;
 		tc[i].y *= (float)Info.TileHeight/Texture->height;
 	}
@@ -214,7 +214,7 @@ bool CLevelMap::GenCells()
 			scalar h = TileSet->Info.TileHeight;
 			for(int k = 0; k < 4; k++)
 			{
-				t->pos[k] = (ji + V2QuadBin[k]);
+				t->pos[k] = (ji + V2_QuadBin[k]);
 				t->pos[k].x *= w;
 				t->pos[k].y *= h;
 			}

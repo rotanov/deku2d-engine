@@ -1,9 +1,10 @@
+#ifdef _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
 #ifndef GUI_H
 #define GUI_H
 
-#include "event.h"
-#include "CoreUtils.h"
-#include "OpenglUtils.h"
+#include "2de_event.h"
+#include "2de_Core.h"
+#include "2de_GraphicsLow.h"
 
 /*
 class CGraphObj
@@ -352,3 +353,4 @@ Deku Team
 
 
 #endif
+#endif _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_

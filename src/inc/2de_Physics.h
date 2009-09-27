@@ -1,8 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include "CoreUtils.h"
-#include "MathUtils.h"
+#include "2de_Core.h"
+#include "2de_MathUtils.h"
 
 class CPhysicalObject : public CUpdateObject
 {

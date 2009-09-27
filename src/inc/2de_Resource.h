@@ -3,10 +3,11 @@
 
 #pragma message("Compiling resource.h")
 
-#include "GameUtils.h"
-#include "CoreUtils.h"
-#include "OpenglUtils.h"
-#include "xml.h"
+#include "2de_GameUtils.h"
+#include "2de_Core.h"
+#include "2de_GraphicsLow.h"
+#include "2de_GraphicsHigh.h"
+#include "2de_Xml.h"
 
 #define CONFIG_FILE_NAME "config/"
 #define DEFUALT_RESOURCE_LIST_PATH "config/resources.xml"

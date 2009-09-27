@@ -7,7 +7,7 @@
 *	2008 year
 */
 
-#include "CoreUtils.h"
+#include "2de_Core.h"
 
 #define XML_DYNAMIC
 #ifndef XML_DYNAMIC

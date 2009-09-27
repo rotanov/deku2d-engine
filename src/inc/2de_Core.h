@@ -107,6 +107,13 @@ __INLINE void SAFE_DELETE(T*& a)
 	delete a, a = NULL;
 }
 
+template<typename T>
+__INLINE void SAFE_DELETE_ARRAY(T*& a) 
+{
+	delete [] a, a = NULL;
+}
+
+
 // Lulz!
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d

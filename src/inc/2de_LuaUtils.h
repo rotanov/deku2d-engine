@@ -1,7 +1,7 @@
 #ifndef  _LUA_UTILS_H_
 #define _LUA_UTILS_H_
 
-#include "CoreUtils.h"
+#include "2de_Core.h"
 #include "Lua.hpp"
 //using namespace std;
 

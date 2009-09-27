@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:msvcrt.lib"
+				AdditionalOptions="/NODEFAULTLIB:&quot;LIBCMTD&quot; /NODEFAULTLIB:&quot;MSVCRT&quot;"
 				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcryptd.lib tnld.lib wsock32.lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
@@ -149,7 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NODEFAULTLIB:LIBCMT.lib"
+				AdditionalOptions="/NODEFAULTLIB:&quot;LIBCMT&quot;"
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcrypt.lib tnl.lib wsock32.lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				AdditionalLibraryDirectories="..\lib\"
@@ -192,47 +192,51 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\src\coreutils.cpp"
+				RelativePath=".\src\2de_Core.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Engine.cpp"
+				RelativePath=".\src\2de_Engine.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\GameUtils.cpp"
+				RelativePath=".\inc\2de_GameUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\gui.cpp"
+				RelativePath=".\src\2de_GraphicsHigh.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\imageutils.cpp"
+				RelativePath=".\src\2de_GraphicsLow.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\LuaUtils.cpp"
+				RelativePath=".\src\2de_Gui.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\mathutils.cpp"
+				RelativePath=".\src\2de_ImageUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\openglutils.cpp"
+				RelativePath=".\src\2de_LuaUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\physics.cpp"
+				RelativePath=".\src\2de_MathUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\resource.cpp"
+				RelativePath=".\src\2de_Physics.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\xml.cpp"
+				RelativePath=".\src\2de_Resource.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\2de_Xml.cpp"
 				>
 			</File>
 		</Filter>
@@ -240,51 +244,55 @@
 			Name="inc"
 			>
 			<File
-				RelativePath=".\inc\CoreUtils.h"
+				RelativePath=".\inc\2de_Core.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Engine.h"
+				RelativePath=".\inc\2de_Engine.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\event.h"
+				RelativePath=".\inc\2de_Event.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\GameUtils.h"
+				RelativePath=".\inc\2de_GameUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\gui.h"
+				RelativePath=".\inc\2de_GraphicsHigh.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ImageUtils.h"
+				RelativePath=".\inc\2de_GraphicsLow.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LuaUtils.h"
+				RelativePath=".\inc\2de_Gui.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MathUtils.h"
+				RelativePath=".\inc\2de_ImageUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\OpenglUtils.h"
+				RelativePath=".\inc\2de_LuaUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Physics.h"
+				RelativePath=".\inc\2de_MathUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\resource.h"
+				RelativePath=".\inc\2de_Physics.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\xml.h"
+				RelativePath=".\inc\2de_Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Xml.h"
 				>
 			</File>
 		</Filter>
@@ -563,6 +571,14 @@
 			</File>
 			<File
 				RelativePath=".\Tanks\Tanks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Tanks\TanksNetwork.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Tanks\TanksNetwork.h"
 				>
 			</File>
 		</Filter>

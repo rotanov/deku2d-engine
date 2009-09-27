@@ -1,7 +1,7 @@
 #ifndef _TANKS_H_
 #define _TANKS_H_
 
-#include "Engine.h"
+#include "2de_Engine.h"
 
 
 
@@ -13,7 +13,7 @@ class CTankAI;
 enum EActionKind {akLeft=0, akRight=1, akUp=2, akDown=3, akFire=4, akItem=5};
 enum ETanksTileIndex {csFree1=7, csFree2=6, csFree3=3, csFree4=2, csBlock=5, csDestr=1, csTank=4, csBullet=0};
 
-const Vector2	Directions[4] = {DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN};
+const Vector2	Directions[4] = {V2_DIR_LEFT, V2_DIR_RIGHT, V2_DIR_UP, V2_DIR_DOWN};
 const scalar	DEFAULT_TANK_HEALTH = 100;
 const scalar	DEFAULT_TANK_DAMAGE = 10;
 const scalar	DEFAULT_TANK_VELOCITY = 3;
@@ -98,7 +98,7 @@ public:
 	void Init(RGBAf* AColor, Vector2 APosition)
 	{
 		Color = AColor;
-		Position = APosition;
+		position = APosition;
 	}
 	CAABB GetAABB();
 	Vector2 GetCenter();

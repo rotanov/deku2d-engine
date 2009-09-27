@@ -11,7 +11,7 @@
 #pragma message("Compiling MathUtils.h")
 
 #include <math.h>
-#include "CoreUtils.h"
+#include "2de_Core.h"
 
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
@@ -321,11 +321,11 @@ __INLINE scalar PointLineDistance(Vector2 v1, Vector2 v2, Vector2 p)
 	return  Abs( D / sqrt( dx * dx + dy * dy));
 }
 
-const Vector2 V2_Z			= Vector2(0.0f, 0.0f);
-const Vector2 DIR_LEFT		= Vector2(-1.0f, 0.0f);
-const Vector2 DIR_RIGHT		= -DIR_LEFT;
-const Vector2 DIR_UP		= Vector2(0.0f, 1.0f);
-const Vector2 DIR_DOWN		= -DIR_UP;
+const Vector2 V2_Z				= Vector2(0.0f, 0.0f);
+const Vector2 V2_DIR_LEFT		= Vector2(-1.0f, 0.0f);
+const Vector2 V2_DIR_RIGHT		= -V2_DIR_LEFT;
+const Vector2 V2_DIR_UP			= Vector2(0.0f, 1.0f);
+const Vector2 V2_DIR_DOWN		= -V2_DIR_UP;
 
 union Vector3{
 public:

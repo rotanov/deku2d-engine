@@ -3,7 +3,7 @@
 
 #pragma message("Compiling Engine.h")
 
-#include "CoreUtils.h"
+#include "2de_Core.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,10 +12,11 @@
 #include <tchar.h>
 #include <math.h>
 
-#include "OpenglUtils.h"
-#include "Gui.h"
-#include "Xml.h"
-#include "resource.h"
+#include "2de_GraphicsLow.h"
+#include "2de_GraphicsHigh.h"
+//#include "2de_Gui.h"
+#include "2de_Xml.h"
+#include "2de_resource.h"
 
 // Константы
 

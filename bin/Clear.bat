@@ -1,0 +1,2 @@
+del *.suo
+del *.ilk

@@ -1,6 +1,6 @@
-#include "LuaUtils.h"
-#include "Engine.h"
-#include "OpenglUtils.h"
+#include "2de_LuaUtils.h"
+#include "2de_Engine.h"
+#include "2de_GraphicsLow.h"
 
 GlobalLuaState* globalLuaState = 0; // todo remove
 

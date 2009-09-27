@@ -47,9 +47,9 @@ bool CTank::Update(scalar dt)
 		Velocity += 0.5f;
 		Velocity = clampf(Velocity, 0.0f, 5.0f);
 	}
-	Position += Direction*Velocity;
+	position += Direction*Velocity;
 	Velocity*=0.9f;
-	AABB.Offset(Position.x, Position.y);
+	AABB.Offset(position.x, position.y);
 	Vector2 BottomLeft = AABB.vMin, TopRight = AABB.vMax, BottomRight = Vector2(AABB.x1, AABB.y0), TopLeft = Vector2(AABB.x0, AABB.y1);
 	CAABB Pot1, Pot2;
 
@@ -59,33 +59,33 @@ bool CTank::Update(scalar dt)
 		Pot1 = Map->GetCellAABB(TopLeft);
 		Pot2 = Map->GetCellAABB(BottomLeft);
 		if (Pot1.Intersect(AABB))
-			Position.x = Pot1.x1;
+			position.x = Pot1.x1;
 		if (Pot2.Intersect(AABB))
-			Position.x = Pot2.x1;
+			position.x = Pot2.x1;
 		break;
 	case akRight:
 		Pot1 = Map->GetCellAABB(TopRight);
 		Pot2 = Map->GetCellAABB(BottomRight);
 		if (Pot1.Intersect(AABB))
-			Position.x = Pot1.x0 - 32;
+			position.x = Pot1.x0 - 32;
 		if (Pot2.Intersect(AABB))
-			Position.x = Pot2.x0 - 32;
+			position.x = Pot2.x0 - 32;
 		break;
 	case akUp:
 		Pot1 = Map->GetCellAABB(TopLeft);
 		Pot2 = Map->GetCellAABB(TopRight);
 		if (Pot1.Intersect(AABB))
-			Position.y = Pot1.y0 - 32;
+			position.y = Pot1.y0 - 32;
 		if (Pot2.Intersect(AABB))
-			Position.y = Pot2.y0 - 32;
+			position.y = Pot2.y0 - 32;
 		break;
 	case akDown:
 		Pot1 = Map->GetCellAABB(BottomLeft);
 		Pot2 = Map->GetCellAABB(BottomRight);
 		if (Pot1.Intersect(AABB))
-			Position.y = Pot1.y1;
+			position.y = Pot1.y1;
 		if (Pot2.Intersect(AABB))
-			Position.y = Pot2.y1;
+			position.y = Pot2.y1;
 		break;
 	}
 
@@ -114,12 +114,12 @@ bool CTank::Update(scalar dt)
 		}
 
 
-		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(0)->Position.x, Host->GetPlayer(0)->Position.y)).Inside(Bullets[i].p) && (name != "TankPlayer1"))
+		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(0)->position.x, Host->GetPlayer(0)->position.y)).Inside(Bullets[i].p) && (name != "TankPlayer1"))
 		{
 			Host->GetPlayer(0)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
 		}
-		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(1)->Position.x, Host->GetPlayer(1)->Position.y)).Inside(Bullets[i].p) && (name != "TankPlayer2"))
+		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(1)->position.x, Host->GetPlayer(1)->position.y)).Inside(Bullets[i].p) && (name != "TankPlayer2"))
 		{
 			Host->GetPlayer(1)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
@@ -133,31 +133,31 @@ bool CTank::Render()
 {
 	glLoadIdentity();
 	scalar Angle = 0;
-	if (Direction == DIR_RIGHT)
+	if (Direction == V2_DIR_RIGHT)
 		Angle = 90;
-	if (Direction == DIR_DOWN)
+	if (Direction == V2_DIR_DOWN)
 		Angle = 180;
-	if (Direction == DIR_LEFT)
+	if (Direction == V2_DIR_LEFT)
 		Angle = 270;
 
-	glTranslatef(Position.x + 16, Position.y + 16, 0.0f);
+	glTranslatef(position.x + 16, position.y + 16, 0.0f);
 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
-	glTranslatef(-Position.x - 16, -Position.y - 16, 0.0f);
+	glTranslatef(-position.x - 16, -position.y - 16, 0.0f);
 	Color->glSet();
 	glEnable(GL_TEXTURE_2D);
 	Tileset->Texture->Bind();
 	glBegin(GL_QUADS);
 		Tileset->GetCellTC(csTank)[0].glTexCoord();
-		glVertex2f(Position.x, Position.y);
+		glVertex2f(position.x, position.y);
 
 		Tileset->GetCellTC(csTank)[1].glTexCoord();
-		glVertex2f(Position.x + 32, Position.y);
+		glVertex2f(position.x + 32, position.y);
 
 		Tileset->GetCellTC(csTank)[2].glTexCoord();
-		glVertex2f(Position.x + 32, Position.y + 32);
+		glVertex2f(position.x + 32, position.y + 32);
 
 		Tileset->GetCellTC(csTank)[3].glTexCoord();
-		glVertex2f(Position.x, Position.y + 32);
+		glVertex2f(position.x, position.y + 32);
 	glEnd();
 	glLoadIdentity();
 
@@ -193,12 +193,12 @@ bool CTank::Render()
 
 CAABB CTank::GetAABB()
 {
-	return CAABB(Position.x, Position.y, Position.x + DEFAULT_CELL_SIZE, Position.y + DEFAULT_CELL_SIZE);
+	return CAABB(position.x, position.y, position.x + DEFAULT_CELL_SIZE, position.y + DEFAULT_CELL_SIZE);
 }
 
 Vector2 CTank::GetCenter()
 {
-	return (Position + Vector2(DEFAULT_CELL_SIZE/2, DEFAULT_CELL_SIZE/2));
+	return (position + Vector2(DEFAULT_CELL_SIZE/2, DEFAULT_CELL_SIZE/2));
 }
 void CTankManager::AddPlayer()
 {

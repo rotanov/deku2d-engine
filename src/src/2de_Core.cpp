@@ -1,4 +1,4 @@
-#include "CoreUtils.h"
+#include "2de_Core.h"
 
 
 bool Enabled = true;

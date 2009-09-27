@@ -1,5 +1,8 @@
-#include "gui.h"
-#include "engine.h"
+// Полное загибание ололо, от безысходности, надо же как-то конфликты имён править.
+#ifdef _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
+
+#include "2de_Gui.h"
+#include "2de_Engine.h"
 //GUI scheme or may be it is "skin"
 CGUIScheme				*GUIScheme=NULL;
 bool					szBind=true;
@@ -13,6 +16,7 @@ CFontManager			*FontManager = NULL;
 char					_key = 0;
 CEngine*				engine = NULL;
 int						scrheight, scrwidth;
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ!!! СОТНИ ИХ!!! Нахуй их. Решительно.
 
 
 
@@ -509,12 +513,12 @@ void CGUIScheme::BeginUI()
 		return;
 	}*/
 	Drawing = 1;
-	ImgData.BeginDraw();
+//	ImgData.BeginDraw(); УБРАЛ
 }
 void CGUIScheme::EndUI()
 {
 	if (Drawing)
-		ImgData.EndDraw();
+	//	ImgData.EndDraw(); УБРАЛ
 	Drawing = 0;
 }
 void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int h)
@@ -523,55 +527,57 @@ void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int
 	if (!Drawing)
 		return;
 	if (target == 0|| target > 8)
-		ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5], 0); //- lt
+		//ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5], 0); //- lt УБРАЛ
 	if (target == 1)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[4],
-		Styles[StInd].Data[1],
-		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
-		Styles[StInd].Data[5], Styles[StInd].Data[9]);//t
+		//ImgData.PushQuadEx(x,y,z,w,h, УБРАЛ
+// 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
+// 		Styles[StInd].Data[1],
+// 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
+// 		Styles[StInd].Data[5], Styles[StInd].Data[9]);//t
 	if (target == 2)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],//mb - 4
-		Styles[StInd].Data[1],
-		Styles[StInd].Data[6],//4, 5
-		Styles[StInd].Data[7], 0);// rt
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],//mb - 4
+// 		Styles[StInd].Data[1],
+// 		Styles[StInd].Data[6],//4, 5
+// 		Styles[StInd].Data[7], 0);// rt
 	if (target == 3)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0],
-		Styles[StInd].Data[1] + Styles[StInd].Data[5],
-		Styles[StInd].Data[4],
-		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//l
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0],
+// 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
+// 		Styles[StInd].Data[4],
+// 		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//l
 	if (target == 4)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[4],
-		Styles[StInd].Data[1] + Styles[StInd].Data[5],
-		Styles[StInd].Data[2] - Styles[StInd].Data[4] - Styles[StInd].Data[6],
-		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[8]);//c
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
+// 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
+// 		Styles[StInd].Data[2] - Styles[StInd].Data[4] - Styles[StInd].Data[6],
+// 		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[8]);//c
 	if (target == 5)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[4],
-		Styles[StInd].Data[1] + Styles[StInd].Data[5],
-		Styles[StInd].Data[6],
-		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//r
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[4],
+// 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
+// 		Styles[StInd].Data[6],
+// 		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//r
 	if (target == 6)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0],
-		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
-		Styles[StInd].Data[4],
-		Styles[StInd].Data[7], 0);//bl
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0],
+// 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
+// 		Styles[StInd].Data[4],
+// 		Styles[StInd].Data[7], 0);//bl
 	if (target == 7)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[4],
-		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
-		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
-		Styles[StInd].Data[7], Styles[StInd].Data[9]);//b
-	if (target == 8)
-		ImgData.PushQuadEx(x,y,z,w,h,
-		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],
-		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
-		Styles[StInd].Data[6],
-		Styles[StInd].Data[7], 0);//br
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
+// 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
+// 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
+// 		Styles[StInd].Data[7], Styles[StInd].Data[9]);//b
+	if (target == 8);
+// 		ImgData.PushQuadEx(x,y,z,w,h,
+// 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],
+// 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
+// 		Styles[StInd].Data[6],
+// 		Styles[StInd].Data[7], 0);//br
+
+/// Кстати, то, что я закомментил выглядит как говнокод, что, правда ничего нельзя сделать?
 }
 bool CGUIScheme::Draw(int StInd, int x, int y, float z, int w, int h)
 {
@@ -765,7 +771,8 @@ void CForm::Draw()
 		return;
 	if (Properties[GUI_DRAWFORMHEADER] == 1)
 	{
-		glColor4f((float)_GetRValue(HeaderColor)/256,(float)_GetGValue(HeaderColor)/256,(float)_GetBValue(HeaderColor)/256,1);
+		// NO~ Даёшь единообразие в хранении цвета! Гет (R/G/B/A) Value идут лесом!!! ДА!!!!
+		//glColor4f((float)_GetRValue(HeaderColor)/256,(float)_GetGValue(HeaderColor)/256,(float)_GetBValue(HeaderColor)/256,1);
 		GUIScheme->Draw(HeaderStyle, Left, Top, ZDepth, Width, HeaderHeight);
 		glColor4f(1,1,1,1);
 		Top = Top + HeaderHeight;
@@ -1668,3 +1675,4 @@ void CEdit::SetCaption( string _caption )
 	SelStart = 0;
 	SelLength = _caption.length();
 }
+#endif _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_

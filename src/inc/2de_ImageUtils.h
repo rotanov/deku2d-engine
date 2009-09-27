@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <png.h>
 
-#include "CoreUtils.h"
+#include "2de_Core.h"
 
 #define PNG_SIG_BYTES 8
 

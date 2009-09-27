@@ -1,4 +1,4 @@
-#include "xml.h"
+#include "2de_Xml.h"
 //<------------------XMLNode------------------->
 //<-XMLNode->
 /*

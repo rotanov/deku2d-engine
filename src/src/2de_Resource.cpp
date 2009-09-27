@@ -1,4 +1,4 @@
-#include "resource.h"
+#include "2de_resource.h"
 
 //-------------------------------------------//
 //				Factory stuff				 //

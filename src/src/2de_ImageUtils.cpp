@@ -1,4 +1,4 @@
-#include <imageutils.h>
+#include "2de_ImageUtils.h"
 #include <assert.h>
 
 RGBAub CImageData::Pixel(int x, int y)
