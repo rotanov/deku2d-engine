@@ -136,6 +136,7 @@ public:
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void IncListRefCount();
 	void DecListRefCount();
+	const int GetListRefCount();
 private:
 	int ListRefCount;
 };
@@ -247,6 +248,7 @@ class CUpdateObject : public virtual CObject
 public:
 	bool Active;
 	CUpdateObject();
+	~CUpdateObject();
 	virtual bool Update(float dt) = 0;
 };
 

@@ -23,12 +23,11 @@ class CTitleScreen : public CRenderObject, public CUpdateObject
 public:
 	CTitleScreen()
 	{
-		Ninja->RenderManager.AddObject(this);
-		Ninja->UpdateManager.AddObject(this);
 		name = "Title screen tanks";
 	}
 	~CTitleScreen()
 	{		
+		
 	}
 	bool Render()
 	{
@@ -54,13 +53,9 @@ public:
 				Ninja->RenderManager.DelObject("Title screen tanks");
 				Ninja->UpdateManager.DelObject("Title screen tanks");
 				dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
-				Tanks = new CTankManager;
-				//CTank *Tank = dynamic_cast<CTank*>(Tanks->GetLast()->GetData());
-				//Ninja->RenderManager.Camera.Assign(&(Tank->Position.x), &(Tank->Position.y));
-	
+				Tanks = new CTankManager;	
 			}
 		}
-		FontEffect->Update(dt);
 		return true;
 	}
 };
@@ -149,6 +144,7 @@ bool Init()
 
 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.
 	new CButton(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// A этот будет работать!
+	new CEdit();
 
 // 	CTileSet TanksTiles;
 // 	TanksTiles.Info.HorNumTiles = 4;

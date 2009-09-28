@@ -1,4 +1,5 @@
 #include "2de_Core.h"
+#include "2de_Engine.h"
 
 
 bool Enabled = true;
@@ -37,6 +38,11 @@ void CObject::DecListRefCount()
 		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
 #endif CRITICAL_ERRORS_MESSAGE_BOXES
 	}
+}
+
+const int CObject::GetListRefCount()
+{
+	return ListRefCount;
 }
 /************************************************************************/
 /* CFile                                                                */
@@ -942,8 +948,13 @@ CUpdateObject::CUpdateObject() : Active(true)
 {
 	type |= T_UPDATABLE;
 	name = "Update Object";
+	CEngine::Instance()->UpdateManager.AddObject(this);
 }
 
+CUpdateObject::~CUpdateObject()
+{
+	CEngine::Instance()->UpdateManager.DelObject(this->id);
+}
 CUpdateManager::CUpdateManager()
 {
 	name += "CUpdateManager";

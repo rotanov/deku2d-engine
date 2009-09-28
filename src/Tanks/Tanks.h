@@ -73,8 +73,6 @@ public:
 	CTank(CTankMap* AMap, CTankManager* AHost, CTankAI* AAI) : Map(AMap), Host(AHost), AI(AAI)
 	{
 		isWalking = false;
-		CEngine::Instance()->RenderManager.AddObject(this);
-		CEngine::Instance()->UpdateManager.AddObject(this);
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 		isAlive = true;
@@ -127,8 +125,6 @@ public:
 	CTileset* Tileset;
 	CTankMap(CTankManager* AHost) : Host(AHost)
 	{
-		CEngine::Instance()->RenderManager.AddObject(this);
-		CEngine::Instance()->UpdateManager.AddObject(this);
 		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 
 		CellSize = DEFAULT_CELL_SIZE;
@@ -177,10 +173,6 @@ public:
 	int PlayerCount;
 	CTankManager() : PlayerCount(0)
 	{
-
-
-		CEngine::Instance()->RenderManager.AddObject(this);
-		CEngine::Instance()->UpdateManager.AddObject(this);
 		Map = new CTankMap(this);
 		AddPlayer();
 		AddPlayer();

@@ -450,29 +450,28 @@ int CEngine::CfgGetInt( char* ParamName )
 bool CEngine::ClearLists()
 {
 	// Не так!!!1!адин!+!+!
-// 	CObject *data = (RenderManager.Next());
-// 	while (data)
-// 	{
-// 		if (data)
-// 		{
-// 			SAFE_DELETE(data);
-// 		}
-// 		
-// 		data = (RenderManager.Next());
-// 	}	
-// 	data = (UpdateManager.Next());
-// 	while (data)
-// 	{
-// 		if (data)
-// 		{
-// 			//delete data;
-// 			//UpdateManager.current.data = NULL;
-// 		}
-// 			
-// 		data = (UpdateManager.Next());
-// 	}	
-// 	RenderManager.Clear();
-// 	UpdateManager.Clear();
+	CObject *data = (RenderManager.Next());
+	while (data)
+	{
+		if (data && !data->GetListRefCount())
+		{
+			SAFE_DELETE(data);
+		}
+		
+		data = (RenderManager.Next());
+	}	
+	data = (UpdateManager.Next());
+	while (data)
+	{
+		if (data && !data->GetListRefCount())
+		{
+			SAFE_DELETE(data);
+		}
+			
+		data = (UpdateManager.Next());
+	}	
+	RenderManager.Clear();
+	UpdateManager.Clear();
 
 	return true;
 }

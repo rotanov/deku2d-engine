@@ -50,7 +50,7 @@ public:
 	RGBAf				color;
 	CRenderObject();	
 	virtual bool Render() = 0;
-	virtual ~CRenderObject(){};
+	virtual ~CRenderObject();
 };
 
 //////////////////////////////////////////////////////////////////////////

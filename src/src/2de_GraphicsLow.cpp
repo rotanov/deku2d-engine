@@ -6,10 +6,15 @@
 
 CRenderObject::CRenderObject() : position(V2_Z), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
 {
+	CEngine::Instance()->RenderManager.AddObject(this);
 	name = "CRenderObject";
 	type |= T_RENDERABLE;
 };
 
+CRenderObject::~CRenderObject()
+{
+	CEngine::Instance()->RenderManager.DelObject(this->id);
+}
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
 
