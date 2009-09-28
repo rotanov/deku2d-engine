@@ -118,6 +118,7 @@ bool Init()
 	CMenuItem *MenuRoot = new CMenuItem;
 	MenuRoot->name = "Root menu item";
 	MenuRoot->text = "Root";
+	
 
 	CMenuItem *next = new CMenuItem();
 	next->name = "menu item Start";

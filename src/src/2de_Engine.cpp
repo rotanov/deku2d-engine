@@ -284,8 +284,8 @@ bool CEngine::ProcessEvents()
 				for(int i = 0; i < KeyInputFuncCount; i++)
 					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);				
 				// Глобальная рекция на escape! Слишком категорично, но пока сойдёт. Потом - либо вывести в опцию, либо убрать и предоставить программисту право выбора
-				if(keysym.sym == SDLK_ESCAPE)	
-						return false;
+				//if(keysym.sym == SDLK_ESCAPE)	
+				//		return false;
 				keys[keysym.sym] = 1;
 				break;
 			}

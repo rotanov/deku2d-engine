@@ -997,6 +997,7 @@ CGUIObject::CGUIObject()
 {
 	Font = CEngine::Instance()->FontManager->GetFont("Font"); // Это конструкто же, а что если конструируется до инициализации движка? втф...
 	PRender = new CPrimitiveRender;
+	Parent = NULL;
 	PRender->plClr = &color;
 	PRender->psClr = &color;
 	PRender->ppClr = &color;
@@ -1442,6 +1443,13 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 					FocusedOnItem->visible = true;
 					GuiManager.SetFocus(FocusedOnItem);
 				}
+			break;
+		case SDLK_ESCAPE:
+			if (!Parent)
+				break;
+			visible = false;
+			(dynamic_cast<CMenuItem*>(Parent))->visible = true;
+			GuiManager.SetFocus(dynamic_cast<CMenuItem*>(Parent));
 			break;
 		}
 	}
