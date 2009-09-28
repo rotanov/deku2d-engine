@@ -188,59 +188,59 @@
 			Name="inc"
 			>
 			<File
-				RelativePath=".\inc\CoreUtils.h"
+				RelativePath=".\inc\2de_Core.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Engine.h"
+				RelativePath=".\inc\2de_Engine.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\event.h"
+				RelativePath=".\inc\2de_Event.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Game.h"
+				RelativePath=".\inc\2de_GameUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\GameUtils.cpp"
+				RelativePath=".\inc\2de_GameUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\GameUtils.h"
+				RelativePath=".\inc\2de_GraphicsHigh.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\gui.h"
+				RelativePath=".\inc\2de_GraphicsLow.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ImageUtils.h"
+				RelativePath=".\inc\2de_Gui.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LuaUtils.h"
+				RelativePath=".\inc\2de_ImageUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MathUtils.h"
+				RelativePath=".\inc\2de_LuaUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\OpenglUtils.h"
+				RelativePath=".\inc\2de_MathUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Physics.h"
+				RelativePath=".\inc\2de_Physics.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\resource.h"
+				RelativePath=".\inc\2de_Resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\xml.h"
+				RelativePath=".\inc\2de_Xml.h"
 				>
 			</File>
 		</Filter>
@@ -248,51 +248,47 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\src\coreutils.cpp"
+				RelativePath=".\src\2de_Core.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Engine.cpp"
+				RelativePath=".\src\2de_Engine.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Font editor\Font editor.cpp"
+				RelativePath=".\src\2de_GraphicsHigh.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\game.cpp"
+				RelativePath=".\src\2de_GraphicsLow.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\gui.cpp"
+				RelativePath=".\src\2de_Gui.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\imageutils.cpp"
+				RelativePath=".\src\2de_ImageUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\LuaUtils.cpp"
+				RelativePath=".\src\2de_LuaUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\mathutils.cpp"
+				RelativePath=".\src\2de_MathUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\openglutils.cpp"
+				RelativePath=".\src\2de_Physics.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\physics.cpp"
+				RelativePath=".\src\2de_Resource.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\resource.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\xml.cpp"
+				RelativePath=".\src\2de_Xml.cpp"
 				>
 			</File>
 		</Filter>
@@ -301,6 +297,14 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+		</Filter>
+		<Filter
+			Name="FontEdotor"
+			>
+			<File
+				RelativePath=".\Font editor\Font editor.cpp"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

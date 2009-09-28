@@ -983,111 +983,56 @@ CParticleSystem::~CParticleSystem()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//Mini Gui
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//GUI
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+///CGUIObject
 
 CGUIObject::CGUIObject()
 {
-	CEngine::Instance()->RenderManager.AddObject(this);
-	CEngine::Instance()->UpdateManager.AddObject(this);	
-	GuiManager.AddObject(this);
-	font = CEngine::Instance()->FontManager->GetFont("Font"); // Это конструкто же, а что если конструируется до инициализации движка? втф...
+	Font = CEngine::Instance()->FontManager->GetFont("Font"); // Это конструкто же, а что если конструируется до инициализации движка? втф...
 	PRender = new CPrimitiveRender;
 	PRender->plClr = &color;
 	PRender->psClr = &color;
 	PRender->ppClr = &color;
-	// Mohawk!!!!
-	// TODO
+	CEngine::Instance()->RenderManager.AddObject(this);
+	CEngine::Instance()->UpdateManager.AddObject(this);	
+	GuiManager.AddObject(this);
 }
 
 CGUIObject::~CGUIObject()
 {
+	delete PRender;
 	CEngine::Instance()->RenderManager.DelObject(id);
 	CEngine::Instance()->UpdateManager.DelObject(id);
 }
 
-CButton::CButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
-OnClick(AOnClick), state(bsOutside)
+void CGUIObject::SetFont(CFont *AFont)
 {
-	aabb = ARect;
-	color = AColor;
-	text = AText;
-
-	PRender->DashedLines = true;
-	PRender->dash = 0x0001;
+	Font = AFont;
 }
 
-CButton::CButton()
+void CGUIObject::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
 {
-	aabb = CAABB(0, 0, 100, 100);
-	color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-	text = "You dumb! You called default constructor!";
+	PRender = APrimitiveRender;
 }
 
-bool CButton::Render()
-{	
-	CEngine *engine = CEngine::Instance();
-	font = engine->FontManager->GetFont("Font");
-
-	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
-	font->tClr = color;
-	glLoadIdentity();
-	PRender->grRectL(aabb.vMin, aabb.vMax);
-	glEnable(GL_TEXTURE_2D);
-	font->Print(text.c_str());
-	return true;
-}
-
-#define Dclr RGBAf(0.1f, 0.1f, 0.1f, 0.0f)
-
-bool CButton::Update(float dt)
+void CGUIObject::SetParent(CGUIObject *AParent)
 {
-	Vector2 mouse;
-	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
-
-	switch (state)
-	{
-	case bsOutside:
-		if (aabb.Inside(mouse))
-			state = bsHovered;
-		break;
-	case bsHovered:
-		color += Dclr;
-		state = bsInside;
-		break;
-	case bsInside:
-		if (!aabb.Inside(mouse))
-		{
-			state = bsLost;
-			break;
-		}
-		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-		{
-			color += Dclr;
-			GuiManager.SetFocusedNodeTo(GuiManager.GetListNode(this));
-			if (OnClick)
-				OnClick();
-			state = bsClicked;
-		}
-		break;
-	case bsLost:
-		color -= Dclr;
-		state = bsOutside;
-		break;
-	case bsClicked:
-		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-			state = bsReleased;
-		break;
-	case bsReleased:
-		color -= Dclr;
-		if (aabb.Inside(mouse))
-			state = bsInside;
-		else
-			state = bsOutside;
-		break;
-
-	}
-	return true;
+	if (!AParent)
+		return;
+	Parent = AParent;
+	Font = AParent->Font;
+	PRender = AParent->PRender;
+	color = AParent->color;
 }
+//////////////////////////////////////////////////////////////////////////
+///CGUIManager
 
 CGUIManager::CGUIManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
 {
@@ -1133,11 +1078,11 @@ bool CGUIManager::Render()
 	glLoadIdentity();
 	if (FocusedOn)
 	{
-		FocusedOn->PRender->LineStippleEnabled = true;
-		FocusedOn->PRender->lwidth = 0.5f;
-		FocusedOn->PRender->grRectL(FocusedOn->aabb.Inflated(5, 5).vMin, FocusedOn->aabb.Inflated(5, 5).vMax);	
-		FocusedOn->PRender->LineStippleEnabled = false;
-		FocusedOn->PRender->lwidth = 1.0f;
+		PRender->LineStippleEnabled = true;
+		PRender->lwidth = 0.5f;
+		PRender->grRectL(FocusedOn->aabb.Inflated(5, 5).vMin, FocusedOn->aabb.Inflated(5, 5).vMax);	
+		PRender->LineStippleEnabled = false;
+		PRender->lwidth = 1.0f;
 	}
 	//FocusedOn->PRender->gDrawBBox(FocusedOn->aabb.Inflated(5, 5));
 	return true;
@@ -1208,7 +1153,97 @@ void CGUIManager::SetFocus(CObject* AObject)
 	}
 }
 
+CGUIManager::~CGUIManager()
+{
+
+}
 CGUIManager GuiManager;
+
+CButton::CButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
+OnClick(AOnClick), state(wmsOutside)
+{
+	aabb = ARect;
+	color = AColor;
+	text = AText;
+
+	PRender->DashedLines = true;
+	PRender->dash = 0x0001;
+}
+
+CButton::CButton()
+{
+	aabb = CAABB(0, 0, 100, 100);
+	color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	text = "You dumb! You called default constructor!";
+}
+
+bool CButton::Render()
+{	
+	CEngine *engine = CEngine::Instance();
+	Font = engine->FontManager->GetFont("Font");
+
+	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(text.c_str()), Font->GetStringHeight(text.c_str())) / 2.0f;
+	Font->tClr = color;
+	glLoadIdentity();
+	PRender->grRectL(aabb.vMin, aabb.vMax);
+	glEnable(GL_TEXTURE_2D);
+	Font->Print(text.c_str());
+	return true;
+}
+
+#define Dclr RGBAf(0.1f, 0.1f, 0.1f, 0.0f)
+
+bool CButton::Update(float dt)
+{
+	Vector2 mouse;
+	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
+
+	switch (state)
+	{
+	case wmsOutside:
+		if (aabb.Inside(mouse))
+			state = wmsHovered;
+		break;
+	case wmsHovered:
+		color += Dclr;
+		state = wmsInside;
+		break;
+	case wmsInside:
+		if (!aabb.Inside(mouse))
+		{
+			state = wmsLost;
+			break;
+		}
+		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
+		{
+			color += Dclr;
+			GuiManager.SetFocusedNodeTo(GuiManager.GetListNode(this));
+			if (OnClick)
+				OnClick();
+			state = wmsClicked;
+		}
+		break;
+	case wmsLost:
+		color -= Dclr;
+		state = wmsOutside;
+		break;
+	case wmsClicked:
+		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
+			state = wmsReleased;
+		break;
+	case wmsReleased:
+		color -= Dclr;
+		if (aabb.Inside(mouse))
+			state = wmsInside;
+		else
+			state = wmsOutside;
+		break;
+
+	}
+	return true;
+}
+
+
 
 bool CEdit::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
 {
@@ -1255,14 +1290,14 @@ bool CEdit::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
 bool CEdit::Render()
 {
 	CEngine *engine = CEngine::Instance();
-	font = engine->FontManager->GetFont("Font");
+	Font = engine->FontManager->GetFont("Font");
 
-	font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(font->GetStringWidth(text.c_str()), font->GetStringHeight(text.c_str())) / 2.0f;
-	font->tClr = color;
+	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(text.c_str()), Font->GetStringHeight(text.c_str())) / 2.0f;
+	Font->tClr = color;
 	glLoadIdentity();
 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
-	font->Print(text.c_str());
+	Font->Print(text.c_str());
 	return true;
 }
 
@@ -1273,40 +1308,40 @@ bool CEdit::Update( scalar dt )
 
 	switch (state)
 	{
-	case bsOutside:
+	case wmsOutside:
 		if (aabb.Inside(mouse))
-			state = bsHovered;
+			state = wmsHovered;
 		break;
-	case bsHovered:
+	case wmsHovered:
 		color += Dclr;
-		state = bsInside;
+		state = wmsInside;
 		break;
-	case bsInside:
+	case wmsInside:
 		if (!aabb.Inside(mouse))
 		{
-			state = bsLost;
+			state = wmsLost;
 			break;
 		}
 		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
 		{
 			color += Dclr;
-			state = bsClicked;
+			state = wmsClicked;
 		}
 		break;
-	case bsLost:
+	case wmsLost:
 		color -= Dclr;
-		state = bsOutside;
+		state = wmsOutside;
 		break;
-	case bsClicked:
+	case wmsClicked:
 		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-			state = bsReleased;
+			state = wmsReleased;
 		break;
-	case bsReleased:
+	case wmsReleased:
 		color -= Dclr;
 		if (aabb.Inside(mouse))
-			state = bsInside;
+			state = wmsInside;
 		else
-			state = bsOutside;
+			state = wmsOutside;
 		break;
 	}
 	return true;
@@ -1336,10 +1371,10 @@ bool CMenuItem::Render()
 	while (ChildMenuItem)
 	{
 		glLoadIdentity();
-		font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
-		font->scale = Vector2(1.0f, 1.0f);
-		font->Pos = ChildMenuItem->position;
-		font->Print(ChildMenuItem->text.c_str());
+		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
+		Font->scale = Vector2(1.0f, 1.0f);
+		Font->Pos = ChildMenuItem->position;
+		Font->Print(ChildMenuItem->text.c_str());
 		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
 	}
 	glLoadIdentity();

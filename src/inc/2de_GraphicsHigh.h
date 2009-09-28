@@ -269,7 +269,7 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////
-//Mini Gui 
+//Gui 
 
 /**
 *	Поскольку Gui петра хуй попользуешься, так как он развёз какую-то еботу 
@@ -279,65 +279,32 @@ protected:
 *	и всякие свистоперделки жизнено необходимые.
 */
 
+enum EWidgetMouseState {wmsInside, wmsOutside, wmsLost, wmsHovered, wmsClicked, wmsReleased};
+
 class CGUIObject : public CRenderObject, public CUpdateObject
 {
 public:
-	CFont* font;				// Указатель на шрифт.
-	CPrimitiveRender* PRender;	// Указатель на рендер примитивов.
-	RGBAf color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
-	string text;				// Это понятно, текст.
-	CGUIObject *Parent;		// Указатель на родительский объект. На будущее; иерархии виджетов пока нет
-	// Очевидные комментарии такие очевидные, что даже надо удалить.
-
+	RGBAf				color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
+	string				text;				// Это понятно, текст.
+	Callback			CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
+											// Очевидные комментарии такие очевидные, что даже надо удалить их.
 	CGUIObject();
 	~CGUIObject();
+	void	SetFont(CFont *AFont);
+	void	SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
+	void	SetParent(CGUIObject *AParent);
+protected:
+	CFont				*Font;				//	Указатель на шрифт.
+	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
+	CGUIObject			*Parent;			//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+	EWidgetMouseState	WidgetMouseState;	//	Состояние мыши относительно виджета в смысле позиции указателя
 };
 
-class CMenuItem : public CGUIObject, public CList
-{
-public:
-	CMenuItem* FocusedOnItem;
-	CListNode* FocusedOnListNode;
-	Callback	CallProc;
-	CMenuItem();
-	bool Render();
-	bool Update(scalar dt);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool AddObject(CObject *AObject);
-};
-
-enum ButtonState {bsInside, bsOutside, bsLost, bsHovered, bsClicked, bsReleased};
-
-class CEdit : public CGUIObject
-{
-public:
-	int CursorPos;
-	ButtonState state;
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
-	CEdit();
-	bool Render();
-	bool Update(scalar dt);
-};
-
-
-
-class CButton : public CGUIObject
-{
-public:
-	ButtonState state;
-	bool (*OnClick)(); // Callback
-
-
-	CButton();
-	CButton(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
-	bool Render();
-	bool Update(float dt);
-};
-
-class CGUIManager : public CList, public CUpdateObject, public CRenderObject
+class CGUIManager : public CList, public CGUIObject
 {
 public:
 	CGUIManager();
+	~CGUIManager();
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool Update(scalar dt);
 	bool Render();
@@ -355,6 +322,43 @@ private:
 
 extern CGUIManager GuiManager;
 
+class CButton : private CGUIObject
+{
+public:
+	EWidgetMouseState state;
+	bool (*OnClick)(); // Callback
+
+
+	CButton();
+	CButton(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
+	bool Render();
+	bool Update(float dt);
+};
+
+class CEdit : public CGUIObject
+{
+public:
+	EWidgetMouseState state;
+	CEdit();
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	bool Render();
+	bool Update(scalar dt);
+private:
+	int CursorPos;
+};
+
+class CMenuItem : public CGUIObject, public CList
+{
+public:
+	CMenuItem();
+	bool Render();
+	bool Update(scalar dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool AddObject(CObject *AObject);
+private:
+	CMenuItem* FocusedOnItem;
+	CListNode* FocusedOnListNode;
+};
 //////////////////////////////////////////////////////////////////////////
 //CText not implemented yet
 class CText : public CRenderObject

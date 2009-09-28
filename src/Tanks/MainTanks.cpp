@@ -18,6 +18,11 @@ CTankManager* Tanks;
 #define SCALE_TITLE 4.0f
 #define TITLE_TEXT "Tanks"
 
+
+//////////////////////////////////////////////////////////////////////////
+///!!!///Где-то в цикле обновления танчиков мы не освобождаем память и как результат - неебический memory leak
+//////////////////////////////////////////////////////////////////////////
+
 class CTitleScreen : public CRenderObject, public CUpdateObject
 {
 public:

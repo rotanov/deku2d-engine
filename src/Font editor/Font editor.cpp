@@ -1,7 +1,6 @@
-#include "Engine.h"
-#include "LuaUtils.h"
-#include "OpenglUtils.h"
-#include "GameUtils.h"
+#include "2de_Engine.h"
+#include "2de_LuaUtils.h"
+#include "2de_GameUtils.h"
 
 // Константы интерфейса.
 const int				INTERFACE_OFFSET_X = 128;
@@ -19,10 +18,10 @@ char					CurrentSymbol = 0;
 int						OffsetX = INTERFACE_OFFSET_X + 5;
 int						OffsetY = 0.0f;
 
-CEditMini*				edFontTextureName = NULL;
-CEditMini*				edFontname = NULL;
-CEditMini*				edCurrentCymbol = NULL;
-CEditMini*				edSampleText = NULL;
+CEdit*					edFontTextureName = NULL;
+CEdit*					edFontname = NULL;
+CEdit*					edCurrentCymbol = NULL;
+CEdit*					edSampleText = NULL;
 
 class CInput : public CObject
 {
@@ -37,7 +36,7 @@ public:
 		{
 			switch(key)
 			{
-				case 
+				//case 
 			}
 		}
 		return true;
@@ -75,20 +74,20 @@ bool LoadTexture()
 
 bool Init()
 {
-	CButtonMini *btn = new CButtonMini(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont);	
-				 btn = new CButtonMini(CAABB(LEFT_MARGIN, 100, BUTTON_WIDTH, BUTTON_HEIGHT), "Save font", RGBAf(0.5f, 0.5f, 0.6f, 1.0f), NULL);
-				 btn = new CButtonMini(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture);
-				 btn = new CButtonMini(CAABB(LEFT_MARGIN, 300, BUTTON_WIDTH, BUTTON_HEIGHT), "Fuck yourself", RGBAf(0.9f, 0.8f, 0.2f, 1.0f), NULL);
+	new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont);	
+	new CButton(CAABB(LEFT_MARGIN, 100, BUTTON_WIDTH, BUTTON_HEIGHT), "Save font", RGBAf(0.5f, 0.5f, 0.6f, 1.0f), NULL);
+	new CButton(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture);
+	new CButton(CAABB(LEFT_MARGIN, 300, BUTTON_WIDTH, BUTTON_HEIGHT), "Fuck yourself", RGBAf(0.9f, 0.8f, 0.2f, 1.0f), NULL);
 
-	edFontTextureName = new CEditMini();
+	edFontTextureName = new CEdit();
 	edFontTextureName->aabb = CAABB(LEFT_MARGIN, 350, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontTextureName->text = "Font";
-	edFontTextureName->color = btn->color;
+	edFontTextureName->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
-	edFontname = new CEditMini();
+	edFontname = new CEdit();
 	edFontname->aabb = CAABB(LEFT_MARGIN, 500, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontname->text = "Font";
-	edFontname->color = btn->color;
+	edFontname->color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	return true;
 }
@@ -173,6 +172,5 @@ int	main(int argc, char *argv[])
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
-	Ninja->FreeInst();
 	return 0x01;
 }
