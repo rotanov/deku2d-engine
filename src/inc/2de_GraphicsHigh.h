@@ -284,12 +284,13 @@ enum EWidgetMouseState {wmsInside, wmsOutside, wmsLost, wmsHovered, wmsClicked, 
 class CGUIObject : public CRenderObject, public CUpdateObject
 {
 public:
-	RGBAf				color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
+	//цвет есть в предке
+	//RGBAf				color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
 	string				text;				// Это понятно, текст.
 	Callback			CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
 											// Очевидные комментарии такие очевидные, что даже надо удалить их.
-	CGUIObject();
-	~CGUIObject();
+			CGUIObject();
+			~CGUIObject();
 	void	SetFont(CFont *AFont);
 	void	SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
 	void	SetParent(CGUIObject *AParent);
@@ -303,21 +304,21 @@ protected:
 class CGUIManager : public CList, public CGUIObject
 {
 public:
-	CGUIManager();
-	~CGUIManager();
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool Update(scalar dt);
-	bool Render();
-	void SetFocusedNodeTo(CListNode* AFocusedNode);
-	void SetFocus(CObject* AObject);
+				CGUIManager();
+				~CGUIManager();
+	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool		Update(scalar dt);
+	bool		Render();
+	void		SetFocusedNodeTo(CListNode* AFocusedNode);
+	void		SetFocus(CObject* AObject);
 private:
-	int KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
-	CListNode *FocusedOnListNode;
-	CGUIObject *FocusedOn;
-	int KeyHoldRepeatInterval;
-	int TimerAccum;
-	bool tabholded;
-	bool repeatstarted;
+	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
+	CListNode	*FocusedOnListNode;
+	CGUIObject	*FocusedOn;
+	int			KeyHoldRepeatInterval;
+	int			TimerAccum;
+	bool		tabholded;
+	bool		repeatstarted;
 };
 
 extern CGUIManager GuiManager;
@@ -325,39 +326,38 @@ extern CGUIManager GuiManager;
 class CButton : private CGUIObject
 {
 public:
-	EWidgetMouseState state;
-	bool (*OnClick)(); // Callback
-
-
-	CButton();
-	CButton(CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick);
-	bool Render();
-	bool Update(float dt);
+				CButton();
+				CButton(CAABB ARect, char* AText, RGBAf AColor, Callback ACallProc);
+				~CButton();
+	bool		Render();
+	bool		Update(float dt);
 };
 
 class CEdit : public CGUIObject
 {
 public:
-	EWidgetMouseState state;
-	CEdit();
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
-	bool Render();
-	bool Update(scalar dt);
+				CEdit();
+				~CEdit();
+	bool		InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	bool		Render();
+	bool		Update(scalar dt);
 private:
-	int CursorPos;
+	int			CursorPos;
 };
 
 class CMenuItem : public CGUIObject, public CList
 {
 public:
-	CMenuItem();
-	bool Render();
-	bool Update(scalar dt);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool AddObject(CObject *AObject);
+	bool		isCycledMenuSwitch;
+				CMenuItem();
+				~CMenuItem();
+	bool		Render();
+	bool		Update(scalar dt);
+	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool		AddObject(CObject *AObject);
 private:
-	CMenuItem* FocusedOnItem;
-	CListNode* FocusedOnListNode;
+	CMenuItem*	FocusedOnItem;
+	CListNode*	FocusedOnListNode;
 };
 //////////////////////////////////////////////////////////////////////////
 //CText not implemented yet

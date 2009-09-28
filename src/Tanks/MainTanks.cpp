@@ -86,36 +86,32 @@ CTitleScreen *TitleScreen;
 
 bool Init()
 {	
-	Font = Ninja->FontManager->GetFont("Font");
-	Ninja->FontManager->SetCurrentFont("Font");
+		Font = Ninja->FontManager->GetFont("Font");
+		Ninja->FontManager->SetCurrentFont("Font");
 	//////////////////////////////////////////////////////////////////////////
-	Ninja->GetState(STATE_SCREEN_WIDTH, &ScreenWidth);
-	Ninja->GetState(STATE_SCREEN_HEIGHT, &ScreenHeight);
-	fPosition.x = ScreenWidth - Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE;
-	fPosition.y = ScreenHeight - Font->GetStringHeight(TITLE_TEXT)*SCALE_TITLE;
-	fPosition *= 0.5f;
-
+		Ninja->GetState(STATE_SCREEN_WIDTH, &ScreenWidth);
+		Ninja->GetState(STATE_SCREEN_HEIGHT, &ScreenHeight);
+		fPosition.x = ScreenWidth - Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE;
+		fPosition.y = ScreenHeight - Font->GetStringHeight(TITLE_TEXT)*SCALE_TITLE;
+		fPosition *= 0.5f;
 	//////////////////////////////////////////////////////////////////////////
-	FontEffect = new CParticleSystem;
-	FontEffect->name = "Title bubbles";
-	FontEffect->Init();
-	FontEffect->Info.sc = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
-	FontEffect->Info.ec = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
-	FontEffect->visible = true;	
-	Vector2 *pnts2 = new Vector2 [2];
-	pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
-	pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
-	FontEffect->Info.plife = 1.0;
-	FontEffect->Info.emission = 10;///*debug 1 */ 3000;
-	FontEffect->Info.startsize = 10;
-	// debug //
-	FontEffect->Info.sizevar = 2.0f;
-	FontEffect->Info.p = Vector2(0, 0);
-
-
-	//FontEffect->Texture = Ninja->TextureManager->GetTextureByName("Particle");
-	FontEffect->SetGeometry(pnts2, 2);
-
+		FontEffect = new CParticleSystem;
+		FontEffect->name = "Title bubbles";
+		FontEffect->Init();
+		FontEffect->Info.sc = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
+		FontEffect->Info.ec = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
+		FontEffect->visible = true;	
+		Vector2 *pnts2 = new Vector2 [2];
+		pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
+		pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
+		FontEffect->Info.plife = 1.0;
+		FontEffect->Info.emission = 10;///*debug 1 */ 3000;
+		FontEffect->Info.startsize = 10;
+		FontEffect->Info.sizevar = 2.0f;
+		FontEffect->Info.p = Vector2(0, 0);
+		FontEffect->Texture = Ninja->TextureManager->GetTextureByName("Particle");
+		FontEffect->SetGeometry(pnts2, 2);
+	//////////////////////////////////////////////////////////////////////////
 	GuiManager.visible = false;
 	TitleScreen = new CTitleScreen;
 	
@@ -128,20 +124,48 @@ bool Init()
 	next->text = "Start";
 	next->CallProc = &StartGame;
 	next->position = Vector2(ScreenWidth*0.5f - 20,180);
+	next->SetParent(MenuRoot);
 	MenuRoot->AddObject(next);
 
 	next = new CMenuItem();
 	next->name = "menu item Options";
 	next->text = "Options";
 	next->position = Vector2(ScreenWidth*0.5f - 20,160);
-	next->CallProc = &Options;
+	next->CallProc = NULL;
+	next->SetParent(MenuRoot);
 	MenuRoot->AddObject(next);
+
+		CMenuItem *options = new CMenuItem();
+		options->name = "menu item Game";
+		options->text = "Game";
+		options->position = Vector2(ScreenWidth*0.5f - 20, 180);
+		options->CallProc = &Options;
+		options->SetParent(next);
+		next->AddObject(options);
+
+		options = new CMenuItem();
+		options->name = "menu item Options";
+		options->text = "Sound";
+		options->position = Vector2(ScreenWidth*0.5f - 20, 160);
+		options->CallProc = NULL;
+		options->SetParent(next);
+		next->AddObject(options);
+
+		options = new CMenuItem();
+		options->name = "menu item Options";
+		options->text = "Video";
+		options->position = Vector2(ScreenWidth*0.5f - 20,140);
+		options->CallProc = NULL;
+		options->SetParent(next);
+		next->AddObject(options);
+
 
 	next = new CMenuItem();
 	next->name = "menu item Exit";
 	next->text = "Exit";
 	next->position = Vector2(ScreenWidth*0.5f - 20,140);
 	next->CallProc = &EndGame;
+	next->SetParent(MenuRoot);
 	MenuRoot->AddObject(next);
 
 	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = true;

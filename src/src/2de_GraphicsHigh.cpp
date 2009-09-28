@@ -1158,14 +1158,16 @@ CGUIManager::~CGUIManager()
 
 }
 CGUIManager GuiManager;
+//////////////////////////////////////////////////////////////////////////
+///CButton
 
-CButton::CButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick ):
-OnClick(AOnClick), state(wmsOutside)
+CButton::CButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick )
 {
+	CallProc = AOnClick;
 	aabb = ARect;
 	color = AColor;
 	text = AText;
-
+	WidgetMouseState = wmsOutside;
 	PRender->DashedLines = true;
 	PRender->dash = 0x0001;
 }
@@ -1198,52 +1200,57 @@ bool CButton::Update(float dt)
 	Vector2 mouse;
 	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
 
-	switch (state)
+	switch (WidgetMouseState)
 	{
 	case wmsOutside:
 		if (aabb.Inside(mouse))
-			state = wmsHovered;
+			WidgetMouseState = wmsHovered;
 		break;
 	case wmsHovered:
 		color += Dclr;
-		state = wmsInside;
+		WidgetMouseState = wmsInside;
 		break;
 	case wmsInside:
 		if (!aabb.Inside(mouse))
 		{
-			state = wmsLost;
+			WidgetMouseState = wmsLost;
 			break;
 		}
 		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
 		{
 			color += Dclr;
 			GuiManager.SetFocusedNodeTo(GuiManager.GetListNode(this));
-			if (OnClick)
-				OnClick();
-			state = wmsClicked;
+			if (CallProc)
+				CallProc();
+			WidgetMouseState = wmsClicked;
 		}
 		break;
 	case wmsLost:
 		color -= Dclr;
-		state = wmsOutside;
+		WidgetMouseState = wmsOutside;
 		break;
 	case wmsClicked:
 		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-			state = wmsReleased;
+			WidgetMouseState = wmsReleased;
 		break;
 	case wmsReleased:
 		color -= Dclr;
 		if (aabb.Inside(mouse))
-			state = wmsInside;
+			WidgetMouseState = wmsInside;
 		else
-			state = wmsOutside;
+			WidgetMouseState = wmsOutside;
 		break;
 
 	}
 	return true;
 }
 
+CButton::~CButton()
+{
 
+}
+//////////////////////////////////////////////////////////////////////////
+///CEdit
 
 bool CEdit::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
 {
@@ -1306,42 +1313,42 @@ bool CEdit::Update( scalar dt )
 	Vector2 mouse;
 	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
 
-	switch (state)
+	switch (WidgetMouseState)
 	{
 	case wmsOutside:
 		if (aabb.Inside(mouse))
-			state = wmsHovered;
+			WidgetMouseState = wmsHovered;
 		break;
 	case wmsHovered:
 		color += Dclr;
-		state = wmsInside;
+		WidgetMouseState = wmsInside;
 		break;
 	case wmsInside:
 		if (!aabb.Inside(mouse))
 		{
-			state = wmsLost;
+			WidgetMouseState = wmsLost;
 			break;
 		}
 		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
 		{
 			color += Dclr;
-			state = wmsClicked;
+			WidgetMouseState = wmsClicked;
 		}
 		break;
 	case wmsLost:
 		color -= Dclr;
-		state = wmsOutside;
+		WidgetMouseState = wmsOutside;
 		break;
 	case wmsClicked:
 		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-			state = wmsReleased;
+			WidgetMouseState = wmsReleased;
 		break;
 	case wmsReleased:
 		color -= Dclr;
 		if (aabb.Inside(mouse))
-			state = wmsInside;
+			WidgetMouseState = wmsInside;
 		else
-			state = wmsOutside;
+			WidgetMouseState = wmsOutside;
 		break;
 	}
 	return true;
@@ -1353,15 +1360,20 @@ CEdit::CEdit() : CursorPos(0)
 {
 }
 
+CEdit::~CEdit()
+{
+
+}
+//////////////////////////////////////////////////////////////////////////
+///CMenuItem
 CMenuItem::CMenuItem()
 {
-	CEngine::Instance()->RenderManager.AddObject(this);
-	CEngine::Instance()->UpdateManager.AddObject(this);
 	GuiManager.AddObject(this);
 	FocusedOnItem = NULL;
 	FocusedOnListNode = NULL;
 	visible = false;
 	CallProc = NULL;
+	isCycledMenuSwitch = true;
 }
 
 bool CMenuItem::Render()
@@ -1397,11 +1409,25 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		switch(key)
 		{
 		case SDLK_UP:
+			if (FocusedOnListNode == GetFirst() && isCycledMenuSwitch)
+			{
+				FocusedOnListNode = GetLast();
+				if (FocusedOnListNode)
+					FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+				break;
+			}
 			FocusedOnListNode = RelativePrev(FocusedOnListNode);
 			if (FocusedOnListNode)
 				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
 			break;
 		case SDLK_DOWN:
+			if (FocusedOnListNode == GetLast() && isCycledMenuSwitch)
+			{
+				FocusedOnListNode = GetFirst();
+				if (FocusedOnListNode)
+					FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+				break;
+			}
 			FocusedOnListNode = RelativeNext(FocusedOnListNode);
 			if (FocusedOnListNode)
 				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
@@ -1409,6 +1435,13 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		case SDLK_RETURN:
 			if (FocusedOnItem->CallProc)
 				FocusedOnItem->CallProc();
+			else
+				if (FocusedOnItem->GetFirst())
+				{
+					visible = false;
+					FocusedOnItem->visible = true;
+					GuiManager.SetFocus(FocusedOnItem);
+				}
 			break;
 		}
 	}
@@ -1426,4 +1459,9 @@ bool CMenuItem::AddObject(CObject *AObject)
 	if (FocusedOnListNode)
 		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
 	return true;
+}
+
+CMenuItem::~CMenuItem()
+{
+
 }
