@@ -58,6 +58,7 @@ public:
 				Ninja->RenderManager.DelObject("Title screen tanks");
 				Ninja->UpdateManager.DelObject("Title screen tanks");
 				dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+				dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
 				Tanks = new CTankManager;	
 			}
 		}
@@ -112,62 +113,38 @@ bool Init()
 		FontEffect->Texture = Ninja->TextureManager->GetTextureByName("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////
+	GuiManager.SetPrimitiveRender(new CPrimitiveRender);
+	GuiManager.SetFont(Font);
 	GuiManager.visible = false;
 	TitleScreen = new CTitleScreen;
 	
-	CMenuItem *MenuRoot = new CMenuItem;
-	MenuRoot->name = "Root menu item";
-	MenuRoot->text = "Root";
-	
-
-	CMenuItem *next = new CMenuItem();
-	next->name = "menu item Start";
-	next->text = "Start";
-	next->CallProc = &StartGame;
+	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item", NULL);
+	MenuRoot->SetFont(Font);
+	MenuRoot->SetPrimitiveRender(new CPrimitiveRender);
+ 	
+	CMenuItem *next = new CMenuItem(MenuRoot, "Start game", &StartGame);
 	next->position = Vector2(ScreenWidth*0.5f - 20,180);
-	next->SetParent(MenuRoot);
-	MenuRoot->AddObject(next);
 
-	next = new CMenuItem();
-	next->name = "menu item Options";
-	next->text = "Options";
+	next = new CMenuItem(MenuRoot, "Options", NULL);
 	next->position = Vector2(ScreenWidth*0.5f - 20,160);
-	next->CallProc = NULL;
-	next->SetParent(MenuRoot);
-	MenuRoot->AddObject(next);
 
-		CMenuItem *options = new CMenuItem();
-		options->name = "menu item Game";
-		options->text = "Game";
+		CMenuItem *options = new CMenuItem(next, "Game", &Options);	
 		options->position = Vector2(ScreenWidth*0.5f - 20, 180);
-		options->CallProc = &Options;
-		options->SetParent(next);
-		next->AddObject(options);
 
-		options = new CMenuItem();
-		options->name = "menu item Options";
-		options->text = "Sound";
+		options = new CMenuItem(next, "Sound", NULL);
 		options->position = Vector2(ScreenWidth*0.5f - 20, 160);
-		options->CallProc = NULL;
-		options->SetParent(next);
-		next->AddObject(options);
 
-		options = new CMenuItem();
-		options->name = "menu item Options";
-		options->text = "Video";
-		options->position = Vector2(ScreenWidth*0.5f - 20,140);
-		options->CallProc = NULL;
-		options->SetParent(next);
-		next->AddObject(options);
+		options = new CMenuItem(next, "Video", NULL);
+		options->position = Vector2(ScreenWidth*0.5f - 20, 140);
+
+		options = new CMenuItem(next, "Others", NULL);
+		options->position = Vector2(ScreenWidth*0.5f - 20, 120);
+
+	next->AddObject(next);
 
 
-	next = new CMenuItem();
-	next->name = "menu item Exit";
-	next->text = "Exit";
+	next = new CMenuItem(MenuRoot, "Exit", &EndGame);
 	next->position = Vector2(ScreenWidth*0.5f - 20,140);
-	next->CallProc = &EndGame;
-	next->SetParent(MenuRoot);
-	MenuRoot->AddObject(next);
 
 	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = true;
 	GuiManager.SetFocus(MenuRoot);

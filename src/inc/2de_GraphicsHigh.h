@@ -350,6 +350,7 @@ class CMenuItem : public CGUIObject, public CList
 public:
 	bool		isCycledMenuSwitch;
 				CMenuItem();
+				CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc);
 				~CMenuItem();
 	bool		Render();
 	bool		Update(scalar dt);

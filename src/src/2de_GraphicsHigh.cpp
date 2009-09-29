@@ -995,12 +995,12 @@ CParticleSystem::~CParticleSystem()
 
 CGUIObject::CGUIObject()
 {
-	Font = CEngine::Instance()->FontManager->GetFont("Font"); // Это конструкто же, а что если конструируется до инициализации движка? втф...
-	PRender = new CPrimitiveRender;
+	Font = NULL;
+	PRender = NULL;
 	Parent = NULL;
-	PRender->plClr = &color;
-	PRender->psClr = &color;
-	PRender->ppClr = &color;
+	CallProc = NULL;
+	WidgetMouseState = wmsOutside;
+	SetParent(&GuiManager);
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
 	GuiManager.AddObject(this);
@@ -1008,7 +1008,6 @@ CGUIObject::CGUIObject()
 
 CGUIObject::~CGUIObject()
 {
-	delete PRender;
 	CEngine::Instance()->RenderManager.DelObject(id);
 	CEngine::Instance()->UpdateManager.DelObject(id);
 }
@@ -1021,6 +1020,9 @@ void CGUIObject::SetFont(CFont *AFont)
 void CGUIObject::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
 {
 	PRender = APrimitiveRender;
+// 	PRender->plClr = &color;
+// 	PRender->psClr = &color;
+// 	PRender->ppClr = &color;
 }
 
 void CGUIObject::SetParent(CGUIObject *AParent)
@@ -1168,9 +1170,6 @@ CButton::CButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick )
 	aabb = ARect;
 	color = AColor;
 	text = AText;
-	WidgetMouseState = wmsOutside;
-	PRender->DashedLines = true;
-	PRender->dash = 0x0001;
 }
 
 CButton::CButton()
@@ -1367,14 +1366,33 @@ CEdit::~CEdit()
 }
 //////////////////////////////////////////////////////////////////////////
 ///CMenuItem
+
+#define DEFAULT_DISTANCE_BEETWEEN_ITEMS 20
+
 CMenuItem::CMenuItem()
 {
-	GuiManager.AddObject(this);
 	FocusedOnItem = NULL;
 	FocusedOnListNode = NULL;
 	visible = false;
-	CallProc = NULL;
 	isCycledMenuSwitch = true;
+}
+
+CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc)
+{
+	FocusedOnItem = NULL;
+	FocusedOnListNode = NULL;
+	visible = false;
+	isCycledMenuSwitch = true;
+	name = text = AMenuText;
+	SetParent(AParent);
+	if (AParent)
+		AParent->AddObject(this);
+	CallProc = ACallProc;
+}
+
+CMenuItem::~CMenuItem()
+{
+
 }
 
 bool CMenuItem::Render()
@@ -1410,6 +1428,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		switch(key)
 		{
 		case SDLK_UP:
+			// Вероятно эту логику можно записать и покороче TODO
 			if (FocusedOnListNode == GetFirst() && isCycledMenuSwitch)
 			{
 				FocusedOnListNode = GetLast();
@@ -1467,9 +1486,4 @@ bool CMenuItem::AddObject(CObject *AObject)
 	if (FocusedOnListNode)
 		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
 	return true;
-}
-
-CMenuItem::~CMenuItem()
-{
-
 }
