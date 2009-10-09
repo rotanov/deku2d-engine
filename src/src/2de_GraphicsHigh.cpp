@@ -1000,7 +1000,6 @@ CGUIObject::CGUIObject()
 	Parent = NULL;
 	CallProc = NULL;
 	WidgetMouseState = wmsOutside;
-	SetParent(&GuiManager);
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
 	GuiManager.AddObject(this);

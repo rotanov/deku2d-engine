@@ -1,11 +1,3 @@
-// TODO: i think there may be some problems with memory access and pointers while
-// using GetPixel for 3 bytes images , and accessing to alpha byte...
-// and goal to solve this problem currently it is necessary to call makergba
-// routine for all loaded images to avoid this problem. 
-// Also All most of ImageData members have not tested with PNG images.
-// So don't use it.
-// TODO! теперь надо перевести гигантский сумбурный комментарий сверху и подумать.
-
 #ifndef IMAGE_UTILS_H
 #define IMAGE_UTILS_H
 

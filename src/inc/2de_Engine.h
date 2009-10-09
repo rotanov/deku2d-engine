@@ -73,6 +73,8 @@ public:
 	bool						AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
 	int							CfgGetInt(char* ParamName);
 	bool						Run();
+
+	bool						Suicide();  // Временно в паблике
 	
 private:
 	char						*ResourceListPath;
@@ -96,7 +98,7 @@ private:
 	bool						MidInit();
 	void						CalcFps();
 	bool						LimitFps();
-	bool						Suicide();
+	
 	bool						ProcessEvents();
 
 	// TODO: либо подумать ещё раз, либо избавиться от констант и перейти на списки. И да, ебал я ваш реаллок.

@@ -446,3 +446,5 @@ typedef CGarbageCollector CSingletoneKiller;
 // 
 // 	cout << ss << " " << p << "\n";
 // }
+
+extern CList CObjectManager;

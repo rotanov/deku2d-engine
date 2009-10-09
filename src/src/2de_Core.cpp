@@ -429,7 +429,8 @@ void CList::Clear()
 	{
 		CListNode *tmp = first;
 		first = first->next;
-		delete tmp;
+		//delete tmp;
+		DelNode(tmp);
 	}
 	NodeCount = 0;
 	first = NULL;

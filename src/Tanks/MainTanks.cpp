@@ -74,6 +74,7 @@ bool StartGame()
 
 bool EndGame()
 {
+	Ninja->Suicide();
 	SDLGLExit(1);
 	return true;
 }
@@ -140,7 +141,7 @@ bool Init()
 		options = new CMenuItem(next, "Others", NULL);
 		options->position = Vector2(ScreenWidth*0.5f - 20, 120);
 
-	next->AddObject(next);
+	
 
 
 	next = new CMenuItem(MenuRoot, "Exit", &EndGame);
@@ -149,9 +150,9 @@ bool Init()
 	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = true;
 	GuiManager.SetFocus(MenuRoot);
 
-	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.
-	new CButton(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// A этот будет работать!
-	new CEdit();
+// 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.
+// 	new CButton(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// A этот будет работать!
+// 	new CEdit();
 
 // 	CTileSet TanksTiles;
 // 	TanksTiles.Info.HorNumTiles = 4;

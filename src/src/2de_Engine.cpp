@@ -243,6 +243,7 @@ bool CEngine::Init()
 
 bool CEngine::Suicide()
 {
+	ClearLists();
 	Log("INFO", "Suicide success");
 	return true;
 }
@@ -389,7 +390,7 @@ bool CEngine::Run()
 #ifdef _DEBUG
 	CObjectManager.DumpToLog();
 #endif
-	Suicide();
+	Suicide();	// ЅЋяЅЋяЅяЋяЅЋяЅЋяЅЋя ћџ —ёƒј Ќ≈ ѕќѕјƒј≈ћ
 	SDLGLExit(0); // ≈сли мы попадаем сюда, то в место после вызова Run() мы уже не попадЄм. Ёто проблема, € думаю, надо что-то другое придумать.
 	return true;
 }
@@ -450,6 +451,10 @@ int CEngine::CfgGetInt( char* ParamName )
 bool CEngine::ClearLists()
 {
 	// Ќе так!!!1!адин!+!+!
+	CObjectManager.Clear();
+	RenderManager.Reset();
+	UpdateManager.Reset();
+	TextureManager->Reset();
 	CObject *data = (RenderManager.Next());
 	while (data)
 	{
@@ -472,6 +477,15 @@ bool CEngine::ClearLists()
 	}	
 	RenderManager.Clear();
 	UpdateManager.Clear();
+
+	data = TextureManager->Next();
+	while(data)
+	{
+		if (data && !data->GetListRefCount())
+			SAFE_DELETE(data);
+		data = RenderManager.Next();
+	}
+	RenderManager.Clear();
 
 	return true;
 }
