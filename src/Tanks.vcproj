@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="Tanks"
 	ProjectGUID="{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
 	RootNamespace="Tanks"
@@ -200,7 +200,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\2de_GameUtils.cpp"
+				RelativePath=".\src\2de_GameUtils.cpp"
 				>
 			</File>
 			<File
