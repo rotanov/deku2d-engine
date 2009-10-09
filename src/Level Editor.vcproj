@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8,00"
 	Name="Level Editor"
-	ProjectGUID="{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
+	ProjectGUID="{B18211B0-4D50-4F93-A351-4530E915E979}"
 	RootNamespace="LevelEditor"
 	Keyword="Win32Proj"
 	>
@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
+				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\lib\"
@@ -149,7 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib"
+				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib"
 				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
 				AdditionalLibraryDirectories="..\lib\"
 				GenerateManifest="true"
@@ -191,51 +191,51 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\src\coreutils.cpp"
+				RelativePath=".\src\2de_Core.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Engine.cpp"
+				RelativePath=".\src\2de_Engine.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\game.cpp"
+				RelativePath=".\src\2de_GameUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\GameUtils.cpp"
+				RelativePath=".\src\2de_GraphicsHigh.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\gui.cpp"
+				RelativePath=".\src\2de_GraphicsLow.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\imageutils.cpp"
+				RelativePath=".\src\2de_Gui.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Level Editor\LevelEditor.cpp"
+				RelativePath=".\src\2de_ImageUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\mathutils.cpp"
+				RelativePath=".\src\2de_LuaUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\openglutils.cpp"
+				RelativePath=".\src\2de_MathUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\physics.cpp"
+				RelativePath=".\src\2de_Physics.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\resource.cpp"
+				RelativePath=".\src\2de_Resource.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\xml.cpp"
+				RelativePath=".\src\2de_Xml.cpp"
 				>
 			</File>
 		</Filter>
@@ -243,313 +243,77 @@
 			Name="inc"
 			>
 			<File
-				RelativePath=".\inc\CoreUtils.h"
+				RelativePath=".\inc\2de_Core.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Engine.h"
+				RelativePath=".\inc\2de_Engine.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\event.h"
+				RelativePath=".\inc\2de_Event.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Game.h"
+				RelativePath=".\inc\2de_GameUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\GameUtils.h"
+				RelativePath=".\inc\2de_GraphicsHigh.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\gui.h"
+				RelativePath=".\inc\2de_GraphicsLow.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ImageUtils.h"
+				RelativePath=".\inc\2de_Gui.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MathUtils.h"
+				RelativePath=".\inc\2de_ImageUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\OpenglUtils.h"
+				RelativePath=".\inc\2de_LuaUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Physics.h"
+				RelativePath=".\inc\2de_MathUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\resource.h"
+				RelativePath=".\inc\2de_Physics.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\xml.h"
+				RelativePath=".\inc\2de_Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Xml.h"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Resource Files"
+			Name="Resource"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="..\ico\Earth.ico"
+				RelativePath=".\Level Editor\Resource\Resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Level Editor.rc"
-				>
-			</File>
-			<File
-				RelativePath=".\resourceLE.h"
+				RelativePath=".\Level Editor\Resource\Resource.rc"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="libpng"
+			Name="Level editor"
 			>
 			<File
-				RelativePath=".\libpng\png.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libpng\pngconf.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="SDL"
-			>
-			<File
-				RelativePath=".\SDL\begin_code.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\close_code.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_active.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_audio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_byteorder.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_cdrom.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_amiga.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_dreamcast.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_macos.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_macosx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_minimal.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_nds.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_os2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_symbian.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_config_win32.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_copying.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_cpuinfo.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_endian.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_error.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_events.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_getenv.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_joystick.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_keyboard.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_keysym.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_loadso.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_main.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_mouse.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_mutex.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_name.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_opengl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_platform.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_quit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_rwops.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_stdinc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_syswm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_thread.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_timer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_types.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_version.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SDL\SDL_video.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="zlib"
-			>
-			<File
-				RelativePath=".\zlib\crypt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\deflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffixed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\ioapi.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\trees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\unzip.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zconf.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zconf.in.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zip.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zlib.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zutil.h"
+				RelativePath=".\Level Editor\LevelEditor.cpp"
 				>
 			</File>
 		</Filter>

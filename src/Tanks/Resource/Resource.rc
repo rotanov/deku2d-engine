@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "ResourceTanks.h"
+#include "Resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 
 1 TEXTINCLUDE 
 BEGIN
-    "ResourceTanks.h\0"
+    "Resource.h\0"
 END
 
 2 TEXTINCLUDE 
@@ -54,7 +54,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON2               ICON                    "../ico/Tank.ico"
+IDI_ICON2               ICON                    "../ico/Planet.ico"
 #endif    // Russian resources
 /////////////////////////////////////////////////////////////////////////////
 

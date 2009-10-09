@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "2de_Engine.h"
 #include "Game.h"
 //#include "LuaUtils.h"
 
@@ -21,6 +21,5 @@ int	main(int argc, char *argv[])
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
-	Ninja->FreeInst();
 	return 0x1;
 }

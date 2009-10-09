@@ -169,12 +169,12 @@ bool CHero::Update( float dt )
 //					if (DegToRad(tangle + 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 			for (int i=0; i< ps->Info.ParticlesActive; i++)
 			{
-				n = (ps->particles[i].p - Vector2(Position.x+C1, Position.y+C2)).Normalized();
-				if (((ps->particles[i].p-Vector2(Position.x, Position.y)).Length())<= 200)
+				n = (ps->particles[i].p - Vector2(x+C1, y+C2)).Normalized();
+				if (((ps->particles[i].p-Vector2(x, y)).Length())<= 200)
 					if (DegToRad(tangle+ 15) > atan2f(n.y, n.x) && atan2f(n.y, n.x) > DegToRad(tangle - 15))
 					{
-						ps->particles[i].p += (Vector2(Position.x, Position.y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(Position.x, Position.y)).Length()*0.15f);
-						if (((ps->particles[i].p-Vector2(Position.x+C1, Position.y+C2)).Length())<= 35)
+						ps->particles[i].p += (Vector2(x, y)-ps->particles[i].p+Vector2(32, 32))/((ps->particles[i].p-Vector2(x, y)).Length()*0.15f);
+						if (((ps->particles[i].p-Vector2(x+C1, y+C2)).Length())<= 35)
 						{
 							Snow += 1;
 							ps->particles[i].age = 0xffffff;
@@ -190,7 +190,7 @@ bool CHero::Update( float dt )
 			prt->v = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*500.01f;
 
 			Vector2 pos = Vector2(cos(DegToRad(tangle)), sin(DegToRad(tangle)))*32;
-			pos += Vector2(C1-16+Position.x, C2-16+Position.y);
+			pos += Vector2(C1-16+x, C2-16+y);
 
 			prt->p = pos;
 			sballlaunched = true;
@@ -227,24 +227,24 @@ bool CHero::Update( float dt )
 	CAABB tmp  = BBox;
 
 
-	Position.x += v.x*dt;
-	tmp.Offset(Position.x, Position.y);
+	x += v.x*dt;
+	tmp.Offset(x, y);
 	if (tmp.Intersect(Gift))
 	{	
 		if (v.x > 0)
-			Position.x = Gift.vMin.x  - 56;
+			x = Gift.vMin.x  - 56;
 		else
-			Position.x = Gift.vMax.x;
+			x = Gift.vMax.x;
 		v.x = -v.x*0.1f;
 	}
 
 
 	tmp = BBox;
-	Position.y += v.y*dt;
-	tmp.Offset(Position.x, Position.y);
+	y += v.y*dt;
+	tmp.Offset(x, y);
 	if (tmp.Intersect(Gift))
 	{
-		Position.y = GROUND+60;
+		y = GROUND+60;
 		v.y = 0;
 		onPlane = true;
 	}
@@ -257,9 +257,9 @@ bool CHero::Update( float dt )
 		v.x *= 0.999f;
 
 	//		if(Gift.)
-	if (Position.y <= GROUND)
+	if (y <= GROUND)
 	{
-		Position.y = GROUND;
+		y = GROUND;
 		v.y = 0 ;
 		onPlane = true;
 	}

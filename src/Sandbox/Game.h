@@ -1,9 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "Engine.h"
-#include "GameUtils.h"
-#include "MathUtils.h"
+#include "2de_Engine.h"
+#include "2de_GameUtils.h"
+#include "2de_MathUtils.h"
 
 #define GROUND 16
 

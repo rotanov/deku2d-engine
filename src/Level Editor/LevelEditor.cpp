@@ -1,5 +1,5 @@
-#include "Engine.h"
-#include "GameUtils.h"
+#include "2de_Engine.h"
+#include "2de_GameUtils.h"
 
 CEngine* Ninja = CEngine::Instance();
 
@@ -63,7 +63,7 @@ void AddTile(int TileIndex, int x, int y)
 	scalar h = TileSet->Info.TileHeight;
 	for(int k = 0; k < 4; k++)
 	{
-		next->info.pos[k] = (ji + V2QuadBin[k]);
+		next->info.pos[k] = (ji + V2_QuadBin[k]);
 		next->info.pos[k].x *= w;
 		next->info.pos[k].y *= h;
 	}
