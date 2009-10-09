@@ -36,8 +36,8 @@ static const scalar d180_PI = 180.0f/PI;
 #ifdef USE_SDL_OPENGL
 #include "SDL_opengl.h"
 #else
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #endif
 #endif
 
@@ -129,7 +129,7 @@ __INLINE unsigned int sign(const float x)
 // 	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
 // }
 
-class Vector2{
+class Vector2 {
 public:
 	scalar x, y;
 	static const Vector2& Blank()

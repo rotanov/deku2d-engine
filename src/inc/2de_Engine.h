@@ -9,14 +9,18 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <memory.h>
+
+#ifdef WIN32
 #include <tchar.h>
+#endif
+
 #include <math.h>
 
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
 //#include "2de_Gui.h"
 #include "2de_Xml.h"
-#include "2de_resource.h"
+#include "2de_Resource.h"
 
 // Константы
 

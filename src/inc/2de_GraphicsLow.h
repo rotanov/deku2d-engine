@@ -8,8 +8,8 @@
 #ifdef USE_SDL_OPENGL
 #include "SDL_opengl.h"
 #else
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #endif
 
 #include "2de_ImageUtils.h"
