@@ -667,48 +667,14 @@ int CPSingleTone::_refcount = 0;
 //----------------------------------//
 //			Log Stuff				//
 //----------------------------------//
-char LogFile[2048];
-int __l=0;
-char _day[7][4];
-char _mon[12][4];
+char LogFile[CFILE_MAX_STRING_LENGTH];
 
 void CreateLogFile(char *fname)
 {
-	memset(LogFile,0,2048);//(LogFile,2048);
-	memcpy(LogFile,fname,strlen(fname));
+	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
+	memcpy(LogFile, fname, strlen(fname));
 	FILE *hf = NULL;
-
-#ifdef WIN32
-	char *MainDir = new char[MAX_PATH], *LastDir = new char[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, LastDir);
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-	SetCurrentDirectory(MainDir);
-#endif WIN32 
-
-
-	hf = fopen(LogFile, "w");
-#ifdef LOG_TIME_TICK
-	fprintf(hf, "[0]%c%c[INFO] Log file \"%s\" created\n", 9,9,fname);
-#else
-	char buff[32];
-	__time32_t time;
-	struct tm rstime;
-	_time32(&time);
-	_localtime32_s(&rstime, &time);
-	memset(buff, 0, 32);
-	asctime_s(buff, 32, &rstime);
-	buff[strlen(buff) - 1] = 0;
-	fprintf(hf, "[%s] [INFO] Log file \"%s\" created\n", buff,fname);
-#endif
-	fclose(hf);
-
-#ifdef WIN32
-	SetCurrentDirectory(LastDir);
-	delete [] MainDir;
-	delete [] LastDir;
-#endif
-
+	Log("INFO", "Log file \"%s\" created", fname);
 }
 void Log(char* Event,char* Format,...)
 {
@@ -716,9 +682,9 @@ void Log(char* Event,char* Format,...)
 		return;
 
 #ifdef WIN32
-	char *MainDir = new char[MAX_PATH], *LastDir = new char[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, LastDir);
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	char *MainDir = new char[CFILE_MAX_STRING_LENGTH], *LastDir = new char[CFILE_MAX_STRING_LENGTH];
+	GetCurrentDirectory(CFILE_MAX_STRING_LENGTH, LastDir);
+	GetModuleFileName(GetModuleHandle(0), MainDir, CFILE_MAX_STRING_LENGTH);
 	DelFNameFromFPath(MainDir);
 	SetCurrentDirectory(MainDir);
 #endif WIN32 
@@ -730,10 +696,10 @@ void Log(char* Event,char* Format,...)
 	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
 #else
 	char buff[32];
-	__time32_t time;
+	time_t _time;
 	struct tm rstime;
-	_time32(&time);
-	_localtime32_s(&rstime, &time);
+	time(&_time);
+	localtime_s(&rstime, &_time);
 	memset(buff, 0, 32);
 	asctime_s(buff, 32, &rstime);
 	buff[strlen(buff) - 1] = 0;
