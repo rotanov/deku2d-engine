@@ -1290,14 +1290,14 @@ __INLINE Vector3 CalcNorm(const Vector3 v1,const Vector3 v2,const Vector3 v3)
    return t;
 }
 
-__INLINE void ÑlampV(Vector2& x, const Vector2 xmin, const Vector2 xmax)
+__INLINE void ClampV(Vector2& x, const Vector2 xmin, const Vector2 xmax)
 {
 	x.x = clampf(x.x, xmin.x, xmax.x);
 	x.y = clampf(x.y, xmin.y, xmax.y);
 }
 
 
-__INLINE void ÑlampV(Vector3& x, const Vector3 xmin, const Vector3 xmax)
+__INLINE void ClampV(Vector3& x, const Vector3 xmin, const Vector3 xmax)
 {
 	x.x = clampf(x.x, xmin.x, xmax.x);
 	x.y = clampf(x.y, xmin.y, xmax.y);

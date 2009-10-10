@@ -11,9 +11,9 @@ SOURCES		=	src/src/2de_Core.cpp \
 			src/src/2de_Resource.cpp \
 			src/src/2de_Xml.cpp \
 			src/Tanks/MainTanks.cpp \
-			src/Tanks/Tanks.cpp \
+			src/Tanks/Tanks.cpp
 
-INCPATH		=	-I/usr/include -I/usr/include/SDL -I/usr/include/libpng -I/usr/include/lua5.1 -Isrc/inc
+INCPATH		=	-I/usr/include/SDL -I/usr/include/libpng -I/usr/include/lua5.1 -iquotesrc/inc
 
 TARGET		=	bin/tanks
 

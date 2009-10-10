@@ -1,6 +1,7 @@
+#include <stdlib.h>
+
 #include "2de_Core.h"
 #include "2de_Engine.h"
-
 
 bool Enabled = true;
 static int CObjectCount = 0;
@@ -696,12 +697,12 @@ void Log(char* Event,char* Format,...)
 	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
 #else
 	char buff[32];
-	time_t _time;
-	struct tm rstime;
-	time(&_time);
-	localtime_s(&rstime, &_time);
+	time_t rawtime;
+	struct tm *rstime;
+	time(&rawtime);
+	rstime = localtime(&rawtime);
 	memset(buff, 0, 32);
-	asctime_s(buff, 32, &rstime);
+	buff = asctime(rstime);
 	buff[strlen(buff) - 1] = 0;
 	fprintf(hf,"[%s] [%s] ", buff, Event);
 #endif

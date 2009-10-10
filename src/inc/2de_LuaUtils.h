@@ -2,7 +2,7 @@
 #define _LUA_UTILS_H_
 
 #include "2de_Core.h"
-#include "Lua.hpp"
+#include "lua.hpp"
 //using namespace std;
 
 struct lua_State;
