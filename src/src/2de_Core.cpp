@@ -275,14 +275,19 @@ bool CFile::Writeln(string buffer)
 {
 	if (file==NULL)
 		return false;
-	char b=13;
+	char b;
+
 	Write((char*)buffer.data(), (DWORD)buffer.length());
-	Write(&b,1);
-	//for windows only 'cause of 13 10=)
 #ifdef WIN32
-	b = 10;
+	// почему это вообще надо?.. лишний байт для чтения в глупых редакторах, не поддерживающих LF онли? или что?.. 
+	// а если уж и нужно, то вообще надо бы сделать константу, дефайн, зависящий от платформы..
+
+	b = 13;
 	Write(&b,1);
 #endif
+	b = 10;
+	Write(&b,1);
+
 	return true;
 }
 
