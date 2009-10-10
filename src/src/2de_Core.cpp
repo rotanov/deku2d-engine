@@ -691,17 +691,14 @@ void CreateLogFile(char *fname)
 #ifdef LOG_TIME_TICK
 	fprintf(hf, "[0]%c%c[INFO] Log file \"%s\" created\n", 9,9,fname);
 #else
-	__time64_t long_time;
-	_time64( &long_time ); 
-	struct tm *newtime;
-	newtime = localtime(&long_time);
-	char buff[256];
-	memset(buff,0,256);
-	strcpy(buff,asctime(newtime));
-	for (unsigned int i=0;i<strlen(buff);i++){
-		if (buff[i]<=13)
-			buff[i] = 0;
-	}
+	char buff[32];
+	__time32_t time;
+	struct tm rstime;
+	_time32(&time);
+	_localtime32_s(&rstime, &time);
+	memset(buff, 0, 32);
+	asctime_s(buff, 32, &rstime);
+	buff[strlen(buff) - 1] = 0;
 	fprintf(hf, "[%s] [INFO] Log file \"%s\" created\n", buff,fname);
 #endif
 	fclose(hf);
@@ -732,17 +729,14 @@ void Log(char* Event,char* Format,...)
 #ifdef LOG_TIME_TICK
 	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
 #else
-	__time64_t long_time;
-	_time64( &long_time ); 
-	struct tm *newtime;
-	newtime = localtime(&long_time);
-	char buff[256];
-	memset(buff,0,256);
-	strcpy(buff,asctime(newtime));
-	for (unsigned int i=0;i<strlen(buff);i++){
-		if (buff[i]<=13)
-			buff[i] = 0;
-	}
+	char buff[32];
+	__time32_t time;
+	struct tm rstime;
+	_time32(&time);
+	_localtime32_s(&rstime, &time);
+	memset(buff, 0, 32);
+	asctime_s(buff, 32, &rstime);
+	buff[strlen(buff) - 1] = 0;
 	fprintf(hf,"[%s] [%s] ", buff, Event);
 #endif
 	va_start(ap, Format);
