@@ -319,7 +319,7 @@ class CFile // унаследовать
 public:
 	FILE *file;
 
-	CFile(void) : file(NULL){}
+	CFile(void) : file(NULL), fname(NULL){}
 	CFile(char *filename, int mode);
 
 	bool Open(const char * filename, int mode);
@@ -334,10 +334,12 @@ public:
 	bool ReadString(string &buffer);
 	bool WriteString(const string buffer);
 	bool Writeln(string buffer);
-	DWORD Size();
+	size_t Size();
 	bool ReadLine(char* &data);
 	bool Eof();
 	bool Seek(unsigned int offset, byte kind);
+protected:
+	char *fname;
 };
 
 /**

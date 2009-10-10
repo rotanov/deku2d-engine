@@ -2,6 +2,7 @@
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
+#include <sys/stat.h>
 
 bool Enabled = true;
 static int CObjectCount = 0;
@@ -50,20 +51,14 @@ const int CObject::GetListRefCount()
 /************************************************************************/
 CFile::CFile(char *filename, int mode)
 {
-	if (mode == CFILE_READ)
-		file = fopen(filename, "rb");
-	else
-		if (mode == CFILE_WRITE)
-			file = fopen(filename, "wb");
-		else
-		{
-			file = NULL;
-			Log("ERROR", "Can't open file %s", filename);
-		}
+	CFile();
+	Open(filename, mode);
 }
 
 bool CFile::Open(const char *filename, int mode)
 {
+	if (fname != NULL)
+		delete[] fname;
 	if (filename == NULL)
 	{
 		Log("ERROR", "Can't open file. Invalid filename");
@@ -74,6 +69,8 @@ bool CFile::Open(const char *filename, int mode)
 		Log("ERROR", "Can't open file %s: another file is already opened.", filename);
 		return false;
 	}
+	fname = new char[strlen(filename)+1];
+	memcpy(fname, filename, strlen(filename)+1);
 	if (mode == CFILE_READ)
 	{
 		file = fopen(filename, "rb");
@@ -289,10 +286,15 @@ bool CFile::Writeln(string buffer)
 	return true;
 }
 
-DWORD CFile::Size()
+size_t CFile::Size()
 {
-// Size return goes here.	
-	return 0;
+	struct stat st;
+	size_t sz = 0;
+	if(stat(fname, &st))
+		Log("ERROR", "Can't get size of %s.", fname);
+	else
+		sz = st.st_size;
+	return sz;
 }
 
 bool CFile::Eof()
@@ -669,12 +671,14 @@ int CPSingleTone::_refcount = 0;
 //			Log Stuff				//
 //----------------------------------//
 char LogFile[CFILE_MAX_STRING_LENGTH];
+bool LogCreationRequired = true;
 
 void CreateLogFile(char *fname)
 {
 	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
 	memcpy(LogFile, fname, strlen(fname));
 	FILE *hf = NULL;
+	LogCreationRequired = true;
 	Log("INFO", "Log file \"%s\" created", fname);
 }
 void Log(char* Event,char* Format,...)
@@ -692,7 +696,9 @@ void Log(char* Event,char* Format,...)
 
 	va_list ap;
 	FILE *hf = NULL;
-	hf = fopen(LogFile, "a");
+	char *mode = LogCreationRequired?"w":"a";
+	LogCreationRequired = false;
+	hf = fopen(LogFile, mode);
 #ifdef LOG_TIME_TICK
 	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
 #else
@@ -701,8 +707,7 @@ void Log(char* Event,char* Format,...)
 	struct tm *rstime;
 	time(&rawtime);
 	rstime = localtime(&rawtime);
-	memset(buff, 0, 32);
-	buff = asctime(rstime);
+	strcpy(buff, asctime(rstime));
 	buff[strlen(buff) - 1] = 0;
 	fprintf(hf,"[%s] [%s] ", buff, Event);
 #endif
