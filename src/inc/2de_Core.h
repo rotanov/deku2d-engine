@@ -352,6 +352,8 @@ void CreateLogFile(char *fname);
 void Log(char* Event, char* Format, ...);
 void ToggleLog(bool _Enabled);
 
+char *GetWorkingDir(char *dir, size_t max_size);
+
 #ifdef WIN32
 
 const int DIRWALK_STATE_FILE		=	0x01;	// פאיכ

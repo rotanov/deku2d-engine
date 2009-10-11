@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <direct.h>
+#ifndef WIN32
+#include <unistd.h>
+#endif
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
@@ -664,14 +666,15 @@ bool LogCreationRequired = true;
 
 void CreateLogFile(char *fname)
 {
+	char cd[CFILE_MAX_STRING_LENGTH];
 	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
-	getcwd(LogFile, CFILE_MAX_STRING_LENGTH);
-	Log("INFO", "Working dir is \"%s\"", LogFile);
+	strcpy(cd, GetWorkingDir(LogFile, CFILE_MAX_STRING_LENGTH));
 	strcat(LogFile, "\\");
 	strcat(LogFile, fname);
 	FILE *hf = NULL;
 	LogCreationRequired = true;
 	Log("INFO", "Log file \"%s\" created", fname);
+	Log("INFO", "Working directory is \"%s\"", cd);
 }
 void Log(char* Event,char* Format,...)
 {
@@ -790,6 +793,19 @@ void DelInterval(string *src, const int s0, const int s1)
 	src->copy(Temp1, src->length() - s1 - 1, s1+1);
 	*src = (string)Temp0 + Temp1;
 }
+
+char * GetWorkingDir(char *dir, size_t max_size)
+{
+	if (dir == NULL)
+		return NULL;
+#ifdef WIN32
+	GetCurrentDirectory(max_size, dir);
+	return dir;
+#else
+	return getcwd(dir, max_size);
+#endif
+}
+
 #ifdef WIN32
 
 bool CDirectoryWalk::List()
