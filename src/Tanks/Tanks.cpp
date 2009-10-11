@@ -206,7 +206,7 @@ void CTankManager::AddPlayer()
 		return;
 	CTank *Tank = new CTank(Map, this, NULL);
 	char * tmp = new char[16];
-	_itoa(PlayerCount+1, tmp, 10);
+	SDL_itoa(PlayerCount+1, tmp, 10);
 	Tank->name = (string)"TankPlayer" + tmp;	
 	delete [] tmp;
 	Tank->Init(PlayerCount == 0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
@@ -218,7 +218,7 @@ void CTankManager::AddPlayer()
 CTank* CTankManager::GetPlayer(int PlayerIndex)
 {
 	char * tmp = new char[16];
-	_itoa(PlayerIndex+1, tmp, 10);
+	SDL_itoa(PlayerIndex+1, tmp, 10);
 	CTank *res = dynamic_cast<CTank*>(GetObject(((string)"TankPlayer" + tmp).c_str()));;	 
 	delete [] tmp;
 	return res;

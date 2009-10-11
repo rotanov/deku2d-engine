@@ -1,6 +1,6 @@
 #ifdef _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
-#ifndef GUI_H
-#define GUI_H
+#ifndef _2DE_GUI_H
+#define _2DE_GUI_H
 
 #include "2de_event.h"
 #include "2de_Core.h"
@@ -352,5 +352,5 @@ Deku Team
 */
 
 
-#endif
-#endif _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
+#endif // _2DE_GUI_H
+#endif // _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_

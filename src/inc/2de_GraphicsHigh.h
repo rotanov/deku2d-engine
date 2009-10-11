@@ -1,5 +1,5 @@
-#ifndef _GRAPHICS_HIGH_H_
-#define _GRAPHICS_HIGH_H_
+#ifndef _2DE_GRAPHICS_HIGH_H_
+#define _2DE_GRAPHICS_HIGH_H_
 
 #include "2de_GraphicsLow.h"
 #include "2de_MathUtils.h"
@@ -371,4 +371,4 @@ private:
 	}
 };
 
-#endif _GRAPHICS_HIGH_H_
+#endif // _2DE_GRAPHICS_HIGH_H_

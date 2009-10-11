@@ -1,5 +1,5 @@
-#ifndef _XML_H_
-#define _XML_H_
+#ifndef _2DE_XML_H
+#define _2DE_XML_H
 /*
 <-----------------Xml-Engine----------------->
 *	Developer : DekuTeam
@@ -110,4 +110,4 @@ public :
 private:
 };
 
-#endif _XML_H_
+#endif // _2DE_XML_H

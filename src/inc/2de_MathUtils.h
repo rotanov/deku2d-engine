@@ -5,8 +5,8 @@
 *	Started : 6.11.2007 2:03
 */
 
-#ifndef _MATH_H
-#define _MATH_H
+#ifndef _2DE_MATH_UTILS_H
+#define _2DE_MATH_UTILS_H
 
 #pragma message("Compiling MathUtils.h")
 
@@ -1380,5 +1380,4 @@ public:
 
 };
 
-#endif _MATH_H
-
+#endif // _2DE_MATH_UTILS_H

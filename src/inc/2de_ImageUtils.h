@@ -1,5 +1,5 @@
-#ifndef IMAGE_UTILS_H
-#define IMAGE_UTILS_H
+#ifndef _2DE_IMAGE_UTILS_H
+#define _2DE_IMAGE_UTILS_H
 
 #include <stdlib.h>
 #include <png.h>
@@ -114,4 +114,4 @@ public:
 
 typedef CImageData* PImageData;
 
-#endif IMAGE_UTILS_H
+#endif // _2DE_IMAGE_UTILS_H

@@ -384,7 +384,11 @@ bool CEngine::Run()
 		else
 		{
 			//WaitMessage();
+#ifdef WIN32
 			Sleep(1);
+#else
+			sleep(1);
+#endif
 		}
 	}	
 #ifdef _DEBUG

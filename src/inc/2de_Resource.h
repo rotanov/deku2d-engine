@@ -1,5 +1,5 @@
-#ifndef _RES_H
-#define _RES_H
+#ifndef _2DE_RESOURCE_H
+#define _2DE_RESOURCE_H
 
 #pragma message("Compiling resource.h")
 
@@ -155,7 +155,7 @@ public:
 private:
 };
 
-#endif _RES_H
+#endif // _2DE_RESOURCE_H
 
 // конфетка. Читать александреску.
 // namespace

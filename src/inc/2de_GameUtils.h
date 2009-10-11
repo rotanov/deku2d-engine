@@ -1,5 +1,5 @@
-#ifndef  _GAME_UTILS_H_
-#define _GAME_UTILS_H_
+#ifndef _2DE_GAME_UTILS_H_
+#define _2DE_GAME_UTILS_H_
 
 #include "2de_Core.h"
 //#include "2de_resource.h"
@@ -106,4 +106,4 @@ public:
 	bool Render();	
 };
 
-#endif
+#endif // _2DE_GAME_UTILS_H

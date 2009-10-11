@@ -13,11 +13,24 @@ SOURCES		=	src/src/2de_Core.cpp \
 			src/Tanks/MainTanks.cpp \
 			src/Tanks/Tanks.cpp
 
-INCPATH		=	-I/usr/include/SDL -I/usr/include/libpng -I/usr/include/lua5.1 -iquotesrc/inc
+INCPATH		=	-iquotesrc/inc
+
+LIBS		=	-lGLU -lGL -lz
+
+SDL_CFLAGS	:=	$(shell sdl-config --cflags)
+LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
+PNG_CFLAGS	:=	$(shell pkg-config --cflags libpng)
+
+SDL_LDFLAGS	:=	$(shell sdl-config --libs)
+LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
+PNG_LDFLAGS	:=	$(shell pkg-config --libs libpng)
+
+CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} ${PNG_CFLAGS} ${INCPATH}
+LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} ${PNG_LDFLAGS} ${LIBS}
 
 TARGET		=	bin/tanks
 
-LIBS		=	-lpng -lz -lGLU -lSDL -lSDLmain -llua5.1
-
 all:
-	g++ -w -o ${TARGET} ${INCPATH} ${SOURCES} ${LIBS}
+	g++ -w -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+maketest:
+	echo ${CFLAGS}

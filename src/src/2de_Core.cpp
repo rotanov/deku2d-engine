@@ -1,8 +1,8 @@
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
-#include <sys/stat.h>
 
 bool Enabled = true;
 static int CObjectCount = 0;
@@ -13,7 +13,7 @@ CObject::CObject()
 	CObjectCount++;
 	type = ListRefCount = 0;
 	char * tmp = new char[16];
-	itoa(CObjectCount, tmp, 10);
+	SDL_itoa(CObjectCount, tmp, 10);
 	name += (string)tmp + " CObject ";
 	delete [] tmp;
 	id = CObjectCount;
@@ -701,7 +701,7 @@ void Log(char* Event,char* Format,...)
 
 	va_list ap;
 	FILE *hf = NULL;
-	char *mode = LogCreationRequired?"w":"a";
+	const char *mode = LogCreationRequired ? "w" : "a";
 	LogCreationRequired = false;
 	hf = fopen(LogFile, mode);
 #ifdef LOG_TIME_TICK

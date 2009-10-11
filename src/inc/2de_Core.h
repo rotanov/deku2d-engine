@@ -1,5 +1,5 @@
-#ifndef CORE_UTILS_H
-#define CORE_UTILS_H
+#ifndef _2DE_CORE_H
+#define _2DE_CORE_H
 
 #pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется.
 
@@ -430,7 +430,7 @@ typedef CGarbageCollector CSingletoneKiller;
 
 
 
-#endif CORE_UTILS_H	
+#endif // _2DE_CORE_H
 
 
 // string itos(int i)	// convert int to stringw

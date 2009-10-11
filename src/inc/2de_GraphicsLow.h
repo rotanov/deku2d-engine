@@ -1,5 +1,5 @@
-#ifndef _GRAPHICS_LOW_H_
-#define _GRAPHICS_LOW_H_
+#ifndef _2DE_GRAPHICS_LOW_H_
+#define _2DE_GRAPHICS_LOW_H_
 
 #include <stdarg.h>
 #include <SDL.h>
@@ -283,4 +283,4 @@ public:
 };
 
 
-#endif _GRAPHICS_LOW_H_
+#endif // _2DE_GRAPHICS_LOW_H_

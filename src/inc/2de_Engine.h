@@ -1,5 +1,5 @@
-#ifndef _ENGINE_H_
-#define _ENGINE_H_
+#ifndef _2DE_ENGINE_H_
+#define _2DE_ENGINE_H_
 
 #pragma message("Compiling Engine.h")
 
@@ -123,4 +123,4 @@ protected:
 //extern CEngine *engine;  // НАХУЙ подсчёт ссылок
 // Да, подсчёт ссылок конечно же нахуй, но тот факт что отслеживать ручками порядок вызова конструкторов - это великая боль в попе - никто не отменял.
 
-#endif _ENGINE_H_
+#endif // _2DE_ENGINE_H_
