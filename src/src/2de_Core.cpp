@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <direct.h>
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
@@ -51,7 +52,8 @@ const int CObject::GetListRefCount()
 /************************************************************************/
 CFile::CFile(char *filename, int mode)
 {
-	CFile();
+	fname = NULL;
+	file = NULL;
 	Open(filename, mode);
 }
 
@@ -141,30 +143,12 @@ bool CFile::Write(const void* buffer, DWORD nbytes)
 
 bool CFile::WriteByte(pbyte buffer)
 {
-	if (buffer == NULL)
-		return false;
-	if (file == NULL)
-		return false;
-	if (fwrite(buffer, 1, 1, file) != 1)
-	{
-		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't write byte.");
-		return false;
-	}
-	return true;
+	return Write(buffer, 1);
 }
 
 bool CFile::WriteByte(byte buffer)
 {
-	if (file == NULL)
-		return false;
-	if (fwrite(&buffer, 1, 1, file) != 1)
-	{
-		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't write byte.");
-		return false;
-	}
-	return true;
+	return WriteByte(&buffer);
 }
 
 bool CFile::Read(void* buffer, DWORD nbytes)
@@ -681,7 +665,10 @@ bool LogCreationRequired = true;
 void CreateLogFile(char *fname)
 {
 	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
-	memcpy(LogFile, fname, strlen(fname));
+	getcwd(LogFile, CFILE_MAX_STRING_LENGTH);
+	Log("INFO", "Working dir is \"%s\"", LogFile);
+	strcat(LogFile, "\\");
+	strcat(LogFile, fname);
 	FILE *hf = NULL;
 	LogCreationRequired = true;
 	Log("INFO", "Log file \"%s\" created", fname);
@@ -690,14 +677,6 @@ void Log(char* Event,char* Format,...)
 {
 	if (!Enabled)
 		return;
-
-#ifdef WIN32
-	char *MainDir = new char[CFILE_MAX_STRING_LENGTH], *LastDir = new char[CFILE_MAX_STRING_LENGTH];
-	GetCurrentDirectory(CFILE_MAX_STRING_LENGTH, LastDir);
-	GetModuleFileName(GetModuleHandle(0), MainDir, CFILE_MAX_STRING_LENGTH);
-	DelFNameFromFPath(MainDir);
-	SetCurrentDirectory(MainDir);
-#endif WIN32 
 
 	va_list ap;
 	FILE *hf = NULL;
@@ -721,12 +700,6 @@ void Log(char* Event,char* Format,...)
 	va_end(ap);
 	fprintf(hf,"\n");
 	fclose(hf);
-
-#ifdef WIN32
-	SetCurrentDirectory(LastDir);
-	delete [] MainDir;
-	delete [] LastDir;
-#endif
 
 }
 
