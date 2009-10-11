@@ -800,10 +800,10 @@ char * GetWorkingDir(char *dir, size_t max_size)
 		return NULL;
 #ifdef WIN32
 	GetCurrentDirectory(max_size, dir);
-	return dir;
 #else
-	return getcwd(dir, max_size);
+	getcwd(dir, max_size);
 #endif
+	return dir;
 }
 
 #ifdef WIN32
