@@ -479,7 +479,7 @@ bool CSprite::LoadTexture(char *filename)
 bool CSprite::LoadFromFile(char* filename)
 {
 	CFile file;
-	file.Open(filename, CFILE_READ);
+	file.Open(filename, CFile::fomRead);
 	file.ReadByte(&numAnimations);
 	if (animations != NULL)
 		delete [] animations;
@@ -493,7 +493,7 @@ bool CSprite::LoadFromFile(char* filename)
 bool CSprite::SaveToFile(char *filename)
 {
 	CFile file;
-	file.Open(filename, CFILE_WRITE);
+	file.Open(filename, CFile::fomWrite);
 	file.WriteByte(&numAnimations);
 	file.Write(animations, numAnimations*sizeof(SAnimationInfo));
 	file.Close();
@@ -878,7 +878,7 @@ bool CParticleSystem::Render()
 bool CParticleSystem::SaveToFile()
 {
 	CFile file;
-	file.Open(filename.c_str(), CFILE_WRITE);
+	file.Open(filename, CFile::fomWrite);
 	file.Write(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
@@ -887,7 +887,7 @@ bool CParticleSystem::SaveToFile()
 bool CParticleSystem::LoadFromFile()
 {
 	CFile file;
-	file.Open(filename.c_str(), CFILE_READ);
+	file.Open(filename, CFile::fomRead);
 	file.Read(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;

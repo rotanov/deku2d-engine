@@ -189,20 +189,20 @@ void CXMLNode::Write(CFile f, int depth)
 	for (int i=0;i<depth;i++)
 		f.Write(&b, 1);
 	if (Type==XML_ATTRIBUTE){
-		f.Writeln(Name + " = \"" + Value + "\"");
+		f.WriteLine(Name + " = \"" + Value + "\"");
 		if (Next!=NULL)
 			Next->Write(f, depth);
 	}
 	else
 	{
-		f.Writeln("<" + Name + ">");
+		f.WriteLine("<" + Name + ">");
 
 		if (Child)
 			Child->Write(f, depth + 1);
 		
 		for (int i=0;i<depth;i++)
 			f.Write(&b, 1);
-		f.Writeln("</" + Name + ">");
+		f.WriteLine("</" + Name + ">");
 		if (Next!=NULL)
 			Next->Write(f, depth);
 	}
@@ -396,7 +396,7 @@ CXMLTable::CXMLTable()
 bool CXMLTable::LoadFromFile(const char *fname)
 {
 	CFile f;
-	if (!f.Open(fname, CFILE_READ))
+	if (!f.Open(fname, CFile::fomRead))
 	{
 		Log("XMLERROR", "Cannot load xml file \"%s\".", fname);
 		return false;
@@ -511,7 +511,7 @@ bool CXMLTable::LoadFromFile(const char *fname)
 bool CXMLTable::SaveToFile(const char *fname)
 {
 	CFile f;
-	if (!f.Open(fname, CFILE_WRITE)){
+	if (!f.Open(fname, CFile::fomWrite)){
 		Log("XMLERROR",XML_ERROR8);
 		return 0;
 	}

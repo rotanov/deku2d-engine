@@ -55,10 +55,18 @@ using namespace std;
 #ifdef WIN32
 #define CRITICAL_ERRORS_MESSAGE_BOXES
 #endif WIN32
-
+// Оставлено для "совместимости". Сделан enum EFileOpenMode в классе CFile.
 #define CFILE_READ				0x01
 #define CFILE_WRITE				0x02
+//
+
 #define CFILE_MAX_STRING_LENGTH	1024
+
+#ifdef WIN32
+#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
+#else
+#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
+#endif
 
 typedef unsigned char		byte;
 typedef byte*				pbyte;
@@ -317,29 +325,42 @@ public:
 class CFile // унаследовать 
 {
 public:
-	FILE *file;
+	enum EFileOpenMode
+	{
+		fomRead,
+		fomWrite
+	};
+	
+	enum ESeekOrigin
+	{
+		soBeginning,
+		soCurrent,
+		soEnd
+	};
 
-	CFile(void) : file(NULL), fname(NULL){}
-	CFile(char *filename, int mode);
+	CFile(void) : File(NULL) {}
+	CFile(const string AFileName, EFileOpenMode Mode);
 
-	bool Open(const char * filename, int mode);
+	bool Open(const string AFileName, EFileOpenMode Mode);
 	bool Close();
-	bool ReadByte(pbyte buffer);
-	bool Read(void* buffer, DWORD nbytes);
-	bool WriteByte(pbyte buffer);
-	bool WriteByte(byte buffer);
-	bool Write(const void* buffer, DWORD nbytes);
-	bool ReadString(char* buffer);
-	bool WriteString(const char* buffer);
-	bool ReadString(string &buffer);
-	bool WriteString(const string buffer);
-	bool Writeln(string buffer);
-	size_t Size();
-	bool ReadLine(char* &data);
+	bool ReadByte(unsigned char *Buffer);
+	bool WriteByte(unsigned char *Buffer);
+	bool WriteByte(unsigned char Buffer);
+	bool Read(void *Buffer, unsigned long BytesCount);
+	bool Write(const void *Buffer, unsigned long BytesCount);
+	bool ReadString(char *Buffer);
+	bool ReadString(string &Buffer);
+	bool WriteString(const char *Buffer);
+	bool WriteString(const string Buffer);
+	bool ReadLine(char* &Data);
+	bool WriteLine(string Buffer);
+	bool Seek(unsigned int Offset, ESeekOrigin Origin);
 	bool Eof();
-	bool Seek(unsigned int offset, byte kind);
-protected:
-	char *fname;
+	size_t Size();
+
+private:
+	FILE *File;
+	string FileName;
 };
 
 /**

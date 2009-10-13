@@ -49,75 +49,77 @@ const int CObject::GetListRefCount()
 {
 	return ListRefCount;
 }
+
 /************************************************************************/
 /* CFile                                                                */
 /************************************************************************/
-CFile::CFile(char *filename, int mode)
+CFile::CFile(const string AFileName, EFileOpenMode Mode)
 {
-	fname = NULL;
-	file = NULL;
-	Open(filename, mode);
+	File = NULL;
+	Open(AFileName, Mode);
 }
 
-bool CFile::Open(const char *filename, int mode)
+bool CFile::Open(const string AFileName, EFileOpenMode Mode)
 {
-	if (fname != NULL)
-		delete[] fname;
-	if (filename == NULL)
+	if (AFileName.empty())
 	{
 		Log("ERROR", "Can't open file. Invalid filename");
 		return false;
 	}
-	if (file != NULL)
+	if (File != NULL)
 	{
-		Log("ERROR", "Can't open file %s: another file is already opened.", filename);
+		Log("ERROR", "Can't open file %s: another file is already opened.", AFileName);
 		return false;
 	}
-	fname = new char[strlen(filename)+1];
-	memcpy(fname, filename, strlen(filename)+1);
-	if (mode == CFILE_READ)
+
+	FileName = AFileName;
+
+	switch (Mode)
 	{
-		file = fopen(filename, "rb");
-		if (file == NULL)
+	case fomRead:
+		File = fopen(FileName.c_str(), "rb");
+		if (File == NULL)
 		{
-			Log("ERROR", "Can't open file %s.", filename);
+			Log("ERROR", "Can't open file %s.", FileName.c_str());
 			return false;
 		}
-		return true;
-	}
-	if (mode == CFILE_WRITE)
-	{
-		file = fopen(filename, "wb");
-		if ( file == NULL )
+		break;
+	case fomWrite:
+		File = fopen(FileName.c_str(), "wb");
+		if (File == NULL)
 		{
-			Log("ERROR", "Can't open file %s.", filename);
+			Log("ERROR", "Can't open file %s.", FileName.c_str());
 			return false;
 		}
-		return true;
-	}
-	if (mode!=CFILE_READ && mode!=CFILE_WRITE)
-	{
-		Log("ERROR", "Can't open file %s: invalid mode.", filename);
+		break;
+	default:
+		Log("ERROR", "Can't open file %s: invalid mode.", FileName.c_str());
 		return false;
 	}
+
 	return true;
 }
 
 bool CFile::Close()
 {
-	if (file == NULL)
+	if (File == NULL)
 		return false;
-	fclose(file);
+
+	fclose(File);
+	File = NULL;
+
+	FileName.clear();
+
 	return true;
 }
 
-bool CFile::ReadByte(pbyte buffer)
+bool CFile::ReadByte(unsigned char *Buffer)
 {
-	if (buffer == NULL)
+	if (Buffer == NULL)
 		return false;
-	if (file == NULL)
+	if (File == NULL)
 		return false;
-	if (fread(buffer, 1, 1, file) != 1)
+	if (fread(Buffer, 1, 1, File) != 1)
 	{
 		if (!Eof())
 			Log("ERROR", "FILE IO Error. Can't read byte.");
@@ -126,42 +128,26 @@ bool CFile::ReadByte(pbyte buffer)
 	return true;
 }
 
-bool CFile::Write(const void* buffer, DWORD nbytes)
+bool CFile::WriteByte(unsigned char *Buffer)
 {
-	if (buffer == NULL)
-		return false;
-	if (file == NULL)
-		return false;
-	if (nbytes == 0)
-		return false;
-	if (fwrite(buffer, 1, nbytes, file) != nbytes)
-	{
-		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't write data.");
-		return false;
-	}
-	return true;
+	return Write(Buffer, 1);
 }
 
-bool CFile::WriteByte(pbyte buffer)
+bool CFile::WriteByte(unsigned char Buffer)
 {
-	return Write(buffer, 1);
+	return WriteByte(&Buffer);
 }
 
-bool CFile::WriteByte(byte buffer)
+bool CFile::Read(void *Buffer, unsigned long BytesCount)
 {
-	return WriteByte(&buffer);
-}
+	if (Buffer == NULL)
+		return false;
+	if (File == NULL)
+		return false;
+	if (BytesCount == 0)
+		return false;
 
-bool CFile::Read(void* buffer, DWORD nbytes)
-{
-	if (buffer == NULL)
-		return false;
-	if (file == NULL)
-		return false;
-	if (nbytes == 0)
-		return false;
-	if (fread(buffer, 1, nbytes, file) != nbytes)
+	if (fread(Buffer, 1, BytesCount, File) != BytesCount)
 	{
 		if (!Eof())
 			Log("ERROR", "FILE IO Error. Can't read data.");
@@ -170,100 +156,136 @@ bool CFile::Read(void* buffer, DWORD nbytes)
 	return true;
 }
 
-bool CFile::ReadLine(char* &data)
+bool CFile::Write(const void *Buffer, unsigned long BytesCount)
 {
-	if (file == NULL)
+	if (Buffer == NULL)
+		return false;
+	if (File == NULL)
+		return false;
+	if (BytesCount == 0)
 		return false;
 
-	char *buffer = new char[CFILE_MAX_STRING_LENGTH];
-	int count = -1;
-	DWORD read = 0;
-	do
+	if (fwrite(Buffer, 1, BytesCount, File) != BytesCount)
 	{
-		fread(buffer+count+1, 1, 1, file);
-		count++;
-	} while ((buffer[count] != 0x00) && (count < CFILE_MAX_STRING_LENGTH));
-	if (data != NULL)
-		delete [] data;
-	data = new char[count+1];
-	for(int i=0; i<count; i++)
-		data[i] = buffer[i];
-	data[count] = 0x00;
-	delete [] buffer;
-	return true;
-}
-
-//note buffer must exists!!!!
-bool CFile::ReadString(char* buffer)
-{
-	if (file == NULL)
+		if (!Eof())
+			Log("ERROR", "FILE IO Error. Can't write data.");
 		return false;
-	byte b;
-	int i = 0;
-	if (!Read(&b,1))
-		return false;
-	while (b != 0)
-	{
-		buffer[i] = b;
-		i++;
-		if (!Read(&b,1))
-			return false;
 	}
 	return true;
 }
 
-bool CFile::WriteString(const char* buffer)
+bool CFile::ReadString(char *Buffer)
 {
-	if (file == NULL)
+	if (File == NULL)
 		return false;
-	byte b = 0;
-	for (unsigned int i = 0;i < strlen(buffer);i++)
-	{
-		Write(&buffer[i], 1);
-	}
-	Write(&b, 1);
-	return true;
-}
 
-bool CFile::ReadString(string &buffer)
-{
-	if (file == NULL)
-		return false;
-	byte b;
-	buffer = "";
+	unsigned char b;
 	int i = 0;
+
 	if (!Read(&b, 1))
 		return false;
+
 	while (b != 0)
 	{
-		buffer += b;
+		Buffer[i] = b;
 		i++;
 		if (!Read(&b, 1))
 			return false;
 	}
+
 	return true;
 }
 
-bool CFile::WriteString(const string buffer)
+bool CFile::ReadString(string &Buffer)
 {
-	if (file == NULL)
+	if (File == NULL)
 		return false;
-	byte b = 0;
-	for (unsigned int i = 0;i<buffer.length();i++)
+
+	unsigned char b;
+	Buffer = "";
+	int i = 0;
+
+	if (!Read(&b, 1))
+		return false;
+
+	while (b != 0)
 	{
-		Write(&buffer[i], 1);
+		Buffer += b;
+		i++;
+		if (!Read(&b, 1))
+			return false;
+	}
+
+	return true;
+}
+
+//note buffer must exists!!!!
+bool CFile::WriteString(const char *Buffer)
+{
+	if (File == NULL)
+		return false;
+
+	unsigned char b = 0;
+	for (unsigned int i = 0; i < strlen(Buffer); i++)
+	{
+		Write(&Buffer[i], 1);
 	}
 	Write(&b, 1);
+
 	return true;
 }
 
-bool CFile::Writeln(string buffer)
+bool CFile::WriteString(const string Buffer)
 {
-	if (file==NULL)
+	if (File == NULL)
 		return false;
+
+	unsigned char b = 0;
+	for (unsigned int i = 0; i < Buffer.length(); i++)
+	{
+		Write(&Buffer[i], 1);
+	}
+	Write(&b, 1);
+
+	return true;
+}
+
+bool CFile::ReadLine(char* &Data)
+{
+	if (File == NULL)
+		return false;
+
+	char *buffer = new char[CFILE_MAX_STRING_LENGTH];
+	int count = -1;
+	unsigned long read = 0;
+
+	do
+	{
+		fread(buffer + count + 1, 1, 1, File);
+		count++;
+	} while ((buffer[count] != 0x00) && (count < CFILE_MAX_STRING_LENGTH));
+
+	if (Data != NULL)
+		delete [] Data;
+
+	Data = new char[count + 1];
+	for (int i = 0; i < count; i++)
+		Data[i] = buffer[i];
+	Data[count] = 0x00;
+	delete [] buffer;
+
+	return true;
+}
+
+bool CFile::WriteLine(string Buffer)
+{
+	if (File == NULL)
+		return false;
+
 	char b;
 
-	Write((char*)buffer.data(), (DWORD)buffer.length());
+	Write((char*) Buffer.data(), (unsigned long) Buffer.length());
+
 #ifdef WIN32
 	// почему это вообще надо?.. лишний байт для чтения в глупых редакторах, не поддерживающих LF онли? или что?.. 
 	// а если уж и нужно, то вообще надо бы сделать константу, дефайн, зависящий от платформы..
@@ -277,27 +299,47 @@ bool CFile::Writeln(string buffer)
 	return true;
 }
 
-size_t CFile::Size()
+bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
 {
-	struct stat st;
-	size_t sz = 0;
-	if(stat(fname, &st))
-		Log("ERROR", "Can't get size of %s.", fname);
-	else
-		sz = st.st_size;
-	return sz;
+	if (File == NULL)
+		return false;
+
+	int origin_const;
+
+	switch (Origin)
+	{
+	case soBeginning:
+		origin_const = SEEK_SET;
+		break;
+	case soCurrent:
+		origin_const = SEEK_CUR;
+		break;
+	case soEnd:
+		origin_const = SEEK_END;
+		break;
+	}
+
+	return (fseek(File, Offset, origin_const) == 0);
 }
 
 bool CFile::Eof()
 {
-	return !!feof(file);
+	return !!feof(File);
 }
-bool CFile::Seek(unsigned int offset, byte kind)
+
+size_t CFile::Size()
 {
-	if (fseek(file, offset, kind))
-		return true;
-	return false;
+	struct stat FileStat;
+
+	if(stat(FileName.c_str(), &FileStat))
+	{
+		Log("ERROR", "Can't get size of %s.", FileName.c_str());
+		return 0;
+	}
+
+	return FileStat.st_size;
 }
+
 
 /************************************************************************/
 /* CList, CListNode                                                     */
