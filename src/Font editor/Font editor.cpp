@@ -2,102 +2,84 @@
 #include "2de_LuaUtils.h"
 #include "2de_GameUtils.h"
 
-// Константы интерфейса.
-const int				INTERFACE_OFFSET_X = 128;
-const int				LEFT_MARGIN = 8;
-const int				EDIT_WIDTH = INTERFACE_OFFSET_X - LEFT_MARGIN*3;
-const int				EDIT_HEIGHT = 32;
-const int				BUTTON_WIDTH = INTERFACE_OFFSET_X - LEFT_MARGIN*3;
-const int				BUTTON_HEIGHT = 32;
+// Константы, определяющие расположение некоторых элементов интерфейса.
+const int				INTERFACE_OFFSET_X	= 128;
+const int				LEFT_MARGIN			= 8;
+const int				EDIT_WIDTH			= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
+const int				EDIT_HEIGHT			= 32;
+const int				BUTTON_WIDTH		= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
+const int				BUTTON_HEIGHT		= 32;
+// Константы, определяющие цвет элементов интерфейса будут тут. Чуть погодя.
+const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
+const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
+const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 1.0f);
+const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
+// Всевозможные переменные.
+CEngine					*Ninja				= CEngine::Instance();
+byte					Zoom				= 2;
+CTexture				*FontTexture		= NULL;
+CFont					*Font				= NULL;
+char					CurrentSymbol		= 0;
+int						OffsetX				= INTERFACE_OFFSET_X + 5;
+int						OffsetY				= 0.0f;
 
-CEngine*				Ninja = CEngine::Instance();
-byte					Zoom  = 2;
-CTexture*				FontTexture = NULL;
-CFont*					Font = NULL;
-char					CurrentSymbol = 0;
-int						OffsetX = INTERFACE_OFFSET_X + 5;
-int						OffsetY = 0.0f;
+CEdit					*edFontTextureName	= NULL;
+CEdit					*edFontname			= NULL;
+CEdit					*edCurrentCymbol	= NULL;
+CEdit					*edSampleText		= NULL;
 
-CEdit*					edFontTextureName = NULL;
-CEdit*					edFontname = NULL;
-CEdit*					edCurrentCymbol = NULL;
-CEdit*					edSampleText = NULL;
-
-class CInput : public CObject
-{
-public:
-	CInput()
-	{
-		Ninja->AddKeyInputFunction(&CObject::InputHandling, this);
-	}
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
-	{
-		if (state == KEY_PRESSED)
-		{
-			switch(key)
-			{
-				//case 
-			}
-		}
-		return true;
-	}
-} Input;
-
-bool LoadFont()
+// На самом деле это не то чтобы Load() а скорее Acquire() ибо все доступные нам шрифты движок уже проиндекировал.
+// Т.е. для пользователя утилыты это будет Load, а для тех, кто способен читать этот комментарий - это Asquire()
+bool LoadFont()  
 {
 	Font = Ninja->FontManager->GetFont(edFontname->text.c_str());
-	if (!Font)
+	if (Font == NULL)
 	{
-		MessageBox(0, "Font not found", "Error", MB_ICONERROR | MB_OK);
+		MessageBox(0, "Font not found", "Error", MB_ICONERROR | MB_OK);  // Это временное решение.
 		return false;
 	}
+	FontTexture = Font->GetTexture();
 	return true;
 }
 
 bool SaveFont()
 {
+	// Написать код сохранения изменений, сделаных в шрифте, в файле здесь.
 	return true;
 }
 
-bool LoadTexture()
+bool LoadTexture()  // Опять же не Load() а Acquire().
 {
 	FontTexture = Ninja->TextureManager->GetTextureByName(edFontTextureName->text);
-	if (!FontTexture)
+	if (FontTexture == NULL)
 	{
 		MessageBox(0, "Texture not found", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-	if (Font)
-		Font->AssignTexture(FontTexture);
 	return true;
 }
 
 bool Init()
 {
-	new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont);	
-	new CButton(CAABB(LEFT_MARGIN, 100, BUTTON_WIDTH, BUTTON_HEIGHT), "Save font", RGBAf(0.5f, 0.5f, 0.6f, 1.0f), NULL);
-	new CButton(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture);
-	new CButton(CAABB(LEFT_MARGIN, 300, BUTTON_WIDTH, BUTTON_HEIGHT), "Fuck yourself", RGBAf(0.9f, 0.8f, 0.2f, 1.0f), NULL);
+	(new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont))->SetParent(&GuiManager);	
+	(new CButton(CAABB(LEFT_MARGIN, 100, BUTTON_WIDTH, BUTTON_HEIGHT), "Save font", RGBAf(0.5f, 0.5f, 0.6f, 1.0f), NULL))->SetParent(&GuiManager);
+	(new CButton(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture))->SetParent(&GuiManager);
+	(new CButton(CAABB(LEFT_MARGIN, 300, BUTTON_WIDTH, BUTTON_HEIGHT), "Fuck yourself", RGBAf(0.9f, 0.8f, 0.2f, 1.0f), NULL))->SetParent(&GuiManager);
 
 	edFontTextureName = new CEdit();
 	edFontTextureName->aabb = CAABB(LEFT_MARGIN, 350, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontTextureName->text = "Font";
 	edFontTextureName->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
+	edFontTextureName->SetParent(&GuiManager);
 
 	edFontname = new CEdit();
 	edFontname->aabb = CAABB(LEFT_MARGIN, 500, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontname->text = "Font";
 	edFontname->color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
+	edFontname->SetParent(&GuiManager);
 
 	return true;
 }
-
-//glColor3f(.4f, .4f, .4f);
-//glColor3f(.5f, .5f, .6f);
-//glColor3f(0.6f, 0.7f, 0.8f);
-//glColor3f(0.9f, 0.8f, 0.2f);
-
-
 
 bool Draw()
 {
@@ -164,13 +146,11 @@ bool Draw()
 	return true;
 }
 
-
-
 int	main(int argc, char *argv[])
 {
 	Ninja->SetState(STATE_CONFIG_NAME, "FontEditor.xml");
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
-	return 0x01;
+	return 0x00;
 }

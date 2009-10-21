@@ -1,9 +1,9 @@
 #include "2de_Engine.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
-#endif
+#endif //_WIN32
 
 //-------------------------------------------//
 //				Ninja stuff					 //
@@ -163,7 +163,7 @@ void CEngine::SetState(int state, void* value)
 
 bool CEngine::Init()
 {
-#ifdef WIN32
+#ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN		
 	{
 		HMODULE hmodule = GetModuleHandle("Ninja Engine.exe");
@@ -179,7 +179,7 @@ bool CEngine::Init()
 		SetCurrentDirectory(MainDir);
 		delete [] MainDir;
 	}	
-#endif
+#endif //_WIN32
 
 	if (!Config.LoadFromFile(ConfigFileName.c_str()))
 	{
@@ -254,13 +254,13 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 {
 	SDLKey sym = event.key.keysym.sym;
 	char TempChar;
-#ifdef WIN32
+#ifdef _WIN32
 	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
 	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
 #else
 	if ((event.key.keysym.unicode & 0xFF80) == 0 )  // только английский
 		TempChar = event.key.keysym.unicode & 0x7F;
-#endif WIN32
+#endif //_WIN32
 	return TempChar;
 }
 
@@ -365,7 +365,7 @@ bool CEngine::Run()
 	{
 		if (ProcessEvents() == false) 
 			break;
-		if (isHaveFocus)
+		//if (isHaveFocus)	// ядрЄн батон, network, threading итд короче надо этим вопросом заниматьс€ отдельно и вплотную.
 		{
 			if (LimitFps())
 			{		
@@ -381,14 +381,14 @@ bool CEngine::Run()
 					procUpdateFunc(dt);
 			}
 		}
-		else
+		//else
 		{
 			//WaitMessage();
-#ifdef WIN32
-			Sleep(1);
+#ifdef _WIN32
+		//	Sleep(1);
 #else
 			sleep(1);
-#endif
+#endif //_WIN32
 		}
 	}	
 #ifdef _DEBUG

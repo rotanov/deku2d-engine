@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
-#endif
+#endif //_WIN32
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
@@ -286,13 +286,12 @@ bool CFile::WriteLine(string Buffer)
 
 	Write((char*) Buffer.data(), (unsigned long) Buffer.length());
 
-#ifdef WIN32
+#ifdef _WIN32
 	// почему это вообще надо?.. лишний байт для чтения в глупых редакторах, не поддерживающих LF онли? или что?.. 
 	// а если уж и нужно, то вообще надо бы сделать константу, дефайн, зависящий от платформы..
-
 	b = 13;
 	Write(&b,1);
-#endif
+#endif //_WIN32
 	b = 10;
 	Write(&b,1);
 
@@ -519,8 +518,9 @@ CListNode* CList::GetListNode(const string* AObjectName)
 	}
 	CListNode* TempNode = first;
 	while (TempNode)
-	{
-		if ((TempNode->GetData()->name) == *(AObjectName))
+	{		
+		// case insensitive due to the fact that filenames on win32 are too.
+		if (stricmp( TempNode->GetData()->name.c_str(),AObjectName->c_str()) == 0)  
 			return TempNode;
 		TempNode = TempNode->next;
 	}
@@ -780,7 +780,7 @@ void DelLastDirFromPath( char* src )
 }
 
 
-#ifdef WIN32
+#ifdef _WIN32
 
 _CrtMemState *MemState1 = NULL, *MemState2 = NULL, *MemState3 = NULL;
 
@@ -835,20 +835,21 @@ void DelInterval(string *src, const int s0, const int s1)
 	src->copy(Temp1, src->length() - s1 - 1, s1+1);
 	*src = (string)Temp0 + Temp1;
 }
+#endif //_WIN32
 
 char * GetWorkingDir(char *dir, size_t max_size)
 {
 	if (dir == NULL)
 		return NULL;
-#ifdef WIN32
+#ifdef _WIN32
 	GetCurrentDirectory(max_size, dir);
 #else
 	getcwd(dir, max_size);
-#endif
+#endif //_WIN32
 	return dir;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 
 bool CDirectoryWalk::List()
 {
@@ -918,9 +919,7 @@ CDirectoryWalk::~CDirectoryWalk()
 	delete [] MainDir;
 	delete [] CurrDir;
 }
-#endif WIN32
-
-#endif
+#endif //_WIN32
 
 CObjectStack::CObjectStack() : last(-1)
 {

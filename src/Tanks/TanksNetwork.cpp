@@ -1,5 +1,3 @@
-
-
 #include <math.h>
 #include "TanksNetwork.h"
 #include "../tnl/tnlBitStream.h"
@@ -8,7 +6,7 @@
 #include "../tnl/tnlSymmetricCipher.h"
 #include "../tnl/tnlAsymmetricKey.h"
 
-namespace TNLTest {
+
 
 	TestGame *clientGame = NULL;
 	TestGame *serverGame = NULL;
@@ -20,8 +18,8 @@ namespace TNLTest {
 	Player::Player(Player::PlayerType pt)
 	{
 		// assign a random starting position for the player.
-		startPos.x = TNL::Random::readF();
-		startPos.y = TNL::Random::readF();
+		startPos.x = TNL::Random::readF()*640;
+		startPos.y = TNL::Random::readF()*480;
 		endPos.x = startPos.x;
 		endPos.y = startPos.y;
 		renderPos = startPos;
@@ -199,8 +197,8 @@ namespace TNLTest {
 			{
 				startPos = renderPos;
 				t = 0;
-				endPos.x = TNL::Random::readF();  
-				endPos.y = TNL::Random::readF();
+				endPos.x = TNL::Random::readF()*640;  
+				endPos.y = TNL::Random::readF()*480;
 				tDelta = 0.2f + TNL::Random::readF() * 0.1f;
 				setMaskBits(PositionMask); // notify the network system that the network state has been updated
 			}
@@ -558,6 +556,9 @@ namespace TNLTest {
 			serverPlayer = new Player(Player::PlayerTypeMyClient);
 			serverPlayer->addToGame(this);
 		}
+		TestGame::CRenderObject::color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+		TestGame::CRenderObject::depth = 0.0f;
+		TestGame::CRenderObject::position = Vector2(0.0f, 0.0f);
 
 		TNL::logprintf("Created a %s...", (server ? "server" : "client"));
 	}
@@ -580,17 +581,18 @@ namespace TNLTest {
 		theConnection->connectLocal(myNetInterface, serverGame->myNetInterface);
 	}
 
-	void TestGame::tick()
+	bool TestGame::Update(float dt)
 	{
 		TNL::U32 currentTime = TNL::Platform::getRealMilliseconds();
 		if(currentTime == lastTime)
-			return;
+			return true;
 
 		TNL::F32 timeDelta = (currentTime - lastTime) / 1000.0f;
 		for(TNL::S32 i = 0; i < players.size(); i++)  
 			players[i]->update(timeDelta);
 		myNetInterface->tick();
 		lastTime = currentTime;
+		return true;
 	}
 
 	void TestGame::moveMyPlayerTo(Position newPosition)
@@ -608,34 +610,6 @@ namespace TNLTest {
 		}
 	}
 
-};
-
-
-//-----------------------------------------------------------------------------------
-//
-//   Torque Network Library - TNLTest example program
-//   Copyright (C) 2004 GarageGames.com, Inc.
-//   For more information see http://www.opentnl.org
-//
-//   This program is free software; you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation; either version 2 of the License, or
-//   (at your option) any later version.
-//
-//   For use in products that are not compatible with the terms of the GNU 
-//   General Public License, alternative licensing options are available 
-//   from GarageGames.com.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//------------------------------------------------------------------------------------
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -650,22 +624,15 @@ namespace TNLTest {
 #include "TanksNetwork.h"
 #include <math.h>
 
-namespace TNLTest {
 
-	void TestGame::renderFrame(int width, int height)
+
+	bool TestGame::Render()
 	{
-		glClearColor(1, 1, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glViewport(0, 0, width, height);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, 1, 1, 0, 0, 1);
-		glMatrixMode(GL_MODELVIEW);
+		int width = 640,height =480;
 
 		// first, render the alpha blended circle around the player,
 		// to show the scoping range.
-
+		glLoadIdentity();
 		if(clientPlayer)
 		{
 			Position p = clientPlayer->renderPos;
@@ -675,7 +642,7 @@ namespace TNLTest {
 			glColor4f(0.5f, 0.5f, 0.5f, 0.65f);
 			for(TNL::F32 r = 0; r < 3.1415 * 2; r += 0.1f)
 			{
-				glVertex2f(p.x + 0.25f * cos(r), p.y + 0.25f * sin(r));
+				glVertex2f(p.x + 50.25f * cos(r), p.y + 50.25f * sin(r));
 			}
 
 			glEnd();
@@ -702,10 +669,10 @@ namespace TNLTest {
 			glBegin(GL_POLYGON);
 			glColor3f(0,0,0);
 
-			glVertex2f(p->renderPos.x - 0.012f, p->renderPos.y - 0.012f);
-			glVertex2f(p->renderPos.x + 0.012f, p->renderPos.y - 0.012f);
-			glVertex2f(p->renderPos.x + 0.012f, p->renderPos.y + 0.012f);
-			glVertex2f(p->renderPos.x - 0.012f, p->renderPos.y + 0.012f);
+			glVertex2f(p->renderPos.x - 10.012f, p->renderPos.y - 10.012f);
+			glVertex2f(p->renderPos.x + 10.012f, p->renderPos.y - 10.012f);
+			glVertex2f(p->renderPos.x + 10.012f, p->renderPos.y + 10.012f);
+			glVertex2f(p->renderPos.x - 10.012f, p->renderPos.y + 10.012f);
 			glEnd();
 
 			glBegin(GL_POLYGON);
@@ -722,13 +689,14 @@ namespace TNLTest {
 				glColor3f(1, 1, 1);
 				break;
 			}
-			glVertex2f(p->renderPos.x - 0.01f, p->renderPos.y - 0.01f);
-			glVertex2f(p->renderPos.x + 0.01f, p->renderPos.y - 0.01f);
-			glVertex2f(p->renderPos.x + 0.01f, p->renderPos.y + 0.01f);
-			glVertex2f(p->renderPos.x - 0.01f, p->renderPos.y + 0.01f);
+			glVertex2f(p->renderPos.x - 10.01f, p->renderPos.y - 10.01f);
+			glVertex2f(p->renderPos.x + 10.01f, p->renderPos.y - 10.01f);
+			glVertex2f(p->renderPos.x + 10.01f, p->renderPos.y + 10.01f);
+			glVertex2f(p->renderPos.x - 10.01f, p->renderPos.y + 10.01f);
 
 			glEnd();
+			
 		}
+		return true;
 	}
 
-};

@@ -323,7 +323,7 @@ private:
 
 extern CGUIManager GuiManager;
 
-class CButton : private CGUIObject
+class CButton : public CGUIObject
 {
 public:
 				CButton();

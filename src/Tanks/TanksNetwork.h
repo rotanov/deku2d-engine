@@ -10,25 +10,15 @@
 #include "../tnl/tnlRPC.h"
 #include "../tnl/tnlString.h"
 
-/// TNL Graphical Test Application.
-///
-/// The TNLTest application demonstrates some of the more useful
-/// features of the Torque Network Library.  The application presents
-/// a single window, representing an abstract simulation area.  Red
-/// rectangles are used to represent "buildings" that small squares
-/// representing players move over.
-///
-/// On the linux and Win32 platforms, TNLTest uses the wxWindows user
-/// interface API.  On Mac OSX TNLTest uses the native Cocoa application
-/// framework to render.
-///
+#include "2de_Core.h"
+#include "2de_GraphicsLow.h"
+
 /// Each instance of TNLTest can run in one of four modes: as a server,
 /// able to host multiple clients; as a client, which searches for and then
 /// connects to a server for game data; a client pinging the localhost for
 /// connecting to a server on the local machine, and as a combined server
 /// and client.
-namespace TNLTest
-{
+
 
 	class TestGame;
 
@@ -297,7 +287,8 @@ namespace TNLTest
 	/// TestGame maintains a list of all the Player and Building objects in the
 	/// playing area, and interfaces with the specific platform's windowing
 	/// system to respond to user input and render the current game display.
-	class TestGame {
+	class TestGame : public CUpdateObject, public CRenderObject
+	{
 	public:
 		TNL::Vector<Player *> players;     ///< vector of player objects in the game
 		TNL::Vector<Building *> buildings; ///< vector of buildings in the game
@@ -324,11 +315,11 @@ namespace TNLTest
 		/// Called periodically by the platform windowing code, tick will update
 		/// all the players in the simulation as well as tick() the game's
 		/// network interface.
-		void tick();
+		bool Update(float dt);
 
 		/// renderFrame is called by the platform windowing code to notify the game
 		/// that it should render the current world using the specified window area.
-		void renderFrame(int width, int height);
+		bool Render();
 
 		/// moveMyPlayerTo is called by the platform windowing code in response to
 		/// user input.
@@ -341,8 +332,8 @@ namespace TNLTest
 	/// The instance of the server game, if there is a server currently running.
 	extern TestGame *serverGame;
 
-};
 
-using namespace TNLTest;
+
+
 
 #endif _TANKS_NETWORK_H_

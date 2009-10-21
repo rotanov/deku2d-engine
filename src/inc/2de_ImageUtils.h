@@ -8,7 +8,7 @@
 
 #define PNG_SIG_BYTES 8
 
-#ifndef WIN32
+#ifndef _WIN32
 
 #if ! (defined(lint) || defined(RC_INVOKED))
 #if ( _MSC_VER >= 800 && !defined(_M_I86)) || defined(_PUSHPOP_SUPPORTED)
@@ -76,7 +76,7 @@ struct BITMAPINFO
 	RGBQUAD				bmiColors[1];
 };
 
-#endif
+#endif //_WIN32
 
 class CImageData
 {

@@ -102,7 +102,7 @@ protected:
 	static int		_refcount;
 };
 
-#ifdef WIN32
+#ifdef _WIN32
 
 class CDataLister
 {
@@ -130,7 +130,7 @@ public:
 	void ExploreDir(HANDLE hfile);
 };
 
-#endif WIN32
+#endif //_WIN32
 
 class CResourceManager
 {

@@ -16,21 +16,16 @@
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
 //#define OPTIMIZE_V2L
-
-
-class Vector2;
-union Matrix2;
-
-const float epsilon = 0.00001f;
-const double HI_PI = 3.1415926535897932;
-const double HI_OOPI = 0.3183098861837906;
-const float PI = 3.1415926f;
-const float OOPI = 0.3183f;
-const int sincostable_dim = 8192;
-static const scalar deganglem = 1.0f/(360.0f/(scalar)sincostable_dim);
-static const scalar radanglem = 1.0f/(PI*2.0f/(scalar)sincostable_dim);
-static const scalar PI_d180 = PI/180.0f;
-static const scalar d180_PI = 180.0f/PI;
+const float				epsilon			=	0.00001f;
+const double			HI_PI			=	3.1415926535897932;
+const double			HI_OOPI			=	0.3183098861837906;
+const float				PI				=	3.1415926f;
+const float				OOPI			=	0.3183f;
+const int				sincostable_dim	=	8192;
+static const scalar		deganglem		=	1.0f/(360.0f/(scalar)sincostable_dim);
+static const scalar		radanglem		=	1.0f/(PI*2.0f/(scalar)sincostable_dim);
+static const scalar		PI_d180			=	PI/180.0f;
+static const scalar		d180_PI			=	180.0f/PI;
 
 #ifdef USING_OPENGL
 #ifdef USE_SDL_OPENGL
@@ -40,6 +35,10 @@ static const scalar d180_PI = 180.0f/PI;
 #include <GL/glu.h>
 #endif
 #endif
+
+class Vector2;
+union Matrix2;
+
 
 void GenSinTable();
 scalar fSinr(scalar angle);
@@ -323,9 +322,9 @@ __INLINE scalar PointLineDistance(Vector2 v1, Vector2 v2, Vector2 p)
 
 const Vector2 V2_Z				= Vector2(0.0f, 0.0f);
 const Vector2 V2_DIR_LEFT		= Vector2(-1.0f, 0.0f);
-const Vector2 V2_DIR_RIGHT		= -V2_DIR_LEFT;
+const Vector2 V2_DIR_RIGHT		= (-V2_DIR_LEFT);
 const Vector2 V2_DIR_UP			= Vector2(0.0f, 1.0f);
-const Vector2 V2_DIR_DOWN		= -V2_DIR_UP;
+const Vector2 V2_DIR_DOWN		= (-V2_DIR_UP);
 
 union Vector3{
 public:

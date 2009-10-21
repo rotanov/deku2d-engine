@@ -1,6 +1,7 @@
 #include "2de_Engine.h"
 //#include "Game.h" 
 #include "Tanks.h"
+#include "TanksNetwork.h"
 
 CEngine* Ninja = CEngine::Instance();
 //////////////////////////////////////////////////////////////////////////
@@ -17,7 +18,22 @@ CTankManager* Tanks;
 
 #define SCALE_TITLE 4.0f
 #define TITLE_TEXT "Tanks"
+//////////////////////////////////////////////////////////////////////////
+//NETWORKS VARS
+static const char *localBroadcastAddress = "IP:broadcast:28999";
+static const char *localHostAddress = "IP:localhost:28999";
+static bool pingLocalHost = false;
 
+
+
+class StdoutLogConsumer : public TNL::LogConsumer
+{
+public:
+	void logString(const char *string)
+	{
+		Log("NETWORK", "%s", string);
+	}
+} gStdoutLogConsumer;
 
 //////////////////////////////////////////////////////////////////////////
 ///!!!///Где-то в цикле обновления танчиков мы не освобождаем память и как результат - неебический memory leak
@@ -86,6 +102,36 @@ bool Options()
 
 CTitleScreen *TitleScreen;
 
+bool CreateServer()
+{
+	// create a server, listening on port 28999.
+	clientGame = NULL;	
+	serverGame = new TestGame(true,TNL::Address(TNL::IPProtocol,TNL::Address::Any, 28999),TNL::Address(localBroadcastAddress));
+
+	Ninja->RenderManager.DelObject("Title screen tanks");
+	Ninja->UpdateManager.DelObject("Title screen tanks");
+	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+
+
+	return true;
+}
+
+bool CreateClient()
+{
+	// create a client, by default pinging the LAN broadcast on port 28999
+	clientGame = new TestGame(false,TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),TNL::Address(pingLocalHost ? localHostAddress : localBroadcastAddress));
+	serverGame = NULL;
+
+	Ninja->RenderManager.DelObject("Title screen tanks");
+	Ninja->UpdateManager.DelObject("Title screen tanks");
+	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+
+
+	return true;
+}
+
 bool Init()
 {	
 		Font = Ninja->FontManager->GetFont("Font");
@@ -147,6 +193,13 @@ bool Init()
 	next = new CMenuItem(MenuRoot, "Exit", &EndGame);
 	next->position = Vector2(ScreenWidth*0.5f - 20,140);
 
+	next = new CMenuItem(MenuRoot, "Create server", &CreateServer);
+	next->position = Vector2(ScreenWidth*0.5f - 20,120);
+
+	next = new CMenuItem(MenuRoot, "Create client", &CreateClient);
+	next->position = Vector2(ScreenWidth*0.5f - 20,100);
+
+
 	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = true;
 	GuiManager.SetFocus(MenuRoot);
 
@@ -170,6 +223,33 @@ bool Init()
 // 	TanksTiles.BBox[7] = CAABB(0, 0, 32, 32);
 // 	TanksTiles.filename = "Data/Tilesets/TanksTileset.tls";
 // 	TanksTiles.SaveToFile();
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//NETWORK TESTING
+
+
+// 
+// 	// construct two local games, one client and one server, and have the client game ping the localhost
+// 	// loopback address.
+// 	clientGame = new TestGame(false,TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),TNL::Address(localHostAddress));
+// 	serverGame = new TestGame(true,TNL::Address(TNL::IPProtocol,TNL::Address::Any, 28999),TNL::Address(localBroadcastAddress));
+// 
+// 	// If the following line is commented out, the local games will create a normal (network) connection.
+// 	// the createLocalConnection call constructs a short-circuit connection that works without
+// 	// network access at all.
+// 	clientGame->createLocalConnection(serverGame);
+
+	//////////////////////////////////////////////////////////////////////////
+	//While in cycle i can call serverGame->moveMyPlayerTo(p);
+
+
+
+	//delete clientGame;
+	//delete serverGame;
+
 	return true;
 }
 

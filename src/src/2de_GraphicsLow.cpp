@@ -274,7 +274,7 @@ bool CFont::LoadFromFile()
 	}
 	char *FontImageName = NULL;
 	file.ReadLine(FontImageName);	
-	CTextureManager *TexMan = CTextureManager ::Instance();
+	CTextureManager *TexMan = CTextureManager::Instance();
 	Texture = TexMan->GetTextureByName(FontImageName);
 
 	file.Read(bbox, sizeof(bbox));
@@ -525,12 +525,15 @@ byte CFont::GetValign()
 	return align & CFONT_VALIGN_MASK;
 }
 
-void CFont::AssignTexture(CTexture* AFontTexture)
+CTexture* CFont::GetTexture()
 {
-	if (AFontTexture)
-		Texture = AFontTexture;
+	return Texture;
 }
 
+void CFont::SetTexture(char *TextureName)
+{
+	Texture = CEngine::Instance()->TextureManager->GetTextureByName(TextureName);
+}
 //////////////////////////////////////////////////////////////////////////
 //Camera
 
@@ -952,5 +955,5 @@ void setVSync(int interval)
 	}
 }
 
-#endif
+#endif  //WIN32
 

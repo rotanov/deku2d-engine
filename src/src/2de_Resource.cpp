@@ -292,4 +292,4 @@ void CDataLister::ExploreDir( HANDLE hfile )
 	}
 }
 
-#endif WIN32
+#endif //WIN32

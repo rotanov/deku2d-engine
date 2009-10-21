@@ -33,15 +33,15 @@
 
 using namespace std;
 
-#ifdef WIN32
+#ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
-#endif
+#endif  //_WIN32
 
 #define USE_SDL_OPENGL
 #define USING_OPENGL
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #define __INLINE __forceinline
 #else
 #define __INLINE inline
@@ -52,9 +52,10 @@ using namespace std;
 //#define _DEBUG
 
 // Будут ли выскакивать MessageBoxы под виндой в случае критических ошибок или нет. #undef если чо
-#ifdef WIN32
+//	Такой способ отлова ошибок на самом деле очень нехороший, я недоволен им всячески.
+#ifdef _WIN32
 #define CRITICAL_ERRORS_MESSAGE_BOXES
-#endif WIN32
+#endif //_WIN32
 // Оставлено для "совместимости". Сделан enum EFileOpenMode в классе CFile.
 #define CFILE_READ				0x01
 #define CFILE_WRITE				0x02
@@ -62,7 +63,7 @@ using namespace std;
 
 #define CFILE_MAX_STRING_LENGTH	1024
 
-#ifdef WIN32
+#ifdef _WIN32
 #define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
 #else
 #define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
@@ -83,10 +84,10 @@ typedef long				LONG;
 
 typedef float scalar;
 
-#ifdef WIN32
+#ifdef _WIN32
 // Второй параметр - состояние. Эта система ещё не доделана, и если не потребуется в будуещем - я от неё откажусь.
 typedef bool (*DirectoryWalkFunc)(char*, int); 
-#endif WIN32
+#endif //_WIN32
 
 typedef bool (*Callback)();
 typedef bool (*UpdateProc)(scalar);
@@ -191,6 +192,8 @@ typedef bool (*ObjCall)(CObject*);
 
 /**
 *	CObjectList - список объектов. Двусвязный.
+*	Внимание, после лекции Лудова по спискам я заявляю, что эта реализация если не ГОВНО, то
+*	говно.
 */
 
 class CList : public virtual CObject
@@ -375,7 +378,7 @@ void ToggleLog(bool _Enabled);
 
 char *GetWorkingDir(char *dir, size_t max_size);
 
-#ifdef WIN32
+#ifdef _WIN32
 
 const int DIRWALK_STATE_FILE		=	0x01;	// файл
 const int DIRWALK_STATE_FOLDER		=	0x02;	// папка
@@ -398,7 +401,7 @@ public:
 	void ExploreDir(HANDLE hfile);
 };
 
-#endif WIN32
+#endif //_WIN32
 
 // Ф-ии для работы со строками, в частности именами файлов и так далее
 

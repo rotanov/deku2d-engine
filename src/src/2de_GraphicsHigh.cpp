@@ -840,7 +840,7 @@ bool CParticleSystem::Render()
 		glBegin(GL_POINTS);
 		for(int i=0;i<Info.ParticlesActive;i++)
 		{
-			gSetColor(particles[i].c);
+			particles[i].c.glSet();
 			glVertex2f(particles[i].p.x, particles[i].p.y);			
 		}
 		glEnd();
@@ -1040,6 +1040,7 @@ CGUIManager::CGUIManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), 
 {
 	name = "Mini GUI manager";
 	FocusedOn = NULL;
+	SetPrimitiveRender(new CPrimitiveRender);
 	CEngine::Instance()->UpdateManager.AddObject(this);
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
@@ -1157,7 +1158,7 @@ void CGUIManager::SetFocus(CObject* AObject)
 
 CGUIManager::~CGUIManager()
 {
-
+	SAFE_DELETE(PRender);
 }
 CGUIManager GuiManager;
 //////////////////////////////////////////////////////////////////////////

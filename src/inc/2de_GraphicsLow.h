@@ -156,7 +156,6 @@ public:
 	void		Print(const char *text, ...);
 
 	void		SetDepth(float ADepth);
-	void		AssignTexture(CTexture* AFontTexture);
 	void		PointTo(const Vector2 *_p);
 	void		PointBack();
 	void		SetAlign(const byte _Halign, const byte _Valign);
@@ -165,6 +164,8 @@ public:
 	int			GetStringWidthEx(int t1, int t2, const char *text);
 	int			GetStringHeight(const char *text);
 	int			GetStringHeightEx(int t1, int t2, const char *text);
+	CTexture*	GetTexture();
+	void		SetTexture(char *TextureName);
 
 private:
 	float				x, y;					//	Фактические координаты для отрисовки в _Print

@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox.vcproj", "{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tanks", "Tanks.vcproj", "{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}"
@@ -8,6 +8,69 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Font Tool", "Font editor.vcproj", "{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Level Editor", "Level Editor.vcproj", "{B18211B0-4D50-4F93-A351-4530E915E979}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tnl", "tnl", "{B68ED8E8-3317-41AB-AE80-788ADDBE18A6}"
+	ProjectSection(SolutionItems) = preProject
+		tnl\assert.cpp = tnl\assert.cpp
+		tnl\asymmetricKey.cpp = tnl\asymmetricKey.cpp
+		tnl\bitStream.cpp = tnl\bitStream.cpp
+		tnl\byteBuffer.cpp = tnl\byteBuffer.cpp
+		tnl\certificate.cpp = tnl\certificate.cpp
+		tnl\clientPuzzle.cpp = tnl\clientPuzzle.cpp
+		tnl\connectionStringTable.cpp = tnl\connectionStringTable.cpp
+		tnl\dataChunker.cpp = tnl\dataChunker.cpp
+		tnl\eventConnection.cpp = tnl\eventConnection.cpp
+		tnl\ghostConnection.cpp = tnl\ghostConnection.cpp
+		tnl\huffmanStringProcessor.cpp = tnl\huffmanStringProcessor.cpp
+		tnl\journal.cpp = tnl\journal.cpp
+		tnl\log.cpp = tnl\log.cpp
+		tnl\netBase.cpp = tnl\netBase.cpp
+		tnl\netConnection.cpp = tnl\netConnection.cpp
+		tnl\netInterface.cpp = tnl\netInterface.cpp
+		tnl\netObject.cpp = tnl\netObject.cpp
+		tnl\netStringTable.cpp = tnl\netStringTable.cpp
+		tnl\platform.cpp = tnl\platform.cpp
+		tnl\random.cpp = tnl\random.cpp
+		tnl\rpc.cpp = tnl\rpc.cpp
+		tnl\symmetricCipher.cpp = tnl\symmetricCipher.cpp
+		tnl\thread.cpp = tnl\thread.cpp
+		tnl\tnl.h = tnl\tnl.h
+		tnl\tnlAssert.h = tnl\tnlAssert.h
+		tnl\tnlAsymmetricKey.h = tnl\tnlAsymmetricKey.h
+		tnl\tnlBitSet.h = tnl\tnlBitSet.h
+		tnl\tnlBitStream.h = tnl\tnlBitStream.h
+		tnl\tnlByteBuffer.h = tnl\tnlByteBuffer.h
+		tnl\tnlCertificate.h = tnl\tnlCertificate.h
+		tnl\tnlClientPuzzle.h = tnl\tnlClientPuzzle.h
+		tnl\tnlConnectionStringTable.h = tnl\tnlConnectionStringTable.h
+		tnl\tnlDataChunker.h = tnl\tnlDataChunker.h
+		tnl\tnlEndian.h = tnl\tnlEndian.h
+		tnl\tnlEventConnection.h = tnl\tnlEventConnection.h
+		tnl\tnlGhostConnection.h = tnl\tnlGhostConnection.h
+		tnl\tnlHuffmanStringProcessor.h = tnl\tnlHuffmanStringProcessor.h
+		tnl\tnlJournal.h = tnl\tnlJournal.h
+		tnl\tnlLog.h = tnl\tnlLog.h
+		tnl\tnlMethodDispatch.cpp = tnl\tnlMethodDispatch.cpp
+		tnl\tnlMethodDispatch.h = tnl\tnlMethodDispatch.h
+		tnl\tnlNetBase.h = tnl\tnlNetBase.h
+		tnl\tnlNetConnection.h = tnl\tnlNetConnection.h
+		tnl\tnlNetEvent.h = tnl\tnlNetEvent.h
+		tnl\tnlNetInterface.h = tnl\tnlNetInterface.h
+		tnl\tnlNetObject.h = tnl\tnlNetObject.h
+		tnl\tnlNetStringTable.h = tnl\tnlNetStringTable.h
+		tnl\tnlNonce.h = tnl\tnlNonce.h
+		tnl\tnlPlatform.h = tnl\tnlPlatform.h
+		tnl\tnlRandom.h = tnl\tnlRandom.h
+		tnl\tnlRPC.h = tnl\tnlRPC.h
+		tnl\tnlString.h = tnl\tnlString.h
+		tnl\tnlSymmetricCipher.h = tnl\tnlSymmetricCipher.h
+		tnl\tnlThread.h = tnl\tnlThread.h
+		tnl\tnlTypes.h = tnl\tnlTypes.h
+		tnl\tnlUDP.h = tnl\tnlUDP.h
+		tnl\tnlVector.h = tnl\tnlVector.h
+		tnl\udp.cpp = tnl\udp.cpp
+		tnl\vector.cpp = tnl\vector.cpp
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

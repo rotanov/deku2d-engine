@@ -12,7 +12,7 @@
 
 #ifdef WIN32
 #include <tchar.h>
-#endif
+#endif //WIN32
 
 #include <math.h>
 

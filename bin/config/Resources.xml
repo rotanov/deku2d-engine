@@ -1,8 +1,8 @@
 <Data>
 	<Fonts>
-		Beta = "data\Fonts\Beta.fif"
 		Font = "data\Fonts\Font.fif"
 		hge = "data\Fonts\hge.fif"
+		iich = "data\Fonts\iich.fif"
 	</Fonts>
 	gui = "gui"
 	<Levels>
@@ -10,7 +10,10 @@
 		Level02 = "data\Levels\Level02.lvl"
 	</Levels>
 	Objects = "Objects"
-	Scripts = "Scripts"
+	<Scripts>
+		button1 = "data\Scripts\button1.lua"
+		button2 = "data\Scripts\button2.lua"
+	</Scripts>
 	<Textures>
 		2d2g5z7 = "data\Textures\2d2g5z7.png"
 		bat2_scetch_col2 = "data\Textures\bat2_scetch_col2.bmp"
