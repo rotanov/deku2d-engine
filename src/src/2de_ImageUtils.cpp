@@ -15,7 +15,7 @@ bool CImageData::LoadBMP(const char * name)
 	pbyte R, G, B;
 	byte temp;
 	
-	if (!file.Open(name, CFile::fomRead))
+	if (!file.Open(name, CFile::OPEN_MODE_READ))
 	{
 		Log("ERROR", "Cant load bmp file: \"%s\" file doesnt exist or can't open", name);
 		return false;

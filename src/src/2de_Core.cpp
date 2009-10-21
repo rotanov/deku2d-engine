@@ -53,13 +53,13 @@ const int CObject::GetListRefCount()
 /************************************************************************/
 /* CFile                                                                */
 /************************************************************************/
-CFile::CFile(const string AFileName, EFileOpenMode Mode)
+CFile::CFile(const string AFileName, EOpenMode Mode)
 {
 	File = NULL;
 	Open(AFileName, Mode);
 }
 
-bool CFile::Open(const string AFileName, EFileOpenMode Mode)
+bool CFile::Open(const string AFileName, EOpenMode Mode)
 {
 	if (AFileName.empty())
 	{
@@ -76,7 +76,7 @@ bool CFile::Open(const string AFileName, EFileOpenMode Mode)
 
 	switch (Mode)
 	{
-	case fomRead:
+	case OPEN_MODE_READ:
 		File = fopen(FileName.c_str(), "rb");
 		if (File == NULL)
 		{
@@ -84,7 +84,7 @@ bool CFile::Open(const string AFileName, EFileOpenMode Mode)
 			return false;
 		}
 		break;
-	case fomWrite:
+	case OPEN_MODE_WRITE:
 		File = fopen(FileName.c_str(), "wb");
 		if (File == NULL)
 		{
@@ -307,13 +307,13 @@ bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
 
 	switch (Origin)
 	{
-	case soBeginning:
+	case SEEK_ORIGIN_BEGINNING:
 		origin_const = SEEK_SET;
 		break;
-	case soCurrent:
+	case SEEK_ORIGIN_CURRENT:
 		origin_const = SEEK_CUR;
 		break;
-	case soEnd:
+	case SEEK_ORIGIN_END:
 		origin_const = SEEK_END;
 		break;
 	}

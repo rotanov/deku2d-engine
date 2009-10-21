@@ -24,11 +24,6 @@ CEngine::CEngine()
 	procFocusGainFunc = NULL;
 	procUpdateFunc = NULL;
 	procRenderFunc = NULL;
-// 	procGUIGetKeyDown = NULL;
-// 	procGUIGetKeyUp = NULL;
-// 	procGUIGetMouseDown = NULL;
-// 	procGUIGetMouseUp = NULL;
-// 	procGUIGetMouseMove = NULL;
 	Factory = CFactory::Instance();
 	FontManager = CFontManager::Instance();
 	//_instance = NULL;
@@ -57,9 +52,6 @@ CEngine* CEngine::Instance()
 	}
 	return _instance;
 }
-
-
-
 
 void CEngine::CalcFps()
 {
@@ -133,21 +125,6 @@ void CEngine::SetState(int state, void* value)
 			case STATE_WINDOW_CAPTION:
 				window.caption = (char*)value;
 				break;
-// 			case STATE_GUI_KEY_DOWN:
-// 				procGUIGetKeyDown = (KeyFunc)value;
-// 				break;
-// 			case STATE_GUI_MOUSE_DOWN:
-// 				procGUIGetMouseDown = (MouseFunc)value;
-// 				break;
-// 			case STATE_GUI_KEY_UP:
-// 				procGUIGetKeyUp = (KeyFunc)value;
-// 				break;
-// 			case STATE_GUI_MOUSE_UP:
-// 				procGUIGetMouseUp = (MouseFunc)value;
-// 				break;
-// 			case STATE_GUI_MOUSE_MOVE:
-// 				procGUIGetMouseMove = (MouseFunc)value;
-// 				break;
 			case STATE_CONFIG_NAME:
 				{
 					ConfigFileName = CONFIG_FILE_NAME;

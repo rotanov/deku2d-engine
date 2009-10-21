@@ -479,7 +479,7 @@ bool CSprite::LoadTexture(char *filename)
 bool CSprite::LoadFromFile(char* filename)
 {
 	CFile file;
-	file.Open(filename, CFile::fomRead);
+	file.Open(filename, CFile::OPEN_MODE_READ);
 	file.ReadByte(&numAnimations);
 	if (animations != NULL)
 		delete [] animations;
@@ -493,7 +493,7 @@ bool CSprite::LoadFromFile(char* filename)
 bool CSprite::SaveToFile(char *filename)
 {
 	CFile file;
-	file.Open(filename, CFile::fomWrite);
+	file.Open(filename, CFile::OPEN_MODE_WRITE);
 	file.WriteByte(&numAnimations);
 	file.Write(animations, numAnimations*sizeof(SAnimationInfo));
 	file.Close();
@@ -878,7 +878,7 @@ bool CParticleSystem::Render()
 bool CParticleSystem::SaveToFile()
 {
 	CFile file;
-	file.Open(filename, CFile::fomWrite);
+	file.Open(filename, CFile::OPEN_MODE_WRITE);
 	file.Write(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
@@ -887,7 +887,7 @@ bool CParticleSystem::SaveToFile()
 bool CParticleSystem::LoadFromFile()
 {
 	CFile file;
-	file.Open(filename, CFile::fomRead);
+	file.Open(filename, CFile::OPEN_MODE_READ);
 	file.Read(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
@@ -1041,8 +1041,6 @@ CGUIManager::CGUIManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), 
 	name = "Mini GUI manager";
 	FocusedOn = NULL;
 	SetPrimitiveRender(new CPrimitiveRender);
-	CEngine::Instance()->UpdateManager.AddObject(this);
-	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 

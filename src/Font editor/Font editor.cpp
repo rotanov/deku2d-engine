@@ -12,7 +12,7 @@ const int				BUTTON_HEIGHT		= 32;
 // Константы, определяющие цвет элементов интерфейса будут тут. Чуть погодя.
 const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
-const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 1.0f);
+const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
 const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
 // Всевозможные переменные.
 CEngine					*Ninja				= CEngine::Instance();
@@ -59,6 +59,129 @@ bool LoadTexture()  // Опять же не Load() а Acquire().
 	return true;
 }
 
+class CFontEditor : public CRenderObject, public CUpdateObject
+{
+public:
+	Vector2 MousePosition;
+	Vector2 MouseDelta;
+	bool isGripToolEnabled;
+	bool doGripping;
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+	{
+		switch (state)
+		{
+		case KEY_PRESSED:
+			switch(key)
+			{
+			case SDLK_g:
+				isGripToolEnabled = true;
+				break;
+			
+			}
+		break;
+		case KEY_RELEASED:
+			switch(key)
+			{
+			case SDLK_g:
+				//doGripping = false;
+				break;
+			}
+			break;
+		}
+		return true;
+	}
+
+	CFontEditor()
+	{
+		isGripToolEnabled = false;
+		doGripping = false;
+		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	}
+
+	bool Render()
+	{
+		int wheight, wwidth;
+		Ninja->GetState(STATE_SCREEN_HEIGHT, &wheight);
+		Ninja->GetState(STATE_SCREEN_WIDTH, &wwidth);
+
+		glLoadIdentity();
+		CPrimitiveRender PRender;
+		PRender.lClr = COLOR_FIRST;
+		PRender.sClr = COLOR_THIRD;
+		PRender.pClr = COLOR_FIRST;
+		PRender.grRectC(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, wheight));
+
+
+		gToggleScissor(true);
+		gScissor(INTERFACE_OFFSET_X, 0, wwidth - INTERFACE_OFFSET_X, wheight);
+		glLoadIdentity();
+		glTranslatef(OffsetX, OffsetY, .0f);
+		glScalef(Zoom, Zoom, 1.0f);
+		if(FontTexture)
+		{
+			FontTexture->Bind();
+			RGBAf(1.0f, 1.0f, 1.0f, 1.0f).glSet();
+			glBegin(GL_QUADS);
+			glTexCoord2f(.0f, .0f);
+			glVertex2f(.0f, .0f);
+
+			glTexCoord2f(1.0f, .0f);
+			glVertex2f(FontTexture->width, .0f);
+
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex2f(FontTexture->width, FontTexture->height);
+
+			glTexCoord2f(.0f, 1.0f);
+			glVertex2f(.0f, FontTexture->height);
+			glEnd();
+		}
+		
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_LINE_WIDTH);
+		glLineWidth(1.0f);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		if (Font)
+		{
+			glBegin(GL_LINES);
+			for(int i=0;i<256;i++)
+			{
+				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
+				glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
+
+				glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
+				glVertex2i(Font->bbox[i].x1, Font->bbox[i].y1);
+
+				glVertex2i(Font->bbox[i].x1, Font->bbox[i].y1);
+				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
+
+				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
+				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
+			}
+			glEnd();
+		}
+		gToggleScissor(false);
+		return true;
+
+	}
+
+	bool Update(float dt)
+	{
+		int x, y;
+		SDL_GetRelativeMouseState(&x, &y);
+		MouseDelta = Vector2(x, y);
+
+		if (isGripToolEnabled &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
+		{
+			OffsetX += MouseDelta.x;
+			OffsetY -= MouseDelta.y;
+		}
+
+		return true;
+	}
+};
+
+CFontEditor *FontEditor;
+
 bool Init()
 {
 	(new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont))->SetParent(&GuiManager);	
@@ -78,71 +201,7 @@ bool Init()
 	edFontname->color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 	edFontname->SetParent(&GuiManager);
 
-	return true;
-}
-
-bool Draw()
-{
-	int wheight, wwidth;
-	Ninja->GetState(STATE_SCREEN_HEIGHT, &wheight);
-	Ninja->GetState(STATE_SCREEN_WIDTH, &wwidth);
-
-	glLoadIdentity();
-// 	CPrimitiveRender PRender;
-// 	PRender.lClr = RGBAf(.4f, .4f, .4f, 1.0f);
-// 	PRender.sClr = RGBAf(0.6f, 0.7f, 0.8f, 0.5f);
-// 	PRender.pClr = RGBAf(.4f, .4f, .4f, 1.0f);
-// 	PRender.	grRectC(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, wheight));
-
-
-	gToggleScissor(true);
-	gScissor(INTERFACE_OFFSET_X, 0, wwidth - INTERFACE_OFFSET_X, wheight);
-	glLoadIdentity();
-	glTranslatef(OffsetX, OffsetY, .0f);
-	glScalef(Zoom, Zoom, 1.0f);
-	if(FontTexture)
-	{
-		FontTexture->Bind();
-		RGBAf(1.0f, 1.0f, 1.0f, 1.0f).glSet();
-		glBegin(GL_QUADS);
-			glTexCoord2f(.0f, .0f);
-			glVertex2f(.0f, .0f);
-
-			glTexCoord2f(1.0f, .0f);
-			glVertex2f(FontTexture->width, .0f);
-
-			glTexCoord2f(1.0f, 1.0f);
-			glVertex2f(FontTexture->width, FontTexture->height);
-
-			glTexCoord2f(.0f, 1.0f);
-			glVertex2f(.0f, FontTexture->height);
-		glEnd();
-	}
-
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_LINE_WIDTH);
-	glLineWidth(1.0f);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	if (Font)
-	{
-		glBegin(GL_LINES);
-		for(int i=0;i<256;i++)
-		{
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
-
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y1);
-
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y1);
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
-
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
-		}
-		glEnd();
-	}
-	gToggleScissor(false);
+	FontEditor = new CFontEditor;
 	return true;
 }
 
@@ -150,7 +209,6 @@ int	main(int argc, char *argv[])
 {
 	Ninja->SetState(STATE_CONFIG_NAME, "FontEditor.xml");
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
 	return 0x00;
 }

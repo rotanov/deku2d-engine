@@ -267,7 +267,7 @@ bool CFont::LoadFromFile()
 	if (filename == "")
 		return false;
 	CFile			file;
-	if (!file.Open(filename, CFile::fomRead))
+	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
 		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
 		return false;
@@ -313,7 +313,7 @@ bool CFont::SaveToFile()
 	if (!Texture)
 		return false;
 	CFile file;
-	file.Open(filename, CFile::fomWrite);
+	file.Open(filename, CFile::OPEN_MODE_WRITE);
 	file.Write(Texture->name.c_str(), (DWORD)Texture->name.length());
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));

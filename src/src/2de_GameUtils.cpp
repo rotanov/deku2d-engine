@@ -9,7 +9,7 @@ bool CTileset::LoadFromFile()
 {
 	CFactory *Factory = CFactory::Instance();
 	CFile file;
-	if (!file.Open(filename, CFile::fomRead))
+	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
 		Log("ERROR", "Can't open TileSet file %s", filename);
 		return false;
@@ -58,7 +58,7 @@ void CTileset::RenderTileSet()
 bool CTileset::SaveToFile()
 {
 	CFile file;
-	if (!file.Open(filename, CFile::fomWrite))
+	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
 	{
 		Log("ERROR", "Can't open TileSet file %s", filename);
 		return false;
@@ -152,7 +152,7 @@ bool CLevelMap::LoadFromFile()
 {
 	CFile File;
 	CFactory *Factory = CFactory::Instance();
-	if (!File.Open(filename, CFile::fomRead))
+	if (!File.Open(filename, CFile::OPEN_MODE_READ))
 	{
 		Log("ERROR", "Can't load level %s", filename.c_str());
 		return false;
@@ -190,7 +190,7 @@ bool CLevelMap::LoadFromFile()
 bool CLevelMap::SaveToFile()
 {
 	CFile file;
-	if (!file.Open(filename, CFile::fomWrite))
+	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
 	{
 		Log("ERROR", "Can't open file %s to save the map", filename);
 		return false;

@@ -396,7 +396,7 @@ CXMLTable::CXMLTable()
 bool CXMLTable::LoadFromFile(const char *fname)
 {
 	CFile f;
-	if (!f.Open(fname, CFile::fomRead))
+	if (!f.Open(fname, CFile::OPEN_MODE_READ))
 	{
 		Log("XMLERROR", "Cannot load xml file \"%s\".", fname);
 		return false;
@@ -511,7 +511,7 @@ bool CXMLTable::LoadFromFile(const char *fname)
 bool CXMLTable::SaveToFile(const char *fname)
 {
 	CFile f;
-	if (!f.Open(fname, CFile::fomWrite)){
+	if (!f.Open(fname, CFile::OPEN_MODE_WRITE)){
 		Log("XMLERROR",XML_ERROR8);
 		return 0;
 	}

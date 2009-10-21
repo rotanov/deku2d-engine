@@ -4,17 +4,17 @@
 #pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется.
 
 //#pragma warning (disable	:	4312)
-#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
-#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
-#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
-#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
+// #pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
+// #pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
+// #pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
+// #pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
 //#pragma warning (disable	:	4996)	
-#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
-#pragma warning (disable	:	4996)	//	rare
-#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
-#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
-#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
-#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
+// #pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
+// #pragma warning (disable	:	4996)	//	rare
+// #pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
+// #pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
+// #pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
+// #pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
 
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
@@ -56,10 +56,6 @@ using namespace std;
 #ifdef _WIN32
 #define CRITICAL_ERRORS_MESSAGE_BOXES
 #endif //_WIN32
-// Оставлено для "совместимости". Сделан enum EFileOpenMode в классе CFile.
-#define CFILE_READ				0x01
-#define CFILE_WRITE				0x02
-//
 
 #define CFILE_MAX_STRING_LENGTH	1024
 
@@ -325,26 +321,26 @@ public:
 *	Как с ним работать я думаю тоже интуитивно понятно.
 */
 
-class CFile // унаследовать 
+class CFile // унаследовать? // или нет? 
 {
 public:
-	enum EFileOpenMode
+	enum EOpenMode
 	{
-		fomRead,
-		fomWrite
+		OPEN_MODE_READ,
+		OPEN_MODE_WRITE
 	};
 	
 	enum ESeekOrigin
 	{
-		soBeginning,
-		soCurrent,
-		soEnd
+		SEEK_ORIGIN_BEGINNING,
+		SEEK_ORIGIN_CURRENT,
+		SEEK_ORIGIN_END
 	};
 
 	CFile(void) : File(NULL) {}
-	CFile(const string AFileName, EFileOpenMode Mode);
+	CFile(const string AFileName, EOpenMode Mode);
 
-	bool Open(const string AFileName, EFileOpenMode Mode);
+	bool Open(const string AFileName, EOpenMode Mode);
 	bool Close();
 	bool ReadByte(unsigned char *Buffer);
 	bool WriteByte(unsigned char *Buffer);
