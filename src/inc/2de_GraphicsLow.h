@@ -17,7 +17,7 @@
 
 const Vector2 V2_QuadBin[4] = 
 {
-	V2_Z,
+	V2_ZERO,
 	V2_DIR_RIGHT,
 	V2_DIR_RIGHT + V2_DIR_UP,
 	V2_DIR_UP
@@ -194,16 +194,8 @@ public:
 	int w, h;
 	Vector2 p, v;
 
-	CCamera()
-	{
-		name = "Camera";
-		view = world = CAABB(100, 100, 540, 380);
-		outer = CAABB(-1024, 0, 2048, 512);
-		Point = p = v = Vector2::Blank();
-		Atx = Aty = NULL;
-		Assigned = false;
-	}
-
+	CCamera();
+	void SetWidthAndHeight(int AWidth, int AHeight);
 	void Assign(scalar *x, scalar *y);
 	void Free();
 	void gTranslate();
@@ -263,17 +255,16 @@ void setVSync(int interval=1);
 //////////////////////////////////////////////////////////////////////////
 //CGLWindow
 
-class CGLWindow
+class CGLWindow : public CObject // Should be singleton
 {
 public:
 	int width;
 	int height;
 	byte bpp;
 	bool fullscreen;
-	char* caption;
+	char *caption;
 
-	CGLWindow();
-	~CGLWindow();
+	static CGLWindow* Instance();
 	bool gCreateWindow(int _width, int _height, byte _bpp, char* _caption);
 	bool gCreateWindow();
 	void SetSize();
@@ -281,6 +272,11 @@ public:
 	void glSuicide();
 	void glResize(GLsizei Width, GLsizei Height);
 	void glInit(GLsizei Width, GLsizei Height);
+protected:
+	static CGLWindow *_instance;
+	CGLWindow();
+	~CGLWindow();
+
 };
 
 

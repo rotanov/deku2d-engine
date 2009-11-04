@@ -1007,8 +1007,8 @@ CGUIObject::CGUIObject()
 
 CGUIObject::~CGUIObject()
 {
-	CEngine::Instance()->RenderManager.DelObject(id);
-	CEngine::Instance()->UpdateManager.DelObject(id);
+	CEngine::Instance()->RenderManager.DelObject(GetID());
+	CEngine::Instance()->UpdateManager.DelObject(GetID());
 }
 
 void CGUIObject::SetFont(CFont *AFont)
@@ -1038,7 +1038,7 @@ void CGUIObject::SetParent(CGUIObject *AParent)
 
 CGUIManager::CGUIManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
 {
-	name = "Mini GUI manager";
+	SetName("CGUIManager");
 	FocusedOn = NULL;
 	SetPrimitiveRender(new CPrimitiveRender);
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
@@ -1183,9 +1183,9 @@ bool CButton::Render()
 	Font = engine->FontManager->GetFont("Font");
 
 	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(text.c_str()), Font->GetStringHeight(text.c_str())) / 2.0f;
-	Font->tClr = color;
+	Font->tClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);//color;
 	glLoadIdentity();
-	PRender->grRectL(aabb.vMin, aabb.vMax);
+	PRender->grRectS(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
 	Font->Print(text.c_str());
 	return true;
@@ -1258,13 +1258,15 @@ bool CEdit::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
 		switch(key)
 		{
 		case SDLK_BACKSPACE:
-			DelInterval(&text, CursorPos, CursorPos);
+			if (CursorPos > 0)
+				DelInterval(&text, CursorPos, CursorPos);
+			CursorPos--;
 			break;
 		case SDLK_DELETE:
 			DelInterval(&text, CursorPos+1, CursorPos+1);
 			break;
 		case SDLK_LEFT:				
-			if (--CursorPos <= -1)
+			if (--CursorPos < -1)
 				CursorPos++;
 			break;
 		case SDLK_RIGHT:
@@ -1303,6 +1305,8 @@ bool CEdit::Render()
 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
 	Font->Print(text.c_str());
+	PRender->grSegmentC(Vector2(Font->Pos.x + Font->GetStringWidthEx(0, CursorPos, text.c_str()), Font->Pos.y + 20 ),
+		Vector2(Font->Pos.x + Font->GetStringWidthEx(0, CursorPos, text.c_str()), Font->Pos.y - 20 ));
 	return true;
 }
 
@@ -1381,7 +1385,7 @@ CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc)
 	FocusedOnListNode = NULL;
 	visible = false;
 	isCycledMenuSwitch = true;
-	name = text = AMenuText;
+	SetName(text = AMenuText);
 	SetParent(AParent);
 	if (AParent)
 		AParent->AddObject(this);

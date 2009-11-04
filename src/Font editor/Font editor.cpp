@@ -66,6 +66,7 @@ public:
 	Vector2 MouseDelta;
 	bool isGripToolEnabled;
 	bool doGripping;
+			int wheight, wwidth;
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
 		switch (state)
@@ -100,17 +101,26 @@ public:
 
 	bool Render()
 	{
-		int wheight, wwidth;
+
 		Ninja->GetState(STATE_SCREEN_HEIGHT, &wheight);
 		Ninja->GetState(STATE_SCREEN_WIDTH, &wwidth);
 
-		glLoadIdentity();
 		CPrimitiveRender PRender;
 		PRender.lClr = COLOR_FIRST;
 		PRender.sClr = COLOR_THIRD;
 		PRender.pClr = COLOR_FIRST;
+		glLoadIdentity();
 		PRender.grRectC(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, wheight));
+		glLoadIdentity();
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);		
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
+		PRender.grCircleL(MousePosition, 5);
+		int fps;
+		Ninja->GetState(STATE_FPS_COUNT, &fps);
+		Ninja->FontManager->PrintEx(10, 400, 0.0f, "FPS: %d", fps);
+		glLoadIdentity();
 
 		gToggleScissor(true);
 		gScissor(INTERFACE_OFFSET_X, 0, wwidth - INTERFACE_OFFSET_X, wheight);
@@ -163,19 +173,22 @@ public:
 		return true;
 
 	}
-
+	
 	bool Update(float dt)
 	{
 		int x, y;
 		SDL_GetRelativeMouseState(&x, &y);
 		MouseDelta = Vector2(x, y);
+		SDL_GetMouseState(&x, &y);
+		Ninja->GetState(STATE_MOUSE_XY, &MousePosition);
+		MousePosition = Vector2(x, wheight - y);
 
 		if (isGripToolEnabled &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
 		{
 			OffsetX += MouseDelta.x;
 			OffsetY -= MouseDelta.y;
 		}
-
+		Sleep(1);
 		return true;
 	}
 };
@@ -183,11 +196,11 @@ public:
 CFontEditor *FontEditor;
 
 bool Init()
-{
+{	
+	SDL_ShowCursor(0);
+	
 	(new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont))->SetParent(&GuiManager);	
-	(new CButton(CAABB(LEFT_MARGIN, 100, BUTTON_WIDTH, BUTTON_HEIGHT), "Save font", RGBAf(0.5f, 0.5f, 0.6f, 1.0f), NULL))->SetParent(&GuiManager);
 	(new CButton(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture))->SetParent(&GuiManager);
-	(new CButton(CAABB(LEFT_MARGIN, 300, BUTTON_WIDTH, BUTTON_HEIGHT), "Fuck yourself", RGBAf(0.9f, 0.8f, 0.2f, 1.0f), NULL))->SetParent(&GuiManager);
 
 	edFontTextureName = new CEdit();
 	edFontTextureName->aabb = CAABB(LEFT_MARGIN, 350, EDIT_WIDTH, BUTTON_HEIGHT);

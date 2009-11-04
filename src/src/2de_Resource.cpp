@@ -26,7 +26,7 @@ void CFactory::FreeInst()
 
 CFactory::CFactory():initialized(false), UpdateManager(NULL), RenderManager(NULL), FontManager(NULL)
 {
-	name = "Factory";
+	SetName("Factory");
 }
 
 CFactory::~CFactory()
@@ -35,7 +35,7 @@ CFactory::~CFactory()
 	Reset();
 	while (Enum(obj))
 	{
-		Log("INFO", "Deleting object %s", obj->name.c_str());
+		Log("INFO", "Deleting object %s", obj->GetName());
 		delete obj;
 	}
 
@@ -167,7 +167,7 @@ bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 		Resource = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
 		if (Resource == NULL) 
 			return false;
-		Resource->name = key;
+		Resource->SetName(key);
 		Resource->filename = val;
 	}
 	Factory->FreeInst();
@@ -191,7 +191,7 @@ bool CResourceManager::LoadResources()
 	return true;
 }
 
-CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc creator)
+CObject* CResourceManager::LoadResource(char* section, char *AResourceName, CreateFunc creator)
 {
 	if (ResourceList == NULL)
 	{
@@ -201,10 +201,10 @@ CObject* CResourceManager::LoadResource(char* section, char *name, CreateFunc cr
 	string val;
 	CFactory *Factory = CFactory::Instance();
 	CResource *result;
-	val = x->Get(name)->GetValue();
+	val = x->Get(AResourceName)->GetValue();
 
 	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
-	result->name = name;
+	result->SetName(AResourceName);
 	result->filename = val;
 	result->LoadFromFile();
 

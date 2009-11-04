@@ -8,7 +8,7 @@ CEngine* Ninja = CEngine::Instance();
 CFont* Font;
 int ScreenWidth = 0;
 int ScreenHeight = 0;
-Vector2 fPosition = V2_Z;
+Vector2 fPosition = V2_ZERO;
 CParticleSystem *FontEffect;
 bool begintimeout = false;
 float TimeOut = 0, TimeLimit = 2.0f;
@@ -44,7 +44,7 @@ class CTitleScreen : public CRenderObject, public CUpdateObject
 public:
 	CTitleScreen()
 	{
-		name = "Title screen tanks";
+		SetName("Title screen tanks");
 	}
 	~CTitleScreen()
 	{		
@@ -144,7 +144,7 @@ bool Init()
 		fPosition *= 0.5f;
 	//////////////////////////////////////////////////////////////////////////
 		FontEffect = new CParticleSystem;
-		FontEffect->name = "Title bubbles";
+		FontEffect->SetName("Title bubbles");
 		FontEffect->Init();
 		FontEffect->Info.sc = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
 		FontEffect->Info.ec = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);

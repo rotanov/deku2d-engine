@@ -114,12 +114,12 @@ bool CTank::Update(scalar dt)
 		}
 
 
-		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(0)->position.x, Host->GetPlayer(0)->position.y)).Inside(Bullets[i].p) && (name != "TankPlayer1"))
+		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(0)->position.x, Host->GetPlayer(0)->position.y)).Inside(Bullets[i].p) && ((string)GetName() != "TankPlayer1"))
 		{
 			Host->GetPlayer(0)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
 		}
-		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(1)->position.x, Host->GetPlayer(1)->position.y)).Inside(Bullets[i].p) && (name != "TankPlayer2"))
+		if ((CAABB(0,0,32,32).Offsetted(Host->GetPlayer(1)->position.x, Host->GetPlayer(1)->position.y)).Inside(Bullets[i].p) && ((string)GetName() != "TankPlayer2"))
 		{
 			Host->GetPlayer(1)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
@@ -207,7 +207,7 @@ void CTankManager::AddPlayer()
 	CTank *Tank = new CTank(Map, this, NULL);
 	char * tmp = new char[16];
 	SDL_itoa(PlayerCount+1, tmp, 10);
-	Tank->name = (string)"TankPlayer" + tmp;	
+	Tank->SetName((string)"TankPlayer" + tmp);	
 	delete [] tmp;
 	Tank->Init(PlayerCount == 0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
 	Tank->SetPlayerControls(PlayerCount);
@@ -229,7 +229,7 @@ void CTankManager::AddAI()
 	CTank *Tank = NULL;
 	CTankAI *AI = new CTankAI(this, Map, Tank);
 	Tank = new CTank(Map, this, AI);
-	Tank->name = "Tank";	
+	Tank->SetName("Tank");	
 	Tank->Init(&COLOR_AI, Map->GetNewTankLocation());
 	AddObject(Tank);
 	PlayerCount++;

@@ -4,16 +4,16 @@
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-CRenderObject::CRenderObject() : position(V2_Z), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
+CRenderObject::CRenderObject() : position(V2_ZERO), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
 {
 	CEngine::Instance()->RenderManager.AddObject(this);
-	name = "CRenderObject";
+	SetName("CRenderObject");
 	type |= T_RENDERABLE;
 };
 
 CRenderObject::~CRenderObject()
 {
-	CEngine::Instance()->RenderManager.DelObject(this->id);
+	CEngine::Instance()->RenderManager.DelObject(GetID());
 }
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
@@ -98,13 +98,17 @@ GLuint CGLImageData::GetTexID()
 
 CGLWindow::CGLWindow()
 {
-	width = 640;
+	SetName("GLWindow");
+	width = 640;	//TODO!!! Default magic numbers - delete them!
 	height = 480;
 	fullscreen = false;
 	bpp = 32;
-	caption = "Warning: CGLWindow class instance have not been initialized";
+	caption = "Warning: CGLWindow class instance have not been initialized properly";
 }
-CGLWindow::~CGLWindow(){}
+CGLWindow::~CGLWindow()
+{
+
+}
 
 bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption)
 {
@@ -234,10 +238,18 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 
 
-	//strstr(WGL_EXT_swap_control);
-	setVSync(1);
+	setVSync(0);
 }
-
+CGLWindow *CGLWindow::_instance = NULL;
+CGLWindow* CGLWindow::Instance()
+{
+	if(!_instance)
+	{
+		_instance = new CGLWindow();
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
+}
 //-------------------------------------------//
 //				Font stuff					 //
 //-------------------------------------------//
@@ -269,7 +281,7 @@ bool CFont::LoadFromFile()
 	CFile			file;
 	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", name.data()); //TODO: filename wrte too.
+		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: filename wrte too.
 		return false;
 	}
 	char *FontImageName = NULL;
@@ -314,7 +326,7 @@ bool CFont::SaveToFile()
 		return false;
 	CFile file;
 	file.Open(filename, CFile::OPEN_MODE_WRITE);
-	file.Write(Texture->name.c_str(), (DWORD)Texture->name.length());
+	file.Write(Texture->GetName(), (DWORD)strlen(Texture->GetName()));
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
 	file.Close();
@@ -579,7 +591,7 @@ void CCamera::Update()
 	*/
 	v = Vector2(*Atx, *Aty) - Point;
 	if (abs(v.x) < 0.001f && abs(v.y) < 0.001f)
-		v = Vector2::Blank();
+		v = V2_ZERO;
 	Point += v*0.05f;
 
 	dx = *Atx;
@@ -611,6 +623,23 @@ void CCamera::gTranslate()
 	glTranslatef((int) (-Point.x + w/2.0f), (int) (-Point.y + h/2.0f), 0.0f);
 }
 
+CCamera::CCamera()
+{
+	SetName("CCamera");
+	view = world = CAABB(100, 100, 540, 380);
+	outer = CAABB(-1024, 0, 2048, 512);
+	Point = p = v = V2_ZERO;
+	Atx = Aty = NULL;
+	Assigned = false;
+	SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height);
+}
+
+void CCamera::SetWidthAndHeight( int AWidth, int AHeight )
+{
+	w = AWidth;
+	h = AHeight;
+	Point = p = v = Vector2(w/2.0f, h/2.0f);
+}
 //-------------------------------------------//
 //				CRenderManager				 //
 //-------------------------------------------//
@@ -762,6 +791,7 @@ CFontManager::~CFontManager()
 
 CFontManager::CFontManager()
 {
+	SetName("Font manager");
 	CurrentFont = NULL;
 }
 
@@ -854,7 +884,7 @@ CTextureManager* CTextureManager::Instance()
 
 CTextureManager::CTextureManager()
 {
-	name = "TextureManager";
+	SetName("Texture manager");
 }
 
 CTextureManager::~CTextureManager()
@@ -880,7 +910,7 @@ GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
-		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", name.c_str());
+		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
 		if (!loaded)
 		{
 			LoadFromFile();
@@ -892,14 +922,14 @@ GLuint CTexture::GetTexID()
 CTexture::CTexture(char * vfilename)
 {	
 	filename = vfilename;
-	name = "CTexture";
+	SetName("CTexture");
 	CTextureManager *TexMan = CTextureManager::Instance();
 	TexMan->AddObject(this);
 }
 
 CTexture::CTexture()
 {
-	name = "CTexture";
+	SetName("CTexture");
 	CTextureManager::Instance()->AddObject(this);
 }
 
@@ -922,7 +952,7 @@ bool CTexture::LoadFromFile()
 {
 	if (filename == "")
 	{
-		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", name);
+		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
 		return false;
 	}
 	if (!loaded)
@@ -931,7 +961,7 @@ bool CTexture::LoadFromFile()
 	return loaded;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <windows.h>
 
@@ -955,5 +985,5 @@ void setVSync(int interval)
 	}
 }
 
-#endif  //WIN32
+#endif  //_WIN32
 

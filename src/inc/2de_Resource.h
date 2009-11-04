@@ -1,7 +1,7 @@
 #ifndef _2DE_RESOURCE_H
 #define _2DE_RESOURCE_H
 
-#pragma message("Compiling resource.h")
+//#pragma message("Compiling resource.h")
 
 #include "2de_GameUtils.h"
 #include "2de_Core.h"
@@ -27,7 +27,7 @@ public:
 	CreateFunc Function;
 	CExtResRelation(char * AExtension, CreateFunc AFunction):Extension(AExtension), Function(AFunction)
 	{
-		name = "Extension Resource Relation";
+		SetName("Extension Resource Relation");
 	}
 };
 

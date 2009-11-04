@@ -14,6 +14,7 @@
 CEngine::CEngine()
 {
 	CreateLogFile("System.log");
+	SetName("Engine main class");
 	memset(keys, 0, sizeof(keys));
 	doLimitFps = false; 
 	isHaveFocus = true;
@@ -26,6 +27,7 @@ CEngine::CEngine()
 	procRenderFunc = NULL;
 	Factory = CFactory::Instance();
 	FontManager = CFontManager::Instance();
+	window = CGLWindow::Instance();
 	//_instance = NULL;
 	//_refcount = 0;
 	ConfigFileName = CONFIG_FILE_NAME;
@@ -117,13 +119,13 @@ void CEngine::SetState(int state, void* value)
 				FpsLimit = 1000 / (DWORD)value;
 				break;
 			case STATE_SCREEN_WIDTH:
-				window.width = (int)value;
+				window->width = (int)value;
 				break;
 			case STATE_SCREEN_HEIGHT:
-				window.height = (int)value;
+				window->height = (int)value;
 				break;
 			case STATE_WINDOW_CAPTION:
-				window.caption = (char*)value;
+				window->caption = (char*)value;
 				break;
 			case STATE_CONFIG_NAME:
 				{
@@ -183,10 +185,10 @@ bool CEngine::Init()
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
 	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
+	RenderManager.Camera.SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height); // Update camera due to update of wh from config
 
-
-	window.bpp = 32;
-	if (!window.gCreateWindow())
+	window->bpp = 32;
+	if (!window->gCreateWindow())
 	{
 		Log("ERROR", "Window creation failed");
 		return false;
@@ -234,6 +236,7 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 #ifdef _WIN32
 	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
 	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
+
 #else
 	if ((event.key.keysym.unicode & 0xFF80) == 0 )  // только английский
 		TempChar = event.key.keysym.unicode & 0x7F;
@@ -261,7 +264,7 @@ bool CEngine::ProcessEvents()
 				SDL_keysym keysym = event.key.keysym;
 				for(int i = 0; i < KeyInputFuncCount; i++)
 					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);				
-				// Глобальная рекция на escape! Слишком категорично, но пока сойдёт. Потом - либо вывести в опцию, либо убрать и предоставить программисту право выбора
+				// Глобальная рекция на escape! Слишком большой хардкод, но пока сойдёт. Потом - либо вывести в опцию, либо убрать и предоставить программисту право выбора
 				//if(keysym.sym == SDLK_ESCAPE)	
 				//		return false;
 				keys[keysym.sym] = 1;
@@ -291,7 +294,7 @@ bool CEngine::ProcessEvents()
 			case SDL_MOUSEMOTION:
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
-				MousePos = Vector2(event.motion.x, window.height - event.motion.y);
+				MousePos = Vector2(event.motion.x, window->height - event.motion.y);
 				break;
 			}
 			case SDL_ACTIVEEVENT:
@@ -314,7 +317,7 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_VIDEORESIZE:
 			{
-				window.glResize(event.resize.w, event.resize.h);
+				window->glResize(event.resize.w, event.resize.h);
 				break;
 			}
 			case SDL_QUIT:
@@ -342,7 +345,7 @@ bool CEngine::Run()
 	{
 		if (ProcessEvents() == false) 
 			break;
-		//if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
+		if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
 		{
 			if (LimitFps())
 			{		
@@ -358,11 +361,11 @@ bool CEngine::Run()
 					procUpdateFunc(dt);
 			}
 		}
-		//else
+		else
 		{
 			//WaitMessage();
 #ifdef _WIN32
-		//	Sleep(1);
+			Sleep(1);
 #else
 			sleep(1);
 #endif //_WIN32
@@ -386,10 +389,10 @@ void CEngine::GetState(int state, void* value)
 	switch (state)
 	{
 	case STATE_SCREEN_WIDTH:
-		*(int*)value = window.width;
+		*(int*)value = window->width;
 		break;
 	case STATE_SCREEN_HEIGHT:
-		*(int*)value = window.height;
+		*(int*)value = window->height;
 		break;
 	case STATE_MOUSE_X:
 		*(float*)value = MousePos.x;

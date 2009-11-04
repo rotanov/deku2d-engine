@@ -64,7 +64,7 @@ bool CTileset::SaveToFile()
 		return false;
 	}
 
-	file.Write(Texture->name.c_str(), Texture->name.length()+1);
+	file.Write(Texture->GetName(), strlen(Texture->GetName())+1);
 	file.Write(&Info, sizeof(Info));
 	file.Write(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
 
@@ -166,7 +166,7 @@ bool CLevelMap::LoadFromFile()
 	TileSet = dynamic_cast<CTileset*>(Factory->GetObject((string*)TileSetName));
 	if (TileSet == NULL)
 	{
-		Log("Error", "Tileset %s for map %s not found in resources", this->name, TileSetName);
+		Log("Error", "Tileset %s for map %s not found in resources", GetName(), TileSetName);
 		return false;
 	}
 	//TileSet->Texture->Load();
@@ -196,7 +196,7 @@ bool CLevelMap::SaveToFile()
 		return false;
 	}
 	
-	file.Write(TileSet->name.c_str(), TileSet->name.length()+1);
+	file.Write(TileSet->GetName(), strlen(TileSet->GetName())+1);
 	file.Write(&numCellsHor, sizeof(numCellsHor));
 	file.Write(&numCellsVer, sizeof(numCellsVer));
 	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
@@ -250,7 +250,7 @@ bool CCompas::Render()
 
 CCompas::CCompas()
 {
-	name = "Visual compass";
+	SetName("CCompas");
 	CEngine *Ninja = CEngine::Instance();
 	Ninja->RenderManager.AddObject(this);
 }
@@ -275,5 +275,5 @@ CTileSetManager* CTileSetManager::Instance()
 
 CTileSetManager::CTileSetManager()
 {
-
+	SetName("Tileset manager");
 }

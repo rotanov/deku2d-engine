@@ -1,11 +1,11 @@
 <configuration>
 	WindowWidth				= "1000"
 	WindowHeight			= "700"
-	WindowBpp				= "32"
+	WindowBpp				= "32"		// todo: deprecate
 	WindowCaption			= "Level editor"
-	DoCalcFps				= "true"
+	DoCalcFps				= "true"	// todo: deprecate
 	DoLimitFps				= "false"
 	FpsLimit				= "60"
     DataPath               	= "Data/"
-	doLoadDefaultResourceList	= "true"	// temp
+	doLoadDefaultResourceList	= "true"	// todo: deprecate
 </configuration>

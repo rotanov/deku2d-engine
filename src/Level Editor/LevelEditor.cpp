@@ -24,11 +24,11 @@ int ScrnHeight;
 
 int CurrTileIndex = 0;
 Vector2 MousePos;
-Vector2 oMp = V2_Z;
-Vector2 Offset = V2_Z;
+Vector2 oMp = V2_ZERO;
+Vector2 Offset = V2_ZERO;
 Vector2 CellOffset;
 
-Vector2 TileSelPos = V2_Z;
+Vector2 TileSelPos = V2_ZERO;
 
 #define ST_SELECT_TILE		0x00
 #define ST_DRAW_TILES		0x01
@@ -278,8 +278,8 @@ void DrawPanels()
 	CPrimitiveRender p;
 	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
 	p.sClr = RGBAf(0.3f, 0.4f, 0.5, 0.7f);
-	p.grRectL(V2_Z+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
-	p.grRectS(V2_Z+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
+	p.grRectL(V2_ZERO+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
+	p.grRectS(V2_ZERO+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
 }
 
 

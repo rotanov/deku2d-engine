@@ -1,18 +1,14 @@
-
 /**
-*	File    : MathUtils.h
+*	File    : 2de_MathUtils.h
 *	Author  : Dreamcatcher
-*	Started : 6.11.2007 2:03
+*	Started : 06.11.2007 2:03
 */
 
 #ifndef _2DE_MATH_UTILS_H
 #define _2DE_MATH_UTILS_H
-
-#pragma message("Compiling MathUtils.h")
-
+//#pragma message("Compiling MathUtils.h")
 #include <math.h>
 #include "2de_Core.h"
-
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
 //#define OPTIMIZE_V2L
@@ -39,7 +35,6 @@ static const scalar		d180_PI			=	180.0f/PI;
 class Vector2;
 union Matrix2;
 
-
 void GenSinTable();
 scalar fSinr(scalar angle);
 scalar fSind(scalar angle);
@@ -48,7 +43,6 @@ scalar fCosr(scalar angle);
 scalar fCosd(scalar angle);
 scalar fCosi(int index);
 
-
 int Random_Int(int min, int max);
 float Random_Float(float min, float max);
 
@@ -56,49 +50,57 @@ __INLINE scalar Max(scalar a, scalar b)
 {
 	return a>=b?a:b;
 }
+
 __INLINE scalar Min(scalar a, scalar b)
 {
 	return a<=b?a:b;
 }
+
 __INLINE scalar clampf(scalar x , scalar xmin, scalar xmax)
 {
 	return Min(Max(x, xmin), xmax);
 }
+
 __INLINE scalar DegToRad(scalar degree)
 { 
 	return (scalar)(degree * PI_d180);
 }
+
 __INLINE scalar RadToDeg(scalar radian)
 {
 	return (scalar)(radian * d180_PI);
 }
+
 __INLINE scalar Sqr(const scalar x)
 {
 	return x*x;
 }
+
 __INLINE scalar Cube(const scalar x)
 {
 	return x*x*x;
 }
+
 // __INLINE scalar Abs(const scalar x)
 // {
 // 	return x<0?-x:x;
 // }
+
 __INLINE float Abs(const float x)
 {
 	*(int *)&x &= 0x7fffffff;
 	return x;
 }
+
 __INLINE bool Equal(const float a, const float b)
 {
 	return Abs(a-b)<epsilon;
 }
+
 __INLINE unsigned int sign(const float x)
 {	
 	return (((unsigned int)x) & 0x80000000);
 }
-
-
 // / quickly determine the sign of a floating point number.
 // 
 // inline unsigned int sign(const float& v)
@@ -128,14 +130,10 @@ __INLINE unsigned int sign(const float x)
 // 	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
 // }
 
-class Vector2 {
+class Vector2
+{
 public:
 	scalar x, y;
-	static const Vector2& Blank()
-	{ 
-		static const Vector2 V(0, 0);
-		return V;
-	} 
 public:
 	__INLINE Vector2(void){}
 	__INLINE Vector2( scalar Ix, scalar Iy) : x(Ix), y(Iy){}
@@ -155,7 +153,7 @@ public:
 	__INLINE Vector2 operator / (const scalar a)const
 	{
 		if (a == 0.0f)
-			return Vector2().Blank();
+			return Vector2(0, 0);
 		scalar t = 1.0f/a;
 		return Vector2(x*t, y*t);
 	}
@@ -320,7 +318,7 @@ __INLINE scalar PointLineDistance(Vector2 v1, Vector2 v2, Vector2 p)
 	return  Abs( D / sqrt( dx * dx + dy * dy));
 }
 
-const Vector2 V2_Z				= Vector2(0.0f, 0.0f);
+const Vector2 V2_ZERO			= Vector2(0.0f, 0.0f);
 const Vector2 V2_DIR_LEFT		= Vector2(-1.0f, 0.0f);
 const Vector2 V2_DIR_RIGHT		= (-V2_DIR_LEFT);
 const Vector2 V2_DIR_UP			= Vector2(0.0f, 1.0f);
@@ -577,7 +575,7 @@ public:
 	struct {float x0, y0, x1, y1;};
 	CAABB()
 	{
-		vMax = vMin = Vector2::Blank();
+		vMax = vMin = V2_ZERO;
 	}
 	CAABB(Vector2 _min, Vector2 _max) : vMin(_min), vMax(_max){}
 	CAABB(scalar xmin, scalar ymin, scalar xmax, scalar ymax)
@@ -587,7 +585,7 @@ public:
 		vMax.x = xmax;
 		vMax.y = ymax;
 	}
-	// ≈сли используетс€ дл€ кнопок и прочей еботы в экранных координатах, то этот конструктор удобнее дл€ человеческого существа
+	// ≈сли используетс€ дл€ кнопок и прочей еботы в экранных координатах, то этот конструктор удобнее дл€ человеческого существа  // ќћ√, кто это писал?
 	CAABB(int x, int y, int width, int height)  
 	{
 		vMin.x = x;

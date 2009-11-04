@@ -1,24 +1,34 @@
 #ifndef _2DE_CORE_H
 #define _2DE_CORE_H
 
-#pragma message("Compiling CoreUtils.h")	// Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется.
+//#pragma message("Compiling CoreUtils.h")	// НЕ.Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется. "НЕ", я сказал. И так output заграмождён.
 
-//#pragma warning (disable	:	4312)
-// #pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
-// #pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
-// #pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
-// #pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
-//#pragma warning (disable	:	4996)	
-// #pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
-// #pragma warning (disable	:	4996)	//	rare
-// #pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
-// #pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
-// #pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
-// #pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
+//#pragma warning (disable	:	4312)   //
+#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
+#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
+#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
+#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
+#pragma warning (disable	:	4996)	
+#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
+#pragma warning (disable	:	4996)	//	rare
+#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
+#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
+#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
+//after w4
+#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
+#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
+ #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
+#pragma warning (disable	:	4100)	//	unreferenced formal parameter
+ #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
+#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
+ #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
+#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
+#pragma warning (disable	:	4702)	//	unreachable code ^^"
+#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
 
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
-
 
 #include <SDL.h>
 #include <iostream>
@@ -29,7 +39,6 @@
 #include <iostream>
 #include <time.h>
 #include <assert.h>
-
 
 using namespace std;
 
@@ -45,7 +54,7 @@ using namespace std;
 #define __INLINE __forceinline
 #else
 #define __INLINE inline
-#endif
+#endif //_MSC_VER
 
 // Отладка. При сборке дебаг конфигурации проекта оно заранее где-то там дефайнится, так что это для релиза, ручное управление так сказать.
 // А вообще это слишком большой комментарий для одной, такой короткой и самоочевидно строчки, мне следует избегать написания таких комментарие в будущем.
@@ -63,7 +72,7 @@ using namespace std;
 #define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
 #else
 #define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
-#endif
+#endif //_WIN32
 
 typedef unsigned char		byte;
 typedef byte*				pbyte;
@@ -80,11 +89,6 @@ typedef long				LONG;
 
 typedef float scalar;
 
-#ifdef _WIN32
-// Второй параметр - состояние. Эта система ещё не доделана, и если не потребуется в будуещем - я от неё откажусь.
-typedef bool (*DirectoryWalkFunc)(char*, int); 
-#endif //_WIN32
-
 typedef bool (*Callback)();
 typedef bool (*UpdateProc)(scalar);
 typedef bool (*EventFunc)(SDL_Event&);
@@ -97,8 +101,11 @@ typedef bool (*EventFunc)(SDL_Event&);
 #define EVER (;;)
 #define Forever for EVER
 
-
-// Это дефайны для флагов свойств объекта
+/**
+*	Это дефайны для флагов свойств объекта 
+*	Как-то уныло вышло, вы не находите? Они же почти не используются. 
+*	Т.е. используются, но не так широко, как задуммывалось. И не так активно.
+*/
 #define T_COBJECT		0x01
 #define T_RENDERABLE	0x02
 #define T_UPDATABLE		0x10
@@ -118,7 +125,6 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 	delete [] a, a = NULL;
 }
 
-
 // Lulz!
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
@@ -134,16 +140,20 @@ class CObject
 {
 public:
 	unsigned int	type;	// type - флаги свойств объекта. 
-	uint			id;
-	string			name;
-	virtual ~CObject(){};
-	CObject();
-	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	void IncListRefCount();
-	void DecListRefCount();
-	const int GetListRefCount();
+	virtual			~CObject(){};
+					CObject();
+	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void			IncListRefCount();
+	void			DecListRefCount();
+	const int		GetListRefCount();
+	const char*		GetName();
+	void			SetName(const char* AObjectName);
+	void			SetName(const string &AObjectName);
+	uint			GetID();
 private:
-	int ListRefCount;
+	string			name;
+	int				ListRefCount;
+	uint			id;
 };
 
 /**
@@ -189,7 +199,7 @@ typedef bool (*ObjCall)(CObject*);
 /**
 *	CObjectList - список объектов. Двусвязный.
 *	Внимание, после лекции Лудова по спискам я заявляю, что эта реализация если не ГОВНО, то
-*	говно.
+*	говно. Да-да, надо переписывать. Опять. Итераторы и всё такое. И концепция контейнеров.
 */
 
 class CList : public virtual CObject
@@ -265,6 +275,7 @@ typedef CObject* (*CreateFunc)();
 /**
 *	CUpdateManager - менеджер объектов, который следует обновлять. Такие дела.
 *	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
+*	И вообще что-то мне подсказывает, что он не здесь должен быть.
 */
 
 class CUpdateManager : public CList
@@ -373,32 +384,6 @@ void Log(char* Event, char* Format, ...);
 void ToggleLog(bool _Enabled);
 
 char *GetWorkingDir(char *dir, size_t max_size);
-
-#ifdef _WIN32
-
-const int DIRWALK_STATE_FILE		=	0x01;	// файл
-const int DIRWALK_STATE_FOLDER		=	0x02;	// папка
-const int DIRWALK_STATE_HIGHER		=	0x20;	// на предыдущем шаге рекурсии мы были на каталог ниже, т.е. вернулись
-const int DIRWALK_STATE_RIGHT_MASK	=	0x0F;
-const int DIRWALK_STATE_LEFT_MASK	=	0xF0;
-
-class CDirectoryWalk
-{
-public:
-	char *MainDir;
-	char *CurrDir;
-	int MainDirL;
-	WIN32_FIND_DATA fdata;
-	DirectoryWalkFunc UserExploreFunc;
-	CDirectoryWalk();
-	~CDirectoryWalk();
-	
-	bool List();
-	void ExploreDir(HANDLE hfile);
-};
-
-#endif //_WIN32
-
 // Ф-ии для работы со строками, в частности именами файлов и так далее
 
 void DelFNameFromFPath(char *src);
@@ -443,6 +428,7 @@ public:
 		CObject *data;
 		while(Enum(data))
 		{
+			Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
 			delete data;
 		}
 	}

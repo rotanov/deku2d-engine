@@ -1,7 +1,7 @@
 #ifndef _2DE_ENGINE_H_
 #define _2DE_ENGINE_H_
 
-#pragma message("Compiling Engine.h")
+//#pragma message("Compiling Engine.h")
 
 #include "2de_Core.h"
 
@@ -95,7 +95,7 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-	CGLWindow					window;
+	CGLWindow					*window;
 	
 	bool						ClearLists();
 	bool						Init();

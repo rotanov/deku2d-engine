@@ -77,8 +77,8 @@ public:
 	{
 		numCellsHor = numCellsVer = 0;
 		Cells = NULL;
-		TileSet = NULL;
-		name = "CLevelMap";		
+		TileSet = NULL;	
+		SetName("CLevelMap");
 	}
 	~CLevelMap(){}
 	

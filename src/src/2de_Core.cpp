@@ -50,6 +50,25 @@ const int CObject::GetListRefCount()
 	return ListRefCount;
 }
 
+const char* CObject::GetName()
+{
+	return name.c_str();
+}
+
+uint CObject::GetID()
+{
+	return id;
+}
+
+void CObject::SetName(const char* AObjectName)
+{
+	name = AObjectName;
+}
+
+void CObject::SetName( const string &AObjectName )
+{
+	name = AObjectName;
+}
 /************************************************************************/
 /* CFile                                                                */
 /************************************************************************/
@@ -361,7 +380,7 @@ void CListNode::SetData(CObject *object)
 
 CList::CList()
 {
-	name = "Object list";
+	SetName("CList");
 	first = last = current = NULL;
 	NodeCount = 0;
 }
@@ -393,7 +412,7 @@ bool CList::DelObject(CObject *AObject)
 	CListNode *ListNode = GetListNode(AObject);
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->name, name, id);
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->GetName(), GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -405,7 +424,7 @@ bool CList::DelObject(const string *AObjectName)
 	CListNode *ListNode = GetListNode(AObjectName);
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, name, id);
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -417,7 +436,7 @@ bool CList::DelObject(const char *AObjectName)
 	CListNode *ListNode = GetListNode(&((string)AObjectName));
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, name, id);
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -429,7 +448,7 @@ bool CList::DelObject(int AId)
 	CListNode *ListNode = GetListNode(AId);
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, name, id);
+		Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -495,7 +514,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 {
 	if (!AObject)
 	{
-		Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; Trying to find object with NULL adress in %s", name);
+		Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -505,7 +524,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s", AObject->name, name);
+	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", ((CObject*)AObject)->GetName(), this->GetName(), this->GetID());
 	return NULL;
 }
 
@@ -513,18 +532,18 @@ CListNode* CList::GetListNode(const string* AObjectName)
 {
 	if (!AObjectName)
 	{
-		Log("ERROR", "Function CObjectList::GetObjectNodeByObjectName; Trying to find object with NULL name pointer", name);
+		Log("ERROR", "Function CObjectList::GetObjectNodeByObjectName; Trying to find object with NULL name pointer");
 		return NULL;
 	}
 	CListNode* TempNode = first;
 	while (TempNode)
 	{		
-		// case insensitive due to the fact that filenames on win32 are too.
-		if (stricmp( TempNode->GetData()->name.c_str(),AObjectName->c_str()) == 0)  
+		// case insensitive due to the fact that win32 filenames are too.
+		if (stricmp( TempNode->GetData()->GetName(),AObjectName->c_str()) == 0)  
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s", AObjectName, name);
+	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", AObjectName, GetName(), GetID());
 	return NULL;
 }
 
@@ -533,11 +552,11 @@ CListNode* CList::GetListNode(int AId)
 	CListNode* TempNode = first;
 	while (TempNode)
 	{
-		if (TempNode->GetData()->id == AId)
+		if (TempNode->GetData()->GetID() == AId)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named, id:%d not found in %s", AId, name);
+	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named, id:%d not found in %s id: %u", AId, GetName(), GetID());
 	return NULL;
 }
 
@@ -597,7 +616,7 @@ void CList::DumpToLog()
 	CObject *Temp = NULL;
 	Reset();
 	while (Enum(Temp))
-		Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->name.c_str(), Temp->id);
+		Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->GetName(), Temp->GetID());
 }
 
 void CList::DelNode(CListNode* AListNode)
@@ -829,7 +848,7 @@ void DelInterval(string *src, const int s0, const int s1)
 		return;
 	if (s0 < 0 || s1 >= src->length())
 		return;
-	char *Temp0 = new char [s0+1], *Temp1 = new char [src->length() - s1];
+	char *Temp0 = new char [s0+1], *Temp1 = new char [src->length() - s1]; // Ага блеадь, утечка памяти вот прямо тут.
 	Temp0[s0] = 0, Temp1[src->length() - s1 - 1] = 0;
 	src->copy(Temp0, s0, 0);
 	src->copy(Temp1, src->length() - s1 - 1, s1+1);
@@ -848,78 +867,6 @@ char * GetWorkingDir(char *dir, size_t max_size)
 #endif //_WIN32
 	return dir;
 }
-
-#ifdef _WIN32
-
-bool CDirectoryWalk::List()
-{
-	HANDLE hfile;
-	char TempDir[MAX_PATH];
-	TempDir[0] = 0;
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-	strcat(TempDir, MainDir);
-	MainDirL = strlen(MainDir);
-	strcat(MainDir, "data\\");
-	SetCurrentDirectory(MainDir);
-
-
-
-	CurrDir[0] = 0;
-	strcat(CurrDir, MainDir);
-
-
-//	Log("----------", "");
-	hfile = FindFirstFile("*.*", &fdata);
-	ExploreDir(hfile);
-//	Log("----------", "");
-
-	SetCurrentDirectory(MainDir);
-
-
-	SetCurrentDirectory(TempDir);	// Ебано как-то, но таки хуй с ним.
-
-	return 0x0;
-}
-
-void CDirectoryWalk::ExploreDir( HANDLE hfile )
-{
-	while (FindNextFile(hfile, &fdata))
-	{
-		if (fdata.cFileName[0] == '.' || fdata.cFileName[0] == '_')
-			continue;
-		if (fdata.dwFileAttributes == 16)
-		{
-			//Log("FOLDER", "%s", fdata.cFileName);			
-			strcat(CurrDir, (string(fdata.cFileName)+string("\\")).c_str());
-			SetCurrentDirectory(CurrDir);
-			UserExploreFunc(fdata.cFileName, DIRWALK_STATE_FOLDER);			
-			HANDLE thandle = FindFirstFile("*.*", &fdata);
-			ExploreDir(thandle);
-			UserExploreFunc(fdata.cFileName, DIRWALK_STATE_FILE | DIRWALK_STATE_HIGHER);			
-			DelLastDirFromPath(CurrDir);
-		}
-		else
-		{
-			//Log("FILE", "%s", fdata.cFileName);
-			UserExploreFunc(fdata.cFileName, DIRWALK_STATE_FOLDER);			
-		}
-	}
-}
-
-CDirectoryWalk::CDirectoryWalk()
-{
-	MainDirL = 0;
-	MainDir = new char[MAX_PATH];
-	CurrDir = new char[MAX_PATH];
-}
-
-CDirectoryWalk::~CDirectoryWalk()
-{
-	delete [] MainDir;
-	delete [] CurrDir;
-}
-#endif //_WIN32
 
 CObjectStack::CObjectStack() : last(-1)
 {
@@ -949,17 +896,17 @@ bool CObjectStack::Empty()
 CUpdateObject::CUpdateObject() : Active(true)
 {
 	type |= T_UPDATABLE;
-	name = "Update Object";
+	SetName("CUpdateObject");
 	CEngine::Instance()->UpdateManager.AddObject(this);
 }
 
 CUpdateObject::~CUpdateObject()
 {
-	CEngine::Instance()->UpdateManager.DelObject(this->id);
+	CEngine::Instance()->UpdateManager.DelObject(GetID());
 }
 CUpdateManager::CUpdateManager()
 {
-	name += "CUpdateManager";
+	SetName("CUpdateManager");
 }
 
 bool CBaseResource::LoadFromFile()
@@ -984,7 +931,7 @@ CBaseResource::CBaseResource() :loaded(false), filename("")
 
 CResource::CResource()
 {
-	name += "CResource";
+	SetName("CResource");
 }
 
 

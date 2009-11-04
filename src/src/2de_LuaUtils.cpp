@@ -173,7 +173,7 @@ void GlobalLuaState::innerFunction1()
 
 
 	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
-	ps->name = "psysaaaa";
+	ps->SetName("psysaaaa");
 	ps->Init();
 	ps->Info.sc = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
 	ps->Info.ec = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);

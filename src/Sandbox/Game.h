@@ -122,7 +122,7 @@ public:
 		snowballs = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
 		Factory->FreeInst();
 
-		snowballs->name = "snowballs";
+		snowballs->SetName("snowballs");
 		snowballs->Init();
 		//(dynamic_cast<CTexture*>(Ninja->TextureManager->GetObject((string*)"snowb_br")))->Load();
 //		snowballs->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("snowb_br")))->GetTexID();
