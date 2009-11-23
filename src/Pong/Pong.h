@@ -17,16 +17,15 @@ enum EPlayerKind
 	PLAYER_KIND_AI,
 };
 
-
-
 class CPongPlayer : public CRenderObject, public CUpdateObject
 {
 	EPlayerKind PlayerKind;
 public:
 	Vector2 Velocity;
+	Vector2 Acceleration;
 	CPongPlayer(EPlayerKind APlayerKind) : PlayerKind(APlayerKind)
 	{
-		Velocity = V2_ZERO;
+		Acceleration = Velocity = V2_ZERO;
 		int ScreenWidth;
 		CEngine::Instance()->GetState(STATE_SCREEN_WIDTH, &ScreenWidth);
 		switch (PlayerKind)
@@ -52,23 +51,25 @@ public:
 		if (PlayerKind == PLAYER_KIND_ONE)
 		{
 			if (CEngine::Instance()->keys[SDLK_UP])
-				Velocity.y += 2.0f;
+				Acceleration.y = 800.0f;
 			if (CEngine::Instance()->keys[SDLK_DOWN])
-				Velocity.y -= 2.0f;
+				Acceleration.y = -800.0f;
 		}
 
 		if (PlayerKind == PLAYER_KIND_TWO)
 		{
 			if (CEngine::Instance()->keys[SDLK_w])
-				Velocity.y += 2.0f;
+				Acceleration.y = 200.0f;
 			if (CEngine::Instance()->keys[SDLK_s])
-				Velocity.y -= 2.0f;
+				Acceleration.y = -200.0f;
 		}
 
 		if (Equal(Velocity.y , 0.0f))
 			Velocity.y = 0;
 		position += Velocity*dt;
+		Velocity += Acceleration*dt;
 		Velocity *= 0.999f;
+		Acceleration = V2_ZERO;
 
 		if (position.y < 0.0f)
 		{

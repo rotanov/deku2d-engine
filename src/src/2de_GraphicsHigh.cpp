@@ -14,7 +14,7 @@ int CPrimitiveRender::glListHalfCircle = 0;
 void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glBegin(GL_LINES);
 	glVertex2fv(&(v0.x));
 	glVertex2fv(&(v1.x));
@@ -25,13 +25,13 @@ void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
 void CPrimitiveRender::grSegment(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glBegin(GL_LINES);
 	glVertex2fv(&(v0.x));
 	glVertex2fv(&(v1.x));
 	glEnd();
 	if (ppClr)
-		glColor4fv(&(ppClr->r));
+		ppClr->glSet();
 	glBegin(GL_POINTS);
 	glVertex2fv(&(v0.x));
 	glVertex2fv(&(v1.x));
@@ -42,7 +42,7 @@ void CPrimitiveRender::grSegment(const Vector2 &v0, const Vector2 &v1)
 void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
 {
 	BeforeRndr();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glTranslatef(v0.x, v0.y, 0.0f);
 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
 	glTranslatef(-v0.x, -v0.y, 0.0f);
@@ -51,7 +51,7 @@ void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
 	glVertex2fv(&(v1.x));
 	glEnd();
 	if (ppClr)
-		glColor4fv(&(ppClr->r));
+		ppClr->glSet();
 	glBegin(GL_POINTS);
 	glVertex2fv(&(v0.x));
 	glVertex2fv(&(v1.x));
@@ -64,7 +64,7 @@ void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
 	if (!glIsList(glListCircleL))
 		return;
 	BeforeRndr();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glTranslatef(p.x, p.y, depth);
 	glScalef(Radius, Radius, 1.0f);
 	glCallList(glListCircleL);
@@ -76,7 +76,7 @@ void CPrimitiveRender::grCircleS(const Vector2 &p, scalar Radius)
 	if (!glIsList(glListCircleL))
 		return;
 	BeforeRndr();
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glTranslatef(p.x, p.y, depth);
 	glScalef(Radius, Radius, 1.0f);
 	glCallList(glListCircleS);
@@ -93,7 +93,7 @@ void CPrimitiveRender::grCircleC(const Vector2 &p, scalar Radius)
 void CPrimitiveRender::grRectL(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(v0.x, v0.y);
 	glVertex2f(v1.x, v0.y);
@@ -105,7 +105,7 @@ void CPrimitiveRender::grRectL(const Vector2 &v0, const Vector2 &v1)
 void CPrimitiveRender::grRectS(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glBegin(GL_QUADS);
 	glVertex2f(v0.x, v0.y);
 	glVertex2f(v1.x, v0.y);
@@ -123,21 +123,21 @@ void CPrimitiveRender::grRectC(const Vector2 &v0, const Vector2 &v1)
 	glTranslatef(hx, hy, 0.0f);
 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
 	glTranslatef(-hx, -hy, 0.0f);
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glBegin(GL_QUADS);
 	glVertex2f(v0.x, v0.y);
 	glVertex2f(v1.x, v0.y);
 	glVertex2f(v1.x, v1.y);
 	glVertex2f(v0.x, v1.y);
 	glEnd();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(v0.x, v0.y);
 	glVertex2f(v1.x, v0.y);
 	glVertex2f(v1.x, v1.y);
 	glVertex2f(v0.x, v1.y);
 	glEnd();
-	glColor4fv(&(ppClr->r));
+	ppClr->glSet();
 	glBegin(GL_POINTS);
 	glVertex2f(v0.x, v0.y);
 	glVertex2f(v1.x, v0.y);
@@ -156,7 +156,7 @@ void CPrimitiveRender::grArrowL(const Vector2& v0, const Vector2& v1)
 	glRotatef(RadToDeg(fAngle), 0.0f, 0.0f, 1.0f);
 	glScalef((v1-v0).Length(), (v1-v0).Length(), 1.0f);
 
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glBegin(GL_LINES);
 	glVertex2f(0.0f, 0.0f);
 	glVertex2f(1.0f, 0.0f);
@@ -165,7 +165,7 @@ void CPrimitiveRender::grArrowL(const Vector2& v0, const Vector2& v1)
 	glVertex2f(1.0f, 0.0f);
 	glVertex2f(0.75f,-0.2f);
 	glEnd();
-	glColor4fv(&(ppClr->r));
+	ppClr->glSet();
 
 	glBegin(GL_POINTS);
 	glVertex2f(0.0f, 0.0f);
@@ -192,7 +192,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
 	glRotatef(angle, 0.0f, 0.0f, -1.0f);
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
@@ -215,7 +215,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 
 	glEnable(GL_LINE_WIDTH);
 	glLineWidth(1.0f);
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glBegin(GL_LINE_LOOP);
 	for(int i = 0; i < poly->numV; i++)
 	{
@@ -231,7 +231,7 @@ void CPrimitiveRender::grRingS(const Vector2 &p, scalar Radius)
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glScalef(Radius, Radius, 0.0f);
 	glCallList(glListRingS);
 	AfterRndr();
@@ -242,7 +242,7 @@ void CPrimitiveRender::grRingC( const Vector2 &p, scalar Radius )
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
 	glScalef(Radius, Radius, 0.0f);
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glCallList(glListRingS);
 	glScalef(1.0f/Radius, 1.0f/Radius, 0.0f);
 	glTranslatef(-p.x, -p.y, 0.0f);
@@ -391,13 +391,13 @@ void CPrimitiveRender::grInYan(const Vector2 &p, scalar Radius)
 	glTranslatef(p.x, p.y, 0.0f);
 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
 	sClr = lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glScalef(Radius, Radius, 0.0f);
 	glTranslatef(0.0f, 0.0f, 0.01f);
 	glCallList(glListHalfCircle);
 	glRotatef(180.0f, 0.0f, 0.0f, -1.0f);
 	sClr = lClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-	glColor4fv(&(psClr->r));
+	psClr->glSet();
 	glCallList(glListHalfCircle);
 	AfterRndr();
 
@@ -421,7 +421,7 @@ void CPrimitiveRender::grInYan(const Vector2 &p, scalar Radius)
 void CPrimitiveRender::gDrawBBox( CAABB box )
 {
 	BeforeRndr();
-	float x0 = box.x0, x1 = box.x1, y0 = box.y0, y1 = box.y1; 
+	float x0 = box.vMin.x, x1 = box.vMax.x, y0 = box.vMin.y, y1 = box.vMax.y; 
 	grSegmentC(Vector2(x0, y0), Vector2(x1, y0));
 	grSegmentC(Vector2(x1, y0), Vector2(x1, y1));
 	grSegmentC(Vector2(x1, y1), Vector2(x0, y1));
@@ -434,7 +434,7 @@ void CPrimitiveRender::grQuarterCircle(const Vector2 &v0, scalar Radius)
 	if (!glIsList(glListQuarterCircle))
 		return;
 	BeforeRndr();
-	glColor4fv(&(plClr->r));
+	plClr->glSet();
 	glTranslatef(v0.x, v0.y, depth);
 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
 	glScalef(Radius, Radius, 1.0f);
@@ -861,7 +861,7 @@ bool CParticleSystem::Render()
 		glBegin(GL_QUADS);
 		for(int i=0;i<Info.ParticlesActive;i++)
 		{
-			gSetColor(particles[i].c);
+			particles[i].c.glSet();
 			glTexCoord2f(0.0f, 0.0f); glVertex2f(particles[i].p.x,						particles[i].p.y					);			
 			glTexCoord2f(1.0f, 0.0f); glVertex2f(particles[i].p.x + particles[i].size,	particles[i].p.y					);			
 			glTexCoord2f(1.0f, 1.0f); glVertex2f(particles[i].p.x + particles[i].size,	particles[i].p.y + particles[i].size);			
@@ -938,10 +938,10 @@ CParticle	*CParticleSystem::CreateParticle()
 				particles[i].size = Random_Int(Info.startsize, Info.startsize + Info.sizevar);
 				particles[i].dsize = (Info.endsize - Info.endsize) / particles[i].life;
 
-				particles[i].c.a = Random_Float(Info.sc.a ,Info.sc.a + Info.vc.a);
-				particles[i].c.r = Random_Float(Info.sc.r ,Info.sc.r + Info.vc.r);
-				particles[i].c.g = Random_Float(Info.sc.g ,Info.sc.g + Info.vc.g);
-				particles[i].c.b = Random_Float(Info.sc.b ,Info.sc.b + Info.vc.b);
+				particles[i].c.w = Random_Float(Info.sc.w ,Info.sc.w + Info.vc.w);
+				particles[i].c.x = Random_Float(Info.sc.x ,Info.sc.x + Info.vc.x);
+				particles[i].c.y = Random_Float(Info.sc.y ,Info.sc.y + Info.vc.y);
+				particles[i].c.z = Random_Float(Info.sc.z ,Info.sc.z + Info.vc.z);
 
 				particles[i].dc = (Info.ec - particles[i].c)/particles[i].life;
 		}

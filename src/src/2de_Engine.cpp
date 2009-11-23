@@ -135,7 +135,7 @@ void CEngine::SetState(int state, void* value)
 			case STATE_GL_BG_COLOR:
 				{
 					RGBAf *t = (RGBAf*)value;
-					glClearColor(t->r, t->g, t->b, t->a); // BAD!!!  TODO: INcapsulate
+					glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  TODO: INcapsulate
 				}
 		}
 	}
@@ -247,7 +247,7 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
-	while(SDL_PollEvent(&event))
+	while(SDL_PollEvent(&event)) // TODO: Look here!!!!!! http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
 	{
 		
 		switch(event.type)
@@ -295,6 +295,7 @@ bool CEngine::ProcessEvents()
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
 				MousePos = Vector2(event.motion.x, window->height - event.motion.y);
+				//SDL_Delay(2);
 				break;
 			}
 			case SDL_ACTIVEEVENT:
@@ -355,11 +356,55 @@ bool CEngine::Run()
 				RenderManager.DrawObjects();
 				if (procRenderFunc != NULL)
 					procRenderFunc();
-				gEndFrame();	
+				
 				UpdateManager.UpdateObjects();
 				if (procUpdateFunc != NULL)
 					procUpdateFunc(dt);
+				// TODO: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
 			}
+			SDL_ShowCursor(0);
+			/*тестовый код*/
+			int x, y;
+			SDL_GetMouseState(&x, &y);
+			MousePos = Vector2(x, window->height - y);
+			const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
+			const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
+			const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
+			const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
+			CPrimitiveRender PRender;
+			PRender.lClr = COLOR_FIRST;
+			PRender.sClr = COLOR_THIRD;
+			PRender.pClr = COLOR_FIRST;
+			glLoadIdentity();
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);		
+			glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+			PRender.grCircleL(MousePos, 5);
+			gEndFrame();	
+
+			/**/
+			// ZOMG There wasn't other choice, the next step is to put it all into separate thread. Or pseudo-thread.
+
+// 			как уже подсказали, нужно 
+// 				> Можно вынести опрос координат курсора в отдельный поток. 
+// 
+// 				но применительно для SDL, можно установить глобальный фильтр обработчика где будет, вызываться твоя функция отрисовки курсора (я делал именно так, и не тормозит)
+// 
+// 				SDL_SetEventFilter(GlobalFilterEvents);
+// 
+// 
+// 			int GlobalFilterEvents(const SDL_Event *event) 
+// 			{ 
+// 				if(SDL_MOUSEMOTION == event->type) 
+// 					RedrawCursor(event->motion.x, event->motion.y);
+// 
+// 				return 1; 
+// 			}
+// 
+// 			это не дословный код но общая идея именно такая.
+//------------------
+// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
+
 		}
 		else
 		{

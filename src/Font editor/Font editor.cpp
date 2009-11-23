@@ -181,7 +181,7 @@ public:
 		MouseDelta = Vector2(x, y);
 		SDL_GetMouseState(&x, &y);
 		Ninja->GetState(STATE_MOUSE_XY, &MousePosition);
-		MousePosition = Vector2(x, wheight - y);
+		//MousePosition = Vector2(x, wheight - y);
 
 		if (isGripToolEnabled &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
 		{
@@ -197,7 +197,7 @@ CFontEditor *FontEditor;
 
 bool Init()
 {	
-	SDL_ShowCursor(0);
+	SDL_ShowCursor(1);
 	
 	(new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont))->SetParent(&GuiManager);	
 	(new CButton(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture))->SetParent(&GuiManager);

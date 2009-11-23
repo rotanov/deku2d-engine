@@ -50,7 +50,7 @@ bool CTank::Update(scalar dt)
 	position += Direction*Velocity;
 	Velocity*=0.9f;
 	AABB.Offset(position.x, position.y);
-	Vector2 BottomLeft = AABB.vMin, TopRight = AABB.vMax, BottomRight = Vector2(AABB.x1, AABB.y0), TopLeft = Vector2(AABB.x0, AABB.y1);
+	Vector2 BottomLeft = AABB.vMin, TopRight = AABB.vMax, BottomRight = Vector2(AABB.vMax.x, AABB.vMin.y), TopLeft = Vector2(AABB.vMin.x, AABB.vMax.y);
 	CAABB Pot1, Pot2;
 
 	switch(Dir2AK(Direction))
@@ -59,33 +59,33 @@ bool CTank::Update(scalar dt)
 		Pot1 = Map->GetCellAABB(TopLeft);
 		Pot2 = Map->GetCellAABB(BottomLeft);
 		if (Pot1.Intersect(AABB))
-			position.x = Pot1.x1;
+			position.x = Pot1.vMax.x;
 		if (Pot2.Intersect(AABB))
-			position.x = Pot2.x1;
+			position.x = Pot2.vMax.x;
 		break;
 	case akRight:
 		Pot1 = Map->GetCellAABB(TopRight);
 		Pot2 = Map->GetCellAABB(BottomRight);
 		if (Pot1.Intersect(AABB))
-			position.x = Pot1.x0 - 32;
+			position.x = Pot1.vMin.x - 32;
 		if (Pot2.Intersect(AABB))
-			position.x = Pot2.x0 - 32;
+			position.x = Pot2.vMin.x - 32;
 		break;
 	case akUp:
 		Pot1 = Map->GetCellAABB(TopLeft);
 		Pot2 = Map->GetCellAABB(TopRight);
 		if (Pot1.Intersect(AABB))
-			position.y = Pot1.y0 - 32;
+			position.y = Pot1.vMin.y - 32;
 		if (Pot2.Intersect(AABB))
-			position.y = Pot2.y0 - 32;
+			position.y = Pot2.vMin.y - 32;
 		break;
 	case akDown:
 		Pot1 = Map->GetCellAABB(BottomLeft);
 		Pot2 = Map->GetCellAABB(BottomRight);
 		if (Pot1.Intersect(AABB))
-			position.y = Pot1.y1;
+			position.y = Pot1.vMax.y;
 		if (Pot2.Intersect(AABB))
-			position.y = Pot2.y1;
+			position.y = Pot2.vMax.y;
 		break;
 	}
 
@@ -205,10 +205,10 @@ void CTankManager::AddPlayer()
 	if (PlayerCount > MAX_PLAYERS_COUNT)
 		return;
 	CTank *Tank = new CTank(Map, this, NULL);
-	char * tmp = new char[16];
-	SDL_itoa(PlayerCount+1, tmp, 10);
-	Tank->SetName((string)"TankPlayer" + tmp);	
-	delete [] tmp;
+	//char * tmp = new char[16];
+	//SDL_itoa(, tmp, 10);
+	Tank->SetName((string)"TankPlayer" + itos(PlayerCount+1));	
+	//delete [] tmp;
 	Tank->Init(PlayerCount == 0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
 	Tank->SetPlayerControls(PlayerCount);
 	AddObject(Tank);
@@ -217,10 +217,10 @@ void CTankManager::AddPlayer()
 
 CTank* CTankManager::GetPlayer(int PlayerIndex)
 {
-	char * tmp = new char[16];
-	SDL_itoa(PlayerIndex+1, tmp, 10);
-	CTank *res = dynamic_cast<CTank*>(GetObject(((string)"TankPlayer" + tmp).c_str()));;	 
-	delete [] tmp;
+	//char * tmp = new char[16];
+	//SDL_itoa(PlayerIndex+1, tmp, 10);
+	CTank *res = dynamic_cast<CTank*>(GetObject(((string)"TankPlayer" + itos(PlayerIndex+1)).c_str()));;	 
+	//delete [] tmp;
 	return res;
 }
 

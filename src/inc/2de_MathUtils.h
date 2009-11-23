@@ -32,8 +32,8 @@ static const scalar		d180_PI			=	180.0f/PI;
 #endif
 #endif
 
-class Vector2;
-union Matrix2;
+struct Vector2;
+struct Matrix2;
 
 void GenSinTable();
 scalar fSinr(scalar angle);
@@ -130,11 +130,10 @@ __INLINE unsigned int sign(const float x)
 // 	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
 // }
 
-class Vector2
+struct Vector2
 {
-public:
 	scalar x, y;
-public:
+
 	__INLINE Vector2(void){}
 	__INLINE Vector2( scalar Ix, scalar Iy) : x(Ix), y(Iy){}
 	
@@ -324,59 +323,54 @@ const Vector2 V2_DIR_RIGHT		= (-V2_DIR_LEFT);
 const Vector2 V2_DIR_UP			= Vector2(0.0f, 1.0f);
 const Vector2 V2_DIR_DOWN		= (-V2_DIR_UP);
 
-union Vector3{
+struct Vector3{
 public:
-	scalar v[3];
-	struct 
-	{
-		scalar x, y, z;
-	};
-	struct 
-	{
-		scalar r, g, b;
-	};
+	scalar x, y, z;
 
-	static const Vector3& Blank() 
-	{ 
-		static const Vector3 V(0, 0, 0);
-		return V;
-	} 
-	__INLINE Vector3() : x(0), y(0), z(0){}
-	__INLINE Vector3( scalar xv, scalar yv, scalar zv ) : x(xv), y(yv), z(zv){}
+	__INLINE Vector3() : x(0.0f), y(0.0f), z(0.0f){}
+
+	__INLINE Vector3(scalar Ax, scalar Ay, scalar Az) : x(Ax), y(Ay), z(Az){}
+
 	__INLINE scalar operator[](int i)
 	{
-		if (i<0 || i> 2)
-			return 0;
-		return v[i];
+		if (i < 0 || i > 2)
+			return 0.0f;
+		return *(&x + i);
 	}
 
 	__INLINE Vector3 operator + (const Vector3 &v)const
 	{
 			return Vector3( x + v.x, y + v.y, z + v.z );
 	}
+
 	__INLINE Vector3 operator - (const Vector3 &v)const
 	{
 			return Vector3( x - v.x, y - v.y, z - v.z );
 	}
+
 	__INLINE Vector3 operator + (const scalar s)const
 	{
 			return Vector3( x + s, y + s, z + s );
 	}
+
 	__INLINE Vector3 operator - (const scalar s)const
 	{
 			return Vector3( x - s, y - s, z - s );
 	}
+
 	__INLINE Vector3 operator * (const scalar s)const
 	{
 		return Vector3( x * s, y * s, z * s);
 	}
+
 	__INLINE Vector3 operator / (const scalar s)const
 	{
 		if (s == 0.0f)
-			return Vector3().Blank();
+			return Vector3();
 		scalar t = 1.0f/s;
 		return Vector3(x*t, y*t, z*t);
 	}
+
 	friend Vector3 operator * (scalar s, const Vector3& v) 
 	{return Vector3(v.x * s, v.y * s, v.z * s); }
 	__INLINE Vector3 &operator  +=(const Vector3 &v) 
@@ -568,11 +562,11 @@ __INLINE float AngleBeetweenVectors(Vector3 a, Vector3 b)
 
 typedef Vector3 RGBf;
 
-union CAABB
+struct CAABB
 {
 public:
-	struct {Vector2 vMin, vMax;};
-	struct {float x0, y0, x1, y1;};
+	Vector2 vMin, vMax;
+
 	CAABB()
 	{
 		vMax = vMin = V2_ZERO;
@@ -640,7 +634,7 @@ public:
 
 	CAABB Inflated(scalar x, scalar y)
 	{
-		CAABB Result(x0-x, y0-y, x1+x, y1+y);
+		CAABB Result(vMin.x-x, vMin.y-y, vMax.x+x, vMax.y+y);
 		return Result;
 	}
 
@@ -760,9 +754,9 @@ public:
 	
 	Matrix3(void)
 	{
-		m[0] = Vector3::Blank();
-		m[1] = Vector3::Blank();
-		m[2] = Vector3::Blank();
+		m[0] = Vector3();
+		m[1] = Vector3();
+		m[2] = Vector3();
 	}
 
 	Matrix3(scalar xx, scalar xy, scalar xz,
@@ -809,12 +803,15 @@ public:
 	}
 	__INLINE Matrix3 &operator /= ( scalar other)
 	{
-		if (other == 0.0f)
-			return Matrix3(0, 0, 0, 0, 0, 0, 0, 0, 0);
-		scalar t = 1.0f/other;
-		m[0] *= t;
-		m[1] *= t;
-		m[2] *= t;
+		if (Equal(other, 0.0f))
+			m[0] = m[1] = m[2] = Vector3();			
+		else
+		{
+			scalar t = 1.0f/other;
+			m[0] *= t;
+			m[1] *= t;
+			m[2] *= t;
+		}
 		return (*this);
 	}
 
@@ -887,31 +884,21 @@ public:
 
 };
 
-union Matrix4
+struct Matrix4
 {
 public:
-	struct
-	{
 		scalar	e11, e12, e13, e14,
 				e21, e22, e23, e24,
 				e31, e32, e33, e34,
 				e41, e42, e43, e44;
-	};
-
-	scalar e[4][4];
 };
 
-union Matrix2
+struct Matrix2
 {
-	struct
-	{
 		float e11;
 		float e12;
 		float e21;
 		float e22;
-	};
-
-	float e[2][2];
 
 	Matrix2(float _e11, float _e12, float _e21, float _e22) : e11(_e11), e12(_e12), e21(_e21), e22(_e22)
 	{}
@@ -928,25 +915,25 @@ union Matrix2
 		e21 =-s; e22 = c;
 	}
 
-	float  operator()(int i, int j) const 
-	{
-		return e[i][j];
-	}
+// 	float  operator()(int i, int j) const 
+// 	{
+// 		return e[i][j];
+// 	}
+// 
+// 	float& operator()(int i, int j)       
+// 	{
+// 		return e[i][j]; 
+// 	}
 
-	float& operator()(int i, int j)       
-	{
-		return e[i][j]; 
-	}
-
-	const Vector2& operator[](int i) const
-	{
-		return reinterpret_cast<const Vector2&>(e[i][0]);
-	}
-
-	Vector2& operator[](int i)
-	{
-		return reinterpret_cast<Vector2&>(e[i][0]);
-	}		
+// 	const Vector2& operator[](int i) const
+// 	{
+// 		return reinterpret_cast<const Vector2&>(e[i][0]);
+// 	}
+// 
+// 	Vector2& operator[](int i)
+// 	{
+// 		return reinterpret_cast<Vector2&>(e[i][0]);
+// 	}		
 
 	static Matrix2 Identity()
 	{
@@ -1048,141 +1035,138 @@ union Matrix2
 	}
 };
 
-union Vector4
+struct Vector4
 {
-	public:
-		scalar v[4];
-		struct {scalar x, y, z, w;};
-		struct {scalar r, g, b, a;};
+	scalar x, y, z, w;
 
-		__INLINE scalar operator[](int i)
-		{
-			if (i<0 || i> 3)
-				return 0;
-			return v[i];
-		}
+	__INLINE scalar operator[](int i)
+	{
+		if (i<0 || i> 3)
+			return 0.0f;
+		return *(&x + i);
+	}
 
 
-		Vector4(){x=y=z=0.0f;w=1.0f;}
-		Vector4(scalar xv, scalar yv, scalar zv, scalar wv){x=xv;y=yv;z=zv;w=wv;}
-		Vector4(Vector3 v){x=v.x;y=v.y;z=v.z;w=0;};
-		//void operator=(const Vector4 &q){x=q.x;y=q.y;z=q.z;w=q.w;}
-		__INLINE Vector4 operator+(Vector4 q){return Vector4( x + q.x , y + q.y, z + q.z, w + q.w );}
-		__INLINE Vector4 operator-(Vector4 q){return Vector4( x - q.x , y - q.y, z - q.z, w - q.w );}
-		__INLINE Vector4 operator*(scalar s){return Vector4(x * s, y * s, z * s, w * s);}
-		__INLINE Vector4 operator=(const Vector4& V)
-		{
-			x = V.x;
-			y = V.y;
-			z = V.z;
-			w = V.w;
-			return *this;
-		}
+	Vector4() : x(0.0f), y(0.0f), z(0.0f), w(1.0f)
+		{}
+	Vector4(scalar Ax, scalar Ay, scalar Az, scalar Aw) : x(Ax), y(Ay), z(Az), w(Aw)
+		{}
+	Vector4(const Vector3 &v) : x(v.x), y(v.y), z(v.z), w(1.0f)
+		{};
+	//void operator=(const Vector4 &q){x=q.x;y=q.y;z=q.z;w=q.w;}
+	__INLINE Vector4 operator+(Vector4 q){return Vector4( x + q.x , y + q.y, z + q.z, w + q.w );}
+	__INLINE Vector4 operator-(Vector4 q){return Vector4( x - q.x , y - q.y, z - q.z, w - q.w );}
+	__INLINE Vector4 operator*(scalar s){return Vector4(x * s, y * s, z * s, w * s);}
+	__INLINE Vector4 operator=(const Vector4& V)
+	{
+		x = V.x;
+		y = V.y;
+		z = V.z;
+		w = V.w;
+		return *this;
+	}
 
+	__INLINE Vector4 operator/(scalar s)
+	{
+		if (s == 0.0f)
+			return Vector4();
+		scalar is = 1.0f/s; 
+		return (*this)*is;
+	}
+	__INLINE Vector4 operator+=(Vector4 q){(*this) = (*this)+q; return *this;}
+	__INLINE Vector4 operator-=(Vector4 q){(*this) = (*this)-q; return *this;}
+	scalar Norm()const{return x * x + y * y + z * z + w * w;}
+	scalar Length( void ){return sqrt(x * x + y * y + z * z + w * w );}	
+	Vector4 Conjugate(){ return Vector4(-x,-y,-z,w);}
+	Vector4 Identity()
+	{
+		//TODO: Danger chek division by zero
+		return (*this).Conjugate()/(*this).Norm();
+	};
+	scalar InnerProduct(const Vector4& q){return x*q.x+y*q.y+z*q.z+w*q.w;}
 
-		__INLINE Vector4 operator/(scalar s)
-		{
-			if (s == 0.0f)
-				return Vector4();
-			scalar is = 1.0f/s; 
-			return (*this)*is;
-		}
-		__INLINE Vector4 operator+=(Vector4 q){(*this) = (*this)+q; return *this;}
-		__INLINE Vector4 operator-=(Vector4 q){(*this) = (*this)-q; return *this;}
-		scalar Norm()const{return x * x + y * y + z * z + w * w;}
-		scalar Length( void ){return sqrt(x * x + y * y + z * z + w * w );}	
-		Vector4 Conjugate(){ return Vector4(-x,-y,-z,w);}
-		Vector4 Identity()
-		{
-			//TODO: Danger chek division by zero
-			return (*this).Conjugate()/(*this).Norm();
-		};
-		scalar InnerProduct(const Vector4& q){return x*q.x+y*q.y+z*q.z+w*q.w;}
+		__INLINE Vector4 operator*(const Vector4 &q)
+	{
+		Vector4 result;
+		result.x = w * q.x + x * q.w + y * q.z - z * q.y;
+		result.y = w * q.y - x * q.z + y * q.w + z * q.x;
+		result.z = w * q.z + x * q.y - y * q.x + z * q.w;
+		result.w = w * q.w - x * q.x - y * q.y - z * q.z;
 
-			__INLINE Vector4 operator*(const Vector4 &q)
-		{
-			Vector4 result;
-
-			result.x = w * q.x + x * q.w + y * q.z - z * q.y;
-            result.y = w * q.y - x * q.z + y * q.w + z * q.x;
-            result.z = w * q.z + x * q.y - y * q.x + z * q.w;
-            result.w = w * q.w - x * q.x - y * q.y - z * q.z;
-
-            return result;
-		}
+		return result;
+	}
 		
-	  __INLINE void AxisAngle(Vector3& axis, scalar& angle)const {
-        scalar vl = (scalar)sqrt( x*x + y*y + z*z );
-        if( vl > 0.0001f )
-        {
-            scalar ivl = 1.0f/vl;
-            axis = Vector3( x*ivl, y*ivl, z*ivl );
-            if( w < 0 )
-                angle = 2.0f*(scalar)atan2(-vl, -w); //-PI,0 
-            else
-                angle = 2.0f*(scalar)atan2( vl,  w); //0,PI 
-        }else{
-            axis = Vector3(0,0,0);
-            angle = 0;
-        }
+	__INLINE void AxisAngle(Vector3& axis, scalar& angle)const
+	{
+		scalar vl = (scalar)sqrt( x*x + y*y + z*z );
+		if( vl > 0.0001f )
+		{
+			scalar ivl = 1.0f/vl;
+			axis = Vector3( x*ivl, y*ivl, z*ivl );
+			if( w < 0 )
+				angle = 2.0f*(scalar)atan2(-vl, -w); //-PI,0 
+			else
+				angle = 2.0f*(scalar)atan2( vl,  w); //0,PI 
+		}
+		else
+		{
+			axis = Vector3(0,0,0);
+			angle = 0;
+		}
     }
 
 
-		void Rotate(scalar amount, scalar xAxis, scalar yAxis, scalar zAxis)
+	void Rotate(scalar amount, scalar xAxis, scalar yAxis, scalar zAxis)
+	{
+		if((xAxis != 0 && xAxis != 1) ||
+			(yAxis != 0 && yAxis != 1) ||
+			(zAxis != 0 && zAxis != 1))
 		{
-			if((xAxis != 0 && xAxis != 1) ||
-               (yAxis != 0 && yAxis != 1) ||
-               (zAxis != 0 && zAxis != 1))
-				{
-					scalar length = (scalar)sqrt(xAxis * xAxis + yAxis * yAxis + zAxis * zAxis);
-					if (length == 0.0f)
-						return;
-					xAxis /= length; yAxis /= length; zAxis /= length;
-				}
-			scalar angle = DegToRad(amount);
-			scalar sine = (scalar)sin(angle / 2.0f);
-
-            
-	         x = xAxis * sine;
-	         y = yAxis * sine;
-	         z = zAxis * sine;
-            w = (scalar)cos(angle / 2.0f);
-
-			//TODO: division by zero check
-            scalar length = 1 / (scalar)sqrt(x * x + y * y + z * z + w * w);
-            x *= length;
-            y *= length;
-            z *= length;
+			scalar length = (scalar)sqrt(xAxis * xAxis + yAxis * yAxis + zAxis * zAxis);
+			if (length == 0.0f)
+				return;
+			xAxis /= length; yAxis /= length; zAxis /= length;
 		}
+		scalar angle = DegToRad(amount);
+		scalar sine = (scalar)sin(angle / 2.0f);
+		x = xAxis * sine;
+		y = yAxis * sine;
+		z = zAxis * sine;
+		w = (scalar)cos(angle / 2.0f);
+		//TODO: division by zero check
+		scalar length = 1 / (scalar)sqrt(x * x + y * y + z * z + w * w);
+		x *= length;
+		y *= length;
+		z *= length;
+	}
 
-	    __INLINE void toMatrix3( Matrix3& m  )const
-		{
-			scalar wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
-			scalar s  = 2.0f/(*this).Norm();  
-			x2 = x * s;    y2 = y * s;    z2 = z * s;
-			xx = x * x2;   xy = x * y2;   xz = x * z2;
-			yy = y * y2;   yz = y * z2;   zz = z * z2;
-			wx = w * x2;   wy = w * y2;   wz = w * z2;
+	__INLINE void toMatrix3( Matrix3& m  )const
+	{
+		scalar wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
+		scalar s  = 2.0f/(*this).Norm();  
+		x2 = x * s;    y2 = y * s;    z2 = z * s;
+		xx = x * x2;   xy = x * y2;   xz = x * z2;
+		yy = y * y2;   yz = y * z2;   zz = z * z2;
+		wx = w * x2;   wy = w * y2;   wz = w * z2;
 
-			m.m[0].x = 1.0f - (yy + zz);
-			m.m[1].x = xy - wz;
-			m.m[2].x = xz + wy;
+		m.m[0].x = 1.0f - (yy + zz);
+		m.m[1].x = xy - wz;
+		m.m[2].x = xz + wy;
 	
-			m.m[0].y = xy + wz;
-			m.m[1].y = 1.0f - (xx + zz);
-			m.m[2].y = yz - wx;
+		m.m[0].y = xy + wz;
+		m.m[1].y = 1.0f - (xx + zz);
+		m.m[2].y = yz - wx;
 	
-			m.m[0].z = xz - wy;
-			m.m[1].z = yz + wx;
-			m.m[2].z = 1.0f - (xx + yy);
+		m.m[0].z = xz - wy;
+		m.m[1].z = yz + wx;
+		m.m[2].z = 1.0f - (xx + yy);
     }
 #ifdef USING_OPENGL
 		__INLINE void glSet()
 		{
-			glColor4fv(&r);
+			glColor4fv(&x);
 		}
 #endif
-
 };
 
 typedef Vector4 Quaternion;

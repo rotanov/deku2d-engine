@@ -394,7 +394,7 @@ void CFont::Print( const char *text, ... )
 
 		if (tempV == CFONT_VALIGN_TOP)
 		{
-			ypos = Pos.y + aabb.y0 - sheight;
+			ypos = Pos.y + aabb.vMin.y - sheight;
 		}
 		if (tempV == CFONT_VALIGN_BOTTOM)
 		{
@@ -402,7 +402,7 @@ void CFont::Print( const char *text, ... )
 		}
 		if (tempV == CFONT_VALIGN_CENTER)
 		{
-			ypos = Pos.y + aabb.y0/2 - sheight/2;
+			ypos = Pos.y + aabb.vMin.y/2 - sheight/2;
 		}
 
 		if (tempH == CFONT_HALIGN_LEFT)
@@ -411,17 +411,17 @@ void CFont::Print( const char *text, ... )
 		}
 		if (tempH == CFONT_HALIGN_RIGHT)
 		{
-			xpos = Pos.x + aabb.x0 - swidth;
+			xpos = Pos.x + aabb.vMin.x - swidth;
 		}
 
 		if (tempH == CFONT_HALIGN_CENTER)
 		{
-			xpos = Pos.x + aabb.x0/2 - swidth/2;
+			xpos = Pos.x + aabb.vMin.x/2 - swidth/2;
 		}
 
 		glPushAttrib(GL_SCISSOR_TEST);
 		glEnable(GL_SCISSOR_TEST);
-		glScissor(Pos.x, Pos.y, aabb.x0, aabb.y0);
+		glScissor(Pos.x, Pos.y, aabb.vMin.x, aabb.vMin.y);
 
 
 		CPrimitiveRender pr;
@@ -687,7 +687,7 @@ bool CRenderManager::DrawObjects()
 
 bool CompAlpha(CObject *a, CObject *b)
 {
-	return (dynamic_cast<CRenderObject*>(a))->color.a >= (dynamic_cast<CRenderObject*>(b))->color.a;
+	return (dynamic_cast<CRenderObject*>(a))->color.w >= (dynamic_cast<CRenderObject*>(b))->color.w;
 }
 
 bool CompZ(CObject *a, CObject *b)
@@ -754,12 +754,6 @@ void gToggleScissor( bool State )
 void gScissor( int x, int y, int width, int height )
 {
 	glScissor(x, y, width, height);
-}
-
-void gSetColor( RGBAf color )
-{
-	glColor4fv(color.v);
-	//glColor4f(color.r, color.g, color.b, color.a);
 }
 
 void gDrawBBox( CAABB box )

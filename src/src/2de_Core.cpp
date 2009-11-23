@@ -15,10 +15,10 @@ CObject::CObject()
 {
 	CObjectCount++;
 	type = ListRefCount = 0;
-	char * tmp = new char[16];
-	SDL_itoa(CObjectCount, tmp, 10);
-	name += (string)tmp + " CObject ";
-	delete [] tmp;
+	//char * tmp = new char[16];
+	//SDL_itoa(CObjectCount, tmp, 10);
+	name += (string)itos(CObjectCount) + " CObject ";
+	//delete [] tmp;
 	id = CObjectCount;
 	CObjectManager.AddObject(this);
 }

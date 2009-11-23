@@ -29,22 +29,8 @@ const Vector2 V2_QuadBin[4] =
 class CRenderObject : public virtual CObject
 {
 public:
-	union									//	«десь немного усложнил c union, но думаю, так будет удобнее пользоватьс€. 
-	{										
-		struct								
-		{
-			Vector2	position;
-			scalar	depth;
-		};
-		struct  
-		{
-			scalar	x, y, z;
-		};
-// 		struct								//	», кстати, что-то мен€ т€нет также добавить возможность обращатьс€ к координатам и как к	
-// 		{									//	Vector3
-// 			Vector3	Position;				
-// 		};
-	};
+	Vector2	position;
+	scalar	depth;
 	CAABB				aabb;				// Axis Aligned Bounding Box
 	bool				visible;
 	RGBAf				color;
@@ -248,7 +234,6 @@ void gEndFrame();
 typedef BOOL (__stdcall *PFNWGLSWAPINTERVALFARPROC)(int);
 void gToggleScissor(bool State);
 void gScissor(int x, int y, int width, int height);
-void gSetColor(RGBAf color);
 
 void setVSync(int interval=1);
 

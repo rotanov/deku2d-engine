@@ -18,11 +18,11 @@
 //after w4
 #pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
 #pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
- #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
+ //#pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
 #pragma warning (disable	:	4100)	//	unreferenced formal parameter
- #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
+ //#pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
 #pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
- #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
+ //#pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
 #pragma warning (disable	:	4389)	//	signed/unsigned mismatch
 #pragma warning (disable	:	4702)	//	unreachable code ^^"
 #pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <time.h>
 #include <assert.h>
@@ -436,25 +437,28 @@ public:
 extern CGarbageCollector SingletoneKiller;
 typedef CGarbageCollector CSingletoneKiller;
 
+__INLINE string itos(int i)
+{
+	stringstream s;
+	s << i;
+	return s.str();
+}
+
+// And then
+// #include <sstream>
+// 
+// template <class T>
+// inline std::string to_string (const T& t)
+// {
+// 	std::stringstream ss;
+// 	ss << t;
+// 	return ss.str();
+// }
+
+
+extern CList CObjectManager;
 
 
 #endif // _2DE_CORE_H
 
 
-// string itos(int i)	// convert int to stringw
-// {
-// 	stringstream s;
-// 	s << i;
-// 	return s.str();
-// }
-// 
-// int main()
-// {
-// 	int i = 127;
-// 	string ss = itos(i);
-// 	const char* p = ss.c_str();
-// 
-// 	cout << ss << " " << p << "\n";
-// }
-
-extern CList CObjectManager;
