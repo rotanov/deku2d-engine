@@ -1,14 +1,14 @@
 #ifndef _TANKS_NETWORK_H_
 #define _TANKS_NETWORK_H_
 
-#include "tnl.h"
-#include "tnlNetBase.h"
-#include "tnlGhostConnection.h"
-#include "tnlNetInterface.h"
-#include "tnlNetObject.h"
-#include "tnlLog.h"
-#include "tnlRPC.h"
-#include "tnlString.h"
+#include "tnl\tnl.h"
+#include "tnl\tnlNetBase.h"
+#include "tnl\tnlGhostConnection.h"
+#include "tnl\tnlNetInterface.h"
+#include "tnl\tnlNetObject.h"
+#include "tnl\tnlLog.h"
+#include "tnl\tnlRPC.h"
+#include "tnl\tnlString.h"
 
 #include "2de_Core.h"
 #include "2de_GraphicsLow.h"

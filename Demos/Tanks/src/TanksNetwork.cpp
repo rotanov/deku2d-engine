@@ -1,10 +1,10 @@
 #include <math.h>
 #include "TanksNetwork.h"
-#include "../tnl/tnlBitStream.h"
-#include "../tnl/tnlNetConnection.h"
-#include "../tnl/tnlRandom.h"
-#include "../tnl/tnlSymmetricCipher.h"
-#include "../tnl/tnlAsymmetricKey.h"
+#include "tnl/tnlBitStream.h"
+#include "tnl/tnlNetConnection.h"
+#include "tnl/tnlRandom.h"
+#include "tnl/tnlSymmetricCipher.h"
+#include "tnl/tnlAsymmetricKey.h"
 
 
 

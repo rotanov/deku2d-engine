@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)\inc\zlib\;$(ProjectDir)\inc\libpng\;$(ProjectDir)\inc\;$(ProjectDir)\inc\SDL\;$(ProjectDir)\inc\gl\;$(ProjectDir)\inc\Lua\;$(ProjectDir)\inc\tnl\;$(ProjectDir)\inc\libtomcrypt\;$(ProjectDir)\inc\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -106,7 +106,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="$(ProjectDir)\inc\zlib\;$(ProjectDir)\inc\libpng\;$(ProjectDir)\inc\;$(ProjectDir)\inc\SDL\;$(ProjectDir)\inc\gl\;$(ProjectDir)\inc\Lua\;$(ProjectDir)\inc\tnl\;$(ProjectDir)\inc\libtomcrypt\;$(ProjectDir)\inc\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
