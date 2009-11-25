@@ -1,0 +1,18 @@
+<configuration>
+	WindowWidth				= "1000"
+	WindowHeight			= "700"
+	WindowBpp				= "32"
+	WindowCaption			= "Level editor"
+	DoCalcFps				= "true"
+	DoLimitFps				= "false"
+	FpsLimit				= "60"
+	XMLResourcesFilename    = "Config/Resources.xml"
+    DataPath               	= "Data"
+	doLoadDefaultResourceList	= "true"	
+
+	DefaultCellSize			= "4"
+	GameVTiles				= "15"
+	GameHTiles				= "20"
+	LeftPanel 				= "196"
+	BottomPanel 			= "196"
+</configuration>
