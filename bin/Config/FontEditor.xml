@@ -6,6 +6,6 @@
 	DoCalcFps				= "true"	// todo: deprecate
 	DoLimitFps				= "false"
 	FpsLimit				= "60"
-    DataPath               	= "Data/"
+	DataPath               	= "Data"
 	doLoadDefaultResourceList	= "true"	// todo: deprecate
 </configuration>

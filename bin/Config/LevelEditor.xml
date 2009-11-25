@@ -6,8 +6,8 @@
 	DoCalcFps				= "true"
 	DoLimitFps				= "false"
 	FpsLimit				= "60"
-	XMLResourcesFilename    = "config/resources.xml"
-    DataPath               	= "Data/"
+	XMLResourcesFilename    = "Config/Resources.xml"
+    DataPath               	= "Data"
 	doLoadDefaultResourceList	= "true"	
 
 	DefaultCellSize			= "4"

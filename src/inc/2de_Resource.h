@@ -9,8 +9,8 @@
 #include "2de_GraphicsHigh.h"
 #include "2de_Xml.h"
 
-#define CONFIG_FILE_NAME "config/"
-#define DEFUALT_RESOURCE_LIST_PATH "config/resources.xml"
+#define CONFIG_FILE_NAME "Config/"
+#define DEFUALT_RESOURCE_LIST_PATH "Config/Resources.xml"
 
 #define DEFAULT_SECTION_COUNT	3
 #define CR_SECTION_FONTS		"Fonts"
@@ -102,36 +102,6 @@ protected:
 	static int		_refcount;
 };
 
-#ifdef _WIN32
-
-class CDataLister
-{
-public:
-	CXMLTable table;
-	CXMLNode *cNode;
-	char *MainDir;
-	char *CurrDir;
-	int MainDirL;
-	WIN32_FIND_DATA fdata;
-
-	CDataLister()
-	{
-		MainDirL = 0;
-		MainDir = new char[MAX_PATH];
-		CurrDir = new char[MAX_PATH];
-	}
-	~CDataLister()
-	{
-		delete [] MainDir;
-		delete [] CurrDir;
-	}
-	void DelLastDirFromPath(char* src);
-	bool List();
-	void ExploreDir(HANDLE hfile);
-};
-
-#endif //_WIN32
-
 class CResourceManager
 {
 public:
@@ -141,6 +111,7 @@ public:
 
 	CResourceManager()
 	{
+		// ResourceList = NULL;
 		ResourceList = new CXMLTable;
 	}
 	~CResourceManager()
@@ -153,6 +124,38 @@ public:
 	CObject*	LoadResource(char* section, char *name, CreateFunc creator);
 	bool		LoadResources();
 private:
+};
+
+class CDataLister
+{
+public:
+	CDataLister()
+	{
+		/*MainDirL = 0;
+		MainDir = new char[MAX_PATH];
+		CurrDir = new char[MAX_PATH];*/
+	}
+	~CDataLister()
+	{
+		/*delete [] MainDir;
+		delete [] CurrDir;*/
+	}
+	// CXMLTable List(string ADataRoot);
+	void List(string ADataRoot);
+private:
+	string WorkDir;
+	CXMLTable Table;
+	CXMLNode *CurNode;
+
+	/*char *MainDir;
+	char *CurrDir;
+	int MainDirL;
+	WIN32_FIND_DATA fdata;*/
+
+	void DelLastDirFromPath(char* src);
+	void ExploreDirectory(string Path);
+	string GetLastPathComponent(string Path);
+	string GetFileNameWithoutExtension(string FileName);
 };
 
 #endif // _2DE_RESOURCE_H

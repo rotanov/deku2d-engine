@@ -11,7 +11,8 @@ class GlobalLuaState
 public:
 	struct Exception : public std::exception
 	{
-		Exception(const std::string& what) : std::exception(what.c_str())
+		//Exception(const std::string& what) : std::exception(what.c_str())
+		Exception(const std::string& what) : std::exception()
 		{
 		}
 	};

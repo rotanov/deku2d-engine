@@ -419,7 +419,7 @@ bool CXMLTable::LoadFromFile(const char *fname)
 		//now reading string
 		byte b = 0;
 		//Log("XML","Reading");
-		while (b!=0x0d && !f.Eof())
+		while (b != '\n' && !f.Eof())
 		{			
 			if (f.Read(&b, 1) && !f.Eof())
 				if (b != 13 && b != 10){

@@ -1,0 +1,34 @@
+<Data>
+	<Scripts>
+		button1 = "Data/Scripts/button1.lua"
+		button2 = "Data/Scripts/button2.lua"
+	</Scripts>
+	<Fonts>
+		hge = "Data/Fonts/hge.fif"
+		iich = "Data/Fonts/iich.fif"
+		Font = "Data/Fonts/Font.fif"
+	</Fonts>
+	<Tilesets>
+		TileSet02-Snow01 = "Data/Tilesets/TileSet02-Snow01.tls"
+		TileSet02 = "Data/Tilesets/TileSet02.tls"
+		TileSet01 = "Data/Tilesets/TileSet01.tls"
+		TanksTileset = "Data/Tilesets/TanksTileset.tls"
+	</Tilesets>
+	<Levels>
+		Level02 = "Data/Levels/Level02.lvl"
+		Level01 = "Data/Levels/Level01.lvl"
+	</Levels>
+	<Textures>
+		iich = "Data/Textures/iich.png"
+		Groundtile = "Data/Textures/Groundtile.bmp"
+		verdana9 = "Data/Textures/verdana9.png"
+		SnowyTileSet = "Data/Textures/SnowyTileSet.bmp"
+		font1 = "Data/Textures/font1.png"
+		box = "Data/Textures/box.bmp"
+		tahoma13b = "Data/Textures/tahoma13b.png"
+		TanksTiles = "Data/Textures/TanksTiles.png"
+		Font = "Data/Textures/Font.png"
+		cells = "Data/Textures/cells.bmp"
+		tahoma13 = "Data/Textures/tahoma13.png"
+	</Textures>
+</Data>

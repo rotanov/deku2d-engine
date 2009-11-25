@@ -142,7 +142,7 @@ public:
 	void		Print(const char *text, ...);
 
 	void		SetDepth(float ADepth);
-	void		PointTo(const Vector2 *_p);
+	void		PointTo(Vector2 *_p);
 	void		PointBack();
 	void		SetAlign(const byte _Halign, const byte _Valign);
 
@@ -156,7 +156,7 @@ public:
 private:
 	float				x, y;					//	‘актические координаты дл€ отрисовки в _Print
 	float				Depth;					//	√лубина по Z
-	(const Vector2)		*pp;					//	”казатель на вектор с координатами текста
+	Vector2		*pp;					//	”казатель на вектор с координатами текста
 	byte				align;					//	‘лаги выравнивани€
 	CTexture*			Texture;				//	”казатель на текстуру шрфита. ќчевидно же, да?
 	GLuint		base;			// Base List of 256 glLists for font
@@ -231,7 +231,8 @@ void SDLGLExit(int code);
 void gSetBlendingMode();
 void gBeginFrame();
 void gEndFrame();
-typedef BOOL (__stdcall *PFNWGLSWAPINTERVALFARPROC)(int);
+//typedef BOOL (__stdcall *PFNWGLSWAPINTERVALFARPROC)(int);
+typedef BOOL (*PFNWGLSWAPINTERVALFARPROC)(int);
 void gToggleScissor(bool State);
 void gScissor(int x, int y, int width, int height);
 

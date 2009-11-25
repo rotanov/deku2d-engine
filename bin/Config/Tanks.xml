@@ -6,6 +6,6 @@
 	DoCalcFps					= "true"
 	DoLimitFps					= "true"
 	FpsLimit					= "30"
-	DataPath					= "Data/"
+	DataPath					= "Data"
 	doLoadDefaultResourceList	= "true" // temp
 </configuration>

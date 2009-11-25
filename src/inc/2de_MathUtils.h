@@ -323,9 +323,15 @@ const Vector2 V2_DIR_RIGHT		= (-V2_DIR_LEFT);
 const Vector2 V2_DIR_UP			= Vector2(0.0f, 1.0f);
 const Vector2 V2_DIR_DOWN		= (-V2_DIR_UP);
 
-struct Vector3{
+union Vector3
+{
 public:
-	scalar x, y, z;
+	struct {
+		scalar x, y, z;
+	};
+	struct {
+		scalar r, g, b;
+	};
 
 	__INLINE Vector3() : x(0.0f), y(0.0f), z(0.0f){}
 
@@ -1035,9 +1041,14 @@ struct Matrix2
 	}
 };
 
-struct Vector4
+union Vector4
 {
-	scalar x, y, z, w;
+	struct {
+		scalar x, y, z, w;
+	};
+	struct {
+		scalar r, g, b, a;
+	};
 
 	__INLINE scalar operator[](int i)
 	{

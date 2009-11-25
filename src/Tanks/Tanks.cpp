@@ -304,7 +304,7 @@ bool CTankMap::Update(scalar dt)
 	return true;
 }
 
-CAABB CTankMap::GetCellAABB(Vector2& V)
+CAABB CTankMap::GetCellAABB(Vector2 V)
 {
 	
 	if (!Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize].isFree())

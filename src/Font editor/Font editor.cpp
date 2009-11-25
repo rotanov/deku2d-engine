@@ -35,7 +35,9 @@ bool LoadFont()
 	Font = Ninja->FontManager->GetFont(edFontname->text.c_str());
 	if (Font == NULL)
 	{
+#ifdef _WIN32
 		MessageBox(0, "Font not found", "Error", MB_ICONERROR | MB_OK);  // Это временное решение.
+#endif
 		return false;
 	}
 	FontTexture = Font->GetTexture();
@@ -53,7 +55,9 @@ bool LoadTexture()  // Опять же не Load() а Acquire().
 	FontTexture = Ninja->TextureManager->GetTextureByName(edFontTextureName->text);
 	if (FontTexture == NULL)
 	{
+#ifdef _WIN32
 		MessageBox(0, "Texture not found", "Error", MB_ICONERROR | MB_OK);
+#endif
 		return false;
 	}
 	return true;
@@ -188,7 +192,7 @@ public:
 			OffsetX += MouseDelta.x;
 			OffsetY -= MouseDelta.y;
 		}
-		Sleep(1);
+		sleep(1);
 		return true;
 	}
 };

@@ -539,7 +539,7 @@ CListNode* CList::GetListNode(const string* AObjectName)
 	while (TempNode)
 	{		
 		// case insensitive due to the fact that win32 filenames are too.
-		if (stricmp( TempNode->GetData()->GetName(),AObjectName->c_str()) == 0)  
+		if (SDL_strcasecmp( TempNode->GetData()->GetName(),AObjectName->c_str()) == 0)  
 			return TempNode;
 		TempNode = TempNode->next;
 	}
@@ -730,7 +730,7 @@ void CreateLogFile(char *fname)
 	char cd[CFILE_MAX_STRING_LENGTH];
 	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
 	strcpy(cd, GetWorkingDir(LogFile, CFILE_MAX_STRING_LENGTH));
-	strcat(LogFile, "\\");
+	strcat(LogFile, "/");
 	strcat(LogFile, fname);
 	FILE *hf = NULL;
 	LogCreationRequired = true;
@@ -841,6 +841,7 @@ void MemCheck()
 		_CrtMemDumpStatistics( MemState3 );
 	CloseHandle(hLogFile);
 }
+#endif //_WIN32
 
 void DelInterval(string *src, const int s0, const int s1)
 {
@@ -854,9 +855,8 @@ void DelInterval(string *src, const int s0, const int s1)
 	src->copy(Temp1, src->length() - s1 - 1, s1+1);
 	*src = (string)Temp0 + Temp1;
 }
-#endif //_WIN32
 
-char * GetWorkingDir(char *dir, size_t max_size)
+char* GetWorkingDir(char *dir, size_t max_size)
 {
 	if (dir == NULL)
 		return NULL;

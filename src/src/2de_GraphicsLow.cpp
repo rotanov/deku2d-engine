@@ -238,7 +238,9 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 
 
+#ifdef _WIN32
 	setVSync(0);
+#endif
 }
 CGLWindow *CGLWindow::_instance = NULL;
 CGLWindow* CGLWindow::Instance()
@@ -510,7 +512,7 @@ void CFont::SetDepth( float _depth )
 	Depth = clampf(Depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
 }
 
-void CFont::PointTo(const Vector2 *_p)
+void CFont::PointTo(Vector2 *_p)
 {
 	if (!_p)
 		return;
@@ -522,7 +524,7 @@ void CFont::PointBack()
 	pp = &Pos;
 }
 
-void CFont::SetAlign( const byte _Halign, const byte _Valign )
+void CFont::SetAlign(const byte _Halign, const byte _Valign )
 {
 	align = _Valign || _Halign;
 }

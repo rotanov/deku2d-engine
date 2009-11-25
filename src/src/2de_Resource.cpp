@@ -1,4 +1,11 @@
+#ifdef _WIN32
+#include "dirent.h"
+#else
+#include <dirent.h>
+#endif
+
 #include "2de_Resource.h"
+#include "2de_Core.h"
 
 //-------------------------------------------//
 //				Factory stuff				 //
@@ -177,9 +184,14 @@ bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
 bool CResourceManager::LoadResources()
 {
 	// TODOODODODOO~!!!!!
+
 	CDataLister DataLister;
-	DataLister.List();
+	DataLister.List(DataPath);
+
 	ResourceList->LoadFromFile(DEFUALT_RESOURCE_LIST_PATH);
+
+	//ResourceList = &DataLister.List(DataPath);
+
 	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
 		if (!LoadSection(strSections[i], fncInitializers[i]))
 		{
@@ -212,8 +224,6 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 	return result;
 }
 
-#ifdef WIN32
-
 void CDataLister::DelLastDirFromPath( char* src )
 {
 	int i = strlen(src)-1;
@@ -224,9 +234,23 @@ void CDataLister::DelLastDirFromPath( char* src )
 	src[i+1] = 0;
 }
 
-bool CDataLister::List()
+// CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
+void CDataLister::List(string DataRoot)
 {
-	HANDLE hfile;
+	char WorkingDir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+	GetWorkingDir(WorkingDir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
+
+	WorkDir = string(WorkingDir) + "/";
+
+	CurNode = Table.First;
+	
+	ExploreDirectory(DataRoot);
+
+	Table.SaveToFile("Config/Resources.xml");
+
+	// return Table;
+
+	/*HANDLE hfile;
 	char TempDir[MAX_PATH];
 	TempDir[0] = 0;
 	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
@@ -251,12 +275,89 @@ bool CDataLister::List()
 
 	table.SaveToFile("..\\Config\\Resources.xml");
 
-	SetCurrentDirectory(TempDir);	// Ебано как-то, но таки хуй с ним.
+	SetCurrentDirectory(TempDir);	Ебано как-то, но таки хуй с ним.
 
-	return 0x0;
+	return 0x0;*/
 }
 
-void CDataLister::ExploreDir( HANDLE hfile )
+void CDataLister::ExploreDirectory(string Path)
+{
+	DIR *dirp = opendir(string(WorkDir + Path).c_str());
+	if (!dirp)
+	{
+		Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());
+		return;
+	}
+
+	CurNode->Name = GetLastPathComponent(Path);
+
+	dirent *entry = NULL;
+
+	while (entry = readdir(dirp))
+	{
+		if (entry->d_type == DT_DIR)
+		{
+			if (entry->d_name[0] == '.')
+			{
+				continue;
+			}
+			CXMLNode *PreviousNode = CurNode;
+			CurNode = CurNode->Add(entry->d_name, entry->d_name);
+			ExploreDirectory(Path + "/" + string(entry->d_name));
+			CurNode = PreviousNode;
+		}
+		else if (entry->d_type == DT_REG)
+		{
+			CurNode->Add(GetFileNameWithoutExtension(string(entry->d_name)),
+				     Path + "/" + string(entry->d_name));
+		}
+
+	}
+
+	closedir(dirp);
+}
+
+string CDataLister::GetLastPathComponent(string Path)
+{
+	if (Path.empty() || ((Path.length() == 1) && (Path[0] == '/')))
+	{
+		return "";
+	}
+
+	if (Path.at(Path.length() - 1) == '/')
+	{
+		Path.erase(Path.length() - 1);
+	}
+
+	int last_slash = Path.find_last_of('/');
+
+	if (last_slash == string::npos)
+	{
+		last_slash = 0;
+	}
+	else
+	{
+		last_slash++;
+	}
+
+	return Path.substr(last_slash);
+}
+
+string CDataLister::GetFileNameWithoutExtension(string FileName)
+{
+	int last_dot = FileName.find_last_of('.');
+
+	if (last_dot == string::npos)
+	{
+		return FileName;
+	}
+
+	FileName.erase(last_dot);
+
+	return FileName;
+}
+
+/*void CDataLister::ExploreDir( HANDLE hfile )
 {
 	while (FindNextFile(hfile, &fdata))
 	{
@@ -290,6 +391,4 @@ void CDataLister::ExploreDir( HANDLE hfile )
 			delete [] tmp;
 		}
 	}
-}
-
-#endif //WIN32
+}*/

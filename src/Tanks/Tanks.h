@@ -47,6 +47,9 @@ __INLINE int Dir2AK(Vector2& V) // Direction to action kind
 class CTank : public CRenderObject, public CUpdateObject
 {
 public:
+	struct Bullet {
+		Vector2 p, v;
+	};
 	Vector2			Direction;
 	int				Health;
 	scalar			Velocity;
@@ -64,7 +67,7 @@ public:
 	bool			isWalking;
 	SDLKey			Controls[6];
 	//////////////////////////////////////////////////////////////////////////
-	struct {Vector2 p, v;}	Bullets[MAX_BULLETS_PER_TANK];
+	Bullet			Bullets[MAX_BULLETS_PER_TANK];
 	
 	int				BulletsCount;
 	scalar			FiringInterval;
@@ -159,7 +162,7 @@ public:
 	}
 
 	CTankMapCell* GetCell(Vector2& V);
-	CAABB GetCellAABB(Vector2& V);
+	CAABB GetCellAABB(Vector2 V);
 	scalar IsFPTWA(int ADir, Vector2 Position);
 	Vector2 GetNewTankLocation();
 	bool Render();

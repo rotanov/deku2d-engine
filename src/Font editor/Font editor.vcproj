@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\"
+				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\"
+				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
