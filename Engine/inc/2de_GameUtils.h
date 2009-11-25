@@ -57,7 +57,7 @@ struct CMapCellInfo
 	int index;
 	int interaction;
 	float z; // if 0 then - check for collision; else z.0f = 1/256.0f;
-	Vector2 *tc; // Его размер тем не менее должен быть 4
+	Vector2 *tc; // Р•РіРѕ СЂР°Р·РјРµСЂ С‚РµРј РЅРµ РјРµРЅРµРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ 4
 	Vector2 pos[4];
 };
 

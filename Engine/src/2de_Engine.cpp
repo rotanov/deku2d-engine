@@ -95,12 +95,12 @@ void CEngine::SetState(int state, void* value)
 				procUserInit = (Callback) value;
 				if (Initialized && procUserInit != NULL)
 				{
-					// Так как минимум один раз пользовательская инициализация уже была установлена,
-					// а следовательно вызвана, то здесь надо вообще всё остановить и подчистить.
-					// И потом переинициализировать всё что нужно и пользовательскую инициализацию
+					// РўР°Рє РєР°Рє РјРёРЅРёРјСѓРј РѕРґРёРЅ СЂР°Р· РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СѓР¶Рµ Р±С‹Р»Р° СѓСЃС‚Р°РЅРѕРІР»РµРЅР°,
+					// Р° СЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РІС‹Р·РІР°РЅР°, С‚Рѕ Р·РґРµСЃСЊ РЅР°РґРѕ РІРѕРѕР±С‰Рµ РІСЃС‘ РѕСЃС‚Р°РЅРѕРІРёС‚СЊ Рё РїРѕРґС‡РёСЃС‚РёС‚СЊ.
+					// Р РїРѕС‚РѕРј РїРµСЂРµРёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РІСЃС‘ С‡С‚Рѕ РЅСѓР¶РЅРѕ Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєСѓСЋ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ
 //					ClearLists();  
 					if (!(Initialized = procUserInit()))
-						Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
+						Log("ERROR", "РџРѕРїС‹С‚РєР° РІС‹РїРѕР»РЅРёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєСѓСЋ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ Р·Р°РЅРѕРІРѕ РїСЂРѕРІР°Р»РёР»Р°СЃСЊ.");
 				}
 				break;
 			case STATE_UPDATE_FUNC:
@@ -150,7 +150,7 @@ bool CEngine::Init()
 		GetModuleFileName(hmodule, pathexe, 256);
 		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
 		delete [] pathexe;
-		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // В ранней версии SDL всегда вылазило окно консоли, потом этот косяк убрали, а мой фикс тут остался
+		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // Р’ СЂР°РЅРЅРµР№ РІРµСЂСЃРёРё SDL РІСЃРµРіРґР° РІС‹Р»Р°Р·РёР»Рѕ РѕРєРЅРѕ РєРѕРЅСЃРѕР»Рё, РїРѕС‚РѕРј СЌС‚РѕС‚ РєРѕСЃСЏРє СѓР±СЂР°Р»Рё, Р° РјРѕР№ С„РёРєСЃ С‚СѓС‚ РѕСЃС‚Р°Р»СЃСЏ
 
 		char *MainDir = new char[MAX_PATH];
 		GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
@@ -234,11 +234,11 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 	SDLKey sym = event.key.keysym.sym;
 	char TempChar;
 #ifdef _WIN32
-	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
+	wchar_t  tmp = (event.key.keysym.unicode);							// +СЂСѓСЃСЃРєРёР№
 	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
 
 #else
-	if ((event.key.keysym.unicode & 0xFF80) == 0 )  // только английский
+	if ((event.key.keysym.unicode & 0xFF80) == 0 )  // С‚РѕР»СЊРєРѕ Р°РЅРіР»РёР№СЃРєРёР№
 		TempChar = event.key.keysym.unicode & 0x7F;
 #endif //_WIN32
 	return TempChar;
@@ -264,7 +264,7 @@ bool CEngine::ProcessEvents()
 				SDL_keysym keysym = event.key.keysym;
 				for(int i = 0; i < KeyInputFuncCount; i++)
 					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);				
-				// Глобальная рекция на escape! Слишком большой хардкод, но пока сойдёт. Потом - либо вывести в опцию, либо убрать и предоставить программисту право выбора
+				// Р“Р»РѕР±Р°Р»СЊРЅР°СЏ СЂРµРєС†РёСЏ РЅР° escape! РЎР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ С…Р°СЂРґРєРѕРґ, РЅРѕ РїРѕРєР° СЃРѕР№РґС‘С‚. РџРѕС‚РѕРј - Р»РёР±Рѕ РІС‹РІРµСЃС‚Рё РІ РѕРїС†РёСЋ, Р»РёР±Рѕ СѓР±СЂР°С‚СЊ Рё РїСЂРµРґРѕСЃС‚Р°РІРёС‚СЊ РїСЂРѕРіСЂР°РјРјРёСЃС‚Сѓ РїСЂР°РІРѕ РІС‹Р±РѕСЂР°
 				//if(keysym.sym == SDLK_ESCAPE)	
 				//		return false;
 				keys[keysym.sym] = 1;
@@ -293,7 +293,7 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_MOUSEMOTION:
 			{
-				// Здесь можно раздавать позицию мыши всем попросившим.
+				// Р—РґРµСЃСЊ РјРѕР¶РЅРѕ СЂР°Р·РґР°РІР°С‚СЊ РїРѕР·РёС†РёСЋ РјС‹С€Рё РІСЃРµРј РїРѕРїСЂРѕСЃРёРІС€РёРј.
 				MousePos = Vector2(event.motion.x, window->height - event.motion.y);
 				//SDL_Delay(2);
 				break;
@@ -346,7 +346,7 @@ bool CEngine::Run()
 	{
 		if (ProcessEvents() == false) 
 			break;
-		if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
+		if (isHaveFocus)	// РЇРґСЂС‘РЅ Р±Р°С‚РѕРЅ, network, threading РёС‚Рґ РєРѕСЂРѕС‡Рµ РЅР°РґРѕ СЌС‚РёРј РІРѕРїСЂРѕСЃРѕРј Р·Р°РЅРёРјР°С‚СЊСЃСЏ РѕС‚РґРµР»СЊРЅРѕ Рё РІРїР»РѕС‚РЅСѓСЋ.
 		{
 			if (LimitFps())
 			{		
@@ -363,7 +363,7 @@ bool CEngine::Run()
 				// TODO: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
 			}
 			SDL_ShowCursor(0);
-			/*тестовый код*/
+			/*С‚РµСЃС‚РѕРІС‹Р№ РєРѕРґ*/
 			int x, y;
 			SDL_GetMouseState(&x, &y);
 			MousePos = Vector2(x, window->height - y);
@@ -385,10 +385,10 @@ bool CEngine::Run()
 			/**/
 			// ZOMG There wasn't other choice, the next step is to put it all into separate thread. Or pseudo-thread.
 
-// 			как уже подсказали, нужно 
-// 				> Можно вынести опрос координат курсора в отдельный поток. 
+// 			РєР°Рє СѓР¶Рµ РїРѕРґСЃРєР°Р·Р°Р»Рё, РЅСѓР¶РЅРѕ 
+// 				> РњРѕР¶РЅРѕ РІС‹РЅРµСЃС‚Рё РѕРїСЂРѕСЃ РєРѕРѕСЂРґРёРЅР°С‚ РєСѓСЂСЃРѕСЂР° РІ РѕС‚РґРµР»СЊРЅС‹Р№ РїРѕС‚РѕРє. 
 // 
-// 				но применительно для SDL, можно установить глобальный фильтр обработчика где будет, вызываться твоя функция отрисовки курсора (я делал именно так, и не тормозит)
+// 				РЅРѕ РїСЂРёРјРµРЅРёС‚РµР»СЊРЅРѕ РґР»СЏ SDL, РјРѕР¶РЅРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РіР»РѕР±Р°Р»СЊРЅС‹Р№ С„РёР»СЊС‚СЂ РѕР±СЂР°Р±РѕС‚С‡РёРєР° РіРґРµ Р±СѓРґРµС‚, РІС‹Р·С‹РІР°С‚СЊСЃСЏ С‚РІРѕСЏ С„СѓРЅРєС†РёСЏ РѕС‚СЂРёСЃРѕРІРєРё РєСѓСЂСЃРѕСЂР° (СЏ РґРµР»Р°Р» РёРјРµРЅРЅРѕ С‚Р°Рє, Рё РЅРµ С‚РѕСЂРјРѕР·РёС‚)
 // 
 // 				SDL_SetEventFilter(GlobalFilterEvents);
 // 
@@ -401,9 +401,9 @@ bool CEngine::Run()
 // 				return 1; 
 // 			}
 // 
-// 			это не дословный код но общая идея именно такая.
+// 			СЌС‚Рѕ РЅРµ РґРѕСЃР»РѕРІРЅС‹Р№ РєРѕРґ РЅРѕ РѕР±С‰Р°СЏ РёРґРµСЏ РёРјРµРЅРЅРѕ С‚Р°РєР°СЏ.
 //------------------
-// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
+// + РёРґРµСЏ РѕС‚ РјРµРЅСЏ - РјРѕР¶РЅРѕ РїС‹С‚Р°С‚СЊСЃСЏ РїСЂРµРґСЃРєР°Р·С‹РІР°С‚СЊ РґРІРёР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°, С‚.Рµ. РіРґРµ РѕРЅ РѕРєР°Р¶РµС‚СЃСЏ, РїРѕРєР° РјС‹ СЂРёСЃСѓРµРј РєР°РґСЂС‹ РїРѕРґ 60FPS
 
 		}
 		else
@@ -419,12 +419,12 @@ bool CEngine::Run()
 #ifdef _DEBUG
 	CObjectManager.DumpToLog();
 #endif
-	Suicide();	// БЛЯБЛЯБЯЛЯБЛЯБЛЯБЛЯ МЫ СЮДА НЕ ПОПАДАЕМ
-	SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
+	Suicide();	// Р‘Р›РЇР‘Р›РЇР‘РЇР›РЇР‘Р›РЇР‘Р›РЇР‘Р›РЇ РњР« РЎР®Р”Рђ РќР• РџРћРџРђР”РђР•Рњ
+	SDLGLExit(0); // Р•СЃР»Рё РјС‹ РїРѕРїР°РґР°РµРј СЃСЋРґР°, С‚Рѕ РІ РјРµСЃС‚Рѕ РїРѕСЃР»Рµ РІС‹Р·РѕРІР° Run() РјС‹ СѓР¶Рµ РЅРµ РїРѕРїР°РґС‘Рј. Р­С‚Рѕ РїСЂРѕР±Р»РµРјР°, СЏ РґСѓРјР°СЋ, РЅР°РґРѕ С‡С‚Рѕ-С‚Рѕ РґСЂСѓРіРѕРµ РїСЂРёРґСѓРјР°С‚СЊ.
 	return true;
 }
 
-bool CEngine::MidInit() // Для чего эта ф-я?
+bool CEngine::MidInit() // Р”Р»СЏ С‡РµРіРѕ СЌС‚Р° С„-СЏ?
 {
 	return true;
 }
@@ -479,7 +479,7 @@ int CEngine::CfgGetInt( char* ParamName )
 
 bool CEngine::ClearLists()
 {
-	// Не так!!!1!адин!+!+!
+	// РќРµ С‚Р°Рє!!!1!Р°РґРёРЅ!+!+!
 	CObjectManager.Clear();
 	RenderManager.Reset();
 	UpdateManager.Reset();
@@ -543,7 +543,7 @@ bool CUpdateManager::UpdateObjects()
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
-		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
+		data->Update(dt); // TODO: РїРѕРґСѓРјР°С‚СЊ С‡С‚Рѕ РёСЃРїРѕР»СЊР·РѕРІР°СЊС‚: С„РёРєСЃРёСЂРѕРІР°РЅРЅСѓСЋ РґРµР»СЊС‚Сѓ РёР»Рё СЂРµР°Р»СЊРЅСѓСЋ engine->Getdt()
 		data = dynamic_cast<CUpdateObject*>(Next());
 	}
 	return true;

@@ -33,7 +33,7 @@ public:
 
 static CList ExtResRelationList;
 
-// типы ресурсов
+// С‚РёРїС‹ СЂРµСЃСѓСЂСЃРѕРІ
 #define CRESOURCE_TYPE_FONT				0x01
 #define CRESOURCE_TYPE_IMAGE			0x02
 #define	CRESOURCE_TYPE_PARTICLESYSTEM	0x03
@@ -43,7 +43,7 @@ static CList ExtResRelationList;
 
 
 
-// Типы объектов. Это для CFactory
+// РўРёРїС‹ РѕР±СЉРµРєС‚РѕРІ. Р­С‚Рѕ РґР»СЏ CFactory
 #define OBJ_SPRITE			0x01
 #define OBJ_PSYSTEM			0x02
 #define OBJ_FONT_M			0x03
@@ -57,7 +57,7 @@ static CList ExtResRelationList;
 #define MANAGER_TYPE_TEX 0x03
 
 /**
-*	Класс CFactory. Назначение классы - контроль создания любых объектов.
+*	РљР»Р°СЃСЃ CFactory. РќР°Р·РЅР°С‡РµРЅРёРµ РєР»Р°СЃСЃС‹ - РєРѕРЅС‚СЂРѕР»СЊ СЃРѕР·РґР°РЅРёСЏ Р»СЋР±С‹С… РѕР±СЉРµРєС‚РѕРІ.
 */
 
 class CFactory : public CList
@@ -129,17 +129,6 @@ private:
 class CDataLister
 {
 public:
-	CDataLister()
-	{
-		/*MainDirL = 0;
-		MainDir = new char[MAX_PATH];
-		CurrDir = new char[MAX_PATH];*/
-	}
-	~CDataLister()
-	{
-		/*delete [] MainDir;
-		delete [] CurrDir;*/
-	}
 	// CXMLTable List(string ADataRoot);
 	void List(string ADataRoot);
 private:
@@ -147,12 +136,6 @@ private:
 	CXMLTable Table;
 	CXMLNode *CurNode;
 
-	/*char *MainDir;
-	char *CurrDir;
-	int MainDirL;
-	WIN32_FIND_DATA fdata;*/
-
-	void DelLastDirFromPath(char* src);
 	void ExploreDirectory(string Path);
 	string GetLastPathComponent(string Path);
 	string GetFileNameWithoutExtension(string FileName);
@@ -160,10 +143,10 @@ private:
 
 #endif // _2DE_RESOURCE_H
 
-// конфетка. Читать александреску.
+// РєРѕРЅС„РµС‚РєР°. Р§РёС‚Р°С‚СЊ Р°Р»РµРєСЃР°РЅРґСЂРµСЃРєСѓ.
 // namespace
 // {
-// 	// Счетчик значений
+// 	// РЎС‡РµС‚С‡РёРє Р·РЅР°С‡РµРЅРёР№
 // 	template <class C>
 // 	class CType2ValCounter
 // 	{
@@ -173,7 +156,7 @@ private:
 // 
 // 	template<class C> C CType2ValCounter<C>::Counter;
 // 
-// 	// Генератор значений
+// 	// Р“РµРЅРµСЂР°С‚РѕСЂ Р·РЅР°С‡РµРЅРёР№
 // 	template<class T, class C>
 // 	class CType2ValGenerator : public CType2ValCounter<C>
 // 	{
@@ -187,7 +170,7 @@ private:
 // 	};
 // }; // namespace
 // 
-// /// Шаблонная функция получения идентификатора типа
+// /// РЁР°Р±Р»РѕРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ РїРѕР»СѓС‡РµРЅРёСЏ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° С‚РёРїР°
 // template <class T, class C>
 // C Type2Val()
 // {

@@ -22,15 +22,15 @@
 #include "2de_Xml.h"
 #include "2de_Resource.h"
 
-// Константы
+// РљРѕРЅСЃС‚Р°РЅС‚С‹
 
 #define FIXED_DELTA_TIME			0.02f
 #define ENGINE_VERSION				0x001
 #define MAX_EVENT_FUNCTIONS			8
 #define MAX_KEY_INPUT_FUNCTIONS		8
 
-// Состояния переменных движка, для Set/Get State
-// пока что тут неполный набор.
+// РЎРѕСЃС‚РѕСЏРЅРёСЏ РїРµСЂРµРјРµРЅРЅС‹С… РґРІРёР¶РєР°, РґР»СЏ Set/Get State
+// РїРѕРєР° С‡С‚Рѕ С‚СѓС‚ РЅРµРїРѕР»РЅС‹Р№ РЅР°Р±РѕСЂ.
 
 #define STATE_SCREEN_WIDTH			0x01
 #define STATE_SCREEN_HEIGHT			0x03
@@ -60,13 +60,13 @@
 class CEngine : public CObject
 {
 public:
-	CFactory					*Factory; // Фабрика объектов. Синглтон.
-	CResourceManager			ResourceManager; // А почему тут инастанс
-	CTextureManager				*TextureManager; // ...а тут указатель?
-	CRenderManager				RenderManager; // а тут инстанс!
-	CFontManager				*FontManager; // ...а тут опять указатель?! 
-	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
-	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
+	CFactory					*Factory; // Р¤Р°Р±СЂРёРєР° РѕР±СЉРµРєС‚РѕРІ. РЎРёРЅРіР»С‚РѕРЅ.
+	CResourceManager			ResourceManager; // Рђ РїРѕС‡РµРјСѓ С‚СѓС‚ РёРЅР°СЃС‚Р°РЅСЃ
+	CTextureManager				*TextureManager; // ...Р° С‚СѓС‚ СѓРєР°Р·Р°С‚РµР»СЊ?
+	CRenderManager				RenderManager; // Р° С‚СѓС‚ РёРЅСЃС‚Р°РЅСЃ!
+	CFontManager				*FontManager; // ...Р° С‚СѓС‚ РѕРїСЏС‚СЊ СѓРєР°Р·Р°С‚РµР»СЊ?! 
+	CUpdateManager				UpdateManager; // РЅРµ, РЅСѓ С‘Р±Р°РЅС‹ РІ СЂРѕС‚.
+	CXMLTable					Config; // Р”Р°! Р­С‚Рѕ  - РєРѕРЅС„РёРі. РќР°С…СѓР№ РµРіРѕ С…СЂР°РЅРёС‚СЊ С‚СѓС‚ РІРѕС‚ С‚РѕР»СЊРєРѕ РјРЅРµ РЅРµРїРѕРЅСЏС‚РЅРѕ... Р’РµРґСЊ РѕРЅ РЅСѓР¶РµРЅ С‚РѕР»СЊРєРѕ РїСЂРё Р·Р°РіСЂСѓР·РєРµ.
 	BOOL						keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;
 
@@ -78,7 +78,7 @@ public:
 	int							CfgGetInt(char* ParamName);
 	bool						Run();
 
-	bool						Suicide();  // Временно в паблике
+	bool						Suicide();  // Р’СЂРµРјРµРЅРЅРѕ РІ РїР°Р±Р»РёРєРµ
 	
 private:
 	char						*ResourceListPath;
@@ -105,7 +105,7 @@ private:
 	
 	bool						ProcessEvents();
 
-	// TODO: либо подумать ещё раз, либо избавиться от констант и перейти на списки. И да, ебал я ваш реаллок.
+	// TODO: Р»РёР±Рѕ РїРѕРґСѓРјР°С‚СЊ РµС‰С‘ СЂР°Р·, Р»РёР±Рѕ РёР·Р±Р°РІРёС‚СЊСЃСЏ РѕС‚ РєРѕРЅСЃС‚Р°РЅС‚ Рё РїРµСЂРµР№С‚Рё РЅР° СЃРїРёСЃРєРё. Р РґР°, РµР±Р°Р» СЏ РІР°С€ СЂРµР°Р»Р»РѕРє.
 	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];	// Noes, dat is not wut we need
 	KeyInputFunc				KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
 	bool						(*procUserInit)();			// ok
@@ -120,7 +120,7 @@ protected:
 	~CEngine();
 };
 
-//extern CEngine *engine;  // НАХУЙ подсчёт ссылок
-// Да, подсчёт ссылок конечно же нахуй, но тот факт что отслеживать ручками порядок вызова конструкторов - это великая боль в попе - никто не отменял.
+//extern CEngine *engine;  // РќРђРҐРЈР™ РїРѕРґСЃС‡С‘С‚ СЃСЃС‹Р»РѕРє
+// Р”Р°, РїРѕРґСЃС‡С‘С‚ СЃСЃС‹Р»РѕРє РєРѕРЅРµС‡РЅРѕ Р¶Рµ РЅР°С…СѓР№, РЅРѕ С‚РѕС‚ С„Р°РєС‚ С‡С‚Рѕ РѕС‚СЃР»РµР¶РёРІР°С‚СЊ СЂСѓС‡РєР°РјРё РїРѕСЂСЏРґРѕРє РІС‹Р·РѕРІР° РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРѕРІ - СЌС‚Рѕ РІРµР»РёРєР°СЏ Р±РѕР»СЊ РІ РїРѕРїРµ - РЅРёРєС‚Рѕ РЅРµ РѕС‚РјРµРЅСЏР».
 
 #endif // _2DE_ENGINE_H_

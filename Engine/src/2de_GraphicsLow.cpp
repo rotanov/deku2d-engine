@@ -35,10 +35,10 @@ bool CGLImageData::MakeTexture()
 {
 	if (data == NULL) 
 		return false;
-	if ((width&(width-1)) != 0)		//	Òóò ìû ïðîñòî âûõîäèì, åñëè øèðèíà èëè âûñîòà  íå ÿâëÿåòñÿ ñòåïåíüþ äâîéêè.
-		return false;				//	Ultimate - ýòî èñïîëüçîâàòü NOT_POWER_OF_TWO åêñòåíøîí, åñëè îí äîñòóïåí;
-	if ((height&(height-1)) != 0)	//	Èíà÷å - äîïèñûâàòü â ïàìÿòü êóñîê ïðîçðà÷íîãî öâåòà, ïî ðàçìåðó òàêîé, ÷òîáû
-		return false;				//	Øèðèíà è âûñòîà ñòàëè áëèæàéøèìè ñòåïåíÿìè äâîéêè. Íî ýòî ïîòîì. È ýòî TODO.
+	if ((width&(width-1)) != 0)		//	Ð¢ÑƒÑ‚ Ð¼Ñ‹ Ð¿Ñ€Ð¾ÑÑ‚Ð¾ Ð²Ñ‹Ñ…Ð¾Ð´Ð¸Ð¼, ÐµÑÐ»Ð¸ ÑˆÐ¸Ñ€Ð¸Ð½Ð° Ð¸Ð»Ð¸ Ð²Ñ‹ÑÐ¾Ñ‚Ð°  Ð½Ðµ ÑÐ²Ð»ÑÐµÑ‚ÑÑ ÑÑ‚ÐµÐ¿ÐµÐ½ÑŒÑŽ Ð´Ð²Ð¾Ð¹ÐºÐ¸.
+		return false;				//	Ultimate - ÑÑ‚Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ NOT_POWER_OF_TWO ÐµÐºÑÑ‚ÐµÐ½ÑˆÐ¾Ð½, ÐµÑÐ»Ð¸ Ð¾Ð½ Ð´Ð¾ÑÑ‚ÑƒÐ¿ÐµÐ½;
+	if ((height&(height-1)) != 0)	//	Ð˜Ð½Ð°Ñ‡Ðµ - Ð´Ð¾Ð¿Ð¸ÑÑ‹Ð²Ð°Ñ‚ÑŒ Ð² Ð¿Ð°Ð¼ÑÑ‚ÑŒ ÐºÑƒÑÐ¾Ðº Ð¿Ñ€Ð¾Ð·Ñ€Ð°Ñ‡Ð½Ð¾Ð³Ð¾ Ñ†Ð²ÐµÑ‚Ð°, Ð¿Ð¾ Ñ€Ð°Ð·Ð¼ÐµÑ€Ñƒ Ñ‚Ð°ÐºÐ¾Ð¹, Ñ‡Ñ‚Ð¾Ð±Ñ‹
+		return false;				//	Ð¨Ð¸Ñ€Ð¸Ð½Ð° Ð¸ Ð²Ñ‹ÑÑ‚Ð¾Ð° ÑÑ‚Ð°Ð»Ð¸ Ð±Ð»Ð¸Ð¶Ð°Ð¹ÑˆÐ¸Ð¼Ð¸ ÑÑ‚ÐµÐ¿ÐµÐ½ÑÐ¼Ð¸ Ð´Ð²Ð¾Ð¹ÐºÐ¸. ÐÐ¾ ÑÑ‚Ð¾ Ð¿Ð¾Ñ‚Ð¾Ð¼. Ð˜ ÑÑ‚Ð¾ TODO.
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &TexID);
 	glBindTexture(GL_TEXTURE_2D, TexID);
@@ -259,7 +259,7 @@ CFont::CFont()
 {
 	scale = Vector2(1.0f, 1.0f);
 	base = 0;
-	Distance = CFONT_DEFAULT_DISTANCE; // Íåò! Ãðóçèòü å¸ èç ôàéëà!!! Íó, ïî êðàéíå ìåðå ïî óìîë÷àíèþ ñòàâèòü èç ôàéëà çíà÷åíèå. Ïîëüçîâàòåëü ïîòîì ñàì ïîïðîàâèò, åñëè íàäî.
+	Distance = CFONT_DEFAULT_DISTANCE; // ÐÐµÑ‚! Ð“Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ ÐµÑ‘ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð°!!! ÐÑƒ, Ð¿Ð¾ ÐºÑ€Ð°Ð¹Ð½Ðµ Ð¼ÐµÑ€Ðµ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ ÑÑ‚Ð°Ð²Ð¸Ñ‚ÑŒ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð° Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ. ÐŸÐ¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒ Ð¿Ð¾Ñ‚Ð¾Ð¼ ÑÐ°Ð¼ Ð¿Ð¾Ð¿Ñ€Ð¾Ð°Ð²Ð¸Ñ‚, ÐµÑÐ»Ð¸ Ð½Ð°Ð´Ð¾.
 	pp = &Pos;
 	offset = 0;
 	isTextSelected = doRenderToRect = false;
@@ -553,7 +553,7 @@ void CFont::SetTexture(char *TextureName)
 
 void CCamera::Assign(scalar *x, scalar *y)
 {
-	CEngine* engine = CEngine::Instance();  // too mush routines // óêîðîòèòü
+	CEngine* engine = CEngine::Instance();  // too mush routines // ÑƒÐºÐ¾Ñ€Ð¾Ñ‚Ð¸Ñ‚ÑŒ
 	engine->GetState(STATE_SCREEN_HEIGHT, &h);
 	engine->GetState(STATE_SCREEN_HEIGHT, &w);
 

@@ -306,7 +306,7 @@ void CPrimitiveRender::CheckTexture()
 	cells->Bind();
 }
 
-void CPrimitiveRender::Init()  // TODO: вынести качество генерации хотя бы в константу.
+void CPrimitiveRender::Init()  // TODO: РІС‹РЅРµСЃС‚Рё РєР°С‡РµСЃС‚РІРѕ РіРµРЅРµСЂР°С†РёРё С…РѕС‚СЏ Р±С‹ РІ РєРѕРЅСЃС‚Р°РЅС‚Сѓ.
 {
 	if (!glIsList(glListCircleL))
 	{
@@ -1430,7 +1430,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		switch(key)
 		{
 		case SDLK_UP:
-			// Вероятно эту логику можно записать и покороче TODO
+			// Р’РµСЂРѕСЏС‚РЅРѕ СЌС‚Сѓ Р»РѕРіРёРєСѓ РјРѕР¶РЅРѕ Р·Р°РїРёСЃР°С‚СЊ Рё РїРѕРєРѕСЂРѕС‡Рµ TODO
 			if (FocusedOnListNode == GetFirst() && isCycledMenuSwitch)
 			{
 				FocusedOnListNode = GetLast();

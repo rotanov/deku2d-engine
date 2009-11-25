@@ -1,4 +1,5 @@
-SOURCES		=	src/Font\ editor.cpp
+SOURCES		=	src/main.cpp \
+			src/Pong.cpp
 
 INCPATH		=	-iquoteinc -iquote../../Engine/inc
 
@@ -15,7 +16,7 @@ PNG_LDFLAGS	:=	$(shell pkg-config --libs libpng)
 CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} ${PNG_CFLAGS} ${INCPATH}
 LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} ${PNG_LDFLAGS} ${LIBS}
 
-TARGET		=	bin/Font\ editor
+TARGET		=	bin/Pong
 
 all:
 	g++ -fpermissive -w -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}

@@ -27,7 +27,7 @@ public:
 class CRigidBody : public CPhysicalObject
 {
 public:
-	CGeometry G;	// Геометрическая интерпретация формы объекта	
+	CGeometry G;	// Р“РµРѕРјРµС‚СЂРёС‡РµСЃРєР°СЏ РёРЅС‚РµСЂРїСЂРµС‚Р°С†РёСЏ С„РѕСЂРјС‹ РѕР±СЉРµРєС‚Р°	
 
 	Vector2 p;
 	scalar	a;
@@ -56,11 +56,11 @@ public:
 		o = Matrix2(a);
 	}
 
-	void ApplyForce(const Vector2 force, const Vector2 point) //применить силу к точке
+	void ApplyForce(const Vector2 force, const Vector2 point) //РїСЂРёРјРµРЅРёС‚СЊ СЃРёР»Сѓ Рє С‚РѕС‡РєРµ
 	{
 		
 	}
-	void ApplyForce2(const Vector2 linearForce, const Vector2 torque) //применить силу и момент сил
+	void ApplyForce2(const Vector2 linearForce, const Vector2 torque) //РїСЂРёРјРµРЅРёС‚СЊ СЃРёР»Сѓ Рё РјРѕРјРµРЅС‚ СЃРёР»
 	{
 
 	}

@@ -2,19 +2,19 @@
 #include "2de_LuaUtils.h"
 #include "2de_GameUtils.h"
 
-// Êîíñòàíòû, îïðåäåëÿþùèå ðàñïîëîæåíèå íåêîòîðûõ ýëåìåíòîâ èíòåðôåéñà.
+// ÐšÐ¾Ð½ÑÑ‚Ð°Ð½Ñ‚Ñ‹, Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»ÑÑŽÑ‰Ð¸Ðµ Ñ€Ð°ÑÐ¿Ð¾Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ Ð½ÐµÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ñ… ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ð² Ð¸Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹ÑÐ°.
 const int				INTERFACE_OFFSET_X	= 128;
 const int				LEFT_MARGIN			= 8;
 const int				EDIT_WIDTH			= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
 const int				EDIT_HEIGHT			= 32;
 const int				BUTTON_WIDTH		= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
 const int				BUTTON_HEIGHT		= 32;
-// Êîíñòàíòû, îïðåäåëÿþùèå öâåò ýëåìåíòîâ èíòåðôåéñà áóäóò òóò. ×óòü ïîãîäÿ.
+// ÐšÐ¾Ð½ÑÑ‚Ð°Ð½Ñ‚Ñ‹, Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»ÑÑŽÑ‰Ð¸Ðµ Ñ†Ð²ÐµÑ‚ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ð² Ð¸Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹ÑÐ° Ð±ÑƒÐ´ÑƒÑ‚ Ñ‚ÑƒÑ‚. Ð§ÑƒÑ‚ÑŒ Ð¿Ð¾Ð³Ð¾Ð´Ñ.
 const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
 const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
-// Âñåâîçìîæíûå ïåðåìåííûå.
+// Ð’ÑÐµÐ²Ð¾Ð·Ð¼Ð¾Ð¶Ð½Ñ‹Ðµ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ðµ.
 CEngine					*Ninja				= CEngine::Instance();
 byte					Zoom				= 2;
 CTexture				*FontTexture		= NULL;
@@ -28,15 +28,15 @@ CEdit					*edFontname			= NULL;
 CEdit					*edCurrentCymbol	= NULL;
 CEdit					*edSampleText		= NULL;
 
-// Íà ñàìîì äåëå ýòî íå òî ÷òîáû Load() à ñêîðåå Acquire() èáî âñå äîñòóïíûå íàì øðèôòû äâèæîê óæå ïðîèíäåêèðîâàë.
-// Ò.å. äëÿ ïîëüçîâàòåëÿ óòèëûòû ýòî áóäåò Load, à äëÿ òåõ, êòî ñïîñîáåí ÷èòàòü ýòîò êîììåíòàðèé - ýòî Asquire()
+// ÐÐ° ÑÐ°Ð¼Ð¾Ð¼ Ð´ÐµÐ»Ðµ ÑÑ‚Ð¾ Ð½Ðµ Ñ‚Ð¾ Ñ‡Ñ‚Ð¾Ð±Ñ‹ Load() Ð° ÑÐºÐ¾Ñ€ÐµÐµ Acquire() Ð¸Ð±Ð¾ Ð²ÑÐµ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ‹Ðµ Ð½Ð°Ð¼ ÑˆÑ€Ð¸Ñ„Ñ‚Ñ‹ Ð´Ð²Ð¸Ð¶Ð¾Ðº ÑƒÐ¶Ðµ Ð¿Ñ€Ð¾Ð¸Ð½Ð´ÐµÐºÐ¸Ñ€Ð¾Ð²Ð°Ð».
+// Ð¢.Ðµ. Ð´Ð»Ñ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ ÑƒÑ‚Ð¸Ð»Ñ‹Ñ‚Ñ‹ ÑÑ‚Ð¾ Ð±ÑƒÐ´ÐµÑ‚ Load, Ð° Ð´Ð»Ñ Ñ‚ÐµÑ…, ÐºÑ‚Ð¾ ÑÐ¿Ð¾ÑÐ¾Ð±ÐµÐ½ Ñ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ ÑÑ‚Ð¾Ñ‚ ÐºÐ¾Ð¼Ð¼ÐµÐ½Ñ‚Ð°Ñ€Ð¸Ð¹ - ÑÑ‚Ð¾ Asquire()
 bool LoadFont()  
 {
 	Font = Ninja->FontManager->GetFont(edFontname->text.c_str());
 	if (Font == NULL)
 	{
 #ifdef _WIN32
-		MessageBox(0, "Font not found", "Error", MB_ICONERROR | MB_OK);  // Ýòî âðåìåííîå ðåøåíèå.
+		MessageBox(0, "Font not found", "Error", MB_ICONERROR | MB_OK);  // Ð­Ñ‚Ð¾ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾Ðµ Ñ€ÐµÑˆÐµÐ½Ð¸Ðµ.
 #endif
 		return false;
 	}
@@ -46,11 +46,11 @@ bool LoadFont()
 
 bool SaveFont()
 {
-	// Íàïèñàòü êîä ñîõðàíåíèÿ èçìåíåíèé, ñäåëàíûõ â øðèôòå, â ôàéëå çäåñü.
+	// ÐÐ°Ð¿Ð¸ÑÐ°Ñ‚ÑŒ ÐºÐ¾Ð´ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ð¹, ÑÐ´ÐµÐ»Ð°Ð½Ñ‹Ñ… Ð² ÑˆÑ€Ð¸Ñ„Ñ‚Ðµ, Ð² Ñ„Ð°Ð¹Ð»Ðµ Ð·Ð´ÐµÑÑŒ.
 	return true;
 }
 
-bool LoadTexture()  // Îïÿòü æå íå Load() à Acquire().
+bool LoadTexture()  // ÐžÐ¿ÑÑ‚ÑŒ Ð¶Ðµ Ð½Ðµ Load() Ð° Acquire().
 {
 	FontTexture = Ninja->TextureManager->GetTextureByName(edFontTextureName->text);
 	if (FontTexture == NULL)

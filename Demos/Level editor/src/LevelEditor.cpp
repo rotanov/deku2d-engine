@@ -187,7 +187,7 @@ bool ProcessInput(SDL_Event& event)
 
 bool Init()
 {	
-	// Çàãðóæàåì èç êîíôèãà âñÿêèå ðàçíûå ïàðàìåòðû äëÿ ðåäàêòîðà
+	// Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ Ð¸Ð· ÐºÐ¾Ð½Ñ„Ð¸Ð³Ð° Ð²ÑÑÐºÐ¸Ðµ Ñ€Ð°Ð·Ð½Ñ‹Ðµ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹ Ð´Ð»Ñ Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¾Ñ€Ð°
 	SetZoom(Ninja->CfgGetInt("DefaultCellSize"));
 	GameVTiles	= Ninja->CfgGetInt("GameVTiles");
 	GameHTiles	= Ninja->CfgGetInt("GameHTiles");

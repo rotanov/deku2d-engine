@@ -1,17 +1,17 @@
-SOURCES		=	../src/2de_Core.cpp \
-			../src/2de_Engine.cpp \
-			../src/2de_GameUtils.cpp \
-			../src/2de_GraphicsHigh.cpp \
-			../src/2de_GraphicsLow.cpp \
-			../src/2de_Gui.cpp \
-			../src/2de_ImageUtils.cpp \
-			../src/2de_LuaUtils.cpp \
-			../src/2de_MathUtils.cpp \
-			../src/2de_Physics.cpp \
-			../src/2de_Resource.cpp \
-			../src/2de_Xml.cpp
+SOURCES		=	src/2de_Core.cpp \
+			src/2de_Engine.cpp \
+			src/2de_GameUtils.cpp \
+			src/2de_GraphicsHigh.cpp \
+			src/2de_GraphicsLow.cpp \
+			src/2de_Gui.cpp \
+			src/2de_ImageUtils.cpp \
+			src/2de_LuaUtils.cpp \
+			src/2de_MathUtils.cpp \
+			src/2de_Physics.cpp \
+			src/2de_Resource.cpp \
+			src/2de_Xml.cpp
 
-INCPATH		=	-iquote../inc
+INCPATH		=	-iquoteinc
 
 LIBS		=	-lGLU -lz
 
@@ -26,7 +26,7 @@ PNG_LDFLAGS	:=	$(shell pkg-config --libs libpng)
 CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} ${PNG_CFLAGS} ${INCPATH}
 LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} ${PNG_LDFLAGS} ${LIBS}
 
-TARGET		=	../../lib/Deku2d.a
+TARGET		=	lib/Deku2d.a
 
 all: release-compile makelib
 
@@ -45,4 +45,10 @@ strict-compile:
 
 makelib:
 	ar cr ${TARGET} *.o
-	mv *.o ../../obj/
+	mv *.o obj/
+
+clean:
+	rm -f obj/*.o
+
+dist-clean: clean
+	rm -f ${TARGET}

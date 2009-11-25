@@ -1,4 +1,4 @@
-// Ïîëíîå çàãèáàíèå îëîëî, îò áåçûñõîäíîñòè, íàäî æå êàê-òî êîíôëèêòû èì¸í ïðàâèòü.
+// ÐŸÐ¾Ð»Ð½Ð¾Ðµ Ð·Ð°Ð³Ð¸Ð±Ð°Ð½Ð¸Ðµ Ð¾Ð»Ð¾Ð»Ð¾, Ð¾Ñ‚ Ð±ÐµÐ·Ñ‹ÑÑ…Ð¾Ð´Ð½Ð¾ÑÑ‚Ð¸, Ð½Ð°Ð´Ð¾ Ð¶Ðµ ÐºÐ°Ðº-Ñ‚Ð¾ ÐºÐ¾Ð½Ñ„Ð»Ð¸ÐºÑ‚Ñ‹ Ð¸Ð¼Ñ‘Ð½ Ð¿Ñ€Ð°Ð²Ð¸Ñ‚ÑŒ.
 #ifdef _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
 
 #include "2de_Gui.h"
@@ -16,7 +16,7 @@ CFontManager			*FontManager = NULL;
 char					_key = 0;
 CEngine*				engine = NULL;
 int						scrheight, scrwidth;
-// ÃËÎÁÀËÜÍÛÅ ÏÅÐÅÌÅÍÍÛÅ!!! ÑÎÒÍÈ ÈÕ!!! Íàõóé èõ. Ðåøèòåëüíî.
+// Ð“Ð›ÐžÐ‘ÐÐ›Ð¬ÐÐ«Ð• ÐŸÐ•Ð Ð•ÐœÐ•ÐÐÐ«Ð•!!! Ð¡ÐžÐ¢ÐÐ˜ Ð˜Ð¥!!! ÐÐ°Ñ…ÑƒÐ¹ Ð¸Ñ…. Ð ÐµÑˆÐ¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾.
 
 
 
@@ -513,12 +513,12 @@ void CGUIScheme::BeginUI()
 		return;
 	}*/
 	Drawing = 1;
-//	ImgData.BeginDraw(); ÓÁÐÀË
+//	ImgData.BeginDraw(); Ð£Ð‘Ð ÐÐ›
 }
 void CGUIScheme::EndUI()
 {
 	if (Drawing)
-	//	ImgData.EndDraw(); ÓÁÐÀË
+	//	ImgData.EndDraw(); Ð£Ð‘Ð ÐÐ›
 	Drawing = 0;
 }
 void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int h)
@@ -527,9 +527,9 @@ void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int
 	if (!Drawing)
 		return;
 	if (target == 0|| target > 8)
-		//ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5], 0); //- lt ÓÁÐÀË
+		//ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5], 0); //- lt Ð£Ð‘Ð ÐÐ›
 	if (target == 1)
-		//ImgData.PushQuadEx(x,y,z,w,h, ÓÁÐÀË
+		//ImgData.PushQuadEx(x,y,z,w,h, Ð£Ð‘Ð ÐÐ›
 // 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
 // 		Styles[StInd].Data[1],
 // 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
@@ -577,7 +577,7 @@ void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int
 // 		Styles[StInd].Data[6],
 // 		Styles[StInd].Data[7], 0);//br
 
-/// Êñòàòè, òî, ÷òî ÿ çàêîììåíòèë âûãëÿäèò êàê ãîâíîêîä, ÷òî, ïðàâäà íè÷åãî íåëüçÿ ñäåëàòü?
+/// ÐšÑÑ‚Ð°Ñ‚Ð¸, Ñ‚Ð¾, Ñ‡Ñ‚Ð¾ Ñ Ð·Ð°ÐºÐ¾Ð¼Ð¼ÐµÐ½Ñ‚Ð¸Ð» Ð²Ñ‹Ð³Ð»ÑÐ´Ð¸Ñ‚ ÐºÐ°Ðº Ð³Ð¾Ð²Ð½Ð¾ÐºÐ¾Ð´, Ñ‡Ñ‚Ð¾, Ð¿Ñ€Ð°Ð²Ð´Ð° Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½ÐµÐ»ÑŒÐ·Ñ ÑÐ´ÐµÐ»Ð°Ñ‚ÑŒ?
 }
 bool CGUIScheme::Draw(int StInd, int x, int y, float z, int w, int h)
 {
@@ -635,7 +635,7 @@ void CGUIScheme::CopyWidget( int kind, PWidget wdg )
 {
 	if (wdg == NULL)
 		return;
-	if (objects[kind] == NULL) // È êòî áëÿòü áóäåò ïðîâåðÿòü, à? Âîò çäåñü ïàäàëî. Êîñÿê òî íå çäåñü, íî åñëè áû íå ýòî, òî ïðîãà áû íîðìàëüíî çàâåðøèëàñü
+	if (objects[kind] == NULL) // Ð˜ ÐºÑ‚Ð¾ Ð±Ð»ÑÑ‚ÑŒ Ð±ÑƒÐ´ÐµÑ‚ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÑÑ‚ÑŒ, Ð°? Ð’Ð¾Ñ‚ Ð·Ð´ÐµÑÑŒ Ð¿Ð°Ð´Ð°Ð»Ð¾. ÐšÐ¾ÑÑÐº Ñ‚Ð¾ Ð½Ðµ Ð·Ð´ÐµÑÑŒ, Ð½Ð¾ ÐµÑÐ»Ð¸ Ð±Ñ‹ Ð½Ðµ ÑÑ‚Ð¾, Ñ‚Ð¾ Ð¿Ñ€Ð¾Ð³Ð° Ð±Ñ‹ Ð½Ð¾Ñ€Ð¼Ð°Ð»ÑŒÐ½Ð¾ Ð·Ð°Ð²ÐµÑ€ÑˆÐ¸Ð»Ð°ÑÑŒ
 		return;
 	string _tmp = typeid(*objects[kind]).name();
 	if (_tmp == "class CButton")
@@ -771,7 +771,7 @@ void CForm::Draw()
 		return;
 	if (Properties[GUI_DRAWFORMHEADER] == 1)
 	{
-		// NO~ Äà¸øü åäèíîîáðàçèå â õðàíåíèè öâåòà! Ãåò (R/G/B/A) Value èäóò ëåñîì!!! ÄÀ!!!!
+		// NO~ Ð”Ð°Ñ‘ÑˆÑŒ ÐµÐ´Ð¸Ð½Ð¾Ð¾Ð±Ñ€Ð°Ð·Ð¸Ðµ Ð² Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ð¸ Ñ†Ð²ÐµÑ‚Ð°! Ð“ÐµÑ‚ (R/G/B/A) Value Ð¸Ð´ÑƒÑ‚ Ð»ÐµÑÐ¾Ð¼!!! Ð”Ð!!!!
 		//glColor4f((float)_GetRValue(HeaderColor)/256,(float)_GetGValue(HeaderColor)/256,(float)_GetBValue(HeaderColor)/256,1);
 		GUIScheme->Draw(HeaderStyle, Left, Top, ZDepth, Width, HeaderHeight);
 		glColor4f(1,1,1,1);
@@ -927,7 +927,7 @@ void CForm::DrawText()
 		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(HeaderStyle);
 		fnt->Pos.y = scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
 		fnt->doRenderToRect = true;
-		//fnt->aabb.x = GUIScheme->GetCWidth(HeaderStyle, Width); Ñàìûé ïðîñòîé ñïîñîá èçáàâèòüñÿ îò îøèáêè ïðè êîìïèëÿöèè íåèñïîëüçóåìîãî êîäà - çàêîììåíòèðîâàòü ñòðîêó ñ îøèáêîé ^^
+		//fnt->aabb.x = GUIScheme->GetCWidth(HeaderStyle, Width); Ð¡Ð°Ð¼Ñ‹Ð¹ Ð¿Ñ€Ð¾ÑÑ‚Ð¾Ð¹ ÑÐ¿Ð¾ÑÐ¾Ð± Ð¸Ð·Ð±Ð°Ð²Ð¸Ñ‚ÑŒÑÑ Ð¾Ñ‚ Ð¾ÑˆÐ¸Ð±ÐºÐ¸ Ð¿Ñ€Ð¸ ÐºÐ¾Ð¼Ð¿Ð¸Ð»ÑÑ†Ð¸Ð¸ Ð½ÐµÐ¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÐ¼Ð¾Ð³Ð¾ ÐºÐ¾Ð´Ð° - Ð·Ð°ÐºÐ¾Ð¼Ð¼ÐµÐ½Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ¾Ð¹ ^^
 		//fnt->aabb.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
 		fnt->Print(Caption.c_str());
 		fnt->doRenderToRect = false;
@@ -988,7 +988,7 @@ void CButton::DrawText()
 		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd]);
 		fnt->Pos.y = scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
 		fnt->doRenderToRect = true;
-//		Ñàìûé ïðîñòîé ñïîñîá èçáàâèòüñÿ îò îøèáêè ïðè êîìïèëÿöèè íåèñïîëüçóåìîãî êîäà - çàêîììåíòèðîâàòü ñòðîêó ñ îøèáêîé ^^
+//		Ð¡Ð°Ð¼Ñ‹Ð¹ Ð¿Ñ€Ð¾ÑÑ‚Ð¾Ð¹ ÑÐ¿Ð¾ÑÐ¾Ð± Ð¸Ð·Ð±Ð°Ð²Ð¸Ñ‚ÑŒÑÑ Ð¾Ñ‚ Ð¾ÑˆÐ¸Ð±ÐºÐ¸ Ð¿Ñ€Ð¸ ÐºÐ¾Ð¼Ð¿Ð¸Ð»ÑÑ†Ð¸Ð¸ Ð½ÐµÐ¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÐ¼Ð¾Ð³Ð¾ ÐºÐ¾Ð´Ð° - Ð·Ð°ÐºÐ¾Ð¼Ð¼ÐµÐ½Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ¾Ð¹ ^^
 //		fnt->aabb.x = GUIScheme->GetCWidth(Styles[StyleInd], Width); 
 //		fnt->aabb.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
 		fnt->Print(Caption.c_str());
@@ -1104,7 +1104,7 @@ void CEdit::DrawText()
 	if (fnt!=NULL || !Visible)
 	{
 		//fnt->PrintEx(
-		//glColor4f(0,0,1,1); > ÁËßÒÜ!
+		//glColor4f(0,0,1,1); > Ð‘Ð›Ð¯Ð¢Ð¬!
 		fnt->tClr = RGBAf(0.1f, 0.2f, 1.0f, 1.0f);
 		int l = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
 		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);

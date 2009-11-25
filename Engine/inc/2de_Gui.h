@@ -197,7 +197,7 @@ typedef CGraphObj *PWidget;
 //CGObj List
 
 
-struct Style	// Структура, это класс со всеми членами в паблик по дефолту. Где префикс С блять?!?!
+struct Style	// РЎС‚СЂСѓРєС‚СѓСЂР°, СЌС‚Рѕ РєР»Р°СЃСЃ СЃРѕ РІСЃРµРјРё С‡Р»РµРЅР°РјРё РІ РїР°Р±Р»РёРє РїРѕ РґРµС„РѕР»С‚Сѓ. Р“РґРµ РїСЂРµС„РёРєСЃ РЎ Р±Р»СЏС‚СЊ?!?!
 {
 	unsigned short int Data[10];
 };
@@ -208,9 +208,9 @@ public:
 	CGUIScheme(char* fname, char* tname);
 	~CGUIScheme();
 	void					Release();
-	PWidget					objects[200]; // с маленькой буквы
+	PWidget					objects[200]; // СЃ РјР°Р»РµРЅСЊРєРѕР№ Р±СѓРєРІС‹
 	int						ObjCount;
-	Style					Styles[200]; // а тут с большой, блять, Петя, что за хуйня. Хотя это мелочи, но ты же сам понимаешь. О какой тут архитектуре речь, если ты...
+	Style					Styles[200]; // Р° С‚СѓС‚ СЃ Р±РѕР»СЊС€РѕР№, Р±Р»СЏС‚СЊ, РџРµС‚СЏ, С‡С‚Рѕ Р·Р° С…СѓР№РЅСЏ. РҐРѕС‚СЏ СЌС‚Рѕ РјРµР»РѕС‡Рё, РЅРѕ С‚С‹ Р¶Рµ СЃР°Рј РїРѕРЅРёРјР°РµС€СЊ. Рћ РєР°РєРѕР№ С‚СѓС‚ Р°СЂС…РёС‚РµРєС‚СѓСЂРµ СЂРµС‡СЊ, РµСЃР»Рё С‚С‹...
 	int						StyleCount;
 	void					BeginUI();
 	void					EndUI();
@@ -236,7 +236,7 @@ bool						LoadGUI(char *fname);
 
 //////////////////////////////////////////////////////////////////////////
 // !!!! BAD !!! __forceinline is Microsoft specific
-// делай как в mathutils.h
+// РґРµР»Р°Р№ РєР°Рє РІ mathutils.h
 //////////////////////////////////////////////////////////////////////////
 
 __INLINE bool ISFORM(CGraphObj *obj){return ((obj->getStyle() & STYLE_OBJMASK) == STYLE_OBJFORM)?true:false;}
@@ -324,7 +324,7 @@ public:
 	~CEdit(){};
 	virtual void			Draw();
 	virtual bool			Update(float dt);
-	// сорри, нехуй в аське не отвечать
+	// СЃРѕСЂСЂРё, РЅРµС…СѓР№ РІ Р°СЃСЊРєРµ РЅРµ РѕС‚РІРµС‡Р°С‚СЊ
 	virtual void			Step();
 	virtual void			SetCaption(string _caption);
 	virtual void			MouseProcess(byte btn, byte event);

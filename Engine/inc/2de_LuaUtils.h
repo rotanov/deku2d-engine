@@ -20,12 +20,12 @@ public:
 	GlobalLuaState(const std::string& filename);
 	~GlobalLuaState();
 
-	// функции, определенные внутри скрипта filename
+	// С„СѓРЅРєС†РёРё, РѕРїСЂРµРґРµР»РµРЅРЅС‹Рµ РІРЅСѓС‚СЂРё СЃРєСЂРёРїС‚Р° filename
 	void outerFunction1();
 	int outerFunction2();
 	std::string outerFunction3();
 
-	// функции, которые могут быть вызваны из скрипта filename
+	// С„СѓРЅРєС†РёРё, РєРѕС‚РѕСЂС‹Рµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РІС‹Р·РІР°РЅС‹ РёР· СЃРєСЂРёРїС‚Р° filename
 	void innerFunction1();
 	int innerFunction2();
 	std::string innerFunction3();
@@ -34,7 +34,7 @@ protected:
 	lua_State* L_;
 };
 
-// кто-то где-то должен создать этот указатель
+// РєС‚Рѕ-С‚Рѕ РіРґРµ-С‚Рѕ РґРѕР»Р¶РµРЅ СЃРѕР·РґР°С‚СЊ СЌС‚РѕС‚ СѓРєР°Р·Р°С‚РµР»СЊ
 extern GlobalLuaState* globalLuaState;
 
 //////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@ typedef void (*CKeyEvent)(CHandle, int);
 
 //////////////////////////////////////////////////////////////////////////
 // !!!! BAD !!! __forceinline is microsoft specific
-// δελΰι κΰκ β mathutils.h
+// Π΄ΠµΠ»Π°ΠΉ ΠΊΠ°ΠΊ Π² mathutils.h
 //////////////////////////////////////////////////////////////////////////
 
 #define  SAFECALL(X, Sender) if (X != NULL) {(X)((CHandle)Sender);}

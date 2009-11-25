@@ -189,8 +189,8 @@ bool CResourceManager::LoadResources()
 	DataLister.List(DataPath);
 
 	ResourceList->LoadFromFile(DEFUALT_RESOURCE_LIST_PATH);
-
-	//ResourceList = &DataLister.List(DataPath);
+	
+	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
 
 	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
 		if (!LoadSection(strSections[i], fncInitializers[i]))
@@ -224,16 +224,6 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 	return result;
 }
 
-void CDataLister::DelLastDirFromPath( char* src )
-{
-	int i = strlen(src)-1;
-	while(src[i] == '\\' || src[i] == '/')
-		i--;
-	while(src[i] != '\\' && src[i] != '/')
-		i--;
-	src[i+1] = 0;
-}
-
 // CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
 {
@@ -249,35 +239,6 @@ void CDataLister::List(string DataRoot)
 	Table.SaveToFile("Config/Resources.xml");
 
 	// return Table;
-
-	/*HANDLE hfile;
-	char TempDir[MAX_PATH];
-	TempDir[0] = 0;
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-	strcat(TempDir, MainDir);
-	MainDirL = strlen(MainDir);
-	strcat(MainDir, "data\\");
-	SetCurrentDirectory(MainDir);
-
-	table.First->Name = "Data";
-
-	CurrDir[0] = 0;
-	strcat(CurrDir, MainDir);
-	cNode = table.First;
-
-	Log("----------", "");
-	hfile = FindFirstFile("*.*", &fdata);
-	ExploreDir(hfile);
-	Log("----------", "");
-
-	SetCurrentDirectory(MainDir);
-
-	table.SaveToFile("..\\Config\\Resources.xml");
-
-	SetCurrentDirectory(TempDir);	Ебано как-то, но таки хуй с ним.
-
-	return 0x0;*/
 }
 
 void CDataLister::ExploreDirectory(string Path)
@@ -356,39 +317,3 @@ string CDataLister::GetFileNameWithoutExtension(string FileName)
 
 	return FileName;
 }
-
-/*void CDataLister::ExploreDir( HANDLE hfile )
-{
-	while (FindNextFile(hfile, &fdata))
-	{
-		if (fdata.cFileName[0] == '.' || fdata.cFileName[0] == '_')
-			continue;
-		if (fdata.dwFileAttributes == 16)
-		{
-			//Log("FOLDER", "%s", fdata.cFileName);			
-			strcat(CurrDir, (string(fdata.cFileName)+string("\\")).c_str());
-			SetCurrentDirectory(CurrDir);
-
-			CXMLNode *tmp = cNode;
-			cNode = cNode->Add(fdata.cFileName, fdata.cFileName);
-
-			HANDLE thandle = FindFirstFile("*.*", &fdata);
-			ExploreDir(thandle);
-
-			cNode = tmp;
-
-			DelLastDirFromPath(CurrDir);
-		}
-		else
-		{
-			//Log("FILE", "%s", fdata.cFileName);
-			char *tmp = new char [MAX_PATH];
-			tmp[0] = 0;
-			strcat(tmp, fdata.cFileName);
-			DelExtFromFName(tmp);
-			if (strnicmp(tmp, "thumbs", MAX_PATH) != 0)
-				cNode->Add(tmp , (string(CurrDir+MainDirL) + string(fdata.cFileName)).c_str() );
-			delete [] tmp;
-		}
-	}
-}*/

@@ -6,7 +6,7 @@ GlobalLuaState* globalLuaState = 0; // todo remove
 
 namespace
 {
-	// маленький помощник, чтобы самим не считать количество lua_push...() и lua_pop()
+	// РјР°Р»РµРЅСЊРєРёР№ РїРѕРјРѕС‰РЅРёРє, С‡С‚РѕР±С‹ СЃР°РјРёРј РЅРµ СЃС‡РёС‚Р°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ lua_push...() Рё lua_pop()
 	class LuaStackGuard
 	{
 	public:
@@ -34,8 +34,8 @@ namespace
 
 	int fun2(lua_State* L)
 	{
-		// LuaStackGuard здесь не нужен!
-		// мы ИЗМЕНЯЕМ Lua-state!
+		// LuaStackGuard Р·РґРµСЃСЊ РЅРµ РЅСѓР¶РµРЅ!
+		// РјС‹ РР—РњР•РќРЇР•Рњ Lua-state!
 		int retVal = globalLuaState->innerFunction2();
 
 		lua_pushnumber(L, retVal);
@@ -45,8 +45,8 @@ namespace
 
 	int fun3(lua_State* L)
 	{
-		// LuaStackGuard здесь не нужен!
-		// мы ИЗМЕНЯЕМ Lua-state!
+		// LuaStackGuard Р·РґРµСЃСЊ РЅРµ РЅСѓР¶РµРЅ!
+		// РјС‹ РР—РњР•РќРЇР•Рњ Lua-state!
 		string retVal = globalLuaState->innerFunction3();
 
 		lua_pushstring(L, retVal.c_str());
@@ -60,13 +60,13 @@ GlobalLuaState::GlobalLuaState(const string& filename)
 	L_ = luaL_newstate();
 	luaL_openlibs(L_);
 
-	// поскольку внутренние функции могут быть вызваны в процессе загрузки скрипта, 
-	// то сначала регистрируем их
+	// РїРѕСЃРєРѕР»СЊРєСѓ РІРЅСѓС‚СЂРµРЅРЅРёРµ С„СѓРЅРєС†РёРё РјРѕРіСѓС‚ Р±С‹С‚СЊ РІС‹Р·РІР°РЅС‹ РІ РїСЂРѕС†РµСЃСЃРµ Р·Р°РіСЂСѓР·РєРё СЃРєСЂРёРїС‚Р°, 
+	// С‚Рѕ СЃРЅР°С‡Р°Р»Р° СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РёС…
 	lua_register(L_, "innerFunction1", fun1);
 	lua_register(L_, "innerFunction2", fun2);
 	lua_register(L_, "innerFunction3", fun3);
 
-	// загружаем скрипт
+	// Р·Р°РіСЂСѓР¶Р°РµРј СЃРєСЂРёРїС‚
 	if(luaL_dofile(L_, filename.c_str()))
 	{
 		string err(lua_tostring(L_, -1));
@@ -108,7 +108,7 @@ int GlobalLuaState::outerFunction2()
 
 	lua_getglobal(L_, "outerFunction2"); // stack: outerFunction1
 
-	if(lua_pcall(L_, 0, 1, 0)) // stack: число
+	if(lua_pcall(L_, 0, 1, 0)) // stack: С‡РёСЃР»Рѕ
 	{
 		string err(lua_tostring(L_, -1));
 
@@ -123,9 +123,9 @@ int GlobalLuaState::outerFunction2()
 
 	return result;
 
-	// после выхода из функции стек Lua должен быть в том же состоянии, 
-	// что и до входа в функцию.
-	// stackGuard сам все подчистит за нами
+	// РїРѕСЃР»Рµ РІС‹С…РѕРґР° РёР· С„СѓРЅРєС†РёРё СЃС‚РµРє Lua РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІ С‚РѕРј Р¶Рµ СЃРѕСЃС‚РѕСЏРЅРёРё, 
+	// С‡С‚Рѕ Рё РґРѕ РІС…РѕРґР° РІ С„СѓРЅРєС†РёСЋ.
+	// stackGuard СЃР°Рј РІСЃРµ РїРѕРґС‡РёСЃС‚РёС‚ Р·Р° РЅР°РјРё
 }
 
 std::string GlobalLuaState::outerFunction3()
@@ -135,7 +135,7 @@ std::string GlobalLuaState::outerFunction3()
 
 	lua_getglobal(L_, "outerFunction3"); // stack: outerFunction1
 
-	if(lua_pcall(L_, 0, 1, 0)) // stack: строка
+	if(lua_pcall(L_, 0, 1, 0)) // stack: СЃС‚СЂРѕРєР°
 	{
 		string err(lua_tostring(L_, -1));
 
@@ -146,7 +146,7 @@ std::string GlobalLuaState::outerFunction3()
 
 	string result;
 
-	// функция может вернуть nil
+	// С„СѓРЅРєС†РёСЏ РјРѕР¶РµС‚ РІРµСЂРЅСѓС‚СЊ nil
 	if(const char* s = lua_tostring(L_, 1))
 	{
 		result = s;
@@ -156,9 +156,9 @@ std::string GlobalLuaState::outerFunction3()
 
 	return result;
 
-	// после выхода из функции стек Lua должен быть в том же состоянии, 
-	// что и до входа в функцию.
-	// stackGuard сам все подчистит за нами
+	// РїРѕСЃР»Рµ РІС‹С…РѕРґР° РёР· С„СѓРЅРєС†РёРё СЃС‚РµРє Lua РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІ С‚РѕРј Р¶Рµ СЃРѕСЃС‚РѕСЏРЅРёРё, 
+	// С‡С‚Рѕ Рё РґРѕ РІС…РѕРґР° РІ С„СѓРЅРєС†РёСЋ.
+	// stackGuard СЃР°Рј РІСЃРµ РїРѕРґС‡РёСЃС‚РёС‚ Р·Р° РЅР°РјРё
 }
 
 Vector2 pnts2[2];
