@@ -1,11 +1,11 @@
 <configuration>
-	WindowWidth					= "1240"
+	WindowWidth					= "640"
 	WindowHeight				= "480"
 	WindowBpp					= "32"
-	WindowCaption				= "Pong"
+	WindowCaption				= "Tanks"
 	DoCalcFps					= "true"
-	DoLimitFps					= "false"
-	FpsLimit					= "60"
-	DataPath					= "Data"
+	DoLimitFps					= "true"
+	FpsLimit					= "30"
+	DataPath					= "../../../Data"
 	doLoadDefaultResourceList	= "true" // temp
 </configuration>

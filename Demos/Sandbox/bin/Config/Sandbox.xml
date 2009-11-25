@@ -2,10 +2,10 @@
 	WindowWidth					= "640"
 	WindowHeight				= "480"
 	WindowBpp					= "32"
-	WindowCaption				= "Tanks"
+	WindowCaption				= "Sandbox"
 	DoCalcFps					= "true"
-	DoLimitFps					= "true"
-	FpsLimit					= "30"
-	DataPath					= "Data"
+	DoLimitFps					= "false"
+	FpsLimit					= "60"
+	DataPath					= "../../../Data"
 	doLoadDefaultResourceList	= "true" // temp
 </configuration>

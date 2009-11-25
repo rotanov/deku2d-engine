@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\..\bin"
-			IntermediateDirectory="$(SolutionDir)\..\obj\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			BuildLogFile="$(IntDir)\$(ProjectName).BuildLog.htm"
@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\zlib\;$(SolutionDir)\Engine\inc\libpng\;$(SolutionDir)\Engine\inc\;$(SolutionDir)\Engine\inc\SDL\;$(SolutionDir)\Engine\inc\gl\;$(SolutionDir)\Engine\inc\Lua\;$(SolutionDir)\Engine\inc\tnl\;$(SolutionDir)\Engine\inc\libtomcrypt\;$(SolutionDir)\Engine\inc\dirent\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -70,7 +70,7 @@
 				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir)\..\lib\"
+				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
 				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
@@ -105,8 +105,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\..\bin"
-			IntermediateDirectory="$(SolutionDir)\..\obj\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			ManagedExtensions="0"
@@ -133,7 +133,7 @@
 				AdditionalOptions="/Zc:wchar_t-"
 				Optimization="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\zlib\;$(SolutionDir)\Engine\inc\libpng\;$(SolutionDir)\Engine\inc\;$(SolutionDir)\Engine\inc\SDL\;$(SolutionDir)\Engine\inc\gl\;$(SolutionDir)\Engine\inc\Lua\;$(SolutionDir)\Engine\inc\tnl\;$(SolutionDir)\Engine\inc\libtomcrypt\;$(SolutionDir)\Engine\inc\dirent\;inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -152,8 +152,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
-				AdditionalLibraryDirectories="$(SolutionDir)\..\lib\"
+				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
+				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
 				GenerateManifest="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -194,11 +194,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\main.cpp"
+				RelativePath=".\src\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Pong.cpp"
+				RelativePath=".\src\Pong.cpp"
 				>
 			</File>
 		</Filter>
@@ -208,7 +208,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Pong.h"
+				RelativePath=".\inc\Pong.h"
 				>
 			</File>
 		</Filter>

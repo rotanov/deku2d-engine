@@ -7,7 +7,7 @@
 	DoLimitFps				= "false"
 	FpsLimit				= "60"
 	XMLResourcesFilename    = "Config/Resources.xml"
-    DataPath               	= "Data"
+    DataPath               	= "../../../Data"
 	doLoadDefaultResourceList	= "true"	
 
 	DefaultCellSize			= "4"

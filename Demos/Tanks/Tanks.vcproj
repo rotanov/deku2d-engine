@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\..\bin"
-			IntermediateDirectory="$(SolutionDir)\..\obj\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			BuildLogFile="$(IntDir)\$(ProjectName).BuildLog.htm"
@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\zlib\;$(SolutionDir)\Engine\inc\libpng\;$(SolutionDir)\Engine\inc\;$(SolutionDir)\Engine\inc\SDL\;$(SolutionDir)\Engine\inc\gl\;$(SolutionDir)\Engine\inc\Lua\;$(SolutionDir)\Engine\inc\tnl\;$(SolutionDir)\Engine\inc\libtomcrypt\;$(SolutionDir)\Engine\inc\dirent\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,9 +65,9 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:&quot;LIBCMTD&quot; /NODEFAULTLIB:&quot;MSVCRT&quot;"
 				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcryptd.lib tnld.lib wsock32.lib Deku2d.$(ConfigurationName).lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
+				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir)\..\lib\"
+				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
 				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
@@ -103,8 +103,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\..\bin"
-			IntermediateDirectory="$(SolutionDir)\..\obj\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			ManagedExtensions="0"
@@ -131,7 +131,7 @@
 				AdditionalOptions="/Zc:wchar_t-"
 				Optimization="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\zlib\;$(SolutionDir)\Engine\inc\libpng\;$(SolutionDir)\Engine\inc\;$(SolutionDir)\Engine\inc\SDL\;$(SolutionDir)\Engine\inc\gl\;$(SolutionDir)\Engine\inc\Lua\;$(SolutionDir)\Engine\inc\tnl\;$(SolutionDir)\Engine\inc\libtomcrypt\;$(SolutionDir)\Engine\inc\dirent\;inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -151,8 +151,8 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:&quot;LIBCMT&quot;"
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcrypt.lib tnl.lib wsock32.lib Deku2d.$(ConfigurationName).lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
-				AdditionalLibraryDirectories="$(SolutionDir)\..\lib\"
+				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
+				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
 				GenerateManifest="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -191,15 +191,15 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\MainTanks.cpp"
+				RelativePath=".\src\MainTanks.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Tanks.cpp"
+				RelativePath=".\src\Tanks.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\TanksNetwork.cpp"
+				RelativePath=".\src\TanksNetwork.cpp"
 				>
 			</File>
 		</Filter>
@@ -207,11 +207,11 @@
 			Name="inc"
 			>
 			<File
-				RelativePath=".\Tanks.h"
+				RelativePath=".\inc\Tanks.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TanksNetwork.h"
+				RelativePath=".\inc\TanksNetwork.h"
 				>
 			</File>
 		</Filter>
@@ -220,18 +220,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\Resource\Planet.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\Resource\Resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Resource\Resource.rc"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

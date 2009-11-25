@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\..\bin"
-			IntermediateDirectory="$(SolutionDir)\..\obj\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			BuildLogFile="$(IntDir)\$(ProjectName).BuildLog.htm"
@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\zlib\;$(SolutionDir)\Engine\inc\libpng\;$(SolutionDir)\Engine\inc\;$(SolutionDir)\Engine\inc\SDL\;$(SolutionDir)\Engine\inc\gl\;$(SolutionDir)\Engine\inc\Lua\;$(SolutionDir)\Engine\inc\tnl\;$(SolutionDir)\Engine\inc\libtomcrypt\;$(SolutionDir)\Engine\inc\dirent\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,9 +65,9 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
 				AdditionalDependencies="libpng.lib zlib.lib  OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
+				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir)\..\lib\"
+				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="2"
@@ -101,8 +101,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\..\bin"
-			IntermediateDirectory="$(SolutionDir)\..\obj\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)\zlib\;$(SolutionDir)\libpng\;$(SolutionDir)\inc\;$(SolutionDir)\SDL\;$(SolutionDir)\gl\;$(SolutionDir)\Lua\;$(SolutionDir)\tnl\;$(SolutionDir)\libtomcrypt\;$(SolutionDir)\dirent\"
+				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\zlib\;$(SolutionDir)\Engine\inc\libpng\;$(SolutionDir)\Engine\inc\;$(SolutionDir)\Engine\inc\SDL\;$(SolutionDir)\Engine\inc\gl\;$(SolutionDir)\Engine\inc\Lua\;$(SolutionDir)\Engine\inc\tnl\;$(SolutionDir)\Engine\inc\libtomcrypt\;$(SolutionDir)\Engine\inc\dirent\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -145,9 +145,9 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="OpenGl32.lib Glu32.lib"
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib"
-				OutputFile="$(SolutionDir)\..\bin\$(ProjectName).$(ConfigurationName).exe"
+				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(SolutionDir)\..\lib\"
+				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="1"
@@ -191,7 +191,7 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\Font editor.cpp"
+				RelativePath=".\Src\Font editor.cpp"
 				>
 			</File>
 		</Filter>
@@ -201,15 +201,15 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\Resource\Planet.ico"
+				RelativePath=".\Res\Planet.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\Resource.h"
+				RelativePath=".\Res\Resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource\Resource.rc"
+				RelativePath=".\Res\Resource.rc"
 				>
 			</File>
 		</Filter>

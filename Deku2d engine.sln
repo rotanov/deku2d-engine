@@ -1,32 +1,32 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcproj", "{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Demos\Sandbox\Sandbox.vcproj", "{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tanks", "Tanks\Tanks.vcproj", "{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tanks", "Demos\Tanks\Tanks.vcproj", "{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Font editor", "Font editor\Font editor.vcproj", "{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Font editor", "Demos\Font editor\Font editor.vcproj", "{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Level editor", "Level editor\Level editor.vcproj", "{B18211B0-4D50-4F93-A351-4530E915E979}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Level editor", "Demos\Level editor\Level editor.vcproj", "{B18211B0-4D50-4F93-A351-4530E915E979}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pong", "Pong\Pong.vcproj", "{D18B515C-FBC6-4BD4-8299-735BA342BEC4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pong", "Demos\Pong\Pong.vcproj", "{D18B515C-FBC6-4BD4-8299-735BA342BEC4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Deku2d", "Deku2d\Deku2d.vcproj", "{35F1F297-4147-41B6-9B7D-09F5670F3E54}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Deku2d", "Engine\Deku2d.vcproj", "{35F1F297-4147-41B6-9B7D-09F5670F3E54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
