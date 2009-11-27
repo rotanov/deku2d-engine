@@ -55,7 +55,7 @@ const char* CObject::GetName()
 	return name.c_str();
 }
 
-uint CObject::GetID()
+unsigned int CObject::GetID()
 {
 	return id;
 }

@@ -350,6 +350,48 @@ float fCosd(float angle){return costable[(int)(angle*deganglem)%sincostable_dim]
 float fCosi(int index){return costable[index%sincostable_dim];}
 
 
+
+//////////////////////////////////////////////////////////////////////////
+//	Geometry
+
+CGeometry::CGeometry()
+{
+	Box  = CAABB(0.0f, 0.0f, 0.0f, 0.0f);
+	type = 0;
+}
+
+
+
+void CPolygon::Reset( int _numV )
+{
+	if (V != NULL)
+		delete [] V;
+	V = new Vector2 [numV];
+	memset(V, 0, sizeof(V[0])*numV);
+}
+
+void CPolygon::CalcBBOX()
+{
+	if (numV == 0)
+		return;
+	if (V == NULL)
+		return;
+	Box.vMin.x = 0xffffff;
+	Box.vMin.y = 0xffffff;
+	Box.vMax.x = -0xffffff;
+	Box.vMax.x = -0xffffff;
+	for(int i = 0; i< numV; i++)
+	{
+		Box.Add(V[i]);
+	}
+}
+
+CPolygon::CPolygon( int _numV ) :numV(_numV)
+{
+	V = new Vector2 [numV];
+	memset(V, 0, sizeof(V[0])*numV);
+}
+
 // Polygons collision stuff will be here
 
 void GetInterval(const Vector2 *axVertices, int iNumVertices, 
@@ -364,8 +406,8 @@ bool IntervalIntersect(const CPolygon* A,
 					   float& taxis, float tmax);
 
 bool CPolygon::Collide(const CPolygon* A, const Vector2& Apos, const Vector2& Avel, const Matrix2& Aorient,
-						const CPolygon* B, const Vector2& Bpos, const Vector2& Bvel, const Matrix2& Borient,
-						Vector2& n, float& depth)
+					   const CPolygon* B, const Vector2& Bpos, const Vector2& Bvel, const Matrix2& Borient,
+					   Vector2& n, float& depth)
 {
 	if (!A || !B)
 		return false;
@@ -478,29 +520,6 @@ bool CPolygon::Collide(const CPolygon* A, const Vector2& Apos, const Vector2& Av
 	return true;
 }
 
-void CPolygon::Reset( int _numV )
-{
-	if (V != NULL)
-		delete [] V;
-	V = new Vector2 [numV];
-	memset(V, 0, sizeof(V[0])*numV);
-}
-
-void CPolygon::CalcBBOX()
-{
-	if (numV == 0)
-		return;
-	if (V == NULL)
-		return;
-	box.vMin.x = 0xffffff;
-	box.vMin.y = 0xffffff;
-	box.vMax.x = -0xffffff;
-	box.vMax.x = -0xffffff;
-	for(int i = 0; i< numV; i++)
-	{
-		box.Add(V[i]);
-	}
-}
 
 void GetInterval(const Vector2 *axVertices, int iNumVertices, const Vector2& xAxis, float& min, float& max)
 {

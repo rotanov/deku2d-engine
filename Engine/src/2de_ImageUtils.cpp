@@ -12,7 +12,7 @@ bool CImageData::LoadBMP(const char * name)
 	BITMAPFILEHEADER bfh ;
 	BITMAPINFO bi;
 	CFile file;
-	pbyte R, G, B;
+	byte* R, *G, *B;
 	byte temp;
 	
 	if (!file.Open(name, CFile::OPEN_MODE_READ))
@@ -63,11 +63,11 @@ bool  CImageData::MakeRGBA()
 {
 	if (data ==  NULL)
 		return false;
-	pbyte _data;
+	byte *_data;
 	_data = new byte [width*height*4];
 	if (_data == NULL)
 		return false;
-	pbyte Rs,Gs,Bs,Ap,Rp,Gp,Bp;
+	byte *Rs, *Gs, *Bs, *Ap, *Rp, *Gp, *Bp;
 	for(int i = 0;i < height*width; i++)
 	{
 		Rs = data + i*3;

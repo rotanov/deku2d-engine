@@ -81,7 +81,7 @@ struct BITMAPINFO
 class CImageData
 {
 public:
-	pbyte data;
+	byte* data;
 	unsigned int height;
 	unsigned int width;
 	byte bpp;

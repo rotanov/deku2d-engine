@@ -1335,37 +1335,40 @@ int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
 
 
 
- //**// Geometry //**//
+//////////////////////////////////////////////////////////////////////////
+//	Geometry
 
 class CGeometry
 {
 public:
-	int type;
-	CAABB box;
-	CGeometry()
-	{
-		box  = CAABB(0.0f, 0.0f, 0.0f, 0.0f);
-		type = 0;
-	}
+	int type;			// Определять тип одним интом как-то не очень хорошо. Да и вообще, чего это тип, я уже и забыл.
+	CAABB Box;
+	CGeometry();
 	virtual void CalcBBOX(){}
 };
 
 class CCircle : public CGeometry
 {
+	Vector2 Position;
 	scalar Radius;
-};
+	CCircle(Vector2 APosition, scalar ARadius) : Radius(ARadius), Position(APosition)
+	{
+		CalcBBOX();
+	}
+	void CalcBBOX()
+	{
+		Box.vMin = Vector2(Position.x - Radius, Position.y - Radius);
+		Box.vMin = Vector2(Position.x + Radius, Position.y + Radius);
+	}
+};	
 
 class CPolygon : public CGeometry
 {
 public:
 	int numV;		// кол-во вершин
-	Vector2 *V;		// указатель на массив вершин
+	Vector2 *V;		// указатель на массив вершин // И кто их создаёт? Кто их удаляет? Где они хранятся? Можно ли их легко добавлять, удалять? Кто вообще так пишет классы? Стоит ли это вынести в отдельный класс? Кто решит все эти вопросы? Зачем эта строка такая длинная? Что я курил на этих выходных?
 	CPolygon(): numV(0), V(NULL){ }
-	CPolygon(int _numV):numV(_numV)
-	{
-		V = new Vector2 [numV];
-		memset(V, 0, sizeof(V[0])*numV);
-	}
+	CPolygon(int _numV);
 	void Reset(int _numV);
 	void CalcBBOX();
 
@@ -1374,5 +1377,16 @@ public:
 						Vector2& n, float& depth);
 
 };
+
+class CRectangle : public CGeometry
+{
+
+};
+
+class CSegment : public CGeometry  // Do we really need it?
+{
+
+};
+
 
 #endif // _2DE_MATH_UTILS_H

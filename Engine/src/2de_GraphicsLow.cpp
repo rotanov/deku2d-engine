@@ -358,7 +358,7 @@ void CFont::Print( const char *text, ... )
 {
 	if (text == NULL)
 		return;
-	if ((uint)offset >= strlen(text) || offset < 0)
+	if ((unsigned int)offset >= strlen(text) || offset < 0)
 		return;
 
 	int swidth = 0, sheight = 0, selx = 0;
@@ -474,10 +474,10 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 		return -1;
 	if (t1 > t2 || t2 < 0)
 		return -1;
-	if ((uint)t2 >= strlen(text))
+	if ((unsigned int)t2 >= strlen(text))
 		return -1;
 	int r = 0;
-	for (uint i = t1; i <= t2; i++)
+	for (unsigned int i = t1; i <= t2; i++)
 		r += width[text[i]-32]+Distance;
 	return r;
 }
@@ -498,10 +498,10 @@ int CFont::GetStringHeightEx( int t1, int t2, const char *text )
 		return -1;
 	if (t1 > t2 || t2 < 0)
 		return -1;
-	if ((uint)t2 >= strlen(text))
+	if ((unsigned int)t2 >= strlen(text))
 		return -1;
-	int r = 0, l = (uint)strlen(text);
-	for (uint i=0; i<l; i++)
+	int r = 0, l = (unsigned int)strlen(text);
+	for (unsigned int i=0; i<l; i++)
 		r = Max(height[text[i]-32], r);
 	return r;
 }

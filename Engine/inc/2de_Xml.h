@@ -81,7 +81,7 @@ public:
 	int						depth;
 	CXMLNode				*Add(string name, string value);
 	void					Clear();
-	CXMLNode*				Get(pchar Str);
+	CXMLNode*				Get(char* Str);
 	char					*GetValue(){return (char*)Value.data();}
 	void					Write(CFile f, int depth);
 	bool					GetPair(string &Key, string &Value);

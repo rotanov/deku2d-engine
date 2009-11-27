@@ -76,19 +76,7 @@ using namespace std;
 #endif //_WIN32
 
 typedef unsigned char		byte;
-typedef byte*				pbyte;
-typedef char*				pchar;
-typedef unsigned long       DWORD;
-typedef int                 BOOL;
-typedef unsigned char       BYTE;
-typedef unsigned short      WORD;
-typedef float               FLOAT;
-typedef char				CHAR;
-typedef short				SHORT;
-typedef unsigned			uint;
-typedef long				LONG;
-
-typedef float scalar;
+typedef float				scalar;
 
 typedef bool (*Callback)();
 typedef bool (*UpdateProc)(scalar);
@@ -150,11 +138,11 @@ public:
 	const char*		GetName();
 	void			SetName(const char* AObjectName);
 	void			SetName(const string &AObjectName);
-	uint			GetID();
+	unsigned int	GetID();
 private:
 	string			name;
 	int				ListRefCount;
-	uint			id;
+	unsigned int	id;
 };
 
 /**
