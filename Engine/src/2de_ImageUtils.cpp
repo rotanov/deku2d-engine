@@ -8,7 +8,7 @@ RGBAub CImageData::Pixel(int x, int y)
 
 bool CImageData::LoadBMP(const char * name)
 {
-	DWORD dwDIBSize;
+	unsigned long dwDIBSize;
 	BITMAPFILEHEADER bfh ;
 	BITMAPINFO bi;
 	CFile file;

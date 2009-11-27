@@ -57,9 +57,9 @@ CEngine* CEngine::Instance()
 
 void CEngine::CalcFps()
 {
-	static DWORD DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
+	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
 	
-	DWORD ct = SDL_GetTicks();
+	unsigned long ct = SDL_GetTicks();
 	DTime = ct-_llt;
 	dt = (float)DTime * 0.001f;
 	_llt = ct;
@@ -76,7 +76,7 @@ bool CEngine::LimitFps()
 {
 	if (!doLimitFps)
 		return true;
-	static DWORD _lt = 0, _llt = 0;
+	static unsigned long _lt = 0, _llt = 0;
 	_lt = SDL_GetTicks();
 	if (_lt - _llt >= FpsLimit)
 	{				
@@ -116,7 +116,7 @@ void CEngine::SetState(int state, void* value)
 				doCalcFps = !!value;
 				break;
 			case STATE_FPS_LIMIT:
-				FpsLimit = 1000 / (DWORD)value;
+				FpsLimit = 1000 / (unsigned long)value;
 				break;
 			case STATE_SCREEN_WIDTH:
 				window->width = (int)value;
@@ -157,7 +157,7 @@ bool CEngine::Init()
 		DelFNameFromFPath(MainDir);
 		SetCurrentDirectory(MainDir);
 		delete [] MainDir;
-	}	
+	}
 #endif //_WIN32
 
 	if (!Config.LoadFromFile(ConfigFileName.c_str()))
@@ -449,10 +449,10 @@ void CEngine::GetState(int state, void* value)
 		*(Vector2*)value = MousePos;
 		break;
 	case STATE_FPS_LIMIT:
-		*(DWORD*)value = FpsLimit;
+		*(unsigned long*)value = FpsLimit;
 		break;
 	case STATE_FPS_COUNT:
-		*(DWORD*)value = FpsCount;
+		*(unsigned long*)value = FpsCount;
 		break;
 	case STATE_DELTA_TIME:
 		*(float*)value = dt;

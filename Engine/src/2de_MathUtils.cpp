@@ -118,7 +118,7 @@ int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, V
 	if (d <= 0) return min;
 }
 
-int PointPlanesSideEx(Vector3 *a, Vector3 *n,WORD *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth, Vector3 scaling)
+int PointPlanesSideEx(Vector3 *a, Vector3 *n, unsigned short *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth, Vector3 scaling)
 {
 	scalar d = 1; 
 	scalar min = 99999999;

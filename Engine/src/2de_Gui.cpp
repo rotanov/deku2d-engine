@@ -1675,4 +1675,4 @@ void CEdit::SetCaption( string _caption )
 	SelStart = 0;
 	SelLength = _caption.length();
 }
-#endif _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
+#endif // _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_

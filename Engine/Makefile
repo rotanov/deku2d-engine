@@ -35,10 +35,10 @@ debug: debug-compile makelib
 strict: strict-compile makelib
 
 release-compile:
-	g++ -fpermissive -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 debug-compile:
-	g++ -g3 -fpermissive -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -g3 -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 strict-compile:
 	g++ -Wall -c ${CFLAGS} ${SOURCES} ${LDFLAGS}

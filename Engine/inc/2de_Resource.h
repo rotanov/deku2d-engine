@@ -18,7 +18,7 @@
 #define CR_SECTION_TILESETS		"Tilesets"
 
 static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture, CTileset::NewTileset};
-static char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES, CR_SECTION_TILESETS};
+static const char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES, CR_SECTION_TILESETS};
 
 class CExtResRelation : public CObject
 {
@@ -120,7 +120,7 @@ public:
 			delete ResourceList;
 	}
 	bool		OpenResourceList(char *_ResourceListFileName);
-	bool		LoadSection(char *SectionName, CreateFunc creator);
+	bool		LoadSection(const char *SectionName, CreateFunc creator);
 	CObject*	LoadResource(char* section, char *name, CreateFunc creator);
 	bool		LoadResources();
 private:

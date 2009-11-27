@@ -29,7 +29,7 @@ CXMLNode::CXMLNode()
 ------------------------------------------------
 *	Returns pointer if success, NULL if failed.
 */
-CXMLNode *CXMLNode::Get(char* Str)
+CXMLNode *CXMLNode::Get(const char* Str)
 {
 	if (Str==NULL){
 		Log("ERROR", "Cannot get XML node for because string pointer has NULL value", Str);
@@ -406,7 +406,7 @@ bool CXMLTable::LoadFromFile(const char *fname)
 	string Value;//max allowed string - 4096
 //	memset(Buffer, 0, 4096);
 	//Log("XML", "Preparing");
-	int strstart = 0;
+	// int strstart = 0; // unused variable
 	First->Clear();
 	XMLNode _tmp = new CXMLNode;
 	XMLNode ptr = _tmp;

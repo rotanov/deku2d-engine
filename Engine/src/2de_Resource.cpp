@@ -1,5 +1,5 @@
 #ifdef _WIN32
-#include "dirent\dirent.h"
+#include "dirent/dirent.h"
 #else
 #include <dirent.h>
 #endif
@@ -151,7 +151,7 @@ int CFactory::_refcount = 0;
 
 
 
-bool CResourceManager::LoadSection(char *SectionName, CreateFunc creator)
+bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
 {
 	if (ResourceList == NULL)
 	{

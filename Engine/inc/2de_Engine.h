@@ -67,7 +67,7 @@ public:
 	CFontManager				*FontManager; // ...а тут опять указатель?! 
 	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
 	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
-	BOOL						keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
+	int						keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;
 
 	static CEngine*				Instance();
@@ -85,8 +85,8 @@ private:
 	string						ConfigFileName;
 	bool						doLimitFps;
 	bool						doLoadDefaultResourceList;
-	DWORD						FpsCount;
-	DWORD						FpsLimit;
+	unsigned long					FpsCount;
+	unsigned long					FpsLimit;
 	float						dt;
 	bool						isHaveFocus;
 	bool						userReInit;

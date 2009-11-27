@@ -1036,7 +1036,7 @@ void CGUIObject::SetParent(CGUIObject *AParent)
 //////////////////////////////////////////////////////////////////////////
 ///CGUIManager
 
-CGUIManager::CGUIManager(): KeyHoldRepeatInterval(50), KeyHoldRepeatDelay(300), tabholded(false), TimerAccum(0)
+CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), tabholded(false)
 {
 	SetName("CGUIManager");
 	FocusedOn = NULL;

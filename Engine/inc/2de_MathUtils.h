@@ -1322,7 +1322,7 @@ void CalcFrustumVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar, 
 
 int PointsPlaneSide(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
 int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth);
-int PointPlanesSideEx(Vector3 *a, Vector3 *n, WORD *iV, Vector3 offset, Matrix3 R, Vector3 point,int  fnum, Vector3 &normal, float &depth, Vector3 scaling);
+int PointPlanesSideEx(Vector3 *a, Vector3 *n, unsigned short *iV, Vector3 offset, Matrix3 R, Vector3 point,int  fnum, Vector3 &normal, float &depth, Vector3 scaling);
 
 
 scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
@@ -1351,7 +1351,7 @@ class CCircle : public CGeometry
 {
 	Vector2 Position;
 	scalar Radius;
-	CCircle(Vector2 APosition, scalar ARadius) : Radius(ARadius), Position(APosition)
+	CCircle(Vector2 APosition, scalar ARadius) : Position(APosition), Radius(ARadius)
 	{
 		CalcBBOX();
 	}

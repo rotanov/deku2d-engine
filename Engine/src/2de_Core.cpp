@@ -38,10 +38,10 @@ void CObject::DecListRefCount()
 	ListRefCount--;
 	if (ListRefCount < 0)
 	{
-		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name, id, ListRefCount);
+		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name.c_str(), id, ListRefCount);
 #ifdef CRITICAL_ERRORS_MESSAGE_BOXES
 		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
-#endif CRITICAL_ERRORS_MESSAGE_BOXES
+#endif // CRITICAL_ERRORS_MESSAGE_BOXES
 	}
 }
 
@@ -87,7 +87,7 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 	}
 	if (File != NULL)
 	{
-		Log("ERROR", "Can't open file %s: another file is already opened.", AFileName);
+		Log("ERROR", "Can't open file %s: another file is already opened.", AFileName.c_str());
 		return false;
 	}
 
@@ -276,7 +276,7 @@ bool CFile::ReadLine(char* &Data)
 
 	char *buffer = new char[CFILE_MAX_STRING_LENGTH];
 	int count = -1;
-	unsigned long read = 0;
+	// unsigned long read = 0; // unused variable
 
 	do
 	{
@@ -725,19 +725,19 @@ int CPSingleTone::_refcount = 0;
 char LogFile[CFILE_MAX_STRING_LENGTH];
 bool LogCreationRequired = true;
 
-void CreateLogFile(char *fname)
+void CreateLogFile(const char *fname)
 {
 	char cd[CFILE_MAX_STRING_LENGTH];
 	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
 	strcpy(cd, GetWorkingDir(LogFile, CFILE_MAX_STRING_LENGTH));
 	strcat(LogFile, "/");
 	strcat(LogFile, fname);
-	FILE *hf = NULL;
+	// FILE *hf = NULL; // unused variable
 	LogCreationRequired = true;
 	Log("INFO", "Log file \"%s\" created", fname);
 	Log("INFO", "Working directory is \"%s\"", cd);
 }
-void Log(char* Event,char* Format,...)
+void Log(const char *Event, const char *Format, ...)
 {
 	if (!Enabled)
 		return;
@@ -767,7 +767,7 @@ void Log(char* Event,char* Format,...)
 
 }
 
-void ToggleLog( bool _Enabled )
+void ToggleLog(bool _Enabled)
 {
 	Enabled = _Enabled;
 }
@@ -788,7 +788,7 @@ void DelExtFromFName(char *src)
 	src[i] = 0;
 }
 
-void DelLastDirFromPath( char* src )
+void DelLastDirFromPath(char *src)
 {
 	int i = strlen(src)-1;
 	while(src[i] == '\\' || src[i] == '/')

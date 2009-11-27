@@ -11,7 +11,7 @@ bool CTileset::LoadFromFile()
 	CFile file;
 	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR", "Can't open TileSet file %s", filename);
+		Log("ERROR", "Can't open TileSet file %s", filename.c_str());
 		return false;
 	}
 
@@ -26,6 +26,8 @@ bool CTileset::LoadFromFile()
 	file.Read(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
 
 	file.Close();
+
+	return true;
 }
 
 void CTileset::RenderTileSet()
@@ -60,7 +62,7 @@ bool CTileset::SaveToFile()
 	CFile file;
 	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
 	{
-		Log("ERROR", "Can't open TileSet file %s", filename);
+		Log("ERROR", "Can't open TileSet file %s", filename.c_str());
 		return false;
 	}
 
@@ -69,6 +71,8 @@ bool CTileset::SaveToFile()
 	file.Write(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
 
 	file.Close();
+
+	return true;
 }
 
 CTileset::CTileset()
@@ -192,7 +196,7 @@ bool CLevelMap::SaveToFile()
 	CFile file;
 	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
 	{
-		Log("ERROR", "Can't open file %s to save the map", filename);
+		Log("ERROR", "Can't open file %s to save the map", filename.c_str());
 		return false;
 	}
 	
@@ -201,6 +205,8 @@ bool CLevelMap::SaveToFile()
 	file.Write(&numCellsVer, sizeof(numCellsVer));
 	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
 	file.Close();
+	
+	return true;
 }
 
 bool CLevelMap::GenCells()

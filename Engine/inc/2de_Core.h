@@ -1,6 +1,7 @@
 #ifndef _2DE_CORE_H
 #define _2DE_CORE_H
 
+#ifdef _MSC_VER
 //#pragma message("Compiling CoreUtils.h")	// НЕ.Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется. "НЕ", я сказал. И так output заграмождён.
 
 //#pragma warning (disable	:	4312)   //
@@ -29,6 +30,8 @@
 
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
+
+#endif // _MSC_VER
 
 #include <SDL.h>
 #include <iostream>
@@ -368,8 +371,8 @@ private:
 *	void ToggleLog(bool _Enabled) - отключение/включение лога. - нахуй это вообще надо, а?
 */
 
-void CreateLogFile(char *fname);
-void Log(char* Event, char* Format, ...);
+void CreateLogFile(const char *fname);
+void Log(const char *Event, const char *Format, ...);
 void ToggleLog(bool _Enabled);
 
 char *GetWorkingDir(char *dir, size_t max_size);
@@ -377,7 +380,7 @@ char *GetWorkingDir(char *dir, size_t max_size);
 
 void DelFNameFromFPath(char *src);
 void DelExtFromFName(char *src);
-void DelLastDirFromPath(char* src);
+void DelLastDirFromPath(char *src);
 void DelInterval(string *src, const int s0, const int s1);
 
 /**

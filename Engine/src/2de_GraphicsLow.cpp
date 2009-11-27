@@ -328,7 +328,7 @@ bool CFont::SaveToFile()
 		return false;
 	CFile file;
 	file.Open(filename, CFile::OPEN_MODE_WRITE);
-	file.Write(Texture->GetName(), (DWORD)strlen(Texture->GetName()));
+	file.Write(Texture->GetName(), (unsigned long)strlen(Texture->GetName()));
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
 	file.Close();

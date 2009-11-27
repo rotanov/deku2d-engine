@@ -143,7 +143,7 @@ public:
 	RGBAf		color;					// цвет
 	GLuint		m_textureID;			// опенгловская хрень идентиф. текстуру
 
-	DWORD		ellapsedtime, lasttime;	// херь чтобы делать время между кадрами
+	unsigned long	ellapsedtime, lasttime;	// херь чтобы делать время между кадрами
 	int			m_nFrameNumber,			// номер текущего кадра
 		m_nCurrentRow,			// номер текущей строки
 		m_nCurrentColumn;		// номер текущей клонки
