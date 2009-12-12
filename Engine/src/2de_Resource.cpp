@@ -26,7 +26,7 @@ void CFactory::FreeInst()
 	if (!_refcount)
 	{		
 		delete this;
-		Log("INFO", "Factory deleted from memory.");
+		Log.Log("INFO", "Factory deleted from memory.");
 		_instance = NULL;
 	}
 }
@@ -42,7 +42,7 @@ CFactory::~CFactory()
 	Reset();
 	while (Enum(obj))
 	{
-		Log("INFO", "Deleting object %s", obj->GetName());
+		Log.Log("INFO", "Deleting object %s", obj->GetName());
 		delete obj;
 	}
 
@@ -52,7 +52,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 {
 	if (!initialized)
 	{
-		Log("WARNING", "Trying to create object while factory has not been initialized");
+		Log.Log("WARNING", "Trying to create object while factory has not been initialized");
 		return NULL;
 	}
 
@@ -131,13 +131,13 @@ bool CFactory::InitManagers( CUpdateManager *vUpdateManager, CRenderManager *vRe
 {
 	if ((UpdateManager = vUpdateManager) == NULL)
 	{
-		Log("WARNING", "Error, UpdateManager has not been initialized");
+		Log.Log("WARNING", "Error, UpdateManager has not been initialized");
 		return false;
 	}
 	if ((RenderManager = vRenderManager) == NULL)
 	{
-		Log("WARNING", "Error, RenderManager has not been initialized");
-			return false;
+		Log.Log("WARNING", "Error, RenderManager has not been initialized");
+		return false;
 	}
 
 	FontManager = CFontManager::Instance();
@@ -155,13 +155,13 @@ bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
 {
 	if (ResourceList == NULL)
 	{
-		Log("WARNING", "Trying to load section %s while Resource list has not been loaded", SectionName);
+		Log.Log("WARNING", "Trying to load section %s while Resource list has not been loaded", SectionName);
 		return false;
 	}
 	XMLNode x = ResourceList->First->Get(SectionName);
 	if (x == NULL)
 	{
-		Log("WARNING", "Section %s has not been found", SectionName);
+		Log.Log("WARNING", "Section %s has not been found", SectionName);
 		return false;
 	}
 	string key, val;
@@ -188,18 +188,18 @@ bool CResourceManager::LoadResources()
 	CDataLister DataLister;
 	DataLister.List(DataPath);
 
-	ResourceList->LoadFromFile(DEFUALT_RESOURCE_LIST_PATH);
+	ResourceList->LoadFromFile(DEFAULT_RESOURCE_LIST_PATH);
 	
 	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
 
 	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
 		if (!LoadSection(strSections[i], fncInitializers[i]))
 		{
-			Log("ERROR","Error loading section %s", strSections[i]);
+			Log.Log("ERROR","Error loading section %s", strSections[i]);
 			return false;
 		}
 		else
-			Log("INFO", "Default section %s loaded", strSections[i]);
+			Log.Log("INFO", "Default section %s loaded", strSections[i]);
 	return true;
 }
 
@@ -227,10 +227,7 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 // CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
 {
-	char WorkingDir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
-	GetWorkingDir(WorkingDir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
-
-	WorkDir = string(WorkingDir) + "/";
+	WorkDir = GetWorkingDir() + "/";
 
 	CurNode = Table.First;
 	
@@ -246,7 +243,7 @@ void CDataLister::ExploreDirectory(string Path)
 	DIR *dirp = opendir(string(WorkDir + Path).c_str());
 	if (!dirp)
 	{
-		Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());
+		Log.Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());
 		return;
 	}
 

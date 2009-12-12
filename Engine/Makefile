@@ -47,8 +47,15 @@ makelib:
 	ar cr ${TARGET} *.o
 	mv *.o obj/
 
+docs: doc/Doxyfile
+	if [ -e /usr/bin/doxygen ]; then \
+		doxygen doc/Doxyfile; \
+	fi
+
 clean:
 	rm -f obj/*.o
 
 dist-clean: clean
 	rm -f ${TARGET}
+	rm -rf doc/html/
+

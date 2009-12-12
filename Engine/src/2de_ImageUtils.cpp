@@ -17,7 +17,7 @@ bool CImageData::LoadBMP(const char * name)
 	
 	if (!file.Open(name, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR", "Cant load bmp file: \"%s\" file doesnt exist or can't open", name);
+		Log.Log("ERROR", "Cant load bmp file: \"%s\" file doesnt exist or can't open", name);
 		return false;
 	}
   
@@ -25,13 +25,13 @@ bool CImageData::LoadBMP(const char * name)
 
 	if (bfh.bfType != 0x4d42)
 	{
-		Log("ERROR", "Cant load bmp file: \"%s\" is not a BMP file", name);
+		Log.Log("ERROR", "Cant load bmp file: \"%s\" is not a BMP file", name);
 		return false;
 	}
 	file.Read(&bi, sizeof(BITMAPINFOHEADER));
 	if (bi.bmiHeader.biBitCount != 24)
 	{
-		Log("ERROR", "Cant load bmp file: \"%s\" only 24 bits per pixel supported", name);
+		Log.Log("ERROR", "Cant load bmp file: \"%s\" only 24 bits per pixel supported", name);
 		return false;
 	}
 
@@ -55,7 +55,7 @@ bool CImageData::LoadBMP(const char * name)
 	}
 
 	file.Close();
-	Log("INFO", "BMP image \"%s\" loaded", name); 
+	Log.Log("INFO", "BMP image \"%s\" loaded", name); 
 	return true;
 }
 
@@ -96,7 +96,7 @@ bool CImageData::LoadPNG(const char * filename)
 	FILE *png_file = fopen(filename, "rb");
 	if (png_file == NULL)
 	{
-		Log("ERROR", "Can't Load PNG file: \"%s\" can't open or doesn't exist", filename);
+		Log.Log("ERROR", "Can't Load PNG file: \"%s\" can't open or doesn't exist", filename);
 		return false;
 	}
 
@@ -105,7 +105,7 @@ bool CImageData::LoadPNG(const char * filename)
 	fread(header, 1, PNG_SIG_BYTES, png_file);
 	if (png_sig_cmp(header, 0, PNG_SIG_BYTES))
 	{
-		Log("ERROR", "Can't load PNG file: \"%s\" is not a PNG file.", filename);
+		Log.Log("ERROR", "Can't load PNG file: \"%s\" is not a PNG file.", filename);
 		return false;
 	}
 
@@ -115,7 +115,7 @@ bool CImageData::LoadPNG(const char * filename)
 
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
-		Log("ERROR", "Can't load PNG file: \"%s\". Some error occured.", filename);
+		Log.Log("ERROR", "Can't load PNG file: \"%s\". Some error occured.", filename);
 		return false;
 	}
 	png_init_io(png_ptr, png_file);
@@ -168,6 +168,6 @@ bool CImageData::LoadPNG(const char * filename)
 	data = pixels;
 	bpp = 4;
 
-	Log("INFO", "PNG image \"%s\" loaded", filename); 
+	Log.Log("INFO", "PNG image \"%s\" loaded", filename); 
 	return true;
 }

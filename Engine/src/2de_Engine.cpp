@@ -13,7 +13,6 @@
 
 CEngine::CEngine()
 {
-	CreateLogFile("System.log");
 	SetName("Engine main class");
 	memset(keys, 0, sizeof(keys));
 	doLimitFps = false; 
@@ -100,7 +99,7 @@ void CEngine::SetState(int state, void* value)
 					// И потом переинициализировать всё что нужно и пользовательскую инициализацию
 //					ClearLists();  
 					if (!(Initialized = procUserInit()))
-						Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
+						Log.Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
 				}
 				break;
 			case STATE_UPDATE_FUNC:
@@ -160,9 +159,13 @@ bool CEngine::Init()
 	}
 #endif //_WIN32
 
+	Log.SetLogFilePath("System.log");	// take path from settings or from some system-specific defines
+
+	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
+
 	if (!Config.LoadFromFile(ConfigFileName.c_str()))
 	{
-		Log("ERROR", "Can't load main configuration %s", CONFIG_FILE_NAME);
+		Log.Log("ERROR", "Can't load main configuration %s", CONFIG_FILE_NAME);
 		return false;
 	}
 	
@@ -190,7 +193,7 @@ bool CEngine::Init()
 	window->bpp = 32;
 	if (!window->gCreateWindow())
 	{
-		Log("ERROR", "Window creation failed");
+		Log.Log("ERROR", "Window creation failed");
 		return false;
 	}
 
@@ -211,19 +214,19 @@ bool CEngine::Init()
 	if (procUserInit != NULL)
 		if (!procUserInit())
 		{
-			Log("ERROR", "User init failed.");
+			Log.Log("ERROR", "User init failed.");
 			return false;
 		}
 
 	Initialized = true;
-	Log("INFO","Initialization success");
+	Log.Log("INFO","Initialization success");
 	return true;
 }
 
 bool CEngine::Suicide()
 {
 	ClearLists();
-	Log("INFO", "Suicide success");
+	Log.Log("INFO", "Suicide success");
 	return true;
 }
 
@@ -337,7 +340,7 @@ bool CEngine::Run()
 {
 	if(!(Initialized = Init()))
 	{
-		Log("ERROR", "Initialization failed");
+		Log.Log("ERROR", "Initialization failed");
 		SDLGLExit(-1);
 		return false;
 	}

@@ -40,7 +40,6 @@
 #include <stdarg.h>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include <time.h>
 #include <assert.h>
 
@@ -340,7 +339,7 @@ public:
 		SEEK_ORIGIN_END
 	};
 
-	CFile(void) : File(NULL) {}
+	CFile() : File(NULL) {}
 	CFile(const string AFileName, EOpenMode Mode);
 
 	bool Open(const string AFileName, EOpenMode Mode);
@@ -365,17 +364,64 @@ private:
 	string FileName;
 };
 
+
 /**
-*	void CreateLogFile(char *fname) - создание лог файла(хз зачем нужно - можно прощще хР) (Ага, жду твоего предложения.)
-*	void Log(char* Event, char* Format, ...) - вывод в лог сообщений формата "[Date] [$Event] $Format ted string\n"
-*	void ToggleLog(bool _Enabled) - отключение/включение лога. - нахуй это вообще надо, а?
-*/
+ * CLog - класс для работы с логом.
+ */
 
-void CreateLogFile(const char *fname);
-void Log(const char *Event, const char *Format, ...);
-void ToggleLog(bool _Enabled);
+class CLog
+{
+public:
+	enum ELogMode
+	{
+		LOG_MODE_STDOUT,
+		LOG_MODE_STDERR,
+		LOG_MODE_FILE
+	};
 
-char *GetWorkingDir(char *dir, size_t max_size);
+	enum ELogFileWriteMode
+	{
+		LOG_FILE_WRITE_MODE_TRUNCATE,
+		LOG_FILE_WRITE_MODE_APPEND
+	};
+
+	CLog();
+
+	~CLog();
+
+	void Log(const char *Event, const char *Format, ...);
+
+	__INLINE void Toggle(bool AEnabled) { Enabled = AEnabled; }
+	__INLINE bool isEnabled() { return Enabled; }
+
+	void SetLogMode(ELogMode ALogMode);
+	__INLINE ELogMode GetLogMode() { return LogMode; }
+
+	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode) { LogFileWriteMode = ALogFileWriteMode; }
+	__INLINE ELogFileWriteMode GetLogFileWriteMode() { return LogFileWriteMode; }
+
+	__INLINE void SetLogFilePath(string ALogFilePath) { LogFilePath = ALogFilePath; }
+	__INLINE string GetLogFilePath() { return LogFilePath; }
+
+private:
+	bool Enabled;
+	ELogMode LogMode;
+	ELogFileWriteMode LogFileWriteMode;
+	ostream *Stream;
+	string LogFilePath;
+};
+
+// CLog global instance
+extern CLog Log;
+
+
+// TODO: taking into account, that global functions is evil, may be we should move such kind of functions
+// 	 in some class, named, for example, CEnvironment
+
+string GetWorkingDir();
+
+//
+
 // Ф-ии для работы со строками, в частности именами файлов и так далее
 
 void DelFNameFromFPath(char *src);
@@ -420,7 +466,7 @@ public:
 		CObject *data;
 		while(Enum(data))
 		{
-			Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
+			Log.Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
 			delete data;
 		}
 	}

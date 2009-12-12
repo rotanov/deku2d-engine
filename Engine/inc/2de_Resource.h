@@ -10,7 +10,7 @@
 #include "2de_Xml.h"
 
 #define CONFIG_FILE_NAME "Config/"
-#define DEFUALT_RESOURCE_LIST_PATH "Config/Resources.xml"
+#define DEFAULT_RESOURCE_LIST_PATH "Config/Resources.xml"
 
 #define DEFAULT_SECTION_COUNT	3
 #define CR_SECTION_FONTS		"Fonts"

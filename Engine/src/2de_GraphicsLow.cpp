@@ -54,14 +54,14 @@ bool CGLImageData::LoadTexture(const char *filename)
 	if (!LoadBMP(filename))
 		if(!LoadPNG(filename))
 		{
-			Log("ERROR", "Can't load image->");
+			Log.Log("ERROR", "Can't load image->");
 			return false;
 		}
 		else
 		{
 			if (!MakeTexture())
 			{
-				Log("ERROR", "Can't load texture in video adapter.");
+				Log.Log("ERROR", "Can't load texture in video adapter.");
 				return false;
 			}
 		}
@@ -69,12 +69,12 @@ bool CGLImageData::LoadTexture(const char *filename)
 	{
 		if(!MakeRGBA())
 		{
-			Log("ERROR", "Can't load texture.");
+			Log.Log("ERROR", "Can't load texture.");
 			return false;
 		}
 		if (!MakeTexture())
 		{
-			Log("ERROR", "Can't load texture in video memory.");
+			Log.Log("ERROR", "Can't load texture in video memory.");
 			return false;
 		}
 	}
@@ -89,7 +89,7 @@ bool CGLImageData::LoadTexture(const char *filename)
 GLuint CGLImageData::GetTexID()
 {
 	if (TexID == 0)
-		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
+		Log.Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
 	return TexID;
 }
 
@@ -114,8 +114,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 {
 	if( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 )
 	{
-		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
-		Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log.Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
+		Log.Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -134,8 +134,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 
 	if (info == NULL)
 	{
-		Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
-		Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log.Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
+		Log.Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -161,8 +161,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	SDL_Surface * screen = SDL_SetVideoMode(width, height, bpp, flags);
 	if (screen == NULL)
 	{
-		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
-		Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log.Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
+		Log.Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);		
 	}
 
@@ -283,7 +283,7 @@ bool CFont::LoadFromFile()
 	CFile			file;
 	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: filename wrte too.
+		Log.Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: filename wrte too.
 		return false;
 	}
 	char *FontImageName = NULL;
@@ -744,12 +744,12 @@ void gToggleScissor( bool State )
 	if (State)
 	{
 		glEnable(GL_SCISSOR_TEST);
-		//		Log("GLINFO", "Enabled Scissor test");
+		//		Log.Log("GLINFO", "Enabled Scissor test");
 	}
 	else
 	{
 		glDisable(GL_SCISSOR_TEST);
-		//		Log("GLINFO", "Disabled Scissor test");
+		//		Log.Log("GLINFO", "Disabled Scissor test");
 	}
 }
 
@@ -906,7 +906,7 @@ GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
-		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
+		Log.Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
 		if (!loaded)
 		{
 			LoadFromFile();
@@ -948,7 +948,7 @@ bool CTexture::LoadFromFile()
 {
 	if (filename == "")
 	{
-		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
+		Log.Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
 		return false;
 	}
 	if (!loaded)
@@ -969,7 +969,7 @@ void setVSync(int interval)
 
 	if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
 	{
-		Log("Error", "WGL_EXT_swap_control extension not supported on your computer.");
+		Log.Log("Error", "WGL_EXT_swap_control extension not supported on your computer.");
 		return;  
 	}
 	else

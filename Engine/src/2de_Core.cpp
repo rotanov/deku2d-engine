@@ -1,4 +1,8 @@
 #include <stdlib.h>
+#include <cstdio>
+#include <cstdarg>
+#include <fstream>
+#include <string>
 #include <sys/stat.h>
 #ifndef _WIN32
 #include <unistd.h>
@@ -38,7 +42,7 @@ void CObject::DecListRefCount()
 	ListRefCount--;
 	if (ListRefCount < 0)
 	{
-		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name.c_str(), id, ListRefCount);
+		Log.Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name.c_str(), id, ListRefCount);
 #ifdef CRITICAL_ERRORS_MESSAGE_BOXES
 		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
 #endif // CRITICAL_ERRORS_MESSAGE_BOXES
@@ -82,12 +86,12 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 {
 	if (AFileName.empty())
 	{
-		Log("ERROR", "Can't open file. Invalid filename");
+		Log.Log("ERROR", "Can't open file. Invalid filename");
 		return false;
 	}
 	if (File != NULL)
 	{
-		Log("ERROR", "Can't open file %s: another file is already opened.", AFileName.c_str());
+		Log.Log("ERROR", "Can't open file %s: another file is already opened.", AFileName.c_str());
 		return false;
 	}
 
@@ -99,7 +103,7 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 		File = fopen(FileName.c_str(), "rb");
 		if (File == NULL)
 		{
-			Log("ERROR", "Can't open file %s.", FileName.c_str());
+			Log.Log("ERROR", "Can't open file %s.", FileName.c_str());
 			return false;
 		}
 		break;
@@ -107,12 +111,12 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 		File = fopen(FileName.c_str(), "wb");
 		if (File == NULL)
 		{
-			Log("ERROR", "Can't open file %s.", FileName.c_str());
+			Log.Log("ERROR", "Can't open file %s.", FileName.c_str());
 			return false;
 		}
 		break;
 	default:
-		Log("ERROR", "Can't open file %s: invalid mode.", FileName.c_str());
+		Log.Log("ERROR", "Can't open file %s: invalid mode.", FileName.c_str());
 		return false;
 	}
 
@@ -141,7 +145,7 @@ bool CFile::ReadByte(unsigned char *Buffer)
 	if (fread(Buffer, 1, 1, File) != 1)
 	{
 		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't read byte.");
+			Log.Log("ERROR", "FILE IO Error. Can't read byte.");
 		return false;
 	}
 	return true;
@@ -169,7 +173,7 @@ bool CFile::Read(void *Buffer, unsigned long BytesCount)
 	if (fread(Buffer, 1, BytesCount, File) != BytesCount)
 	{
 		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't read data.");
+			Log.Log("ERROR", "FILE IO Error. Can't read data.");
 		return false;
 	}
 	return true;
@@ -187,7 +191,7 @@ bool CFile::Write(const void *Buffer, unsigned long BytesCount)
 	if (fwrite(Buffer, 1, BytesCount, File) != BytesCount)
 	{
 		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't write data.");
+			Log.Log("ERROR", "FILE IO Error. Can't write data.");
 		return false;
 	}
 	return true;
@@ -351,7 +355,7 @@ size_t CFile::Size()
 
 	if(stat(FileName.c_str(), &FileStat))
 	{
-		Log("ERROR", "Can't get size of %s.", FileName.c_str());
+		Log.Log("ERROR", "Can't get size of %s.", FileName.c_str());
 		return 0;
 	}
 
@@ -412,7 +416,7 @@ bool CList::DelObject(CObject *AObject)
 	CListNode *ListNode = GetListNode(AObject);
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->GetName(), GetName(), GetID());
+		Log.Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->GetName(), GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -424,7 +428,7 @@ bool CList::DelObject(const string *AObjectName)
 	CListNode *ListNode = GetListNode(AObjectName);
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
+		Log.Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -436,7 +440,7 @@ bool CList::DelObject(const char *AObjectName)
 	CListNode *ListNode = GetListNode(&((string)AObjectName));
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
+		Log.Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -448,7 +452,7 @@ bool CList::DelObject(int AId)
 	CListNode *ListNode = GetListNode(AId);
 	if (!ListNode)
 	{
-		Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, GetName(), GetID());
+		Log.Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -514,7 +518,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 {
 	if (!AObject)
 	{
-		Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
+		Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -524,7 +528,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", ((CObject*)AObject)->GetName(), this->GetName(), this->GetID());
+	Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", ((CObject*)AObject)->GetName(), this->GetName(), this->GetID());
 	return NULL;
 }
 
@@ -532,7 +536,7 @@ CListNode* CList::GetListNode(const string* AObjectName)
 {
 	if (!AObjectName)
 	{
-		Log("ERROR", "Function CObjectList::GetObjectNodeByObjectName; Trying to find object with NULL name pointer");
+		Log.Log("ERROR", "Function CObjectList::GetObjectNodeByObjectName; Trying to find object with NULL name pointer");
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -543,7 +547,7 @@ CListNode* CList::GetListNode(const string* AObjectName)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", AObjectName, GetName(), GetID());
+	Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", AObjectName, GetName(), GetID());
 	return NULL;
 }
 
@@ -556,7 +560,7 @@ CListNode* CList::GetListNode(int AId)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named, id:%d not found in %s id: %u", AId, GetName(), GetID());
+	Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named, id:%d not found in %s id: %u", AId, GetName(), GetID());
 	return NULL;
 }
 
@@ -616,7 +620,7 @@ void CList::DumpToLog()
 	CObject *Temp = NULL;
 	Reset();
 	while (Enum(Temp))
-		Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->GetName(), Temp->GetID());
+		Log.Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->GetName(), Temp->GetID());
 }
 
 void CList::DelNode(CListNode* AListNode)
@@ -700,7 +704,7 @@ void CPSingleTone::FreeInst()
 	if (!_refcount)
 	{
 		delete this;
-		Log("INFO", "Singletone deleted from memory.");
+		Log.Log("INFO", "Singletone deleted from memory.");
 		_instance = NULL;
 	}
 }
@@ -719,58 +723,130 @@ CPSingleTone* CPSingleTone::_instance = 0;
 int CPSingleTone::_refcount = 0;
 
 
-//----------------------------------//
-//			Log Stuff				//
-//----------------------------------//
-char LogFile[CFILE_MAX_STRING_LENGTH];
-bool LogCreationRequired = true;
+/************************************************************************/
+/* CLog                                                                 */
+/************************************************************************/
 
-void CreateLogFile(const char *fname)
+CLog::CLog()
 {
-	char cd[CFILE_MAX_STRING_LENGTH];
-	memset(LogFile, 0, CFILE_MAX_STRING_LENGTH);//(LogFile,2048);
-	strcpy(cd, GetWorkingDir(LogFile, CFILE_MAX_STRING_LENGTH));
-	strcat(LogFile, "/");
-	strcat(LogFile, fname);
-	// FILE *hf = NULL; // unused variable
-	LogCreationRequired = true;
-	Log("INFO", "Log file \"%s\" created", fname);
-	Log("INFO", "Working directory is \"%s\"", cd);
+	Enabled = true;
+	LogMode = LOG_MODE_FILE;	// well, usual default behaviour for user-space (non-system) programs is to log on a console,
+					// but for now i left the behaviour, some of us used to... may be changed any time by calling
+					// CLog::SetLogMode(CLog::ELogMode ALogMode);
+
+	LogFileWriteMode = LOG_FILE_WRITE_MODE_TRUNCATE;
+	Stream = NULL;
+	LogFilePath = "System.log";
 }
-void Log(const char *Event, const char *Format, ...)
+
+CLog::~CLog()
+{
+	if (Stream != NULL)
+	{
+		Log("INFO", "Log finished\n");
+
+		if (LogMode == LOG_MODE_FILE)
+		{
+			dynamic_cast<ofstream*>(Stream)->close();
+			delete Stream;
+		}
+
+	}
+}
+
+void CLog::Log(const char *Event, const char *Format, ...)
 {
 	if (!Enabled)
+	{
 		return;
+	}
 
-	va_list ap;
-	FILE *hf = NULL;
-	const char *mode = LogCreationRequired ? "w" : "a";
-	LogCreationRequired = false;
-	hf = fopen(LogFile, mode);
+	if (Stream == NULL)
+	{
+		SetLogMode(LogMode);
+		if (Stream == NULL)
+		{
+			return;
+		}
+	}
+
+	char TimeAndEvent[64];
+
 #ifdef LOG_TIME_TICK
-	fprintf(hf,"[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
+	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
+	TimeAndEvent[sizeof(TimeAndEvent) - 1] = 0;
 #else
-	char buff[32];
-	time_t rawtime;
-	struct tm *rstime;
-	time(&rawtime);
-	rstime = localtime(&rawtime);
-	strcpy(buff, asctime(rstime));
-	buff[strlen(buff) - 1] = 0;
-	fprintf(hf,"[%s] [%s] ", buff, Event);
+	char TimeString[64];
+	time_t RawTime;
+	struct tm *TimeStruct;
+	time(&RawTime);
+	TimeStruct = localtime(&RawTime);
+	strcpy(TimeString, asctime(TimeStruct));
+	TimeString[strlen(TimeString) - 1] = 0;
+	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%s] [%s] ", TimeString, Event);
 #endif
-	va_start(ap, Format);
-	vfprintf(hf, Format, ap);
-	va_end(ap);
-	fprintf(hf,"\n");
-	fclose(hf);
 
+	char buffer[1024];
+
+	va_list args;
+	va_start(args, Format);
+	vsnprintf(buffer, sizeof(buffer) - 1, Format, args);	// safe, but writes only first 1024 chars per log line...
+	buffer[sizeof(buffer) - 1] = 0;				// should be sufficent for all cases, though...
+	va_end(args);
+
+	*Stream << TimeAndEvent << buffer << endl;
 }
 
-void ToggleLog(bool _Enabled)
+void CLog::SetLogMode(CLog::ELogMode ALogMode)
 {
-	Enabled = _Enabled;
+	if (Stream != NULL)
+	{
+		Log("INFO", "Log finished\n");
+
+		if (LogMode == LOG_MODE_FILE)
+		{
+			dynamic_cast<ofstream*>(Stream)->close();
+			delete Stream;
+		}
+	}
+
+	switch (ALogMode)
+	{
+	case LOG_MODE_STDOUT:
+		Stream = &cout;
+		Log("INFO", "Log to stdout started");
+		break;
+	case LOG_MODE_STDERR:
+		Stream = &cerr;
+		Log("INFO", "Log to stderr started");
+		break;
+	case LOG_MODE_FILE:
+		ios_base::openmode om;
+
+		switch (LogFileWriteMode)
+		{
+		case LOG_FILE_WRITE_MODE_TRUNCATE:
+			om = ios_base::trunc;
+			break;
+		case LOG_FILE_WRITE_MODE_APPEND:
+			om = ios_base::app;
+			break;
+		}
+
+		Stream = new ofstream(LogFilePath.c_str(), ios_base::out | om);
+		if (Stream == NULL)
+		{
+			return;
+		}
+		Log("INFO", "Log to file \"%s\" started", LogFilePath.c_str());
+		break;
+	}
+	LogMode = ALogMode;
 }
+
+// CLog global instance
+CLog Log;
+
 
 void DelFNameFromFPath(char *src)
 {
@@ -856,16 +932,20 @@ void DelInterval(string *src, const int s0, const int s1)
 	*src = (string)Temp0 + Temp1;
 }
 
-char* GetWorkingDir(char *dir, size_t max_size)
+
+string GetWorkingDir()
 {
-	if (dir == NULL)
-		return NULL;
+	string result;
+	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+
 #ifdef _WIN32
-	GetCurrentDirectory(max_size, dir);
+	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
 #else
-	getcwd(dir, max_size);
+	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
 #endif //_WIN32
-	return dir;
+
+	result = dir;
+	return result;
 }
 
 CObjectStack::CObjectStack() : last(-1)
