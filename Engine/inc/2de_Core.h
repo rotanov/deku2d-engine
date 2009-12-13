@@ -404,15 +404,23 @@ public:
 	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode) { LogFileWriteMode = ALogFileWriteMode; }
 	__INLINE ELogFileWriteMode GetLogFileWriteMode() { return LogFileWriteMode; }
 
+	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames) { DatedLogFileNames = ADatedLogFileNames; }
+	__INLINE bool GetDatedLogFileNames() { return DatedLogFileNames; }
+
 	__INLINE void SetLogFilePath(string ALogFilePath) { LogFilePath = ALogFilePath; }
 	__INLINE string GetLogFilePath() { return LogFilePath; }
+
+	__INLINE void SetLogName(string ALogName) { LogName = ALogName; }
+	__INLINE string GetLogName() { return LogName; }
 
 private:
 	bool Enabled;
 	ELogMode LogMode;
 	ELogFileWriteMode LogFileWriteMode;
+	bool DatedLogFileNames;
 	ostream *Stream;
 	string LogFilePath;
+	string LogName;
 };
 
 // CLog global instance
@@ -423,6 +431,10 @@ extern CLog Log;
 // 	 in some class, named, for example, CEnvironment
 
 string GetWorkingDir();
+
+tm GetLocalTimeAndDate();
+
+string GetFormattedTime(const tm TimeStruct, const char *Format);
 
 //
 

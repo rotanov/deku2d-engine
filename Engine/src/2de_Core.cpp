@@ -735,8 +735,10 @@ CLog::CLog()
 					// CLog::SetLogMode(CLog::ELogMode ALogMode);
 
 	LogFileWriteMode = LOG_FILE_WRITE_MODE_TRUNCATE;
+	DatedLogFileNames = true;
 	Stream = NULL;
-	LogFilePath = "System.log";
+	LogFilePath = "";
+	LogName = "System";
 }
 
 CLog::~CLog()
@@ -777,11 +779,7 @@ void CLog::Log(const char *Event, const char *Format, ...)
 	TimeAndEvent[sizeof(TimeAndEvent) - 1] = 0;
 #else
 	char TimeString[64];
-	time_t RawTime;
-	struct tm *TimeStruct;
-	time(&RawTime);
-	TimeStruct = localtime(&RawTime);
-	strcpy(TimeString, asctime(TimeStruct));
+	strcpy(TimeString, asctime(&GetLocalTimeAndDate()));
 	TimeString[strlen(TimeString) - 1] = 0;
 	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%s] [%s] ", TimeString, Event);
 #endif
@@ -833,12 +831,21 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 			break;
 		}
 
-		Stream = new ofstream(LogFilePath.c_str(), ios_base::out | om);
-		if (Stream == NULL)
+		string NewLogFileName = LogFilePath + LogName;
+
+		if (DatedLogFileNames) {
+			tm TimeStruct = GetLocalTimeAndDate();
+			NewLogFileName += "_" + GetFormattedTime(TimeStruct, "%d%m%y_%H%M%S");
+		}
+		NewLogFileName += ".log";
+
+		Stream = new ofstream(NewLogFileName.c_str(), ios_base::out | om);
+		if (Stream == NULL || !dynamic_cast<ofstream*>(Stream)->is_open())
 		{
+			cerr << "Can't open log file \"" << NewLogFileName << "\"." << endl;
 			return;
 		}
-		Log("INFO", "Log to file \"%s\" started", LogFilePath.c_str());
+		Log("INFO", "Log to file \"%s\" started", NewLogFileName.c_str());
 		break;
 	}
 	LogMode = ALogMode;
@@ -846,6 +853,53 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 
 // CLog global instance
 CLog Log;
+
+
+string GetWorkingDir()
+{
+	string result;
+	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+
+#ifdef _WIN32
+	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
+#else
+	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
+#endif //_WIN32
+
+	result = dir;
+	return result;
+}
+
+tm GetLocalTimeAndDate()
+{
+	time_t RawTime;
+	tm *TimeStruct;
+	time(&RawTime);
+	TimeStruct = localtime(&RawTime);
+	return *TimeStruct;
+}
+
+string GetFormattedTime(const tm TimeStruct, const char *Format)
+{
+	int AllocSize = 128;
+	bool allocated = false;
+
+	char *buffer = NULL;
+
+	while (!allocated)
+	{
+		delete[] buffer;
+		buffer = new char[AllocSize];
+		if (!buffer)
+			return string("");
+
+		allocated = (strftime(buffer, AllocSize - 1, Format, &TimeStruct) != 0);
+		AllocSize *= 2;
+	}
+	
+	string result = buffer;
+	return result;
+}
 
 
 void DelFNameFromFPath(char *src)
@@ -930,22 +984,6 @@ void DelInterval(string *src, const int s0, const int s1)
 	src->copy(Temp0, s0, 0);
 	src->copy(Temp1, src->length() - s1 - 1, s1+1);
 	*src = (string)Temp0 + Temp1;
-}
-
-
-string GetWorkingDir()
-{
-	string result;
-	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
-
-#ifdef _WIN32
-	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
-#else
-	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
-#endif //_WIN32
-
-	result = dir;
-	return result;
 }
 
 CObjectStack::CObjectStack() : last(-1)

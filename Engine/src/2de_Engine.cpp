@@ -159,7 +159,8 @@ bool CEngine::Init()
 	}
 #endif //_WIN32
 
-	Log.SetLogFilePath("System.log");	// take path from settings or from some system-specific defines
+	Log.SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
+	Log.SetLogName("System");
 
 	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
 
