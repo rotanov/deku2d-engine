@@ -31,7 +31,7 @@ class StdoutLogConsumer : public TNL::LogConsumer
 public:
 	void logString(const char *string)
 	{
-		Log("NETWORK", "%s", string);
+		Log.Log("NETWORK", "%s", string);
 	}
 } gStdoutLogConsumer;
 

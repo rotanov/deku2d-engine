@@ -77,6 +77,10 @@ using namespace std;
 #define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
 #endif //_WIN32
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif //_MSC_VER
+
 typedef unsigned char		byte;
 typedef float				scalar;
 

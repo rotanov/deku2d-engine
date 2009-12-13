@@ -898,7 +898,7 @@ void MemCheck()
 {
 	if (!MemState1 || !MemState2)
 	{
-		Log("CAUTION", "Invalid MemCheck call: MemChp1() or MemChp2() has not been called");
+		Log.Log("CAUTION", "Invalid MemCheck call: MemChp1() or MemChp2() has not been called");
 		return;
 	}
 	if (!MemState3)
