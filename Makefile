@@ -5,6 +5,7 @@ all:
 	$(MAKE) -C "Demos/Font editor/" $(MAKETARGET)
 	$(MAKE) -C "Demos/Level editor/" $(MAKETARGET)
 	$(MAKE) -C Demos/Pong/ $(MAKETARGET)
+	$(MAKE) -C Demos/SoundCheck/ $(MAKETARGET)
 
 debug: MAKETARGET = debug
 debug: all

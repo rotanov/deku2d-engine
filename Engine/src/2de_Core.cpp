@@ -49,12 +49,12 @@ void CObject::DecListRefCount()
 	}
 }
 
-const int CObject::GetListRefCount()
+const int CObject::GetListRefCount() const
 {
 	return ListRefCount;
 }
 
-const char* CObject::GetName()
+const char* CObject::GetName() const
 {
 	return name.c_str();
 }
@@ -69,10 +69,17 @@ void CObject::SetName(const char* AObjectName)
 	name = AObjectName;
 }
 
-void CObject::SetName( const string &AObjectName )
+void CObject::SetName(const string &AObjectName)
 {
 	name = AObjectName;
 }
+
+ostream& operator<<(ostream &Stream, CObject Object)
+{
+	Stream << Object.name << "(" << Object.id << ")";
+	return Stream;
+}
+
 /************************************************************************/
 /* CFile                                                                */
 /************************************************************************/
@@ -518,7 +525,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 {
 	if (!AObject)
 	{
-		Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
+		Log.Log("ERROR", "CList::GetListNode: Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -528,7 +535,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", ((CObject*)AObject)->GetName(), this->GetName(), this->GetID());
+	Log.Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObject->GetName(), this->GetName(), this->GetID());
 	return NULL;
 }
 
@@ -536,7 +543,7 @@ CListNode* CList::GetListNode(const string* AObjectName)
 {
 	if (!AObjectName)
 	{
-		Log.Log("ERROR", "Function CObjectList::GetObjectNodeByObjectName; Trying to find object with NULL name pointer");
+		Log.Log("ERROR", "CList::GetListNode: Trying to find object with NULL name pointer in %s id: %u", GetName(), GetID());
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -547,11 +554,11 @@ CListNode* CList::GetListNode(const string* AObjectName)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named %s not found in %s id: %u", AObjectName, GetName(), GetID());
+	Log.Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObjectName->c_str(), GetName(), GetID());
 	return NULL;
 }
 
-CListNode* CList::GetListNode(int AId)
+CListNode* CList::GetListNode(unsigned int AId)
 {
 	CListNode* TempNode = first;
 	while (TempNode)
@@ -560,7 +567,7 @@ CListNode* CList::GetListNode(int AId)
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log.Log("ERROR", "Function CObjectList::GetObjectNodeByPointer; object named, id:%d not found in %s id: %u", AId, GetName(), GetID());
+	Log.Log("ERROR", "CList::GetListNode: Object with id: %d not found in %s id: %u", AId, GetName(), GetID());
 	return NULL;
 }
 
@@ -1059,3 +1066,4 @@ CGarbageCollector::CGarbageCollector()
 {
 
 }
+

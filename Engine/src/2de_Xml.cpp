@@ -35,16 +35,21 @@ CXMLNode *CXMLNode::Get(const char* Str)
 		Log.Log("ERROR", "Cannot get XML node for because string pointer has NULL value", Str);
 		return NULL;
 	}
+	CXMLNode *result = NULL;
 	CXMLNode *ptr = this->Child;
 	if (ptr==NULL){
 		Log.Log("ERROR", "Cannot get XML node for \"%s\"", Str);
 		return NULL;
 	}
-	while ((ptr->Name!=Str)&&(ptr->Next != NULL))
+	while (ptr != NULL && result == NULL)
 	{
+		if (ptr->Name == Str)
+		{
+			result = ptr;
+		}
 		ptr = ptr->Next;
 	}
-	return ptr;
+	return result;
 }
 /*
 *	_XMLNode *_XMLNode::Add(char *name, char *value);

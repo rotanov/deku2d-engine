@@ -35,7 +35,7 @@ public:
 
 };
 
-class CTileSetManager : public CList
+class CTileSetManager : public CList, public CTSingleton<CTileSetManager>
 {
 public:
 	CTileset* GetTileset(const string &ATilesetName)
@@ -46,10 +46,9 @@ public:
 			Tileset->CheckLoad();
 		return Tileset;
 	}
-	static CTileSetManager* Instance();
 protected:
-	static CTileSetManager *_instance;
 	CTileSetManager();
+	friend class CTSingleton<CTileSetManager>;
 };
 
 struct CMapCellInfo

@@ -266,18 +266,8 @@ CCompas::~CCompas()
 	
 }
 
-
-CTileSetManager* CTileSetManager::_instance = NULL;
-
-CTileSetManager* CTileSetManager::Instance()
-{
-	if (!_instance)
-	{
-		_instance = new CTileSetManager;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
+//////////////////////////////////////////////////////////////////////////
+// CTileSetManager
 
 CTileSetManager::CTileSetManager()
 {

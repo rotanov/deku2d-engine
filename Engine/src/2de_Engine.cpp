@@ -1,5 +1,8 @@
 #include "2de_Engine.h"
 
+#include "2de_Core.h"
+#include "2de_Sound.h"
+
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
@@ -178,7 +181,7 @@ bool CEngine::Init()
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
 	SetState(STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
-	ResourceListPath			= (Config.First->Get("XMLResourcesFilename"))->GetValue();
+	//ResourceListPath			= (Config.First->Get("XMLResourcesFilename"))->GetValue();
 	ResourceManager.DataPath	= (Config.First->Get("DataPath"))->GetValue();
 	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
 
@@ -201,8 +204,11 @@ bool CEngine::Init()
 	SDL_EnableUNICODE(1);
 	gToggleScissor(false);
 
+	SoundMixer = CSoundMixer::Instance();
 
 	TextureManager = CTextureManager::Instance();
+	SoundManager = CSoundManager::Instance();
+	MusicManager = CMusicManager::Instance();
 	Factory->InitManagers(&UpdateManager, &RenderManager);
 
 	if (doLoadDefaultResourceList)

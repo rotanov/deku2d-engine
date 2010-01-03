@@ -9,11 +9,12 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_MathUtils.cpp \
 			src/2de_Physics.cpp \
 			src/2de_Resource.cpp \
+			src/2de_Sound.cpp \
 			src/2de_Xml.cpp
 
 INCPATH		=	-iquoteinc
 
-LIBS		=	-lGLU -lz
+LIBS		=	-lGLU -lz -lSDL_mixer
 
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
@@ -38,7 +39,7 @@ release-compile:
 	g++ -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 debug-compile:
-	g++ -g3 -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -g3 -D_DEBUG -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 strict-compile:
 	g++ -Wall -c ${CFLAGS} ${SOURCES} ${LDFLAGS}

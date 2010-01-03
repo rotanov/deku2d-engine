@@ -92,6 +92,22 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 			tmp = creation;
 			break;
 		}
+	case OBJ_SOUND_RES:
+		{
+			CSound* creation = new CSound;
+			SoundManager->AddObject(creation);
+			AddObject(creation);
+			tmp = creation;
+			break;
+		}
+	case OBJ_MUSIC_RES:
+		{
+			CMusic* creation = new CMusic;
+			MusicManager->AddObject(creation);
+			AddObject(creation);
+			tmp = creation;
+			break;
+		}
 	case OBJ_USER_DEFINED:
 		{
 			tmp = creator();
@@ -142,6 +158,8 @@ bool CFactory::InitManagers( CUpdateManager *vUpdateManager, CRenderManager *vRe
 
 	FontManager = CFontManager::Instance();
 	TextureManager = CTextureManager::Instance();
+	SoundManager = CSoundManager::Instance();
+	MusicManager = CMusicManager::Instance();
 	initialized = true;
 	return true;
 }
@@ -172,8 +190,11 @@ bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
 	while (x->Enum(key, val, Result))
 	{
 		Resource = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
-		if (Resource == NULL) 
+		if (Resource == NULL)
+		{
+			Log.Log("ERROR","Error loading section %s", SectionName);
 			return false;
+		}
 		Resource->SetName(key);
 		Resource->filename = val;
 	}
@@ -193,13 +214,10 @@ bool CResourceManager::LoadResources()
 	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
 
 	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
-		if (!LoadSection(strSections[i], fncInitializers[i]))
+		if (LoadSection(strSections[i], fncInitializers[i]))
 		{
-			Log.Log("ERROR","Error loading section %s", strSections[i]);
-			return false;
-		}
-		else
 			Log.Log("INFO", "Default section %s loaded", strSections[i]);
+		}
 	return true;
 }
 

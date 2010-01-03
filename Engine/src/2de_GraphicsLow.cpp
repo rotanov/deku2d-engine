@@ -238,9 +238,7 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 
 
-#ifdef _WIN32
 	setVSync(0);
-#endif
 }
 CGLWindow *CGLWindow::_instance = NULL;
 CGLWindow* CGLWindow::Instance()
@@ -780,31 +778,13 @@ void gDrawBBox( CAABB box )
 //			Font Manager
 //////////////////////////////////////////////////////////////////////////
 
-CFontManager::~CFontManager()
-{
-
-}
-
 CFontManager::CFontManager()
 {
 	SetName("Font manager");
 	CurrentFont = NULL;
 }
 
-CFontManager* CFontManager::Instance()
-{
-	if (!_instance)
-	{
-		_instance = new CFontManager;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
-
-CFontManager* CFontManager::_instance = NULL;
-
-
-CFont* CFontManager::GetFont(const char* fontname )	
+CFont* CFontManager::GetFont(const char* fontname)	
 {
 	CFont *TempFont = NULL;
 	TempFont = dynamic_cast<CFont*>(GetObject(&((string)fontname)));
@@ -813,12 +793,12 @@ CFont* CFontManager::GetFont(const char* fontname )
 	return TempFont;
 }
 
-CFont* CFontManager::GetFontEx( string fontname )
+CFont* CFontManager::GetFontEx(string fontname)
 {
 	return dynamic_cast<CFont*>(GetObject(&fontname));
 }
 
-bool CFontManager::SetCurrentFont( char* fontname )
+bool CFontManager::SetCurrentFont(char* fontname)
 {
 	CurrentFont = GetFont(fontname);
 	if (!CurrentFont->loaded)
@@ -826,10 +806,9 @@ bool CFontManager::SetCurrentFont( char* fontname )
 	return !!CurrentFont;
 }
 
-bool CFontManager::Print( int x, int y, float depth, char* text, ... )
+bool CFontManager::Print(int x, int y, float depth, char* text, ...)
 {
 	if (!CurrentFont)
-
 		return false;
 
 	CurrentFont->SetDepth(depth);
@@ -838,7 +817,7 @@ bool CFontManager::Print( int x, int y, float depth, char* text, ... )
 	return true;
 }
 
-bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
+bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 {
 	if (!CurrentFont)
 		return false;
@@ -855,7 +834,7 @@ bool CFontManager::PrintEx( int x, int y, float depth, char* text, ... )
 	return true;
 }
 
-bool CFontManager::AddObject( CObject *object )
+bool CFontManager::AddObject(CObject *object)
 {
 	CList::AddObject(object);
 	if (CurrentFont == NULL)
@@ -867,28 +846,12 @@ bool CFontManager::AddObject( CObject *object )
 //						CTexture Manager
 //////////////////////////////////////////////////////////////////////////
 
-CTextureManager* CTextureManager::Instance()
-{
-	if (!_instance)
-	{
-		_instance = new CTextureManager;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
-
-
 CTextureManager::CTextureManager()
 {
 	SetName("Texture manager");
 }
 
-CTextureManager::~CTextureManager()
-{
-
-}
-
-CTexture* CTextureManager::GetTextureByName( const string &TextureName )
+CTexture* CTextureManager::GetTextureByName(const string &TextureName)
 {
 	CTexture *TempTexture = NULL;
 	TempTexture = dynamic_cast<CTexture*>(GetObject(&TextureName));
@@ -896,7 +859,6 @@ CTexture* CTextureManager::GetTextureByName( const string &TextureName )
 		TempTexture->CheckLoad();
 	return TempTexture;
 }
-CTextureManager* CTextureManager::_instance = 0;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -957,29 +919,52 @@ bool CTexture::LoadFromFile()
 	return loaded;
 }
 
-#ifdef _WIN32
 
-#include <windows.h>
+// всё что я тут понагородил мне самому не нравится... каких-то макросов понаизобретал.. зато универсально и ынтерпрайзно..
 
-PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
+#if defined(_WIN32) || defined(__linux)		// <platforms, that support swap interval control>
+
+#define GET_PROC_ADDRESS(x,y) ((x((const GLubyte*)"(y)")))
+
+#if defined(_WIN32)
+	#include <windows.h>
+	#define SWAP_INTERVAL_EXTENSION_NAME "WGL_EXT_swap_control"
+	#define SWAP_INTERVAL_PROC_NAME wglSwapIntervalEXT
+	#define GET_PROC_ADDRESS_FUNC wglGetProcAddress
+#elif defined(__linux)
+	#include <GL/glx.h>
+	#define SWAP_INTERVAL_EXTENSION_NAME "GLX_SGI_swap_control"
+	#define SWAP_INTERVAL_PROC_NAME glXSwapIntervalSGI
+	#define GET_PROC_ADDRESS_FUNC glXGetProcAddress
+#endif
+
+SWAP_INTERVAL_PROC SWAP_INTERVAL_PROC_NAME = 0;
+
+#endif						// </platforms, that support swap interval control>
+
+// да, функция будет для всех, но для неподдерживаемых она просто ничего не будет делать..
+// это чтобы не городить ифдефы в другом месте..
 
 void setVSync(int interval)
 {
-	const char *extensions = (const char *)glGetString(GL_EXTENSIONS);
+#if defined(_WIN32) || defined(__linux)		// <platforms, that support swap interval control>
+#if defined(_WIN32)
+	const char *extensions = (const char *) glGetString(GL_EXTENSIONS);
+#elif defined(__linux)
+	const char *extensions = (const char *) glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
+#endif
 
-	if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
+	if (strstr(extensions, SWAP_INTERVAL_EXTENSION_NAME) != 0)
 	{
-		Log.Log("Error", "WGL_EXT_swap_control extension not supported on your computer.");
-		return;  
+		SWAP_INTERVAL_PROC_NAME = (SWAP_INTERVAL_PROC) GET_PROC_ADDRESS(GET_PROC_ADDRESS_FUNC, SWAP_INTERVAL_PROC_NAME);
+
+		if (SWAP_INTERVAL_PROC_NAME)
+			SWAP_INTERVAL_PROC_NAME(interval);
 	}
 	else
 	{
-		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
-
-		if(wglSwapIntervalEXT)
-			wglSwapIntervalEXT(interval);
+		Log.Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME "is not supported on your computer.");
 	}
+#endif						// </platforms, that support swap interval control>
 }
-
-#endif  //_WIN32
 

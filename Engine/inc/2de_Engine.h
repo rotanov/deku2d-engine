@@ -21,6 +21,7 @@
 //#include "2de_Gui.h"
 #include "2de_Xml.h"
 #include "2de_Resource.h"
+#include "2de_Sound.h"
 
 // Константы
 
@@ -66,6 +67,9 @@ public:
 	CRenderManager				RenderManager; // а тут инстанс!
 	CFontManager				*FontManager; // ...а тут опять указатель?! 
 	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
+	CSoundMixer				*SoundMixer;	// это микшер, его надо инициализровать ДО инициализации звуков и музыки
+	CSoundManager				*SoundManager;
+	CMusicManager				*MusicManager;
 	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
 	int						keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;

@@ -79,15 +79,13 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CTextureManager
 
-class CTextureManager : public CList
+class CTextureManager : public CList, public CTSingleton<CTextureManager> 
 {
 public:
 	CTexture* GetTextureByName(const string &TextureName);
-	static CTextureManager* Instance();
 protected:
 	CTextureManager();
-	~CTextureManager();
-	static CTextureManager * _instance;
+	friend class CTSingleton<CTextureManager>;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -190,10 +188,9 @@ public:
 };
 
 
-class CFontManager : public CList
+class CFontManager : public CList, public CTSingleton<CFontManager>
 {
 public:
-	static CFontManager*	Instance();
 	CFont					*CurrentFont;
 	bool					SetCurrentFont(char* fontname);
 	bool					PrintEx(int x, int y, float depth, char* text, ...);
@@ -204,8 +201,7 @@ public:
 
 protected:
 	CFontManager();
-	~CFontManager();
-	static			CFontManager* _instance;
+	friend class CTSingleton<CFontManager>;
 };
 
 class CRenderManager : public CList
@@ -231,9 +227,15 @@ void SDLGLExit(int code);
 void gSetBlendingMode();
 void gBeginFrame();
 void gEndFrame();
-#ifdef _WIN32
-typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
-#endif	//_WIN32
+
+#if defined(_WIN32)
+#define SWAP_INTERVAL_PROC PFNWGLSWAPINTERVALFARPROC 
+#elif defined(__linux)
+#define SWAP_INTERVAL_PROC PFNGLXSWAPINTERVALSGIPROC
+#endif
+
+typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
+
 void gToggleScissor(bool State);
 void gScissor(int x, int y, int width, int height);
 

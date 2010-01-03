@@ -4,7 +4,7 @@ SOURCES		=	src/MainTanks.cpp \
 
 INCPATH		=	-iquoteinc -iquote../../Engine/inc
 
-LIBS		=	-lGLU -lz ../../Engine/lib/Deku2d.a ../../Engine/lib/libtnl.a ../../Engine/lib/libtomcrypt.a
+LIBS		=	-lGLU -lz -lSDL_mixer ../../Engine/lib/Deku2d.a ../../Engine/lib/libtnl.a ../../Engine/lib/libtomcrypt.a
 
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
@@ -30,3 +30,4 @@ strict:
 
 dist-clean:
 	rm -f ${TARGET}
+	rm -f bin/Logs/*

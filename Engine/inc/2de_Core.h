@@ -140,16 +140,18 @@ public:
 	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void			IncListRefCount();
 	void			DecListRefCount();
-	const int		GetListRefCount();
-	const char*		GetName();
+	const int		GetListRefCount() const;
+	const char*		GetName() const;
 	void			SetName(const char* AObjectName);
 	void			SetName(const string &AObjectName);
 	unsigned int	GetID();
+	friend ostream& operator<<(ostream &Stream, CObject Object);
 private:
 	string			name;
 	int				ListRefCount;
 	unsigned int	id;
 };
+
 
 /**
 *	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
@@ -216,7 +218,7 @@ public:
 	CObject*			GetObject(int AId);
 	CListNode*			GetListNode(const CObject* AObject);
 	CListNode*			GetListNode(const string* AObjectName);
-	CListNode*			GetListNode(int AId);	
+	CListNode*			GetListNode(unsigned int AId);	
 	int					GetObjectsCount();
 	CListNode*			GetFirst();
 	CListNode*			GetLast();																	
@@ -396,22 +398,22 @@ public:
 	void Log(const char *Event, const char *Format, ...);
 
 	__INLINE void Toggle(bool AEnabled) { Enabled = AEnabled; }
-	__INLINE bool isEnabled() { return Enabled; }
+	__INLINE bool isEnabled() const { return Enabled; }
 
 	void SetLogMode(ELogMode ALogMode);
-	__INLINE ELogMode GetLogMode() { return LogMode; }
+	__INLINE ELogMode GetLogMode() const { return LogMode; }
 
 	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode) { LogFileWriteMode = ALogFileWriteMode; }
-	__INLINE ELogFileWriteMode GetLogFileWriteMode() { return LogFileWriteMode; }
+	__INLINE ELogFileWriteMode GetLogFileWriteMode() const { return LogFileWriteMode; }
 
 	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames) { DatedLogFileNames = ADatedLogFileNames; }
-	__INLINE bool GetDatedLogFileNames() { return DatedLogFileNames; }
+	__INLINE bool GetDatedLogFileNames() const { return DatedLogFileNames; }
 
 	__INLINE void SetLogFilePath(string ALogFilePath) { LogFilePath = ALogFilePath; }
-	__INLINE string GetLogFilePath() { return LogFilePath; }
+	__INLINE string GetLogFilePath() const { return LogFilePath; }
 
 	__INLINE void SetLogName(string ALogName) { LogName = ALogName; }
-	__INLINE string GetLogName() { return LogName; }
+	__INLINE string GetLogName() const { return LogName; }
 
 private:
 	bool Enabled;
@@ -489,6 +491,53 @@ public:
 };
 extern CGarbageCollector SingletoneKiller;
 typedef CGarbageCollector CSingletoneKiller;
+
+/**
+ * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
+ *
+ * Для использования нужно наследовать класс от него следующим образом:
+ * 	class CSomeClass : public CTSingleton<CSomeClass>
+ * 	{
+ * 	public:
+ * 		<...>
+ * 	private:
+ * 		<...>
+ *	protected:
+ *		friend class CTSingleton<CSomeClass>;
+ *		CSomeClass() { }
+ * 	};
+ *
+ * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
+ */
+
+export template <class T>
+class CTSingleton : public virtual CObject
+{
+public:
+	static T* Instance();
+
+protected:
+	CTSingleton() { }
+	virtual ~CTSingleton() { }
+
+private:
+	static T * _instance;
+};
+
+template <class T>
+T* CTSingleton<T>::Instance()
+{
+	if (!_instance)
+	{
+		_instance = new T;
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
+}
+
+template <class T>
+T* CTSingleton<T>::_instance = 0;
+
 
 __INLINE string itos(int i)
 {

@@ -123,6 +123,7 @@ public:
 		PRender.grCircleL(MousePosition, 5);
 		int fps;
 		Ninja->GetState(STATE_FPS_COUNT, &fps);
+		Ninja->FontManager->SetCurrentFont("Font");
 		Ninja->FontManager->PrintEx(10, 400, 0.0f, "FPS: %d", fps);
 		glLoadIdentity();
 

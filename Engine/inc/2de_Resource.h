@@ -8,17 +8,20 @@
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
 #include "2de_Xml.h"
+#include "2de_Sound.h"
 
 #define CONFIG_FILE_NAME "Config/"
 #define DEFAULT_RESOURCE_LIST_PATH "Config/Resources.xml"
 
-#define DEFAULT_SECTION_COUNT	3
+#define DEFAULT_SECTION_COUNT	5
 #define CR_SECTION_FONTS		"Fonts"
 #define CR_SECTION_TEXTURES		"Textures"
 #define CR_SECTION_TILESETS		"Tilesets"
+#define CR_SECTION_SOUNDS		"Sounds"
+#define CR_SECTION_MUSIC		"Music"
 
-static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture, CTileset::NewTileset};
-static const char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES, CR_SECTION_TILESETS};
+static CreateFunc fncInitializers[DEFAULT_SECTION_COUNT] = {CFont::NewFont, CTexture::NewTexture, CTileset::NewTileset, CSound::NewSound, CMusic::NewMusic};
+static const char* strSections[DEFAULT_SECTION_COUNT] = {CR_SECTION_FONTS, CR_SECTION_TEXTURES, CR_SECTION_TILESETS, CR_SECTION_SOUNDS, CR_SECTION_MUSIC};
 
 class CExtResRelation : public CObject
 {
@@ -34,12 +37,14 @@ public:
 static CList ExtResRelationList;
 
 // типы ресурсов
-#define CRESOURCE_TYPE_FONT				0x01
+#define CRESOURCE_TYPE_FONT			0x01
 #define CRESOURCE_TYPE_IMAGE			0x02
-#define	CRESOURCE_TYPE_PARTICLESYSTEM	0x03
+#define	CRESOURCE_TYPE_PARTICLESYSTEM		0x03
 #define CRESOURCE_TYPE_ANIMATION		0x04
-#define CRESOURCE_TYPE_XML				0x05
-#define CRESOURCE_TYPE_USER_DEFINED		0x06
+#define CRESOURCE_TYPE_XML			0x05
+#define CRESOURCE_TYPE_SOUND			0x06
+#define CRESOURCE_TYPE_MUSIC			0x07
+#define CRESOURCE_TYPE_USER_DEFINED		0x08
 
 
 
@@ -50,11 +55,15 @@ static CList ExtResRelationList;
 #define	OBJ_USER_DEFINED	0x04
 #define OBJ_TEXTURE_RES		0x05
 #define OBJ_TILESET_RES		0x06
+#define OBJ_SOUND_RES		0x07
+#define OBJ_MUSIC_RES		0x08
 
 #define MANAGER_TYPE_REN 0x00
 #define MANAGER_TYPE_FNT 0x01
 #define MANAGER_TYPE_UPD 0x02
 #define MANAGER_TYPE_TEX 0x03
+#define MANAGER_TYPE_SND 0x04
+#define MANAGER_TYPE_MUS 0x05
 
 /**
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
@@ -83,6 +92,12 @@ public:
 		case MANAGER_TYPE_TEX:
 			return TextureManager;
 			break;
+		case MANAGER_TYPE_SND:
+			return SoundManager;
+			break;
+		case MANAGER_TYPE_MUS:
+			return MusicManager;
+			break;
 		default:
 			return this;
 			break;
@@ -95,6 +110,8 @@ protected:
 	CUpdateManager *UpdateManager;
 	CRenderManager *RenderManager;
 	CTextureManager *TextureManager;
+	CSoundManager *SoundManager;
+	CMusicManager *MusicManager;
 
 	CFactory();
 	~CFactory();
