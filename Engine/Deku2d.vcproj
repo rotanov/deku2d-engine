@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\2de_Sound.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\2de_Xml.cpp"
 				>
 			</File>
@@ -255,10 +259,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Sound.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Xml.h"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\Deku2d classes.cd"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

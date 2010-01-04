@@ -28,6 +28,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pong", "Demos\Pong\Pong.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Deku2d", "Engine\Deku2d.vcproj", "{35F1F297-4147-41B6-9B7D-09F5670F3E54}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoundCheck", "Demos\SoundCheck\SoundCheck.vcproj", "{2CF7D7FD-635D-41AD-A4AD-DFF2158D4DCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -58,6 +60,10 @@ Global
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54}.Debug|Win32.Build.0 = Debug|Win32
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54}.Release|Win32.ActiveCfg = Release|Win32
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54}.Release|Win32.Build.0 = Release|Win32
+		{2CF7D7FD-635D-41AD-A4AD-DFF2158D4DCD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2CF7D7FD-635D-41AD-A4AD-DFF2158D4DCD}.Debug|Win32.Build.0 = Debug|Win32
+		{2CF7D7FD-635D-41AD-A4AD-DFF2158D4DCD}.Release|Win32.ActiveCfg = Release|Win32
+		{2CF7D7FD-635D-41AD-A4AD-DFF2158D4DCD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

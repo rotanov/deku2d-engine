@@ -859,7 +859,7 @@ bool CParticleSystem::Render()
 		Texture->Bind();
 
 		glBegin(GL_QUADS);
-		for(int i=0;i<Info.ParticlesActive;i++)
+		for(int i = 0; i < Info.ParticlesActive; i++)
 		{
 			particles[i].c.glSet();
 			glTexCoord2f(0.0f, 0.0f); glVertex2f(particles[i].p.x,						particles[i].p.y					);			
@@ -995,10 +995,24 @@ CParticleSystem::~CParticleSystem()
 
 CGUIObject::CGUIObject()
 {
+	Parent = &GuiManager;
 	Font = NULL;
 	PRender = NULL;
-	Parent = NULL;
+	Parent = NULL;  // <---- NNNNNOOOO Defparampampampampam
 	CallProc = NULL;
+	WidgetMouseState = wmsOutside;
+	CEngine::Instance()->RenderManager.AddObject(this);
+	CEngine::Instance()->UpdateManager.AddObject(this);	
+	GuiManager.AddObject(this);
+}
+
+CGUIObject::CGUIObject(CGUIObject *AParent)
+{
+	Parent = AParent;
+	Font = Parent->Font;
+	PRender = Parent->PRender;
+	Text = Parent->Text;
+	CallProc = Parent->CallProc;
 	WidgetMouseState = wmsOutside;
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
@@ -1019,9 +1033,6 @@ void CGUIObject::SetFont(CFont *AFont)
 void CGUIObject::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
 {
 	PRender = APrimitiveRender;
-// 	PRender->plClr = &color;
-// 	PRender->psClr = &color;
-// 	PRender->ppClr = &color;
 }
 
 void CGUIObject::SetParent(CGUIObject *AParent)
@@ -1029,9 +1040,11 @@ void CGUIObject::SetParent(CGUIObject *AParent)
 	if (!AParent)
 		return;
 	Parent = AParent;
-	Font = AParent->Font;
-	PRender = AParent->PRender;
-	color = AParent->color;
+	Font = Parent->Font;
+	PRender = Parent->PRender;
+	color = Parent->color;
+	//Text = Parent->Text;  
+	//CallProc = Parent->CallProc;
 }
 //////////////////////////////////////////////////////////////////////////
 ///CGUIManager
@@ -1156,25 +1169,25 @@ void CGUIManager::SetFocus(CObject* AObject)
 
 CGUIManager::~CGUIManager()
 {
-	SAFE_DELETE(PRender);
+	SAFE_DELETE(PRender);   ///////// TODO: NONONONONONONONON DONT DOIT
 }
 CGUIManager GuiManager;
 //////////////////////////////////////////////////////////////////////////
 ///CButton
 
-CButton::CButton( CAABB ARect, char* AText, RGBAf AColor, Callback AOnClick )
+CButton::CButton( CAABB ARect, const char* AText, RGBAf AColor, Callback AOnClick )
 {
 	CallProc = AOnClick;
 	aabb = ARect;
 	color = AColor;
-	text = AText;
+	Text = AText;
 }
 
 CButton::CButton()
 {
 	aabb = CAABB(0, 0, 100, 100);
 	color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-	text = "You dumb! You called default constructor!";
+	Text = "You dumb! You called default constructor!";
 }
 
 bool CButton::Render()
@@ -1182,12 +1195,12 @@ bool CButton::Render()
 	CEngine *engine = CEngine::Instance();
 	Font = engine->FontManager->GetFont("Font");
 
-	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(text.c_str()), Font->GetStringHeight(text.c_str())) / 2.0f;
+	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
 	Font->tClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);//color;
 	glLoadIdentity();
 	PRender->grRectS(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
-	Font->Print(text.c_str());
+	Font->Print(Text.c_str());
 	return true;
 }
 
@@ -1258,25 +1271,27 @@ bool CEdit::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
 		switch(key)
 		{
 		case SDLK_BACKSPACE:
-			if (CursorPos > 0)
-				DelInterval(&text, CursorPos, CursorPos);
-			CursorPos--;
+			if (CursorPos >= 0)
+			{
+				DelInterval(&Text, CursorPos, CursorPos);
+				CursorPos--;
+			}			
 			break;
 		case SDLK_DELETE:
-			DelInterval(&text, CursorPos+1, CursorPos+1);
+			DelInterval(&Text, CursorPos+1, CursorPos+1);
 			break;
 		case SDLK_LEFT:				
 			if (--CursorPos < -1)
 				CursorPos++;
 			break;
 		case SDLK_RIGHT:
-			if (++CursorPos >= text.length())
+			if (++CursorPos >= Text.length())
 				CursorPos--;
 			break;
 		default:
 			if (letter > 31)
 			{
-				text.insert(CursorPos, &letter, 1);
+				Text.insert(CursorPos+1, &letter, 1);
 				CursorPos++;
 			}
 		}
@@ -1299,14 +1314,18 @@ bool CEdit::Render()
 	CEngine *engine = CEngine::Instance();
 	Font = engine->FontManager->GetFont("Font");
 
-	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(text.c_str()), Font->GetStringHeight(text.c_str())) / 2.0f;
+	float StringWidth = Font->GetStringWidth(Text.c_str());
+	float StringHeight = Font->GetStringHeight(Text.c_str());
+	float CursorDistance = Font->GetStringWidthEx(0, CursorPos, Text.c_str());
+	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(StringWidth, StringHeight) / 2.0f;
 	Font->tClr = color;
 	glLoadIdentity();
 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
-	Font->Print(text.c_str());
-	PRender->grSegmentC(Vector2(Font->Pos.x + Font->GetStringWidthEx(0, CursorPos, text.c_str()), Font->Pos.y + 20 ),
-		Vector2(Font->Pos.x + Font->GetStringWidthEx(0, CursorPos, text.c_str()), Font->Pos.y - 20 ));
+	Font->Print(Text.c_str());
+	PRender->psize = 2.0f;
+	PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, Font->Pos.y + StringHeight ),
+						Vector2(Font->Pos.x + CursorDistance, Font->Pos.y ));
 	return true;
 }
 
@@ -1385,7 +1404,7 @@ CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc)
 	FocusedOnListNode = NULL;
 	visible = false;
 	isCycledMenuSwitch = true;
-	SetName(text = AMenuText);
+	SetName(Text = AMenuText);
 	SetParent(AParent);
 	if (AParent)
 		AParent->AddObject(this);
@@ -1407,7 +1426,7 @@ bool CMenuItem::Render()
 		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
 		Font->scale = Vector2(1.0f, 1.0f);
 		Font->Pos = ChildMenuItem->position;
-		Font->Print(ChildMenuItem->text.c_str());
+		Font->Print(ChildMenuItem->Text.c_str());
 		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
 	}
 	glLoadIdentity();

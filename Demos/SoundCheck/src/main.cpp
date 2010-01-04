@@ -11,7 +11,7 @@ bool Init()
 	return true;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	Engine->SetState(STATE_USER_INIT_FUNC, &Init);
 	Engine->SetState(STATE_CONFIG_NAME, "SoundCheck.xml");

@@ -924,19 +924,21 @@ bool CTexture::LoadFromFile()
 
 #if defined(_WIN32) || defined(__linux)		// <platforms, that support swap interval control>
 
-#define GET_PROC_ADDRESS(x,y) ((x((const GLubyte*)"(y)")))
-
 #if defined(_WIN32)
 	#include <windows.h>
+	#define GL_GET_PROCESS_ADDRESS_ARG_TYPE (const char*)
 	#define SWAP_INTERVAL_EXTENSION_NAME "WGL_EXT_swap_control"
 	#define SWAP_INTERVAL_PROC_NAME wglSwapIntervalEXT
 	#define GET_PROC_ADDRESS_FUNC wglGetProcAddress
 #elif defined(__linux)
 	#include <GL/glx.h>
+	#define GL_GET_PROCESS_ADDRESS_ARG_TYPE (const GLubyte*)
 	#define SWAP_INTERVAL_EXTENSION_NAME "GLX_SGI_swap_control"
 	#define SWAP_INTERVAL_PROC_NAME glXSwapIntervalSGI
 	#define GET_PROC_ADDRESS_FUNC glXGetProcAddress
 #endif
+
+#define GET_PROC_ADDRESS(x,y) ((x(GL_GET_PROCESS_ADDRESS_ARG_TYPE"(y)")))
 
 SWAP_INTERVAL_PROC SWAP_INTERVAL_PROC_NAME = 0;
 

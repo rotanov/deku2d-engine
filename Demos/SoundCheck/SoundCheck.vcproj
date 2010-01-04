@@ -2,11 +2,11 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="Font editor"
-	ProjectGUID="{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}"
-	RootNamespace="Font editor"
+	Name="SoundCheck"
+	ProjectGUID="{2CF7D7FD-635D-41AD-A4AD-DFF2158D4DCD}"
+	RootNamespace="SoundCheck"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -42,14 +42,17 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				EnableEnhancedInstructionSet="0"
+				DisableLanguageExtensions="false"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
+				WarnAsError="false"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -68,6 +71,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
+				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="2"
@@ -105,6 +109,7 @@
 			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
+			ManagedExtensions="0"
 			WholeProgramOptimization="1"
 			BuildLogFile="$(IntDir)\$(ProjectName).BuildLog.htm"
 			>
@@ -125,6 +130,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zc:wchar_t-"
+				Optimization="2"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
@@ -143,14 +151,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="OpenGl32.lib Glu32.lib"
 				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
-				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
-				SubSystem="1"
+				GenerateManifest="true"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
@@ -184,34 +189,30 @@
 	</References>
 	<Files>
 		<Filter
-			Name="inc"
-			>
-		</Filter>
-		<Filter
 			Name="src"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Src\Font editor.cpp"
+				RelativePath=".\src\main.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Resource Files"
+			Name="inc"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\inc\SoundCheck.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\Res\Planet.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\Res\Resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Res\Resource.rc"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

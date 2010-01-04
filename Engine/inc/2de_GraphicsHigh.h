@@ -206,6 +206,7 @@ public:
 struct CParticle
 {
 	Vector2			p;			//	позиция частицы
+	Vector2			pp;			//	Сейчас не задействована, но в будующем пригодится - предыдущая позиция. (сейчас она даже не обновляется)
 	Vector2			v;			//	скорость 
 	RGBAf			c;			//	текущий цвет
 	RGBAf			dc;			//	приращение цвета на каждом шаге
@@ -304,12 +305,11 @@ enum EWidgetMouseState {wmsInside, wmsOutside, wmsLost, wmsHovered, wmsClicked, 
 class CGUIObject : public CRenderObject, public CUpdateObject
 {
 public:
-	//цвет есть в предке
-	//RGBAf				color;				// Цвет. Я хотел сперва указатель на цвет, чтобы смена одного цвета меняла много чего, нно...возникили проблемы. Пока будет так. ЭТо же мини гуи.
-	string				text;				// Это понятно, текст.
+	string				Text;
 	Callback			CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
-											// Очевидные комментарии такие очевидные, что даже надо удалить их.
+
 			CGUIObject();
+			CGUIObject(CGUIObject *AParent);
 			~CGUIObject();
 	void	SetFont(CFont *AFont);
 	void	SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
@@ -347,7 +347,7 @@ class CButton : public CGUIObject
 {
 public:
 				CButton();
-				CButton(CAABB ARect, char* AText, RGBAf AColor, Callback ACallProc);
+				CButton(CAABB ARect, const char* AText, RGBAf AColor, Callback ACallProc);
 				~CButton();
 	bool		Render();
 	bool		Update(float dt);

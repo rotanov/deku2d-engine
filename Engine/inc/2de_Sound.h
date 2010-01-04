@@ -1,7 +1,7 @@
 #ifndef _2DE_SOUND_H
 #define _2DE_SOUND_H
 
-#include <SDL/SDL_mixer.h>
+#include <SDL_mixer.h>
 
 #include "2de_Core.h"
 

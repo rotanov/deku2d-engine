@@ -72,11 +72,12 @@ public:
 
 bool PlayFile()
 {
-	string test = dynamic_cast<CEdit*>(GuiManager.GetLast()->GetData())->text;
+	string test = dynamic_cast<CEdit*>(GuiManager.GetLast()->GetData())->Text;
 	Log.Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
 	CMusic *mus = new CMusic(test.c_str());
 	mus->LoadFromFile();
 	CSoundMixer::Instance()->PlayMusic(mus);
+	return true;
 }
 
 class CLoadFileGUI
@@ -89,7 +90,7 @@ public:
 
 		FileNameEdit = new CEdit;
 		FileNameEdit->aabb = CAABB(80, 300, 300, 32);
-		FileNameEdit->text = "";
+		FileNameEdit->Text = "";
 		FileNameEdit->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 		FileNameEdit->SetParent(&GuiManager);
 

@@ -117,7 +117,7 @@ private:
 	bool						(*procFocusLostFunc)();		// ok
 	bool						(*procFocusGainFunc)();		// ok
 	bool						(*procUpdateFunc)(scalar);	// ok, yeah
-	bool						(*procRenderFunc)();		// ok
+	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP Motherfuckers don't forget 'bout it
 protected:
 	static CEngine *_instance;
 	CEngine();

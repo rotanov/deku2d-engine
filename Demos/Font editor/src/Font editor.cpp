@@ -9,7 +9,7 @@ const int				EDIT_WIDTH			= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
 const int				EDIT_HEIGHT			= 32;
 const int				BUTTON_WIDTH		= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
 const int				BUTTON_HEIGHT		= 32;
-// Константы, определяющие цвет элементов интерфейса будут тут. Чуть погодя.
+// Константы, определяющие цвет элементов интерфейса.
 const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
@@ -32,7 +32,7 @@ CEdit					*edSampleText		= NULL;
 // Т.е. для пользователя утилыты это будет Load, а для тех, кто способен читать этот комментарий - это Asquire()
 bool LoadFont()  
 {
-	Font = Ninja->FontManager->GetFont(edFontname->text.c_str());
+	Font = Ninja->FontManager->GetFont(edFontname->Text.c_str());
 	if (Font == NULL)
 	{
 #ifdef _WIN32
@@ -52,7 +52,7 @@ bool SaveFont()
 
 bool LoadTexture()  // Опять же не Load() а Acquire().
 {
-	FontTexture = Ninja->TextureManager->GetTextureByName(edFontTextureName->text);
+	FontTexture = Ninja->TextureManager->GetTextureByName(edFontTextureName->Text);
 	if (FontTexture == NULL)
 	{
 #ifdef _WIN32
@@ -200,24 +200,36 @@ public:
 
 CFontEditor *FontEditor;
 
+bool ExitFontEditor()
+{
+	SDLGLExit(0);
+	return true;
+}
+
 bool Init()
 {	
 	SDL_ShowCursor(1);
+#define BUTTONS_COUNT 3
+	const char* ButtonNames[BUTTONS_COUNT] = {"Load font", "Load texture", "Exit", };
+	const Callback ButtonCallers[BUTTONS_COUNT] = {&LoadFont, &LoadTexture, &ExitFontEditor, };
 	
-	(new CButton(CAABB(LEFT_MARGIN, 20, BUTTON_WIDTH, BUTTON_HEIGHT), "Load font", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), LoadFont))->SetParent(&GuiManager);	
-	(new CButton(CAABB(LEFT_MARGIN, 200, BUTTON_WIDTH, BUTTON_HEIGHT), "Load texture", RGBAf(0.6f, 0.7f, 0.8f, 1.0f), LoadTexture))->SetParent(&GuiManager);
+	for(int i = 0; i < BUTTONS_COUNT; i++)
+		(new CButton(CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT+10)*i, BUTTON_WIDTH, BUTTON_HEIGHT), ButtonNames[i], RGBAf(0.4f, 0.4f, 0.4f, 1.0f), ButtonCallers[i]))->SetParent(&GuiManager);	
+	
 
 	edFontTextureName = new CEdit();
-	edFontTextureName->aabb = CAABB(LEFT_MARGIN, 350, EDIT_WIDTH, BUTTON_HEIGHT);
-	edFontTextureName->text = "Font";
-	edFontTextureName->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 	edFontTextureName->SetParent(&GuiManager);
+	edFontTextureName->aabb = CAABB(LEFT_MARGIN, 350, EDIT_WIDTH, BUTTON_HEIGHT);
+	edFontTextureName->Text = "Font";
+	edFontTextureName->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
+	
 
 	edFontname = new CEdit();
-	edFontname->aabb = CAABB(LEFT_MARGIN, 500, EDIT_WIDTH, BUTTON_HEIGHT);
-	edFontname->text = "Font";
-	edFontname->color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 	edFontname->SetParent(&GuiManager);
+	edFontname->aabb = CAABB(LEFT_MARGIN, 500, EDIT_WIDTH, BUTTON_HEIGHT);
+	edFontname->Text = "Font";
+	edFontname->color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
+	
 
 	FontEditor = new CFontEditor;
 	return true;

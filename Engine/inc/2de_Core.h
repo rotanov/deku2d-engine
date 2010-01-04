@@ -125,7 +125,7 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_FOOD 0xdeadf00d
 
 #define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
-#define COLOR_BLACK RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
+#define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
 
 /**
 *	CObject - базовый класс. Всё наследовать от него.
@@ -135,8 +135,9 @@ class CObject
 {
 public:
 	unsigned int	type;	// type - флаги свойств объекта. 
+
 	virtual			~CObject(){};
-					CObject();
+	CObject();
 	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void			IncListRefCount();
 	void			DecListRefCount();
@@ -161,11 +162,6 @@ private:
 *	И четвёртый параметр - ASCII код.
 */
 typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);
-/** 
-*	1й и 2й параметры - х и у соответственно
-*	кстати довольнo бесполезная штука в отличие от той, что выше. Неудобно, я считаю.
-*/
-typedef bool (*MouseInputFunc)(scalar, scalar); 
 
 /**
 *	CNodeObject - это узел списка.
@@ -382,13 +378,13 @@ public:
 	{
 		LOG_MODE_STDOUT,
 		LOG_MODE_STDERR,
-		LOG_MODE_FILE
+		LOG_MODE_FILE,
 	};
 
 	enum ELogFileWriteMode
 	{
 		LOG_FILE_WRITE_MODE_TRUNCATE,
-		LOG_FILE_WRITE_MODE_APPEND
+		LOG_FILE_WRITE_MODE_APPEND,
 	};
 
 	CLog();
@@ -431,6 +427,7 @@ extern CLog Log;
 
 // TODO: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment
+// Agreed with you.
 
 string GetWorkingDir();
 
@@ -458,8 +455,7 @@ void MemChp2();
 void MemCheck();
 
 /**
-*	Суть синглотона в том, что в памяти всегда присутствует только один экзмепляр класса.
-*	Этот класс реально нигде не используется и лежит здесь, чтобы не забыть как делать синглтон.
+*	здесь, чтобы не забыть как делать синглтон. Хотя чего там можно забыть, в гемсах же копипаста.
 */ 
 
 class CPSingleTone
@@ -510,7 +506,7 @@ typedef CGarbageCollector CSingletoneKiller;
  * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
  */
 
-export template <class T>
+template <class T>
 class CTSingleton : public virtual CObject
 {
 public:
