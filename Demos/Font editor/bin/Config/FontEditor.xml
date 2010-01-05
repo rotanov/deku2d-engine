@@ -2,7 +2,7 @@
 	WindowWidth				= "1000"
 	WindowHeight			= "700"
 	WindowBpp				= "32"		// todo: deprecate
-	WindowCaption			= "Level editor"
+	WindowCaption			= "Font editor"
 	DoCalcFps				= "true"	// todo: deprecate
 	DoLimitFps				= "false"
 	FpsLimit				= "60"

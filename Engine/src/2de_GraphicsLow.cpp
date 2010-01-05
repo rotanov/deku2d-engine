@@ -474,6 +474,7 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 		return -1;
 	if ((unsigned int)t2 >= strlen(text))
 		return -1;
+
 	int r = 0;
 	for (unsigned int i = t1; i <= t2; i++)
 		r += width[text[i]-32]+Distance;
@@ -502,6 +503,27 @@ int CFont::GetStringHeightEx( int t1, int t2, const char *text )
 	for (unsigned int i=0; i<l; i++)
 		r = Max(height[text[i]-32], r);
 	return r;
+}
+
+int CFont::StringCoordToCursorPos(const char *text, int x, int y)
+{
+	if (text == NULL)
+		return -1;
+	if (strlen(text) == 0)
+		return -1;
+	
+	Vector2 Local = Vector2(x, y) - Pos;
+	if (Local.x < 0)
+		return -1;
+
+	for (int i = 0; i < strlen(text); i++)
+	{
+		int SubstrWidth = GetStringWidthEx(0, i, text);
+		int SymbolCenterCoord = SubstrWidth - Distance - (width[text[i] - 32] / 2);
+		if (Local.x < SymbolCenterCoord)
+			return (i - 1);
+	}
+	return (strlen(text) - 1);
 }
 
 void CFont::SetDepth( float _depth )
@@ -798,17 +820,15 @@ CFont* CFontManager::GetFontEx(string fontname)
 	return dynamic_cast<CFont*>(GetObject(&fontname));
 }
 
-bool CFontManager::SetCurrentFont(char* fontname)
+bool CFontManager::SetCurrentFont(const char* fontname)
 {
 	CurrentFont = GetFont(fontname);
-	if (!CurrentFont->loaded)
-		CurrentFont->LoadFromFile();
 	return !!CurrentFont;
 }
 
 bool CFontManager::Print(int x, int y, float depth, char* text, ...)
 {
-	if (!CurrentFont)
+	if (!CurrentFont || !CurrentFont->CheckLoad())
 		return false;
 
 	CurrentFont->SetDepth(depth);
@@ -819,7 +839,7 @@ bool CFontManager::Print(int x, int y, float depth, char* text, ...)
 
 bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 {
-	if (!CurrentFont)
+	if (!CurrentFont || !CurrentFont->CheckLoad())
 		return false;
 
 	char temp[256];

@@ -148,6 +148,7 @@ public:
 	int			GetStringWidthEx(int t1, int t2, const char *text);
 	int			GetStringHeight(const char *text);
 	int			GetStringHeightEx(int t1, int t2, const char *text);
+	int			StringCoordToCursorPos(const char *text, int x, int y);
 	CTexture*	GetTexture();
 	void		SetTexture(char *TextureName);
 
@@ -192,7 +193,7 @@ class CFontManager : public CList, public CTSingleton<CFontManager>
 {
 public:
 	CFont					*CurrentFont;
-	bool					SetCurrentFont(char* fontname);
+	bool					SetCurrentFont(const char* fontname);
 	bool					PrintEx(int x, int y, float depth, char* text, ...);
 	bool					Print(int x, int y, float depth, char* text, ...);
 	CFont*					GetFont(const char* fontname);

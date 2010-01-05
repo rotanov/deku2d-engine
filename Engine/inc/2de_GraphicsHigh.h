@@ -300,28 +300,47 @@ protected:
 *	и всякие свистоперделки жизнено необходимые.
 */
 
-enum EWidgetMouseState {wmsInside, wmsOutside, wmsLost, wmsHovered, wmsClicked, wmsReleased};
+// enum EWidgetMouseState {wmsInside, wmsOutside, wmsLost, wmsHovered, wmsClicked, wmsReleased}; // это вообще в корне разные состояния.. оно может быть нажато, но аутсайд...
 
-class CGUIObject : public CRenderObject, public CUpdateObject
+class CGUIObjectBase : public CRenderObject, public CUpdateObject
 {
 public:
+	struct CMouseState
+	{
+		bool Hovered;
+		bool Pressed;
+		bool PressedInside;
+		bool PressedOutside;
+	};
 	string				Text;
 	Callback			CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
 
-			CGUIObject();
-			CGUIObject(CGUIObject *AParent);
-			~CGUIObject();
+	CGUIObjectBase();
+	CGUIObjectBase(CGUIObjectBase *AParent);
+	~CGUIObjectBase();
+
 	void	SetFont(CFont *AFont);
 	void	SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
-	void	SetParent(CGUIObject *AParent);
+	void	SetParent(CGUIObjectBase *AParent);
+	Vector2 GlobalToLocal(const Vector2& Coords) const;
 protected:
 	CFont				*Font;				//	Указатель на шрифт.
 	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
-	CGUIObject			*Parent;			//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
-	EWidgetMouseState	WidgetMouseState;	//	Состояние мыши относительно виджета в смысле позиции указателя
+	CGUIObjectBase			*Parent;			//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+	//EWidgetMouseState	WidgetMouseState;	//	Состояние мыши относительно виджета в смысле позиции указателя
+	CMouseState MouseState;
+	CMouseState PreviousMouseState;
+	CMouseState WidgetState;
 };
 
-class CGUIManager : public CList, public CGUIObject
+class CGUIObject : public CGUIObjectBase
+{
+public:
+	CGUIObject();
+	bool isFocused() const;
+};
+
+class CGUIManager : public CList, public CGUIObjectBase
 {
 public:
 				CGUIManager();
@@ -331,6 +350,7 @@ public:
 	bool		Render();
 	void		SetFocusedNodeTo(CListNode* AFocusedNode);
 	void		SetFocus(CObject* AObject);
+	CGUIObject* 	GetFocusedObject() const;
 private:
 	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
 	CListNode	*FocusedOnListNode;
@@ -349,6 +369,7 @@ public:
 				CButton();
 				CButton(CAABB ARect, const char* AText, RGBAf AColor, Callback ACallProc);
 				~CButton();
+	bool		InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 	bool		Render();
 	bool		Update(float dt);
 };
@@ -362,7 +383,8 @@ public:
 	bool		Render();
 	bool		Update(scalar dt);
 private:
-	int			CursorPos;
+	int		CursorPos;
+	int		MouseToCursorPos(const Vector2& MousePosition);
 };
 
 class CMenuItem : public CGUIObject, public CList

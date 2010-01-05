@@ -1046,7 +1046,7 @@ bool CBaseResource::SaveToFile()
 
 bool CBaseResource::CheckLoad()
 {
-	return loaded = !loaded?LoadFromFile():true;
+	return loaded = !loaded ? LoadFromFile() : true;
 }
 
 CBaseResource::CBaseResource() :loaded(false), filename("")

@@ -991,51 +991,78 @@ CParticleSystem::~CParticleSystem()
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
-///CGUIObject
+// CGUIObjectBase
 
-CGUIObject::CGUIObject()
+CGUIObjectBase::CGUIObjectBase()
 {
 	Parent = &GuiManager;
 	Font = NULL;
 	PRender = NULL;
 	Parent = NULL;  // <---- NNNNNOOOO Defparampampampampam
 	CallProc = NULL;
-	WidgetMouseState = wmsOutside;
+	//WidgetMouseState = wmsOutside;
+
+	MouseState.Hovered = false;
+	MouseState.Pressed = false;
+	MouseState.PressedInside = false;
+	MouseState.PressedOutside = false;
+	PreviousMouseState.Hovered = false;
+	PreviousMouseState.Pressed = false;
+	PreviousMouseState.PressedInside = false;
+	PreviousMouseState.PressedOutside = false;
+	WidgetState.Hovered = false;
+	WidgetState.Pressed = false;
+	WidgetState.PressedInside = false;
+	WidgetState.PressedOutside = false;
+
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
-	GuiManager.AddObject(this);
 }
 
-CGUIObject::CGUIObject(CGUIObject *AParent)
+CGUIObjectBase::CGUIObjectBase(CGUIObjectBase *AParent)
 {
 	Parent = AParent;
 	Font = Parent->Font;
 	PRender = Parent->PRender;
 	Text = Parent->Text;
 	CallProc = Parent->CallProc;
-	WidgetMouseState = wmsOutside;
+	//WidgetMouseState = wmsOutside;
+
+	MouseState.Hovered = false;
+	MouseState.Pressed = false;
+	MouseState.PressedInside = false;
+	MouseState.PressedOutside = false;
+	PreviousMouseState.Hovered = false;
+	PreviousMouseState.Pressed = false;
+	PreviousMouseState.PressedInside = false;
+	PreviousMouseState.PressedOutside = false;
+	WidgetState.Hovered = false;
+	WidgetState.Pressed = false;
+	WidgetState.PressedInside = false;
+	WidgetState.PressedOutside = false;
+
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
 	GuiManager.AddObject(this);
 }
 
-CGUIObject::~CGUIObject()
+CGUIObjectBase::~CGUIObjectBase()
 {
 	CEngine::Instance()->RenderManager.DelObject(GetID());
 	CEngine::Instance()->UpdateManager.DelObject(GetID());
 }
 
-void CGUIObject::SetFont(CFont *AFont)
+void CGUIObjectBase::SetFont(CFont *AFont)
 {
 	Font = AFont;
 }
 
-void CGUIObject::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
+void CGUIObjectBase::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
 {
 	PRender = APrimitiveRender;
 }
 
-void CGUIObject::SetParent(CGUIObject *AParent)
+void CGUIObjectBase::SetParent(CGUIObjectBase *AParent)
 {
 	if (!AParent)
 		return;
@@ -1046,8 +1073,31 @@ void CGUIObject::SetParent(CGUIObject *AParent)
 	//Text = Parent->Text;  
 	//CallProc = Parent->CallProc;
 }
+
+Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
+{
+	Vector2 Result;
+	Result.x = Max(Coords.x - aabb.vMin.x, 0);
+	Result.y = Max(Coords.y - aabb.vMin.y, 0);
+	return Result;
+}
+
+bool CGUIObject::isFocused() const
+{
+	return (GuiManager.GetFocusedObject() == this);
+}
+
+
 //////////////////////////////////////////////////////////////////////////
-///CGUIManager
+// CGUIObject
+
+CGUIObject::CGUIObject()
+{
+	GuiManager.AddObject(this);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CGUIManager
 
 CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), tabholded(false)
 {
@@ -1057,7 +1107,7 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
-bool CGUIManager::Update( scalar dt )
+bool CGUIManager::Update(scalar dt)
 {
 	if (tabholded)
 	{
@@ -1102,7 +1152,7 @@ bool CGUIManager::Render()
 	return true;
 }
 
-bool CGUIManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
+bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch(state)
 	{
@@ -1111,15 +1161,13 @@ bool CGUIManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char lette
 		{
 		case SDLK_TAB:
 			tabholded = true;
-			if (FocusedOnListNode == NULL)
+			if (FocusedOnListNode != NULL)
 			{
-				FocusedOnListNode = GetFirst();
-				if (GetFirst())
-					FocusedOn = dynamic_cast<CGUIObject*>(GetFirst()->GetData());
-			}
-			else
-			{
-				FocusedOnListNode = FocusedOnListNode->next;
+				if (mod & KMOD_SHIFT)
+					FocusedOnListNode = FocusedOnListNode->prev;
+				else
+					FocusedOnListNode = FocusedOnListNode->next;
+
 				if (FocusedOnListNode)
 					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
 
@@ -1127,14 +1175,14 @@ bool CGUIManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char lette
 
 			if (FocusedOnListNode == NULL)
 			{
-				FocusedOnListNode = GetFirst();
-				if (GetFirst())
-					FocusedOn = dynamic_cast<CGUIObject*>(GetFirst()->GetData());
+				if (mod & KMOD_SHIFT)
+					FocusedOnListNode = GetLast();
+				else
+					FocusedOnListNode = GetFirst();
+
+				if (FocusedOnListNode)
+					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
 			}
-			break;
-		default:
-			if(FocusedOnListNode)
-				FocusedOn->InputHandling(state, key, mod, letter);
 			break;
 		}
 		break;
@@ -1147,6 +1195,9 @@ bool CGUIManager::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char lette
 		}
 		break;
 	}
+
+	if(FocusedOnListNode)
+		FocusedOn->InputHandling(state, key, mod, letter);
 	return true;
 }
 
@@ -1167,6 +1218,11 @@ void CGUIManager::SetFocus(CObject* AObject)
 	}
 }
 
+CGUIObject* CGUIManager::GetFocusedObject() const
+{
+	return FocusedOn;
+}
+
 CGUIManager::~CGUIManager()
 {
 	SAFE_DELETE(PRender);   ///////// TODO: NONONONONONONONON DONT DOIT
@@ -1175,7 +1231,9 @@ CGUIManager GuiManager;
 //////////////////////////////////////////////////////////////////////////
 ///CButton
 
-CButton::CButton( CAABB ARect, const char* AText, RGBAf AColor, Callback AOnClick )
+#define Dclr RGBAf(-0.2f, -0.2f, -0.2f, 0.0f)
+
+CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor, Callback AOnClick)
 {
 	CallProc = AOnClick;
 	aabb = ARect;
@@ -1197,6 +1255,15 @@ bool CButton::Render()
 
 	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
 	Font->tClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);//color;
+
+	RGBAf CurrentColor = color;
+
+	if (WidgetState.Hovered)
+		CurrentColor = color + Dclr;
+	if (WidgetState.Pressed)
+		CurrentColor = color + Dclr * 2.0f;
+
+	PRender->sClr = CurrentColor;
 	glLoadIdentity();
 	PRender->grRectS(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
@@ -1204,55 +1271,47 @@ bool CButton::Render()
 	return true;
 }
 
-#define Dclr RGBAf(0.1f, 0.1f, 0.1f, 0.0f)
 
 bool CButton::Update(float dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
 
-	switch (WidgetMouseState)
-	{
-	case wmsOutside:
-		if (aabb.Inside(mouse))
-			WidgetMouseState = wmsHovered;
-		break;
-	case wmsHovered:
-		color += Dclr;
-		WidgetMouseState = wmsInside;
-		break;
-	case wmsInside:
-		if (!aabb.Inside(mouse))
-		{
-			WidgetMouseState = wmsLost;
-			break;
-		}
-		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-		{
-			color += Dclr;
-			GuiManager.SetFocusedNodeTo(GuiManager.GetListNode(this));
-			if (CallProc)
-				CallProc();
-			WidgetMouseState = wmsClicked;
-		}
-		break;
-	case wmsLost:
-		color -= Dclr;
-		WidgetMouseState = wmsOutside;
-		break;
-	case wmsClicked:
-		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-			WidgetMouseState = wmsReleased;
-		break;
-	case wmsReleased:
-		color -= Dclr;
-		if (aabb.Inside(mouse))
-			WidgetMouseState = wmsInside;
-		else
-			WidgetMouseState = wmsOutside;
-		break;
+	MouseState.Hovered = aabb.Inside(mouse);
+	MouseState.Pressed = SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1);
+	MouseState.PressedInside = MouseState.Hovered && MouseState.Pressed;
 
+	if (!MouseState.Hovered && MouseState.Pressed && !PreviousMouseState.Pressed)
+		MouseState.PressedOutside = true;
+
+	if (!MouseState.Pressed && PreviousMouseState.Pressed && MouseState.PressedOutside)
+		MouseState.PressedOutside = false;
+	
+	
+	if (MouseState.Hovered && !PreviousMouseState.Hovered)
+	{
+		WidgetState.Hovered = true;
 	}
+
+	if (!MouseState.Hovered && PreviousMouseState.Hovered)
+	{
+		WidgetState.Hovered = false;
+	}
+
+	if (MouseState.PressedInside && !PreviousMouseState.PressedInside && !MouseState.PressedOutside)
+	{
+		WidgetState.Pressed = true;
+		GuiManager.SetFocus(this);
+	}
+
+	if (!MouseState.PressedInside && PreviousMouseState.PressedInside && !MouseState.PressedOutside)
+	{
+		WidgetState.Pressed = false;
+		if (CallProc && MouseState.Hovered && isFocused())
+			CallProc();
+	}
+
+	PreviousMouseState = MouseState;
 	return true;
 }
 
@@ -1260,10 +1319,42 @@ CButton::~CButton()
 {
 
 }
+
+bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod, char letter)
+{
+	switch(state)
+	{
+	case KEY_PRESSED:
+		switch(key)
+		{
+		case SDLK_SPACE:
+			WidgetState.Pressed = true;
+			break;
+		case SDLK_RETURN:
+			if (CallProc)
+				CallProc();
+			break;
+		}
+		break;
+	case KEY_RELEASED:
+		switch(key)
+		{
+		case SDLK_SPACE:
+			WidgetState.Pressed = false;
+			if (CallProc)
+				CallProc();
+			break;
+		}
+		break;
+	}
+	return true;
+
+}
+
 //////////////////////////////////////////////////////////////////////////
 ///CEdit
 
-bool CEdit::InputHandling( Uint8 state, Uint16 key, SDLMod, char letter )
+bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod, char letter)
 {
 	switch(state)
 	{
@@ -1323,61 +1414,43 @@ bool CEdit::Render()
 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	glEnable(GL_TEXTURE_2D);
 	Font->Print(Text.c_str());
-	PRender->psize = 2.0f;
-	PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, Font->Pos.y + StringHeight ),
-						Vector2(Font->Pos.x + CursorDistance, Font->Pos.y ));
+	if (isFocused())
+	{
+		PRender->psize = 2.0f;
+		PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -6.0f).vMax.y),
+				   Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -6.0f).vMin.y));
+	}
 	return true;
 }
 
-bool CEdit::Update( scalar dt )
+bool CEdit::Update(scalar dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
 
-	switch (WidgetMouseState)
-	{
-	case wmsOutside:
-		if (aabb.Inside(mouse))
-			WidgetMouseState = wmsHovered;
-		break;
-	case wmsHovered:
-		color += Dclr;
-		WidgetMouseState = wmsInside;
-		break;
-	case wmsInside:
-		if (!aabb.Inside(mouse))
-		{
-			WidgetMouseState = wmsLost;
-			break;
-		}
-		if ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-		{
-			color += Dclr;
-			WidgetMouseState = wmsClicked;
-		}
-		break;
-	case wmsLost:
-		color -= Dclr;
-		WidgetMouseState = wmsOutside;
-		break;
-	case wmsClicked:
-		if (!(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)))
-			WidgetMouseState = wmsReleased;
-		break;
-	case wmsReleased:
-		color -= Dclr;
-		if (aabb.Inside(mouse))
-			WidgetMouseState = wmsInside;
-		else
-			WidgetMouseState = wmsOutside;
-		break;
-	}
-	return true;
+	MouseState.Hovered = aabb.Inside(mouse);
+	MouseState.Pressed = (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) && MouseState.Hovered;
+	
+	if (MouseState.Pressed && !PreviousMouseState.Pressed)
+		GuiManager.SetFocus(this);
+
+	if (MouseState.Pressed)
+		CursorPos = MouseToCursorPos(mouse);
+
+	PreviousMouseState = MouseState;
 
 	return true;
 }
 
-CEdit::CEdit() : CursorPos(0)
+int CEdit::MouseToCursorPos(const Vector2& MousePosition)
+{
+	if (!aabb.Inside(MousePosition))
+		return -1;
+
+	return Font->StringCoordToCursorPos(Text.c_str(), MousePosition.x, MousePosition.y);
+}
+
+CEdit::CEdit() : CursorPos(-1)
 {
 }
 

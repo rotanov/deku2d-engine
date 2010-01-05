@@ -123,7 +123,6 @@ public:
 		PRender.grCircleL(MousePosition, 5);
 		int fps;
 		Ninja->GetState(STATE_FPS_COUNT, &fps);
-		Ninja->FontManager->SetCurrentFont("Font");
 		Ninja->FontManager->PrintEx(10, 400, 0.0f, "FPS: %d", fps);
 		glLoadIdentity();
 
@@ -188,7 +187,7 @@ public:
 		Ninja->GetState(STATE_MOUSE_XY, &MousePosition);
 		//MousePosition = Vector2(x, wheight - y);
 
-		if (isGripToolEnabled &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
+		if (isGripToolEnabled && !CAABB(0, 0, INTERFACE_OFFSET_X, wheight).Inside(MousePosition) &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
 		{
 			OffsetX += MouseDelta.x;
 			OffsetY -= MouseDelta.y;
