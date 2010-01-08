@@ -292,7 +292,7 @@ bool CEngine::ProcessEvents()
 			case SDL_MOUSEBUTTONDOWN:
 			{
 				for(int i=0;i<KeyInputFuncCount;i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, event.button.button, SDL_GetModState(), 0);				
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, event.button.button, SDL_GetModState(), 0);				
 				break;
 			}
 			case SDL_MOUSEBUTTONUP:

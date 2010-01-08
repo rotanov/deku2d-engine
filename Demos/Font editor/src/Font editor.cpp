@@ -1,6 +1,7 @@
 #include "2de_Engine.h"
 #include "2de_LuaUtils.h"
 #include "2de_GameUtils.h"
+#include "boost/signals.hpp"
 
 // Константы, определяющие расположение некоторых элементов интерфейса.
 const int				INTERFACE_OFFSET_X	= 128;
@@ -14,9 +15,13 @@ const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
 const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
+// Ограничения:
+const float ZOOM_MAX = 16.0f;
+const float ZOOM_MIN = 0.5f;
+const float ZOOM_STEP = 1.0f;
 // Всевозможные переменные.
 CEngine					*Ninja				= CEngine::Instance();
-byte					Zoom				= 2;
+float					Zoom				= 2.0f;
 CTexture				*FontTexture		= NULL;
 CFont					*Font				= NULL;
 char					CurrentSymbol		= 0;
@@ -35,9 +40,7 @@ bool LoadFont()
 	Font = Ninja->FontManager->GetFont(edFontname->Text.c_str());
 	if (Font == NULL)
 	{
-#ifdef _WIN32
-		MessageBox(0, "Font not found", "Error", MB_ICONERROR | MB_OK);  // Это временное решение.
-#endif
+		Log.Log("Error", "Font %s not found within data/fonts", edFontname->Text);
 		return false;
 	}
 	FontTexture = Font->GetTexture();
@@ -70,7 +73,20 @@ public:
 	Vector2 MouseDelta;
 	bool isGripToolEnabled;
 	bool doGripping;
-			int wheight, wwidth;
+	int wheight, wwidth;
+	void SetZoom(float AZoom)
+	{
+		float OldZoom = Zoom;
+		Zoom = AZoom;
+		Zoom = clampf(Zoom, ZOOM_MIN, ZOOM_MAX);
+		if (Zoom == OldZoom)
+			return;
+		float TempX = (MousePosition.x - OffsetX) / (FontTexture->width * OldZoom);
+		float TempY = (MousePosition.y - OffsetY) / (FontTexture->height * OldZoom);
+		OffsetX = - TempX * (FontTexture->width * Zoom) + MousePosition.x;
+		OffsetY = - TempY * (FontTexture->height * Zoom) + MousePosition.y;
+
+	}
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
 		switch (state)
@@ -81,7 +97,12 @@ public:
 			case SDLK_g:
 				isGripToolEnabled = true;
 				break;
-			
+			case SDL_BUTTON_WHEELUP:
+				SetZoom(Zoom + ZOOM_STEP);
+				break;
+			case SDL_BUTTON_WHEELDOWN:
+				SetZoom(Zoom - ZOOM_STEP);
+				break;
 			}
 		break;
 		case KEY_RELEASED:

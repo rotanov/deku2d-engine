@@ -58,6 +58,13 @@
 
 #define STATE_GL_BG_COLOR			0xA0
 
+// class CEventManager
+// {
+// 	CEventManager(){}
+// 	~CEventManager(){}
+// 	void RegisterEvent(const CObject &Subscriber, const long int );
+// };
+
 class CEngine : public CObject
 {
 public:
@@ -117,7 +124,7 @@ private:
 	bool						(*procFocusLostFunc)();		// ok
 	bool						(*procFocusGainFunc)();		// ok
 	bool						(*procUpdateFunc)(scalar);	// ok, yeah
-	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP Motherfuckers don't forget 'bout it
+	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
 protected:
 	static CEngine *_instance;
 	CEngine();
