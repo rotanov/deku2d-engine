@@ -1,7 +1,6 @@
 #include "2de_Engine.h"
 #include "2de_LuaUtils.h"
 #include "2de_GameUtils.h"
-#include "boost/signals.hpp"
 
 // Константы, определяющие расположение некоторых элементов интерфейса.
 const int				INTERFACE_OFFSET_X	= 128;
@@ -83,6 +82,8 @@ public:
 			return;
 		float TempX = (MousePosition.x - OffsetX) / (FontTexture->width * OldZoom);
 		float TempY = (MousePosition.y - OffsetY) / (FontTexture->height * OldZoom);
+		TempX = clampf(TempX, 0.0f, 1.0f);
+		TempY = clampf(TempY, 0.0f, 1.0f);
 		OffsetX = - TempX * (FontTexture->width * Zoom) + MousePosition.x;
 		OffsetY = - TempY * (FontTexture->height * Zoom) + MousePosition.y;
 
