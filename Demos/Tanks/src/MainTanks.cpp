@@ -256,6 +256,7 @@ bool Init()
 
 int	main(int argc, char *argv[])
 {
+	Ninja->SetState(STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(STATE_CONFIG_NAME, "Tanks.xml");
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->Run();

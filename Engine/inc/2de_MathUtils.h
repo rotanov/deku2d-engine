@@ -616,7 +616,7 @@ public:
 		vMax.y += dy;
 	}
 
-	CAABB Offsetted(scalar dx, scalar dy)
+	CAABB Offsetted(scalar dx, scalar dy) const
 	{
 		CAABB tmp;
 		tmp.vMin.x = vMin.x + dx;
@@ -639,13 +639,13 @@ public:
 		vMax.y +=y;		
 	}
 
-	CAABB Inflated(scalar x, scalar y)
+	CAABB Inflated(scalar x, scalar y) const
 	{
 		CAABB Result(vMin.x-x, vMin.y-y, vMax.x+x, vMax.y+y);
 		return Result;
 	}
 
-	bool Inside(Vector2 point)
+	bool Inside(Vector2 point) const
 	{
 		if (point.x >= vMax.x || point.x <= vMin.x)
 			return false;
@@ -654,7 +654,7 @@ public:
 		return true;
 	}
 
-	bool Inside(Vector2 point, scalar &MTD) // MTD - is minimal translation distance
+	bool Inside(Vector2 point, scalar &MTD) const // MTD - is minimal translation distance
 	{
 		if (point.x >= vMax.x || point.x <= vMin.x)
 			return false;
@@ -671,7 +671,7 @@ public:
 		return true;
 	}
 
-	bool Inside(Vector2 point, scalar &MTD, Vector2 &n) // MTD - is minimal translation distance
+	bool Inside(Vector2 point, scalar &MTD, Vector2 &n) const // MTD - is minimal translation distance
 	{
 		if (point.x >= vMax.x || point.x <= vMin.x)
 			return false;
@@ -698,7 +698,7 @@ public:
 		return true;
 	}
 
-	bool Outside(Vector2 point, scalar &MTD, Vector2 &n) // MTD - is minimal translation distance
+	bool Outside(Vector2 point, scalar &MTD, Vector2 &n) const // MTD - is minimal translation distance
 	{
 		if (point.x < vMax.x && point.x > vMin.x && point.y < vMax.y || point.y > vMin.y)
 			return false;
@@ -723,7 +723,7 @@ public:
 		return true;
 	}
 
-	bool Intersect(CAABB box)
+	bool Intersect(CAABB box) const
 	{
 		if (box.vMin.x >= vMax.x)
 			return false;
@@ -743,12 +743,12 @@ public:
 		Add(other.vMin);
 	}
 
-	scalar Width()
+	scalar Width() const
 	{
 		return vMax.x - vMin.x;
 	}
 
-	scalar Height()
+	scalar Height() const
 	{
 		return vMax.y - vMin.y;
 	}
@@ -1184,7 +1184,7 @@ union Vector4
 };
 
 typedef Vector4 Quaternion;
-typedef Vector4 RGBAf;
+typedef Vector4 RGBAf;		// я не совсем понимаю, зачем это делать именно так? разве нам нужны для цвета векторные операции? да нет, не нужны.. зато очень нужна возможность конвертировать RGBAub в RGBAf, например.. и как это сделаешь теперь, если это всего-лишь тайпдеф от вектора.. а ведь я щас как раз делаю CGUIStyle и заебусь высчитывать флоаты для дефолтных цветов...
 
 /**
 *	MatrixNM - произвольная матрица. M строк, N столбцов

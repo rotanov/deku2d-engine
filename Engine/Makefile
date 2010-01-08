@@ -12,6 +12,20 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Sound.cpp \
 			src/2de_Xml.cpp
 
+OBJFILES	=	obj/2de_Core.o \
+			obj/2de_Engine.o \
+			obj/2de_GameUtils.o \
+			obj/2de_GraphicsHigh.o \
+			obj/2de_GraphicsLow.o \
+			obj/2de_Gui.o \
+			obj/2de_ImageUtils.o \
+			obj/2de_LuaUtils.o \
+			obj/2de_MathUtils.o \
+			obj/2de_Physics.o \
+			obj/2de_Resource.o \
+			obj/2de_Sound.o \
+			obj/2de_Xml.o
+
 INCPATH		=	-iquoteinc
 
 LIBS		=	-lGLU -lz -lSDL_mixer
@@ -27,26 +41,23 @@ PNG_LDFLAGS	:=	$(shell pkg-config --libs libpng)
 CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} ${PNG_CFLAGS} ${INCPATH}
 LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} ${PNG_LDFLAGS} ${LIBS}
 
-TARGET		=	lib/Deku2d.a
+obj/%.o: src/%.cpp
+	g++ $(DEBUGFLAG) $(STRICTFLAG) -c -o $@ $(CFLAGS) $<
 
-all: release-compile makelib
+lib/Deku2d.a: lib/Deku2d.a($(OBJFILES))
 
-debug: debug-compile makelib
+STRICTFLAG = -w
 
-strict: strict-compile makelib
+all: lib/Deku2d.a
 
-release-compile:
-	g++ -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
+shared: $(OBJFILES)
+	g++ $(STRICTFLAG) -shared -fPIC -o lib/Deku2d.so $(OBJFILES)
 
-debug-compile:
-	g++ -g3 -D_DEBUG -w -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
+debug: DEBUGFLAG = -g3 -D_DEBUG
+debug: lib/Deku2d.a
 
-strict-compile:
-	g++ -Wall -c ${CFLAGS} ${SOURCES} ${LDFLAGS}
-
-makelib:
-	ar cr ${TARGET} *.o
-	mv *.o obj/
+strict: STRICTFLAG = -Wall
+strict: lib/Deku2d.a
 
 docs: doc/Doxyfile
 	if [ -e /usr/bin/doxygen ]; then \
@@ -57,6 +68,8 @@ clean:
 	rm -f obj/*.o
 
 dist-clean: clean
-	rm -f ${TARGET}
+	rm -f lib/Deku2d.a
+	rm -f lib/Deku2d.so
 	rm -rf doc/html/
 
+.PHONY: clean dist-clean docs

@@ -46,6 +46,7 @@
 #define STATE_MOUSE_XY				0x0B
 #define STATE_HIDE_CONSOLE_WINDOW	0x0C
 #define STATE_DELTA_TIME			0x0D
+#define STATE_CONFIG_PATH			0x0E
 
 #define STATE_USER_INIT_FUNC		0x81
 #define STATE_UPDATE_FUNC			0x82
@@ -90,10 +91,10 @@ public:
 	bool						Run();
 
 	bool						Suicide();  // Временно в паблике
+	string						ConfigFileName;
+	string						ConfigFilePath;		// temporary, until CConfig created
 	
 private:
-	char						*ResourceListPath;
-	string						ConfigFileName;
 	bool						doLimitFps;
 	bool						doLoadDefaultResourceList;
 	unsigned long					FpsCount;

@@ -10,18 +10,8 @@
 
 #ifndef _WIN32
 
-#if ! (defined(lint) || defined(RC_INVOKED))
-#if ( _MSC_VER >= 800 && !defined(_M_I86)) || defined(_PUSHPOP_SUPPORTED)
-#pragma warning(disable:4103)
-#if !(defined( MIDL_PASS )) || defined( __midl )
+// я убрал все эти дополнительные проверки.. GCC полностью поддерживает pragma pack, а остальные non-windows компиляторы мы пока не поддерживаем
 #pragma pack(push,2)
-#else
-#pragma pack(2)
-#endif
-#else
-#pragma pack(2)
-#endif
-#endif // ! (defined(lint) || defined(RC_INVOKED))
 
 typedef struct tagBITMAPFILEHEADER {
 	unsigned short	bfType;
@@ -31,20 +21,7 @@ typedef struct tagBITMAPFILEHEADER {
 	unsigned long	bfOffBits;
 } BITMAPFILEHEADER, FAR *LPBITMAPFILEHEADER, *PBITMAPFILEHEADER;
 
-
-#if ! (defined(lint) || defined(RC_INVOKED))
-#if ( _MSC_VER >= 800 && !defined(_M_I86)) || defined(_PUSHPOP_SUPPORTED)
-#pragma warning(disable:4103)
-#if !(defined( MIDL_PASS )) || defined( __midl )
 #pragma pack(pop)
-#else
-#pragma pack()
-#endif
-#else
-#pragma pack()
-#endif
-#endif // ! (defined(lint) || defined(RC_INVOKED))
-
 
 struct RGBQUAD
 {

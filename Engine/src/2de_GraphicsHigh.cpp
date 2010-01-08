@@ -1082,10 +1082,6 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 	return Result;
 }
 
-bool CGUIObject::isFocused() const
-{
-	return (GuiManager.GetFocusedObject() == this);
-}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -1093,7 +1089,18 @@ bool CGUIObject::isFocused() const
 
 CGUIObject::CGUIObject()
 {
+	Style = GuiManager.GetStyle();
 	GuiManager.AddObject(this);
+}
+
+bool CGUIObject::isFocused() const
+{
+	return (GuiManager.GetFocusedObject() == this);
+}
+
+void CGUIObject::Focus()
+{
+	GuiManager.SetFocus(this);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1103,7 +1110,8 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 {
 	SetName("CGUIManager");
 	FocusedOn = NULL;
-	SetPrimitiveRender(new CPrimitiveRender);
+	// SetPrimitiveRender(new CPrimitiveRender);	// зачем использовать функцию-mutator, если мы находимся в самом классе, свойство которого хотим измеить?
+	PRender = new CPrimitiveRender;
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
@@ -1143,8 +1151,10 @@ bool CGUIManager::Render()
 	if (FocusedOn)
 	{
 		PRender->LineStippleEnabled = true;
-		PRender->lwidth = 0.5f;
-		PRender->grRectL(FocusedOn->aabb.Inflated(5, 5).vMin, FocusedOn->aabb.Inflated(5, 5).vMax);	
+		PRender->lwidth = Style.Metrics.FocusRectLineWidth;
+		PRender->lClr = Style.Colors.FocusRect;
+		PRender->grRectL(FocusedOn->aabb.Inflated(Style.Metrics.FocusRectSpacing, Style.Metrics.FocusRectSpacing).vMin,
+				 FocusedOn->aabb.Inflated(Style.Metrics.FocusRectSpacing, Style.Metrics.FocusRectSpacing).vMax);	
 		PRender->LineStippleEnabled = false;
 		PRender->lwidth = 1.0f;
 	}
@@ -1218,11 +1228,6 @@ void CGUIManager::SetFocus(CObject* AObject)
 	}
 }
 
-CGUIObject* CGUIManager::GetFocusedObject() const
-{
-	return FocusedOn;
-}
-
 CGUIManager::~CGUIManager()
 {
 	SAFE_DELETE(PRender);   ///////// TODO: NONONONONONONONON DONT DOIT
@@ -1254,19 +1259,22 @@ bool CButton::Render()
 	Font = engine->FontManager->GetFont("Font");
 
 	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
-	Font->tClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);//color;
+	Font->tClr = Style->Colors.ButtonText;
 
-	RGBAf CurrentColor = color;
-
+	PRender->sClr = Style->Colors.ButtonFace;
+	PRender->lClr = Style->Colors.ButtonBorder;
 	if (WidgetState.Hovered)
-		CurrentColor = color + Dclr;
+	{
+		PRender->sClr = Style->Colors.ButtonFaceHovered;
+		PRender->lClr = Style->Colors.ButtonBorderHovered;
+	}
 	if (WidgetState.Pressed)
-		CurrentColor = color + Dclr * 2.0f;
-
-	PRender->sClr = CurrentColor;
-	glLoadIdentity();
+	{
+		PRender->sClr = Style->Colors.ButtonFacePressed;
+		PRender->lClr = Style->Colors.ButtonFacePressed;
+	}
 	PRender->grRectS(aabb.vMin, aabb.vMax);
-	glEnable(GL_TEXTURE_2D);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
 	Font->Print(Text.c_str());
 	return true;
 }
@@ -1301,7 +1309,7 @@ bool CButton::Update(float dt)
 	if (MouseState.PressedInside && !PreviousMouseState.PressedInside && !MouseState.PressedOutside)
 	{
 		WidgetState.Pressed = true;
-		GuiManager.SetFocus(this);
+		Focus();
 	}
 
 	if (!MouseState.PressedInside && PreviousMouseState.PressedInside && !MouseState.PressedOutside)
@@ -1320,7 +1328,7 @@ CButton::~CButton()
 
 }
 
-bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod, char letter)
+bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch(state)
 	{
@@ -1354,7 +1362,7 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod, char letter)
 //////////////////////////////////////////////////////////////////////////
 ///CEdit
 
-bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod, char letter)
+bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch(state)
 	{
@@ -1362,28 +1370,113 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod, char letter)
 		switch(key)
 		{
 		case SDLK_BACKSPACE:
-			if (CursorPos >= 0)
+			if (Selection.Exists())
 			{
-				DelInterval(&Text, CursorPos, CursorPos);
-				CursorPos--;
-			}			
+				CursorPos = Selection.RangeStart();
+				Text.erase(Selection.RangeStart() + 1, Selection.Length());
+				Selection.Clear();
+			}
+			else
+			{
+				if (CursorPos >= 0)
+				{
+					Text.erase(CursorPos, 1);
+					CursorPos--;
+
+					if (VisibleTextOffset > 0)
+						VisibleTextOffset--;
+				}
+			}
 			break;
 		case SDLK_DELETE:
-			DelInterval(&Text, CursorPos+1, CursorPos+1);
+			if (Selection.Exists())
+			{
+				CursorPos = Selection.RangeStart();
+				Text.erase(Selection.RangeStart() + 1, Selection.Length());
+				Selection.Clear();
+			}
+			else
+			{
+				Text.erase(CursorPos + 1, 1);
+				if (VisibleTextOffset > 0)
+					VisibleTextOffset--;
+			}
 			break;
 		case SDLK_LEFT:				
 			if (--CursorPos < -1)
 				CursorPos++;
+
+			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
+				VisibleTextOffset--;
+			if (mod & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
 			break;
 		case SDLK_RIGHT:
+		{
 			if (++CursorPos >= Text.length())
 				CursorPos--;
+			if (mod & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+
+			string RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+
+			while (!isTextFits(RightIncText.c_str()))
+			{
+				VisibleTextOffset++;
+				RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+			}
 			break;
+		}
+		case SDLK_HOME:
+			CursorPos = -1;
+			if (mod & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+
+			VisibleTextOffset = 0;
+			break;
+		case SDLK_END:
+		{
+			CursorPos = Text.length() - 1;
+			if (mod & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+
+			string RightEndText = Text.substr(VisibleTextOffset);
+
+			while (!isTextFits(RightEndText.c_str()))
+			{
+				VisibleTextOffset++;
+				RightEndText = Text.substr(VisibleTextOffset);
+			}
+			break;
+		}
 		default:
 			if (letter > 31)
 			{
-				Text.insert(CursorPos+1, &letter, 1);
+				if (Selection.Exists())
+				{
+					CursorPos = Selection.RangeStart();
+					Text.erase(Selection.RangeStart() + 1, Selection.Length());
+					Selection.Clear();
+				}
+				Text.insert(CursorPos + 1, &letter, 1);
 				CursorPos++;
+
+				Selection.Clear(CursorPos);
+
+				string NewText = GetVisibleText() + letter;
+				while (!isTextFits(NewText.c_str()))
+				{
+					VisibleTextOffset++;
+					NewText = GetVisibleText() + letter;
+				}
 			}
 		}
 		break;
@@ -1407,18 +1500,44 @@ bool CEdit::Render()
 
 	float StringWidth = Font->GetStringWidth(Text.c_str());
 	float StringHeight = Font->GetStringHeight(Text.c_str());
-	float CursorDistance = Font->GetStringWidthEx(0, CursorPos, Text.c_str());
-	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(StringWidth, StringHeight) / 2.0f;
-	Font->tClr = color;
-	glLoadIdentity();
+	float CursorDistance = Font->GetStringWidthEx(0, (CursorPos - VisibleTextOffset), GetVisibleText().c_str());
+	Font->Pos.x = aabb.vMin.x + Style->Metrics.EditMargins.x;
+	Font->Pos.y = (aabb.vMin.y + aabb.vMax.y) / 2.0f - StringHeight / 2.0f;
+	Font->tClr = Style->Colors.EditText;
+
+	if (MouseState.Hovered)
+	{
+		PRender->lClr = Style->Colors.EditBorderHovered;
+		PRender->sClr = Style->Colors.EditBackgroundHovered;
+	}
+	else
+	{
+		PRender->lClr = Style->Colors.EditBorder;
+		PRender->sClr = Style->Colors.EditBackground;
+	}
+	PRender->lwidth = Style->Metrics.EditBorderWidth;
+	PRender->grRectS(aabb.vMin, aabb.vMax);
 	PRender->grRectL(aabb.vMin, aabb.vMax);
-	glEnable(GL_TEXTURE_2D);
-	Font->Print(Text.c_str());
+	Font->Print(GetVisibleText().c_str());
 	if (isFocused())
 	{
+		if (Selection.Exists())
+		{
+			CAABB SelBox(aabb.vMin.x + Style->Metrics.EditMargins.x +
+						Font->GetStringWidthEx(0, Max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
+				     aabb.vMin.y + Style->Metrics.EditMargins.y,
+				     aabb.vMin.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0, Min(Selection.RangeEnd() - VisibleTextOffset,
+						GetVisibleText().length() - 1), GetVisibleText().c_str()),
+				     aabb.vMax.y - Style->Metrics.EditMargins.y);
+
+			PRender->sClr = Style->Colors.EditSelection;
+			PRender->grRectS(SelBox.vMin, SelBox.vMax);
+		}
 		PRender->psize = 2.0f;
-		PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -6.0f).vMax.y),
-				   Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -6.0f).vMin.y));
+		PRender->lClr = Style->Colors.EditText;
+		PRender->lwidth = 1.0f;
+		PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -Style->Metrics.EditMargins.y).vMax.y),
+				   Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -Style->Metrics.EditMargins.y).vMin.y));
 	}
 	return true;
 }
@@ -1432,10 +1551,39 @@ bool CEdit::Update(scalar dt)
 	MouseState.Pressed = (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) && MouseState.Hovered;
 	
 	if (MouseState.Pressed && !PreviousMouseState.Pressed)
-		GuiManager.SetFocus(this);
+		Focus();
 
 	if (MouseState.Pressed)
+	{
 		CursorPos = MouseToCursorPos(mouse);
+		if (!PreviousMouseState.Pressed)
+			Selection.Start = CursorPos;
+		else
+			Selection.End = CursorPos;
+
+		CAABB LeftScrollArea(aabb.vMin.x, aabb.vMin.y, aabb.vMin.x + 5.0f, aabb.vMax.y);
+		CAABB RightScrollArea(aabb.vMax.x - 5.0f, aabb.vMin.y, aabb.vMax.x, aabb.vMax.y);
+
+		if (LeftScrollArea.Inside(mouse))
+		{
+			// TODO: move this copy-paste from SDLK_LEFT handler to some function...
+			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
+				VisibleTextOffset--;
+		}
+
+		if (RightScrollArea.Inside(mouse))
+		{
+			string RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
+
+			while (!isTextFits(RightIncText.c_str()))
+			{
+				VisibleTextOffset++;
+				RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
+			}
+		}
+
+
+	}
 
 	PreviousMouseState = MouseState;
 
@@ -1447,11 +1595,28 @@ int CEdit::MouseToCursorPos(const Vector2& MousePosition)
 	if (!aabb.Inside(MousePosition))
 		return -1;
 
-	return Font->StringCoordToCursorPos(Text.c_str(), MousePosition.x, MousePosition.y);
+	return Font->StringCoordToCursorPos(GetVisibleText().c_str(), MousePosition.x, MousePosition.y) + VisibleTextOffset;
 }
 
-CEdit::CEdit() : CursorPos(-1)
+string CEdit::GetVisibleText() const
 {
+	string VisibleText = Text.substr(VisibleTextOffset);
+	int i = 0;
+
+	while (isTextFits(VisibleText.substr(0, i + 1).c_str()) && (i < VisibleText.length()))
+		i++;
+
+	return VisibleText.substr(0, i);
+}
+
+bool CEdit::isTextFits(const char *AText) const
+{
+	return ((Font->GetStringWidth(AText) + 2.0f * Style->Metrics.EditMargins.x) < aabb.Width());
+}
+
+CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
+{
+	Selection.Start = Selection.End = CursorPos;
 }
 
 CEdit::~CEdit()

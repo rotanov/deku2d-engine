@@ -153,6 +153,9 @@ public:
 		glLoadIdentity();
 		glTranslatef(OffsetX, OffsetY, .0f);
 		glScalef(Zoom, Zoom, 1.0f);
+
+		glEnable(GL_TEXTURE_2D);
+
 		if(FontTexture)
 		{
 			FontTexture->Bind();
@@ -258,6 +261,7 @@ bool Init()
 
 int	main(int argc, char *argv[])
 {
+	Ninja->SetState(STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(STATE_CONFIG_NAME, "FontEditor.xml");
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
 	Ninja->Run();

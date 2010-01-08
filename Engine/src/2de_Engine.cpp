@@ -32,11 +32,13 @@ CEngine::CEngine()
 	window = CGLWindow::Instance();
 	//_instance = NULL;
 	//_refcount = 0;
-	ConfigFileName = CONFIG_FILE_NAME;
-	ConfigFileName += "configuration.xml";
+	// temporary, until CConfig created..
+	// yes, it's defaults.. developer or maintainer of program should set this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
+	ConfigFilePath = "";
+	ConfigFileName = "Config.xml";
 	EventFuncCount = 0;
 	KeyInputFuncCount = 0;
-	isHaveFocus = 1;
+	isHaveFocus = true;
 	userReInit = false;
 	Initialized = false;
 }
@@ -129,16 +131,19 @@ void CEngine::SetState(int state, void* value)
 			case STATE_WINDOW_CAPTION:
 				window->caption = (char*)value;
 				break;
+			case STATE_CONFIG_PATH:
+				ConfigFilePath = (char*)value;
+				break;
 			case STATE_CONFIG_NAME:
-				{
-					ConfigFileName = CONFIG_FILE_NAME;
-					ConfigFileName += (char*)value; // BAD!!! 
-				}
+				ConfigFileName = (char*)value; // BAD!!!
+				// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!! that's not the way things should be done
+				break;
 			case STATE_GL_BG_COLOR:
 				{
 					RGBAf *t = (RGBAf*)value;
 					glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  TODO: INcapsulate
 				}
+				break;
 		}
 	}
 
@@ -167,9 +172,9 @@ bool CEngine::Init()
 
 	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
 
-	if (!Config.LoadFromFile(ConfigFileName.c_str()))
+	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
-		Log.Log("ERROR", "Can't load main configuration %s", CONFIG_FILE_NAME);
+		Log.Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
 		return false;
 	}
 	
@@ -181,7 +186,6 @@ bool CEngine::Init()
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
 	SetState(STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
-	//ResourceListPath			= (Config.First->Get("XMLResourcesFilename"))->GetValue();
 	ResourceManager.DataPath	= (Config.First->Get("DataPath"))->GetValue();
 	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
 
@@ -490,6 +494,7 @@ int CEngine::CfgGetInt( char* ParamName )
 bool CEngine::ClearLists()
 {
 	// Не так!!!1!адин!+!+!
+	// где-то в тектстовиках я видел шутку про менеджер менеджеров... так вот, он бы реально пригодился тут))
 	CObjectManager.Clear();
 	RenderManager.Reset();
 	UpdateManager.Reset();

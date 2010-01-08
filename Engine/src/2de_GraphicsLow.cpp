@@ -352,7 +352,7 @@ void CFont::_Print(const char *text)
 
 
 
-void CFont::Print( const char *text, ... )
+void CFont::Print(const char *text, ...)
 {
 	if (text == NULL)
 		return;
@@ -369,9 +369,9 @@ void CFont::Print( const char *text, ... )
 			Sel1--;
 		}
 
-		swidth = GetStringWidth(text + offset);
-		sheight = GetStringHeight(text + offset);
-		selx = Pos.x + GetStringWidthEx(0, Sel0-1-offset, text+offset);
+		swidth = GetStringWidth(text);
+		sheight = GetStringHeight(text);
+		selx = Pos.x + GetStringWidthEx(0, Sel0-1-offset, text);
 
 
 		if (!(Sel0 > Sel1 || Sel0 < 0 || (uInt)Sel1 >= strlen(text)))
@@ -455,11 +455,10 @@ void CFont::Print( const char *text, ... )
 }
 
 
-int	CFont::GetStringWidth(const char *text)
+int CFont::GetStringWidth(const char *text)
 {
-
 	if (text == NULL)
-		return -1;
+		return 0;
 	int r = 0, l = (int)strlen(text);
 	for (int i=0;i<l;i++)
 		r += width[text[i]-32] + Distance;
@@ -468,10 +467,11 @@ int	CFont::GetStringWidth(const char *text)
 
 int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 {
+	// if text doesn't exist (NULL or just ""), then its width is 0, not fucking -1
 	if (text == NULL)
-		return -1;
+		return 0;
 	if (t1 > t2 || t2 < 0)
-		return -1;
+		return 0;
 	if ((unsigned int)t2 >= strlen(text))
 		return -1;
 
@@ -481,22 +481,22 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 	return r;
 }
 
-int	CFont::GetStringHeight(const char *text)
+int CFont::GetStringHeight(const char *text)
 {
 	if (text == NULL)
-		return -1;
+		return 0;
 	int r = 0, l = (uInt)strlen(text);
 	for (int i=0;i<l;i++)
 		r = Max(height[text[i]-32], r);
 	return r;
 }
 
-int CFont::GetStringHeightEx( int t1, int t2, const char *text )
+int CFont::GetStringHeightEx(int t1, int t2, const char *text)
 {
 	if (text == NULL)
-		return -1;
+		return 0;
 	if (t1 > t2 || t2 < 0)
-		return -1;
+		return 0;
 	if ((unsigned int)t2 >= strlen(text))
 		return -1;
 	int r = 0, l = (unsigned int)strlen(text);
@@ -946,19 +946,19 @@ bool CTexture::LoadFromFile()
 
 #if defined(_WIN32)
 	#include <windows.h>
-	#define GL_GET_PROCESS_ADDRESS_ARG_TYPE (const char*)
+	#define GL_GET_PROC_ADDRESS_ARG_TYPE (const char*)
 	#define SWAP_INTERVAL_EXTENSION_NAME "WGL_EXT_swap_control"
 	#define SWAP_INTERVAL_PROC_NAME wglSwapIntervalEXT
 	#define GET_PROC_ADDRESS_FUNC wglGetProcAddress
 #elif defined(__linux)
 	#include <GL/glx.h>
-	#define GL_GET_PROCESS_ADDRESS_ARG_TYPE (const GLubyte*)
+	#define GL_GET_PROC_ADDRESS_ARG_TYPE (const GLubyte*)
 	#define SWAP_INTERVAL_EXTENSION_NAME "GLX_SGI_swap_control"
 	#define SWAP_INTERVAL_PROC_NAME glXSwapIntervalSGI
 	#define GET_PROC_ADDRESS_FUNC glXGetProcAddress
 #endif
 
-#define GET_PROC_ADDRESS(x,y) ((x(GL_GET_PROCESS_ADDRESS_ARG_TYPE"(y)")))
+#define GET_PROC_ADDRESS(x,y) ((x(GL_GET_PROC_ADDRESS_ARG_TYPE"(y)")))
 
 SWAP_INTERVAL_PROC SWAP_INTERVAL_PROC_NAME = 0;
 

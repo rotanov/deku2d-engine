@@ -317,7 +317,7 @@ class RGBAub
 public:
 	byte r, g, b, a;
 	RGBAub(byte _r, byte _g, byte _b, byte _a) : r(_r), g(_g), b(_b), a(_a){}
-	RGBAub(void){}
+	RGBAub(){}
 };
 
 /**

@@ -353,6 +353,7 @@ bool Draw()
 }
 int	main(int argc, char *argv[])
 {
+	Ninja->SetState(STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(STATE_CONFIG_NAME, "LevelEditor.xml");
 	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
 	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);

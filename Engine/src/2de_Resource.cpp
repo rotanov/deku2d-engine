@@ -6,6 +6,7 @@
 
 #include "2de_Resource.h"
 #include "2de_Core.h"
+#include "2de_Engine.h"
 
 //-------------------------------------------//
 //				Factory stuff				 //
@@ -209,7 +210,7 @@ bool CResourceManager::LoadResources()
 	CDataLister DataLister;
 	DataLister.List(DataPath);
 
-	ResourceList->LoadFromFile(DEFAULT_RESOURCE_LIST_PATH);
+	ResourceList->LoadFromFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
 	
 	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
 
@@ -245,20 +246,17 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 // CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
 {
-	WorkDir = GetWorkingDir() + "/";
-
 	CurNode = Table.First;
 	
 	ExploreDirectory(DataRoot);
-
-	Table.SaveToFile("Config/Resources.xml");
+	Table.SaveToFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
 
 	// return Table;
 }
 
 void CDataLister::ExploreDirectory(string Path)
 {
-	DIR *dirp = opendir(string(WorkDir + Path).c_str());
+	DIR *dirp = opendir(Path.c_str());
 	if (!dirp)
 	{
 		Log.Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());

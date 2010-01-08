@@ -10,8 +10,7 @@
 #include "2de_Xml.h"
 #include "2de_Sound.h"
 
-#define CONFIG_FILE_NAME "Config/"
-#define DEFAULT_RESOURCE_LIST_PATH "Config/Resources.xml"
+#define DEFAULT_RESOURCE_LIST_FILE_NAME "Resources.xml"
 
 #define DEFAULT_SECTION_COUNT	5
 #define CR_SECTION_FONTS		"Fonts"
@@ -149,7 +148,6 @@ public:
 	// CXMLTable List(string ADataRoot);
 	void List(string ADataRoot);
 private:
-	string WorkDir;
 	CXMLTable Table;
 	CXMLNode *CurNode;
 

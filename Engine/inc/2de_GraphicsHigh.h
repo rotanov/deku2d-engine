@@ -300,7 +300,80 @@ protected:
 *	и всякие свистоперделки жизнено необходимые.
 */
 
-// enum EWidgetMouseState {wmsInside, wmsOutside, wmsLost, wmsHovered, wmsClicked, wmsReleased}; // это вообще в корне разные состояния.. оно может быть нажато, но аутсайд...
+/**
+ * CGUIStyle - класс, представляющий стиль GUI, содержащий цвета и размеры стандартных элементов GUI.
+ *
+ * Для создания нового стиля можно либо наследовать и перегрузить конструктор, либо инстанцировать и изменить нужные значения.
+ */
+
+// небольшой комментарий: возможно, кому-то не понравится эта идея, возможно, кто-то любит разукрашивать разные кнопки в разные цвета - и т. п.
+// 			  я предлагаю такое решение: у каждого элемента будет указатель на стиль
+// 			  поэтому, можно будет создать по стилю на каждую кнопку и указать его
+// 			  или же наследовать кнопку и перегрузить в ней конструктор, который будет создавать определённый стиль
+// 			  вобщем - гибкость рулит, но и унификация стиля - хорошая вещь
+
+class CGUIStyle
+{
+public:
+	struct CGUIStyleColors
+	{
+		RGBAf FocusRect;
+		RGBAf ButtonFace;
+		RGBAf ButtonFaceHovered;
+		RGBAf ButtonFacePressed;
+		RGBAf ButtonBorder;
+		RGBAf ButtonBorderHovered;
+		RGBAf ButtonBorderPressed;
+		RGBAf ButtonText;
+		RGBAf ButtonInactiveText;
+		RGBAf EditBackground;
+		RGBAf EditBackgroundHovered;
+		RGBAf EditBorder;
+		RGBAf EditBorderHovered;
+		RGBAf EditText;
+		RGBAf EditInactiveText;
+		RGBAf EditSelection;
+	};
+	struct CGUIStyleMetrics
+	{
+		scalar FocusRectSpacing;
+		scalar FocusRectLineWidth;
+		Vector2 EditMargins;
+		scalar EditBorderWidth;
+	};
+
+	CGUIStyle()
+	{
+		// default style values - very ugly style :) i'm programmer, not fucking "эстет" :) you're welcome to fix colors to more beautyful ones
+
+		Colors.FocusRect = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
+		Colors.ButtonFace = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonFaceHovered = RGBAf(0.6f, 0.6f, 0.6f, 1.0f);
+		Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
+		Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
+		Colors.ButtonBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonBorderPressed = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonText = COLOR_BLACK;
+		Colors.ButtonInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
+		Colors.EditBackground = COLOR_WHITE;
+		Colors.EditBackgroundHovered = COLOR_WHITE;
+		Colors.EditBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.EditBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.EditText = COLOR_BLACK;
+		Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
+		Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
+
+		Metrics.FocusRectSpacing = 5.0f;
+		Metrics.FocusRectLineWidth = 0.5f;
+		Metrics.EditMargins = Vector2(4.0f, 6.0f);
+		Metrics.EditBorderWidth = 2.0f;
+	}
+	CGUIStyleColors Colors;
+	CGUIStyleMetrics Metrics;
+
+	// TODO: loading style from XML file (and even maybe saving)
+};
 
 class CGUIObjectBase : public CRenderObject, public CUpdateObject
 {
@@ -324,21 +397,32 @@ public:
 	void	SetParent(CGUIObjectBase *AParent);
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
 protected:
+				// вот зачем эти очвевидные комментарии? неужели кому-то не понятно, что CFont *Font - это указатель на шрифт?
+				// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
 	CFont				*Font;				//	Указатель на шрифт.
 	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
 	CGUIObjectBase			*Parent;			//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
-	//EWidgetMouseState	WidgetMouseState;	//	Состояние мыши относительно виджета в смысле позиции указателя
 	CMouseState MouseState;
 	CMouseState PreviousMouseState;
 	CMouseState WidgetState;
 };
 
+
 class CGUIObject : public CGUIObjectBase
 {
 public:
 	CGUIObject();
+
 	bool isFocused() const;
+	void Focus();
+	
+	CGUIStyle* GetStyle() const { return Style; }
+	void SetStyle(CGUIStyle *AStyle) { Style = AStyle; }
+
+protected:
+	CGUIStyle *Style;
 };
+
 
 class CGUIManager : public CList, public CGUIObjectBase
 {
@@ -348,9 +432,11 @@ public:
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool		Update(scalar dt);
 	bool		Render();
-	void		SetFocusedNodeTo(CListNode* AFocusedNode);
-	void		SetFocus(CObject* AObject);
-	CGUIObject* 	GetFocusedObject() const;
+	CGUIObject* 	GetFocusedObject() const { return FocusedOn; }
+	void		SetFocusedNodeTo(CListNode *AFocusedNode);
+	void		SetFocus(CObject *AObject);
+	CGUIStyle*	GetStyle() { return &Style; }
+	void		SetStyle(const CGUIStyle &AStyle) { Style = AStyle; }
 private:
 	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
 	CListNode	*FocusedOnListNode;
@@ -359,9 +445,11 @@ private:
 	int			TimerAccum;
 	bool		tabholded;
 	bool		repeatstarted;
+	CGUIStyle	Style;
 };
 
 extern CGUIManager GuiManager;
+
 
 class CButton : public CGUIObject
 {
@@ -374,9 +462,64 @@ public:
 	bool		Update(float dt);
 };
 
+
 class CEdit : public CGUIObject
 {
 public:
+	class CTextSelection
+	{
+	public:
+		CTextSelection()
+		{
+			Start = End = -1;
+		}
+
+		CTextSelection(int AStart, int AEnd)
+		{
+			Start = AStart;
+			End = AEnd;
+		}
+
+		void Set(int AStart, int AEnd)
+		{
+			Start = AStart;
+			End = AEnd;
+		}
+
+		bool Exists() const
+		{
+			return (Start != End);
+		}
+
+		int RangeStart() const
+		{
+			return Min(Start, End);
+		}
+
+		int RangeEnd() const
+		{
+
+			return Max(Start, End);
+		}
+
+		int Length() const
+		{
+			return (RangeEnd() - RangeStart());
+		}
+
+		void Clear()
+		{
+			Start = End;
+		}
+
+		void Clear(int ACursorPos)
+		{
+			Start = End = ACursorPos;
+		}
+
+		int Start;
+		int End;
+	};
 				CEdit();
 				~CEdit();
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
@@ -385,6 +528,10 @@ public:
 private:
 	int		CursorPos;
 	int		MouseToCursorPos(const Vector2& MousePosition);
+	string		GetVisibleText() const;
+	bool		isTextFits(const char *AText) const;
+	int		VisibleTextOffset;
+	CTextSelection	Selection;
 };
 
 class CMenuItem : public CGUIObject, public CList
