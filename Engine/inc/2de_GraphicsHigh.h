@@ -344,7 +344,7 @@ public:
 
 	CGUIStyle()
 	{
-		// default style values - very ugly style :) i'm programmer, not fucking "эстет" :) you're welcome to fix colors to more beautyful ones
+		// default style values - very ugly style :) I'm programmer, not fucking "эстет" :) you're welcome to fix colors to more beautiful ones
 
 		Colors.FocusRect = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
 		Colors.ButtonFace = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
@@ -399,6 +399,7 @@ public:
 protected:
 				// вот зачем эти очвевидные комментарии? неужели кому-то не понятно, что CFont *Font - это указатель на шрифт?
 				// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
+				//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
 	CFont				*Font;				//	Указатель на шрифт.
 	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
 	CGUIObjectBase			*Parent;			//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
@@ -424,15 +425,14 @@ protected:
 };
 
 
-class CGUIManager : public CList, public CGUIObjectBase
+class CGUIManager : public CList, public CGUIObjectBase, public CTSingleton<CGUIManager>
 {
 public:
-				CGUIManager();
 				~CGUIManager();
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool		Update(scalar dt);
 	bool		Render();
-	CGUIObject* 	GetFocusedObject() const { return FocusedOn; }
+	CGUIObject* GetFocusedObject() const;
 	void		SetFocusedNodeTo(CListNode *AFocusedNode);
 	void		SetFocus(CObject *AObject);
 	CGUIStyle*	GetStyle() { return &Style; }
@@ -446,10 +446,26 @@ private:
 	bool		tabholded;
 	bool		repeatstarted;
 	CGUIStyle	Style;
+protected:
+	CGUIManager();
+	friend class CTSingleton<CGUIManager>;
 };
 
-extern CGUIManager GuiManager;
-
+class CLabel : public CGUIObject
+{
+public:
+	CLabel();
+	CLabel(const string &AText)
+	{
+		Text = AText;
+		Font = CFontManager::Instance()->GetFont("Font");
+	}
+	bool Render();
+	bool Update(float dt)
+	{
+		return true;
+	}
+};
 
 class CButton : public CGUIObject
 {
@@ -469,56 +485,17 @@ public:
 	class CTextSelection
 	{
 	public:
-		CTextSelection()
-		{
-			Start = End = -1;
-		}
-
-		CTextSelection(int AStart, int AEnd)
-		{
-			Start = AStart;
-			End = AEnd;
-		}
-
-		void Set(int AStart, int AEnd)
-		{
-			Start = AStart;
-			End = AEnd;
-		}
-
-		bool Exists() const
-		{
-			return (Start != End);
-		}
-
-		int RangeStart() const
-		{
-			return Min(Start, End);
-		}
-
-		int RangeEnd() const
-		{
-
-			return Max(Start, End);
-		}
-
-		int Length() const
-		{
-			return (RangeEnd() - RangeStart());
-		}
-
-		void Clear()
-		{
-			Start = End;
-		}
-
-		void Clear(int ACursorPos)
-		{
-			Start = End = ACursorPos;
-		}
-
 		int Start;
 		int End;
+		CTextSelection();
+		CTextSelection(int AStart, int AEnd);
+		void Set(int AStart, int AEnd);
+		bool Exists() const;
+		int RangeStart() const;
+		int RangeEnd() const;
+		int Length() const;
+		void Clear();
+		void Clear(int ACursorPos);
 	};
 				CEdit();
 				~CEdit();

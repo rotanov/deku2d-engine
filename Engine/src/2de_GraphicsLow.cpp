@@ -51,32 +51,20 @@ bool CGLImageData::MakeTexture()
 
 bool CGLImageData::LoadTexture(const char *filename)
 {
-	if (!LoadBMP(filename))
-		if(!LoadPNG(filename))
-		{
-			Log.Log("ERROR", "Can't load image->");
-			return false;
-		}
-		else
-		{
-			if (!MakeTexture())
-			{
-				Log.Log("ERROR", "Can't load texture in video adapter.");
-				return false;
-			}
-		}
-	else
+	if (!LoadFromFile(filename))
 	{
-		if(!MakeRGBA())
-		{
-			Log.Log("ERROR", "Can't load texture.");
-			return false;
-		}
-		if (!MakeTexture())
-		{
-			Log.Log("ERROR", "Can't load texture in video memory.");
-			return false;
-		}
+		Log.Log("ERROR", "Can't load image->");
+		return false;
+	}
+	if(!MakeRGBA())
+	{
+		Log.Log("ERROR", "Can't load texture.");
+		return false;
+	}
+	if (!MakeTexture())
+	{
+		Log.Log("ERROR", "Can't load texture in video memory.");
+		return false;
 	}
 	if (CleanData)
 	{
@@ -826,14 +814,14 @@ bool CFontManager::SetCurrentFont(const char* fontname)
 	return !!CurrentFont;
 }
 
-bool CFontManager::Print(int x, int y, float depth, char* text, ...)
+bool CFontManager::Print(int x, int y, float depth, const string &text)
 {
 	if (!CurrentFont || !CurrentFont->CheckLoad())
 		return false;
 
 	CurrentFont->SetDepth(depth);
 	CurrentFont->Pos.In(x, y);
-	CurrentFont->Print(text);
+	CurrentFont->Print(text.c_str());
 	return true;
 }
 

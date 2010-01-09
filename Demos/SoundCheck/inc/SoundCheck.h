@@ -72,7 +72,7 @@ public:
 
 bool PlayFile()
 {
-	string test = dynamic_cast<CEdit*>(GuiManager.GetLast()->GetData())->Text;
+	string test = dynamic_cast<CEdit*>(CGUIManager::Instance()->GetLast()->GetData())->Text;
 	Log.Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
 	CMusic *mus = new CMusic(test.c_str());
 	mus->LoadFromFile();
@@ -86,13 +86,13 @@ public:
 	CLoadFileGUI()
 	{
 		LoadFileButton = new CButton(CAABB(400, 300, 100, 32), "Play", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), PlayFile);
-		LoadFileButton->SetParent(&GuiManager);
+		LoadFileButton->SetParent(CGUIManager::Instance());
 
 		FileNameEdit = new CEdit;
 		FileNameEdit->aabb = CAABB(80, 300, 300, 32);
 		FileNameEdit->Text = "";
 		FileNameEdit->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
-		FileNameEdit->SetParent(&GuiManager);
+		FileNameEdit->SetParent(CGUIManager::Instance());
 
 
 	}

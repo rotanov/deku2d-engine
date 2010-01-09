@@ -2,11 +2,11 @@
 #define _2DE_GRAPHICS_LOW_H_
 
 #include <stdarg.h>
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include "2de_Core.h"
 
 #ifdef USE_SDL_OPENGL
-#include "SDL_opengl.h"
+#include <SDL/SDL_opengl.h>
 #else
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -151,6 +151,24 @@ public:
 	int			StringCoordToCursorPos(const char *text, int x, int y);
 	CTexture*	GetTexture();
 	void		SetTexture(char *TextureName);
+	CAABB		GetSymbolsBBOX()
+	{
+		CAABB Result;
+		Result.vMin.In(9999.0f, 9999.0f);
+		Result.vMax.In(0.0f, 0.0f);
+		for(int i = 0; i < 256; i++)
+		{
+			if (bbox[i].x0 < Result.vMin.x)
+				Result.vMin.x = bbox[i].x0;
+			if (bbox[i].y0 < Result.vMin.y)
+				Result.vMin.y = bbox[i].y0;
+			if (bbox[i].x1 > Result.vMax.x)
+				Result.vMax.x = bbox[i].x1;
+			if (bbox[i].y1 > Result.vMax.y)
+				Result.vMax.y = bbox[i].y1;		
+		}
+		return Result;
+	}
 
 private:
 	float				x, y;					//	Фактические координаты для отрисовки в _Print
@@ -195,7 +213,7 @@ public:
 	CFont					*CurrentFont;
 	bool					SetCurrentFont(const char* fontname);
 	bool					PrintEx(int x, int y, float depth, char* text, ...);
-	bool					Print(int x, int y, float depth, char* text, ...);
+	bool					Print(int x, int y, float depth, const string &text);
 	CFont*					GetFont(const char* fontname);
 	CFont*					GetFontEx(string fontname);
 	bool					AddObject(CObject *object);

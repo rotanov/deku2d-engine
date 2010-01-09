@@ -25,7 +25,7 @@ static const scalar		d180_PI			=	180.0f/PI;
 
 #ifdef USING_OPENGL
 #ifdef USE_SDL_OPENGL
-#include "SDL_opengl.h"
+#include <SDL/SDL_opengl.h>
 #else
 #include <GL/gl.h>
 #include <GL/glu.h>

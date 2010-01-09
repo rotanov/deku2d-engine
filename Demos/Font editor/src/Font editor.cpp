@@ -17,7 +17,7 @@ const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
 // Ограничения:
 const float ZOOM_MAX = 16.0f;
 const float ZOOM_MIN = 0.5f;
-const float ZOOM_STEP = 1.0f;
+const float ZOOM_STEP = 0.5f;
 // Всевозможные переменные.
 CEngine					*Ninja				= CEngine::Instance();
 float					Zoom				= 2.0f;
@@ -30,7 +30,8 @@ int						OffsetY				= 0.0f;
 CEdit					*edFontTextureName	= NULL;
 CEdit					*edFontname			= NULL;
 CEdit					*edCurrentCymbol	= NULL;
-CEdit					*edSampleText		= NULL;
+
+CLabel					*lblSampleText		= NULL;
 
 // На самом деле это не то чтобы Load() а скорее Acquire() ибо все доступные нам шрифты движок уже проиндекировал.
 // Т.е. для пользователя утилыты это будет Load, а для тех, кто способен читать этот комментарий - это Asquire()
@@ -43,6 +44,7 @@ bool LoadFont()
 		return false;
 	}
 	FontTexture = Font->GetTexture();
+	lblSampleText->SetFont(Font);
 	return true;
 }
 
@@ -67,27 +69,49 @@ bool LoadTexture()  // Опять же не Load() а Acquire().
 
 class CFontEditor : public CRenderObject, public CUpdateObject
 {
+	enum 
+	{
+		GRIP_TOOL,
+		SELECT_TOOL,
+		MOVE_TOOL,
+	};
 public:
 	Vector2 MousePosition;
 	Vector2 MouseDelta;
 	bool isGripToolEnabled;
 	bool doGripping;
 	int wheight, wwidth;
+
 	void SetZoom(float AZoom)
 	{
+		if (FontTexture == NULL && Font == NULL)
+			return;
 		float OldZoom = Zoom;
 		Zoom = AZoom;
 		Zoom = clampf(Zoom, ZOOM_MIN, ZOOM_MAX);
 		if (Zoom == OldZoom)
 			return;
-		float TempX = (MousePosition.x - OffsetX) / (FontTexture->width * OldZoom);
-		float TempY = (MousePosition.y - OffsetY) / (FontTexture->height * OldZoom);
+		float TempX = 0.5f, TempY = 0.5f;
+		float TempWidth = 0.0f, TempHeight = 0.0f;
+		if (FontTexture != NULL)
+		{
+			TempWidth = FontTexture->width;
+			TempHeight= FontTexture->height;
+		}
+		else
+		{
+			TempWidth = Font->GetSymbolsBBOX().Width();
+			TempHeight = Font->GetSymbolsBBOX().Height();
+		}
+		TempX = (MousePosition.x - OffsetX) / (TempWidth * OldZoom);
+		TempY = (MousePosition.y - OffsetY) / (TempHeight * OldZoom);
 		TempX = clampf(TempX, 0.0f, 1.0f);
 		TempY = clampf(TempY, 0.0f, 1.0f);
-		OffsetX = - TempX * (FontTexture->width * Zoom) + MousePosition.x;
-		OffsetY = - TempY * (FontTexture->height * Zoom) + MousePosition.y;
+		OffsetX = - TempX * (TempWidth * Zoom) + MousePosition.x;
+		OffsetY = - TempY * (TempHeight * Zoom) + MousePosition.y;
 
 	}
+
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
 		switch (state)
@@ -103,6 +127,33 @@ public:
 				break;
 			case SDL_BUTTON_WHEELDOWN:
 				SetZoom(Zoom - ZOOM_STEP);
+				break;
+			case SDL_BUTTON_LEFT:
+				if (Font != NULL)
+					for(int i = 0; i < 256; i++)
+						if (Font->bbox[i].x0 < (MousePosition.x / Zoom - OffsetX / Zoom) && Font->bbox[i].x1 > (MousePosition.x / Zoom - OffsetX / Zoom) &&
+							Font->bbox[i].y0 < (MousePosition.y / Zoom - OffsetY / Zoom) && Font->bbox[i].y1 > (MousePosition.y / Zoom - OffsetY / Zoom))
+						{
+							CurrentSymbol = i;
+							break;
+						}
+				break;
+			case  SDL_BUTTON_RIGHT:
+				if (Font == NULL)
+					break;
+				float a1, a2, a3, a4;
+				a1 = abs(MousePosition.x / Zoom - OffsetX / Zoom - Font->bbox[CurrentSymbol].x0);
+				a2 = abs(MousePosition.x / Zoom - OffsetX / Zoom - Font->bbox[CurrentSymbol].x1);
+				a3 = abs(MousePosition.y / Zoom - OffsetY / Zoom - Font->bbox[CurrentSymbol].y0);
+				a4 = abs(MousePosition.y / Zoom - OffsetY / Zoom - Font->bbox[CurrentSymbol].y1);
+				a1 = Min(a1, Min(a2, Min(a3, a4)));
+				if (a1 == a2)
+					Font->bbox[CurrentSymbol].x1 = MousePosition.x / Zoom - OffsetX / Zoom; else
+				if (a1 == a3)
+					Font->bbox[CurrentSymbol].y0 = MousePosition.y / Zoom - OffsetY / Zoom; else
+				if (a1 == a4)
+					Font->bbox[CurrentSymbol].y1 = MousePosition.y / Zoom - OffsetY / Zoom; else
+					Font->bbox[CurrentSymbol].x0 = MousePosition.x / Zoom - OffsetX / Zoom;
 				break;
 			}
 		break;
@@ -145,6 +196,7 @@ public:
 		PRender.grCircleL(MousePosition, 5);
 		int fps;
 		Ninja->GetState(STATE_FPS_COUNT, &fps);
+		Ninja->FontManager->CurrentFont->tClr = COLOR_WHITE;
 		Ninja->FontManager->PrintEx(10, 400, 0.0f, "FPS: %d", fps);
 		glLoadIdentity();
 
@@ -184,6 +236,8 @@ public:
 			glBegin(GL_LINES);
 			for(int i=0;i<256;i++)
 			{
+				if (i == CurrentSymbol)
+					RGBAf(0.9f, 0.4f, 0.3f, 0.9f).glSet();
 				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
 				glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
 
@@ -195,6 +249,8 @@ public:
 
 				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
 				glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
+				if (i == CurrentSymbol)
+					COLOR_WHITE.glSet();
 			}
 			glEnd();
 		}
@@ -207,17 +263,13 @@ public:
 	{
 		int x, y;
 		SDL_GetRelativeMouseState(&x, &y);
-		MouseDelta = Vector2(x, y);
-		SDL_GetMouseState(&x, &y);
+		MouseDelta = Vector2(x, -y);
 		Ninja->GetState(STATE_MOUSE_XY, &MousePosition);
-		//MousePosition = Vector2(x, wheight - y);
-
 		if (isGripToolEnabled && !CAABB(0, 0, INTERFACE_OFFSET_X, wheight).Inside(MousePosition) &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
 		{
 			OffsetX += MouseDelta.x;
-			OffsetY -= MouseDelta.y;
+			OffsetY += MouseDelta.y;
 		}
-		
 		return true;
 	}
 };
@@ -230,31 +282,41 @@ bool ExitFontEditor()
 	return true;
 }
 
+bool ShowTestPhrase()
+{
+	CRenderObject *Lbl = NULL;
+	Lbl = dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("lblSampleText"));
+	Lbl->visible = !Lbl->visible;
+	return true;
+}
+
 bool Init()
 {	
-	SDL_ShowCursor(1);
-#define BUTTONS_COUNT 3
-	const char* ButtonNames[BUTTONS_COUNT] = {"Load font", "Load texture", "Exit", };
-	const Callback ButtonCallers[BUTTONS_COUNT] = {&LoadFont, &LoadTexture, &ExitFontEditor, };
+	#define BUTTONS_COUNT 4
+	const char* ButtonNames[BUTTONS_COUNT] = {"Load font", "Load texture", "Exit", "Test phrase",};
+	const Callback ButtonCallers[BUTTONS_COUNT] = {&LoadFont, &LoadTexture, &ExitFontEditor, &ShowTestPhrase};
 	
 	for(int i = 0; i < BUTTONS_COUNT; i++)
-		(new CButton(CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT+10)*i, BUTTON_WIDTH, BUTTON_HEIGHT), ButtonNames[i], RGBAf(0.4f, 0.4f, 0.4f, 1.0f), ButtonCallers[i]))->SetParent(&GuiManager);	
+		(new CButton(CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT+10)*i, BUTTON_WIDTH, BUTTON_HEIGHT),
+					ButtonNames[i],
+					RGBAf(0.4f, 0.4f, 0.4f, 1.0f),
+					ButtonCallers[i]));	
 	
-
 	edFontTextureName = new CEdit();
-	edFontTextureName->SetParent(&GuiManager);
 	edFontTextureName->aabb = CAABB(LEFT_MARGIN, 350, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontTextureName->Text = "Font";
 	edFontTextureName->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 	
-
 	edFontname = new CEdit();
-	edFontname->SetParent(&GuiManager);
 	edFontname->aabb = CAABB(LEFT_MARGIN, 500, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontname->Text = "Font";
 	edFontname->color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
-	
 
+	lblSampleText = new CLabel("The quick brown fox jumps over a lazy dog.");
+	lblSampleText->aabb = CAABB(INTERFACE_OFFSET_X + 20, 20 + (BUTTON_HEIGHT+10)*3, 500, 25);
+	lblSampleText->color = COLOR_WHITE;
+	lblSampleText->SetName("lblSampleText");
+	
 	FontEditor = new CFontEditor;
 	return true;
 }

@@ -59,13 +59,6 @@
 
 #define STATE_GL_BG_COLOR			0xA0
 
-// class CEventManager
-// {
-// 	CEventManager(){}
-// 	~CEventManager(){}
-// 	void RegisterEvent(const CObject &Subscriber, const long int );
-// };
-
 class CEngine : public CObject
 {
 public:
@@ -75,11 +68,11 @@ public:
 	CRenderManager				RenderManager; // а тут инстанс!
 	CFontManager				*FontManager; // ...а тут опять указатель?! 
 	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
-	CSoundMixer				*SoundMixer;	// это микшер, его надо инициализровать ДО инициализации звуков и музыки
+	CSoundMixer					*SoundMixer;	// это микшер, его надо инициализровать ДО инициализации звуков и музыки
 	CSoundManager				*SoundManager;
 	CMusicManager				*MusicManager;
 	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
-	int						keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
+	int							keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;
 
 	static CEngine*				Instance();

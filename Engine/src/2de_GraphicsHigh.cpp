@@ -995,7 +995,7 @@ CParticleSystem::~CParticleSystem()
 
 CGUIObjectBase::CGUIObjectBase()
 {
-	Parent = &GuiManager;
+
 	Font = NULL;
 	PRender = NULL;
 	Parent = NULL;  // <---- NNNNNOOOO Defparampampampampam
@@ -1014,9 +1014,6 @@ CGUIObjectBase::CGUIObjectBase()
 	WidgetState.Pressed = false;
 	WidgetState.PressedInside = false;
 	WidgetState.PressedOutside = false;
-
-	CEngine::Instance()->RenderManager.AddObject(this);
-	CEngine::Instance()->UpdateManager.AddObject(this);	
 }
 
 CGUIObjectBase::CGUIObjectBase(CGUIObjectBase *AParent)
@@ -1043,7 +1040,7 @@ CGUIObjectBase::CGUIObjectBase(CGUIObjectBase *AParent)
 
 	CEngine::Instance()->RenderManager.AddObject(this);
 	CEngine::Instance()->UpdateManager.AddObject(this);	
-	GuiManager.AddObject(this);
+	CGUIManager::Instance()->AddObject(this);
 }
 
 CGUIObjectBase::~CGUIObjectBase()
@@ -1089,18 +1086,19 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 
 CGUIObject::CGUIObject()
 {
-	Style = GuiManager.GetStyle();
-	GuiManager.AddObject(this);
+	Style = CGUIManager::Instance()->GetStyle();
+	CGUIManager::Instance()->AddObject(this);
+	SetParent(CGUIManager::Instance());
 }
 
 bool CGUIObject::isFocused() const
 {
-	return (GuiManager.GetFocusedObject() == this);
+	return (CGUIManager::Instance()->GetFocusedObject() == this);
 }
 
 void CGUIObject::Focus()
 {
-	GuiManager.SetFocus(this);
+	CGUIManager::Instance()->SetFocus(this);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1110,9 +1108,11 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 {
 	SetName("CGUIManager");
 	FocusedOn = NULL;
+	FocusedOnListNode = NULL;
 	// SetPrimitiveRender(new CPrimitiveRender);	// зачем использовать функцию-mutator, если мы находимся в самом классе, свойство которого хотим измеить?
 	PRender = new CPrimitiveRender;
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	Font = CFontManager::Instance()->GetFont("Font");
 }
 
 bool CGUIManager::Update(scalar dt)
@@ -1232,7 +1232,11 @@ CGUIManager::~CGUIManager()
 {
 	SAFE_DELETE(PRender);   ///////// TODO: NONONONONONONONON DONT DOIT
 }
-CGUIManager GuiManager;
+
+CGUIObject* CGUIManager::GetFocusedObject() const
+{
+	return FocusedOn;
+}
 //////////////////////////////////////////////////////////////////////////
 ///CButton
 
@@ -1256,7 +1260,6 @@ CButton::CButton()
 bool CButton::Render()
 {	
 	CEngine *engine = CEngine::Instance();
-	Font = engine->FontManager->GetFont("Font");
 
 	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
 	Font->tClr = Style->Colors.ButtonText;
@@ -1496,7 +1499,6 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 bool CEdit::Render()
 {
 	CEngine *engine = CEngine::Instance();
-	Font = engine->FontManager->GetFont("Font");
 
 	float StringWidth = Font->GetStringWidth(Text.c_str());
 	float StringHeight = Font->GetStringHeight(Text.c_str());
@@ -1719,7 +1721,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 				{
 					visible = false;
 					FocusedOnItem->visible = true;
-					GuiManager.SetFocus(FocusedOnItem);
+					CGUIManager::Instance()->SetFocus(FocusedOnItem);
 				}
 			break;
 		case SDLK_ESCAPE:
@@ -1727,7 +1729,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 				break;
 			visible = false;
 			(dynamic_cast<CMenuItem*>(Parent))->visible = true;
-			GuiManager.SetFocus(dynamic_cast<CMenuItem*>(Parent));
+			CGUIManager::Instance()->SetFocus(dynamic_cast<CMenuItem*>(Parent));
 			break;
 		}
 	}
@@ -1744,5 +1746,72 @@ bool CMenuItem::AddObject(CObject *AObject)
 	FocusedOnListNode = GetFirst();
 	if (FocusedOnListNode)
 		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+	return true;
+}
+
+void CEdit::CTextSelection::Clear(int ACursorPos)
+{
+	Start = End = ACursorPos;
+}
+
+void CEdit::CTextSelection::Clear()
+{
+	Start = End;
+}
+
+int CEdit::CTextSelection::Length() const
+{
+	return (RangeEnd() - RangeStart());
+}
+
+int CEdit::CTextSelection::RangeEnd() const
+{
+	return Max(Start, End);
+}
+
+int CEdit::CTextSelection::RangeStart() const
+{
+	return Min(Start, End);
+}
+
+bool CEdit::CTextSelection::Exists() const
+{
+	return (Start != End);
+}
+
+void CEdit::CTextSelection::Set(int AStart, int AEnd)
+{
+	Start = AStart;
+	End = AEnd;
+}
+
+CEdit::CTextSelection::CTextSelection(int AStart, int AEnd)
+{
+	Start = AStart;
+	End = AEnd;
+}
+
+CEdit::CTextSelection::CTextSelection()
+{
+	Start = End = -1;
+}
+
+bool CLabel::Render()
+{
+	CEngine *engine = CEngine::Instance();
+
+	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
+	Font->tClr = Style->Colors.ButtonText;
+
+	PRender->sClr = Style->Colors.ButtonFace;
+	PRender->lClr = Style->Colors.ButtonBorder;
+	if (WidgetState.Hovered)
+	{
+		PRender->sClr = Style->Colors.ButtonFaceHovered;
+		PRender->lClr = Style->Colors.ButtonBorderHovered;
+	}
+	PRender->grRectS(aabb.vMin, aabb.vMax);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
+	Font->Print(Text.c_str());
 	return true;
 }

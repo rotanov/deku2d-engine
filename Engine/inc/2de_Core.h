@@ -33,7 +33,7 @@
 
 #endif // _MSC_VER
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>

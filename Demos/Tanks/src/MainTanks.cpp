@@ -73,8 +73,8 @@ public:
 			{
 				Ninja->RenderManager.DelObject("Title screen tanks");
 				Ninja->UpdateManager.DelObject("Title screen tanks");
-				dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
-				dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
+				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
 				Tanks = new CTankManager;	
 			}
 		}
@@ -110,8 +110,8 @@ bool CreateServer()
 
 	Ninja->RenderManager.DelObject("Title screen tanks");
 	Ninja->UpdateManager.DelObject("Title screen tanks");
-	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
-	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
 
 
 	return true;
@@ -125,8 +125,8 @@ bool CreateClient()
 
 	Ninja->RenderManager.DelObject("Title screen tanks");
 	Ninja->UpdateManager.DelObject("Title screen tanks");
-	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
-	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
 
 
 	return true;
@@ -160,9 +160,9 @@ bool Init()
 		FontEffect->Texture = Ninja->TextureManager->GetTextureByName("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////
-	GuiManager.SetPrimitiveRender(new CPrimitiveRender);
-	GuiManager.SetFont(Font);
-	GuiManager.visible = false;
+	CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);
+	CGUIManager::Instance()->SetFont(Font);
+	CGUIManager::Instance()->visible = false;
 	TitleScreen = new CTitleScreen;
 	
 	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item", NULL);
@@ -200,8 +200,8 @@ bool Init()
 	next->position = Vector2(ScreenWidth*0.5f - 20,100);
 
 
-	dynamic_cast<CRenderObject*>(GuiManager.GetObject("Root menu item"))->visible = true;
-	GuiManager.SetFocus(MenuRoot);
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = true;
+	CGUIManager::Instance()->SetFocus(MenuRoot);
 
 // 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.
 // 	new CButton(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// A этот будет работать!

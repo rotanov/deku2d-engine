@@ -44,5 +44,11 @@ __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 	}
 }
 
+// class CEventManager
+// {
+// 	CEventManager(){}
+// 	~CEventManager(){}
+// 	void RegisterEvent(const CObject &Subscriber, const long int );
+// };
 
 #endif

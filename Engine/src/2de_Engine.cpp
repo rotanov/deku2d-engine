@@ -205,6 +205,8 @@ bool CEngine::Init()
 		return false;
 	}
 
+	ilInit(); // Инициализация DevIL
+
 	SDL_EnableUNICODE(1);
 	gToggleScissor(false);
 
