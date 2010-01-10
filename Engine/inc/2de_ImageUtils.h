@@ -2,8 +2,6 @@
 #define _2DE_IMAGE_UTILS_H_
 
 #include <stdlib.h>
-#include <libpng/png.h>
-#include <IL/il.h>
 #include "2de_Core.h"
 
 class CImageData

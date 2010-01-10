@@ -2,6 +2,7 @@
 
 #include "2de_Core.h"
 #include "2de_Sound.h"
+#include <IL/il.h>
 
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
@@ -424,9 +425,8 @@ bool CEngine::Run()
 		}
 		else
 		{
-			//WaitMessage();
-#ifdef _WIN32
-			Sleep(1);
+#ifdef _WIN32			
+			WaitMessage(); // SDL_WaitEvent(NULL);
 #else
 			sleep(1);
 #endif //_WIN32

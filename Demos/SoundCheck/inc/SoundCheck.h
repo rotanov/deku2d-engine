@@ -70,7 +70,7 @@ public:
 	}
 };
 
-bool PlayFile()
+bool PlayFile(CObject *Caller)
 {
 	string test = dynamic_cast<CEdit*>(CGUIManager::Instance()->GetLast()->GetData())->Text;
 	Log.Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
@@ -85,7 +85,8 @@ class CLoadFileGUI
 public:
 	CLoadFileGUI()
 	{
-		LoadFileButton = new CButton(CAABB(400, 300, 100, 32), "Play", RGBAf(0.4f, 0.4f, 0.4f, 1.0f), PlayFile);
+		LoadFileButton = new CButton(CAABB(400, 300, 100, 32), "Play", RGBAf(0.4f, 0.4f, 0.4f, 1.0f));
+		LoadFileButton->SetCallback(&PlayFile, NULL);
 		LoadFileButton->SetParent(CGUIManager::Instance());
 
 		FileNameEdit = new CEdit;

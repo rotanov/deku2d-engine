@@ -82,19 +82,19 @@ public:
 	}
 };
 
-bool StartGame()
+bool StartGame(CObject *Caller)
 {
 	begintimeout = true;
 	return true;
 }
 
-bool EndGame()
+bool EndGame(CObject *Caller)
 {
 	Ninja->Suicide();
 	SDLGLExit(1);
 	return true;
 }
-bool Options()
+bool Options(CObject *Caller)
 {
 	FadeClr = (Random_Int(0,1)==0)?COLOR_P1:COLOR_P2;
 	return true;
@@ -102,7 +102,7 @@ bool Options()
 
 CTitleScreen *TitleScreen;
 
-bool CreateServer()
+bool CreateServer(CObject *Caller)
 {
 	// create a server, listening on port 28999.
 	clientGame = NULL;	
@@ -117,7 +117,7 @@ bool CreateServer()
 	return true;
 }
 
-bool CreateClient()
+bool CreateClient(CObject *Caller)
 {
 	// create a client, by default pinging the LAN broadcast on port 28999
 	clientGame = new TestGame(false,TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),TNL::Address(pingLocalHost ? localHostAddress : localBroadcastAddress));
@@ -165,39 +165,44 @@ bool Init()
 	CGUIManager::Instance()->visible = false;
 	TitleScreen = new CTitleScreen;
 	
-	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item", NULL);
+	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item");
 	MenuRoot->SetFont(Font);
 	MenuRoot->SetPrimitiveRender(new CPrimitiveRender);
  	
-	CMenuItem *next = new CMenuItem(MenuRoot, "Start game", &StartGame);
+	CMenuItem *next = new CMenuItem(MenuRoot, "Start game");
+	next->SetCallback(&StartGame, NULL);
 	next->position = Vector2(ScreenWidth*0.5f - 20,180);
 
-	next = new CMenuItem(MenuRoot, "Options", NULL);
+	next = new CMenuItem(MenuRoot, "Options");
 	next->position = Vector2(ScreenWidth*0.5f - 20,160);
 
-		CMenuItem *options = new CMenuItem(next, "Game", &Options);	
+		CMenuItem *options = new CMenuItem(next, "Game");	
 		options->position = Vector2(ScreenWidth*0.5f - 20, 180);
+		options->SetCallback(&Options, NULL);
 
-		options = new CMenuItem(next, "Sound", NULL);
+		options = new CMenuItem(next, "Sound");
 		options->position = Vector2(ScreenWidth*0.5f - 20, 160);
 
-		options = new CMenuItem(next, "Video", NULL);
+		options = new CMenuItem(next, "Video");
 		options->position = Vector2(ScreenWidth*0.5f - 20, 140);
 
-		options = new CMenuItem(next, "Others", NULL);
+		options = new CMenuItem(next, "Others");
 		options->position = Vector2(ScreenWidth*0.5f - 20, 120);
 
 	
 
 
-	next = new CMenuItem(MenuRoot, "Exit", &EndGame);
+	next = new CMenuItem(MenuRoot, "Exit");
+	next->SetCallback(&EndGame, NULL);
 	next->position = Vector2(ScreenWidth*0.5f - 20,140);
 
-	next = new CMenuItem(MenuRoot, "Create server", &CreateServer);
+	next = new CMenuItem(MenuRoot, "Create server");
 	next->position = Vector2(ScreenWidth*0.5f - 20,120);
+	next->SetCallback(&CreateServer, NULL);
 
-	next = new CMenuItem(MenuRoot, "Create client", &CreateClient);
+	next = new CMenuItem(MenuRoot, "Create client");
 	next->position = Vector2(ScreenWidth*0.5f - 20,100);
+	next->SetCallback(&CreateClient, NULL);
 
 
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = true;

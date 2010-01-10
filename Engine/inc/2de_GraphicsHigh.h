@@ -63,6 +63,7 @@ public:
 		Angle = depth = 0.0f;
 		lwidth = 1.0f;
 		psize = 8.0f;
+		BlendingOption = PRM_RNDR_OPT_BLEND_OTHER;
 		LineStippleEnabled = doUseGlobalCoordSystem = false;			
 	}
 
@@ -386,7 +387,6 @@ public:
 		bool PressedOutside;
 	};
 	string				Text;
-	Callback			CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
 
 	CGUIObjectBase();
 	CGUIObjectBase(CGUIObjectBase *AParent);
@@ -395,8 +395,16 @@ public:
 	void	SetFont(CFont *AFont);
 	void	SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
 	void	SetParent(CGUIObjectBase *AParent);
+	void	SetCallback(CObjectCallback ACallProc, CObject *ACaller)
+	{
+		Caller = ACaller;
+		CallProc = ACallProc;
+	}
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
 protected:
+	CObjectCallback		CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
+	CObject				*Caller;
+
 				// вот зачем эти очвевидные комментарии? неужели кому-то не понятно, что CFont *Font - это указатель на шрифт?
 				// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
 				//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
@@ -435,8 +443,8 @@ public:
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocusedNodeTo(CListNode *AFocusedNode);
 	void		SetFocus(CObject *AObject);
-	CGUIStyle*	GetStyle() { return &Style; }
-	void		SetStyle(const CGUIStyle &AStyle) { Style = AStyle; }
+	CGUIStyle*	GetStyle();
+	void		SetStyle(const CGUIStyle &AStyle);
 private:
 	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
 	CListNode	*FocusedOnListNode;
@@ -471,7 +479,7 @@ class CButton : public CGUIObject
 {
 public:
 				CButton();
-				CButton(CAABB ARect, const char* AText, RGBAf AColor, Callback ACallProc);
+				CButton(CAABB ARect, const char* AText, RGBAf AColor);
 				~CButton();
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 	bool		Render();
@@ -516,7 +524,7 @@ class CMenuItem : public CGUIObject, public CList
 public:
 	bool		isCycledMenuSwitch;
 				CMenuItem();
-				CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc);
+				CMenuItem(CMenuItem* AParent, char* AMenuText);
 				~CMenuItem();
 	bool		Render();
 	bool		Update(scalar dt);

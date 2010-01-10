@@ -999,7 +999,9 @@ CGUIObjectBase::CGUIObjectBase()
 	Font = NULL;
 	PRender = NULL;
 	Parent = NULL;  // <---- NNNNNOOOO Defparampampampampam
+	Text = "";
 	CallProc = NULL;
+	Caller = NULL;
 	//WidgetMouseState = wmsOutside;
 
 	MouseState.Hovered = false;
@@ -1021,8 +1023,11 @@ CGUIObjectBase::CGUIObjectBase(CGUIObjectBase *AParent)
 	Parent = AParent;
 	Font = Parent->Font;
 	PRender = Parent->PRender;
-	Text = Parent->Text;
-	CallProc = Parent->CallProc;
+	Text = "";
+	CallProc = NULL;
+	Caller = NULL;
+	//Text = Parent->Text;
+	//CallProc = Parent->CallProc;
 	//WidgetMouseState = wmsOutside;
 
 	MouseState.Hovered = false;
@@ -1237,14 +1242,23 @@ CGUIObject* CGUIManager::GetFocusedObject() const
 {
 	return FocusedOn;
 }
+
+CGUIStyle* CGUIManager::GetStyle()
+{
+	return &Style;
+}
+
+void CGUIManager::SetStyle(const CGUIStyle &AStyle)
+{
+	Style = AStyle;
+}
 //////////////////////////////////////////////////////////////////////////
 ///CButton
 
 #define Dclr RGBAf(-0.2f, -0.2f, -0.2f, 0.0f)
 
-CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor, Callback AOnClick)
+CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor)
 {
-	CallProc = AOnClick;
 	aabb = ARect;
 	color = AColor;
 	Text = AText;
@@ -1319,7 +1333,7 @@ bool CButton::Update(float dt)
 	{
 		WidgetState.Pressed = false;
 		if (CallProc && MouseState.Hovered && isFocused())
-			CallProc();
+			CallProc(Caller);
 	}
 
 	PreviousMouseState = MouseState;
@@ -1343,7 +1357,7 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			break;
 		case SDLK_RETURN:
 			if (CallProc)
-				CallProc();
+				CallProc(Caller);
 			break;
 		}
 		break;
@@ -1353,7 +1367,7 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		case SDLK_SPACE:
 			WidgetState.Pressed = false;
 			if (CallProc)
-				CallProc();
+				CallProc(Caller);
 			break;
 		}
 		break;
@@ -1638,7 +1652,7 @@ CMenuItem::CMenuItem()
 	isCycledMenuSwitch = true;
 }
 
-CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc)
+CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
 {
 	FocusedOnItem = NULL;
 	FocusedOnListNode = NULL;
@@ -1648,7 +1662,6 @@ CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText, Callback ACallProc)
 	SetParent(AParent);
 	if (AParent)
 		AParent->AddObject(this);
-	CallProc = ACallProc;
 }
 
 CMenuItem::~CMenuItem()
@@ -1715,7 +1728,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			break;
 		case SDLK_RETURN:
 			if (FocusedOnItem->CallProc)
-				FocusedOnItem->CallProc();
+				FocusedOnItem->CallProc(Caller);
 			else
 				if (FocusedOnItem->GetFirst())
 				{
@@ -1812,6 +1825,7 @@ bool CLabel::Render()
 	}
 	PRender->grRectS(aabb.vMin, aabb.vMax);
 	PRender->grRectL(aabb.vMin, aabb.vMax);
+
 	Font->Print(Text.c_str());
 	return true;
 }

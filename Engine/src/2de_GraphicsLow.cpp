@@ -362,7 +362,7 @@ void CFont::Print(const char *text, ...)
 		selx = Pos.x + GetStringWidthEx(0, Sel0-1-offset, text);
 
 
-		if (!(Sel0 > Sel1 || Sel0 < 0 || (uInt)Sel1 >= strlen(text)))
+		if (!(Sel0 > Sel1 || Sel0 < 0 || (unsigned int)Sel1 >= strlen(text)))
 		{
 			int selw = GetStringWidthEx(max(Sel0, offset), Sel1, text);
 			CPrimitiveRender pr;
@@ -473,7 +473,7 @@ int CFont::GetStringHeight(const char *text)
 {
 	if (text == NULL)
 		return 0;
-	int r = 0, l = (uInt)strlen(text);
+	int r = 0, l = (unsigned int)strlen(text);
 	for (int i=0;i<l;i++)
 		r = Max(height[text[i]-32], r);
 	return r;

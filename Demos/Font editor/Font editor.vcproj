@@ -64,7 +64,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
+				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
@@ -144,7 +144,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="OpenGl32.lib Glu32.lib"
-				AdditionalDependencies="libpng.lib zlib.lib OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
+				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
@@ -186,12 +186,20 @@
 		<Filter
 			Name="inc"
 			>
+			<File
+				RelativePath=".\src\Font editor.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="src"
 			>
 			<File
 				RelativePath=".\Src\Font editor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\main.cpp"
 				>
 			</File>
 		</Filter>

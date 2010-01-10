@@ -1,5 +1,6 @@
 #include "2de_ImageUtils.h"
 #include <assert.h>
+#include <IL/il.h>
 
 CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0)
 {
