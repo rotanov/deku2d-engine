@@ -43,11 +43,12 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -267,10 +268,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\ClassDiagram21.cd"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

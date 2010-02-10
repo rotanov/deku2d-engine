@@ -83,7 +83,7 @@
 
 		for(TNL::S32 i = 0; i < game->players.size(); i++)
 		{
-			Position playerP = game->players[i]->renderPos;
+			PositionStr playerP = game->players[i]->renderPos;
 			TNL::F32 dx = playerP.x - renderPos.x;
 			TNL::F32 dy = playerP.y - renderPos.y;
 			TNL::F32 distSquared = dx * dx + dy * dy;
@@ -169,7 +169,7 @@
 		}
 	}
 
-	void Player::serverSetPosition(Position inStartPos, Position inEndPos, TNL::F32 inT, TNL::F32 inTDelta)
+	void Player::serverSetPosition(PositionStr inStartPos, PositionStr inEndPos, TNL::F32 inT, TNL::F32 inTDelta)
 	{
 		// update the instance variables of the object
 		startPos = inStartPos;
@@ -378,7 +378,7 @@
 		(TNL::F32 x, TNL::F32 y), (x, y),
 		TNL::NetClassGroupGameMask, TNL::RPCGuaranteedOrdered, TNL::RPCDirClientToServer, 0)
 	{
-		Position newPosition;
+		PositionStr newPosition;
 		newPosition.x = x;
 		newPosition.y = y;
 
@@ -556,9 +556,9 @@
 			serverPlayer = new Player(Player::PlayerTypeMyClient);
 			serverPlayer->addToGame(this);
 		}
-		TestGame::CRenderObject::color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-		TestGame::CRenderObject::depth = 0.0f;
-		TestGame::CRenderObject::position = Vector2(0.0f, 0.0f);
+		TestGame::CRenderObject::Color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+		TestGame::CRenderObject::Depth = 0.0f;
+		TestGame::CRenderObject::Position = Vector2(0.0f, 0.0f);
 
 		TNL::logprintf("Created a %s...", (server ? "server" : "client"));
 	}
@@ -595,7 +595,7 @@
 		return true;
 	}
 
-	void TestGame::moveMyPlayerTo(Position newPosition)
+	void TestGame::moveMyPlayerTo(PositionStr newPosition)
 	{
 		if(isServer)
 		{
@@ -635,7 +635,7 @@
 		glLoadIdentity();
 		if(clientPlayer)
 		{
-			Position p = clientPlayer->renderPos;
+			PositionStr p = clientPlayer->renderPos;
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glBegin(GL_POLYGON);

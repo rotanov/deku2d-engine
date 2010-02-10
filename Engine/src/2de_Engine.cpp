@@ -7,13 +7,7 @@
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
-#endif //_WIN32
-
-//-------------------------------------------//
-//				Ninja stuff					 //
-//-------------------------------------------//
-
-//CEngine
+#endif // _WIN32
 
 CEngine::CEngine()
 {
@@ -31,8 +25,6 @@ CEngine::CEngine()
 	Factory = CFactory::Instance();
 	FontManager = CFontManager::Instance();
 	window = CGLWindow::Instance();
-	//_instance = NULL;
-	//_refcount = 0;
 	// temporary, until CConfig created..
 	// yes, it's defaults.. developer or maintainer of program should set this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
 	ConfigFilePath = "";
@@ -43,21 +35,10 @@ CEngine::CEngine()
 	userReInit = false;
 	Initialized = false;
 }
-CEngine::~CEngine(){}
 
-CEngine* CEngine::Instance()
+CEngine::~CEngine()
 {
-// 	if (_instance == NULL)
-// 	{
-// 		_instance = new CEngine;
-// 	}
-// 	_refcount++;
-	if(!_instance)
-	{
-		_instance = new CEngine;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
+
 }
 
 void CEngine::CalcFps()
@@ -91,62 +72,61 @@ bool CEngine::LimitFps()
 	return false;
 }
 
-
 void CEngine::SetState(int state, void* value)
+{
+	switch(state)
 	{
-		switch(state)
-		{
-			case STATE_USER_INIT_FUNC:
-				procUserInit = (Callback) value;
-				if (Initialized && procUserInit != NULL)
-				{
-					// Так как минимум один раз пользовательская инициализация уже была установлена,
-					// а следовательно вызвана, то здесь надо вообще всё остановить и подчистить.
-					// И потом переинициализировать всё что нужно и пользовательскую инициализацию
+		case STATE_USER_INIT_FUNC:
+			procUserInit = (Callback) value;
+			if (Initialized && procUserInit != NULL)
+			{
+				// Так как минимум один раз пользовательская инициализация уже была установлена,
+				// а следовательно вызвана, то здесь надо вообще всё остановить и подчистить.
+				// И потом переинициализировать всё что нужно и пользовательскую инициализацию
 //					ClearLists();  
-					if (!(Initialized = procUserInit()))
-						Log.Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
-				}
-				break;
-			case STATE_UPDATE_FUNC:
-				procUpdateFunc = (UpdateProc) value;
-				break;
-			case STATE_RENDER_FUNC:
-				procRenderFunc = (Callback) value;
-				break;
-			case STATE_DO_LIMIT_FPS:
-				doLimitFps = !!value;
-				break;
-			case STATE_DO_CALC_FPS:
-				doCalcFps = !!value;
-				break;
-			case STATE_FPS_LIMIT:
-				FpsLimit = 1000 / (unsigned long)value;
-				break;
-			case STATE_SCREEN_WIDTH:
-				window->width = (int)value;
-				break;
-			case STATE_SCREEN_HEIGHT:
-				window->height = (int)value;
-				break;
-			case STATE_WINDOW_CAPTION:
-				window->caption = (char*)value;
-				break;
-			case STATE_CONFIG_PATH:
-				ConfigFilePath = (char*)value;
-				break;
-			case STATE_CONFIG_NAME:
-				ConfigFileName = (char*)value; // BAD!!!
-				// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!! that's not the way things should be done
-				break;
-			case STATE_GL_BG_COLOR:
-				{
-					RGBAf *t = (RGBAf*)value;
-					glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  TODO: INcapsulate
-				}
-				break;
-		}
+				if (!(Initialized = procUserInit()))
+					Log.Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
+			}
+			break;
+		case STATE_UPDATE_FUNC:
+			procUpdateFunc = (UpdateProc) value;
+			break;
+		case STATE_RENDER_FUNC:
+			procRenderFunc = (Callback) value;
+			break;
+		case STATE_DO_LIMIT_FPS:
+			doLimitFps = !!value;
+			break;
+		case STATE_DO_CALC_FPS:
+			doCalcFps = !!value;
+			break;
+		case STATE_FPS_LIMIT:
+			FpsLimit = 1000 / (unsigned long)value;
+			break;
+		case STATE_SCREEN_WIDTH:
+			window->width = (int)value;
+			break;
+		case STATE_SCREEN_HEIGHT:
+			window->height = (int)value;
+			break;
+		case STATE_WINDOW_CAPTION:
+			window->caption = (char*)value;
+			break;
+		case STATE_CONFIG_PATH:
+			ConfigFilePath = (char*)value;
+			break;
+		case STATE_CONFIG_NAME:
+			ConfigFileName = (char*)value; // BAD!!!
+			// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!! that's not the way things should be done
+			break;
+		case STATE_GL_BG_COLOR:
+			{
+				RGBAf *t = (RGBAf*)value;
+				glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  TODO: INcapsulate
+			}
+			break;
 	}
+}
 
 bool CEngine::Init()
 {
@@ -239,6 +219,7 @@ bool CEngine::Init()
 
 bool CEngine::Suicide()
 {
+	ilShutDown();
 	ClearLists();
 	Log.Log("INFO", "Suicide success");
 	return true;
@@ -339,7 +320,7 @@ bool CEngine::ProcessEvents()
 				break;
 			}
 			case SDL_QUIT:
-				SDLGLExit(1);
+				return false;
 				break;
 			default:
 			{
@@ -359,10 +340,8 @@ bool CEngine::Run()
 		return false;
 	}
 
-	Forever
+	while (ProcessEvents())
 	{
-		if (ProcessEvents() == false) 
-			break;
 		if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
 		{
 			if (LimitFps())
@@ -436,7 +415,8 @@ bool CEngine::Run()
 	CObjectManager.DumpToLog();
 #endif
 	Suicide();	// БЛЯБЛЯБЯЛЯБЛЯБЛЯБЛЯ МЫ СЮДА НЕ ПОПАДАЕМ
-	SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
+	//SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
+	SDL_Quit();
 	return true;
 }
 

@@ -1,8 +1,6 @@
 #ifndef _2DE_ENGINE_H_
 #define _2DE_ENGINE_H_
 
-//#pragma message("Compiling Engine.h")
-
 #include "2de_Core.h"
 
 #include <stdlib.h>
@@ -10,15 +8,14 @@
 #include <malloc.h>
 #include <memory.h>
 
-#ifdef WIN32
-#include <tchar.h>
-#endif //WIN32
+#ifdef _WIN32
+	#include <tchar.h>
+#endif // _WIN32
 
 #include <math.h>
 
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
-//#include "2de_Gui.h"
 #include "2de_Xml.h"
 #include "2de_Resource.h"
 #include "2de_Sound.h"
@@ -59,23 +56,22 @@
 
 #define STATE_GL_BG_COLOR			0xA0
 
-class CEngine : public CObject
+class CEngine : public CTSingleton<CEngine>
 {
 public:
-	CFactory					*Factory; // Фабрика объектов. Синглтон.
-	CResourceManager			ResourceManager; // А почему тут инастанс
-	CTextureManager				*TextureManager; // ...а тут указатель?
-	CRenderManager				RenderManager; // а тут инстанс!
-	CFontManager				*FontManager; // ...а тут опять указатель?! 
-	CUpdateManager				UpdateManager; // не, ну ёбаны в рот.
-	CSoundMixer					*SoundMixer;	// это микшер, его надо инициализровать ДО инициализации звуков и музыки
-	CSoundManager				*SoundManager;
+	CFactory					*Factory;			// Фабрика объектов. Синглтон.
+	CResourceManager			ResourceManager;	// А почему тут инастанс
+	CTextureManager				*TextureManager;	// ...а тут указатель?
+	CRenderManager				RenderManager;		// а тут инстанс!
+	CFontManager				*FontManager;		// ...а тут опять указатель?! 
+	CUpdateManager				UpdateManager;		// не, ну ёбаны в рот.
+	CSoundMixer					*SoundMixer;		// это микшер, его надо инициализровать ДО инициализации звуков и музыки
+	CSoundManager				*SoundManager;		// А зачем собственно вообще хранить это тут? Мы же можем из любого места обратиться.
 	CMusicManager				*MusicManager;
-	CXMLTable					Config; // Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
-	int							keys[SDLK_LAST];  //FFFFFFFFUUUUUUUUUU~ ?
+	CXMLTable					Config;				// Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
+	int							keys[SDLK_LAST];	//FFFFFFFFUUUUUUUUUU~ ?
 	Vector2						MousePos;
 
-	static CEngine*				Instance();
 	void						SetState(int state, void* value);
 	void						GetState(int state, void* value);
 	bool						AddEventFunction(EventFunc func);
@@ -90,8 +86,8 @@ public:
 private:
 	bool						doLimitFps;
 	bool						doLoadDefaultResourceList;
-	unsigned long					FpsCount;
-	unsigned long					FpsLimit;
+	unsigned long				FpsCount;
+	unsigned long				FpsLimit;
 	float						dt;
 	bool						isHaveFocus;
 	bool						userReInit;
@@ -120,12 +116,9 @@ private:
 	bool						(*procUpdateFunc)(scalar);	// ok, yeah
 	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
 protected:
-	static CEngine *_instance;
+	friend class CTSingleton<CEngine>;
 	CEngine();
 	~CEngine();
 };
-
-//extern CEngine *engine;  // НАХУЙ подсчёт ссылок
-// Да, подсчёт ссылок конечно же нахуй, но тот факт что отслеживать ручками порядок вызова конструкторов - это великая боль в попе - никто не отменял.
 
 #endif // _2DE_ENGINE_H_

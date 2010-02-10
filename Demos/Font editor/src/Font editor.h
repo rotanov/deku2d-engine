@@ -22,43 +22,59 @@ const float ZOOM_STEP = 0.5f;
 
 class CFontEditor : public CRenderObject, public CUpdateObject
 {
-	enum 
+	enum EEditorState
 	{
-		GRIP_TOOL,
-		SELECT_TOOL,
-		MOVE_TOOL,
+		ES_GRIP_TOOL,
+		ES_SELECT_TOOL,
+		ES_MOVE_TOOL,
+		ES_NONE,
+	};
+	enum ESelectionCornerKind
+	{
+		SCK_LEFT_BOTTOM,
+		SCK_RIGHT_BOTTOM,
+		SCK_RIGHT_TOP,
+		SCK_LEFT_TOP,
+		SCK_CENTER,
+		SCK_NONE,
 	};
 public:
-	Vector2		MousePosition;
-	Vector2		MouseDelta;
-	bool		isGripToolEnabled;
-	bool		doGripping;
-	int			wheight;
-	int			wwidth;
+	Vector2					MousePosition;
+	Vector2					MouseDelta;
+	int						WindowWidth;
+	int						WindowHeight;
+	Vector2					Offset;
+	float					Zoom;
+	CTexture				*FontTexture;
+	CFont					*Font;
+	int						CurrentSymbol;
+	CEdit					*edFontTextureName;
+	CEdit					*edFontname;
+	CEdit					*edCurrentCymbol;
+	CLabel					*lblSampleText;
+	CLabel					*lblCharachterSelectedASCIIIndex;
+	CPrimitiveRender		PRender;
+	Vector2					SelectionBoxes[SCK_NONE * 4];
+	ESelectionCornerKind	CornerKind;
+	EEditorState			State;
+	EEditorState			PreviousState;
 
-	float		Zoom;
-	CTexture	*FontTexture;
-	CFont		*Font;
-	char		CurrentSymbol;
-	int			OffsetX;
-	int			OffsetY;
-
-	CEdit		*edFontTextureName;
-	CEdit		*edFontname;
-	CEdit		*edCurrentCymbol;
-	CLabel		*lblSampleText;
-
-	void SetZoom(float AZoom);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	CFontEditor();
+	~CFontEditor();
+	void SetZoom(float AZoom);
+	void SetSelectedBoxTo(int Index);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	
 	bool Render();
 	bool Update(float dt);
+	
 	friend bool LoadFont(CObject *Caller);
 	friend bool SaveFont(CObject *Caller);
-	friend bool LoadTexture(CObject *Caller);  // ќп€ть же не Load() а Acquire().;
+	friend bool LoadTexture(CObject *Caller);
 	friend bool ExitFontEditor(CObject *Caller);
 	friend bool ShowTestPhrase(CObject *Caller);
-
+	friend bool GoToPrevChar(CObject *Caller);
+	friend bool GoToNextChar(CObject *Caller);
+	friend bool ExposeRect(CObject *Caller);
 };
 
 

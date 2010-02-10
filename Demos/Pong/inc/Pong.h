@@ -31,10 +31,10 @@ public:
 		switch (PlayerKind)
 		{
 		case PLAYER_KIND_ONE:
-			position = Vector2(PONG_MARGIN, PONG_MARGIN);
+			Position = Vector2(PONG_MARGIN, PONG_MARGIN);
 			break;
 		case PLAYER_KIND_TWO:
-			position = Vector2(ScreenWidth - PONG_MARGIN - PONG_PLAYER_WIDTH, PONG_MARGIN);
+			Position = Vector2(ScreenWidth - PONG_MARGIN - PONG_PLAYER_WIDTH, PONG_MARGIN);
 			break;
 		}
 	}
@@ -66,20 +66,20 @@ public:
 
 		if (Equal(Velocity.y , 0.0f))
 			Velocity.y = 0;
-		position += Velocity*dt;
+		Position += Velocity*dt;
 		Velocity += Acceleration*dt;
 		Velocity *= 0.999f;
 		Acceleration = V2_ZERO;
 
-		if (position.y < 0.0f)
+		if (Position.y < 0.0f)
 		{
-			position.y = 0.0f;
+			Position.y = 0.0f;
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		if (position.y + PONG_PLAYER_HEIGHT > CGLWindow::Instance()->height)
+		if (Position.y + PONG_PLAYER_HEIGHT > CGLWindow::Instance()->height)
 		{
-			position.y = CGLWindow::Instance()->height - PONG_PLAYER_HEIGHT;
+			Position.y = CGLWindow::Instance()->height - PONG_PLAYER_HEIGHT;
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
@@ -94,7 +94,7 @@ public:
 	void Iinitialize()
 	{
 		Velocity = Vector2(Random_Float(-500.0f, 500.0f), Random_Float(-500.0f, 500.0f));
-		position = Vector2(CGLWindow::Instance()->width * 0.5f, CGLWindow::Instance()->height * 0.5f);
+		Position = Vector2(CGLWindow::Instance()->width * 0.5f, CGLWindow::Instance()->height * 0.5f);
 	}
 	CPongBall()
 	{
@@ -110,17 +110,17 @@ public:
 	}
 	bool Update(float dt)
 	{
-		position += Velocity * dt;
+		Position += Velocity * dt;
 
-		if (position.y < 0.0f)
+		if (Position.y < 0.0f)
 		{
-			position.y = 0.0f;
+			Position.y = 0.0f;
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		if (position.y + PONG_BALL_SIZE > CGLWindow::Instance()->height)
+		if (Position.y + PONG_BALL_SIZE > CGLWindow::Instance()->height)
 		{
-			position.y = CGLWindow::Instance()->height - PONG_BALL_SIZE;
+			Position.y = CGLWindow::Instance()->height - PONG_BALL_SIZE;
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
@@ -160,9 +160,9 @@ public:
 	bool Update(float dt)
 	{
 		CAABB BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;
-		BallBox = CAABB(Ball->position, Ball->position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
-		PlayerOneBox = CAABB(PlayerOne->position, PlayerOne->position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
-		PlayerTwoBox = CAABB(PlayerTwo->position, PlayerTwo->position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+		BallBox = CAABB(Ball->Position, Ball->Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
+		PlayerOneBox = CAABB(PlayerOne->Position, PlayerOne->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+		PlayerTwoBox = CAABB(PlayerTwo->Position, PlayerTwo->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 		CPongPlayer *CollidedPlayer = NULL;
 
 		float CollideFlagf = 0.0f;
@@ -181,19 +181,19 @@ public:
 			Ball->Velocity.y += abs(CollidedPlayer->Velocity.y)*0.01f;
 		}
 
-		if (Ball->position.x > 1100)
-			PlayerTwo->Velocity.y += (- PlayerTwo->position.y - PONG_PLAYER_HEIGHT*0.5f + Ball->position.y + PONG_BALL_SIZE * 0.5f)*0.34f;
+		if (Ball->Position.x > 1100)
+			PlayerTwo->Velocity.y += (- PlayerTwo->Position.y - PONG_PLAYER_HEIGHT*0.5f + Ball->Position.y + PONG_BALL_SIZE * 0.5f)*0.34f;
 
 		if (CEngine::Instance()->keys[SDLK_SPACE])
 			Ball->Iinitialize();		
 
-		if (Ball->position.x < 0.0f)
+		if (Ball->Position.x < 0.0f)
 		{
 			Ball->Iinitialize();
 			PlayerTwoScore++;
 		}
 
-		if (Ball->position.x + PONG_BALL_SIZE > CGLWindow::Instance()->width)
+		if (Ball->Position.x + PONG_BALL_SIZE > CGLWindow::Instance()->width)
 		{
 			Ball->Iinitialize();
 			PlayerOneScore++;

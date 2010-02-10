@@ -46,3 +46,6 @@ an empty function to keep the compiler happy.
 ->
 
 <-
+
+Идеи для системы частиц:
+	But! Collection of quads with precalculated tracks can be rendered much more efficiently in terms of speed. You should not evaluate invisible particle systems, you know the exact AABB, you should not apply heavy maths in runtime. [Это если системы частиц - только эффект, то есть не является частью геймплея, и даже как эффект - не зависит от всего остального окружения. Другими словами, если нам нужен просто эффект системы частиц, которая разово делает что-то, скажем просто тупо снег, то это да, это победа будет]

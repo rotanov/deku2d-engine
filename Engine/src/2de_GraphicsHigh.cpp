@@ -448,7 +448,7 @@ void CPrimitiveRender::grQuarterCircle(const Vector2 &v0, scalar Radius)
 CSprite::CSprite()
 {
 	m_bFirstRendering = true;
-	color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	Color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 	animations = NULL;
 	anim = NULL;
 	numAnimations = 0;
@@ -599,7 +599,7 @@ bool CSprite::Render()
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
 	glBegin( GL_QUADS );
-	color.glSet();
+	Color.glSet();
 	if (!mirror_h)
 	{
 		glTexCoord2f(fLowerLeft_s, fLowerLeft_t);
@@ -1071,7 +1071,7 @@ void CGUIObjectBase::SetParent(CGUIObjectBase *AParent)
 	Parent = AParent;
 	Font = Parent->Font;
 	PRender = Parent->PRender;
-	color = Parent->color;
+	Color = Parent->Color;
 	//Text = Parent->Text;  
 	//CallProc = Parent->CallProc;
 }
@@ -1260,14 +1260,14 @@ void CGUIManager::SetStyle(const CGUIStyle &AStyle)
 CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor)
 {
 	aabb = ARect;
-	color = AColor;
+	Color = AColor;
 	Text = AText;
 }
 
 CButton::CButton()
 {
 	aabb = CAABB(0, 0, 100, 100);
-	color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
+	Color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 	Text = "You dumb! You called default constructor!";
 }
 
@@ -1275,7 +1275,9 @@ bool CButton::Render()
 {	
 	CEngine *engine = CEngine::Instance();
 
-	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
+	Font->Pos.x = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).x;
+	Font->Pos.y = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).y;
+
 	Font->tClr = Style->Colors.ButtonText;
 
 	PRender->sClr = Style->Colors.ButtonFace;
@@ -1475,7 +1477,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			break;
 		}
 		default:
-			if (letter > 31)
+			if (letter > 31 || letter < 0)
 			{
 				if (Selection.Exists())
 				{
@@ -1517,8 +1519,8 @@ bool CEdit::Render()
 	float StringWidth = Font->GetStringWidth(Text.c_str());
 	float StringHeight = Font->GetStringHeight(Text.c_str());
 	float CursorDistance = Font->GetStringWidthEx(0, (CursorPos - VisibleTextOffset), GetVisibleText().c_str());
-	Font->Pos.x = aabb.vMin.x + Style->Metrics.EditMargins.x;
-	Font->Pos.y = (aabb.vMin.y + aabb.vMax.y) / 2.0f - StringHeight / 2.0f;
+	Font->Pos.x = (int)aabb.vMin.x + (int)Style->Metrics.EditMargins.x;
+	Font->Pos.y = (int)((aabb.vMin.y + aabb.vMax.y) / 2.0f - StringHeight / 2.0f);
 	Font->tClr = Style->Colors.EditText;
 
 	if (MouseState.Hovered)
@@ -1648,7 +1650,7 @@ CMenuItem::CMenuItem()
 {
 	FocusedOnItem = NULL;
 	FocusedOnListNode = NULL;
-	visible = false;
+	Visible = false;
 	isCycledMenuSwitch = true;
 }
 
@@ -1656,7 +1658,7 @@ CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
 {
 	FocusedOnItem = NULL;
 	FocusedOnListNode = NULL;
-	visible = false;
+	Visible = false;
 	isCycledMenuSwitch = true;
 	SetName(Text = AMenuText);
 	SetParent(AParent);
@@ -1678,13 +1680,13 @@ bool CMenuItem::Render()
 		glLoadIdentity();
 		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
 		Font->scale = Vector2(1.0f, 1.0f);
-		Font->Pos = ChildMenuItem->position;
+		Font->Pos = ChildMenuItem->Position;
 		Font->Print(ChildMenuItem->Text.c_str());
 		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
 	}
 	glLoadIdentity();
-	color = COLOR_WHITE;
-	PRender->grCircleS(FocusedOnItem->position - Vector2(20.0f, -10.0f), 5);
+	Color = COLOR_WHITE;
+	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
 	return true;
 }
 
@@ -1695,7 +1697,7 @@ bool CMenuItem::Update(scalar dt)
 
 bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	if (!visible)
+	if (!Visible)
 		return false;
 	if (state == KEY_PRESSED)
 	{
@@ -1732,16 +1734,16 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			else
 				if (FocusedOnItem->GetFirst())
 				{
-					visible = false;
-					FocusedOnItem->visible = true;
+					Visible = false;
+					FocusedOnItem->Visible = true;
 					CGUIManager::Instance()->SetFocus(FocusedOnItem);
 				}
 			break;
 		case SDLK_ESCAPE:
 			if (!Parent)
 				break;
-			visible = false;
-			(dynamic_cast<CMenuItem*>(Parent))->visible = true;
+			Visible = false;
+			(dynamic_cast<CMenuItem*>(Parent))->Visible = true;
 			CGUIManager::Instance()->SetFocus(dynamic_cast<CMenuItem*>(Parent));
 			break;
 		}
@@ -1813,7 +1815,8 @@ bool CLabel::Render()
 {
 	CEngine *engine = CEngine::Instance();
 
-	Font->Pos = (aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f;
+	Font->Pos.x = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).x;
+	Font->Pos.y = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).y;
 	Font->tClr = Style->Colors.ButtonText;
 
 	PRender->sClr = Style->Colors.ButtonFace;

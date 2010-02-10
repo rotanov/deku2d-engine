@@ -6,10 +6,10 @@
 #include "2de_Core.h"
 
 #ifdef USE_SDL_OPENGL
-#include <SDL/SDL_opengl.h>
+	#include <SDL/SDL_opengl.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+	#include <GL/gl.h>
+	#include <GL/glu.h>
 #endif
 
 #include "2de_ImageUtils.h"
@@ -23,17 +23,34 @@ const Vector2 V2_QuadBin[4] =
 	V2_DIR_UP
 };
 
+const Vector2 V2_QuadBinCenter[4] = 
+{
+	V2_DIR_LEFT + V2_DIR_DOWN,
+	V2_DIR_RIGHT + V2_DIR_DOWN,
+	V2_DIR_RIGHT + V2_DIR_UP,
+	V2_DIR_LEFT + V2_DIR_UP
+};
+
+
+const scalar ROTATIONAL_AXIS_Z = 1.0f;
+
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
 class CRenderObject : public virtual CObject
 {
+private:
+
 public:
-	Vector2	position;
-	scalar	depth;
-	CAABB				aabb;				// Axis Aligned Bounding Box
-	bool				visible;
-	RGBAf				color;
+	Vector2				Position;
+	scalar				Orientation;		//	Orientation angle.
+	scalar				Scaling;
+	scalar				Depth;				//	[-1; 1]?
+	CAABB				aabb;				//	Axis Aligned Bounding Box
+	RGBAf				Color;
+	bool				Visible;
+	bool				doIgnoreCamera;
+
 	CRenderObject();	
 	virtual bool Render() = 0;
 	virtual ~CRenderObject();
@@ -45,14 +62,14 @@ public:
 class CGLImageData : public CImageData
 {
 public:
-	bool	CleanData;
+	bool			doCleanData;
 					CGLImageData();
 					~CGLImageData();
 	bool			MakeTexture();
 	bool			LoadTexture(const char *filename);
 	virtual GLuint	GetTexID();
 protected:
-	GLuint TexID;
+	GLuint			TexID;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -127,7 +144,7 @@ public:
 //	CPrimitiveRender	*PRender;					//	Настройки линий и прочей хуеты связаной с рамкой.
 	int					width[CFONT_MAX_SYMBOLS];	//	Ширина символа
 	int					height[CFONT_MAX_SYMBOLS];	//	Высота символа
-	CRecti		bbox[256];		// Баундинг бокс каждого для каждого символа
+	CRecti				bbox[256];		// Баундинг бокс каждого для каждого символа
 	Vector2				scale;
 
 	static CObject* NewFont()
@@ -150,7 +167,7 @@ public:
 	int			GetStringHeightEx(int t1, int t2, const char *text);
 	int			StringCoordToCursorPos(const char *text, int x, int y);
 	CTexture*	GetTexture();
-	void		SetTexture(char *TextureName);
+	void		SetTexture(const string &TextureName);
 	CAABB		GetSymbolsBBOX()
 	{
 		CAABB Result;
@@ -173,12 +190,12 @@ public:
 private:
 	float				x, y;					//	Фактические координаты для отрисовки в _Print
 	float				Depth;					//	Глубина по Z
-	Vector2		*pp;					//	Указатель на вектор с координатами текста
+	Vector2				*pp;					//	Указатель на вектор с координатами текста
 	byte				align;					//	Флаги выравнивания
 	CTexture*			Texture;				//	Указатель на текстуру шрфита. Очевидно же, да?
-	GLuint		base;			// Base List of 256 glLists for font
+	GLuint				base;					// Base List of 256 glLists for font
 
-	void		_Print(const char *text);
+	void		_Print(const unsigned char *text);
 	byte		GetHalign();
 	byte		GetValign();
 };
@@ -190,11 +207,11 @@ class CCamera : public CObject
 {
 public:
 	Vector2 Point;					//
-	CAABB view, outer, world;		//
-	bool Assigned;
-	scalar *Atx, *Aty;
-	scalar dx, dy;
-	int w, h;
+	CAABB	view, outer, world;		//
+	bool	Assigned;
+	scalar	*Atx, *Aty;
+	scalar	dx, dy;
+	int		w, h;
 	Vector2 p, v;
 
 	CCamera();
@@ -232,6 +249,21 @@ public:
 	CCamera	Camera;
 	CRenderManager();
 	~CRenderManager();
+
+	void Init()
+	{
+		glEnableClientState(GL_VERTEX_ARRAY);
+		// GL_COLOR_ARRAY
+		// GL_TEXTURE_COORD_ARRAY
+		// --
+		// glVertexPointer();
+		// glColorPointer();
+		// glTexCoordPointer();
+		// --
+		//glArrayElement();
+		//glArrayElementEXT()
+
+	}
 
 	void SortByAlpha();
 	void SortByZ();

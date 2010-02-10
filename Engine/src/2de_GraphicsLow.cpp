@@ -4,11 +4,11 @@
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-CRenderObject::CRenderObject() : position(V2_ZERO), depth(0.0f), visible(true), color(1.0f, 1.0f, 1.0f, 1.0f)
+CRenderObject::CRenderObject() : Position(V2_ZERO), Orientation(0.0f), Scaling(1.0f), Depth(0.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
-	CEngine::Instance()->RenderManager.AddObject(this);
 	SetName("CRenderObject");
 	type |= T_RENDERABLE;
+	CEngine::Instance()->RenderManager.AddObject(this);
 };
 
 CRenderObject::~CRenderObject()
@@ -21,7 +21,7 @@ CRenderObject::~CRenderObject()
 CGLImageData::CGLImageData()
 {
 	TexID = width = height = bpp = 0;
-	CleanData = true;
+	doCleanData = true;
 	data = NULL;
 }
 
@@ -42,9 +42,9 @@ bool CGLImageData::MakeTexture()
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &TexID);
 	glBindTexture(GL_TEXTURE_2D, TexID);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	int MODE = (bpp == 3)?GL_RGB : GL_RGBA;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	int MODE = (bpp == 3) ? GL_RGB : GL_RGBA;
 	glTexImage2D(GL_TEXTURE_2D, 0, bpp, width, height, 0, MODE, GL_UNSIGNED_BYTE, data);
 	return true;
 }
@@ -66,7 +66,7 @@ bool CGLImageData::LoadTexture(const char *filename)
 		Log.Log("ERROR", "Can't load texture in video memory.");
 		return false;
 	}
-	if (CleanData)
+	if (doCleanData)
 	{
 		delete [] data;
 		data = NULL;
@@ -284,6 +284,10 @@ bool CFont::LoadFromFile()
 	float TmpOOWdth = 1.0f/Texture->width, TmpOOHght = 1.0f/Texture->height;
 	for(int i=0;i<256;i++)
 	{
+		if (bbox[i].x0 > bbox[i].x1)
+			swap(bbox[i].x0, bbox[i].x1);
+		if (bbox[i].y0 > bbox[i].y1)
+			swap(bbox[i].y0, bbox[i].y1);
 		glNewList(base+i, GL_COMPILE);
 		glBegin(GL_QUADS);		
 		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
@@ -321,19 +325,20 @@ bool CFont::SaveToFile()
 	return true;
 }
 
-void CFont::_Print(const char *text)
+void CFont::_Print(const unsigned char *text)
 {
-	glPushAttrib(GL_TEXTURE_BIT);
-	glPushMatrix();
-	tClr.glSet();
-	glEnable(GL_TEXTURE_2D);
+ 	glPushAttrib(GL_TEXTURE_BIT);
+ 	glPushMatrix();
+ 	tClr.glSet();
+ 	glEnable(GL_TEXTURE_2D);
 	Texture->Bind();
 	glTranslatef(pp->x, pp->y, Depth);
-	scale.glScale();
+//	scale.glScale();
 	glListBase(base-32);
-	glCallLists((GLsizei)strlen(text), GL_BYTE, text);
-	glPopMatrix();
-	glPopAttrib(); 
+	const char *temptext = reinterpret_cast<const char*>(text);
+	glCallLists((GLsizei)strlen(temptext), GL_UNSIGNED_BYTE, text);
+ 	glPopMatrix();
+ 	glPopAttrib(); 
 	//GLenum err = glGetError() ;
 }
 
@@ -432,7 +437,7 @@ void CFont::Print(const char *text, ...)
 	va_start(ap, text);
 	vsprintf(temp, text, ap);
 	va_end(ap);
-	_Print(temp);
+	_Print(reinterpret_cast<unsigned char*>(temp));
 	delete [] temp;
 
 	if (doRenderToRect)
@@ -449,7 +454,7 @@ int CFont::GetStringWidth(const char *text)
 		return 0;
 	int r = 0, l = (int)strlen(text);
 	for (int i=0;i<l;i++)
-		r += width[text[i]-32] + Distance;
+		r += width[(unsigned char)text[i]-32] + Distance;
 	return r;
 }
 
@@ -465,7 +470,7 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 
 	int r = 0;
 	for (unsigned int i = t1; i <= t2; i++)
-		r += width[text[i]-32]+Distance;
+		r += width[(unsigned char)text[i]-32] + Distance;
 	return r;
 }
 
@@ -474,8 +479,8 @@ int CFont::GetStringHeight(const char *text)
 	if (text == NULL)
 		return 0;
 	int r = 0, l = (unsigned int)strlen(text);
-	for (int i=0;i<l;i++)
-		r = Max(height[text[i]-32], r);
+	for (int i = 0; i < l; i++)
+		r = Max(height[(unsigned char)text[i] - 32], r);
 	return r;
 }
 
@@ -489,7 +494,7 @@ int CFont::GetStringHeightEx(int t1, int t2, const char *text)
 		return -1;
 	int r = 0, l = (unsigned int)strlen(text);
 	for (unsigned int i=0; i<l; i++)
-		r = Max(height[text[i]-32], r);
+		r = Max(height[(unsigned char)text[i] - 32], r);
 	return r;
 }
 
@@ -507,7 +512,7 @@ int CFont::StringCoordToCursorPos(const char *text, int x, int y)
 	for (int i = 0; i < strlen(text); i++)
 	{
 		int SubstrWidth = GetStringWidthEx(0, i, text);
-		int SymbolCenterCoord = SubstrWidth - Distance - (width[text[i] - 32] / 2);
+		int SymbolCenterCoord = SubstrWidth - Distance - (width[(unsigned char)text[i] - 32] / 2);
 		if (Local.x < SymbolCenterCoord)
 			return (i - 1);
 	}
@@ -552,7 +557,7 @@ CTexture* CFont::GetTexture()
 	return Texture;
 }
 
-void CFont::SetTexture(char *TextureName)
+void CFont::SetTexture(const string &TextureName)
 {
 	Texture = CEngine::Instance()->TextureManager->GetTextureByName(TextureName);
 }
@@ -670,23 +675,23 @@ bool CRenderManager::DrawObjects()
 {
 	Reset();
 	CRenderObject *data = dynamic_cast<CRenderObject*>(Next());
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glPushMatrix();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // !!!
+	//glPushMatrix();
 	Camera.Update();
 
 
 	while (data)
 	{
-		if (data->visible)
+		if (data->Visible)
 		{
 			glLoadIdentity();
 			Camera.gTranslate();
-			glTranslatef(data->position.x, data->position.y, data->depth);
+			glTranslatef(data->Position.x, data->Position.y, data->Depth);
 			data->Render();
 		}
 		data = dynamic_cast<CRenderObject*>(Next());
 	}
-	glPopMatrix();
+	//glPopMatrix();
 
 #ifdef _DEBUG
 	//	Camera.DrawDebug();
@@ -697,12 +702,12 @@ bool CRenderManager::DrawObjects()
 
 bool CompAlpha(CObject *a, CObject *b)
 {
-	return (dynamic_cast<CRenderObject*>(a))->color.w >= (dynamic_cast<CRenderObject*>(b))->color.w;
+	return (dynamic_cast<CRenderObject*>(a))->Color.w >= (dynamic_cast<CRenderObject*>(b))->Color.w;
 }
 
 bool CompZ(CObject *a, CObject *b)
 {
-	return (dynamic_cast<CRenderObject*>(a))->depth <= (dynamic_cast<CRenderObject*>(b)->depth);
+	return (dynamic_cast<CRenderObject*>(a))->Depth <= (dynamic_cast<CRenderObject*>(b)->Depth);
 }
 
 
@@ -744,7 +749,6 @@ void gSetBlendingMode(void)
 void SDLGLExit(int code)
 {
 	SDL_Quit();
-	exit(0x01);
 }
 
 void gToggleScissor( bool State )
@@ -930,34 +934,36 @@ bool CTexture::LoadFromFile()
 
 // всё что я тут понагородил мне самому не нравится... каких-то макросов понаизобретал.. зато универсально и ынтерпрайзно..
 
-#if defined(_WIN32) || defined(__linux)		// <platforms, that support swap interval control>
+#if defined(_WIN32) || defined(__linux)        // <platforms, that support swap interval control>
 
 #if defined(_WIN32)
-	#include <windows.h>
-	#define GL_GET_PROC_ADDRESS_ARG_TYPE (const char*)
-	#define SWAP_INTERVAL_EXTENSION_NAME "WGL_EXT_swap_control"
-	#define SWAP_INTERVAL_PROC_NAME wglSwapIntervalEXT
-	#define GET_PROC_ADDRESS_FUNC wglGetProcAddress
+#include <windows.h>
+#define GL_GET_PROC_ADDRESS_ARG_TYPE (const char*)
+#define SWAP_INTERVAL_EXTENSION_NAME "WGL_EXT_swap_control"
+#define SWAP_INTERVAL_PROC_NAME_STR "wglSwapIntervalEXT"
+#define SWAP_INTERVAL_PROC_NAME wglSwapIntervalEXT
+#define GET_PROC_ADDRESS_FUNC wglGetProcAddress
 #elif defined(__linux)
-	#include <GL/glx.h>
-	#define GL_GET_PROC_ADDRESS_ARG_TYPE (const GLubyte*)
-	#define SWAP_INTERVAL_EXTENSION_NAME "GLX_SGI_swap_control"
-	#define SWAP_INTERVAL_PROC_NAME glXSwapIntervalSGI
-	#define GET_PROC_ADDRESS_FUNC glXGetProcAddress
+#include <GL/glx.h>
+#define GL_GET_PROC_ADDRESS_ARG_TYPE (const GLubyte*)
+#define SWAP_INTERVAL_EXTENSION_NAME "GLX_SGI_swap_control"
+#define SWAP_INTERVAL_PROC_NAME_STR "glXSwapIntervalSGI"
+#define SWAP_INTERVAL_PROC_NAME glXSwapIntervalSGI
+#define GET_PROC_ADDRESS_FUNC glXGetProcAddress
 #endif
 
-#define GET_PROC_ADDRESS(x,y) ((x(GL_GET_PROC_ADDRESS_ARG_TYPE"(y)")))
+#define GET_PROC_ADDRESS(x,y) ((x(GL_GET_PROC_ADDRESS_ARG_TYPE(y))))
 
 SWAP_INTERVAL_PROC SWAP_INTERVAL_PROC_NAME = 0;
 
-#endif						// </platforms, that support swap interval control>
+#endif                        // </platforms, that support swap interval control>
 
 // да, функция будет для всех, но для неподдерживаемых она просто ничего не будет делать..
 // это чтобы не городить ифдефы в другом месте..
 
 void setVSync(int interval)
 {
-#if defined(_WIN32) || defined(__linux)		// <platforms, that support swap interval control>
+#if defined(_WIN32) || defined(__linux)        // <platforms, that support swap interval control>
 #if defined(_WIN32)
 	const char *extensions = (const char *) glGetString(GL_EXTENSIONS);
 #elif defined(__linux)
@@ -966,15 +972,14 @@ void setVSync(int interval)
 
 	if (strstr(extensions, SWAP_INTERVAL_EXTENSION_NAME) != 0)
 	{
-		SWAP_INTERVAL_PROC_NAME = (SWAP_INTERVAL_PROC) GET_PROC_ADDRESS(GET_PROC_ADDRESS_FUNC, SWAP_INTERVAL_PROC_NAME);
+		SWAP_INTERVAL_PROC_NAME = (SWAP_INTERVAL_PROC) GET_PROC_ADDRESS(GET_PROC_ADDRESS_FUNC, SWAP_INTERVAL_PROC_NAME_STR);
 
 		if (SWAP_INTERVAL_PROC_NAME)
 			SWAP_INTERVAL_PROC_NAME(interval);
 	}
 	else
 	{
-		Log.Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME "is not supported on your computer.");
+		Log.Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer.");
 	}
-#endif						// </platforms, that support swap interval control>
+#endif                        // </platforms, that support swap interval control>
 }
-

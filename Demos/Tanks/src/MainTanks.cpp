@@ -73,8 +73,8 @@ public:
 			{
 				Ninja->RenderManager.DelObject("Title screen tanks");
 				Ninja->UpdateManager.DelObject("Title screen tanks");
-				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
-				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
+				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
+				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 				Tanks = new CTankManager;	
 			}
 		}
@@ -110,8 +110,8 @@ bool CreateServer(CObject *Caller)
 
 	Ninja->RenderManager.DelObject("Title screen tanks");
 	Ninja->UpdateManager.DelObject("Title screen tanks");
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 
 
 	return true;
@@ -125,8 +125,8 @@ bool CreateClient(CObject *Caller)
 
 	Ninja->RenderManager.DelObject("Title screen tanks");
 	Ninja->UpdateManager.DelObject("Title screen tanks");
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 
 
 	return true;
@@ -148,7 +148,7 @@ bool Init()
 		FontEffect->Init();
 		FontEffect->Info.sc = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
 		FontEffect->Info.ec = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
-		FontEffect->visible = true;	
+		FontEffect->Visible = true;	
 		Vector2 *pnts2 = new Vector2 [2];
 		pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
 		pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
@@ -162,7 +162,7 @@ bool Init()
 	//////////////////////////////////////////////////////////////////////////
 	CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);
 	CGUIManager::Instance()->SetFont(Font);
-	CGUIManager::Instance()->visible = false;
+	CGUIManager::Instance()->Visible = false;
 	TitleScreen = new CTitleScreen;
 	
 	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item");
@@ -171,41 +171,41 @@ bool Init()
  	
 	CMenuItem *next = new CMenuItem(MenuRoot, "Start game");
 	next->SetCallback(&StartGame, NULL);
-	next->position = Vector2(ScreenWidth*0.5f - 20,180);
+	next->Position = Vector2(ScreenWidth*0.5f - 20,180);
 
 	next = new CMenuItem(MenuRoot, "Options");
-	next->position = Vector2(ScreenWidth*0.5f - 20,160);
+	next->Position = Vector2(ScreenWidth*0.5f - 20,160);
 
 		CMenuItem *options = new CMenuItem(next, "Game");	
-		options->position = Vector2(ScreenWidth*0.5f - 20, 180);
+		options->Position = Vector2(ScreenWidth*0.5f - 20, 180);
 		options->SetCallback(&Options, NULL);
 
 		options = new CMenuItem(next, "Sound");
-		options->position = Vector2(ScreenWidth*0.5f - 20, 160);
+		options->Position = Vector2(ScreenWidth*0.5f - 20, 160);
 
 		options = new CMenuItem(next, "Video");
-		options->position = Vector2(ScreenWidth*0.5f - 20, 140);
+		options->Position = Vector2(ScreenWidth*0.5f - 20, 140);
 
 		options = new CMenuItem(next, "Others");
-		options->position = Vector2(ScreenWidth*0.5f - 20, 120);
+		options->Position = Vector2(ScreenWidth*0.5f - 20, 120);
 
 	
 
 
 	next = new CMenuItem(MenuRoot, "Exit");
 	next->SetCallback(&EndGame, NULL);
-	next->position = Vector2(ScreenWidth*0.5f - 20,140);
+	next->Position = Vector2(ScreenWidth*0.5f - 20,140);
 
 	next = new CMenuItem(MenuRoot, "Create server");
-	next->position = Vector2(ScreenWidth*0.5f - 20,120);
+	next->Position = Vector2(ScreenWidth*0.5f - 20,120);
 	next->SetCallback(&CreateServer, NULL);
 
 	next = new CMenuItem(MenuRoot, "Create client");
-	next->position = Vector2(ScreenWidth*0.5f - 20,100);
+	next->Position = Vector2(ScreenWidth*0.5f - 20,100);
 	next->SetCallback(&CreateClient, NULL);
 
 
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->visible = true;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = true;
 	CGUIManager::Instance()->SetFocus(MenuRoot);
 
 // 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.

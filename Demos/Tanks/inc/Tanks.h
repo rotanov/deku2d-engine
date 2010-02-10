@@ -99,7 +99,7 @@ public:
 	void Init(RGBAf* AColor, Vector2 APosition)
 	{
 		Color = AColor;
-		position = APosition;
+		Position = APosition;
 	}
 	CAABB GetAABB();
 	Vector2 GetCenter();

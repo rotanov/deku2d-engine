@@ -177,7 +177,7 @@ void GlobalLuaState::innerFunction1()
 	ps->Init();
 	ps->Info.sc = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
 	ps->Info.ec = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);
-	ps->visible = true;	
+	ps->Visible = true;	
 	pnts2[0] = Vector2(0, 480);
 	pnts2[1] = Vector2(640, 480);
 	ps->Info.plife = 3;

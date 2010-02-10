@@ -218,8 +218,8 @@ bool Init()
 
 	}
 	Level.GenCells();
-	Level.visible = true;
-	Level.depth = -0.6f;
+	Level.Visible = true;
+	Level.Depth = -0.6f;
 
 	return true;
 }

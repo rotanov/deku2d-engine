@@ -6,11 +6,15 @@ CEngine* Ninja = CEngine::Instance();
 
 bool Init()
 {	
+	CTestUnit *Unit = new CTestUnit;
 	return true;
 }
 
 bool Draw()
 {	
+	unsigned long FPS = 0;
+	CEngine::Instance()->GetState(STATE_FPS_COUNT, &FPS);
+	CFontManager::Instance()->Print(0, 0, 0, itos(FPS));
 	return true;
 }
 

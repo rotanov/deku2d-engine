@@ -23,7 +23,7 @@
 	class TestGame;
 
 	/// Position structure used for positions of objects in the test game.
-	struct Position
+	struct PositionStr
 	{
 		TNL::F32 x; ///< X position of the object, from 0 ... 1
 		TNL::F32 y; ///< Y position of the object, from 0 ... 1
@@ -38,8 +38,8 @@
 	{
 		typedef TNL::NetObject Parent;
 	public:
-		Position startPos, endPos; ///< All players move along a line from startPos to endPos.
-		Position renderPos;        ///< Position at which to render the player - computed during update().
+		PositionStr startPos, endPos; ///< All players move along a line from startPos to endPos.
+		PositionStr renderPos;        ///< Position at which to render the player - computed during update().
 		TNL::F32 t;                     ///< Parameter of how far the player is along the line from startPos to endPos.
 		TNL::F32 tDelta;                ///< Change in t per second (ie, velocity).
 		TestGame *game;            ///< The game object this player is associated with
@@ -85,7 +85,7 @@
 		/// to change the position of the player it controls.  serverSetPosition will call
 		/// setMaskBits(PositionMask) to notify the network system that this object has
 		/// changed state.
-		void serverSetPosition(Position startPos, Position endPos, TNL::F32 t, TNL::F32 tDelta);
+		void serverSetPosition(PositionStr startPos, PositionStr endPos, TNL::F32 t, TNL::F32 tDelta);
 
 		/// Move this object along its path.
 		///
@@ -143,8 +143,8 @@
 			InitialMask = (1 << 0), ///< Building's only mask bit is the initial mask, as no other states are ever set.
 		};
 		TestGame *game;      ///< The game object this building is associated with
-		Position upperLeft;  ///< Upper left corner of the building rectangle on the screen.
-		Position lowerRight; ///< Lower right corner of the building rectangle on the screen.
+		PositionStr upperLeft;  ///< Upper left corner of the building rectangle on the screen.
+		PositionStr lowerRight; ///< Lower right corner of the building rectangle on the screen.
 
 		/// The Building constructor creates a random position and extent for the building, and marks it as scopeAlways.
 		Building();
@@ -323,7 +323,7 @@
 
 		/// moveMyPlayerTo is called by the platform windowing code in response to
 		/// user input.
-		void moveMyPlayerTo(Position newPosition);
+		void moveMyPlayerTo(PositionStr newPosition);
 	};
 
 	/// The instance of the client game, if there is a client currently running.

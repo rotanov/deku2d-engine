@@ -92,7 +92,7 @@ public:
 		FileNameEdit = new CEdit;
 		FileNameEdit->aabb = CAABB(80, 300, 300, 32);
 		FileNameEdit->Text = "";
-		FileNameEdit->color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
+		FileNameEdit->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 		FileNameEdit->SetParent(CGUIManager::Instance());
 
 

@@ -141,7 +141,7 @@ class CSprite : public CRenderObject
 public:
 	int			m_nTextureWidth,		// ширина текстуры в пикселях
 		m_nTextureHeight;		// тоже, но длина
-	RGBAf		color;					// цвет
+	RGBAf		Color;					// цвет
 	GLuint		m_textureID;			// опенгловская хрень идентиф. текстуру
 
 	unsigned long	ellapsedtime, lasttime;	// херь чтобы делать время между кадрами

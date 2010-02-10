@@ -908,7 +908,6 @@ string GetFormattedTime(const tm TimeStruct, const char *Format)
 	return result;
 }
 
-
 void DelFNameFromFPath(char *src)
 {
 	int i = strlen(src)-1;
@@ -1066,4 +1065,3 @@ CGarbageCollector::CGarbageCollector()
 {
 
 }
-
