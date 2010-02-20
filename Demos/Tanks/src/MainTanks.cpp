@@ -57,7 +57,7 @@ public:
 		Font->scale.In(SCALE_TITLE, SCALE_TITLE);
 
 		FadeClr.glSet();
-		FontEffect->Info.sc = FadeClr;
+		FontEffect->ColorStart = FadeClr;
 		FontEffect->Render();
 		Font->tClr = FadeClr;
 		Font->Print(TITLE_TEXT);
@@ -146,17 +146,17 @@ bool Init()
 		FontEffect = new CParticleSystem;
 		FontEffect->SetName("Title bubbles");
 		FontEffect->Init();
-		FontEffect->Info.sc = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
-		FontEffect->Info.ec = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
+		FontEffect->ColorStart = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
+		FontEffect->ColorOver = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
 		FontEffect->Visible = true;	
 		Vector2 *pnts2 = new Vector2 [2];
 		pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
 		pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
-		FontEffect->Info.plife = 1.0;
-		FontEffect->Info.emission = 10;///*debug 1 */ 3000;
-		FontEffect->Info.startsize = 10;
-		FontEffect->Info.sizevar = 2.0f;
-		FontEffect->Info.p = Vector2(0, 0);
+		FontEffect->ParticleLife = 1.0;
+		FontEffect->Emission = 10;///*debug 1 */ 3000;
+		FontEffect->SizeStart = 10;
+		FontEffect->SizeVariability = 2.0f;
+		FontEffect->Position = Vector2(0, 0);
 		FontEffect->Texture = Ninja->TextureManager->GetTextureByName("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////

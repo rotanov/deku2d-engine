@@ -709,34 +709,32 @@ CSprite* CSprite::Instance()
 
 void CParticleSystem::_swap(int i, int j)
 {
-	CParticle t		= particles[i];
-	particles[i]	= particles[j];
-	particles[j]	= t;
+	CParticle t		= Particles[i];
+	Particles[i]	= Particles[j];
+	Particles[j]	= t;
 }
 
 
 void CParticleSystem::Init()
 {
-	memset(&Info, 0, sizeof(Info));
-
-	this->Info.ParticlesActive = 0;
-	this->Info.MaxParticles = 10000;
-	this->particles = new CParticle [Info.MaxParticles];
-	Info.emission = 500;
-	Info.age = 0;
-	Info.sizevar = 1;
-	Info.plifevar = 1;
-	Info.life = -1;
-	Info.plife = 1;
+	this->ParticlesActive = 0;
+	this->MaxParticles = 10000;
+	this->Particles = new CParticle [MaxParticles];
+	Emission = 500;
+	Age = 0;
+	SizeVariability = 1;
+	ParticleLifeVariability = 1;
+	Life = -1;
+	ParticleLife = 1;
 
 	user_create = false;
 	user_update = false;
 
 	Texture = NULL;
 
-	Info.sc = RGBAf(1.0,0.0,0.0,0.5);
-	Info.ec = RGBAf(0.0,0.0,1.0,0.5);
-	Info.vc = RGBAf(0.0f,0.0f,0.0f,0.0f);
+	ColorStart = RGBAf(1.0,0.0,0.0,0.5);
+	ColorOver = RGBAf(0.0,0.0,1.0,0.5);
+	ColorVariability = RGBAf(0.0f,0.0f,0.0f,0.0f);
 }
 
 bool CParticleSystem::Update(scalar dt)
@@ -745,41 +743,41 @@ bool CParticleSystem::Update(scalar dt)
 	return false;
 #endif
 	// Here integrating and updating values of active particles
-	for(int i=0; i < Info.ParticlesActive; i++)
+	for(int i=0; i < ParticlesActive; i++)
 	{
 		if (!user_update)
 		{
-			particles[i].age += dt;
-			if (particles[i].age >= particles[i].life
+			Particles[i].Age += dt;
+			if (Particles[i].Age >= Particles[i].Life
 				)
 			{
-				_swap(i, Info.ParticlesActive-1);
-				Info.ParticlesActive--;
+				_swap(i, ParticlesActive-1);
+				ParticlesActive--;
 				i--;
 				continue;
 			}
-			particles[i].p += particles[i].v*dt;
-			particles[i].c += (particles[i].dc*dt);
-			particles[i].size += particles[i].dsize;
+			Particles[i].Position += Particles[i].Velocity*dt;
+			Particles[i].Color += (Particles[i].DeltaColor*dt);
+			Particles[i].Size += Particles[i].DeltaSize;
 
 		}
 		else
 		{
-			procUserUpdate(&(particles[i]), dt);
+			procUserUpdate(&(Particles[i]), dt);
 		}
 	}
 
 
-	float np = Info.emission * dt;	// + uncreated;
+	float np = Emission * dt;	// + uncreated;
 
-	if (Info.life != -1)
+	if (Life != -1)
 	{
-		Info.age += dt;
-		if (Info.age >= Info.life)
+		Age += dt;
+		if (Age >= Life)
 			return true;
 	}
 
-	int t = Info.ParticlesActive;
+	int t = ParticlesActive;
 	for (int i = t; i < t + np; i++)
 	{
 		CreateParticle();
@@ -836,12 +834,12 @@ bool CParticleSystem::Render()
 		glPushAttrib(GL_TEXTURE_BIT | GL_POINTS);
 		glEnable(GL_POINTS);
 		glDisable(GL_TEXTURE_2D);
-		glPointSize(particles[0].size);
+		glPointSize(Particles[0].Size);
 		glBegin(GL_POINTS);
-		for(int i=0;i<Info.ParticlesActive;i++)
+		for(int i = 0; i < ParticlesActive; i++)
 		{
-			particles[i].c.glSet();
-			glVertex2f(particles[i].p.x, particles[i].p.y);			
+			Particles[i].Color.glSet();
+			glVertex2f(Particles[i].Position.x, Particles[i].Position.y);			
 		}
 		glEnd();
 		glPopAttrib();
@@ -859,13 +857,13 @@ bool CParticleSystem::Render()
 		Texture->Bind();
 
 		glBegin(GL_QUADS);
-		for(int i = 0; i < Info.ParticlesActive; i++)
+		for(int i = 0; i < ParticlesActive; i++)
 		{
-			particles[i].c.glSet();
-			glTexCoord2f(0.0f, 0.0f); glVertex2f(particles[i].p.x,						particles[i].p.y					);			
-			glTexCoord2f(1.0f, 0.0f); glVertex2f(particles[i].p.x + particles[i].size,	particles[i].p.y					);			
-			glTexCoord2f(1.0f, 1.0f); glVertex2f(particles[i].p.x + particles[i].size,	particles[i].p.y + particles[i].size);			
-			glTexCoord2f(0.0f, 1.0f); glVertex2f(particles[i].p.x,						particles[i].p.y + particles[i].size);			
+			Particles[i].Color.glSet();
+			glTexCoord2f(0.0f, 0.0f); glVertex2f(Particles[i].Position.x,						Particles[i].Position.y					);			
+			glTexCoord2f(1.0f, 0.0f); glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y					);			
+			glTexCoord2f(1.0f, 1.0f); glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);			
+			glTexCoord2f(0.0f, 1.0f); glVertex2f(Particles[i].Position.x,						Particles[i].Position.y + Particles[i].Size);			
 		}
 		glEnd();
 		glPopAttrib();
@@ -879,7 +877,7 @@ bool CParticleSystem::SaveToFile()
 {
 	CFile file;
 	file.Open(filename, CFile::OPEN_MODE_WRITE);
-	file.Write(&Info, sizeof(CPsysteminfo));
+	//file.Write(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
 }
@@ -888,69 +886,69 @@ bool CParticleSystem::LoadFromFile()
 {
 	CFile file;
 	file.Open(filename, CFile::OPEN_MODE_READ);
-	file.Read(&Info, sizeof(CPsysteminfo));
+	//file.Read(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
 }
 
 void CParticleSystem::SetGeometry( Vector2 * points, int numPoints )
 {
-	Info.geom = points;
-	Info.GeomNumPoints = numPoints;
+	GeometryVertices = points;
+	GeometryPointsCount = numPoints;
 }
 
-CParticle	*CParticleSystem::CreateParticle()
+CParticle* CParticleSystem::CreateParticle()
 {
-	int t = Info.ParticlesActive;
+	int t = ParticlesActive;
 	int i = t;
 	{
-		if (i >= Info.MaxParticles)
+		if (i >= MaxParticles)
 			return NULL;
-		if (Info.ParticlesActive >= Info.MaxParticles)
+		if (ParticlesActive >= MaxParticles)
 			return NULL;
-		Info.ParticlesActive++;
+		ParticlesActive++;
 
 		if (!user_create)
 		{
-			particles[i].life  = Random_Float(Info.plife ,Info.plife + Info.plifevar);
-			if (particles[i].life < 0 )
-				particles[i].life = Info.plife;
-			particles[i].age = 0;
+			Particles[i].Life  = Random_Float(ParticleLife, ParticleLife + ParticleLifeVariability);
+			if (Particles[i].Life < 0 )
+				Particles[i].Life = ParticleLife;
+			Particles[i].Age = 0;
 
-			if (Info.GeomNumPoints == 1)
+			if (GeometryPointsCount == 1)
 			{
-				particles[i].p = Info.geom[0];
-				particles[i].v = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
+				Particles[i].Position = GeometryVertices[0];
+				Particles[i].Velocity = Vector2( (rand() % 1000 - rand() % 1000) / 1.0f, (rand() % 1000 - rand() % 1000) / 1.0f); // MAGIC NUMBERS ARE BAD BAD BAD BAD BAD
 			}
 			else
-				if (Info.geom != NULL)
+				if (GeometryVertices != NULL)
 				{
-					int sr = Random_Int(0, Info.GeomNumPoints-2);
-					particles[i].p = Info.geom[sr] + (Info.geom[sr+1]-Info.geom[sr])*Random_Float(0.0f, 1.0f);
-					particles[i].v = ((Info.geom[sr]-Info.geom[sr+1]).GetPerp().Normalized())/0.01f; 
+					int sr = Random_Int(0, GeometryPointsCount - 2);
+					Particles[i].Position = GeometryVertices[sr] + (GeometryVertices[sr + 1] - GeometryVertices[sr])*Random_Float(0.0f, 1.0f);
+					Particles[i].Velocity = ((GeometryVertices[sr]-GeometryVertices[sr + 1]).GetPerp().Normalized())/0.01f; 
 				}
 				else
 				{
-					particles[i].p = Info.p;
-					particles[i].v = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
+					Particles[i].Position = Position;
+					Particles[i].Velocity = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
 				}
 
-				particles[i].size = Random_Int(Info.startsize, Info.startsize + Info.sizevar);
-				particles[i].dsize = (Info.endsize - Info.endsize) / particles[i].life;
+				Particles[i].Size = Random_Int(SizeStart, SizeStart + SizeVariability);
+				Particles[i].DeltaSize = (SizeOver - Particles[i].Size) / Particles[i].Life;
 
-				particles[i].c.w = Random_Float(Info.sc.w ,Info.sc.w + Info.vc.w);
-				particles[i].c.x = Random_Float(Info.sc.x ,Info.sc.x + Info.vc.x);
-				particles[i].c.y = Random_Float(Info.sc.y ,Info.sc.y + Info.vc.y);
-				particles[i].c.z = Random_Float(Info.sc.z ,Info.sc.z + Info.vc.z);
+				Particles[i].Color.w = Random_Float(ColorStart.w, ColorStart.w + ColorVariability.w);
+				Particles[i].Color.x = Random_Float(ColorStart.x, ColorStart.x + ColorVariability.x);
+				Particles[i].Color.y = Random_Float(ColorStart.y, ColorStart.y + ColorVariability.y);
+				Particles[i].Color.z = Random_Float(ColorStart.z, ColorStart.z + ColorVariability.z);
 
-				particles[i].dc = (Info.ec - particles[i].c)/particles[i].life;
+				Particles[i].DeltaColor = (ColorOver - Particles[i].Color) / Particles[i].Life;
 		}
 		else
 		{
-			procUserCreate(&(particles[i]));
+			procUserCreate(&(Particles[i]));
 		}
 	}
-	return &particles[i];
+	return &Particles[i];
 }
 
 void CParticleSystem::SetUserUpdate( FUpdateFunc func)
@@ -972,14 +970,14 @@ void CParticleSystem::SetUserCreate( FCreateFunc func )
 CParticleSystem::CParticleSystem()
 {
 	Texture = NULL;
-	particles = NULL;
+	Particles = NULL;
 	user_create = user_update = user_render = false;
 }
 
 
 CParticleSystem::~CParticleSystem()
 {
-	SAFE_DELETE(particles);
+	SAFE_DELETE(Particles);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1079,8 +1077,8 @@ void CGUIObjectBase::SetParent(CGUIObjectBase *AParent)
 Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 {
 	Vector2 Result;
-	Result.x = Max(Coords.x - aabb.vMin.x, 0);
-	Result.y = Max(Coords.y - aabb.vMin.y, 0);
+	Result.x = std::max(Coords.x - aabb.vMin.x, 0.0f);
+	Result.y = std::max(Coords.y - aabb.vMin.y, 0.0f);
 	return Result;
 }
 
@@ -1542,10 +1540,11 @@ bool CEdit::Render()
 		if (Selection.Exists())
 		{
 			CAABB SelBox(aabb.vMin.x + Style->Metrics.EditMargins.x +
-						Font->GetStringWidthEx(0, Max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
+						Font->GetStringWidthEx(0, std::max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
 				     aabb.vMin.y + Style->Metrics.EditMargins.y,
-				     aabb.vMin.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0, Min(Selection.RangeEnd() - VisibleTextOffset,
-						GetVisibleText().length() - 1), GetVisibleText().c_str()),
+					 aabb.vMin.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0,
+						std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1),
+						GetVisibleText().c_str()),
 				     aabb.vMax.y - Style->Metrics.EditMargins.y);
 
 			PRender->sClr = Style->Colors.EditSelection;
@@ -1781,12 +1780,12 @@ int CEdit::CTextSelection::Length() const
 
 int CEdit::CTextSelection::RangeEnd() const
 {
-	return Max(Start, End);
+	return std::max(Start, End);
 }
 
 int CEdit::CTextSelection::RangeStart() const
 {
-	return Min(Start, End);
+	return std::min(Start, End);
 }
 
 bool CEdit::CTextSelection::Exists() const

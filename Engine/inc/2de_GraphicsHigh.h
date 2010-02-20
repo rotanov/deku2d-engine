@@ -206,44 +206,17 @@ public:
 
 struct CParticle
 {
-	Vector2			p;			//	позиция частицы
-	Vector2			pp;			//	Сейчас не задействована, но в будующем пригодится - предыдущая позиция. (сейчас она даже не обновляется)
-	Vector2			v;			//	скорость 
-	RGBAf			c;			//	текущий цвет
-	RGBAf			dc;			//	приращение цвета на каждом шаге
-	float			size;		//	текущий размер
-	float			dsize;		//	приращение размера
-	float			life;		//	время жизни частицы; -1 значит бесконечность
-	float			age;		//	возраст частицы, то есть сколько она уже просуществовала
-};
-
-struct CPsysteminfo
-{
-	Vector2			p;						//	позиция системы частиц
-
-	RGBAf			sc;						//	начальный цвет каждой частицы
-	RGBAf			ec;						//	конечный цвет каждой частицы
-	RGBAf			vc;						//	фактор случайности при выборе цвета
-
-	int				MaxParticles;			//	максимально возможно число частиц
-	int				ParticlesActive;		//	сколько частиц активно сейчас
-	int				lifemin;				//	минимальное время жизни частицы
-	int				lifemax;				//	максимальное время жизни частицы
-
-	float			startsize;				//	начальный размер каждой частицы
-	float			endsize;				//	конечный размер
-	float			sizevar;				//	фактор случайности при выборе размера частицы
-
-	float			plife;					//	авотхуйегознает
-	int				plifevar;				//	авотхуйегознает
-
-	float			life;					//	время жизни системы; -1 значит бесонечность
-	int				age;					//	текущий возраст системы
-
-	int				emission;				//	фактор, определяющий сколько частиц вылетит за раз
-	int				notcreated;				//	количество частиц, которые мы не смогли выпустить в этом кадре по каким-то причинам
-	Vector2			*geom;					//	массив точек, для генерации частиц
-	int				GeomNumPoints;			//	число этих точек
+	Vector2			Position;				//	позиция частицы
+	Vector2			PreviousPosition;		//	Сейчас не задействована, но в будующем пригодится - предыдущая позиция. (сейчас она даже не обновляется)
+	Vector2			Velocity;				//	скорость 
+	RGBAf			Color;					//	текущий цвет
+	RGBAf			DeltaColor;				//	приращение цвета на каждом шаге
+	float			Size;					//	текущий размер
+	float			DeltaSize;				//	приращение размера
+	float			Life;					//	время жизни частицы; -1 значит бесконечность
+	float			Age;					//	возраст частицы, то есть сколько она уже просуществовала // Была озвучена такая точка зрения:
+											//	life можно не хранить, достаточно только выставлять age в нужное значение при создании и уменьшать это значение на
+											//	каждом шаге. Сравнивать с нулём. Надо подумать, точно ли нам нигде больше не пригодится Life
 };
 
 typedef void (*FCreateFunc)(CParticle *);
@@ -259,11 +232,34 @@ typedef void (*FUpdateFunc)(CParticle *, float);
 class CParticleSystem :  public CResource, public CRenderObject, public CUpdateObject
 {
 public:
-	CPsysteminfo			Info;
-	CParticle*				particles;
-	CTexture*				Texture;
+	CParticle			*Particles;
+	Vector2				Position;					//	позиция системы частиц
 
-	CRenderObject*			UserRenderSample;
+	RGBAf				ColorStart;					//	начальный цвет каждой частицы
+	RGBAf				ColorOver;					//	конечный цвет каждой частицы
+	RGBAf				ColorVariability;			//	фактор случайности при выборе цвета
+
+	int					MaxParticles;				//	максимально возможно число частиц
+	int					ParticlesActive;			//	сколько частиц активно сейчас
+
+	float				SizeStart;					//	начальный размер каждой частицы
+	float				SizeOver;					//	конечный размер
+	float				SizeVariability;			//	фактор случайности при выборе размера частицы
+
+	float				ParticleLife;				//	авотхуйегознает
+	int					ParticleLifeVariability;	//	авотхуйегознает
+	
+	float				Life;						//	время жизни системы; -1 значит бесонечность
+	int					Age;						//	текущий возраст системы
+	
+	int					Emission;					//	фактор, определяющий сколько частиц вылетит за раз
+	int					NotCreated;					//	количество частиц, которые мы не смогли выпустить в этом кадре по каким-то причинам
+	Vector2				*GeometryVertices;			//	массив точек, для генерации частиц
+	int					GeometryPointsCount;		//	число этих точек
+
+	CTexture			*Texture;
+
+	CRenderObject			*UserRenderSample;
 	bool					user_create;
 	bool					user_update;
 	bool					user_render;

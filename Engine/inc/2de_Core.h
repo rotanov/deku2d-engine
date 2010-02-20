@@ -30,6 +30,7 @@
 
 #define VC_LEANMEAN
 #define _CRT_SECURE_NO_DEPRECATE
+#define NOMINMAX
 
 #endif // _MSC_VER
 
@@ -63,18 +64,12 @@ using namespace std;
 // А вообще это слишком большой комментарий для одной, такой короткой и самоочевидно строчки, мне следует избегать написания таких комментарие в будущем.
 //#define _DEBUG
 
-// Будут ли выскакивать MessageBoxы под виндой в случае критических ошибок или нет. #undef если чо
-//	Такой способ отлова ошибок на самом деле очень нехороший, я недоволен им всячески.
-#ifdef _WIN32
-#define CRITICAL_ERRORS_MESSAGE_BOXES
-#endif //_WIN32
-
 #define CFILE_MAX_STRING_LENGTH	1024
 
 #ifdef _WIN32
-#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
+	#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
 #else
-#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
+	#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
 #endif //_WIN32
 
 #ifdef _MSC_VER
@@ -126,6 +121,7 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 
 #define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
+#define COLOR_RED	RGBAf(0.98f, 0.05f, 0.1f, 1.0f)
 
 /**
 *	CObject - базовый класс. Всё наследовать от него.

@@ -614,3 +614,68 @@ bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
 
 	return (mini != -1);
 }
+
+scalar HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Кстати, это площадь тругольника на этих трёх точках. // Или параллелограма.
+{
+	return (u0.x - p.x) * (u1.y - p.y) - (u0.y - p.y) * (u1.x - p.x);
+}
+
+bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
+{
+	scalar a1 = u1.y - u0.y;
+	scalar b1 = u0.x - u1.x; 
+	scalar a2 = v1.y - v0.y;
+	scalar b2 = v0.x - v1.x;
+	Matrix2 deltaMatrix(a1, b1, a2, b2);
+	scalar deltaDet = deltaMatrix.Determinant();
+	if (Equal(deltaDet, 0.0f))
+		return false;	// Прямые параллельны, т.е. a1b2 - a2b1 == 0; Кстати, условие перпендикулярности: a1a2 == -b1b2;
+	scalar c1 = u1.y * u0.x - u1.x * u0.y;	//a1 * u0.x + b1 * u0.y;
+	scalar c2 = v1.y * v0.x - v1.x * v0.y;	//a2 * v0.x + b2 * v0.y;
+	Result = Vector2(Matrix2(c1, b1, c2, b2).Determinant() / deltaDet, Matrix2(a1, c1, a2, c2).Determinant() / deltaDet);
+	return true;
+}
+
+bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
+{
+	if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
+		return false;
+	if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
+		return false;
+	if (!IntersectLines(u0, u1, v0, v1, Result))
+		return false;
+	return true;
+}
+
+bool IntersectCircles(const Vector2 &p0, const scalar r0, const Vector2 &p1, const scalar r1, Vector2 &Normal, scalar &Depth)
+{
+	Vector2 p0p1 = p1 - p0;
+	if ((Sqr(p0p1.x) + Sqr(p0p1.y)) >= Sqr(r0 + r1))
+		return false;
+	Normal = p0p1.Normalized();
+	Depth = abs(r1 - r0);
+	return true;
+}
+
+bool PointInsidePolygon();
+
+scalar DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
+{
+	return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
+}
+
+scalar DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
+{
+	Vector2 v = u1 - u0;
+	Vector2 w = p - u0;
+
+	scalar c1 = w * v;
+	if (c1 <= 0)
+		return (p - u0).Length() * Sign(HalfPlaneSign(u0, u1, p)); // Мы же хотим получить расстояние со знаком даже если это расстояние до концов отрезка.
+
+	scalar c2 = v * v;
+	if (c2 <= c1)
+		return (p - u1).Length() * Sign(HalfPlaneSign(u0, u1, p));
+
+	return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
+}

@@ -480,7 +480,7 @@ int CFont::GetStringHeight(const char *text)
 		return 0;
 	int r = 0, l = (unsigned int)strlen(text);
 	for (int i = 0; i < l; i++)
-		r = Max(height[(unsigned char)text[i] - 32], r);
+		r = std::max(height[(unsigned char)text[i] - 32], r);
 	return r;
 }
 
@@ -494,7 +494,7 @@ int CFont::GetStringHeightEx(int t1, int t2, const char *text)
 		return -1;
 	int r = 0, l = (unsigned int)strlen(text);
 	for (unsigned int i=0; i<l; i++)
-		r = Max(height[(unsigned char)text[i] - 32], r);
+		r = std::max(height[(unsigned char)text[i] - 32], r);
 	return r;
 }
 

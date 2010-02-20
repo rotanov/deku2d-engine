@@ -6,8 +6,9 @@
 
 #ifndef _2DE_MATH_UTILS_H
 #define _2DE_MATH_UTILS_H
-//#pragma message("Compiling MathUtils.h")
+
 #include <math.h>
+#include <algorithm>
 #include "2de_Core.h"
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
@@ -18,18 +19,18 @@ const double			HI_OOPI			=	0.3183098861837906;
 const float				PI				=	3.1415926f;
 const float				OOPI			=	0.3183f;
 const int				sincostable_dim	=	8192;
-static const scalar		deganglem		=	1.0f/(360.0f/(scalar)sincostable_dim);
-static const scalar		radanglem		=	1.0f/(PI*2.0f/(scalar)sincostable_dim);
-static const scalar		PI_d180			=	PI/180.0f;
-static const scalar		d180_PI			=	180.0f/PI;
+static const scalar		deganglem		=	1.0f / (360.0f / (scalar)sincostable_dim);
+static const scalar		radanglem		=	1.0f / (PI * 2.0f / (scalar)sincostable_dim);
+static const scalar		PI_d180			=	PI / 180.0f;
+static const scalar		d180_PI			=	180.0f / PI;
 
 #ifdef USING_OPENGL
-#ifdef USE_SDL_OPENGL
-#include <SDL/SDL_opengl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+	#ifdef USE_SDL_OPENGL
+		#include <SDL/SDL_opengl.h>
+	#else
+		#include <GL/gl.h>
+		#include <GL/glu.h>
+	#endif
 #endif
 
 struct Vector2;
@@ -46,19 +47,9 @@ scalar fCosi(int index);
 int Random_Int(int min, int max);
 float Random_Float(float min, float max);
 
-__INLINE scalar Max(scalar a, scalar b)
-{
-	return a>=b?a:b;
-}
-
-__INLINE scalar Min(scalar a, scalar b)
-{
-	return a<=b?a:b;
-}
-
 __INLINE scalar clampf(scalar x , scalar xmin, scalar xmax)
 {
-	return Min(Max(x, xmin), xmax);
+	return std::min(std::max(x, xmin), xmax);
 }
 
 __INLINE scalar DegToRad(scalar degree)
@@ -94,20 +85,23 @@ __INLINE float Abs(const float x)
 
 __INLINE bool Equal(const float a, const float b)
 {
-	return Abs(a-b)<epsilon;
+	return Abs(a - b) < epsilon;
 }
 
-__INLINE unsigned int sign(const float x)
+__INLINE int Sign(const float x)
 {	
-	return (((unsigned int)x) & 0x80000000);
+   if (((int&)x & 0x7FFFFFFF)==0) return 0; // test exponent & mantissa bits: is input zero?
+    return (signed((int&)x & 0x80000000) >> 31 ) | 1;
 }
-// / quickly determine the sign of a floating point number.
-// 
-// inline unsigned int sign(const float& v)
-// {	
-// 	return (((unsigned int&)v) & 0x80000000);
+
+// __INLINE float Sign(const float x)
+// {
+// 	   if (((int&)f & 0x7FFFFFFF)==0) return 0.f; // test exponent & mantissa bits: is input zero?
+//     else {
+//         float r = 1.0f;
+//         (int&)r |= ((int&)f & 0x80000000); // mask sign bit in f, set it in r if necessary
+//         return r;
 // }
-// 
 // / fast floating point absolute value.
 // 
 // inline float abs(float v)
@@ -200,7 +194,7 @@ struct Vector2
 		return x * V.x + y * V.y;
 	}
 
-	// В некотором смысле аналог векторного произведения для 2х мерного случая
+	// В некотором смысле аналог векторного произведения для 2х мерного случая // В каком именно смысле никто до сих пор не понял
 	__INLINE scalar operator ^ (const Vector2 &V) const
 	{
 		return x * V.y - y * V.x;
@@ -211,9 +205,9 @@ struct Vector2
 	}
 
 
-	Vector2 operator * (const Matrix2& M) const;
+	Vector2 operator *(const Matrix2& M) const;
 
-	Vector2 operator ^ (const Matrix2& M) const;
+	Vector2 operator ^(const Matrix2& M) const;
 
 	Vector2& operator *=(const Matrix2& M);
 
@@ -233,11 +227,11 @@ struct Vector2
 			else
 				dy = y;
 			if ( dx < dy )  
-				return 0.961f*dy+0.398f*dx;  
+				return 0.961f * dy + 0.398f * dx;  
 			else    
-				return 0.961f*dx+0.398f*dy;
+				return 0.961f * dx + 0.398f * dy;
 		#else
-			return (scalar)sqrt((double)(x*x + y*y));
+			return (scalar)sqrt((double)(x * x + y * y));
 		#endif
 	}
 
@@ -299,23 +293,6 @@ struct Vector2
 
 
 };
-
-/**
-*	Расстояние от точки до прямой вычисляет эта функция.
-*	v1, v2 - координаты любых двух (возможно не совпадающих)
-*		точек, принадлежащих прямой.
-*	p - та самая точка, расстояние от которой мы ищем.
-*	TODO : оптимизировать её нужно.
-*/
-
-__INLINE scalar PointLineDistance(Vector2 v1, Vector2 v2, Vector2 p)
-{
-	scalar dx, dy, D;
-	dx = v1.x - v2.x;
-	dy = v1.y - v2.y;
-	D = dx * (p.y - v1.y) - dy * ( p.x - v1.x );
-	return  Abs( D / sqrt( dx * dx + dy * dy));
-}
 
 const Vector2 V2_ZERO			= Vector2(0.0f, 0.0f);
 const Vector2 V2_DIR_LEFT		= Vector2(-1.0f, 0.0f);
@@ -667,7 +644,7 @@ public:
 		d2 =  vMax.y - point.y;
 		d3 = -vMin.x + point.x;
 		d4 = -vMin.y + point.y;
-		MTD = Min(Min(d1, d2), Min(d3, d4));
+		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
 		return true;
 	}
 
@@ -684,7 +661,7 @@ public:
 		d2 =  vMax.y - point.y;
 		d3 = -vMin.x + point.x;
 		d4 = -vMin.y + point.y;
-		MTD = Min(Min(d1, d2), Min(d3, d4));
+		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
 
 		if (MTD == d1)
 			n = Vector2(1.0f, 0.0f);
@@ -709,7 +686,7 @@ public:
 		d2 = -vMax.y + point.y;
 		d3 =  vMin.x - point.x;
 		d4 =  vMin.y - point.y;
-		MTD = Min(Min(d1, d2), Min(d3, d4));
+		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
 
 		if (MTD == d1)
 			n = Vector2(1.0f, 0.0f);
@@ -1040,6 +1017,11 @@ struct Matrix2
 		T.e22 = e22 - M.e22;
 		return T;
 	}
+
+	__INLINE scalar Determinant()
+	{
+		return e11 * e22 - e12 * e21;
+	}
 };
 
 union Vector4
@@ -1184,7 +1166,21 @@ union Vector4
 };
 
 typedef Vector4 Quaternion;
-typedef Vector4 RGBAf;		// я не совсем понимаю, зачем это делать именно так? разве нам нужны для цвета векторные операции? да нет, не нужны.. зато очень нужна возможность конвертировать RGBAub в RGBAf, например.. и как это сделаешь теперь, если это всего-лишь тайпдеф от вектора.. а ведь я щас как раз делаю CGUIStyle и заебусь высчитывать флоаты для дефолтных цветов...
+typedef Vector4 RGBAf;
+
+/**
+/	я не совсем понимаю, зачем это делать именно так? разве нам нужны для 
+/	цвета векторные операции? да нет, не нужны.. зато очень нужна возможность
+/	конвертировать RGBAub в RGBAf, например.. и как это сделаешь теперь, если это
+/	всего-лишь тайпдеф от вектора.. а ведь я щас как раз делаю CGUIStyle и заебусь
+/	высчитывать флоаты для дефолтных цветов...
+*/
+
+/**
+/	Ты ошибаешься и нам как раз таки нужны векторные операции для цвета.
+/	Фишку с конвертацией можно прокрутить унаследовава от Vector4. Опять же,
+/	Я хочу ещё работу с HSV добавить.
+*/
 
 /**
 *	MatrixNM - произвольная матрица. M строк, N столбцов
@@ -1300,9 +1296,9 @@ __INLINE void ClampV(Vector3& x, const Vector3 xmin, const Vector3 xmax)
 }
 
 /**
-*	SqareEq(...) Эта детка решает нам квдратное уравнение.
-*	И запихивает корни в t0 и t1
-*	a b c - соответствующие коэффициенты квадратного уравнения
+*	SqareEq(...) Решает квдратное уравнение.
+*	Корни - t0 и t1
+*	a b c - соответствующие коэффициенты квадратного уравнения.
 */
 
 bool SqareEq( scalar a, scalar b, scalar c, scalar &t0, scalar &t1);
@@ -1333,7 +1329,34 @@ bool CullBox(Vector3 _min, Vector3 _max, Vector3 pos, Vector3 scaling, Matrix3 R
 // непонятная функция. походу я её откуда-то рипанул, надо разобраться
 int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
 
+/**
+/	HalfPlaneSign - определяет знак полуплоскости точки x относительно прямой, лежащей на отрезке [u0, u1].
+/	Если точка лежит на прямой, то результат 0.0f
+*/
+scalar HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p);
 
+/**
+/	DistanceToLine - определяет расстояние со знаком от точки до прямой, лежащей на отрезке.
+*/
+scalar DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p);
+
+/**
+/	DistanceToSegment - определяет расстояние со знаком от точки до отрезка.
+/	TODO: Возможно есть более быстрый способ определять знак расстояниея в случаях конца отрезка.
+	TODO: Возможно стоит возвращать ещё и найденный случай, т.е. первая точка отрезка, вторая или сам отрезок.
+*/
+scalar DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p);
+
+/**
+/	IntersectLines - определяет точку пересечения прямых, лежащих на отрезках, если они пересекаются.
+*/
+bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);
+
+/**
+/	IntersectSegments - определяет точку пересечения отрезков, если они пересекаются.
+/	TODO: есть подозрения на рассмотрение случая совпадения прямых.
+*/
+bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);	// Feel the difference.
 
 //////////////////////////////////////////////////////////////////////////
 //	Geometry
@@ -1383,7 +1406,7 @@ class CRectangle : public CGeometry
 
 };
 
-class CSegment : public CGeometry  // Do we really need it?
+class CSegment : public CGeometry  // Are we really need it?
 {
 
 };
