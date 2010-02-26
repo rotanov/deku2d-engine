@@ -33,7 +33,7 @@ public:
 	}
 };
 
-static CList ExtResRelationList;
+//static CList ExtResRelationList;
 
 // типы ресурсов
 #define CRESOURCE_TYPE_FONT			0x01
@@ -68,68 +68,58 @@ static CList ExtResRelationList;
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
 */
 
-class CFactory : public CList
+class CFactory : public CList, public CTSingleton<CFactory>
 {
 public:
-	static			CFactory* Instance();
-	void			FreeInst();
 	CObject*		Create(int ObjectId, CreateFunc creator);
-	bool			InitManagers(CUpdateManager *vUpdateManager, CRenderManager *vRenderManager);
-	CList*	GetManager(int mantype)
-	{
-		switch (mantype)
-		{
-		case MANAGER_TYPE_REN:
-			return RenderManager;
-			break;
-		case MANAGER_TYPE_FNT:
-			return FontManager;
-			break;
-		case MANAGER_TYPE_UPD:
-			return UpdateManager;
-			break;
-		case MANAGER_TYPE_TEX:
-			return TextureManager;
-			break;
-		case MANAGER_TYPE_SND:
-			return SoundManager;
-			break;
-		case MANAGER_TYPE_MUS:
-			return MusicManager;
-			break;
-		default:
-			return this;
-			break;
-		}
-	}
+// 	CList*	GetManager(int mantype)
+// 	{
+// 		switch (mantype)
+// 		{
+// 		case MANAGER_TYPE_REN:
+// 			return RenderManager;
+// 			break;
+// 		case MANAGER_TYPE_FNT:
+// 			return FontManager;
+// 			break;
+// 		case MANAGER_TYPE_UPD:
+// 			return UpdateManager;
+// 			break;
+// 		case MANAGER_TYPE_TEX:
+// 			return TextureManager;
+// 			break;
+// 		case MANAGER_TYPE_SND:
+// 			return SoundManager;
+// 			break;
+// 		case MANAGER_TYPE_MUS:
+// 			return MusicManager;
+// 			break;
+// 		default:
+// 			return this;
+// 			break;
+// 		}
+// 	}
 
 protected:
 	bool initialized;
-	CFontManager *FontManager;
-	CUpdateManager *UpdateManager;
-	CRenderManager *RenderManager;
-	CTextureManager *TextureManager;
-	CSoundManager *SoundManager;
-	CMusicManager *MusicManager;
-
+// 	CFontManager *FontManager;
+// 	CUpdateManager *UpdateManager;
+// 	CRenderManager *RenderManager;
+// 	CTextureManager *TextureManager;
+// 	CSoundManager *SoundManager;
+// 	CMusicManager *MusicManager;
 	CFactory();
+	friend class CTSingleton<CFactory>;
 	~CFactory();
-	static			CFactory* _instance;
-	static int		_refcount;
 };
 
-class CResourceManager
+class CResourceManager : public CTSingleton<CResourceManager>
 {
 public:
 	string DataPath;
 	CXMLTable *ResourceList;
 
 
-	CResourceManager()
-	{
-		// ResourceList = NULL;
-		ResourceList = new CXMLTable;
-	}
 	~CResourceManager()
 	{
 		if (ResourceList != NULL)
@@ -139,7 +129,14 @@ public:
 	bool		LoadSection(const char *SectionName, CreateFunc creator);
 	CObject*	LoadResource(char* section, char *name, CreateFunc creator);
 	bool		LoadResources();
-private:
+protected:
+	CResourceManager()
+	{
+		SetName("ResourceManager");
+		// ResourceList = NULL;
+		ResourceList = new CXMLTable;
+	}
+	friend class CTSingleton<CResourceManager>;
 };
 
 class CDataLister

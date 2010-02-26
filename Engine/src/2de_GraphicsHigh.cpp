@@ -1041,15 +1041,15 @@ CGUIObjectBase::CGUIObjectBase(CGUIObjectBase *AParent)
 	WidgetState.PressedInside = false;
 	WidgetState.PressedOutside = false;
 
-	CEngine::Instance()->RenderManager.AddObject(this);
-	CEngine::Instance()->UpdateManager.AddObject(this);	
+	CRenderManager::Instance()->AddObject(this);
+	CUpdateManager::Instance()->AddObject(this);	
 	CGUIManager::Instance()->AddObject(this);
 }
 
 CGUIObjectBase::~CGUIObjectBase()
 {
-	CEngine::Instance()->RenderManager.DelObject(GetID());
-	CEngine::Instance()->UpdateManager.DelObject(GetID());
+ 	CRenderManager::Instance()->DelObject(GetID());
+ 	CUpdateManager::Instance()->DelObject(GetID());
 }
 
 void CGUIObjectBase::SetFont(CFont *AFont)

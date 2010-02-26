@@ -8,12 +8,12 @@ CRenderObject::CRenderObject() : Position(V2_ZERO), Orientation(0.0f), Scaling(1
 {
 	SetName("CRenderObject");
 	type |= T_RENDERABLE;
-	CEngine::Instance()->RenderManager.AddObject(this);
+	CRenderManager::Instance()->AddObject(this);
 };
 
 CRenderObject::~CRenderObject()
 {
-	CEngine::Instance()->RenderManager.DelObject(GetID());
+	CRenderManager::Instance()->DelObject(GetID());
 }
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
@@ -56,7 +56,7 @@ bool CGLImageData::LoadTexture(const char *filename)
 		Log.Log("ERROR", "Can't load image->");
 		return false;
 	}
-	if(!MakeRGBA())
+	if(!ProcessColorkey())
 	{
 		Log.Log("ERROR", "Can't load texture.");
 		return false;
@@ -559,7 +559,7 @@ CTexture* CFont::GetTexture()
 
 void CFont::SetTexture(const string &TextureName)
 {
-	Texture = CEngine::Instance()->TextureManager->GetTextureByName(TextureName);
+	Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
 }
 //////////////////////////////////////////////////////////////////////////
 //Camera
@@ -660,6 +660,7 @@ void CCamera::SetWidthAndHeight( int AWidth, int AHeight )
 //-------------------------------------------//
 CRenderManager::CRenderManager()
 {
+	SetName("Render Manager");
 	v2Dots		= NULL;
 	v2Lines		= NULL;
 	v2Quads		= NULL;

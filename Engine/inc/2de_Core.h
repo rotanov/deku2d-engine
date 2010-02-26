@@ -60,10 +60,6 @@ using namespace std;
 #define __INLINE inline
 #endif //_MSC_VER
 
-// Отладка. При сборке дебаг конфигурации проекта оно заранее где-то там дефайнится, так что это для релиза, ручное управление так сказать.
-// А вообще это слишком большой комментарий для одной, такой короткой и самоочевидно строчки, мне следует избегать написания таких комментарие в будущем.
-//#define _DEBUG
-
 #define CFILE_MAX_STRING_LENGTH	1024
 
 #ifdef _WIN32
@@ -122,6 +118,55 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
 #define COLOR_RED	RGBAf(0.98f, 0.05f, 0.1f, 1.0f)
+
+/**
+ * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
+ *
+ * Для использования нужно наследовать класс от него следующим образом:
+ * 	class CSomeClass : public CTSingleton<CSomeClass>
+ * 	{
+ * 	public:
+ * 		<...>
+ * 	private:
+ * 		<...>
+ *	protected:
+ *		friend class CTSingleton<CSomeClass>;
+ *		CSomeClass() { }
+ * 	};
+ *
+ * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
+ */
+
+template <class T>
+class CTSingleton : public virtual CObject
+{
+public:
+	static T* Instance();
+
+protected:
+	CTSingleton() { }
+	virtual ~CTSingleton() { }
+
+private:
+	static T * _instance;
+};
+
+template <class T>
+T* CTSingleton<T>::Instance()
+{
+	if (!_instance)
+	{
+		_instance = new T;
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
+}
+
+template <class T>
+T* CTSingleton<T>::_instance = 0;
+
+
+
 
 /**
 *	CObject - базовый класс. Всё наследовать от него.
@@ -269,11 +314,13 @@ typedef CObject* (*CreateFunc)();
 *	И вообще что-то мне подсказывает, что он не здесь должен быть.
 */
 
-class CUpdateManager : public CList
+class CUpdateManager : public CList, public CTSingleton<CUpdateManager>
 {
-public:
-	CUpdateManager();
+public:	
 	bool UpdateObjects();
+protected:
+	CUpdateManager();
+	friend class CTSingleton<CUpdateManager>;
 };
 
 
@@ -485,53 +532,6 @@ public:
 };
 extern CGarbageCollector SingletoneKiller;
 typedef CGarbageCollector CSingletoneKiller;
-
-/**
- * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
- *
- * Для использования нужно наследовать класс от него следующим образом:
- * 	class CSomeClass : public CTSingleton<CSomeClass>
- * 	{
- * 	public:
- * 		<...>
- * 	private:
- * 		<...>
- *	protected:
- *		friend class CTSingleton<CSomeClass>;
- *		CSomeClass() { }
- * 	};
- *
- * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
- */
-
-template <class T>
-class CTSingleton : public virtual CObject
-{
-public:
-	static T* Instance();
-
-protected:
-	CTSingleton() { }
-	virtual ~CTSingleton() { }
-
-private:
-	static T * _instance;
-};
-
-template <class T>
-T* CTSingleton<T>::Instance()
-{
-	if (!_instance)
-	{
-		_instance = new T;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
-
-template <class T>
-T* CTSingleton<T>::_instance = 0;
-
 
 __INLINE string itos(int i)
 {

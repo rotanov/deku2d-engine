@@ -214,8 +214,8 @@ bool CFontEditor::Render()
 	PRender.grCircleL(MousePosition, 5);
 	int fps;
 	CEngine::Instance()->GetState(STATE_FPS_COUNT, &fps);
-	CEngine::Instance()->FontManager->CurrentFont->tClr = COLOR_WHITE;
-	CEngine::Instance()->FontManager->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
+	CFontManager::Instance()->CurrentFont->tClr = COLOR_WHITE;
+	CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
 	glLoadIdentity();
 
 	gToggleScissor(true);

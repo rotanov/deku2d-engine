@@ -240,7 +240,7 @@ bool CTankManager::Render()
 {
 	glLoadIdentity();
 	gSetBlendingMode();	
-	CFont *Font = CEngine::Instance()->FontManager->GetFont("Font");
+	CFont *Font = CFontManager::Instance()->GetFont("Font");
 	Font->tClr = COLOR_P1;
 	Font->SetDepth(0.5f);
 	Font->Pos.In(10, 460);

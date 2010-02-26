@@ -5,20 +5,20 @@
 //#include "2de_resource.h"
 #include "2de_GraphicsLow.h"
 
-struct CTileSetInfo 
+class CUnitBase : public CRenderObject, public CUpdateObject
 {
-	byte TileWidth;
-	byte TileHeight;
-	int HorNumTiles;
-	int VerNumTiles;
+	
 };
 
 class CTileset : public CResource
 {
 public:
-	CTexture *Texture;
-	CTileSetInfo Info;
-	CAABB *BBox;
+	CTexture	*Texture;
+	byte		TileWidth;
+	byte		TileHeight;
+	int			HorNumTiles;
+	int			VerNumTiles;
+	CAABB		*BBox;
 
 	CTileset ();
 	static CObject* NewTileset()

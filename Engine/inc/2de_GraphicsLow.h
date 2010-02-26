@@ -240,14 +240,16 @@ protected:
 	friend class CTSingleton<CFontManager>;
 };
 
-class CRenderManager : public CList
+class CRenderManager : public CList, public CTSingleton<CRenderManager>
 {
+protected:
+	CRenderManager();
+	friend class CTSingleton<CRenderManager>;
 private:
 	Vector2	*v2Dots, *v2Lines, *v2Quads, *v2Triangles;
 
 public:
 	CCamera	Camera;
-	CRenderManager();
 	~CRenderManager();
 
 	void Init()
@@ -262,7 +264,6 @@ public:
 		// --
 		//glArrayElement();
 		//glArrayElementEXT()
-
 	}
 
 	void SortByAlpha();

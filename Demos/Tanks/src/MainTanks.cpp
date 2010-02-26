@@ -71,8 +71,8 @@ public:
 			FadeClr -= RGBAf(0.02, 0.02, 0.02, 0.02);
 			if (TimeOut >= TimeLimit)
 			{
-				Ninja->RenderManager.DelObject("Title screen tanks");
-				Ninja->UpdateManager.DelObject("Title screen tanks");
+				CRenderManager::Instance()->DelObject("Title screen tanks");
+				CUpdateManager::Instance()->DelObject("Title screen tanks");
 				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 				Tanks = new CTankManager;	
@@ -108,8 +108,8 @@ bool CreateServer(CObject *Caller)
 	clientGame = NULL;	
 	serverGame = new TestGame(true,TNL::Address(TNL::IPProtocol,TNL::Address::Any, 28999),TNL::Address(localBroadcastAddress));
 
-	Ninja->RenderManager.DelObject("Title screen tanks");
-	Ninja->UpdateManager.DelObject("Title screen tanks");
+	CRenderManager::Instance()->DelObject("Title screen tanks");
+	CUpdateManager::Instance()->DelObject("Title screen tanks");
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 
@@ -123,8 +123,8 @@ bool CreateClient(CObject *Caller)
 	clientGame = new TestGame(false,TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),TNL::Address(pingLocalHost ? localHostAddress : localBroadcastAddress));
 	serverGame = NULL;
 
-	Ninja->RenderManager.DelObject("Title screen tanks");
-	Ninja->UpdateManager.DelObject("Title screen tanks");
+	CRenderManager::Instance()->DelObject("Title screen tanks");
+	CUpdateManager::Instance()->DelObject("Title screen tanks");
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 
@@ -134,8 +134,8 @@ bool CreateClient(CObject *Caller)
 
 bool Init()
 {	
-		Font = Ninja->FontManager->GetFont("Font");
-		Ninja->FontManager->SetCurrentFont("Font");
+		Font = CFontManager::Instance()->GetFont("Font");
+		CFontManager::Instance()->SetCurrentFont("Font");
 	//////////////////////////////////////////////////////////////////////////
 		Ninja->GetState(STATE_SCREEN_WIDTH, &ScreenWidth);
 		Ninja->GetState(STATE_SCREEN_HEIGHT, &ScreenHeight);
@@ -157,7 +157,7 @@ bool Init()
 		FontEffect->SizeStart = 10;
 		FontEffect->SizeVariability = 2.0f;
 		FontEffect->Position = Vector2(0, 0);
-		FontEffect->Texture = Ninja->TextureManager->GetTextureByName("Particle");
+		FontEffect->Texture = CTextureManager::Instance()->GetTextureByName("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////
 	CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);

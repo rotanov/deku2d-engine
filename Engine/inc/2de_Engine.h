@@ -59,17 +59,8 @@
 class CEngine : public CTSingleton<CEngine>
 {
 public:
-	CFactory					*Factory;			// Фабрика объектов. Синглтон.
-	CResourceManager			ResourceManager;	// А почему тут инастанс
-	CTextureManager				*TextureManager;	// ...а тут указатель?
-	CRenderManager				RenderManager;		// а тут инстанс!
-	CFontManager				*FontManager;		// ...а тут опять указатель?! 
-	CUpdateManager				UpdateManager;		// не, ну ёбаны в рот.
-	CSoundMixer					*SoundMixer;		// это микшер, его надо инициализровать ДО инициализации звуков и музыки
-	CSoundManager				*SoundManager;		// А зачем собственно вообще хранить это тут? Мы же можем из любого места обратиться.
-	CMusicManager				*MusicManager;
 	CXMLTable					Config;				// Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
-	int							keys[SDLK_LAST];	//FFFFFFFFUUUUUUUUUU~ ?
+	int							keys[SDLK_LAST];	//FFFFFFFFUUUUUUUUUU~ ? хз
 	Vector2						MousePos;
 
 	void						SetState(int state, void* value);
@@ -77,7 +68,9 @@ public:
 	bool						AddEventFunction(EventFunc func);
 	bool						AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
 	int							CfgGetInt(char* ParamName);
-	bool						Run();
+	bool						Run();	// Есть ран, значит должно быть Pause и ShutDown
+	//bool						Pause();
+	//bool						ShutDown();
 
 	bool						Suicide();  // Временно в паблике
 	string						ConfigFileName;
@@ -96,7 +89,7 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-	CGLWindow					*window;
+	CGLWindow					*window;	// ORLY We need it here?
 	
 	bool						ClearLists();
 	bool						Init();
@@ -106,8 +99,8 @@ private:
 	
 	bool						ProcessEvents();
 
-	// TODO: либо подумать ещё раз, либо избавиться от констант и перейти на списки. И да, ебал я ваш реаллок.
-	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];	// Noes, dat is not wut we need
+	// Временно здесь, будет заменено на систему KeyBinding'a и подписчиков.
+	EventFunc					EventFunctions[MAX_EVENT_FUNCTIONS];
 	KeyInputFunc				KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
 	bool						(*procUserInit)();			// ok
 	bool						(*procUserSuicide)();		// wrong design

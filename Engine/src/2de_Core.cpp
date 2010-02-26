@@ -1021,16 +1021,35 @@ CUpdateObject::CUpdateObject() : Active(true)
 {
 	type |= T_UPDATABLE;
 	SetName("CUpdateObject");
-	CEngine::Instance()->UpdateManager.AddObject(this);
+	CUpdateManager::Instance()->AddObject(this);
 }
 
 CUpdateObject::~CUpdateObject()
 {
-	CEngine::Instance()->UpdateManager.DelObject(GetID());
+	CUpdateManager::Instance()->DelObject(GetID());
 }
+
 CUpdateManager::CUpdateManager()
 {
 	SetName("CUpdateManager");
+}
+
+bool CUpdateManager::UpdateObjects()
+{
+	Reset();
+	CEngine *engine = CEngine::Instance();
+	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
+	while (data)
+	{
+		if (!data->Active)
+			continue;
+		// FIXED_DELTA_TIME
+		float dt = 0;
+		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
+		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
+		data = dynamic_cast<CUpdateObject*>(Next());
+	}
+	return true;
 }
 
 bool CBaseResource::LoadFromFile()
@@ -1063,5 +1082,5 @@ CGarbageCollector SingletoneKiller;
 
 CGarbageCollector::CGarbageCollector()
 {
-
+	SetName("Some CGarbageCollector");
 }

@@ -18,12 +18,16 @@ bool CTileset::LoadFromFile()
 	char * TextureName = NULL;
 	file.ReadLine(TextureName);
 	//Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
-	Texture = CEngine::Instance()->TextureManager->GetTextureByName(TextureName);
+	Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
 
-	file.Read(&Info, sizeof(Info));
+	file.Read(&TileWidth, sizeof(TileWidth));
+	file.Read(&TileHeight, sizeof(TileHeight) + 2);
+	file.Read(&HorNumTiles, sizeof(HorNumTiles));
+	file.Read(&VerNumTiles, sizeof(VerNumTiles));
+
 	if (BBox != NULL)
 		delete [] BBox;
-	file.Read(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
+	file.Read(BBox, sizeof(CAABB)*HorNumTiles*VerNumTiles);
 
 	file.Close();
 
@@ -37,9 +41,9 @@ void CTileset::RenderTileSet()
 	Texture->Bind();
 	glBegin(GL_QUADS);
 		glTexCoord2f(0, 0); glVertex2f(0, 0);
-		glTexCoord2f(1, 0); glVertex2f(Info.TileWidth*Info.HorNumTiles, 0);
-		glTexCoord2f(1, 1); glVertex2f(Info.TileWidth*Info.HorNumTiles, Info.TileHeight*Info.VerNumTiles);
-		glTexCoord2f(0, 1); glVertex2f(0, Info.TileHeight*Info.VerNumTiles);
+		glTexCoord2f(1, 0); glVertex2f(TileWidth*HorNumTiles, 0);
+		glTexCoord2f(1, 1); glVertex2f(TileWidth*HorNumTiles, TileHeight*VerNumTiles);
+		glTexCoord2f(0, 1); glVertex2f(0, TileHeight*VerNumTiles);
 	glEnd();
 
 	CPrimitiveRender p;
@@ -49,12 +53,12 @@ void CTileset::RenderTileSet()
 	p.pClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
 	p.lwidth = 0.1f;
 	
-	for (int i = 0; i <= Info.HorNumTiles; i++)
-		p.grSegment(Vector2(i*Info.TileWidth, 0.0f),
-			Vector2(i*Info.TileWidth, Texture->height));
-	for (int i = 0; i <= Info.VerNumTiles; i++)
-		p.grSegment(Vector2(0.0f, i*Info.TileHeight),
-			Vector2(Texture->width, i*Info.TileHeight));
+	for (int i = 0; i <= HorNumTiles; i++)
+		p.grSegment(Vector2(i*TileWidth, 0.0f),
+			Vector2(i*TileWidth, Texture->height));
+	for (int i = 0; i <= VerNumTiles; i++)
+		p.grSegment(Vector2(0.0f, i*TileHeight),
+			Vector2(Texture->width, i*TileHeight));
 }
 
 bool CTileset::SaveToFile()
@@ -67,8 +71,12 @@ bool CTileset::SaveToFile()
 	}
 
 	file.Write(Texture->GetName(), strlen(Texture->GetName())+1);
-	file.Write(&Info, sizeof(Info));
-	file.Write(BBox, sizeof(CAABB)*Info.HorNumTiles*Info.VerNumTiles);
+	file.Write(&TileWidth, sizeof(TileWidth));
+	file.Write(&TileHeight, sizeof(TileHeight));
+	file.Write(&HorNumTiles, sizeof(HorNumTiles));
+	file.Write(&VerNumTiles, sizeof(VerNumTiles));
+
+	file.Write(BBox, sizeof(CAABB)*HorNumTiles*VerNumTiles);
 
 	file.Close();
 
@@ -77,23 +85,26 @@ bool CTileset::SaveToFile()
 
 CTileset::CTileset()
 {
-	BBox = NULL;
-	Texture = NULL;
-	memset(&Info, 0, sizeof(Info));
+	BBox		=	NULL;
+	Texture		=	NULL;
+	TileWidth	=	0;
+	TileHeight	=	0;
+	HorNumTiles	=	0;
+	VerNumTiles	=	0;
 	CTileSetManager::Instance()->AddObject(this);
 }
 
 void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData )
 {
-	Info.HorNumTiles = _HorNumTiles;
-	Info.VerNumTiles = _VerNumTiles;
-	Info.TileWidth = _TileWidth;
-	Info.TileHeight = _TileHeight;
+	HorNumTiles = _HorNumTiles;
+	VerNumTiles = _VerNumTiles;
+	TileWidth = _TileWidth;
+	TileHeight = _TileHeight;
 	if (BBox != NULL)
 		delete [] BBox;
-	BBox = new CAABB [Info.HorNumTiles*Info.VerNumTiles];
-	for(int i=0; i<Info.HorNumTiles*Info.VerNumTiles; i++)
-		BBox[i] = CAABB(0, 0, Info.TileHeight, Info.TileWidth);
+	BBox = new CAABB [HorNumTiles*VerNumTiles];
+	for(int i=0; i<HorNumTiles*VerNumTiles; i++)
+		BBox[i] = CAABB(0, 0, TileHeight, TileWidth);
 }
 
 Vector2* CTileset::GetCellTC(int CellIndex)
@@ -102,13 +113,13 @@ Vector2* CTileset::GetCellTC(int CellIndex)
 
 	Vector2 *tc, t;
 	tc = new Vector2[4];
-	t.x = CellIndex % Info.HorNumTiles;
-	t.y = CellIndex / Info.HorNumTiles;
+	t.x = CellIndex % HorNumTiles;
+	t.y = CellIndex / HorNumTiles;
 	for (int i = 0; i < 4; i++)
 	{
 		tc[i] = (t + V2_QuadBin[i]);
-		tc[i].x *= (float)Info.TileWidth/Texture->width;
-		tc[i].y *= (float)Info.TileHeight/Texture->height;
+		tc[i].x *= (float)TileWidth/Texture->width;
+		tc[i].y *= (float)TileHeight/Texture->height;
 	}
 	return tc;
 }
@@ -185,7 +196,6 @@ bool CLevelMap::LoadFromFile()
 	GenCells();
 
 	File.Close();
-	Factory->FreeInst();
 	loaded = true;
 	return true;
 }
@@ -216,8 +226,8 @@ bool CLevelMap::GenCells()
 		{
 			CMapCellInfo *t = &(Cells[_Cell(j, i)]);
 			Vector2 ji = Vector2(j, i);
-			scalar w = TileSet->Info.TileWidth;
-			scalar h = TileSet->Info.TileHeight;
+			scalar w = TileSet->TileWidth;
+			scalar h = TileSet->TileHeight;
 			for(int k = 0; k < 4; k++)
 			{
 				t->pos[k] = (ji + V2_QuadBin[k]);
@@ -234,7 +244,7 @@ bool CCompas::Render()
 {
 		Vector2 v1, n;
 		CEngine *Ninja = CEngine::Instance();
-		v1 = Ninja->RenderManager.Camera.Point;
+		v1 = CRenderManager::Instance()->Camera.Point;
 		n = (-v1).Normalized();
 		float depth = v1.Length()/40.0f;
 		depth = clampf(depth, 0.0f, 90.0f);
@@ -258,7 +268,7 @@ CCompas::CCompas()
 {
 	SetName("CCompas");
 	CEngine *Ninja = CEngine::Instance();
-	Ninja->RenderManager.AddObject(this);
+	CRenderManager::Instance()->AddObject(this);
 }
 
 CCompas::~CCompas()

@@ -11,28 +11,8 @@
 //-------------------------------------------//
 //				Factory stuff				 //
 //-------------------------------------------//
-CFactory* CFactory::Instance()
-{
-	if (_instance == NULL)
-	{
-		_instance = new CFactory;
-	}
-	_refcount++;
-	return _instance;
-}
 
-void CFactory::FreeInst()
-{
-	_refcount--;
-	if (!_refcount)
-	{		
-		delete this;
-		Log.Log("INFO", "Factory deleted from memory.");
-		_instance = NULL;
-	}
-}
-
-CFactory::CFactory():initialized(false), UpdateManager(NULL), RenderManager(NULL), FontManager(NULL)
+CFactory::CFactory():initialized(true)//, UpdateManager(NULL), RenderManager(NULL), FontManager(NULL)
 {
 	SetName("Factory");
 }
@@ -63,7 +43,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	case OBJ_FONT_M:
 		{
 			CFont *creation = new CFont;
-			FontManager->AddObject(creation);
+			CFontManager::Instance()->AddObject(creation);
 			AddObject(creation);
 			tmp = creation;
 			break;
@@ -71,7 +51,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	case OBJ_SPRITE:
 		{
 			CSprite* creation = new CSprite;
-			RenderManager->AddObject(creation);
+			CRenderManager::Instance()->AddObject(creation);
 			AddObject(creation);
 			tmp = creation;
 			break;
@@ -79,8 +59,8 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	case OBJ_PSYSTEM:
 		{
 			CParticleSystem* creation = new CParticleSystem;			
-			RenderManager->AddObject(creation);
-			UpdateManager->AddObject(creation);
+			CRenderManager::Instance()->AddObject(creation);
+			CUpdateManager::Instance()->AddObject(creation);
 			AddObject(creation);
 			tmp = creation;
 			break;
@@ -88,7 +68,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	case OBJ_TEXTURE_RES:
 		{
 			CTexture* creation = new CTexture;
-			TextureManager->AddObject(creation);
+			CTextureManager::Instance()->AddObject(creation);
 			AddObject(creation);
 			tmp = creation;
 			break;
@@ -96,7 +76,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	case OBJ_SOUND_RES:
 		{
 			CSound* creation = new CSound;
-			SoundManager->AddObject(creation);
+			CSoundManager::Instance()->AddObject(creation);
 			AddObject(creation);
 			tmp = creation;
 			break;
@@ -104,7 +84,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	case OBJ_MUSIC_RES:
 		{
 			CMusic* creation = new CMusic;
-			MusicManager->AddObject(creation);
+			CMusicManager::Instance()->AddObject(creation);
 			AddObject(creation);
 			tmp = creation;
 			break;
@@ -121,12 +101,12 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 				}
 			case T_RENDERABLE:
 				{
-					RenderManager->AddObject(tmp);
+					CRenderManager::Instance()->AddObject(tmp);
 					break;
 				}
 			case T_RENDERABLE | T_COBJECT:
 				{
-					RenderManager->AddObject(tmp);
+					CRenderManager::Instance()->AddObject(tmp);
 					break;
 				}
 			}
@@ -134,7 +114,7 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 			{
 			case T_UPDATABLE:
 				{
-					UpdateManager->AddObject(tmp);
+					CUpdateManager::Instance()->AddObject(tmp);
 					break;
 				}
 			}
@@ -143,32 +123,6 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 	}
 	return tmp;
 }
-
-bool CFactory::InitManagers( CUpdateManager *vUpdateManager, CRenderManager *vRenderManager )
-{
-	if ((UpdateManager = vUpdateManager) == NULL)
-	{
-		Log.Log("WARNING", "Error, UpdateManager has not been initialized");
-		return false;
-	}
-	if ((RenderManager = vRenderManager) == NULL)
-	{
-		Log.Log("WARNING", "Error, RenderManager has not been initialized");
-		return false;
-	}
-
-	FontManager = CFontManager::Instance();
-	TextureManager = CTextureManager::Instance();
-	SoundManager = CSoundManager::Instance();
-	MusicManager = CMusicManager::Instance();
-	initialized = true;
-	return true;
-}
-
-CFactory* CFactory::_instance = 0;
-int CFactory::_refcount = 0;
-
-
 
 bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
 {
@@ -199,7 +153,6 @@ bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
 		Resource->SetName(key);
 		Resource->filename = val;
 	}
-	Factory->FreeInst();
 	return true;
 }
 
@@ -239,7 +192,6 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 	result->filename = val;
 	result->LoadFromFile();
 
-	Factory->FreeInst();
 	return result;
 }
 

@@ -140,7 +140,7 @@ public:
 		PlayerOne = new CPongPlayer(PLAYER_KIND_ONE);
 		PlayerTwo = new CPongPlayer(PLAYER_KIND_TWO);
 		Ball = new CPongBall;
-		CEngine::Instance()->FontManager->SetCurrentFont("Font");
+		CFontManager::Instance()->SetCurrentFont("Font");
 	}
 	~CPongGame()
 	{
@@ -152,8 +152,8 @@ public:
 	{
 		glLoadIdentity();
 		glColor3f(1.0f, 1.0f, 1.0f);
-		CEngine::Instance()->FontManager->PrintEx(10, 450, 0.0f, "Score: %d", PlayerOneScore);
-		CEngine::Instance()->FontManager->PrintEx(1170, 450, 0.0f, "Score: %d", PlayerTwoScore);
+		CFontManager::Instance()->PrintEx(10, 450, 0.0f, "Score: %d", PlayerOneScore);
+		CFontManager::Instance()->PrintEx(1170, 450, 0.0f, "Score: %d", PlayerTwoScore);
 		return true;
 	}
 

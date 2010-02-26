@@ -1,39 +1,37 @@
+#include <IL/il.h>
 #include "2de_Engine.h"
-
 #include "2de_Core.h"
 #include "2de_Sound.h"
-#include <IL/il.h>
+#include "2de_GraphicsLow.h"
 
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif // _WIN32
 
-CEngine::CEngine()
+CEngine::CEngine()	// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ...
 {
 	SetName("Engine main class");
 	memset(keys, 0, sizeof(keys));
-	doLimitFps = false; 
-	isHaveFocus = true;
-	doCalcFps = true;
-	procUserInit = NULL;
-	procUserSuicide = NULL;
-	procFocusLostFunc = NULL;
-	procFocusGainFunc = NULL;
-	procUpdateFunc = NULL;
-	procRenderFunc = NULL;
-	Factory = CFactory::Instance();
-	FontManager = CFontManager::Instance();
-	window = CGLWindow::Instance();
+	doLimitFps			=	false; 
+	isHaveFocus			=	true;
+	doCalcFps			=	true;
+	procUserInit		=	NULL;
+	procUserSuicide		=	NULL;
+	procFocusLostFunc	=	NULL;
+	procFocusGainFunc	=	NULL;
+	procUpdateFunc		=	NULL;
+	procRenderFunc		=	NULL;
+	window				=	CGLWindow::Instance();	//??
 	// temporary, until CConfig created..
 	// yes, it's defaults.. developer or maintainer of program should set this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
-	ConfigFilePath = "";
-	ConfigFileName = "Config.xml";
-	EventFuncCount = 0;
-	KeyInputFuncCount = 0;
-	isHaveFocus = true;
-	userReInit = false;
-	Initialized = false;
+	ConfigFilePath		=	"";
+	ConfigFileName		=	"Config.xml";
+	EventFuncCount		=	0;
+	KeyInputFuncCount	=	0;
+	isHaveFocus			=	true;
+	userReInit			=	false;
+	Initialized			=	false;
 }
 
 CEngine::~CEngine()
@@ -133,12 +131,12 @@ bool CEngine::Init()
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN		
 	{
-		HMODULE hmodule = GetModuleHandle("Ninja Engine.exe");
- 		char * pathexe = new char[1024];
-		GetModuleFileName(hmodule, pathexe, 256);
-		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
-		delete [] pathexe;
-		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // В ранней версии SDL всегда вылазило окно консоли, потом этот косяк убрали, а мой фикс тут остался
+// 		HMODULE hmodule = GetModuleHandle(0);
+//  		char * pathexe = new char[1024];
+// 		GetModuleFileName(hmodule, pathexe, 256);
+// 		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
+// 		delete [] pathexe;
+// 		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // В ранней версии SDL всегда вылазило окно консоли, потом этот косяк убрали, а мой фикс тут остался
 
 		char *MainDir = new char[MAX_PATH];
 		GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
@@ -167,7 +165,7 @@ bool CEngine::Init()
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
 	SetState(STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
-	ResourceManager.DataPath	= (Config.First->Get("DataPath"))->GetValue();
+	CResourceManager::Instance()->DataPath	= (Config.First->Get("DataPath"))->GetValue();
 	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
 
 	SetState(STATE_SCREEN_WIDTH, (void*)wwidth);
@@ -177,7 +175,7 @@ bool CEngine::Init()
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
 	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
-	RenderManager.Camera.SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height); // Update camera due to update of wh from config
+	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height); // Update camera due to update of wh from config
 
 	window->bpp = 32;
 	if (!window->gCreateWindow())
@@ -187,23 +185,16 @@ bool CEngine::Init()
 	}
 
 	ilInit(); // Инициализация DevIL
+	CSoundMixer::Instance();
 
 	SDL_EnableUNICODE(1);
 	gToggleScissor(false);
 
-	SoundMixer = CSoundMixer::Instance();
-
-	TextureManager = CTextureManager::Instance();
-	SoundManager = CSoundManager::Instance();
-	MusicManager = CMusicManager::Instance();
-	Factory->InitManagers(&UpdateManager, &RenderManager);
-
 	if (doLoadDefaultResourceList)
 	{
-		if (!ResourceManager.LoadResources())
+		if (!CResourceManager::Instance()->LoadResources())
 			return false;
 	}
-
 
 	if (procUserInit != NULL)
 		if (!procUserInit())
@@ -321,7 +312,6 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_QUIT:
 				return false;
-				break;
 			default:
 			{
 				break;
@@ -349,11 +339,11 @@ bool CEngine::Run()
 				if (doCalcFps)
 					CalcFps();
 				gBeginFrame();
-				RenderManager.DrawObjects();
+				CRenderManager::Instance()->DrawObjects();
 				if (procRenderFunc != NULL)
 					procRenderFunc();
 				
-				UpdateManager.UpdateObjects();
+				CUpdateManager::Instance()->UpdateObjects();
 				if (procUpdateFunc != NULL)
 					procUpdateFunc(dt);
 				// TODO: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
@@ -477,11 +467,11 @@ bool CEngine::ClearLists()
 {
 	// Не так!!!1!адин!+!+!
 	// где-то в тектстовиках я видел шутку про менеджер менеджеров... так вот, он бы реально пригодился тут))
-	CObjectManager.Clear();
-	RenderManager.Reset();
-	UpdateManager.Reset();
-	TextureManager->Reset();
-	CObject *data = (RenderManager.Next());
+	CObjectManager.Clear(); // Почему это не синглтон до сих пор?!
+	CRenderManager::Instance()->Reset();
+	CUpdateManager::Instance()->Reset();
+	CTextureManager::Instance()->Reset();
+	CObject *data = (CRenderManager::Instance()->Next());
 	while (data)
 	{
 		if (data && !data->GetListRefCount())
@@ -489,9 +479,9 @@ bool CEngine::ClearLists()
 			SAFE_DELETE(data);
 		}
 		
-		data = (RenderManager.Next());
+		data = (CRenderManager::Instance()->Next());
 	}	
-	data = (UpdateManager.Next());
+	data = (CUpdateManager::Instance()->Next());
 	while (data)
 	{
 		if (data && !data->GetListRefCount())
@@ -499,19 +489,19 @@ bool CEngine::ClearLists()
 			SAFE_DELETE(data);
 		}
 			
-		data = (UpdateManager.Next());
+		data = (CUpdateManager::Instance()->Next());
 	}	
-	RenderManager.Clear();
-	UpdateManager.Clear();
+	CRenderManager::Instance()->Clear();
+	CUpdateManager::Instance()->Clear();
 
-	data = TextureManager->Next();
+	data = CTextureManager::Instance()->Next();
 	while(data)
 	{
 		if (data && !data->GetListRefCount())
 			SAFE_DELETE(data);
-		data = RenderManager.Next();
+		data = CRenderManager::Instance()->Next();
 	}
-	RenderManager.Clear();
+	CRenderManager::Instance()->Clear();
 
 	return true;
 }
@@ -523,25 +513,5 @@ bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKey
 	KeyInputFunctions[KeyInputFuncCount] = AKeyInputFunction;
 	KeyFuncCallers[KeyInputFuncCount] = AKeyFuncCaller;
 	KeyInputFuncCount++;
-	return true;
-}
-CEngine *CEngine::_instance = NULL;
-//int CEngine::_refcount = 0;
-
-bool CUpdateManager::UpdateObjects()
-{
-	Reset();
-	CEngine *engine = CEngine::Instance();
-	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
-	while (data)
-	{
-		if (!data->Active)
-			continue;
-		// FIXED_DELTA_TIME
-		float dt = 0;
-		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
-		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
-		data = dynamic_cast<CUpdateObject*>(Next());
-	}
 	return true;
 }

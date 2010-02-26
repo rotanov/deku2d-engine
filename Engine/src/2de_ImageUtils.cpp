@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <IL/il.h>
 
-CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0)
+CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0), Colorkey(255, 0, 255, 0)
 {
 
 }
@@ -13,7 +13,7 @@ CImageData::~CImageData()
 		delete [] data;
 }
 
-bool  CImageData::MakeRGBA()
+bool  CImageData::ProcessColorkey()
 {
 	if (data ==  NULL)
 		return false;
@@ -27,7 +27,7 @@ bool  CImageData::MakeRGBA()
 		Gp = data + i*bpp + 1;
 		Bp = data + i*bpp + 2;
 		Ap = data + i*bpp + 3;
-		if ( *Rs == 255 && *Bs == 255 && *Gs == 0 )
+		if ( *Rs == Colorkey.r && *Gs == Colorkey.g && *Bs == Colorkey.b)
 			*Ap = 0;
 		*Rp =*Rs;
 		*Gp =*Gs;

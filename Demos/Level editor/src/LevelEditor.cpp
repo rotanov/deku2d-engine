@@ -59,8 +59,8 @@ void AddTile(int TileIndex, int x, int y)
 	next->info.z = 0.0f;
 	next->info.tc = TileSet->GetCellTC(TileIndex);
 	Vector2 ji = Vector2(x, y);
-	scalar w = TileSet->Info.TileWidth;
-	scalar h = TileSet->Info.TileHeight;
+	scalar w = TileSet->TileWidth;
+	scalar h = TileSet->TileHeight;
 	for(int k = 0; k < 4; k++)
 	{
 		next->info.pos[k] = (ji + V2_QuadBin[k]);
@@ -74,7 +74,7 @@ void RenderTileList()
 	CCellNode *next = root.next;
 	glLoadIdentity();
 	glTranslatef(Offset.x, Offset.y, 0.0f);
-	glScalef((float)Zoom / (float)TileSet->Info.TileWidth , (float)Zoom / (float)TileSet->Info.TileHeight , 0.0f);
+	glScalef((float)Zoom / (float)TileSet->TileWidth , (float)Zoom / (float)TileSet->TileHeight , 0.0f);
 	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
 	glEnable(GL_TEXTURE);
 	//glDisable(GL_BLEND);
@@ -177,7 +177,7 @@ bool ProcessInput(SDL_Event& event)
 				}
 				if (event.button.button == SDL_BUTTON_LEFT && State == ST_SELECT_TILE)
 				{
-					CurrTileIndex = ((int)(MousePos.y - TileSelPos.y)/(int)TileSet->Info.TileHeight)*TileSet->Info.HorNumTiles + (int)(MousePos.x - TileSelPos.x)/(int)TileSet->Info.TileWidth; 
+					CurrTileIndex = ((int)(MousePos.y - TileSelPos.y)/(int)TileSet->TileHeight)*TileSet->HorNumTiles + (int)(MousePos.x - TileSelPos.x)/(int)TileSet->TileWidth; 
 				}
 			}
 			break;
@@ -198,9 +198,9 @@ bool Init()
 	SDL_ShowCursor(0);
 	//Ninja->RenderManager.SortByAlpha();
 	//Ninja->RenderManager.SortByZ();	
-	TileSet = dynamic_cast<CTileset*>(Ninja->ResourceManager.LoadResource("Tilesets", "TileSet02-Snow01", CTileset::NewTileset));
+	TileSet = dynamic_cast<CTileset*>(CResourceManager::Instance()->LoadResource("Tilesets", "TileSet02-Snow01", CTileset::NewTileset));
 	gSetBlendingMode();
-	Ninja->FontManager->SetCurrentFont("Font");
+	CFontManager::Instance()->SetCurrentFont("Font");
 	CFontManager* fm = CFontManager::Instance();
 	f = fm->CurrentFont;
 	Ninja->AddEventFunction(ProcessInput);
@@ -321,9 +321,9 @@ bool Draw()
 		
 		//Level.Render();
 		TileSet->RenderTileSet();
-		Vector2 vt0 = Vector2(((int)(MousePos.x - TileSelPos.x)/(int) TileSet->Info.TileWidth) * TileSet->Info.TileWidth,
-						((int)(MousePos.y - TileSelPos.y)/(int) TileSet->Info.TileHeight) * TileSet->Info.TileHeight) + TileSelPos;
-		Vector2 vt1 = vt0 + Vector2(TileSet->Info.TileWidth, TileSet->Info.TileHeight);
+		Vector2 vt0 = Vector2(((int)(MousePos.x - TileSelPos.x)/(int) TileSet->TileWidth) * TileSet->TileWidth,
+						((int)(MousePos.y - TileSelPos.y)/(int) TileSet->TileHeight) * TileSet->TileHeight) + TileSelPos;
+		Vector2 vt1 = vt0 + Vector2(TileSet->TileWidth, TileSet->TileHeight);
 		p.grRectC(vt0, vt1);
 	}
 
