@@ -54,6 +54,10 @@ using namespace std;
 #define USE_SDL_OPENGL
 #define USING_OPENGL
 
+// так как у меня SDL_EnableKeyRepeat и связанные с этим вещи работают и проблем не вызывают, то я не нашёл ничего лучше, кроме как сделать вот так...
+// раскомментировать, если устраивает то, как работает SDL_EnableKeyRepeat и связанные с этим вещи
+//#define I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
+
 #ifdef _MSC_VER
 #define __INLINE __forceinline
 #else
@@ -118,52 +122,6 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
 #define COLOR_RED	RGBAf(0.98f, 0.05f, 0.1f, 1.0f)
-
-/**
- * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
- *
- * Для использования нужно наследовать класс от него следующим образом:
- * 	class CSomeClass : public CTSingleton<CSomeClass>
- * 	{
- * 	public:
- * 		<...>
- * 	private:
- * 		<...>
- *	protected:
- *		friend class CTSingleton<CSomeClass>;
- *		CSomeClass() { }
- * 	};
- *
- * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
- */
-
-template <class T>
-class CTSingleton : public virtual CObject
-{
-public:
-	static T* Instance();
-
-protected:
-	CTSingleton() { }
-	virtual ~CTSingleton() { }
-
-private:
-	static T * _instance;
-};
-
-template <class T>
-T* CTSingleton<T>::Instance()
-{
-	if (!_instance)
-	{
-		_instance = new T;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
-
-template <class T>
-T* CTSingleton<T>::_instance = 0;
 
 
 
@@ -230,6 +188,64 @@ typedef bool (*ObjCompCall)(CObject*, CObject*);
 *	ObjCall - тип ф-и для выполнения действий над объектом
 */
 typedef bool (*ObjCall)(CObject*);
+
+
+/**
+ * CLog - класс для работы с логом.
+ */
+
+class CLog
+{
+public:
+	enum ELogMode
+	{
+		LOG_MODE_STDOUT,
+		LOG_MODE_STDERR,
+		LOG_MODE_FILE,
+	};
+
+	enum ELogFileWriteMode
+	{
+		LOG_FILE_WRITE_MODE_TRUNCATE,
+		LOG_FILE_WRITE_MODE_APPEND,
+	};
+
+	CLog();
+
+	~CLog();
+
+	void Log(const char *Event, const char *Format, ...);
+
+	__INLINE void Toggle(bool AEnabled) { Enabled = AEnabled; }
+	__INLINE bool isEnabled() const { return Enabled; }
+
+	void SetLogMode(ELogMode ALogMode);
+	__INLINE ELogMode GetLogMode() const { return LogMode; }
+
+	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode) { LogFileWriteMode = ALogFileWriteMode; }
+	__INLINE ELogFileWriteMode GetLogFileWriteMode() const { return LogFileWriteMode; }
+
+	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames) { DatedLogFileNames = ADatedLogFileNames; }
+	__INLINE bool GetDatedLogFileNames() const { return DatedLogFileNames; }
+
+	__INLINE void SetLogFilePath(string ALogFilePath) { LogFilePath = ALogFilePath; }
+	__INLINE string GetLogFilePath() const { return LogFilePath; }
+
+	__INLINE void SetLogName(string ALogName) { LogName = ALogName; }
+	__INLINE string GetLogName() const { return LogName; }
+
+private:
+	bool Enabled;
+	ELogMode LogMode;
+	ELogFileWriteMode LogFileWriteMode;
+	bool DatedLogFileNames;
+	ostream *Stream;
+	string LogFilePath;
+	string LogName;
+};
+
+// CLog global instance
+extern CLog Log;
 
 
 /**
@@ -306,6 +322,71 @@ public:
 };
 
 typedef CObject* (*CreateFunc)();
+
+
+class CGarbageCollector : public CList
+{
+public:
+	CGarbageCollector();
+	~CGarbageCollector()
+	{
+		CObject *data;
+		while(Enum(data))
+		{
+			Log.Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
+			delete data;
+		}
+	}
+};
+extern CGarbageCollector SingletoneKiller;
+typedef CGarbageCollector CSingletoneKiller;
+
+
+/**
+ * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
+ *
+ * Для использования нужно наследовать класс от него следующим образом:
+ * 	class CSomeClass : public CTSingleton<CSomeClass>
+ * 	{
+ * 	public:
+ * 		<...>
+ * 	private:
+ * 		<...>
+ *	protected:
+ *		friend class CTSingleton<CSomeClass>;
+ *		CSomeClass() { }
+ * 	};
+ *
+ * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
+ */
+
+template <class T>
+class CTSingleton : public virtual CObject
+{
+public:
+	static T* Instance();
+
+protected:
+	CTSingleton() { }
+	virtual ~CTSingleton() { }
+
+private:
+	static T * _instance;
+};
+
+template <class T>
+T* CTSingleton<T>::Instance()
+{
+	if (!_instance)
+	{
+		_instance = new T;
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
+}
+
+template <class T>
+T* CTSingleton<T>::_instance = 0;
 
 
 /**
@@ -412,63 +493,6 @@ private:
 };
 
 
-/**
- * CLog - класс для работы с логом.
- */
-
-class CLog
-{
-public:
-	enum ELogMode
-	{
-		LOG_MODE_STDOUT,
-		LOG_MODE_STDERR,
-		LOG_MODE_FILE,
-	};
-
-	enum ELogFileWriteMode
-	{
-		LOG_FILE_WRITE_MODE_TRUNCATE,
-		LOG_FILE_WRITE_MODE_APPEND,
-	};
-
-	CLog();
-
-	~CLog();
-
-	void Log(const char *Event, const char *Format, ...);
-
-	__INLINE void Toggle(bool AEnabled) { Enabled = AEnabled; }
-	__INLINE bool isEnabled() const { return Enabled; }
-
-	void SetLogMode(ELogMode ALogMode);
-	__INLINE ELogMode GetLogMode() const { return LogMode; }
-
-	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode) { LogFileWriteMode = ALogFileWriteMode; }
-	__INLINE ELogFileWriteMode GetLogFileWriteMode() const { return LogFileWriteMode; }
-
-	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames) { DatedLogFileNames = ADatedLogFileNames; }
-	__INLINE bool GetDatedLogFileNames() const { return DatedLogFileNames; }
-
-	__INLINE void SetLogFilePath(string ALogFilePath) { LogFilePath = ALogFilePath; }
-	__INLINE string GetLogFilePath() const { return LogFilePath; }
-
-	__INLINE void SetLogName(string ALogName) { LogName = ALogName; }
-	__INLINE string GetLogName() const { return LogName; }
-
-private:
-	bool Enabled;
-	ELogMode LogMode;
-	ELogFileWriteMode LogFileWriteMode;
-	bool DatedLogFileNames;
-	ostream *Stream;
-	string LogFilePath;
-	string LogName;
-};
-
-// CLog global instance
-extern CLog Log;
-
 
 // TODO: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment
@@ -515,23 +539,6 @@ protected:
 	static int _refcount;
 };
 
-
-class CGarbageCollector : public CList
-{
-public:
-	CGarbageCollector();
-	~CGarbageCollector()
-	{
-		CObject *data;
-		while(Enum(data))
-		{
-			Log.Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
-			delete data;
-		}
-	}
-};
-extern CGarbageCollector SingletoneKiller;
-typedef CGarbageCollector CSingletoneKiller;
 
 __INLINE string itos(int i)
 {

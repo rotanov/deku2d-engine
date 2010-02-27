@@ -1,8 +1,10 @@
 #ifndef _2DE_LUA_UTILS_H
 #define _2DE_LUA_UTILS_H
 
-#include "2de_Core.h"
 #include <lua.hpp>
+
+#include "2de_Core.h"
+
 //using namespace std;
 
 struct lua_State;

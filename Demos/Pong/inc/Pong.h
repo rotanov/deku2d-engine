@@ -177,8 +177,8 @@ public:
 
 		if (CollideFlagf != 0.0f)
 		{
-			Ball->Velocity.x = -Ball->Velocity.x + CollideFlagf * abs(CollidedPlayer->Velocity.y);
-			Ball->Velocity.y += abs(CollidedPlayer->Velocity.y)*0.01f;
+			Ball->Velocity.x = -Ball->Velocity.x + CollideFlagf * Abs(CollidedPlayer->Velocity.y);
+			Ball->Velocity.y += Abs(CollidedPlayer->Velocity.y)*0.01f;
 		}
 
 		if (Ball->Position.x > 1100)

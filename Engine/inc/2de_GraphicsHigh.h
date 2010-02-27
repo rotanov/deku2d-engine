@@ -330,6 +330,7 @@ public:
 		RGBAf EditText;
 		RGBAf EditInactiveText;
 		RGBAf EditSelection;
+		RGBAf LabelText;
 	};
 	struct CGUIStyleMetrics
 	{
@@ -338,6 +339,12 @@ public:
 		Vector2 EditMargins;
 		scalar EditBorderWidth;
 	};
+	// на данный момент я буду юзать один шрифт для всего ГУИ для простоты и потому что некоторые моменты использования шрифтов не до коцна ясны и требуют пересмотра
+	/*struct CGUIStyleFonts
+	{
+		CFont* ButtonFont;
+		CFont* EditFont;
+	};*/
 
 	CGUIStyle()
 	{
@@ -360,14 +367,19 @@ public:
 		Colors.EditText = COLOR_BLACK;
 		Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
 		Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
+		Colors.LabelText = COLOR_BLACK;
 
 		Metrics.FocusRectSpacing = 5.0f;
 		Metrics.FocusRectLineWidth = 0.5f;
 		Metrics.EditMargins = Vector2(4.0f, 6.0f);
 		Metrics.EditBorderWidth = 2.0f;
+
+		Font = CFontManager::Instance()->GetFont("Font");
 	}
 	CGUIStyleColors Colors;
 	CGUIStyleMetrics Metrics;
+	CFont *Font;
+	//CGUIStyleFonts Fonts;
 
 	// TODO: loading style from XML file (and even maybe saving)
 };
@@ -385,28 +397,34 @@ public:
 	string				Text;
 
 	CGUIObjectBase();
-	CGUIObjectBase(CGUIObjectBase *AParent);
 	~CGUIObjectBase();
 
-	void	SetFont(CFont *AFont);
-	void	SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
-	void	SetParent(CGUIObjectBase *AParent);
-	void	SetCallback(CObjectCallback ACallProc, CObject *ACaller)
+	CFont* GetFont() const;
+	void SetFont(CFont *AFont);
+
+	CPrimitiveRender* GetPrimitiveRender() const;
+	void SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
+	
+	CGUIStyle* GetStyle() const;
+	void SetStyle(CGUIStyle *AStyle);
+
+	void SetCallback(CObjectCallback ACallProc, CObject *ACaller)
 	{
 		Caller = ACaller;
 		CallProc = ACallProc;
 	}
+
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
 protected:
-	CObjectCallback		CallProc;			//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
-	CObject				*Caller;
+	CObjectCallback		CallProc;	//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
+	CObject			*Caller;
 
 				// вот зачем эти очвевидные комментарии? неужели кому-то не понятно, что CFont *Font - это указатель на шрифт?
 				// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
 				//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
-	CFont				*Font;				//	Указатель на шрифт.
+	CFont				*Font;				//	Указатель на шрифт. // deprecated, я считаю, ибо всегда можно взять из стиля
 	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
-	CGUIObjectBase			*Parent;			//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+	CGUIStyle *Style;
 	CMouseState MouseState;
 	CMouseState PreviousMouseState;
 	CMouseState WidgetState;
@@ -417,18 +435,20 @@ class CGUIObject : public CGUIObjectBase
 {
 public:
 	CGUIObject();
+	CGUIObject(CGUIObjectBase *AParent);
 
 	bool isFocused() const;
 	void Focus();
-	
-	CGUIStyle* GetStyle() const { return Style; }
-	void SetStyle(CGUIStyle *AStyle) { Style = AStyle; }
+
+	void SetParent(CGUIObjectBase *AParent);
 
 protected:
-	CGUIStyle *Style;
+	CGUIObjectBase *Parent;		//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+					// 	ну она как бы есть, но не совсем иерархия.. и да, родителем объекта может быть и Base, поэтому тут будет он
 };
 
-
+// вот этот класс (CGUIManager) наследован одновременно и от синглтона, и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
+// получаем всякие гадости в логах при удалении, потому что его сначала удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
 class CGUIManager : public CList, public CGUIObjectBase, public CTSingleton<CGUIManager>
 {
 public:
@@ -439,8 +459,6 @@ public:
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocusedNodeTo(CListNode *AFocusedNode);
 	void		SetFocus(CObject *AObject);
-	CGUIStyle*	GetStyle();
-	void		SetStyle(const CGUIStyle &AStyle);
 private:
 	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
 	CListNode	*FocusedOnListNode;
@@ -449,7 +467,6 @@ private:
 	int			TimerAccum;
 	bool		tabholded;
 	bool		repeatstarted;
-	CGUIStyle	Style;
 protected:
 	CGUIManager();
 	friend class CTSingleton<CGUIManager>;
@@ -458,12 +475,7 @@ protected:
 class CLabel : public CGUIObject
 {
 public:
-	CLabel();
-	CLabel(const string &AText)
-	{
-		Text = AText;
-		Font = CFontManager::Instance()->GetFont("Font");
-	}
+	CLabel(const string &AText = "");
 	bool Render();
 	bool Update(float dt)
 	{
@@ -474,12 +486,11 @@ public:
 class CButton : public CGUIObject
 {
 public:
-				CButton();
-				CButton(CAABB ARect, const char* AText, RGBAf AColor);
-				~CButton();
-	bool		InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
-	bool		Render();
-	bool		Update(float dt);
+	CButton();
+	CButton(CAABB ARect, const char* AText, RGBAf AColor);
+	bool Render();
+	bool Update(float dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 };
 
 
@@ -501,18 +512,19 @@ public:
 		void Clear();
 		void Clear(int ACursorPos);
 	};
-				CEdit();
-				~CEdit();
-	bool		InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
-	bool		Render();
-	bool		Update(scalar dt);
+
+	CEdit();
+	bool Render();
+	bool Update(scalar dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+
 private:
-	int		CursorPos;
-	int		MouseToCursorPos(const Vector2& MousePosition);
-	string		GetVisibleText() const;
-	bool		isTextFits(const char *AText) const;
-	int		VisibleTextOffset;
-	CTextSelection	Selection;
+	int MouseToCursorPos(const Vector2& MousePosition) const;
+	string GetVisibleText() const;
+	bool isTextFits(const char *AText) const;
+	int CursorPos;
+	CTextSelection Selection;
+	int VisibleTextOffset;
 };
 
 class CMenuItem : public CGUIObject, public CList

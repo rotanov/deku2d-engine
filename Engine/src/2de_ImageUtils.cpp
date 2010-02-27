@@ -1,5 +1,5 @@
 #include "2de_ImageUtils.h"
-#include <assert.h>
+
 #include <IL/il.h>
 
 CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0), Colorkey(255, 0, 255, 0)
@@ -47,10 +47,18 @@ bool CImageData::LoadFromFile(const string &Filename)
 	width = ilGetInteger(IL_IMAGE_WIDTH);
 	height = ilGetInteger(IL_IMAGE_HEIGHT);
 
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
 	data = new byte[width * height * 4];
 	ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, data);
+
+	// хорошо бы писать в лог что-то поумнее, но для того, чтобы достать вменяемый текст ошибки, нужно подключать ILU: iluGetErrorString(ilGetError())
+	// учитывая, что из него никаких больше функций не нужно, мне его подключать не охота..
+	if (ilGetError() != IL_NO_ERROR)
+		Log.Log("ERROR", "IL failed.");
+
 	//bpp = ilGetInteger(IL_IMAGE_FORMAT);
-	//bpp = ilGetInteger(IL_IMAGE_BPP);
+	//bpp = ilGetInteger(IL_IMAGE_BPP);	// если вдруг на будущее, то IL_IMAGE_BYTES_PER_PIXEL
 	bpp = 4;
 	ilDeleteImage(ILID);
 	return true;

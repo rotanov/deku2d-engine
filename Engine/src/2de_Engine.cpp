@@ -1,5 +1,7 @@
-#include <IL/il.h>
 #include "2de_Engine.h"
+
+#include <IL/il.h>
+
 #include "2de_Core.h"
 #include "2de_Sound.h"
 #include "2de_GraphicsLow.h"
@@ -129,7 +131,6 @@ void CEngine::SetState(int state, void* value)
 bool CEngine::Init()
 {
 #ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN		
 	{
 // 		HMODULE hmodule = GetModuleHandle(0);
 //  		char * pathexe = new char[1024];
@@ -188,6 +189,11 @@ bool CEngine::Init()
 	CSoundMixer::Instance();
 
 	SDL_EnableUNICODE(1);
+
+#ifdef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+#endif
+
 	gToggleScissor(false);
 
 	if (doLoadDefaultResourceList)
@@ -220,15 +226,16 @@ bool CEngine::Suicide()
 
 char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 {
-	SDLKey sym = event.key.keysym.sym;
-	char TempChar;
+	char TempChar = '\0';
 #ifdef _WIN32
 	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
 	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
 
 #else
-	if ((event.key.keysym.unicode & 0xFF80) == 0 )  // только английский
-		TempChar = event.key.keysym.unicode & 0x7F;
+	// вообще говоря, наверное даже кроссплатформенно, если хотите - уберите WinAPI и #ifdef
+	char *iconv_str_out = SDL_iconv_string("CP1251", "UTF16", (char *) &event.key.keysym.unicode, 2);
+	TempChar = iconv_str_out[0];
+	SDL_free(iconv_str_out);
 #endif //_WIN32
 	return TempChar;
 }
@@ -365,6 +372,12 @@ bool CEngine::Run()
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);		
 			glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+
+			/*PRender.lClr = PRender.pClr = RGBAf(0.8f, 0.8f, 0.8f, 1.0f);
+			PRender.lwidth = 4.0f;
+			PRender.psize = 4.0f;
+			PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле.. но по дефолту оставим круглешок.. */
+
 			PRender.grCircleL(MousePos, 5);
 			gEndFrame();	
 

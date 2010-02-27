@@ -12,7 +12,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Sound.cpp \
 			src/2de_Xml.cpp
 
-OBJFILES	=	obj/2de_Core.o \
+OBJECTS		=	obj/2de_Core.o \
 			obj/2de_Engine.o \
 			obj/2de_GameUtils.o \
 			obj/2de_GraphicsHigh.o \
@@ -26,38 +26,75 @@ OBJFILES	=	obj/2de_Core.o \
 			obj/2de_Sound.o \
 			obj/2de_Xml.o
 
-INCPATH		=	-iquoteinc
-
-LIBS		=	-lGLU -lz -lSDL_mixer
-
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
-PNG_CFLAGS	:=	$(shell pkg-config --cflags libpng)
+
+CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -iquoteinc
 
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
-PNG_LDFLAGS	:=	$(shell pkg-config --libs libpng)
 
-CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} ${PNG_CFLAGS} ${INCPATH}
-LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} ${PNG_LDFLAGS} ${LIBS}
+TC_TNL_STATIC	=	lib/libtomcrypt.a lib/libtnl.a
+
+TC_DIR		=	inc/libtomcrypt
+TNL_DIR		=	inc/tnl
+
+TC_TNL_OBJECTS	=	$(TC_DIR)/obj/*.o $(TNL_DIR)/obj/*.o
+
+LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lSDL_mixer $(TC_TNL_STATIC)
+
+TARGET_STATIC	=	lib/libDeku2d.a
+TARGET_SHARED	=	lib/libDeku2d.so
+
+STRICTFLAG	=	-w
+
+all: static
 
 obj/%.o: src/%.cpp
 	g++ $(DEBUGFLAG) $(STRICTFLAG) -c -o $@ $(CFLAGS) $<
 
-lib/Deku2d.a: lib/Deku2d.a($(OBJFILES))
+$(TC_DIR)/obj/*.o:
+	$(MAKE) -C $(TC_DIR)
 
-STRICTFLAG = -w
+$(TNL_DIR)/obj/*.o:
+	$(MAKE) -C $(TNL_DIR)
 
-all: lib/Deku2d.a
+# maybe replace this implicit rule by explicit one, that uses ar
+$(TARGET_STATIC): $(TARGET_STATIC)($(OBJECTS) $(TC_TNL_OBJECTS))
 
-shared: $(OBJFILES)
-	g++ $(STRICTFLAG) -shared -fPIC -o lib/Deku2d.so $(OBJFILES)
+$(TARGET_SHARED): $(OBJECTS) $(TC_TNL_OBJECTS)
+	g++ $(DEBUGFLAG) $(STRICTFLAG) -shared -fPIC $(LDFLAGS) -o $(TARGET_SHARED) $(OBJECTS) $(TC_TNL_OBJECTS)
+
+obj:
+	mkdir -p obj/
+
+
+static: obj $(TARGET_STATIC)
+
+shared: obj $(TARGET_SHARED)
 
 debug: DEBUGFLAG = -g3 -D_DEBUG
-debug: lib/Deku2d.a
+debug: static
 
 strict: STRICTFLAG = -Wall
-strict: lib/Deku2d.a
+strict: static
+
+debug-shared: DEBUGFLAG = -g3 -D_DEBUG
+debug-shared: shared
+
+strict-shared: STRICTFLAG = -Wall
+strict-shared: shared
+
+PREFIXDIR = $(DESTDIR)/usr/
+INCLUDEDIR = $(PREFIXDIR)include/deku2d/
+
+install: $(TARGET_STATIC) $(TARGET_SHARED)
+	install -d $(PREFIXDIR)lib/
+	install -d $(INCLUDEDIR)
+	install -m644 $(TARGET) $(PREFIXDIR)$(TARGET_STATIC)
+	install -m644 $(TARGET_SHARED) $(PREFIXDIR)$(TARGET_SHARED)
+	install -m644 inc/2de_*.h $(INCLUDEDIR)
+	
 
 docs: doc/Doxyfile
 	if [ -e /usr/bin/doxygen ]; then \
@@ -65,11 +102,12 @@ docs: doc/Doxyfile
 	fi
 
 clean:
-	rm -f obj/*.o
+	rm -f $(OBJECTS)
 
-dist-clean: clean
-	rm -f lib/Deku2d.a
-	rm -f lib/Deku2d.so
+distclean: clean
+	rm -f $(TARGET_STATIC)
+	rm -f $(TARGET_SHARED)
+	rm -f $(TC_TNL_OBJECTS)
 	rm -rf doc/html/
 
-.PHONY: clean dist-clean docs
+.PHONY: clean distclean docs

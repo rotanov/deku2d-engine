@@ -3,22 +3,32 @@
 
 #include "2de_Engine.h"
 
-// Константы, определяющие расположение некоторых элементов интерфейса.
+// РљРѕРЅСЃС‚Р°РЅС‚С‹, РѕРїСЂРµРґРµР»СЏСЋС‰РёРµ СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ РЅРµРєРѕС‚РѕСЂС‹С… СЌР»РµРјРµРЅС‚РѕРІ РёРЅС‚РµСЂС„РµР№СЃР°.
 const int				INTERFACE_OFFSET_X	= 128;
 const int				LEFT_MARGIN			= 8;
 const int				EDIT_WIDTH			= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
 const int				EDIT_HEIGHT			= 32;
 const int				BUTTON_WIDTH		= INTERFACE_OFFSET_X - LEFT_MARGIN*3;
 const int				BUTTON_HEIGHT		= 32;
-// Константы, определяющие цвет элементов интерфейса.
+// РљРѕРЅСЃС‚Р°РЅС‚С‹, РѕРїСЂРµРґРµР»СЏСЋС‰РёРµ С†РІРµС‚ СЌР»РµРјРµРЅС‚РѕРІ РёРЅС‚РµСЂС„РµР№СЃР°.
 const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
 const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
-// Ограничения:
+// РћРіСЂР°РЅРёС‡РµРЅРёСЏ:
 const float ZOOM_MAX = 16.0f;
 const float ZOOM_MIN = 0.5f;
 const float ZOOM_STEP = 0.5f;
+
+// РїСЂРѕС‚РѕС‚РёРїС‹, С‡С‘СЂС‚ РїРѕРґРµСЂРё... РЅРµ СЂР°Р±РѕС‚Р°РµС‚ Р±РµР· РЅРёС… Сѓ РјРµРЅСЏ.. С‚Рѕ С‡С‚Рѕ РѕРЅРё С‚Р°Рј РіРґРµ-С‚Рѕ С„СЂРµРЅРґС‹ РµС‰С‘ РЅРµ Р·РЅР°С‡РёС‚, С‡С‚Рѕ РѕРЅРё РІРёРґРЅС‹ РїСЂРё РїСЂРёСЃРІР°РёРІР°РЅРёРё РёС… Р°РґСЂРµСЃРѕРІ...
+bool LoadFont(CObject *Caller);
+bool SaveFont(CObject *Caller);
+bool LoadTexture(CObject *Caller);
+bool ExitFontEditor(CObject *Caller);
+bool ShowTestPhrase(CObject *Caller);
+bool GoToPrevChar(CObject *Caller);
+bool GoToNextChar(CObject *Caller);
+bool ExposeRect(CObject *Caller);
 
 class CFontEditor : public CRenderObject, public CUpdateObject
 {

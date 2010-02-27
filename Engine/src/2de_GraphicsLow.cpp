@@ -327,10 +327,11 @@ bool CFont::SaveToFile()
 
 void CFont::_Print(const unsigned char *text)
 {
- 	glPushAttrib(GL_TEXTURE_BIT);
- 	glPushMatrix();
- 	tClr.glSet();
- 	glEnable(GL_TEXTURE_2D);
+	glPushAttrib(GL_TEXTURE_BIT);
+	glPushMatrix();
+	tClr.glSet();
+	//ptClr->glSet();
+	glEnable(GL_TEXTURE_2D);
 	Texture->Bind();
 	glTranslatef(pp->x, pp->y, Depth);
 //	scale.glScale();
@@ -353,7 +354,7 @@ void CFont::Print(const char *text, ...)
 		return;
 
 	int swidth = 0, sheight = 0, selx = 0;
-	if (isTextSelected)
+	if (isTextSelected)	// deprecated
 	{
 		if (Sel0 > Sel1+1)
 		{
@@ -367,7 +368,7 @@ void CFont::Print(const char *text, ...)
 		selx = Pos.x + GetStringWidthEx(0, Sel0-1-offset, text);
 
 
-		if (!(Sel0 > Sel1 || Sel0 < 0 || (unsigned int)Sel1 >= strlen(text)))
+		if (!(Sel0 > Sel1 || Sel0 < 0 || (unsigned int) Sel1 >= strlen(text)))
 		{
 			int selw = GetStringWidthEx(max(Sel0, offset), Sel1, text);
 			CPrimitiveRender pr;
@@ -380,7 +381,7 @@ void CFont::Print(const char *text, ...)
 	}
 
 	int xpos, ypos;
-	if (doRenderToRect)
+	if (doRenderToRect)	// maybe deprecated too.. but i'm not sure.. at least it's not used in GUI..
 	{
 
 		byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
@@ -478,7 +479,7 @@ int CFont::GetStringHeight(const char *text)
 {
 	if (text == NULL)
 		return 0;
-	int r = 0, l = (unsigned int)strlen(text);
+	int r = 0, l = (unsigned int) strlen(text);
 	for (int i = 0; i < l; i++)
 		r = std::max(height[(unsigned char)text[i] - 32], r);
 	return r;
@@ -605,7 +606,7 @@ void CCamera::Update()
 	}
 	*/
 	v = Vector2(*Atx, *Aty) - Point;
-	if (abs(v.x) < 0.001f && abs(v.y) < 0.001f)
+	if (Abs(v.x) < 0.001f && Abs(v.y) < 0.001f)
 		v = V2_ZERO;
 	Point += v*0.05f;
 
@@ -649,11 +650,11 @@ CCamera::CCamera()
 	SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height);
 }
 
-void CCamera::SetWidthAndHeight( int AWidth, int AHeight )
+void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
 {
 	w = AWidth;
 	h = AHeight;
-	Point = p = v = Vector2(w/2.0f, h/2.0f);
+	Point = p = v = Vector2(w / 2.0f, h / 2.0f);
 }
 //-------------------------------------------//
 //				CRenderManager				 //

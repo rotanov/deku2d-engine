@@ -2,7 +2,7 @@
 #define _GAME_H_
 
 #include "2de_Engine.h"
-#include <SDL\SDL_opengl.h>
+#include <SDL/SDL_opengl.h>
 
 extern const unsigned int IMAGE_SHROOM_WIDTH;
 extern const unsigned int IMAGE_SHROOM_HEIGHT;

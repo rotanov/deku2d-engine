@@ -106,9 +106,9 @@ int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, V
 	for(int i = 0; i < fnum; i++)
 	{
 		d = n[i] * (offset + point - a[iV[i*3]]); // *R
-		if (min > abs(d))
+		if (min > Abs(d))
 		{
-			min = abs(d);
+			min = Abs(d);
 			depth = min;
 			normal = n[i];
 		}
@@ -131,9 +131,9 @@ int PointPlanesSideEx(Vector3 *a, Vector3 *n, unsigned short *iV, Vector3 offset
 					a[iV[i*3]].y*scaling.y,
 					a[iV[i*3]].z*scaling.z)  
 				*R); 
-		if (min > abs(d))
+		if (min > Abs(d))
 		{
-			min = abs(d);
+			min = Abs(d);
 			depth = min;
 			normal = n[i]*R;
 		}
@@ -615,7 +615,7 @@ bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
 	return (mini != -1);
 }
 
-scalar HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Êñòàòè, ýòî ïëîùàäü òðóãîëüíèêà íà ýòèõ òð¸õ òî÷êàõ. // Èëè ïàðàëëåëîãðàìà.
+scalar HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// ÐšÑÑ‚Ð°Ñ‚Ð¸, ÑÑ‚Ð¾ Ð¿Ð»Ð¾Ñ‰Ð°Ð´ÑŒ Ñ‚Ñ€ÑƒÐ³Ð¾Ð»ÑŒÐ½Ð¸ÐºÐ° Ð½Ð° ÑÑ‚Ð¸Ñ… Ñ‚Ñ€Ñ‘Ñ… Ñ‚Ð¾Ñ‡ÐºÐ°Ñ…. // Ð˜Ð»Ð¸ Ð¿Ð°Ñ€Ð°Ð»Ð»ÐµÐ»Ð¾Ð³Ñ€Ð°Ð¼Ð°.
 {
 	return (u0.x - p.x) * (u1.y - p.y) - (u0.y - p.y) * (u1.x - p.x);
 }
@@ -629,7 +629,7 @@ bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, con
 	Matrix2 deltaMatrix(a1, b1, a2, b2);
 	scalar deltaDet = deltaMatrix.Determinant();
 	if (Equal(deltaDet, 0.0f))
-		return false;	// Ïðÿìûå ïàðàëëåëüíû, ò.å. a1b2 - a2b1 == 0; Êñòàòè, óñëîâèå ïåðïåíäèêóëÿðíîñòè: a1a2 == -b1b2;
+		return false;	// ÐŸÑ€ÑÐ¼Ñ‹Ðµ Ð¿Ð°Ñ€Ð°Ð»Ð»ÐµÐ»ÑŒÐ½Ñ‹, Ñ‚.Ðµ. a1b2 - a2b1 == 0; ÐšÑÑ‚Ð°Ñ‚Ð¸, ÑƒÑÐ»Ð¾Ð²Ð¸Ðµ Ð¿ÐµÑ€Ð¿ÐµÐ½Ð´Ð¸ÐºÑƒÐ»ÑÑ€Ð½Ð¾ÑÑ‚Ð¸: a1a2 == -b1b2;
 	scalar c1 = u1.y * u0.x - u1.x * u0.y;	//a1 * u0.x + b1 * u0.y;
 	scalar c2 = v1.y * v0.x - v1.x * v0.y;	//a2 * v0.x + b2 * v0.y;
 	Result = Vector2(Matrix2(c1, b1, c2, b2).Determinant() / deltaDet, Matrix2(a1, c1, a2, c2).Determinant() / deltaDet);
@@ -653,7 +653,7 @@ bool IntersectCircles(const Vector2 &p0, const scalar r0, const Vector2 &p1, con
 	if ((Sqr(p0p1.x) + Sqr(p0p1.y)) >= Sqr(r0 + r1))
 		return false;
 	Normal = p0p1.Normalized();
-	Depth = abs(r1 - r0);
+	Depth = Abs(r1 - r0);
 	return true;
 }
 
@@ -671,7 +671,7 @@ scalar DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
 
 	scalar c1 = w * v;
 	if (c1 <= 0)
-		return (p - u0).Length() * Sign(HalfPlaneSign(u0, u1, p)); // Ìû æå õîòèì ïîëó÷èòü ðàññòîÿíèå ñî çíàêîì äàæå åñëè ýòî ðàññòîÿíèå äî êîíöîâ îòðåçêà.
+		return (p - u0).Length() * Sign(HalfPlaneSign(u0, u1, p)); // ÐœÑ‹ Ð¶Ðµ Ñ…Ð¾Ñ‚Ð¸Ð¼ Ð¿Ð¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ñ€Ð°ÑÑÑ‚Ð¾ÑÐ½Ð¸Ðµ ÑÐ¾ Ð·Ð½Ð°ÐºÐ¾Ð¼ Ð´Ð°Ð¶Ðµ ÐµÑÐ»Ð¸ ÑÑ‚Ð¾ Ñ€Ð°ÑÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð´Ð¾ ÐºÐ¾Ð½Ñ†Ð¾Ð² Ð¾Ñ‚Ñ€ÐµÐ·ÐºÐ°.
 
 	scalar c2 = v * v;
 	if (c2 <= c1)

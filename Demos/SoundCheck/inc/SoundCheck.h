@@ -57,15 +57,6 @@ public:
 		FontManager->PrintEx(5, ScreenHeight - 90, 0.0f, "You can try to enter file name and click Play");
 		FontManager->PrintEx(5, ScreenHeight - 120, 0.0f, "to play it as music");
 
-		CPrimitiveRender pr;
-		/*pr.lClr = RGBAf(0.5f, 0.5f, 0.5f, 0.5f);
-		pr.sClr = RGBAf(0.5f, 0.5f, 0.5f, 0.5f);
-		pr.pClr = RGBAf(0.5f, 0.5f, 0.5f, 0.5f);*/
-		glLoadIdentity();
-		pr.grArrowL(Vector2(320.0f, (scalar) (ScreenHeight - 240)), Vector2(320.0f, (scalar) (ScreenHeight - 200)));
-
-		FontManager->PrintEx(5, ScreenHeight - 270, 0.0f, "GUI is unstable and may crash - you've been warned...");
-
 		return true;
 	}
 };
