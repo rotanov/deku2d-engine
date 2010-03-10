@@ -2,6 +2,7 @@
 //#include "Game.h" 
 #include "Tanks.h"
 #include "TanksNetwork.h"
+#include "2de_Gui.h"
 
 CEngine* Ninja = CEngine::Instance();
 //////////////////////////////////////////////////////////////////////////
@@ -54,7 +55,7 @@ public:
 	{
 		glLoadIdentity();
 		Font->Pos = fPosition;
-		Font->scale.In(SCALE_TITLE, SCALE_TITLE);
+		Font->scale = Vector2(SCALE_TITLE, SCALE_TITLE);
 
 		FadeClr.glSet();
 		FontEffect->ColorStart = FadeClr;

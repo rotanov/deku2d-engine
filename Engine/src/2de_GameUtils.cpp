@@ -247,7 +247,7 @@ bool CCompas::Render()
 		v1 = CRenderManager::Instance()->Camera.Point;
 		n = (-v1).Normalized();
 		float depth = v1.Length()/40.0f;
-		depth = clampf(depth, 0.0f, 90.0f);
+		depth = Clamp(depth, 0.0f, 90.0f);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 		glEnable(GL_LINE_WIDTH);
 		glLineWidth(3.0f);

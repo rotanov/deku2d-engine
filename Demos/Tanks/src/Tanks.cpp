@@ -45,7 +45,7 @@ bool CTank::Update(scalar dt)
 	if (isWalking)
 	{
 		Velocity += 0.5f;
-		Velocity = clampf(Velocity, 0.0f, 5.0f);
+		Velocity = Clamp(Velocity, 0.0f, 5.0f);
 	}
 	Position += Direction*Velocity;
 	Velocity*=0.9f;
@@ -243,10 +243,10 @@ bool CTankManager::Render()
 	CFont *Font = CFontManager::Instance()->GetFont("Font");
 	Font->tClr = COLOR_P1;
 	Font->SetDepth(0.5f);
-	Font->Pos.In(10, 460);
+	Font->Pos = Vector2(10, 460);
 	Font->Print("Player1 health: %d", GetPlayer(0)->Health);
 	Font->tClr = COLOR_P2;
-	Font->Pos.In(490, 460);
+	Font->Pos = Vector2(490, 460);
 	Font->Print("Player2 health: %d", GetPlayer(1)->Health);
 	COLOR_WHITE.glSet();
 	return true;

@@ -2,6 +2,7 @@
 #define _SOUND_CHECK_H
 
 #include "2de_Engine.h"
+#include "2de_Gui.h"
 
 class CSoundObject : public CObject
 {

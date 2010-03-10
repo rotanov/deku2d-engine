@@ -86,10 +86,8 @@ typedef bool (*EventFunc)(SDL_Event&);
 #define KEY_PRESSED		0x00
 #define KEY_RELEASED	0x01
 
-// Это для улучшения читабельности дефайн. Тоесть мы хотим бесконечный цикл: for(;;). А можно for EVER.
-// Хотя выглядит как выебон.
-#define EVER (;;)
-#define Forever for EVER
+//	"Forever" instead of "for(;;)", anyway, just kidding.
+#define Forever for(;;)
 
 /**
 *	Это дефайны для флагов свойств объекта 
@@ -115,25 +113,26 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 	delete [] a, a = NULL;
 }
 
-// Lulz!
+// I did it for teh lulz!
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
+// For sure, colors constants should be placed somewhere not there.
 #define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
 #define COLOR_RED	RGBAf(0.98f, 0.05f, 0.1f, 1.0f)
 
-
-
-
 /**
-*	CObject - базовый класс. Всё наследовать от него.
+*	CObject - базовый класс. <strike>Всё</strike> наследовать от него. На самом деле не всё.
 */
 
 class CObject
 {
 public:
-	unsigned int	type;	// type - флаги свойств объекта. 
+	unsigned int	type;	//	type - флаги свойств объекта. Я думаю,
+							//	что это устаревший С like подход, который
+							//	во-первых, не факт, что вообще нужен нам,
+							//	во-вторых - лучше заменить каким-нибудь другим.
 
 	virtual			~CObject(){};
 	CObject();

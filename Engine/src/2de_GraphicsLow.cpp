@@ -523,7 +523,7 @@ int CFont::StringCoordToCursorPos(const char *text, int x, int y)
 void CFont::SetDepth( float _depth )
 {
 	Depth = _depth;
-	Depth = clampf(Depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
+	Depth = Clamp(Depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
 }
 
 void CFont::PointTo(Vector2 *_p)
@@ -826,7 +826,7 @@ bool CFontManager::Print(int x, int y, float depth, const string &text)
 		return false;
 
 	CurrentFont->SetDepth(depth);
-	CurrentFont->Pos.In(x, y);
+	CurrentFont->Pos  = Vector2(x, y);
 	CurrentFont->Print(text.c_str());
 	return true;
 }
@@ -843,7 +843,7 @@ bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 	va_end(ap);
 
 	CurrentFont->SetDepth(depth);
-	CurrentFont->Pos.In(x, y);
+	CurrentFont->Pos = Vector2(x, y);
 	CurrentFont->Print(temp);
 	return true;
 }

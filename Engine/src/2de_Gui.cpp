@@ -1,1678 +1,865 @@
-// Полное загибание ололо, от безысходности, надо же как-то конфликты имён править.
-#ifdef _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
-
 #include "2de_Gui.h"
 #include "2de_Engine.h"
-//GUI scheme or may be it is "skin"
-CGUIScheme				*GUIScheme=NULL;
-bool					szBind=true;
-CList				Objects, Forms;
-int						_mx, _my;
-bool					GUICreated=false;
-bool					_Mbt[10];
-CGraphObj				*MouseFocus = NULL, *Focus = NULL;
-int						CTag = 0;
-CFontManager			*FontManager = NULL;
-char					_key = 0;
-CEngine*				engine = NULL;
-int						scrheight, scrwidth;
-// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ!!! СОТНИ ИХ!!! Нахуй их. Решительно.
 
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//GUI
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////
+// CGUIObjectBase
 
-bool FormSort(CObject *obj1, CObject *obj2)
+CGUIObjectBase::CGUIObjectBase()
 {
-	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	return (dynamic_cast<PWidget>(obj1))->Tag <= (dynamic_cast<PWidget>(obj2))->Tag;
+	Font = NULL;
+	PRender = NULL;
+	Style = NULL;
+	Text = "";
+	CallProc = NULL;
+	Caller = NULL;
+
+	MouseState.Hovered = false;
+	MouseState.Pressed = false;
+	MouseState.PressedInside = false;
+	MouseState.PressedOutside = false;
+	PreviousMouseState.Hovered = false;
+	PreviousMouseState.Pressed = false;
+	PreviousMouseState.PressedInside = false;
+	PreviousMouseState.PressedOutside = false;
+	WidgetState.Hovered = false;
+	WidgetState.Pressed = false;
+	WidgetState.PressedInside = false;
+	WidgetState.PressedOutside = false;
 }
 
-bool InvFormSort(CObject *obj1, CObject *obj2)
+CGUIObjectBase::~CGUIObjectBase()
 {
-	(dynamic_cast<PWidget>(obj1))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj1))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	(dynamic_cast<PWidget>(obj2))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj2))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-	return (dynamic_cast<PWidget>(obj1))->Tag >= (dynamic_cast<PWidget>(obj2))->Tag;
 }
 
-bool MouseIn(int l, int t, int w, int h)
+CFont* CGUIObjectBase::GetFont() const
 {
-	int r = l + w;
-	int b = t + h;
-	SDL_GetMouseState(&_mx, &_my);
+	return Font;
+}
 
-	if (l>r)
+void CGUIObjectBase::SetFont(CFont *AFont)
+{
+	Font = AFont;
+}
+
+CPrimitiveRender* CGUIObjectBase::GetPrimitiveRender() const
+{
+	return PRender;
+}
+
+void CGUIObjectBase::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
+{
+	PRender = APrimitiveRender;
+}
+
+
+CGUIStyle* CGUIObjectBase::GetStyle() const
+{
+	return Style;
+}
+
+void CGUIObjectBase::SetStyle(CGUIStyle *AStyle)
+{
+	Style = AStyle;
+}
+
+Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
+{
+	Vector2 Result;
+	Result.x = std::max(Coords.x - aabb.vMin.x, 0.0f);
+	Result.y = std::max(Coords.y - aabb.vMin.y, 0.0f);
+	return Result;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CGUIObject
+
+CGUIObject::CGUIObject()
+{
+	CGUIManager::Instance()->AddObject(this);
+	SetParent(CGUIManager::Instance());
+}
+
+CGUIObject::CGUIObject(CGUIObjectBase *AParent)
+{
+	CGUIManager::Instance()->AddObject(this);
+	SetParent(AParent);
+}
+
+bool CGUIObject::isFocused() const
+{
+	return (CGUIManager::Instance()->GetFocusedObject() == this);
+}
+
+void CGUIObject::Focus()
+{
+	CGUIManager::Instance()->SetFocus(this);
+}
+
+void CGUIObject::SetParent(CGUIObjectBase *AParent)
+{
+	Parent = AParent;
+	if (!AParent)
 	{
-		int tm = l;
-		l = r;
-		r = tm;
-	}
-	if (t>b)
-	{
-		int tm = t;
-		t = b;
-		b = tm;
-	}
-	if (((_mx >= l) && (_mx <= r)) && ((_my >= t) && (_my <= b)))
-		return 1;
-
-	return 0;
-}
-
-bool MouseInObjRect(PWidget obj)
-{
-	int l, t;
-	l = obj->GetLeft();
-	t = obj->GetTop();
-	PWidget tmpobj = obj;
-	return MouseIn(l, t, obj->Width, obj->Height);
-}
-bool MbState(byte btn)
-{
-	return _Mbt[btn];
-}
-
-
-bool GUIKeyUp(char key, SDLKey sym)
-{
-	if (Focus!=NULL)
-		Focus->KeyProcess(sym, GUI_KEYUP);
-	return 1;
-}
-bool GUIKeyDown(char key, SDLKey sym)
-{
-	_key = key;
-	if (Focus!=NULL)
-		Focus->KeyProcess(sym, GUI_KEYDOWN);
-	return 1;
-}
-bool GUIMbDown(int x, int y, byte btn)
-{
-	_mx = x;
-	_my = y;
-	_Mbt[btn] = 1;
-	if (MouseFocus!=NULL)
-		MouseFocus->MouseProcess(btn, GUI_MBDOWN);
-	return 1;
-}
-bool GUIMbUp(int x, int y, byte btn)
-{
-	_mx = x;
-	_my = y;
-	if (_Mbt[btn]!=0)
-		if (MouseFocus!=NULL)
-			MouseFocus->MouseProcess(btn, GUI_MBCLICK);
-	else
-		if (MouseFocus!=NULL)
-			MouseFocus->MouseProcess(btn, GUI_MBUP);
-	_Mbt[btn] = 0;
-	return 1;
-}
-
-// bool GUIMbMove(int x, int y, byte btn)
-// {
-// 	_mx = x;
-// 	_my = y;
-// 	return 1;
-// }
-
-void						clearWidget(PWidget res)
-{
-	res->Align = 0;
-	res->Caption="";
-	res->Enabled = 1;
-	res->Height = 0;
-	res->Left = 0;
-	res->fnt = NULL;
-	res->MinHeight = 0;
-	res->MinWidth = 0;
-	res->name="";
-	ToggleLog(0);
-	res->Parent = dynamic_cast<PWidget>(Objects.GetObject((string*)"ScreenForm"));
-	ToggleLog(1);
-	res->Top = 0;
-	memset(res->type, 0, 100);
-	res->Visible = 0;
-	res->Width = 0;
-}
-
-PWidget		newWidget(char *name, unsigned int Style){
-	//first wee need to select proper class to create else raise exception(but i think better
-	//will be to create simple dummy
-	PWidget res=NULL;
-	switch (Style & STYLE_OBJMASK)
-	{
-	case STYLE_OBJFORM:
-		res = new CForm(Style);
-		clearWidget(res);
-		res->name=name;
-		if (!(Style & STYLE_ADDTOLISTMASK))
-		{
-			Objects.AddObject(res);
-			if (strcmp(name, "!@#$%^&*()") != 0 )
-				Forms.AddObject(res);
-		}
-		res->Tag = CTag;
-		CTag++;
-		return res;
-		break;
-	case STYLE_OBJBUTTON:
-		res = new CButton(Style);
-		clearWidget(res);
-		res->name=name;
-		if (!(Style & STYLE_ADDTOLISTMASK))
-			Objects.AddObject(res);
-		res->Tag = CTag;
-		CTag++;
-		return res;
-		break;
-	case STYLE_OBJEDIT:
-		res = new CEdit(Style);
-		clearWidget(res);
-		res->name=name;
-		if (!(Style & STYLE_ADDTOLISTMASK))
-			Objects.AddObject(res);
-		res->Tag = CTag;
-		CTag++;
-		return res;
-		break;
-	default:
-/*		res = szWidgets.Items[szWidgets.ItemCount] = new Cdummy();
-		clearWidget(res);
-		szWidgets.ItemCount++;
-		return res;*/
-		return NULL;
-		break;
-	}
-}
-void		FormAddWidget(PWidget obj, PWidget form){
-	if (obj==NULL)
-		return;
-	if (form == NULL)
-	{
-		CForm *__form = dynamic_cast<CForm*>(Objects.GetObject((string*)"ScreenForm"));
-		if (__form != NULL)
-		{
-			__form->Items.AddObject(obj);
-			obj->Parent = __form;
-		}
-		return;
-	}
-	if (!ISFORM(form))
-		return;
-	CForm *_form=(CForm*)form;
-	_form->Items.AddObject(obj);
-	obj->Parent=form;
-}
-void		showWidget(PWidget obj){
-	if (obj)
-		obj->Visible = true;
-}
-void		hideWidget(PWidget obj){
-	if (obj)
-		obj->Visible = false;
-}
-void		enableWidget(PWidget obj){
-	if (obj)
-		obj->Enabled = true;
-}
-void		disableWidget(PWidget obj){
-	if (obj)
-		obj->Enabled = false;
-}
-void		setWidgetStyle(PWidget obj, unsigned int Style){
-	if (!obj) return;
-	obj->setStyle(Style);
-}
-PWidget		getWidget(char *name){
-	return dynamic_cast<PWidget>(Objects.GetObject((string*)name));
-}
-
-void CGraphObj::setStyle(unsigned int _Style)
-{
-	Style=(Style & STYLE_OBJMASK) + (_Style & XSTYLE_MASK); 
-}
-void CGraphObj::SetStyle(unsigned int style)
-{
-	Style=style; 
-}
-
-void CGraphObj::ReadComponent(CFile f)
-{
-}
-
-int CGraphObj::GetLeft()
-{
-	int l;
-	l = 0;
-	PWidget tmpobj = this;
-	while (tmpobj != NULL)
-	{
-		l += tmpobj->Left;
-		tmpobj = tmpobj->Parent;
-	}
-	return l;
-}
-
-int CGraphObj::GetTop()
-{
-	int t;
-	t = 0;
-	PWidget tmpobj = this;
-	while (tmpobj != NULL)
-	{
-		t += tmpobj->Top;
-		if (ISFORM(tmpobj))
-		{
-			if (((CForm*)tmpobj)->Properties[GUI_DRAWFORMHEADER])
-				t+= ((CForm*)tmpobj)->HeaderHeight;
-		}
-		tmpobj = tmpobj->Parent;
-	}
-	return t;
-}
-
-bool CGraphObj::SetFont( string FontName )
-{
-	Font = FontName;
-	fnt = FontManager->GetFontEx(FontName);
-	return (fnt!=NULL);
-}
-
-void CGraphObj::SetCaption( string _caption )
-{
-	Caption = _caption;
-}
-
-void CGraphObj::MouseProcess( byte btn, byte event )
-{
-	if (event==GUI_MBDOWN && btn < 3)
-	{
-		if (MouseInObjRect(this))
-		{
-			//SAFECALL(onClick, this);
-//			KeyState = 0;
-//			if (Focus)
-//			{
-////				if (typeid(*Focus).name() == "class CEdit")
-////				{
-////				if (!dynamic_cast<PWidget>(Focus)->mbpr)
-//					SetFocus();
-////				}
-////				else
-////					Focus = this;
-//			}
-//			else
-			SetFocus();
-		}
-	}
-}
-
-void CGraphObj::SetFocus()
-{
-	Focus = this;
-}
-
-void CGraphObj::KeyProcess( SDLKey &btn, byte event )
-{
-	if (btn == SDLK_TAB && event == GUI_KEYUP)
-	{
-		if (Focus != NULL && Focus->Parent != NULL)
-		{
-			dynamic_cast<CControl*>(Focus->Parent)->Next();
-		}
-	}
-	if (btn == SDLK_RETURN && event == GUI_KEYUP)
-	{
-		if (Focus != NULL)
-		{
-			SAFECALL(Focus->onAccept, this);
-		}
-	}
-}
-/*void BeginUI()
-{
-	szBind=false;
-}
-void EndUI()
-{
-	szBind=true;
-}*/
-CGUIScheme::CGUIScheme(char *fname, char *tname)
-{
-	//creating new form( - main form)
-	for (int i = 0; i < 200 ; i++) //!
-		objects[i] = NULL;
-	CForm *frm = (CForm*)newWidget("ScreenForm", STYLE_OBJFORM);
-	frm->Width = scrwidth;
-	frm->Height = scrheight;
-	frm->Left = 0;
-	frm->Top = 0;
-	frm->Properties[GUI_DRAWFORMHEADER] = 0;
-	frm->Properties[GUI_DRAWFORMBODY] = 0;
-	frm->Properties[GUI_FORMRESIZABLE] = 0;
-	frm->Properties[GUI_FORMCANMOVE] = 0;
-	frm->Visible = true;
-	frm->Enabled = true;
-	CFile f;
-	GUIScheme = this;
-	if (fname==NULL||tname==NULL)
-	{
-		Log("ERROR","Specified pointer has NULL value!",fname);
-		return;
-	}
-	if (f.Open(fname,CFILE_READ))
-	{
-		Log("INFO","Loading GUI scheme \"%s\".",fname);
-		byte b=0;
-		f.Read(&b, 1);
-		if (b!='D')
-		{
-			Log("ERROR","File %s has unknown format or damaged.",fname);
-			f.Close();
+		Parent = CGUIManager::Instance();	// if parent feels bad, reparent GUI object to CGUIManager
+		if (!Parent)				// even CGUIManager feels bad.. how terrible...
 			return;
-		}
-		f.Read(&b, 1);
-		if (b!='G')
+	}
+	Style = Parent->GetStyle();
+	Font = Parent->GetFont();
+	PRender = Parent->GetPrimitiveRender();
+	Color = Parent->Color;	// Color is deprecated for GUI objects (really not used in CButton, CEdit, but there is something related to Color in CMenuItem), use CGUIStyle instead
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CGUIManager
+
+CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), tabholded(false)
+{
+	SetName("CGUIManager");
+	FocusedOn = NULL;
+	FocusedOnListNode = NULL;
+	PRender = new CPrimitiveRender;
+	Style = new CGUIStyle;
+	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	Font = Style->Font;
+}
+
+bool CGUIManager::Update(scalar dt)
+{
+#ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
+	if (tabholded)
+	{
+		TimerAccum += dt*1000;
+		if (!repeatstarted)
 		{
-			Log("ERROR","File %s has unknown format or damaged.",fname);
-			f.Close();
-			return;
-		}
-		f.Read(&b, 1);
-		if (b!='K')
-		{
-			Log("ERROR","File %s has unknown format or damaged.",fname);
-			f.Close();
-			return;
-		}
-		name = "";
-		f.ReadString(name);
-		f.Read(&StyleCount, 4);
-		for (int i = 0;i < StyleCount;i++)
-		{
-			f.Read(&Styles[i], 20);
-		}
-		int type=0, tmp=0;
-		f.Read(&ObjCount, 4);
-		for (int i = 0;i < ObjCount;i++)
-		{
-			f.Read(&type, 4);
-			f.Read(&tmp, 4);
-			switch (type)
+			if (TimerAccum > KeyHoldRepeatDelay)
 			{
-			case 0:
-				{
-//					color Color
-//						style Style
-//						int Height
-//						string Font
-//# -Body----------------------
-//						-Body
-//						style Style
-//						int MinHeight
-//						int MinWidth
-//						int MaxHeight
-//						int MaxWidth
-//						int Cursor
-//						end
-					//This is form
-					//now we need to do something xP =)
-					CForm * obj = (CForm*)newWidget("!@#$%^&*()", STYLE_OBJFORM|STYLE_DONOTADD);
-					objects[i] = obj;
-					obj->Tag = i;
-					f.ReadString(obj->name);
-					f.Read(&obj->HeaderColor, 4);
-					f.Read(&obj->HeaderStyle, 4);
-					f.Read(&obj->HeaderHeight, 4);
-					f.ReadString(obj->Font);
-					f.Read(&obj->BodyStyle, 4);
-					f.Read(&obj->MinHeight, 4);
-					f.Read(&obj->MinWidth, 4);
-					f.Read(&obj->MaxHeight, 4);
-					f.Read(&obj->MaxWidth, 4);
-					f.Read(&obj->Cursor, 4);
-					break;
-				}
-			case 1:
-				{
-					//button
-					CButton *obj = (CButton*)newWidget("noname", STYLE_OBJBUTTON|STYLE_DONOTADD);
-					objects[i] = obj;
-					obj->Tag = i;
-			//				string Name
-			//# -Style name
-			//					style Normal
-			//					style On
-			//					style Clicked
-			//					int MinHeight
-			//					int MinWidth
-			//					int MaxHeight
-			//					int MaxWidth
-			//					end
-					f.ReadString(obj->name);
-					f.Read(obj->Styles, 12);
-					f.Read(&obj->MinHeight, 4);
-					f.Read(&obj->MinWidth, 4);
-					f.Read(&obj->MaxHeight, 4);
-					f.Read(&obj->MaxWidth, 4);
-					f.ReadString(obj->Font);
-					//f.Read(&obj->Cursor, 4);
-					break;
-				}
-			case 3: // lol
-				{
-					//edit
-					CEdit *obj = (CEdit*)newWidget("noname", STYLE_OBJEDIT|STYLE_DONOTADD);
-					objects[i] = obj;
-					obj->Tag = i;
-					f.ReadString(obj->name);
-					f.Read(&obj->ThisStyle, 4);
-					f.Read(&obj->MinHeight, 4);
-					f.Read(&obj->MinWidth, 4);
-					f.Read(&obj->MaxHeight, 4);
-					f.Read(&obj->MaxWidth, 4);
-					f.Read(&obj->Cursor, 4);
-					break;
-				}
+				TimerAccum = 0;
+				repeatstarted = true;
 			}
 		}
-		
-		f.Close();
-		Log("INFO","Gui Scheme \"%s\" loaded.",name.data());
-		ImgData.LoadTexture(tname);
+		else
+		{
+			if (TimerAccum > KeyHoldRepeatInterval)
+			{
+				TimerAccum = 0;
+				InputHandling(KEY_PRESSED, SDLK_TAB, SDLMod(0), 0);
+			}
+		}
 	}
 	else
 	{
-		Log("ERROR","Cannot load GUI Scheme from file %s .",fname);
+		TimerAccum = 0;
+		repeatstarted = false;
 	}
-}
-int	CGUIScheme::GetXOffset(int StInd)
-{
-	return Styles[StInd].Data[4];
-}
-int	CGUIScheme::GetYOffset(int StInd)
-{
-	return Styles[StInd].Data[5];
-}
-int	CGUIScheme::GetCWidth(int StInd, int w)
-{
-	return w - Styles[StInd].Data[4] - Styles[StInd].Data[6];
-}
-int	CGUIScheme::GetCHeight(int StInd, int h)
-{
-	return h - Styles[StInd].Data[5] - Styles[StInd].Data[7];
-}
-
-void CGUIScheme::BeginUI()
-{
-	GUIScheme=this;
-//	szBind = true;
-/*	else
-	{
-		Log("ERROR", "Cannot bind GUI scheme %s!", name);
-		return;
-	}*/
-	Drawing = 1;
-//	ImgData.BeginDraw(); УБРАЛ
-}
-void CGUIScheme::EndUI()
-{
-	if (Drawing)
-	//	ImgData.EndDraw(); УБРАЛ
-	Drawing = 0;
-}
-void CGUIScheme::_Draw(int StInd, byte target, int x, int y, float z, int w, int h)
-{
-	//now drawing xP
-	if (!Drawing)
-		return;
-	if (target == 0|| target > 8)
-		//ImgData.PushQuadEx(x,y,z,w,h,Styles[StInd].Data[0], Styles[StInd].Data[1], Styles[StInd].Data[4], Styles[StInd].Data[5], 0); //- lt УБРАЛ
-	if (target == 1)
-		//ImgData.PushQuadEx(x,y,z,w,h, УБРАЛ
-// 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
-// 		Styles[StInd].Data[1],
-// 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
-// 		Styles[StInd].Data[5], Styles[StInd].Data[9]);//t
-	if (target == 2)
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],//mb - 4
-// 		Styles[StInd].Data[1],
-// 		Styles[StInd].Data[6],//4, 5
-// 		Styles[StInd].Data[7], 0);// rt
-	if (target == 3)
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0],
-// 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
-// 		Styles[StInd].Data[4],
-// 		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//l
-	if (target == 4)
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
-// 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
-// 		Styles[StInd].Data[2] - Styles[StInd].Data[4] - Styles[StInd].Data[6],
-// 		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[8]);//c
-	if (target == 5)
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[4],
-// 		Styles[StInd].Data[1] + Styles[StInd].Data[5],
-// 		Styles[StInd].Data[6],
-// 		Styles[StInd].Data[3] - Styles[StInd].Data[7] - Styles[StInd].Data[5], Styles[StInd].Data[9]);//r
-	if (target == 6)
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0],
-// 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
-// 		Styles[StInd].Data[4],
-// 		Styles[StInd].Data[7], 0);//bl
-	if (target == 7)
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0] + Styles[StInd].Data[4],
-// 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
-// 		Styles[StInd].Data[2] - Styles[StInd].Data[6] - Styles[StInd].Data[4],
-// 		Styles[StInd].Data[7], Styles[StInd].Data[9]);//b
-	if (target == 8);
-// 		ImgData.PushQuadEx(x,y,z,w,h,
-// 		Styles[StInd].Data[0] + Styles[StInd].Data[2] - Styles[StInd].Data[6],
-// 		Styles[StInd].Data[1] + Styles[StInd].Data[3] - Styles[StInd].Data[7],
-// 		Styles[StInd].Data[6],
-// 		Styles[StInd].Data[7], 0);//br
-
-/// Кстати, то, что я закомментил выглядит как говнокод, что, правда ничего нельзя сделать?
-}
-bool CGUIScheme::Draw(int StInd, int x, int y, float z, int w, int h)
-{
-	_Draw(StInd, 0, x, y, z, Styles[StInd].Data[4], Styles[StInd].Data[5]);
-	_Draw(StInd, 1, x + Styles[StInd].Data[4], y, z, w - Styles[StInd].Data[4] - Styles[StInd].Data[6], Styles[StInd].Data[5]);
-	_Draw(StInd, 2, x + w - Styles[StInd].Data[6], y, z, Styles[StInd].Data[6], Styles[StInd].Data[5]);
-	_Draw(StInd, 3, x, y + Styles[StInd].Data[5], z, Styles[StInd].Data[4], h - Styles[StInd].Data[5] - Styles[StInd].Data[7]);
-	_Draw(StInd, 4, x + Styles[StInd].Data[4], y + Styles[StInd].Data[5], z, w - Styles[StInd].Data[4] - Styles[StInd].Data[6], h - Styles[StInd].Data[5] - Styles[StInd].Data[7]);
-	_Draw(StInd, 5, x + w - Styles[StInd].Data[6], y + Styles[StInd].Data[5], z, Styles[StInd].Data[6], h - Styles[StInd].Data[5] - Styles[StInd].Data[7]);
-	_Draw(StInd, 6, x, y + h - Styles[StInd].Data[7], z, Styles[StInd].Data[4], Styles[StInd].Data[7]);
-	_Draw(StInd, 7, x + Styles[StInd].Data[4], y + h - Styles[StInd].Data[7], z, w - Styles[StInd].Data[4] - Styles[StInd].Data[6], Styles[StInd].Data[7]);
-	_Draw(StInd, 8, x + w - Styles[StInd].Data[6], y + h - Styles[StInd].Data[7], z, Styles[StInd].Data[6], Styles[StInd].Data[7]);
+#endif
 	return true;
 }
-void CGUIScheme::Release()
+
+bool CGUIManager::Render()
 {
+	glLoadIdentity();
+	if (FocusedOn)
+	{
+		PRender->LineStippleEnabled = true;
+		PRender->lwidth = Style->Metrics.FocusRectLineWidth;
+		PRender->lClr = Style->Colors.FocusRect;
+		PRender->grRectL(FocusedOn->aabb.Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMin,
+			FocusedOn->aabb.Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMax);	
+		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
+		PRender->lwidth = 1.0f;
+	}
+	//FocusedOn->PRender->gDrawBBox(FocusedOn->aabb.Inflated(5, 5));
+	return true;
 }
 
-PWidget CGUIScheme::CreateWidget( int kind )
+bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-//	PWidget tmp = NULL;
-//	for (int i = 0; i < ObjCount; i++)
-//	/{
-//		if (objects[i]->getStyle())
-//	}
-	PWidget res = NULL;
-	string _tmp = typeid(*objects[kind]).name();
-	if (_tmp == "class CButton")
+	switch(state)
 	{
-		//here is button
-		res = newWidget("NoName", STYLE_OBJBUTTON);
-		
-		/*CButton *tmp = (CButton*)objects[kind];
-		res->name = tmp->name + "_noname";
-		memcpy(res->Styles, tmp->Styles, 12);
-		res->MinHeight = tmp->MinHeight;
-		res->MinWidth = tmp->MinWidth;
-		res->MaxHeight = tmp->MaxHeight;
-		res->MaxWidth = tmp->MaxWidth;*/
-	}
-	if (_tmp == "class CForm")
-	{
-		res = newWidget("!@#$%^&*()", STYLE_OBJFORM);
-		res->name = "NoName";
-	}
-	CopyWidget(kind, res);
-//	switch (typeid(objects[kind]).name))
-//	{
-//	case "":
-//	}
-	return res;
-}
-
-void CGUIScheme::CopyWidget( int kind, PWidget wdg )
-{
-	if (wdg == NULL)
-		return;
-	if (objects[kind] == NULL) // И кто блять будет проверять, а? Вот здесь падало. Косяк то не здесь, но если бы не это, то прога бы нормально завершилась
-		return;
-	string _tmp = typeid(*objects[kind]).name();
-	if (_tmp == "class CButton")
-	{
-		//here is button
-		CButton *res = (CButton*)wdg;
-		CButton *tmp = (CButton*)objects[kind];
-//		res->name = tmp->name + "_noname";
-		memcpy(res->Styles, tmp->Styles, 12);
-		res->MinHeight = tmp->MinHeight;
-		res->MinWidth = tmp->MinWidth;
-		res->MaxHeight = tmp->MaxHeight;
-		res->MaxWidth = tmp->MaxWidth;
-		res->Font		   = tmp->Font;
-	}
-	if (_tmp == "class CForm")
-	{
-		CForm *res = (CForm*)wdg;
-		CForm *tmp = (CForm*)objects[kind];
-		res->HeaderColor   = tmp->HeaderColor;
-		res->HeaderStyle   = tmp->HeaderStyle;
-		res->HeaderHeight  = tmp->HeaderHeight;
-		res->Font		   = tmp->Font;
-		res->BodyStyle	   = tmp->BodyStyle;
-		res->MinHeight	   = tmp->MinHeight;
-		res->MinWidth	   = tmp->MinWidth;
-		res->MaxHeight	   = tmp->MaxHeight;
-		res->MaxWidth	   = tmp->MaxWidth;
-		res->Cursor		   = tmp->Cursor;
-		res->Font		   = tmp->Font;
-	}
-	if (_tmp == "class CEdit")
-	{
-		CEdit *res = (CEdit*)wdg;
-		CEdit *tmp = (CEdit*)objects[kind];
-		res->ThisStyle	   = tmp->ThisStyle;
-		res->MinHeight	   = tmp->MinHeight;
-		res->MinWidth	   = tmp->MinWidth;
-		res->MaxHeight	   = tmp->MaxHeight;
-		res->MaxWidth	   = tmp->MaxWidth;
-		res->Cursor		   = tmp->Cursor;
-		res->Font		   = tmp->Font;
-	}
-/*	color Color
-		style Style
-		int Height
-		string Font
-# -Body----------------------
-		-Body
-		style Style
-		int MinHeight
-		int MinWidth
-		int MaxHeight
-		int MaxWidth
-		int Cursor*/
-}
-
-CGUIScheme::~CGUIScheme()
-{
-	for (int i = 0; i < ObjCount; i++)
-		SAFE_DELETE(objects[i]);
-}
-CControl::CControl()
-{
-//	Style=_Style;
-	CGraphObj::CGraphObj();
-	name = "";
-	isControl = true;
-}
-
-void CControl::Next()
-{
-	Items.Sort(FormSort);
-	CObject *tmp;
-	bool hitfocus = Items.GetObjectsCount()==0;
-	for (int i = 0; i < 2; i++)
-	{
-		Items.Reset();
-		while (Items.Enum(tmp))
+	case KEY_PRESSED:
+		switch(key)
 		{
-			PWidget obj = dynamic_cast<PWidget>(tmp);
-			if (hitfocus && obj->Enabled)
+		case SDLK_TAB:
+			tabholded = true;
+			if (FocusedOnListNode != NULL)
 			{
-				if (obj->isControl)
-				{
-					PWidget tmpfocus = Focus;
-					Focus = NULL;
-					dynamic_cast<CControl*>(obj)->Next();
-					if (Focus != NULL)
-					{
-						return;
-					}
-					Focus = tmpfocus;
-				}
+				if (mod & KMOD_SHIFT)
+					FocusedOnListNode = FocusedOnListNode->prev;
 				else
-				{
-					Focus = dynamic_cast<PWidget>(tmp);
-					return;
-				}
+					FocusedOnListNode = FocusedOnListNode->next;
+
+				if (FocusedOnListNode)
+					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
 
 			}
-			hitfocus = tmp==Focus;
-		}
-	}
-}
-CForm::CForm(unsigned int _Style)
-{
-	CControl::CControl();
-	Style=_Style;
-	name = "";
-}
-bool FormDraw(PWidget obj)
-{
-	if (obj->Visible)
-		obj->Draw();
-	return 1;
-}
-bool FormStep(PWidget obj)
-{
-	obj->Step();
-	return 1;
-}
 
-PWidget addForm( char *Fname )
-{
-	PWidget frm = newWidget("noname", STYLE_OBJFORM);
-	((CForm*)frm)->LoadForm(Fname);
-	return frm;
-}
-void CForm::Draw()
-{
-	if (!this->Visible)
-		return;
-	if (Properties[GUI_DRAWFORMHEADER] == 1)
-	{
-		// NO~ Даёшь единообразие в хранении цвета! Гет (R/G/B/A) Value идут лесом!!! ДА!!!!
-		//glColor4f((float)_GetRValue(HeaderColor)/256,(float)_GetGValue(HeaderColor)/256,(float)_GetBValue(HeaderColor)/256,1);
-		GUIScheme->Draw(HeaderStyle, Left, Top, ZDepth, Width, HeaderHeight);
-		glColor4f(1,1,1,1);
-		Top = Top + HeaderHeight;
-	}
-	if (Properties[GUI_DRAWFORMBODY] == 1)
-		GUIScheme->Draw(BodyStyle, Left, Top, ZDepth, Width, Height);
-	CObject *obj;
-	Items.Reset();
-	while (Items.Enum(obj))
-	{
-		dynamic_cast<PWidget>(obj)->ZDepth = (float)(Tag/CTag)*(GUI_TOP - GUI_BOTTOM) + GUI_BOTTOM;
-		(dynamic_cast<PWidget>(obj))->Draw();
-	}
-	if (Properties[GUI_DRAWFORMHEADER] == 1)
-		Top = Top - HeaderHeight;
-//	Body.Items.Call(FormDraw);
-	//first of all drawing form but after somethiung else
-}
-
-
-bool CForm::LoadForm(char *Fname)
-{
-	CFile *file = new CFile(Fname, CFILE_READ);
-	byte b = 0;
-	file->Read(&b, 1);
-	if (b != 'D')
-	{
-		file->Close();
-		Log("ERROR", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
-		return 0;
-	}
-	file->Read(&b, 1);
-	if (b != 'F')
-	{
-		file->Close();
-		Log("ERROR", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
-		return 0;
-	}
-	file->Read(&b, 1);
-	if (b != 'M')
-	{
-		file->Close();
-		Log("ERROR", "Failed to load form \"%s\". File is damaged or has unknown extension.", Fname);
-		return 0;
-	}
-	file->ReadString(name);
-	string tmp;
-	file->ReadString(tmp);
-	file->Read(&Width, 4);
-	file->Read(&Height, 4);
-	file->Read(&Left, 4);
-	file->Read(&Top, 4);
-	//now setting form style
-	int fstyle;
-	file->Read(&fstyle, 4);
-	GUIScheme->CopyWidget(fstyle, this);
-	file->Read(&Halign, 4);
-	file->Read(&Valign, 4);
-	file->Read(Properties, 6);
-	file->ReadString(Caption);
-	int tmpi = 0;
-	file->Read(&tmpi, 4);
-	for (int i = 0; i < tmpi; i++)
-	{
-		//here adding objects...
-		//reading style
-		int st;
-		file->Read(&st, 4);
-		PWidget wdg = GUIScheme->CreateWidget(st);
-		file->ReadString(wdg->name);
-		file->ReadString(wdg->Caption);
-		file->Read(&wdg->Left, 4);
-		file->Read(&wdg->Top, 4);
-		file->Read(&wdg->Width, 4);
-		file->Read(&wdg->Height, 4);
-
-		file->Read(&wdg->Align, 4);
-		file->Read(&wdg->Valign, 4);
-
-		byte b = 0;
-		file->Read(&b, 1);
-		wdg->Visible = (b==1);
-		file->Read(&b, 1);
-		wdg->Enabled = (b==1);
-
-		//here will be script
-		//not implemented... yet...
-
-		int cnt = 0;
-		file->Read(&cnt , 4);
-
-		for (int i = 0; i < cnt; i++)
-		{
-			string __tmp;
-			file->ReadString(__tmp);
-		}
-
-
-		FormAddWidget(wdg, this);
-	}
-	
-	file->Close();
-	delete file;	
-	return 1;
-}
-
-bool CForm::Update( float dt )
-{
-	CObject *tmp;
-	Items.Reset();
-	bool flag = 0;
-	while (Items.Enum(tmp))
-	{
-		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
-		if (MouseInObjRect(obj))
-		{
-			if (((MouseFocus != NULL) && (!ISFORM(MouseFocus))) && (MouseFocus != obj))
+			if (FocusedOnListNode == NULL)
 			{
-				MouseFocus->Update(dt);
-				flag = 1;
+				if (mod & KMOD_SHIFT)
+					FocusedOnListNode = GetLast();
+				else
+					FocusedOnListNode = GetFirst();
+
+				if (FocusedOnListNode)
+					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
 			}
-			MouseFocus = obj;
-			flag = 1;
-			obj->Update(dt);
-			//return true;
 			break;
 		}
+		break;
+	case KEY_RELEASED:
+		switch(key)
+		{
+		case SDLK_TAB:
+			tabholded =  false;
+			break;
+		}
+		break;
 	}
-	if (Focus && Focus != this)
-		Focus->Update(dt);
-	
-	if (MouseFocus != NULL)
-		if (!(ISFORM(MouseFocus)))
-			MouseFocus->Update(dt);
-	if (flag)
-		return true;
-	MouseFocus = this;
+
+	if(FocusedOnListNode)
+		FocusedOn->InputHandling(state, key, mod, letter);
 	return true;
 }
 
-void CForm::DrawText()
+CGUIObject* CGUIManager::GetFocusedObject() const
 {
-	CObject *tmp;
-	Items.Reset();
-		//fnt = FontManager->GetFontEx(Font);
-	if (fnt!=NULL)
+	return FocusedOn;
+}
+
+void CGUIManager::SetFocusedNodeTo(CListNode* AFocusedNode)
+{
+	FocusedOnListNode = AFocusedNode;
+	if (FocusedOnListNode)
+		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
+}
+
+void CGUIManager::SetFocus(CObject* AObject)
+{
+	CListNode* ListNode = GetListNode(AObject);
+	if (ListNode)
 	{
-		//fnt->PrintEx(
-		glColor4f(0,0,1,1);
-		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
-		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
-		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(HeaderStyle);
-		fnt->Pos.y = scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle);
-		fnt->doRenderToRect = true;
-		//fnt->aabb.x = GUIScheme->GetCWidth(HeaderStyle, Width); Самый простой способ избавиться от ошибки при компиляции неиспользуемого кода - закомментировать строку с ошибкой ^^
-		//fnt->aabb.y = GUIScheme->GetCHeight(HeaderStyle, HeaderHeight);
-		fnt->Print(Caption.c_str());
-		fnt->doRenderToRect = false;
-/*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(HeaderStyle)
-			,scrheight-GetTop() + GUIScheme->GetYOffset(HeaderStyle)
-			,ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
-			,GUIScheme->GetCWidth(HeaderStyle, Width)///_szGUIScheme->GetCWidth(Styles[StyleInd], Width)//GUIScheme->GetCWidth(HeaderStyle, Width)
-			,GUIScheme->GetCWidth(HeaderStyle, HeaderHeight)//_szGUIScheme->GetCWidth(Styles[StyleInd], Height)//GUIScheme->GetCWidth(HeaderStyle, HeaderHeight)
-			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_CENTER, (char*)Caption.data());*/
-		glColor4f(1,1,1,1);
-	}
-	while (Items.Enum(tmp))
-	{
-		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
-		obj->DrawText();
+		FocusedOnListNode = ListNode;
+		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
 	}
 }
-//Button functions
-CButton::CButton(unsigned int _Style)
+
+CGUIManager::~CGUIManager()
 {
-	//Zero(name,sizeof(name));
-	CGraphObj::CGraphObj();
-	Style = _Style;
-	StyleInd = 0;
-	onClick = NULL;
+	delete Style;
+	SAFE_DELETE(PRender);   ///////// TODO: NONONONONONONONON DONT DOIT
 }
-CButton::~CButton()
+
+
+//////////////////////////////////////////////////////////////////////////
+// CLabel
+
+CLabel::CLabel(const string &AText /*= ""*/)
 {
+	Text = AText;
 }
-void CButton::Draw()
+
+bool CLabel::Render()
 {
-	if (!Visible)
-		return;
-	PWidget ptr = Parent;
-	int _left = Left;
-	int _top = Top;
-	while (ptr != NULL)
+	CEngine *engine = CEngine::Instance();
+
+	Font->tClr = Style->Colors.LabelText;
+	Font->Pos.x = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).x;
+	Font->Pos.y = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).y;
+
+	PRender->sClr = Style->Colors.ButtonFace;
+	PRender->lClr = Style->Colors.ButtonBorder;
+
+	PRender->grRectS(aabb.vMin, aabb.vMax);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
+	Font->Print(Text.c_str());
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CButton
+
+CButton::CButton()
+{
+	aabb = CAABB(0, 0, 100, 100);
+	Color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);	// deprecated, use style
+	//Text = "You dumb! You called default constructor!";
+	Text = "Button " + itos(GetID());
+}
+
+CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor)
+{
+	aabb = ARect;
+	Color = AColor;	// deprecated, use style
+	Text = AText;
+}
+
+bool CButton::Render()
+{	
+	CEngine *engine = CEngine::Instance();
+
+	// Font = Style->Fonts.ButtonFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
+
+	Font->Pos.x = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).x;
+	Font->Pos.y = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).y;
+
+	Font->tClr = Style->Colors.ButtonText;
+
+	PRender->sClr = Style->Colors.ButtonFace;
+	PRender->lClr = Style->Colors.ButtonBorder;
+	if (WidgetState.Hovered)
 	{
-		_left += ptr->Left;
-		_top += ptr->Top;
-		ptr = ptr->Parent;
+		PRender->sClr = Style->Colors.ButtonFaceHovered;
+		PRender->lClr = Style->Colors.ButtonBorderHovered;
 	}
-	GUIScheme->Draw(Styles[StyleInd], _left, _top, ZDepth, Width, Height);
-}
-void CButton::DrawText()
-{
-//	return;
-	if (!Visible)
-		return;
-	if (fnt == NULL)
-		fnt = FontManager->GetFontEx(Font);
-	if (fnt!=NULL)
+	if (WidgetState.Pressed)
 	{
-		//fnt->PrintEx(
-		glColor4f(0,0,1,1);
-		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
-		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
-		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd]);
-		fnt->Pos.y = scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd]);
-		fnt->doRenderToRect = true;
-//		Самый простой способ избавиться от ошибки при компиляции неиспользуемого кода - закомментировать строку с ошибкой ^^
-//		fnt->aabb.x = GUIScheme->GetCWidth(Styles[StyleInd], Width); 
-//		fnt->aabb.y = GUIScheme->GetCHeight(Styles[StyleInd], Height);
-		fnt->Print(Caption.c_str());
-		fnt->doRenderToRect = false;
-/*		fnt->PrintRectEx(GetLeft() + GUIScheme->GetXOffset(Styles[StyleInd])
-			,scrheight-GetTop() - Height + GUIScheme->GetYOffset(Styles[StyleInd])
-			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
-			,GUIScheme->GetCWidth(Styles[StyleInd], Width)//ClientWidth
-			,GUIScheme->GetCWidth(Styles[StyleInd], Height)//ClientHeight_sz
-			,0,CFONT_VALIGN_CENTER | CFONT_HALIGN_CENTER, (char*)Caption.data());*/
-		glColor4f(1,1,1,1);
+		PRender->sClr = Style->Colors.ButtonFacePressed;
+		PRender->lClr = Style->Colors.ButtonFacePressed;
 	}
+	PRender->grRectS(aabb.vMin, aabb.vMax);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
+	Font->Print(Text.c_str());
+	return true;
 }
+
+
 bool CButton::Update(float dt)
 {
-	//checking enabled
-	if (Width<MinWidth)
-		Width = MinWidth;
-	if (Height<MinHeight)
-		Height = MinHeight;
-	ClientWidth = GUIScheme->GetCWidth(Styles[StyleInd], Width);
-	ClientHeight = GUIScheme->GetCHeight(Styles[StyleInd], Height);
-	if (!Enabled)
-	{
-		StyleInd = 3;
-		return true;
-	}
-	if (MouseInObjRect(this))//MouseFocus == this)//
-	{
-		StyleInd = 1;
-/*		if (MouseFocus != this && MouseFocus != NULL)
-		{
-			if ((MouseFocus->getStyle() & STYLE_OBJMASK) == STYLE_OBJBUTTON)
-				((CButton*)MouseFocus)->StyleInd = 0;
-		}
-//		MouseFocus = this;*/
-		if (MouseFocus == this)
+	Vector2 mouse;
+	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
 
-		if (MbState(SDL_BUTTON_LEFT))
-		{
-			StyleInd = 2;
-		}
+	MouseState.Hovered = aabb.Inside(mouse);
+	MouseState.Pressed = SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1);
+	MouseState.PressedInside = MouseState.Hovered && MouseState.Pressed;
+
+	if (!MouseState.Hovered && MouseState.Pressed && !PreviousMouseState.Pressed)
+		MouseState.PressedOutside = true;
+
+	if (!MouseState.Pressed && PreviousMouseState.Pressed && MouseState.PressedOutside)
+		MouseState.PressedOutside = false;
+
+
+	if (MouseState.Hovered && !PreviousMouseState.Hovered)
+	{
+		WidgetState.Hovered = true;
 	}
-	else{
-/*		if (MouseFocus == this)
-			MouseFocus = NULL;
-		else
-			if (MouseFocus != NULL)
-				MouseFocus->Update(dt);*/
-		StyleInd = 0;
+
+	if (!MouseState.Hovered && PreviousMouseState.Hovered)
+	{
+		WidgetState.Hovered = false;
+	}
+
+	if (MouseState.PressedInside && !PreviousMouseState.PressedInside && !MouseState.PressedOutside)
+	{
+		WidgetState.Pressed = true;
+		Focus();
+	}
+
+	if (!MouseState.PressedInside && PreviousMouseState.PressedInside && !MouseState.PressedOutside)
+	{
+		WidgetState.Pressed = false;
+		if (CallProc && MouseState.Hovered && isFocused())
+			CallProc(Caller);
+	}
+
+	PreviousMouseState = MouseState;
+	return true;
+}
+
+bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+{
+	switch(state)
+	{
+	case KEY_PRESSED:
+		switch(key)
+		{
+		case SDLK_SPACE:
+			WidgetState.Pressed = true;
+			break;
+		case SDLK_RETURN:
+			if (CallProc)
+				CallProc(Caller);
+			break;
+		}
+		break;
+	case KEY_RELEASED:
+		switch(key)
+		{
+		case SDLK_SPACE:
+			WidgetState.Pressed = false;
+			if (CallProc)
+				CallProc(Caller);
+			break;
+		}
+		break;
+	}
+	return true;
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CEdit
+
+CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
+{
+	Selection.Clear(CursorPos);
+}
+
+bool CEdit::Render()
+{
+	CEngine *engine = CEngine::Instance();
+
+	float StringWidth = Font->GetStringWidth(Text.c_str());
+	float StringHeight = Font->GetStringHeight(Text.c_str());
+	float CursorDistance = Font->GetStringWidthEx(0, (CursorPos - VisibleTextOffset), GetVisibleText().c_str());
+
+	// Font = Style->Fonts.EditFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
+
+	Font->Pos.x = (int)aabb.vMin.x + (int)Style->Metrics.EditMargins.x;
+	Font->Pos.y = (int)((aabb.vMin.y + aabb.vMax.y) / 2.0f - StringHeight / 2.0f);
+	Font->tClr = Style->Colors.EditText;
+
+	if (MouseState.Hovered)
+	{
+		PRender->lClr = Style->Colors.EditBorderHovered;
+		PRender->sClr = Style->Colors.EditBackgroundHovered;
+	}
+	else
+	{
+		PRender->lClr = Style->Colors.EditBorder;
+		PRender->sClr = Style->Colors.EditBackground;
+	}
+	PRender->lwidth = Style->Metrics.EditBorderWidth;
+	PRender->grRectS(aabb.vMin, aabb.vMax);
+	PRender->grRectL(aabb.vMin, aabb.vMax);
+	Font->Print(GetVisibleText().c_str());
+	if (isFocused())
+	{
+		if (Selection.Exists())
+		{
+			CAABB SelBox(aabb.vMin.x + Style->Metrics.EditMargins.x +
+				Font->GetStringWidthEx(0, std::max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
+				aabb.vMin.y + Style->Metrics.EditMargins.y,
+				aabb.vMin.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0,
+				std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1), GetVisibleText().c_str()),
+				aabb.vMax.y - Style->Metrics.EditMargins.y);
+
+			PRender->sClr = Style->Colors.EditSelection;
+			PRender->grRectS(SelBox.vMin, SelBox.vMax);
+		}
+		PRender->psize = 2.0f;
+		PRender->lClr = Style->Colors.EditText;
+		PRender->lwidth = 1.0f;
+		PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -Style->Metrics.EditMargins.y).vMax.y),
+			Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -Style->Metrics.EditMargins.y).vMin.y));
 	}
 	return true;
 }
 
-void CButton::MouseProcess(byte btn, byte event)
+bool CEdit::Update(scalar dt)
 {
-	if (!Enabled)
-		return;
-	CGraphObj::MouseProcess(btn, event);
-	if (event==GUI_MBCLICK)
+	Vector2 mouse;
+	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
+
+	MouseState.Hovered = aabb.Inside(mouse);
+	MouseState.Pressed = (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) && MouseState.Hovered;
+
+
+	if (MouseState.Pressed && !PreviousMouseState.Pressed)
+		Focus();
+
+	if (MouseState.Pressed)
 	{
-		if (MouseIn(Left, Top, Width, Height))
+		CursorPos = MouseToCursorPos(mouse);
+		if (!PreviousMouseState.Pressed)
+			Selection.Start = CursorPos;
+		else
+			Selection.End = CursorPos;
+
+		CAABB LeftScrollArea(aabb.vMin.x, aabb.vMin.y, aabb.vMin.x + 5.0f, aabb.vMax.y);
+		CAABB RightScrollArea(aabb.vMax.x - 5.0f, aabb.vMin.y, aabb.vMax.x, aabb.vMax.y);
+
+		if (LeftScrollArea.Inside(mouse))
 		{
-			SAFECALL(onClick, this);
-			Focus = this;
+			// TODO: move this copy-paste from here and from SDLK_LEFT handler to some function...
+			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
+				VisibleTextOffset--;
 		}
-	}
-}
 
-CEdit::CEdit(unsigned int _Style)
-{
-	CGraphObj::CGraphObj();
-	Style = _Style;
-	onKeyPress = NULL;
-	onClick = NULL;
-	SelStart = 0;
-	SelLength = 0;
-	CurrentKey = SDLK_HELP;
-	KeyState = 0;
-	KeyTime = 0;
-	Shift = 0;
-	offset = 0;
-}
-void CEdit::Step()
-{
-	if (Width<MinWidth)
-		Width = MinWidth;
-	if (Height<MinHeight)
-		Height = MinHeight;
-	if (MouseIn(Left, Top, Width, Height))
-	{
-		if (MouseFocus != this && MouseFocus != NULL)
+		if (RightScrollArea.Inside(mouse))
 		{
-			if ((MouseFocus->getStyle() & STYLE_OBJMASK) == STYLE_OBJBUTTON)
-				((CButton*)MouseFocus)->StyleInd = 0;
+			string RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
+
+			while (!isTextFits(RightIncText.c_str()))
+			{
+				VisibleTextOffset++;
+				RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
+			}
 		}
-		MouseFocus = this;
+
+
 	}
+
+	PreviousMouseState = MouseState;
+
+	return true;
 }
 
-void CEdit::Draw()
+bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	//now drawing
-	if (!Visible)
-		return;
-	GUIScheme->Draw(ThisStyle, GetLeft(), GetTop(), 0, Width, Height);
-}
-
-void CEdit::DrawText()
-{
-	if (fnt == NULL)
-		fnt = FontManager->GetFontEx(Font);
-	if (fnt!=NULL || !Visible)
+	// this function has many copy-pasted blocks.. they're all marked with fN, where N is 1, 2, 3, ...
+	// TODO: move 'em all to separate functions
+	// or maybe selection will be handled by some CText or whatever... i just don't know yet..
+	switch(state)
 	{
-		//fnt->PrintEx(
-		//glColor4f(0,0,1,1); > БЛЯТЬ!
-		fnt->tClr = RGBAf(0.1f, 0.2f, 1.0f, 1.0f);
-		int l = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-		fnt->SetAlign(CFONT_HALIGN_CENTER, CFONT_VALIGN_CENTER);
-		fnt->SetDepth(ZDepth + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5));
-		fnt->Pos.x = GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-		fnt->Pos.y = scrheight - GetTop() - Height + GUIScheme->GetYOffset(ThisStyle);
-		fnt->doRenderToRect = true;
-		fnt->isTextSelected = SelLength != 0;
-		fnt->Sel0 = SelStart;
-		fnt->Sel1 = SelStart + SelLength - 1;
-//		fnt->aabb.x = GUIScheme->GetCWidth(ThisStyle, Width);
-//		fnt->aabb.y = GUIScheme->GetCHeight(ThisStyle, Height);
-		fnt->Print(Caption.c_str());
-		fnt->doRenderToRect = false;
-		fnt->isTextSelected = false;
-/*		fnt->PrintSelRect(l
-			,scrheight-GetTop() - Height + GUIScheme->GetYOffset(ThisStyle)
-			,ZDepth + GUI_BOTTOM + (float)(GUI_TOP - GUI_BOTTOM)/(CTag+5)
-			,GUIScheme->GetCWidth(ThisStyle, Width)//ClientWidth
-			,GUIScheme->GetCWidth(ThisStyle, Height)//ClientHeight_sz
-			,offset,CFONT_VALIGN_CENTER | CFONT_HALIGN_LEFT, (char*)Caption.data(), SelStart, SelStart + SelLength - 1);*/
-		
-	}
-}
-
-void CEdit::MouseProcess(byte btn, byte event)
-{
-	if (!Enabled)
-		return;
-	CGraphObj::MouseProcess(btn, event);
-	if (fnt == NULL)
-		fnt = FontManager->GetFontEx(Font);
-	if (fnt == NULL)
-		return;
-
-	//if (event==GUI_MBCLICK)
-	//{
-	//	if (MouseInObjRect(this))
-	//	{
-	//		//SAFECALL(onClick, this);
-	//		KeyState = 0;
-	//		if (Focus)
-	//		{
-	//			if (typeid(*Focus).name() == "class CEdit")
-	//			{
-	//				if (!dynamic_cast<CEdit*>(Focus)->mbpr)
-	//					Focus = this;
-	//			}
-	//			else
-	//				Focus = this;
-	//		}
-	//		else
-	//			Focus = this;
-	//	}
-	//}
-	if (event==GUI_MBDOWN&&btn==1)
-	{
-		//getting position
-		if (!Focus)
-			return;
-		if (MouseIn(GetLeft() + GUIScheme->GetXOffset(ThisStyle),
-					GetTop() + GUIScheme->GetYOffset(ThisStyle),
-					GUIScheme->GetCWidth(ThisStyle, Width),
-					GUIScheme->GetCHeight(ThisStyle, Height)))
+	case KEY_PRESSED:
+		switch(key)
 		{
-			int x, y;
-			SDL_GetMouseState(&x, &y);
-			x -= GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-			//getting letter pos
-			if (!fnt)
-				return;
-			int i = 0;
-			mbpr = 1;
-			for (i = 0; i < Caption.length() - offset; i++)
-				if (fnt->GetStringWidthEx(offset, offset + i - (i > 0), (char*)Caption.data()) >= x)
-					break;
-			if (Shift)
-				SelLength = i + offset - SelStart;
+		case SDLK_BACKSPACE:
+			if (Selection.Exists())
+			{
+				// f1
+				CursorPos = Selection.RangeStart();
+				Text.erase(Selection.RangeStart() + 1, Selection.Length());
+				Selection.Clear();
+			}
 			else
 			{
-				SelStart = i + offset;
-				SelLength = 0;
-			}
-		}
-	}
-	if (event==GUI_MBUP&&btn==1)
-	{
-		mbpr = 0;
-	}
+				if (CursorPos >= 0)
+				{
+					Text.erase(CursorPos, 1);
+					CursorPos--;
 
-}
-void CEdit::KeyProcess(SDLKey &btn, byte event)
-{
-	CGraphObj::KeyProcess(btn, event);
-	if (event == GUI_KEYDOWN)
-	{
-		switch (btn)
-		{
-		case SDLK_LSHIFT:
-			{
-				Shift = 1;
-				KeyState = (KeyState > 0);//0;mb 
-				break;
+					// f2
+					if (VisibleTextOffset > 0)
+						VisibleTextOffset--;
+				}
 			}
-		case SDLK_RSHIFT:
-			{
-				Shift = 1;
-				KeyState = (KeyState > 0);//0;mb 
-				break;
-			}
+			break;
 		case SDLK_DELETE:
+			if (Selection.Exists())
 			{
-				//removing selection and setting key to delete
-				//Caption.erase()
-				if (SelLength != 0)
-				{
-					//Caption.replace(SelStart, SelStart + SelLength, "");
-					Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
-					SelStart = min(SelStart, SelStart + SelLength);
-				}
-				else
-					if (Caption.length() != SelStart)
-						Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
-				SelLength = 0;
-				CurrentKey = SDLK_DELETE;
-				KeyState = 1;
-				KeyTime = SDL_GetTicks();
-				break;
+				// f1
+				CursorPos = Selection.RangeStart();
+				Text.erase(Selection.RangeStart() + 1, Selection.Length());
+				Selection.Clear();
 			}
-		case SDLK_BACKSPACE:
+			else
 			{
-				if (SelLength != 0)
-				{
-					//Caption.replace(SelStart, SelStart + SelLength, "");
-					Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
-					SelStart = min(SelStart, SelStart + SelLength);
-				}
-				else
-					if (0 != SelStart)
-						Caption.erase(Caption.begin() + SelStart - 1, Caption.begin() + SelStart);
-				SelLength = 0;
-				if (SelStart)
-					SelStart--;
-				CurrentKey = SDLK_BACKSPACE;
-				KeyState = 1;
-				KeyTime = SDL_GetTicks();
-				break;
+				Text.erase(CursorPos + 1, 1);
+				// f2
+				if (VisibleTextOffset > 0)
+					VisibleTextOffset--;
 			}
-		case SDLK_LEFT:
-			{
-				if (Shift)
-				{
-					if (SelLength + SelStart> 0)
-						SelLength --;
-				}
-				else
-				{
-					if (SelLength != 0)
-						SelStart = min(SelStart, SelStart + SelLength);
-					else
-						SelStart = max(0, SelStart - 1);
-					SelStart = max(0, SelStart);
-					SelLength = 0;
-				}
-				CurrentKey = SDLK_LEFT;
-				KeyState = 1;
-				KeyTime = SDL_GetTicks();
-				break;
-			}
+			break;
+		case SDLK_LEFT:				
+			if (--CursorPos < -1)
+				CursorPos++;
+
+			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
+				VisibleTextOffset--;
+
+			// f3
+			if (mod & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+			break;
 		case SDLK_RIGHT:
 			{
-				if (Shift)
-				{
-					if (!(SelStart + SelLength >= Caption.length()))
-						SelLength ++;
-				}
+				if (++CursorPos >= Text.length())
+					CursorPos--;
+
+				// f3
+				if (mod & KMOD_SHIFT)
+					Selection.End = CursorPos;
 				else
+					Selection.Clear(CursorPos);
+
+				string RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+
+				while (!isTextFits(RightIncText.c_str()))
 				{
-					if (SelLength == 0)
-					{
-						if (SelStart + 1 > Caption.length())
-							SelStart = Caption.length();
-						else
-							SelStart ++;
-					}
-					else
-						SelStart = max(SelStart + SelLength, SelStart);
-					if (SelStart + 1 > Caption.length())
-						SelStart = Caption.length();
-					SelLength = 0;
+					VisibleTextOffset++;
+					RightIncText = Text.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
 				}
-				CurrentKey = SDLK_RIGHT;
-				KeyState = 1;
-				KeyTime = SDL_GetTicks();
 				break;
 			}
 		case SDLK_HOME:
-			{
-				if (Shift)
-					SelLength = -SelStart;
-				else
-				{
-					SelStart = 0;
-					SelLength = 0;
-				}
-				break;
-			}
+			CursorPos = -1;
+
+			// f3
+			if (mod & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+
+			VisibleTextOffset = 0;
+			break;
 		case SDLK_END:
 			{
-				if (Shift)
-					SelLength = Caption.length() - SelStart;
+				CursorPos = Text.length() - 1;
+
+				// f3
+				if (mod & KMOD_SHIFT)
+					Selection.End = CursorPos;
 				else
+					Selection.Clear(CursorPos);
+
+				string RightEndText = Text.substr(VisibleTextOffset);
+
+				while (!isTextFits(RightEndText.c_str()))
 				{
-					SelStart = Caption.length();
-					SelLength = 0;
+					VisibleTextOffset++;
+					RightEndText = Text.substr(VisibleTextOffset);
 				}
 				break;
 			}
 		default:
+			if (letter > 31 || letter < 0)
 			{
-				char _out = _key;
-				/*if (btn <= SDLK_z && btn >= SDLK_a)
+				if (Selection.Exists())
 				{
-					_out = btn - SDLK_a;
-					if (!Shift)
-						_out += 'a';
-					else
-						_out += 'A';
+					// f1
+					CursorPos = Selection.RangeStart();
+					Text.erase(Selection.RangeStart() + 1, Selection.Length());
+					Selection.Clear();
 				}
-				if (btn == SDLK_SPACE)
+				Text.insert(CursorPos + 1, &letter, 1);
+				CursorPos++;
+
+				Selection.Clear(CursorPos);
+
+				string NewText = GetVisibleText() + letter;
+				while (!isTextFits(NewText.c_str()))
 				{
-					_out = ' ';
+					VisibleTextOffset++;
+					NewText = GetVisibleText() + letter;
 				}
-				if (btn <= SDLK_9 && btn >= SDLK_0)
-				{
-					_out = btn - SDLK_0;
-					_out += '0';
-				}*/
-				if (_out != 0)
-				{
-					_cout = _out;
-					CurrentKey = btn;
-					KeyState = 1;
-					KeyTime = SDL_GetTicks();
-					if (SelLength == 0)
-						Caption.insert(Caption.begin() + SelStart, 1, _out);
-					else
-					{
-						Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
-						SelStart = min(SelStart, SelStart + SelLength);
-						Caption.insert(Caption.begin() + SelStart, 1, _out);
-					}
-					SelLength = 0;
-					SelStart++;
-				}
-				break;
 			}
 		}
-
-	}
-	if (event == GUI_KEYUP)
-	{
-		switch (btn)
+		break;
+	case KEY_RELEASED:
+		switch(key)
 		{
-		case SDLK_LSHIFT:
-			{
-				Shift = 0;
-				KeyState = (KeyState > 0);//0;mb 
-				break;
-			}
-		case SDLK_RSHIFT:
-			{
-				Shift = 0;
-				KeyState = (KeyState > 0);//0;mb 
-				break;
-			}
-		case SDLK_DELETE:
-			{
-				//removing selection and setting key to delete
-				//Caption.erase()
-				if (CurrentKey == SDLK_DELETE)
-					KeyState = 0;
-				break;
-			}
-		case SDLK_BACKSPACE:
-			{
-				//removing selection and setting key to delete
-				//Caption.erase()
-				if (CurrentKey == SDLK_BACKSPACE)
-					KeyState = 0;
-				break;
-			}
-		case SDLK_LEFT:
-			{
-				//removing selection and setting key to delete
-				//Caption.erase()
-				if (CurrentKey == SDLK_LEFT)
-					KeyState = 0;
-				break;
-			}
-		case SDLK_RIGHT:
-			{
-				//removing selection and setting key to delete
-				//Caption.erase()
-				if (CurrentKey == SDLK_RIGHT)
-					KeyState = 0;
-				break;
-			}
-		default:
-			{
-				if (btn == CurrentKey)
-					KeyState = 0;
-				break;
-			}
+		case SDLK_AMPERSAND:
+			break;
+		default:;
 		}
-
+		break;
 	}
-	return;
+	return true;
+	// ужоснах, индусский код в чистом виде...
 }
 
-bool CEdit::Update( float dt )
+int CEdit::MouseToCursorPos(const Vector2& MousePosition) const
 {
-	if (fnt == NULL)
-		return 1;
-	//int sw = ;
-	//int cw = ;
-	while (fnt->GetStringWidthEx(offset, SelStart, (char*)Caption.data()) > GUIScheme->GetCWidth(ThisStyle, Width) - 10 && offset < Caption.length() - 1)
-		offset++;
-	while (fnt->GetStringWidthEx(0, SelStart, (char*)Caption.data()) < fnt->GetStringWidthEx(0, offset, (char*)Caption.data()) + 20 && offset > 0)
-		offset--;
-	if (mbpr&&MbState(1))
+	if (!aabb.Inside(MousePosition))
+		return -1;
+
+	return Font->StringCoordToCursorPos(GetVisibleText().c_str(), MousePosition.x, MousePosition.y) + VisibleTextOffset;
+}
+
+string CEdit::GetVisibleText() const
+{
+	string VisibleText = Text.substr(VisibleTextOffset);
+	int i = 0;
+
+	while (isTextFits(VisibleText.substr(0, i + 1).c_str()) && (i < VisibleText.length()))
+		i++;
+
+	return VisibleText.substr(0, i);
+}
+
+bool CEdit::isTextFits(const char *AText) const
+{
+	return ((Font->GetStringWidth(AText) + 2.0f * Style->Metrics.EditMargins.x) < aabb.Width());
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CEdit::CTextSelection
+
+void CEdit::CTextSelection::Clear(int ACursorPos)
+{
+	Start = End = ACursorPos;
+}
+
+void CEdit::CTextSelection::Clear()
+{
+	Start = End;
+}
+
+int CEdit::CTextSelection::Length() const
+{
+	return (RangeEnd() - RangeStart());
+}
+
+int CEdit::CTextSelection::RangeEnd() const
+{
+	return std::max(Start, End);
+}
+
+int CEdit::CTextSelection::RangeStart() const
+{
+	return std::min(Start, End);
+}
+
+bool CEdit::CTextSelection::Exists() const
+{
+	return (Start != End);
+}
+
+void CEdit::CTextSelection::Set(int AStart, int AEnd)
+{
+	Start = AStart;
+	End = AEnd;
+}
+
+CEdit::CTextSelection::CTextSelection(int AStart, int AEnd)
+{
+	Start = AStart;
+	End = AEnd;
+}
+
+CEdit::CTextSelection::CTextSelection()
+{
+	Start = End = -1;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CMenuItem
+
+#define DEFAULT_DISTANCE_BEETWEEN_ITEMS 20
+
+CMenuItem::CMenuItem()
+{
+	FocusedOnItem = NULL;
+	FocusedOnListNode = NULL;
+	Visible = false;
+	isCycledMenuSwitch = true;
+}
+
+CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
+{
+	FocusedOnItem = NULL;
+	FocusedOnListNode = NULL;
+	Visible = false;
+	isCycledMenuSwitch = true;
+	SetName(Text = AMenuText);
+	SetParent(AParent);
+	if (AParent)
+		AParent->AddObject(this);
+}
+
+CMenuItem::~CMenuItem()
+{
+
+}
+
+bool CMenuItem::Render()
+{
+	Reset();
+	CMenuItem *ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
+	while (ChildMenuItem)
 	{
-		int x, y;
-		SDL_GetMouseState(&x, &y);
-		x -= GetLeft() + GUIScheme->GetXOffset(ThisStyle);
-		//getting letter pos
-		if (x>0)
+		glLoadIdentity();
+		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
+		Font->scale = Vector2(1.0f, 1.0f);
+		Font->Pos = ChildMenuItem->Position;
+		Font->Print(ChildMenuItem->Text.c_str());
+		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
+	}
+	glLoadIdentity();
+	Color = COLOR_WHITE;
+	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
+	return true;
+}
+
+bool CMenuItem::Update(scalar dt)
+{
+	return true;
+}
+
+bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+{
+	if (!Visible)
+		return false;
+	if (state == KEY_PRESSED)
+	{
+		switch(key)
 		{
-			int i = 0;
-			//mbpr = 1;
-			for (i = 0; i < Caption.length() - offset; i++)
-				if (fnt->GetStringWidthEx(offset, offset + i - (i > 0), (char*)Caption.data()) >= x)
-					break;
-			//if (Shift)
-				SelLength = i + offset - SelStart;
-			//else
-			//{
-			//	SelStart = i + offset;
-			//	SelLength = 0;
-			//}
+		case SDLK_UP:
+			// Вероятно эту логику можно записать и покороче TODO
+			if (FocusedOnListNode == GetFirst() && isCycledMenuSwitch)
+			{
+				FocusedOnListNode = GetLast();
+				if (FocusedOnListNode)
+					FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+				break;
+			}
+			FocusedOnListNode = RelativePrev(FocusedOnListNode);
+			if (FocusedOnListNode)
+				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+			break;
+		case SDLK_DOWN:
+			if (FocusedOnListNode == GetLast() && isCycledMenuSwitch)
+			{
+				FocusedOnListNode = GetFirst();
+				if (FocusedOnListNode)
+					FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+				break;
+			}
+			FocusedOnListNode = RelativeNext(FocusedOnListNode);
+			if (FocusedOnListNode)
+				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+			break;
+		case SDLK_RETURN:
+			if (FocusedOnItem->CallProc)
+				FocusedOnItem->CallProc(Caller);
+			else
+				if (FocusedOnItem->GetFirst())
+				{
+					Visible = false;
+					FocusedOnItem->Visible = true;
+					CGUIManager::Instance()->SetFocus(FocusedOnItem);
+				}
+				break;
+		case SDLK_ESCAPE:
+			if (!Parent)
+				break;
+			Visible = false;
+			(dynamic_cast<CMenuItem*>(Parent))->Visible = true;
+			CGUIManager::Instance()->SetFocus(dynamic_cast<CMenuItem*>(Parent));
+			break;
 		}
 	}
 	else
-		mbpr = 0;
-	if (KeyState > 0)
 	{
-		bool flag = 0;
-		if (KeyState == 2)
-		{
-			if (SDL_GetTicks() - KeyTime >= GUI_DELAY1)
-			{
-				KeyTime = SDL_GetTicks() - GUI_DELAY1;//0;
-				flag = 1;
-			}
-		}
-		if (KeyState == 1)
-		{
-			if (SDL_GetTicks() - KeyTime >= GUI_DELAY0)
-			{
-				KeyTime = SDL_GetTicks() - GUI_DELAY0;//0;
-				KeyState = 2;
-				flag = 1;
-			}
-		}
-		if (flag)
-		{
-			switch (CurrentKey)
-			{
-			case SDLK_DELETE:
-				{
-					if (SelLength != 0)
-					{
-						//Caption.replace(SelStart, SelStart + SelLength, "");
-						Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
-						SelStart = min(SelStart, SelStart + SelLength);
-					}
-					else
-						if (Caption.length() != SelStart)
-							Caption.erase(Caption.begin() + SelStart, Caption.begin() + SelStart + 1);
-					SelLength = 0;
-					break;
-				}
-			case SDLK_BACKSPACE:
-				{
-					if (SelLength != 0)
-					{
-						//Caption.replace(SelStart, SelStart + SelLength, "");
-						Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
-						SelStart = min(SelStart, SelStart + SelLength);
-					}
-					else
-						if (0 != SelStart)
-							Caption.erase(Caption.begin() + SelStart - 1, Caption.begin() + SelStart);
-					SelLength = 0;
-					if (SelStart)
-						SelStart--;
-					break;
-				}
-			case SDLK_LEFT:
-				{
-					if (Shift)
-					{
-						if (SelLength + SelStart> 0)
-							SelLength --;
-					}
-					else
-					{
-						if (SelLength != 0)
-							SelStart = min(SelStart, SelStart + SelLength);
-						else
-							SelStart = max(0, SelStart - 1);
-						SelStart = max(0, SelStart);
-						SelLength = 0;
-					}
-					break;
-				}
-			case SDLK_RIGHT:
-				{
-					if (Shift)
-					{
-						if (!(SelStart + SelLength >= Caption.length()))
-							SelLength ++;
-					}
-					else
-					{
-						if (SelLength == 0)
-						{
-							if (SelStart + 1 > Caption.length())
-								SelStart = Caption.length();
-							else
-								SelStart ++;
-						}
-						else
-							SelStart = max(SelStart + SelLength, SelStart);
-						if (SelStart + 1 > Caption.length())
-							SelStart = Caption.length();
-						SelLength = 0;
-					}
-					break;
-				}
-			default:
-				{
-					char _out = _cout;
-					/*if (CurrentKey <= SDLK_z && CurrentKey >= SDLK_a)
-					{
-						_out = CurrentKey - SDLK_a;
-						if (!Shift)
-							_out += 'a';
-						else
-							_out += 'A';
-					}
-					if (CurrentKey == SDLK_SPACE)
-					{
-						_out = ' ';
-					}
-					if (CurrentKey <= SDLK_9 && CurrentKey >= SDLK_0)
-					{
-						_out = CurrentKey - SDLK_0;
-						_out += '0';
-					}*/
-					if (_out != 0)
-					{
-						if (SelLength == 0)
-							Caption.insert(Caption.begin() + SelStart, 1, _out);
-						else
-						{
-							Caption.erase(Caption.begin() + min(SelStart, SelStart + SelLength), Caption.begin() + max(SelStart, SelStart + SelLength));
-							SelStart = min(SelStart, SelStart + SelLength);
-							Caption.insert(Caption.begin() + SelStart, 1, _out);
-						}
-						SelLength = 0;
-						SelStart++;
-					}
-					break;
-				}
 
-			}
-		}
 	}
 	return true;
 }
 
-bool CGUIRenderer::Render()
+bool CMenuItem::AddObject(CObject *AObject)
 {
-	//here drawing scheme
-	//first of all sorting 
-	Forms.Sort(FormSort);
-	CObject *tmp;
-
-	Forms.Reset();
-	GUIScheme->BeginUI();
-	while (Forms.Enum(tmp))
-	{
-		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
-		(dynamic_cast<PWidget>(obj))->ZDepth = GUI_BOTTOM + (dynamic_cast<PWidget>(obj))->Tag*(GUI_TOP - GUI_BOTTOM)/CTag;
-		(dynamic_cast<CForm*>(obj))->Items.Sort(FormSort);
-		obj->Draw();
-	}
-	GUIScheme->EndUI();
-
-	Forms.Reset();
-	while (Forms.Enum(tmp))
-	{
-		PWidget obj = dynamic_cast<CGraphObj*>(tmp);
-		obj->DrawText();
-	}
-	
-	return 1;
-}
-
-bool CGUIRenderer::Update( float dt )
-{
-	Forms.Sort(InvFormSort);
-	Forms.Reset();
-	CObject *tmp;
-	while (Forms.Enum(tmp))
-	{
-		CForm *obj = dynamic_cast<CForm*>(tmp);
-
-		if (MouseIn(obj->Left, obj->Top, obj->Width, obj->HeaderHeight*obj->Properties[GUI_DRAWFORMHEADER]))
-		{
-			//header
-			if (MouseFocus != NULL && MouseFocus != obj)
-				if (!(ISFORM(MouseFocus)))
-					MouseFocus->Update(dt);
-			MouseFocus = obj;
-			return true;
-		}
-		if (MouseIn(obj->Left, obj->Top + obj->HeaderHeight*obj->Properties[GUI_DRAWFORMHEADER], obj->Width, obj->Height))
-		{
-			//header
-			obj->Update(dt);
-			return true;
-		}
-	}
-	if (MouseFocus != NULL)
-		if (!(ISFORM(MouseFocus)))
-			MouseFocus->Update(dt);
+	CList::AddObject(AObject);
+	FocusedOnListNode = GetFirst();
+	if (FocusedOnListNode)
+		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
 	return true;
 }
 
-CGUIRenderer::CGUIRenderer()
-{
-	FontManager = CFontManager::Instance();
-	engine = CEngine::Instance();
-	engine->GetState(STATE_SCREEN_HEIGHT, &scrheight);
-	engine->GetState(STATE_SCREEN_HEIGHT, &scrwidth);
-}
-
-CGUIRenderer::~CGUIRenderer()
-{
-	
-}
-
-void CEdit::SetCaption( string _caption )
-{
-	CGraphObj::SetCaption(_caption);
-	SelStart = 0;
-	SelLength = _caption.length();
-}
-#endif // _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_

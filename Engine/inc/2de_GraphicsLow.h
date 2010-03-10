@@ -171,8 +171,8 @@ public:
 	CAABB		GetSymbolsBBOX()
 	{
 		CAABB Result;
-		Result.vMin.In(9999.0f, 9999.0f);
-		Result.vMax.In(0.0f, 0.0f);
+		Result.vMin = Vector2(9999.0f, 9999.0f);
+		Result.vMax = Vector2(0.0f, 0.0f);
 		for(int i = 0; i < 256; i++)
 		{
 			if (bbox[i].x0 < Result.vMin.x)

@@ -4,6 +4,10 @@
 *	Started : 06.11.2007 2:03
 */
 
+/**
+* @todo Refactor & rewiev
+*/
+
 #ifndef _2DE_MATH_UTILS_H
 #define _2DE_MATH_UTILS_H
 
@@ -24,7 +28,7 @@ static const scalar		radanglem		=	1.0f / (PI * 2.0f / (scalar)sincostable_dim);
 static const scalar		PI_d180			=	PI / 180.0f;
 static const scalar		d180_PI			=	180.0f / PI;
 
-#ifdef USING_OPENGL
+#ifdef USING_OPENGL	// ORLY we need ot here?
 	#ifdef USE_SDL_OPENGL
 		#include <SDL/SDL_opengl.h>
 	#else
@@ -33,8 +37,8 @@ static const scalar		d180_PI			=	180.0f / PI;
 	#endif
 #endif
 
-struct Vector2;
-struct Matrix2;
+class Vector2;
+class Matrix2;
 
 void GenSinTable();
 scalar fSinr(scalar angle);
@@ -47,9 +51,10 @@ scalar fCosi(int index);
 int Random_Int(int min, int max);
 float Random_Float(float min, float max);
 
-__INLINE scalar clampf(scalar x , scalar xmin, scalar xmax)
+template<typename T>
+__INLINE T Clamp(const T &x , const T &min, const T &max)
 {
-	return std::min(std::max(x, xmin), xmax);
+	return std::min(std::max(x, min), max);
 }
 
 __INLINE scalar DegToRad(scalar degree)
@@ -62,33 +67,45 @@ __INLINE scalar RadToDeg(scalar radian)
 	return (scalar)(radian * d180_PI);
 }
 
-__INLINE scalar Sqr(const scalar x)
+template<typename T>
+__INLINE T Sqr(const T &x)
 {
-	return x*x;
+	return x * x;
 }
 
-__INLINE scalar Cube(const scalar x)
+template<typename T>
+__INLINE T Cube(const T &x)
 {
 	return x*x*x;
 }
 
-// __INLINE scalar Abs(const scalar x)
-// {
-// 	return x<0?-x:x;
-// }
+template<typename T>
+__INLINE T Abs(const T &x)
+{
+	return x < 0 ? -x : x;
+}
 
-__INLINE float Abs(const float x)
+template<>
+__INLINE float Abs<float>(const float &x)
 {
 	*(int *)&x &= 0x7fffffff;
 	return x;
 }
 
-__INLINE bool Equal(const float a, const float b)
+template<typename T>
+__INLINE bool Equal(const T &a, const T &b)
 {
 	return Abs(a - b) < epsilon;
 }
 
-__INLINE int Sign(const float x)
+template<typename T>
+__INLINE int Sign(const T &x)
+{
+	return x < 0 ? -1 : 1;
+}
+
+template<>
+__INLINE int Sign<float>(const float &x)
 {	
    if (((int&)x & 0x7FFFFFFF)==0) return 0; // test exponent & mantissa bits: is input zero?
     return (signed((int&)x & 0x80000000) >> 31 ) | 1;
@@ -124,109 +141,95 @@ __INLINE int Sign(const float x)
 // 	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
 // }
 
-struct Vector2
+class Vector2
 {
+public:
 	scalar x, y;
 
-	__INLINE Vector2(){}
-	__INLINE Vector2(scalar Ax, scalar Ay) : x(Ax), y(Ay){}
+	__INLINE Vector2(scalar Ax = 0.0f, scalar Ay = 0.0f) : x(Ax), y(Ay){}
 	
-	__INLINE  Vector2 operator + (const Vector2 &V)const
+	__INLINE  Vector2 operator +(const Vector2 &V) const
 	{ 
 		return Vector2(x + V.x, y + V.y);
 	}
-	__INLINE Vector2 operator - (const Vector2 &V)const
+	__INLINE Vector2 operator -(const Vector2 &V) const
 	{ 
 		return Vector2(x - V.x, y - V.y);
 	}
-	__INLINE Vector2 operator * (const scalar a)const
+	__INLINE Vector2 operator *(scalar a) const
 	{ 
 		return Vector2(x * a, y * a);
 	}
-	__INLINE Vector2 operator / (const scalar a)const
+	__INLINE Vector2 operator /(scalar a) const
 	{
-		if (a == 0.0f)
-			return Vector2(0, 0);
-		scalar t = 1.0f/a;
-		return Vector2(x*t, y*t);
+		try
+		{
+			if(a == 0)
+				throw std::runtime_error("Division by zero encountered in Vector2 operator / ");
+			scalar t = 1.0f / a;
+			return Vector2(x * t, y * t);
+		}
+		catch(const std::runtime_error& e)
+		{
+			cout << e.what() << endl;
+		}
+		return Vector2(); // What we should return if we tried to divide by zero?
 	}
-	friend __INLINE  Vector2 operator * (scalar k, const Vector2& V)
+	friend __INLINE  Vector2 operator *(scalar k, const Vector2& V)
 	{
-		return Vector2(V.x*k, V.y*k);
+		return Vector2(V.x * k, V.y * k);
 	}
-
-	__INLINE Vector2 const &operator +=(const Vector2 &V) 
+	__INLINE Vector2& operator +=(const Vector2 &V) 
 	{
 		x += V.x;
 		y += V.y;
 		return *this;
 	}
-	__INLINE Vector2 const &operator -=(const Vector2 &V)
+	__INLINE Vector2& operator -=(const Vector2 &V)
 	{
 		x -= V.x;
 		y -= V.y;
 		return *this;
 	}
-	__INLINE Vector2 const  &operator *=(const scalar a)
+	__INLINE Vector2& operator *=(scalar a)
 	{
 		x *= a;
 		y *= a;
 		return *this;
 	}
-	__INLINE Vector2 const &operator /=(const scalar &a)
+	__INLINE Vector2& operator /=(scalar a)
 	{
-		if (a == 0.0f)
-			return *this;
-		scalar t = 1.0f/a;
-		x *= t;
-		y *= t;
-		return *this;
+		return *this = *this / a;
 	}
 
-	__INLINE Vector2 operator -(void) const
+	__INLINE Vector2 operator -() const
 	{
-		return Vector2( -x, -y);
+		return Vector2(-x, -y);
 	}
-
-	// скалярное произведение векторов
-	__INLINE scalar operator * (const Vector2 &V) const
+	// Cкалярное произведение векторов. / Dot product.
+	__INLINE scalar operator *(const Vector2 &V) const
 	{
 		return x * V.x + y * V.y;
-	}
-
-	// В некотором смысле аналог векторного произведения для 2х мерного случая // В каком именно смысле никто до сих пор не понял
-	__INLINE scalar operator ^ (const Vector2 &V) const
-	{
-		return x * V.y - y * V.x;
 	}
 	__INLINE bool operator ==(const Vector2 &V) const
 	{
 		return Equal(x, V.x) && Equal(y, V.y);
 	}
-
-
-	Vector2 operator *(const Matrix2& M) const;
-
-	Vector2 operator ^(const Matrix2& M) const;
-
-	Vector2& operator *=(const Matrix2& M);
-
-	Vector2& operator ^=(const Matrix2& M);
-
-	__INLINE scalar Length(void) const
+	__INLINE bool operator !=(const Vector2 &V) const
+	{
+		return !(*this == V);
+	}
+	Vector2 operator *(const Matrix2 &M) const;
+	Vector2 operator ^(const Matrix2 &M) const;
+	Vector2& operator *=(const Matrix2 &M);
+	Vector2& operator ^=(const Matrix2 &M);
+	__INLINE scalar Length() const
 	{ 
 		#ifdef OPTIMIZE_V2L
 			scalar dx, dy;
-			if ( x < 0 )
-				dx = -x;
-			else
-				dx = x;
-
-			if ( y < 0 )
-				dy = -y;
-			else
-				dy = y;
-			if ( dx < dy )  
+			dx = Abs(x);
+			dy = Abs(y);
+			if (dx < dy)  
 				return 0.961f * dy + 0.398f * dx;  
 			else    
 				return 0.961f * dx + 0.398f * dy;
@@ -234,71 +237,52 @@ struct Vector2
 			return (scalar)sqrt((double)(x * x + y * y));
 		#endif
 	}
-
-	__INLINE Vector2 GetPerp()
+	__INLINE Vector2 GetPerpendicular() const
 	{
 		return Vector2(-y, x);
 	}
-
-	__INLINE Vector2 Normalized(void)const
+	__INLINE Vector2 Normalized() const
 	{
-		scalar l = Length();
-		if ( l == 0.0f )
-			return Vector2();
-		Vector2 t = (*this) * ( 1.0f / l );	 
-		return t;
+		return *this / Length();
 	}
-	__INLINE float Normalize(void) 
+	__INLINE scalar Normalize()
 	{
 		scalar l = Length();
-		if ( l == 0.0f )
-			return 0.0f;
-		(*this) *= ( 1.0f / l );	 
+		*this /= l;
 		return l;
 	}
-
-	__INLINE void In(const float _x, const float _y)
+	__INLINE void ClampTo(const Vector2 &min, const Vector2 &max)
 	{
-		x = _x;
-		y = _y;
+		x = Clamp(x, min.x, max.x);
+		y = Clamp(y, min.y, max.y);
 	}
 
-#ifdef USING_OPENGL
-
-		__INLINE void glTranslate()
+#ifdef USING_OPENGL		// WTF is this? OpenGL in Math module?
+		__INLINE void glTranslate() const
 		{
 			glTranslatef(x, y, 0.0f);
 		}
 
-		__INLINE void glScale()
+		__INLINE void glScale() const
 		{
 			glScalef(x, y, 1.0f);
 		}
-
-
-		__INLINE void glVertex()
+		__INLINE void glVertex() const
 		{
 			glVertex2f(x, y);
 		}
-
-
-		__INLINE void glTexCoord()
+		__INLINE void glTexCoord() const
 		{
 			glTexCoord2f(x, y);
 		}
-
-
 #endif
-
-
-
 };
 
-const Vector2 V2_ZERO			= Vector2(0.0f, 0.0f);
-const Vector2 V2_DIR_LEFT		= Vector2(-1.0f, 0.0f);
-const Vector2 V2_DIR_RIGHT		= (-V2_DIR_LEFT);
-const Vector2 V2_DIR_UP			= Vector2(0.0f, 1.0f);
-const Vector2 V2_DIR_DOWN		= (-V2_DIR_UP);
+const Vector2 V2_ZERO		= Vector2(0.0f, 0.0f);
+const Vector2 V2_DIR_LEFT	= Vector2(-1.0f, 0.0f);
+const Vector2 V2_DIR_RIGHT	= (-V2_DIR_LEFT);
+const Vector2 V2_DIR_UP		= Vector2(0.0f, 1.0f);
+const Vector2 V2_DIR_DOWN	= (-V2_DIR_UP);
 
 union Vector3{
 public:
@@ -311,95 +295,120 @@ public:
 		scalar r, g, b;
 	};
 
-	__INLINE Vector3() : x(0.0f), y(0.0f), z(0.0f){}
-
-	__INLINE Vector3(scalar Ax, scalar Ay, scalar Az) : x(Ax), y(Ay), z(Az){}
+	__INLINE Vector3(scalar Ax = 0.0f, scalar Ay = 0.0f, scalar Az = 0.0f) : x(Ax), y(Ay), z(Az){}
 
 	__INLINE scalar operator[](int i)
 	{
-		if (i < 0 || i > 2)
-			return 0.0f;
+		try
+		{
+			if (i < 0 || i > 2)
+				throw std::runtime_error("Access vector3 components: indx out of bounds");		
+		}
+		catch(const std::runtime_error& e)
+		{
+			cout << e.what() << endl;
+		}
 		return *(&x + i);
 	}
 
-	__INLINE Vector3 operator + (const Vector3 &v)const
+	__INLINE Vector3 operator +(const Vector3 &v) const
 	{
-			return Vector3( x + v.x, y + v.y, z + v.z );
+			return Vector3(x + v.x, y + v.y, z + v.z);
 	}
 
-	__INLINE Vector3 operator - (const Vector3 &v)const
+	__INLINE Vector3 operator -(const Vector3 &v) const
 	{
-			return Vector3( x - v.x, y - v.y, z - v.z );
+			return Vector3(x - v.x, y - v.y, z - v.z);
 	}
 
-	__INLINE Vector3 operator + (const scalar s)const
+	__INLINE Vector3 operator +(scalar s) const
 	{
-			return Vector3( x + s, y + s, z + s );
+			return Vector3(x + s, y + s, z + s);
 	}
 
-	__INLINE Vector3 operator - (const scalar s)const
+	__INLINE Vector3 operator -(scalar s) const
 	{
-			return Vector3( x - s, y - s, z - s );
+			return Vector3(x - s, y - s, z - s);
 	}
 
-	__INLINE Vector3 operator * (const scalar s)const
+	__INLINE Vector3 operator *(scalar s) const
 	{
-		return Vector3( x * s, y * s, z * s);
+		return Vector3(x * s, y * s, z * s);
 	}
 
-	__INLINE Vector3 operator / (const scalar s)const
+	__INLINE Vector3 operator /(scalar s) const
 	{
-		if (s == 0.0f)
-			return Vector3();
-		scalar t = 1.0f/s;
-		return Vector3(x*t, y*t, z*t);
+		try
+		{
+			if(s == 0)
+				throw std::runtime_error("Division by zero encountered in Vector3 operator / ");
+			scalar t = 1.0f / s;
+			return Vector3(x * t, y * t, z * t);
+		}
+		catch(const std::runtime_error& e)
+		{
+			cout << e.what() << endl;
+		}
+		return Vector3();
 	}
 
-	friend Vector3 operator * (scalar s, const Vector3& v) 
-	{return Vector3(v.x * s, v.y * s, v.z * s); }
-	__INLINE Vector3 &operator  +=(const Vector3 &v) 
+	friend Vector3 operator *(scalar s, const Vector3 &v) 
+	{
+		return Vector3(v.x * s, v.y * s, v.z * s); 
+	}
+
+	__INLINE Vector3& operator +=(const Vector3 &v) 
 	{ 
 		x += v.x;
 		y += v.y;
 		z += v.z;
 		return *this;
 	}
-	__INLINE Vector3 &operator -=(const Vector3 &v)
+
+	__INLINE Vector3& operator -=(const Vector3 &v)
 	{
-		x -= v.x; y -= v.y; z -= v.z; return *this;}
-	__INLINE Vector3 &operator *=(const scalar s)
-	{
-		x *= s; y *= s; z *= s; return *this;}
-	__INLINE Vector3 &operator /=(const scalar s)
-	{
-		if (s == 0.0f)
-			return *this;
-		scalar t = 1.0f/s;
-		x *= t;
-		y *= t;
-		z *= t; 
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
 		return *this;
 	}
-	__INLINE Vector3 operator -(void) const
+
+	__INLINE Vector3& operator *=(scalar s)
 	{
-		return Vector3( -x, -y, -z);
+		x *= s;
+		y *= s;
+		z *= s;
+		return *this;
 	}
-	__INLINE scalar operator*(const Vector3 &v)const
+
+	__INLINE Vector3& operator /=(scalar s)
+	{
+		return *this = *this / s;
+	}
+
+	__INLINE Vector3 operator -() const
+	{
+		return Vector3(-x, -y, -z);
+	}
+
+	__INLINE scalar operator *(const Vector3 &v) const
 	{
 		return x * v.x + y * v.y + z * v.z;
 	}
-	__INLINE Vector3 operator^(const Vector3 &v)const
+
+	__INLINE Vector3 operator ^(const Vector3 &v) const
 	{
 		return Vector3(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
 	}
-	__INLINE scalar Length(void) const
+
+	__INLINE scalar Length() const
 	{
-		return (scalar)sqrt((double)(x*x + y*y + z*z));
+		return (scalar)sqrt((double)(x * x + y * y + z * z));
 	}
 
-	Vector3& RotateAroundAxis(const Vector3& P, const Vector3& D, float angle)
+	Vector3 RotateAroundAxis(const Vector3& P, const Vector3& D, float angle)
 	{
-		//rotate around the vector parallel to (u,v,w) that passes through (a,b,c)
+		//rotate around the vector parallel to (u,v,w) that passes through (a,b,c) // OMFG
 		float axx,axy,axz,ax1;
 		float ayx,ayy,ayz,ay1;
 		float azx,azy,azz,az1;
@@ -415,8 +424,8 @@ public:
 
 		u = D.x;
 		v = D.y;
-		w = D.z;
-		
+		w = D.z;												//< OMG OMG OMG OMG OMG OMG OMG OMG OMG OMG OMG OMG >
+																//			\/	\/	\/ \/ \/ \/ \/ \/
 		u2 = u*u;
 		v2 = v*v;
 		w2 = w*w;
@@ -439,8 +448,7 @@ public:
 		return *this;
 	}
 
-
-	scalar Normalise(void) 
+	scalar Normalise() 
 	{
 		scalar l = Length();
 		if ( l == 0.0f )
@@ -449,7 +457,7 @@ public:
 		return l; 
 	}
 
-	Vector3 Normalized(void) 
+	Vector3 Normalized() 
 	{
 		scalar l = Length();
 		if ( l == 0.0f )
@@ -465,6 +473,15 @@ public:
 		(*this)  = E ^ F;		
 		return (*this).Normalise();
 	}
+
+	__INLINE void ClampTo(const Vector3 &min, const Vector3 &max)
+	{
+		x = Clamp(x, min.x, max.x);
+		y = Clamp(y, min.y, max.y);
+		z = Clamp(z, min.z, max.z);
+	}
+
+
 
 	void Rotate(Vector3 angle)
 	{
@@ -491,62 +508,31 @@ public:
 
 		temp.x = (x * cosa.y + z * sina.y);
 		temp.z = (z * cosa.y - x * sina.y);
-		/*		temp.x = (x * cosa.z + y * sina.z);
-		temp.y = (y * cosa.z - x * sina.z);
-
-		x = temp.x;
-		y = temp.y;
-
-		temp.z = (z * cosa.x + z * sina.x);
-		temp.y = (y * cosa.x - x * sina.x);
-
-		z = temp.z;
-		y = temp.y;
-
-		temp.x = (x * cosa.y + x * sina.y);
-		temp.z = (z * cosa.y - z * sina.y);
-*/
 
 		x = temp.x;
 		z = temp.z;
 	}
-// if that vector is normal so this function will return Euler angle to axes
+	// if that vector is normal so this function will return Euler angle to axes
 
-__INLINE Vector3 GetEulerAnglesFromNormal(Vector3 n)
-{
-    Vector3 xyz_rot;
-//    float d1 = sqrt( n.x*n.x + n.z * n.z );
-//  float cos1 = n.x / d1;
-//   float sin1 = n.z / d1;
-//    xyz_rot.x = 0.0f;
-//    xyz_rot.y = asin( sin1 );
+	__INLINE Vector3 GetEulerAnglesFromNormal(Vector3 n)
+	{
+		Vector3 xyz_rot;
+		xyz_rot.x= -atan2(n.y, n.z) + PI  /2.0f;
+		xyz_rot.y= atan2(n.x, n.z);
+		xyz_rot.z= -atan2(n.x, n.y);
+		return xyz_rot;
+	}
 
-//    float x1 = cos1 * n.x - sin1 * n.z;
-
-  //  float d2 = sqrt ( x1*x1 + n.y*n.y );
-//    float cos2 = n.y / d2;
-//    float sin2 = x1 / d2;
-//    xyz_rot.z = asin( sin2 );
-	xyz_rot.x=-atan2(n.y,n.z)+PI/2.0f;
-	xyz_rot.y=atan2(n.x,n.z);//D3DX_PI/6;//atan2(n.z,n.x);
-	xyz_rot.z=-atan2(n.x,n.y);//D3DX_PI/6;//atan2(n.z,n.x);-D3DX_PI/2.0f-
-//	xyz_rot.z=0;//atan2(-n.x,n.y);
-	return xyz_rot;
-
-
-}
-
-__INLINE float AngleBeetweenVectors(Vector3 a, Vector3 b)
-{
-	// TODO: Check if length of a || b == 0.0f
-	return acos((a*b)/(a.Length()*b.Length()));
-}
-
+	__INLINE float AngleBeetweenVectors(Vector3 a, Vector3 b)
+	{
+		// TODO: Check if length of a || b == 0.0f
+		return acos((a*b)/(a.Length()*b.Length()));
+	}
 };
 
 typedef Vector3 RGBf;
 
-struct CAABB
+class CAABB
 {
 public:
 	Vector2 vMin, vMax;
@@ -555,7 +541,7 @@ public:
 	{
 		vMax = vMin = V2_ZERO;
 	}
-	CAABB(Vector2 _min, Vector2 _max) : vMin(_min), vMax(_max){}
+	CAABB(const Vector2 &_min, const Vector2 &_max) : vMin(_min), vMax(_max){}
 	CAABB(scalar xmin, scalar ymin, scalar xmax, scalar ymax)
 	{
 		vMin.x = xmin;
@@ -573,7 +559,7 @@ public:
 	}
 
 
-	void Add(Vector2 point)
+	void Add(const Vector2 &point)
 	{
 		if (point.x > vMax.x)
 			vMax.x = point.x;
@@ -622,7 +608,7 @@ public:
 		return Result;
 	}
 
-	bool Inside(Vector2 point) const
+	bool Inside(const Vector2 &point) const
 	{
 		if (point.x >= vMax.x || point.x <= vMin.x)
 			return false;
@@ -631,7 +617,7 @@ public:
 		return true;
 	}
 
-	bool Inside(Vector2 point, scalar &MTD) const // MTD - is minimal translation distance
+	bool Inside(const Vector2 &point, scalar &MTD) const // MTD - is minimal translation distance
 	{
 		if (point.x >= vMax.x || point.x <= vMin.x)
 			return false;
@@ -648,7 +634,7 @@ public:
 		return true;
 	}
 
-	bool Inside(Vector2 point, scalar &MTD, Vector2 &n) const // MTD - is minimal translation distance
+	bool Inside(const Vector2 &point, scalar &MTD, Vector2 &n) const // MTD - is minimal translation distance // Ага блядь, одинаковые комменты рулят. OMG, там ещё третий внизу.
 	{
 		if (point.x >= vMax.x || point.x <= vMin.x)
 			return false;
@@ -675,7 +661,7 @@ public:
 		return true;
 	}
 
-	bool Outside(Vector2 point, scalar &MTD, Vector2 &n) const // MTD - is minimal translation distance
+	bool Outside(const Vector2 &point, scalar &MTD, Vector2 &n) const // MTD - is minimal translation distance
 	{
 		if (point.x < vMax.x && point.x > vMin.x && point.y < vMax.y || point.y > vMin.y)
 			return false;
@@ -736,7 +722,7 @@ class Matrix3
 public:
 	Vector3 m[3];
 	
-	Matrix3(void)
+	Matrix3()
 	{
 		m[0] = Vector3();
 		m[1] = Vector3();
@@ -868,7 +854,7 @@ public:
 
 };
 
-struct Matrix4
+class Matrix4
 {
 public:
 		scalar	e11, e12, e13, e14,
@@ -877,8 +863,9 @@ public:
 				e41, e42, e43, e44;
 };
 
-struct Matrix2
+class Matrix2
 {
+public:
 		float e11;
 		float e12;
 		float e21;
@@ -952,7 +939,7 @@ struct Matrix2
 		return T;
 	}
 
-	__INLINE Matrix2 operator - (void) const
+	__INLINE Matrix2 operator - () const
 	{
 		Matrix2 T;
 		T.e11 = -e11;
@@ -1072,7 +1059,7 @@ union Vector4
 	__INLINE Vector4 operator+=(Vector4 q){(*this) = (*this)+q; return *this;}
 	__INLINE Vector4 operator-=(Vector4 q){(*this) = (*this)-q; return *this;}
 	scalar Norm()const{return x * x + y * y + z * z + w * w;}
-	scalar Length( void ){return sqrt(x * x + y * y + z * z + w * w );}	
+	scalar Length(  ){return sqrt(x * x + y * y + z * z + w * w );}	
 	Vector4 Conjugate(){ return Vector4(-x,-y,-z,w);}
 	Vector4 Identity()
 	{
@@ -1288,20 +1275,6 @@ __INLINE Vector3 CalcNorm(const Vector3 v1,const Vector3 v2,const Vector3 v3)
    Vector3 t = (v3-v2)^(v2-v1);
    t.Normalise();
    return t;
-}
-
-__INLINE void ClampV(Vector2& x, const Vector2 xmin, const Vector2 xmax)
-{
-	x.x = clampf(x.x, xmin.x, xmax.x);
-	x.y = clampf(x.y, xmin.y, xmax.y);
-}
-
-
-__INLINE void ClampV(Vector3& x, const Vector3 xmin, const Vector3 xmax)
-{
-	x.x = clampf(x.x, xmin.x, xmax.x);
-	x.y = clampf(x.y, xmin.y, xmax.y);
-	x.z = clampf(x.z, xmin.z, xmax.z);
 }
 
 /**

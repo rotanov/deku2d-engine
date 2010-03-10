@@ -7,6 +7,9 @@ CEngine* Ninja = CEngine::Instance();
 
 bool Init()
 {	
+	Vector2 V(1.0f, 1.0f), U(2.0f, 2.0f), W(3.0f, 3.0f);
+	(V += U) += W;
+	W  = V / 0.0f;
 	CTestUnit *Unit = new CTestUnit;
 	return true;
 }

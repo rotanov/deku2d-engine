@@ -42,18 +42,18 @@ void CFontEditor::SetZoom(float AZoom)
 		return;
 	float OldZoom = Zoom;
 	Zoom = AZoom;
-	Zoom = clampf(Zoom, ZOOM_MIN, ZOOM_MAX);
+	Zoom = Clamp(Zoom, ZOOM_MIN, ZOOM_MAX);
 	if (Zoom == OldZoom)
 		return;
 	Vector2 Temp;
 	Vector2 TempWH;
 	if (FontTexture != NULL)
-		TempWH.In(FontTexture->width, FontTexture->height);
+		TempWH = Vector2(FontTexture->width, FontTexture->height);
 	else
-		Temp.In(Font->GetSymbolsBBOX().Width(), Font->GetSymbolsBBOX().Height());
+		Temp = Vector2(Font->GetSymbolsBBOX().Width(), Font->GetSymbolsBBOX().Height());
 	Temp.x = (MousePosition.x - Offset.x) / (TempWH.x * OldZoom);
 	Temp.y = (MousePosition.y - Offset.y) / (TempWH.y * OldZoom);
-	ClampV(Temp, V2_ZERO, Vector2(1.0f, 1.0f));
+	Temp.ClampTo(V2_ZERO, Vector2(1.0f, 1.0f));
 	Offset.x = - Temp.x * (TempWH.x * Zoom) + MousePosition.x;
 	Offset.y = - Temp.y * (TempWH.y * Zoom) + MousePosition.y;
 }

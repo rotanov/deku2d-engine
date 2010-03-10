@@ -2,6 +2,7 @@
 #define	_FONT_EDITOR_H_
 
 #include "2de_Engine.h"
+#include "2de_Gui.h"
 
 // Константы, определяющие расположение некоторых элементов интерфейса.
 const int				INTERFACE_OFFSET_X	= 128;

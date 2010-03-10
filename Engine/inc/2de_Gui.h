@@ -1,356 +1,269 @@
-#ifdef _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
-#ifndef _2DE_GUI_H
-#define _2DE_GUI_H
+#ifndef _2DE_GUI_H_
+#define _2DE_GUI_H_
 
-#include "2de_event.h"
-#include "2de_Core.h"
-#include "2de_GraphicsLow.h"
-
-/*
-class CGraphObj
-child of class CObject inherits all of it's propiertes
-*/
-
-//DEFINES
-
-#define MAX_ITEMS 100
-#define CHECK_NAME true//if true each object on creation will be checked
-
-//Styles 0xAABBSSSS
-//AA : Object type (max 255)
-//BB : Draw style
-//SSSS : style number
-//Draw styles
-
-//#fixed defines
-#define GUI_OBJFORM			0x0
-#define GUI_OBJBUTTON		0x1
-#define GUI_OBJEDIT			0x2
-#define STYLE_OBJMASK		0x00ff
-#define STYLE_OBJDUMMY		0x00ff
-#define STYLE_OBJFORM		0x0000
-#define STYLE_OBJBUTTON		0x0001
-#define STYLE_OBJEDIT		0x0002
-#define STYLE_ADDTOLISTMASK 0xff00
-#define STYLE_DONOTADD		0x0100
-//#end of fixed defines
-
-#define STYLE_DRAWMASK		0x00ff0000
-#define STYLE_DRAWNONE		0x00000000
-#define STYLE_DRAWNORMAL	0x00010000
-#define STYLE_DRAWSTYLE		0x00020000
-
-//Objects
-
-#define STYLE_NONE			0x00000000
-#define STYLE_MASK			0x0000ffff
-#define XSTYLE_MASK			0x00ffffff
-
-//animations
-#define TLEFT_CORNER				0x10
-#define TRIGHT_CORNER				0x20
-#define BRIGHT_CORNER				0x30
-#define BLEFT_CORNER				0x40
-#define LEFT_SIDE					0x50
-#define TOP_SIDE					0x60
-#define RIGHT_SIDE					0x70
-#define BOTTOM_SIDE					0x80
-
-#define ANIM_BUTTON_MOUSE_OVER		0x01
-#define ANIM_BUTTON_MOUSE_ON		0x02
-#define ANIM_BUTTON_MOUSE_CLICK		0x03
-
-//Align
-
-#define ALIGN_LEFT					0x01
-#define ALIGN_CENTER				0x02
-#define ALIGN_RIGHT					0x03
-#define ALIGN_MASK					0x0f
-#define ALIGN_TOP					0x10
-#define ALIGN_MIDDLE				0x20
-#define ALIGN_BOTTOM				0x30
-#define VALIGN_MASK					0xf0
-
-//input defines
-
-#define GUI_MBDOWN					0x0
-#define GUI_MBUP					0x1
-#define GUI_KEYDOWN					0x2
-#define GUI_KEYUP					0x3
-#define GUI_MBCLICK					0xf
-
-#define GUI_BOTTOM					0.0f
-#define GUI_TOP						1.0f
-
-
-#define GUI_DRAWFORMBODY			0x0
-#define GUI_DRAWFORMHEADER			0x1
-#define GUI_FORMRESIZABLE			0x2
-#define GUI_FORMCANMOVE				0x3
-#define _GUI_DRAWFORMBODY			0x4
-#define __GUI_DRAWFORMBODY			0x5
-
-
-#define GUI_DELAY0					500
-#define GUI_DELAY1					250
-
-bool GUIKeyUp(char key, SDLKey sym);
-bool GUIKeyDown(char key, SDLKey sym);
-bool GUIMbDown(int x, int y, byte btn);
-bool GUIMbUp(int x, int y, byte btn);
-bool GUIMbMove(int x, int y, byte btn);
-bool MouseIn(int l, int t, int w, int h);
-bool MbState(byte btn);
-
-
-bool GUIInit(char *fname);
-void GUIStep();
-void GUIDraw();
-
-class CGUIRenderer : public CRenderObject, public CUpdateObject
-{
-public:
-	CGUIRenderer();
-	~CGUIRenderer();
-	bool Render(); 
-	bool Update(float dt);
-	static CObject*	NewRenderer()
-	{
-		CRenderObject *res = new CGUIRenderer;
-//		res->type = T_RENDERABLE|T_UPDATABLE;
-		return res;
-	}
-};
-
-
-class CGraphObj : public CObject//Update
-{
-public:
-	CGraphObj()
-	{
-		Align = Left = Top = Width = Height = MinWidth = MinHeight = ClientHeight = ClientWidth = 0;
-		Parent = NULL;
-		Visible= false;
-		Enabled = true;
-		Caption = "";
-		fnt = NULL;
-		isControl = false;
-		onKeyPress = NULL;
-		onClick = onAccept = onDecline = NULL;
-	}
-/*	static CObject*	NewWidget()
-	{
-		CRenderObject *res = newWidget();
-		//		res->type = T_RENDERABLE|T_UPDATABLE;
-		return res;
-	}*/
-	virtual void			Draw(){}
-	virtual void			Step(){}
-	virtual void			DrawText(){}
-	virtual void			MouseProcess(byte btn, byte event);
-	virtual void			KeyProcess(SDLKey &btn, byte event);
-	unsigned int			getStyle(){return Style;}
-	void					setStyle(unsigned int _Style);
-	bool					Visible;
-	bool					Enabled;
-	CGraphObj				*Parent;
-	int						Left, Top, Width, Height, MinWidth, MinHeight, 
-							MaxWidth, MaxHeight, ClientHeight, ClientWidth;
-	byte					Align;
-	char					type[100];
-	string					Caption;
-	void					ReadComponent(CFile f);
-	void					SetStyle(unsigned int style);
-	CFont					*fnt;
-	int						Tag;
-	int						Cursor;
-	string					Font;
-	int						Valign, Halign;
-	int						Kind;
-	bool					isControl;
-	void					ApplyStyle(CGraphObj *wdg);
-	float					ZDepth;
-	int						GetLeft();
-	int						GetTop();
-	bool					SetFont(string FontName);
-	virtual void			SetCaption(string _caption);
-	virtual bool			Update(float dt){return 1;};
-	virtual void			SetFocus();
-	//events
-	CKeyEvent				onKeyPress;
-	CEvent					onClick, onAccept, onDecline;
-
-	static CObject*			NewRenderer()
-	{
-		CRenderObject *res = new CGUIRenderer;
-		//		res->type = T_RENDERABLE|T_UPDATABLE;
-		return res;
-	}
-protected:
-	unsigned int			Style;					
-};
-typedef CGraphObj CWidget;
-typedef CGraphObj *PWidget;
-//typedef bool (*ObjCompCall)(PWidget, PWidget);
-//typedef bool (*ObjCall)(PWidget);
-
-//CGObj List
-
-
-struct Style	// Структура, это класс со всеми членами в паблик по дефолту. Где префикс С блять?!?!
-{
-	unsigned short int Data[10];
-};
-
-class CGUIScheme : public CObject
-{
-public:
-	CGUIScheme(char* fname, char* tname);
-	~CGUIScheme();
-	void					Release();
-	PWidget					objects[200]; // с маленькой буквы
-	int						ObjCount;
-	Style					Styles[200]; // а тут с большой, блять, Петя, что за хуйня. Хотя это мелочи, но ты же сам понимаешь. О какой тут архитектуре речь, если ты...
-	int						StyleCount;
-	void					BeginUI();
-	void					EndUI();
-	void					_Draw(int StInd, byte target, int x, int y, float z, int w, int h);
-	bool					Draw(int StInd, int x, int y, float z, int w, int h);
-	int						GetXOffset(int StInd);
-	int						GetYOffset(int StInd);
-	int						GetCWidth(int StInd, int w);
-	int						GetCHeight(int StInd, int h);
-	void					AssignStyle(PWidget obj, int ObjKind, int StyleInd);
-	int						GetFormInd(int ind);
-	CGLImageData			ImgData;
-	void					CopyWidget(int kind, PWidget wdg);
-	PWidget					CreateWidget(int kind);
-protected:
-	bool					Drawing;
-};
-
-
-bool						LoadGUI(char *fname);
-//void BeginUI();
-//void EndUI();
+#include "2de_GraphicsHigh.h"
 
 //////////////////////////////////////////////////////////////////////////
-// !!!! BAD !!! __forceinline is Microsoft specific
-// делай как в mathutils.h
-//////////////////////////////////////////////////////////////////////////
+//Gui 
 
-__INLINE bool ISFORM(CGraphObj *obj){return ((obj->getStyle() & STYLE_OBJMASK) == STYLE_OBJFORM)?true:false;}
-
-
-PWidget						newWidget(char *name, unsigned int Style);
-void						clearWidget(PWidget res);
-void						FormAddWidget(PWidget obj, PWidget form);
-void						showWidget(PWidget obj);
-void						hideWidget(PWidget obj);
-void						enableWidget(PWidget obj);
-void						disableWidget(PWidget obj);
-void						setWidgetStyle(PWidget obj, unsigned int Style);//NOTE if you are trying to change 
-																			//object type, you'll get nothing=)
-PWidget						getWidget(char *name);
-PWidget						addForm(char *Fname);
-
-class Cdummy : public CGraphObj
-{
-public:
-	Cdummy(){}
-	void					Draw(){}
-	void					Step(){}
-};
-class CControl : public CGraphObj
-{
-public:
-	CControl();
-	~CControl(){};
-	CList				Items;
-	virtual void			Next();
-	virtual void			Draw(){};
-	virtual void			Step(){};
-};
-//may be i'll cancel custom head bar
-//color Color
-//style Style
-//int Height
-//string Font
-//# -Body----------------------
-//-Body
-//style Style
-//int MinHeight
-//int MinWidth
-//int MaxHeight
-//int MaxWidth
-//int Cursor
-class CForm : public CControl
-{
-public:
-	CForm(unsigned int _Style);
-//	CControl				Body;
-	bool					LoadForm(char *Fname);
-	void					Draw();
-	void					DrawText();
-	bool					Update(float dt);
-	int						HeaderStyle;
-	int						BodyStyle;
-	DWORD					HeaderColor;
-	int						HeaderHeight;
-	byte					Properties[6];
-};
-
-class CButton : public CGraphObj
-{
-public:
-	CButton(unsigned int _Style);
-	~CButton();
-	virtual void			Draw();
-	virtual bool			Update(float dt);
-	virtual void			MouseProcess(byte btn, byte event);
-	unsigned int			Styles[4];//0 - normal, 1 - mouseon, 2 - clicked, 3 - not enabled
-	void					DrawText();
-	byte					StyleInd;
-};
-class CCustomEdit : public CGraphObj
-{
-public:
-	CCustomEdit(unsigned int _Style);
-};
-class CEdit : public CGraphObj
-{
-public:
-	CEdit(unsigned int _Style);
-	~CEdit(){};
-	virtual void			Draw();
-	virtual bool			Update(float dt);
-	// сорри, нехуй в аське не отвечать
-	virtual void			Step();
-	virtual void			SetCaption(string _caption);
-	virtual void			MouseProcess(byte btn, byte event);
-	virtual void			KeyProcess(SDLKey &btn, byte event);
-	int						SelStart, SelLength;
-	int						_Style;
-	void					DrawText();
-	DWORD					ThisStyle;
-	SDLKey					CurrentKey;
-	byte					KeyState;
-	DWORD					KeyTime;
-	byte					Shift;
-	char					_cout;
-	int						offset;
-	bool					mbpr;
-};
-
-/*
-GUI library
-Deku Team
+/**
+*	Поскольку Gui петра хуй попользуешься, так как он развёз какую-то еботу 
+*	и не может доделать её уже год (сейчас август 09го), то тут будет мини гуи;
+*	это будет маленький и удобный и, я надеюсь, временный набор классов. Пока что
+*	будет Edit, Button и менеджер. Если будет пиздец, то буду его расширять, появятся табы
+*	и всякие свистоперделки жизнено необходимые.
 */
 
-/*
+/**
+*	11.03.2010 Update. GUI Петра уничтожен. 
+*	>Если будет пиздец, то буду его расширять, появятся...
+*	Да, буду.
+*/
+
+/**
+ * CGUIStyle - класс, представляющий стиль GUI, содержащий цвета и размеры стандартных элементов GUI.
+ *
+ * Для создания нового стиля можно либо наследовать и перегрузить конструктор, либо инстанцировать и изменить нужные значения.
+ */
+
+// небольшой комментарий: возможно, кому-то не понравится эта идея, возможно, кто-то любит разукрашивать разные кнопки в разные цвета - и т. п.
+// 			  я предлагаю такое решение: у каждого элемента будет указатель на стиль
+// 			  поэтому, можно будет создать по стилю на каждую кнопку и указать его
+// 			  или же наследовать кнопку и перегрузить в ней конструктор, который будет создавать определённый стиль
+// 			  вобщем - гибкость рулит, но и унификация стиля - хорошая вещь
+
+class CGUIStyle
+{
+public:
+	struct CGUIStyleColors
+	{
+		RGBAf FocusRect;
+		RGBAf ButtonFace;
+		RGBAf ButtonFaceHovered;
+		RGBAf ButtonFacePressed;
+		RGBAf ButtonBorder;
+		RGBAf ButtonBorderHovered;
+		RGBAf ButtonBorderPressed;
+		RGBAf ButtonText;
+		RGBAf ButtonInactiveText;
+		RGBAf EditBackground;
+		RGBAf EditBackgroundHovered;
+		RGBAf EditBorder;
+		RGBAf EditBorderHovered;
+		RGBAf EditText;
+		RGBAf EditInactiveText;
+		RGBAf EditSelection;
+		RGBAf LabelText;
+	};
+	struct CGUIStyleMetrics
+	{
+		scalar FocusRectSpacing;
+		scalar FocusRectLineWidth;
+		Vector2 EditMargins;
+		scalar EditBorderWidth;
+	};
+	// на данный момент я буду юзать один шрифт для всего ГУИ для простоты и потому что некоторые моменты использования шрифтов не до коцна ясны и требуют пересмотра
+	/*struct CGUIStyleFonts
+	{
+		CFont* ButtonFont;
+		CFont* EditFont;
+	};*/
+
+	CGUIStyle()
+	{
+		// default style values - very ugly style :) I'm programmer, not fucking "эстет" :) you're welcome to fix colors to more beautiful ones
+
+		Colors.FocusRect = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
+		Colors.ButtonFace = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonFaceHovered = RGBAf(0.6f, 0.6f, 0.6f, 1.0f);
+		Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
+		Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
+		Colors.ButtonBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonBorderPressed = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.ButtonText = COLOR_BLACK;
+		Colors.ButtonInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
+		Colors.EditBackground = COLOR_WHITE;
+		Colors.EditBackgroundHovered = COLOR_WHITE;
+		Colors.EditBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.EditBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+		Colors.EditText = COLOR_BLACK;
+		Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
+		Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
+		Colors.LabelText = COLOR_BLACK;
+
+		Metrics.FocusRectSpacing = 5.0f;
+		Metrics.FocusRectLineWidth = 0.5f;
+		Metrics.EditMargins = Vector2(4.0f, 6.0f);
+		Metrics.EditBorderWidth = 2.0f;
+
+		Font = CFontManager::Instance()->GetFont("Font");
+	}
+	CGUIStyleColors Colors;
+	CGUIStyleMetrics Metrics;
+	CFont *Font;
+	//CGUIStyleFonts Fonts;
+
+	// TODO: loading style from XML file (and even maybe saving)
+};
+
+class CGUIObjectBase : public CRenderObject, public CUpdateObject
+{
+public:
+	struct CMouseState
+	{
+		bool Hovered;
+		bool Pressed;
+		bool PressedInside;
+		bool PressedOutside;
+	};
+	string				Text;
+
+	CGUIObjectBase();
+	~CGUIObjectBase();
+
+	CFont* GetFont() const;
+	void SetFont(CFont *AFont);
+
+	CPrimitiveRender* GetPrimitiveRender() const;
+	void SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
 	
-*/
+	CGUIStyle* GetStyle() const;
+	void SetStyle(CGUIStyle *AStyle);
+
+	void SetCallback(CObjectCallback ACallProc, CObject *ACaller)
+	{
+		Caller = ACaller;
+		CallProc = ACallProc;
+	}
+
+	Vector2 GlobalToLocal(const Vector2& Coords) const;
+protected:
+	CObjectCallback		CallProc;	//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
+	CObject			*Caller;
+
+				// вот зачем эти очвевидные комментарии? неужели кому-то не понятно, что CFont *Font - это указатель на шрифт?
+				// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
+				//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
+	CFont				*Font;				//	Указатель на шрифт. // deprecated, я считаю, ибо всегда можно взять из стиля
+	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
+	CGUIStyle *Style;
+	CMouseState MouseState;
+	CMouseState PreviousMouseState;
+	CMouseState WidgetState;
+};
 
 
-#endif // _2DE_GUI_H
-#endif // _SOME_DEFINE_TO_UNLOCK_MAIN_GUI_
+class CGUIObject : public CGUIObjectBase
+{
+public:
+	CGUIObject();
+	CGUIObject(CGUIObjectBase *AParent);
+
+	bool isFocused() const;
+	void Focus();
+
+	void SetParent(CGUIObjectBase *AParent);
+
+protected:
+	CGUIObjectBase *Parent;		//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
+					// 	ну она как бы есть, но не совсем иерархия.. и да, родителем объекта может быть и Base, поэтому тут будет он
+};
+
+// вот этот класс (CGUIManager) наследован одновременно и от синглтона, и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
+// получаем всякие гадости в логах при удалении, потому что его сначала удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
+class CGUIManager : public CList, public CGUIObjectBase, public CTSingleton<CGUIManager>
+{
+public:
+				~CGUIManager();
+	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool		Update(scalar dt);
+	bool		Render();
+	CGUIObject* GetFocusedObject() const;
+	void		SetFocusedNodeTo(CListNode *AFocusedNode);
+	void		SetFocus(CObject *AObject);
+private:
+	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
+	CListNode	*FocusedOnListNode;
+	CGUIObject	*FocusedOn;
+	int			KeyHoldRepeatInterval;
+	int			TimerAccum;
+	bool		tabholded;
+	bool		repeatstarted;
+protected:
+	CGUIManager();
+	friend class CTSingleton<CGUIManager>;
+};
+
+class CLabel : public CGUIObject
+{
+public:
+	CLabel(const string &AText = "");
+	bool Render();
+	bool Update(float dt)
+	{
+		return true;
+	}
+};
+
+class CButton : public CGUIObject
+{
+public:
+	CButton();
+	CButton(CAABB ARect, const char* AText, RGBAf AColor);
+	bool Render();
+	bool Update(float dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+};
+
+
+class CEdit : public CGUIObject
+{
+public:
+	class CTextSelection
+	{
+	public:
+		int Start;
+		int End;
+		CTextSelection();
+		CTextSelection(int AStart, int AEnd);
+		void Set(int AStart, int AEnd);
+		bool Exists() const;
+		int RangeStart() const;
+		int RangeEnd() const;
+		int Length() const;
+		void Clear();
+		void Clear(int ACursorPos);
+	};
+
+	CEdit();
+	bool Render();
+	bool Update(scalar dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+
+private:
+	int MouseToCursorPos(const Vector2& MousePosition) const;
+	string GetVisibleText() const;
+	bool isTextFits(const char *AText) const;
+	int CursorPos;
+	CTextSelection Selection;
+	int VisibleTextOffset;
+};
+
+class CMenuItem : public CGUIObject, public CList
+{
+public:
+	bool		isCycledMenuSwitch;
+				CMenuItem();
+				CMenuItem(CMenuItem* AParent, char* AMenuText);
+				~CMenuItem();
+	bool		Render();
+	bool		Update(scalar dt);
+	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool		AddObject(CObject *AObject);
+private:
+	CMenuItem*	FocusedOnItem;
+	CListNode*	FocusedOnListNode;
+};
+
+#endif // _2DE_GUI_H_

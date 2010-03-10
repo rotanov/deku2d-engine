@@ -107,7 +107,7 @@ void RenderTileList()
 
 void SetZoom(int _Zoom)
 {
-	Zoom = clampf(_Zoom, MIN_ZOOM, MAX_ZOOM);
+	Zoom = Clamp(_Zoom, MIN_ZOOM, MAX_ZOOM);
 }
 
 int CalcF1(scalar p, scalar size)

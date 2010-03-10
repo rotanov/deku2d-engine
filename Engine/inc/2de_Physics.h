@@ -52,7 +52,7 @@ public:
 	{
 		p += lv * dt;
 		a += av * dt;
-		a = clampf(a, 0.0f, PI*2);
+		a = Clamp(a, 0.0f, PI*2);
 		o = Matrix2(a);
 	}
 
