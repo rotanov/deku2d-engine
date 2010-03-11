@@ -72,7 +72,7 @@ bool CEngine::LimitFps()
 	return false;
 }
 
-void CEngine::SetState(int state, void* value)
+void CEngine::SetState(CEngine::EState state, void* value)
 {
 	switch(state)
 	{
@@ -152,6 +152,9 @@ bool CEngine::Init()
 
 	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
 
+	_putenv("SDL_VIDEO_CENTERED=1");
+
+	CXMLTable Config;
 	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
 		Log.Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
@@ -165,13 +168,13 @@ bool CEngine::Init()
 	char			*wcaption	= (Config.First->Get("WindowCaption"))->GetValue();
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
-	SetState(STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
+	SetState(CEngine::STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
 	CResourceManager::Instance()->DataPath	= (Config.First->Get("DataPath"))->GetValue();
 	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
 
-	SetState(STATE_SCREEN_WIDTH, (void*)wwidth);
-	SetState(STATE_SCREEN_HEIGHT, (void*)wheight);
-	SetState(STATE_WINDOW_CAPTION, wcaption);
+	SetState(CEngine::STATE_SCREEN_WIDTH, (void*)wwidth);
+	SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
+	SetState(CEngine::STATE_WINDOW_CAPTION, wcaption);
 
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
@@ -428,7 +431,7 @@ bool CEngine::MidInit() // Для чего эта ф-я?
 	return true;
 }
 
-void CEngine::GetState(int state, void* value)
+void CEngine::GetState(CEngine::EState state, void* value)
 {
 	switch (state)
 	{
@@ -473,6 +476,12 @@ bool CEngine::AddEventFunction(EventFunc func)
 
 int CEngine::CfgGetInt( char* ParamName )
 {
+	CXMLTable Config;
+	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
+	{
+		Log.Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
+		return false;
+	}
 	return atoi((Config.First->Get(ParamName))->GetValue());
 }
 

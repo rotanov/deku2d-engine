@@ -4,6 +4,8 @@
 #include "2de_Engine.h"
 #include "2de_Gui.h"
 
+// @todo Place some parameters to config, so youser will be able to change them
+
 // Константы, определяющие расположение некоторых элементов интерфейса.
 const int				INTERFACE_OFFSET_X	= 128;
 const int				LEFT_MARGIN			= 8;

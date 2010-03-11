@@ -568,8 +568,8 @@ void CFont::SetTexture(const string &TextureName)
 void CCamera::Assign(scalar *x, scalar *y)
 {
 	CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
-	engine->GetState(STATE_SCREEN_HEIGHT, &h);
-	engine->GetState(STATE_SCREEN_HEIGHT, &w);
+	engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &h);
+	engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &w);
 
 	Atx = x;
 	Aty = y;

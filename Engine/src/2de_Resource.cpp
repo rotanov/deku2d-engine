@@ -8,11 +8,10 @@
 #include "2de_Core.h"
 #include "2de_Engine.h"
 
-//-------------------------------------------//
-//				Factory stuff				 //
-//-------------------------------------------//
+//////////////////////////////////////////////////////////////////////////
+//	CFactory
 
-CFactory::CFactory():initialized(true)//, UpdateManager(NULL), RenderManager(NULL), FontManager(NULL)
+CFactory::CFactory():initialized(true)
 {
 	SetName("Factory");
 }
@@ -158,8 +157,6 @@ bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
 
 bool CResourceManager::LoadResources()
 {
-	// TODOODODODOO~!!!!!
-
 	CDataLister DataLister;
 	DataLister.List(DataPath);
 
@@ -237,9 +234,7 @@ void CDataLister::ExploreDirectory(string Path)
 			CurNode->Add(GetFileNameWithoutExtension(string(entry->d_name)),
 				     Path + "/" + string(entry->d_name));
 		}
-
 	}
-
 	closedir(dirp);
 }
 

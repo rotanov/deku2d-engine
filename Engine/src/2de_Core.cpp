@@ -1045,7 +1045,7 @@ bool CUpdateManager::UpdateObjects()
 			continue;
 		// FIXED_DELTA_TIME
 		float dt = 0;
-		CEngine::Instance()->GetState(STATE_DELTA_TIME, &dt);
+		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
 		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 		data = dynamic_cast<CUpdateObject*>(Next());
 	}

@@ -136,8 +136,8 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 
 CFontEditor::CFontEditor()
 {
-	CEngine::Instance()->GetState(STATE_SCREEN_HEIGHT, &WindowHeight);
-	CEngine::Instance()->GetState(STATE_SCREEN_WIDTH, &WindowWidth);
+	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &WindowHeight);
+	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &WindowWidth);
 	PRender.lClr		= COLOR_FIRST;
 	PRender.sClr		= COLOR_THIRD;
 	PRender.pClr		= COLOR_FIRST;
@@ -213,7 +213,7 @@ bool CFontEditor::Render()
 
 	PRender.grCircleL(MousePosition, 5);
 	int fps;
-	CEngine::Instance()->GetState(STATE_FPS_COUNT, &fps);
+	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
 	CFontManager::Instance()->CurrentFont->tClr = COLOR_WHITE;
 	CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
 	glLoadIdentity();
@@ -322,7 +322,7 @@ bool CFontEditor::Render()
 
 bool CFontEditor::Update(float dt)
 {
-	CEngine::Instance()->GetState(STATE_MOUSE_XY, &MousePosition);
+	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &MousePosition);
 
 	switch (State)
 	{

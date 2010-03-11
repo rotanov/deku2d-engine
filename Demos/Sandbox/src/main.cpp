@@ -17,7 +17,7 @@ bool Init()
 bool Draw()
 {	
 	unsigned long FPS = 0;
-	CEngine::Instance()->GetState(STATE_FPS_COUNT, &FPS);
+	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &FPS);
 	CFontManager::Instance()->Print(0.0f, 0.0f, 0.0f, itos(FPS));
 	return true;
 }
@@ -25,10 +25,10 @@ bool Draw()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_CONFIG_PATH, "Config/");
-	Ninja->SetState(STATE_CONFIG_NAME, "Sandbox.xml");
-	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);	
+	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Sandbox.xml");
+	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
 	return 0x1;
 }

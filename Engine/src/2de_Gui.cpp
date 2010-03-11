@@ -337,7 +337,7 @@ bool CButton::Render()
 bool CButton::Update(float dt)
 {
 	Vector2 mouse;
-	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
+	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
 
 	MouseState.Hovered = aabb.Inside(mouse);
 	MouseState.Pressed = SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1);
@@ -471,7 +471,7 @@ bool CEdit::Render()
 bool CEdit::Update(scalar dt)
 {
 	Vector2 mouse;
-	CEngine::Instance()->GetState(STATE_MOUSE_XY, &mouse);
+	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
 
 	MouseState.Hovered = aabb.Inside(mouse);
 	MouseState.Pressed = (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) && MouseState.Hovered;

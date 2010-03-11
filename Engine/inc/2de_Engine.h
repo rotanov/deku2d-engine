@@ -7,12 +7,11 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <memory.h>
+#include <math.h>
 
 #ifdef _WIN32
 	#include <tchar.h>
 #endif // _WIN32
-
-#include <math.h>
 
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
@@ -20,61 +19,56 @@
 #include "2de_Resource.h"
 #include "2de_Sound.h"
 
-// Константы
-
-#define FIXED_DELTA_TIME			0.02f
-#define ENGINE_VERSION				0x001
-#define MAX_EVENT_FUNCTIONS			8
-#define MAX_KEY_INPUT_FUNCTIONS		8
-
-// Состояния переменных движка, для Set/Get State
-// пока что тут неполный набор.
-
-#define STATE_SCREEN_WIDTH			0x01
-#define STATE_SCREEN_HEIGHT			0x03
-#define STATE_WINDOW_CAPTION		0x04
-#define STATE_DO_LIMIT_FPS			0x05
-#define STATE_DO_CALC_FPS			0x06
-#define STATE_FPS_LIMIT				0x07
-#define STATE_FPS_COUNT				0x02
-#define STATE_CONFIG_NAME			0x08
-#define STATE_MOUSE_X				0x09
-#define STATE_MOUSE_Y				0x0A
-#define STATE_MOUSE_XY				0x0B
-#define STATE_HIDE_CONSOLE_WINDOW	0x0C
-#define STATE_DELTA_TIME			0x0D
-#define STATE_CONFIG_PATH			0x0E
-
-#define STATE_USER_INIT_FUNC		0x81
-#define STATE_UPDATE_FUNC			0x82
-#define STATE_RENDER_FUNC			0x83
-#define STATE_GUI_KEY_DOWN			0x84
-#define STATE_GUI_KEY_UP			0x85
-#define STATE_GUI_MOUSE_DOWN		0x86
-#define STATE_GUI_MOUSE_UP			0x87
-#define STATE_GUI_MOUSE_MOVE		0x88
-
-#define STATE_GL_BG_COLOR			0xA0
+const float FIXED_DELTA_TIME		=	0.02f;
+const int ENGINE_VERSION			=	0x001;
+const int MAX_EVENT_FUNCTIONS		=	8;
+const int MAX_KEY_INPUT_FUNCTIONS	=	8;
 
 class CEngine : public CTSingleton<CEngine>
 {
 public:
-	CXMLTable					Config;				// Да! Это  - конфиг. Нахуй его хранить тут вот только мне непонятно... Ведь он нужен только при загрузке.
-	int							keys[SDLK_LAST];	//FFFFFFFFUUUUUUUUUU~ ? хз
+	enum EState
+	{
+		STATE_SCREEN_WIDTH,
+		STATE_SCREEN_HEIGHT,
+		STATE_WINDOW_CAPTION,
+		STATE_DO_LIMIT_FPS,
+		STATE_DO_CALC_FPS,
+		STATE_FPS_LIMIT,
+		STATE_FPS_COUNT,
+		STATE_CONFIG_NAME,
+		STATE_MOUSE_X,
+		STATE_MOUSE_Y,
+		STATE_MOUSE_XY,
+		STATE_HIDE_CONSOLE_WINDOW,
+		STATE_DELTA_TIME,
+		STATE_CONFIG_PATH,
+		STATE_USER_INIT_FUNC,
+		STATE_UPDATE_FUNC,
+		STATE_RENDER_FUNC,
+		STATE_GUI_KEY_DOWN,
+		STATE_GUI_KEY_UP,
+		STATE_GUI_MOUSE_DOWN,
+		STATE_GUI_MOUSE_UP,
+		STATE_GUI_MOUSE_MOVE,
+		STATE_GL_BG_COLOR,
+	};
+
+	int							keys[SDLK_LAST];	//FFUUU~ for sure. Wait til the Event system.
 	Vector2						MousePos;
 
-	void						SetState(int state, void* value);
-	void						GetState(int state, void* value);
-	bool						AddEventFunction(EventFunc func);
+	void						SetState(EState state, void* value);	// "void*" ??? FFFUUUUU~
+	void						GetState(EState state, void* value);	// Same.
+	bool						AddEventFunction(EventFunc func);		// Until event system created.
 	bool						AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
-	int							CfgGetInt(char* ParamName);
-	bool						Run();	// Есть ран, значит должно быть Pause и ShutDown
+	int							CfgGetInt(char* ParamName);				// I think this one shouldn't be a member of CEnine. User knows the config name and path. But to do such from script. Should think more about it.
+	bool						Run();	// If we have Run() we should have Pause() and ShutDown() or smthng.
 	//bool						Pause();
 	//bool						ShutDown();
 
 	bool						Suicide();  // Временно в паблике
 	string						ConfigFileName;
-	string						ConfigFilePath;		// temporary, until CConfig created
+	string						ConfigFilePath;		//Temporary, until CConfig created. // Or no. We are not have CEngine::Config now.
 	
 private:
 	bool						doLimitFps;
@@ -89,7 +83,7 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-	CGLWindow					*window;	// ORLY We need it here?
+	CGLWindow					*window;	// ORLY We need it here? // For sure we are not.
 	
 	bool						ClearLists();
 	bool						Init();

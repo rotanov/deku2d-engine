@@ -138,8 +138,8 @@ bool Init()
 		Font = CFontManager::Instance()->GetFont("Font");
 		CFontManager::Instance()->SetCurrentFont("Font");
 	//////////////////////////////////////////////////////////////////////////
-		Ninja->GetState(STATE_SCREEN_WIDTH, &ScreenWidth);
-		Ninja->GetState(STATE_SCREEN_HEIGHT, &ScreenHeight);
+		Ninja->GetState(CEngine::STATE_SCREEN_WIDTH, &ScreenWidth);
+		Ninja->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScreenHeight);
 		fPosition.x = ScreenWidth - Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE;
 		fPosition.y = ScreenHeight - Font->GetStringHeight(TITLE_TEXT)*SCALE_TITLE;
 		fPosition *= 0.5f;
@@ -262,9 +262,9 @@ bool Init()
 
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_CONFIG_PATH, "Config/");
-	Ninja->SetState(STATE_CONFIG_NAME, "Tanks.xml");
-	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Tanks.xml");
+	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
 	Ninja->Run();
 	return 0x1;
 }

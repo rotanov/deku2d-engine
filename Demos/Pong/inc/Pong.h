@@ -27,7 +27,7 @@ public:
 	{
 		Acceleration = Velocity = V2_ZERO;
 		int ScreenWidth;
-		CEngine::Instance()->GetState(STATE_SCREEN_WIDTH, &ScreenWidth);
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScreenWidth);
 		switch (PlayerKind)
 		{
 		case PLAYER_KIND_ONE:

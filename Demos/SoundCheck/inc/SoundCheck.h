@@ -51,7 +51,7 @@ public:
 
 		// i hate this fucking "State"... completely wrong, not type-safe, inconvenient design...
 		int ScreenHeight;
-		CEngine::Instance()->GetState(STATE_SCREEN_HEIGHT, &ScreenHeight);
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScreenHeight);
 
 		FontManager->PrintEx(5, ScreenHeight - 30, 0.0f, "Sound: q - play, w - stop"); 
 		FontManager->PrintEx(5, ScreenHeight - 60, 0.0f, "Music: a - play, s - stop"); 

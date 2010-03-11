@@ -193,8 +193,8 @@ bool Init()
 	GameHTiles	= Ninja->CfgGetInt("GameHTiles");
 	LeftPanel	= Ninja->CfgGetInt("LeftPanel");
 	BottomPanel	= Ninja->CfgGetInt("BottomPanel");
-	Ninja->GetState(STATE_SCREEN_WIDTH, &ScrnWidth);
-	Ninja->GetState(STATE_SCREEN_HEIGHT, &ScrnHeight);
+	Ninja->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrnWidth);
+	Ninja->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrnHeight);
 	SDL_ShowCursor(0);
 	//Ninja->RenderManager.SortByAlpha();
 	//Ninja->RenderManager.SortByZ();	
@@ -286,7 +286,7 @@ void DrawPanels()
 
 bool Draw()
 {	
-	Ninja->GetState(STATE_MOUSE_XY, &MousePos);
+	Ninja->GetState(CEngine::STATE_MOUSE_XY, &MousePos);
 	if (Ninja->keys[SDLK_g])
 	{
 		Offset += MousePos - oMp;
@@ -353,10 +353,10 @@ bool Draw()
 }
 int	main(int argc, char *argv[])
 {
-	Ninja->SetState(STATE_CONFIG_PATH, "Config/");
-	Ninja->SetState(STATE_CONFIG_NAME, "LevelEditor.xml");
-	Ninja->SetState(STATE_RENDER_FUNC, &Draw);
-	Ninja->SetState(STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "LevelEditor.xml");
+	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);
+	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
 
 	Ninja->Run();
 

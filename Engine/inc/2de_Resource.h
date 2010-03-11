@@ -36,33 +36,29 @@ public:
 //static CList ExtResRelationList;
 
 // типы ресурсов
-#define CRESOURCE_TYPE_FONT			0x01
-#define CRESOURCE_TYPE_IMAGE			0x02
-#define	CRESOURCE_TYPE_PARTICLESYSTEM		0x03
-#define CRESOURCE_TYPE_ANIMATION		0x04
-#define CRESOURCE_TYPE_XML			0x05
-#define CRESOURCE_TYPE_SOUND			0x06
-#define CRESOURCE_TYPE_MUSIC			0x07
-#define CRESOURCE_TYPE_USER_DEFINED		0x08
+// #define CRESOURCE_TYPE_FONT			0x01
+// #define CRESOURCE_TYPE_IMAGE			0x02
+// #define	CRESOURCE_TYPE_PARTICLESYSTEM		0x03
+// #define CRESOURCE_TYPE_ANIMATION		0x04
+// #define CRESOURCE_TYPE_XML			0x05
+// #define CRESOURCE_TYPE_SOUND			0x06
+// #define CRESOURCE_TYPE_MUSIC			0x07
+// #define CRESOURCE_TYPE_USER_DEFINED		0x08
 
 
 
-// Типы объектов. Это для CFactory
-#define OBJ_SPRITE			0x01
-#define OBJ_PSYSTEM			0x02
-#define OBJ_FONT_M			0x03
-#define	OBJ_USER_DEFINED	0x04
-#define OBJ_TEXTURE_RES		0x05
-#define OBJ_TILESET_RES		0x06
-#define OBJ_SOUND_RES		0x07
-#define OBJ_MUSIC_RES		0x08
-
-#define MANAGER_TYPE_REN 0x00
-#define MANAGER_TYPE_FNT 0x01
-#define MANAGER_TYPE_UPD 0x02
-#define MANAGER_TYPE_TEX 0x03
-#define MANAGER_TYPE_SND 0x04
-#define MANAGER_TYPE_MUS 0x05
+// Типы объектов. Это для CFactory // И пока не используется
+enum EObjectType
+{
+	OBJ_SPRITE,
+	OBJ_PSYSTEM,
+	OBJ_FONT_M,
+	OBJ_USER_DEFINED,
+	OBJ_TEXTURE_RES,
+	OBJ_TILESET_RES,
+	OBJ_SOUND_RES,
+	OBJ_MUSIC_RES,
+};
 
 /**
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
@@ -72,42 +68,10 @@ class CFactory : public CList, public CTSingleton<CFactory>
 {
 public:
 	CObject*		Create(int ObjectId, CreateFunc creator);
-// 	CList*	GetManager(int mantype)
-// 	{
-// 		switch (mantype)
-// 		{
-// 		case MANAGER_TYPE_REN:
-// 			return RenderManager;
-// 			break;
-// 		case MANAGER_TYPE_FNT:
-// 			return FontManager;
-// 			break;
-// 		case MANAGER_TYPE_UPD:
-// 			return UpdateManager;
-// 			break;
-// 		case MANAGER_TYPE_TEX:
-// 			return TextureManager;
-// 			break;
-// 		case MANAGER_TYPE_SND:
-// 			return SoundManager;
-// 			break;
-// 		case MANAGER_TYPE_MUS:
-// 			return MusicManager;
-// 			break;
-// 		default:
-// 			return this;
-// 			break;
-// 		}
-// 	}
 
 protected:
 	bool initialized;
-// 	CFontManager *FontManager;
-// 	CUpdateManager *UpdateManager;
-// 	CRenderManager *RenderManager;
-// 	CTextureManager *TextureManager;
-// 	CSoundManager *SoundManager;
-// 	CMusicManager *MusicManager;
+
 	CFactory();
 	friend class CTSingleton<CFactory>;
 	~CFactory();
@@ -133,7 +97,6 @@ protected:
 	CResourceManager()
 	{
 		SetName("ResourceManager");
-		// ResourceList = NULL;
 		ResourceList = new CXMLTable;
 	}
 	friend class CTSingleton<CResourceManager>;
@@ -142,7 +105,6 @@ protected:
 class CDataLister
 {
 public:
-	// CXMLTable List(string ADataRoot);
 	void List(string ADataRoot);
 private:
 	CXMLTable Table;

@@ -27,8 +27,8 @@ public:
 	bool Render()
 	{
 		int ScrWidth, ScrHeight;
-		CEngine::Instance()->GetState(STATE_SCREEN_WIDTH, &ScrWidth);
-		CEngine::Instance()->GetState(STATE_SCREEN_HEIGHT, &ScrHeight);
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
 		shroom.Bind();

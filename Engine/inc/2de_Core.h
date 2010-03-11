@@ -359,7 +359,7 @@ typedef CGarbageCollector CSingletoneKiller;
  * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
  */
 
-template <class T>
+template <typename T>
 class CTSingleton : public virtual CObject
 {
 public:
@@ -373,7 +373,7 @@ private:
 	static T * _instance;
 };
 
-template <class T>
+template <typename T>
 T* CTSingleton<T>::Instance()
 {
 	if (!_instance)
@@ -384,7 +384,7 @@ T* CTSingleton<T>::Instance()
 	return _instance;
 }
 
-template <class T>
+template <typename T>
 T* CTSingleton<T>::_instance = 0;
 
 
@@ -456,14 +456,14 @@ public:
 	enum EOpenMode
 	{
 		OPEN_MODE_READ,
-		OPEN_MODE_WRITE
+		OPEN_MODE_WRITE,
 	};
 	
 	enum ESeekOrigin
 	{
 		SEEK_ORIGIN_BEGINNING,
 		SEEK_ORIGIN_CURRENT,
-		SEEK_ORIGIN_END
+		SEEK_ORIGIN_END,
 	};
 
 	CFile() : File(NULL) {}

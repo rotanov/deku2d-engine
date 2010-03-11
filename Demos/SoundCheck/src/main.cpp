@@ -13,9 +13,9 @@ bool Init()
 
 int main(int argc, char* argv[])
 {
-	Engine->SetState(STATE_USER_INIT_FUNC, &Init);
-	Engine->SetState(STATE_CONFIG_PATH, "Config/");
-	Engine->SetState(STATE_CONFIG_NAME, "SoundCheck.xml");
+	Engine->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Engine->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	Engine->SetState(CEngine::STATE_CONFIG_NAME, "SoundCheck.xml");
 	Engine->Run();
 
 	return 0;
