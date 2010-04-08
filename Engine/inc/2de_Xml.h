@@ -83,7 +83,7 @@ public:
 	void					Clear();
 	CXMLNode*				Get(const char* Str);
 	char					*GetValue(){return (char*)Value.data();}
-	void					Write(CFile f, int depth);
+	void					Write(const CFile& f, int depth);
 	bool					GetPair(string &Key, string &Value);
 	void					ResetEnum(int Kind){enumPtr = Child;enumKind = Kind;_last = 0;}
 	int						Enum(string &outKey, string &outValue, int &res);

@@ -2,7 +2,6 @@
 #define _2DE_CORE_H
 
 #ifdef _MSC_VER
-//#pragma message("Compiling CoreUtils.h")	// НЕ.Впихивать эту тему в файлы чтобы видеть в Output какой файл компилируется. "НЕ", я сказал. И так output заграмождён.
 
 //#pragma warning (disable	:	4312)   //
 #pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
@@ -75,6 +74,107 @@ using namespace std;
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif //_MSC_VER
+
+/**
+*	Отлов утечек памяти.
+*	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
+*	TODO: Implement new[] and delete []
+*	TODO: Remove inline from AddTrack and RemoveTrack and others.
+*/
+
+#ifdef _DEBUG
+
+#include <list>
+
+struct ALLOC_INFO
+{
+	DWORD	address;
+	DWORD	size;
+	char	file[64];
+	DWORD	line;
+};
+
+typedef list<ALLOC_INFO*> AllocList;
+
+static AllocList *allocList;
+
+inline void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
+{
+	ALLOC_INFO *info;
+
+	if(!allocList) {
+		allocList = new(AllocList);
+	}
+
+	info = new(ALLOC_INFO);
+	info->address = addr;
+	strncpy(info->file, fname, 63);
+	info->line = lnum;
+	info->size = asize;
+	allocList->insert(allocList->begin(), info);
+};
+
+inline void RemoveTrack(DWORD addr)
+{
+	AllocList::iterator i;
+
+	if(!allocList)
+		return;
+	for(i = allocList->begin(); i != allocList->end(); i++)
+	{
+		if((*i)->address == addr)
+		{
+			allocList->remove((*i));
+			break;
+		}
+	}
+};
+
+inline void DumpUnfreed()
+{
+	FILE *fo = fopen("Memory.log", "w");
+	AllocList::iterator i;
+	DWORD totalSize = 0;
+	char buf[1024];
+
+	if(!allocList)
+		return;
+
+	for(i = allocList->begin(); i != allocList->end(); i++) {
+		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
+			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
+		fprintf(fo, "%s", buf);
+		totalSize += (*i)->size;
+	}
+	sprintf(buf, "-----------------------------------------------------------\n");
+	fprintf(fo, "%s", buf);
+	sprintf(buf, "Total Unfreed: %d bytes\n", totalSize);
+	fprintf(fo, "%s", buf);
+	fclose(fo);
+};
+
+inline void * __cdecl operator new(unsigned int size, const char *file, int line)
+{
+	void *ptr = (void *)malloc(size);
+	AddTrack((DWORD)ptr, size, file, line);
+	return(ptr);
+};
+
+inline void __cdecl operator delete(void *p)
+{
+	RemoveTrack((DWORD)p);
+	free(p);
+};
+
+#ifdef _DEBUG
+	#define DEBUG_NEW new(__FILE__, __LINE__)
+#else
+	#define DEBUG_NEW new
+#endif
+	#define new DEBUG_NEW
+
+#endif
+
 
 typedef unsigned char		byte;
 typedef float				scalar;
@@ -251,6 +351,9 @@ extern CLog Log;
 *	CObjectList - список объектов. Двусвязный.
 *	Внимание, после лекции Лудова по спискам я заявляю, что эта реализация если не ГОВНО, то
 *	говно. Да-да, надо переписывать. Опять. Итераторы и всё такое. И концепция контейнеров.
+*/
+/**
+*	А после лекции Кленина - этот список точно ГОВНО. см. Issue #какой-то там.
 */
 
 class CList : public virtual CObject
@@ -445,12 +548,7 @@ public:
 	RGBAub(){}
 };
 
-/**
-*	CFile - класс для работы с файлом. Названия ф-ий интуитивны.
-*	Как с ним работать я думаю тоже интуитивно понятно.
-*/
-
-class CFile // унаследовать? // или нет? 
+class CFile
 {
 public:
 	enum EOpenMode
@@ -468,30 +566,29 @@ public:
 
 	CFile() : File(NULL) {}
 	CFile(const string AFileName, EOpenMode Mode);
+	~CFile();
 
 	bool Open(const string AFileName, EOpenMode Mode);
 	bool Close();
-	bool ReadByte(unsigned char *Buffer);
-	bool WriteByte(unsigned char *Buffer);
-	bool WriteByte(unsigned char Buffer);
-	bool Read(void *Buffer, unsigned long BytesCount);
-	bool Write(const void *Buffer, unsigned long BytesCount);
-	bool ReadString(char *Buffer);
-	bool ReadString(string &Buffer);
-	bool WriteString(const char *Buffer);
-	bool WriteString(const string Buffer);
-	bool ReadLine(char* &Data);
-	bool WriteLine(string Buffer);
-	bool Seek(unsigned int Offset, ESeekOrigin Origin);
-	bool Eof();
-	size_t Size();
+	bool ReadByte(unsigned char *Buffer) const;
+	bool WriteByte(unsigned char *Buffer) const;
+	bool WriteByte(unsigned char Buffer) const;
+	bool Read(void *Buffer, unsigned long BytesCount) const;
+	bool Write(const void *Buffer, unsigned long BytesCount) const;
+	bool ReadString(char *Buffer) const;
+	bool ReadString(string &Buffer) const;
+	bool WriteString(const char *Buffer) const;
+	bool WriteString(const string Buffer) const;
+	bool ReadLine(char* &Data) const;
+	bool WriteLine(string Buffer) const;
+	bool Seek(unsigned int Offset, ESeekOrigin Origin) const;
+	bool Eof() const;
+	size_t Size() const;
 
 private:
 	FILE *File;
-	string FileName;
+	string Filename;
 };
-
-
 
 // TODO: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment
@@ -510,17 +607,6 @@ string GetFormattedTime(const tm TimeStruct, const char *Format);
 void DelFNameFromFPath(char *src);
 void DelExtFromFName(char *src);
 void DelLastDirFromPath(char *src);
-void DelInterval(string *src, const int s0, const int s1);
-
-/**
-*	Внизу временные ф-ии для отлова утечек памяти.
-*	То что внизу - либо убрать нахуй, либо сделать нормально.
-*	Но это мелочи, так что пока пусть будет как есть, всё равно теперь не используется
-*/
-
-void MemChp1();
-void MemChp2();
-void MemCheck();
 
 /**
 *	здесь, чтобы не забыть как делать синглтон. Хотя чего там можно забыть, в гемсах же копипаста.

@@ -102,28 +102,28 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 		return false;
 	}
 
-	FileName = AFileName;
+	Filename = AFileName;
 
 	switch (Mode)
 	{
 	case OPEN_MODE_READ:
-		File = fopen(FileName.c_str(), "rb");
+		File = fopen(Filename.c_str(), "rb");
 		if (File == NULL)
 		{
-			Log.Log("ERROR", "Can't open file %s.", FileName.c_str());
+			Log.Log("ERROR", "Can't open file %s.", Filename.c_str());
 			return false;
 		}
 		break;
 	case OPEN_MODE_WRITE:
-		File = fopen(FileName.c_str(), "wb");
+		File = fopen(Filename.c_str(), "wb");
 		if (File == NULL)
 		{
-			Log.Log("ERROR", "Can't open file %s.", FileName.c_str());
+			Log.Log("ERROR", "Can't open file %s.", Filename.c_str());
 			return false;
 		}
 		break;
 	default:
-		Log.Log("ERROR", "Can't open file %s: invalid mode.", FileName.c_str());
+		Log.Log("ERROR", "Can't open file %s: invalid mode.", Filename.c_str());
 		return false;
 	}
 
@@ -138,12 +138,12 @@ bool CFile::Close()
 	fclose(File);
 	File = NULL;
 
-	FileName.clear();
+	Filename.clear();
 
 	return true;
 }
 
-bool CFile::ReadByte(unsigned char *Buffer)
+bool CFile::ReadByte(unsigned char *Buffer) const
 {
 	if (Buffer == NULL)
 		return false;
@@ -158,17 +158,17 @@ bool CFile::ReadByte(unsigned char *Buffer)
 	return true;
 }
 
-bool CFile::WriteByte(unsigned char *Buffer)
+bool CFile::WriteByte(unsigned char *Buffer) const
 {
 	return Write(Buffer, 1);
 }
 
-bool CFile::WriteByte(unsigned char Buffer)
+bool CFile::WriteByte(unsigned char Buffer) const
 {
 	return WriteByte(&Buffer);
 }
 
-bool CFile::Read(void *Buffer, unsigned long BytesCount)
+bool CFile::Read(void *Buffer, unsigned long BytesCount) const
 {
 	if (Buffer == NULL)
 		return false;
@@ -186,7 +186,7 @@ bool CFile::Read(void *Buffer, unsigned long BytesCount)
 	return true;
 }
 
-bool CFile::Write(const void *Buffer, unsigned long BytesCount)
+bool CFile::Write(const void *Buffer, unsigned long BytesCount) const
 {
 	if (Buffer == NULL)
 		return false;
@@ -204,7 +204,7 @@ bool CFile::Write(const void *Buffer, unsigned long BytesCount)
 	return true;
 }
 
-bool CFile::ReadString(char *Buffer)
+bool CFile::ReadString(char *Buffer) const
 {
 	if (File == NULL)
 		return false;
@@ -226,7 +226,7 @@ bool CFile::ReadString(char *Buffer)
 	return true;
 }
 
-bool CFile::ReadString(string &Buffer)
+bool CFile::ReadString(string &Buffer) const
 {
 	if (File == NULL)
 		return false;
@@ -250,7 +250,7 @@ bool CFile::ReadString(string &Buffer)
 }
 
 //note buffer must exists!!!!
-bool CFile::WriteString(const char *Buffer)
+bool CFile::WriteString(const char *Buffer) const
 {
 	if (File == NULL)
 		return false;
@@ -265,7 +265,7 @@ bool CFile::WriteString(const char *Buffer)
 	return true;
 }
 
-bool CFile::WriteString(const string Buffer)
+bool CFile::WriteString(const string Buffer) const
 {
 	if (File == NULL)
 		return false;
@@ -280,7 +280,7 @@ bool CFile::WriteString(const string Buffer)
 	return true;
 }
 
-bool CFile::ReadLine(char* &Data)
+bool CFile::ReadLine(char* &Data) const
 {
 	if (File == NULL)
 		return false;
@@ -307,7 +307,7 @@ bool CFile::ReadLine(char* &Data)
 	return true;
 }
 
-bool CFile::WriteLine(string Buffer)
+bool CFile::WriteLine(string Buffer) const
 {
 	if (File == NULL)
 		return false;
@@ -328,7 +328,7 @@ bool CFile::WriteLine(string Buffer)
 	return true;
 }
 
-bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
+bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin) const
 {
 	if (File == NULL)
 		return false;
@@ -351,24 +351,28 @@ bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
 	return (fseek(File, Offset, origin_const) == 0);
 }
 
-bool CFile::Eof()
+bool CFile::Eof() const
 {
 	return !!feof(File);
 }
 
-size_t CFile::Size()
+size_t CFile::Size() const
 {
 	struct stat FileStat;
 
-	if(stat(FileName.c_str(), &FileStat))
+	if(stat(Filename.c_str(), &FileStat))
 	{
-		Log.Log("ERROR", "Can't get size of %s.", FileName.c_str());
+		Log.Log("ERROR", "Can't get size of %s.", Filename.c_str());
 		return 0;
 	}
 
 	return FileStat.st_size;
 }
 
+CFile::~CFile()
+{
+	Close();
+}
 
 /************************************************************************/
 /* CList, CListNode                                                     */
@@ -978,19 +982,6 @@ void MemCheck()
 	CloseHandle(hLogFile);
 }
 #endif //_WIN32
-
-void DelInterval(string *src, const int s0, const int s1)
-{
-	if (s1 < s0)
-		return;
-	if (s0 < 0 || s1 >= src->length())
-		return;
-	char *Temp0 = new char [s0+1], *Temp1 = new char [src->length() - s1]; // Ага блеадь, утечка памяти вот прямо тут.
-	Temp0[s0] = 0, Temp1[src->length() - s1 - 1] = 0;
-	src->copy(Temp0, s0, 0);
-	src->copy(Temp1, src->length() - s1 - 1, s1+1);
-	*src = (string)Temp0 + Temp1;
-}
 
 CObjectStack::CObjectStack() : last(-1)
 {

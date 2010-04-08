@@ -74,8 +74,8 @@ public:
 			{
 				CRenderManager::Instance()->DelObject("Title screen tanks");
 				CUpdateManager::Instance()->DelObject("Title screen tanks");
-				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
-				dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
+				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
+				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 				Tanks = new CTankManager;	
 			}
 		}

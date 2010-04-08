@@ -188,7 +188,7 @@ int CXMLNode::Enum(string &outKey, string &outValue, int &res)
 *	Writes node data to file
 ------------------------------------------------
 */
-void CXMLNode::Write(CFile f, int depth)
+void CXMLNode::Write(const CFile &f, int depth)
 {
 	char b=9;
 	for (int i=0;i<depth;i++)

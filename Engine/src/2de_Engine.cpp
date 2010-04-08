@@ -152,8 +152,8 @@ bool CEngine::Init()
 
 	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
 
-	_putenv("SDL_VIDEO_CENTERED=1");
-
+		
+	putenv("SDL_VIDEO_CENTERED=1");
 	CXMLTable Config;
 	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
@@ -342,79 +342,87 @@ bool CEngine::Run()
 
 	while (ProcessEvents())
 	{
-		if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
+		try
 		{
-			if (LimitFps())
-			{		
-				if (doCalcFps)
-					CalcFps();
-				gBeginFrame();
-				CRenderManager::Instance()->DrawObjects();
-				if (procRenderFunc != NULL)
-					procRenderFunc();
-				
-				CUpdateManager::Instance()->UpdateObjects();
-				if (procUpdateFunc != NULL)
-					procUpdateFunc(dt);
-				// TODO: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
+			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
+			{
+				if (LimitFps())
+				{		
+					if (doCalcFps)
+						CalcFps();
+					gBeginFrame();
+					CRenderManager::Instance()->DrawObjects();
+					if (procRenderFunc != NULL)
+						procRenderFunc();
+					
+					CUpdateManager::Instance()->UpdateObjects();
+					if (procUpdateFunc != NULL)
+						procUpdateFunc(dt);
+					// TODO: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
+				}
+				SDL_ShowCursor(0);
+				/*тестовый код*/
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				MousePos = Vector2(x, window->height - y);
+				const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
+				const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
+				const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
+				const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
+				CPrimitiveRender PRender;
+				PRender.lClr = COLOR_FIRST;
+				PRender.sClr = COLOR_THIRD;
+				PRender.pClr = COLOR_FIRST;
+				glLoadIdentity();
+				glDisable(GL_DEPTH_TEST);
+				glEnable(GL_BLEND);		
+				glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+
+				/*PRender.lClr = PRender.pClr = RGBAf(0.8f, 0.8f, 0.8f, 1.0f);
+				PRender.lwidth = 4.0f;
+				PRender.psize = 4.0f;
+				PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле.. но по дефолту оставим круглешок.. */
+
+				PRender.grCircleL(MousePos, 5);
+				gEndFrame();	
+
+				/**/
+				// ZOMG There wasn't other choice, the next step is to put it all into separate thread. Or pseudo-thread.
+
+	// 			как уже подсказали, нужно 
+	// 				> Можно вынести опрос координат курсора в отдельный поток. 
+	// 
+	// 				но применительно для SDL, можно установить глобальный фильтр обработчика где будет, вызываться твоя функция отрисовки курсора (я делал именно так, и не тормозит)
+	// 
+	// 				SDL_SetEventFilter(GlobalFilterEvents);
+	// 
+	// 
+	// 			int GlobalFilterEvents(const SDL_Event *event) 
+	// 			{ 
+	// 				if(SDL_MOUSEMOTION == event->type) 
+	// 					RedrawCursor(event->motion.x, event->motion.y);
+	// 
+	// 				return 1; 
+	// 			}
+	// 
+	// 			это не дословный код но общая идея именно такая.
+	//------------------
+	// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
+
 			}
-			SDL_ShowCursor(0);
-			/*тестовый код*/
-			int x, y;
-			SDL_GetMouseState(&x, &y);
-			MousePos = Vector2(x, window->height - y);
-			const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
-			const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
-			const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
-			const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
-			CPrimitiveRender PRender;
-			PRender.lClr = COLOR_FIRST;
-			PRender.sClr = COLOR_THIRD;
-			PRender.pClr = COLOR_FIRST;
-			glLoadIdentity();
-			glDisable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);		
-			glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-
-			/*PRender.lClr = PRender.pClr = RGBAf(0.8f, 0.8f, 0.8f, 1.0f);
-			PRender.lwidth = 4.0f;
-			PRender.psize = 4.0f;
-			PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле.. но по дефолту оставим круглешок.. */
-
-			PRender.grCircleL(MousePos, 5);
-			gEndFrame();	
-
-			/**/
-			// ZOMG There wasn't other choice, the next step is to put it all into separate thread. Or pseudo-thread.
-
-// 			как уже подсказали, нужно 
-// 				> Можно вынести опрос координат курсора в отдельный поток. 
-// 
-// 				но применительно для SDL, можно установить глобальный фильтр обработчика где будет, вызываться твоя функция отрисовки курсора (я делал именно так, и не тормозит)
-// 
-// 				SDL_SetEventFilter(GlobalFilterEvents);
-// 
-// 
-// 			int GlobalFilterEvents(const SDL_Event *event) 
-// 			{ 
-// 				if(SDL_MOUSEMOTION == event->type) 
-// 					RedrawCursor(event->motion.x, event->motion.y);
-// 
-// 				return 1; 
-// 			}
-// 
-// 			это не дословный код но общая идея именно такая.
-//------------------
-// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
-
+			else
+			{
+	#ifdef _WIN32			
+				WaitMessage(); // SDL_WaitEvent(NULL);
+	#else
+				sleep(1);
+	#endif //_WIN32
+			}
 		}
-		else
+		catch(...)
 		{
-#ifdef _WIN32			
-			WaitMessage(); // SDL_WaitEvent(NULL);
-#else
-			sleep(1);
-#endif //_WIN32
+			Log.Log("ERROR", "A critical error in main loop occured. Exiting");
+			throw;
 		}
 	}	
 #ifdef _DEBUG
@@ -423,6 +431,7 @@ bool CEngine::Run()
 	Suicide();	// БЛЯБЛЯБЯЛЯБЛЯБЛЯБЛЯ МЫ СЮДА НЕ ПОПАДАЕМ
 	//SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
 	SDL_Quit();
+	DumpUnfreed();
 	return true;
 }
 
