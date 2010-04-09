@@ -87,7 +87,6 @@ private:
 	
 	bool						ClearLists();
 	bool						Init();
-	bool						MidInit();
 	void						CalcFps();
 	bool						LimitFps();
 	

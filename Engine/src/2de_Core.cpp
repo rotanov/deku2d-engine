@@ -15,6 +15,53 @@ bool Enabled = true;
 static int CObjectCount = 0;
 CList CObjectManager; // Ultimate!!!!111!!11
 
+#ifdef _DEBUG
+
+AllocList *allocList = NULL;
+
+void RemoveTrack(DWORD addr)
+{
+	AllocList::iterator i;
+
+	if (allocList == NULL)
+		return;
+	for(i = allocList->begin(); i != allocList->end(); i++)
+	{
+		if((*i)->address == addr)
+		{
+			allocList->remove((*i));
+			break;
+		}
+	}
+};
+
+void DumpUnfreed()
+{
+	FILE *fo = fopen("Memory.log", "w");
+	AllocList::iterator i;
+	DWORD totalSize = 0;
+	char buf[1024];
+
+	if (allocList == NULL)
+		return;
+
+	for(i = allocList->begin(); i != allocList->end(); i++) {
+		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
+			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
+		fprintf(fo, "%s", buf);
+		totalSize += (*i)->size;
+	}
+	sprintf(buf, "-----------------------------------------------------------\n");
+	fprintf(fo, "%s", buf);
+	sprintf(buf, "Total Unfreed: %d bytes\n", totalSize);
+	fprintf(fo, "%s", buf);
+	fclose(fo);
+};
+
+
+
+#endif
+
 CObject::CObject()
 {
 	CObjectCount++;

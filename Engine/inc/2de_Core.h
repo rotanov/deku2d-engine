@@ -96,15 +96,14 @@ struct ALLOC_INFO
 
 typedef list<ALLOC_INFO*> AllocList;
 
-static AllocList *allocList;
+extern AllocList *allocList;
 
 inline void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
 {
 	ALLOC_INFO *info;
 
-	if(!allocList) {
+	if (allocList == NULL)
 		allocList = new(AllocList);
-	}
 
 	info = new(ALLOC_INFO);
 	info->address = addr;
@@ -114,44 +113,8 @@ inline void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
 	allocList->insert(allocList->begin(), info);
 };
 
-inline void RemoveTrack(DWORD addr)
-{
-	AllocList::iterator i;
-
-	if(!allocList)
-		return;
-	for(i = allocList->begin(); i != allocList->end(); i++)
-	{
-		if((*i)->address == addr)
-		{
-			allocList->remove((*i));
-			break;
-		}
-	}
-};
-
-inline void DumpUnfreed()
-{
-	FILE *fo = fopen("Memory.log", "w");
-	AllocList::iterator i;
-	DWORD totalSize = 0;
-	char buf[1024];
-
-	if(!allocList)
-		return;
-
-	for(i = allocList->begin(); i != allocList->end(); i++) {
-		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
-			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
-		fprintf(fo, "%s", buf);
-		totalSize += (*i)->size;
-	}
-	sprintf(buf, "-----------------------------------------------------------\n");
-	fprintf(fo, "%s", buf);
-	sprintf(buf, "Total Unfreed: %d bytes\n", totalSize);
-	fprintf(fo, "%s", buf);
-	fclose(fo);
-};
+void RemoveTrack(DWORD addr);
+void DumpUnfreed();
 
 inline void * __cdecl operator new(unsigned int size, const char *file, int line)
 {
@@ -166,13 +129,18 @@ inline void __cdecl operator delete(void *p)
 	free(p);
 };
 
+inline void __cdecl operator delete[](void *p)
+{
+	RemoveTrack((DWORD)p);
+	free(p);
+};
+
 #ifdef _DEBUG
 	#define DEBUG_NEW new(__FILE__, __LINE__)
 #else
 	#define DEBUG_NEW new
 #endif
 	#define new DEBUG_NEW
-
 #endif
 
 

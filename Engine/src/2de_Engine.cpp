@@ -428,15 +428,9 @@ bool CEngine::Run()
 #ifdef _DEBUG
 	CObjectManager.DumpToLog();
 #endif
-	Suicide();	// БЛЯБЛЯБЯЛЯБЛЯБЛЯБЛЯ МЫ СЮДА НЕ ПОПАДАЕМ
-	//SDLGLExit(0); // Если мы попадаем сюда, то в место после вызова Run() мы уже не попадём. Это проблема, я думаю, надо что-то другое придумать.
+	Suicide();
 	SDL_Quit();
 	DumpUnfreed();
-	return true;
-}
-
-bool CEngine::MidInit() // Для чего эта ф-я?
-{
 	return true;
 }
 
