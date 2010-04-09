@@ -218,7 +218,10 @@ void CDataLister::ExploreDirectory(string Path)
 
 	while (entry = readdir(dirp))
 	{
-		if (entry->d_type == DT_DIR)
+		DIR *testdir = opendir(string(Path + "/" + string(entry->d_name)).c_str());
+
+		//if (entry->d_type == DT_DIR)
+		if (testdir)
 		{
 			if (entry->d_name[0] == '.')
 			{
@@ -229,11 +232,14 @@ void CDataLister::ExploreDirectory(string Path)
 			ExploreDirectory(Path + "/" + string(entry->d_name));
 			CurNode = PreviousNode;
 		}
-		else if (entry->d_type == DT_REG)
+		//else if (entry->d_type == DT_REG)
+		else
 		{
 			CurNode->Add(GetFileNameWithoutExtension(string(entry->d_name)),
 				     Path + "/" + string(entry->d_name));
 		}
+
+		closedir(testdir);
 	}
 	closedir(dirp);
 }

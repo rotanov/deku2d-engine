@@ -152,8 +152,8 @@ bool CEngine::Init()
 
 	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
 
-		
-	putenv("SDL_VIDEO_CENTERED=1");
+	SDL_putenv("SDL_VIDEO_CENTERED=1");
+
 	CXMLTable Config;
 	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
@@ -430,7 +430,11 @@ bool CEngine::Run()
 #endif
 	Suicide();
 	SDL_Quit();
+
+#if defined(_DEBUG) && defined(_MSC_VER)
 	DumpUnfreed();
+#endif
+
 	return true;
 }
 

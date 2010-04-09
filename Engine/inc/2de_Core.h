@@ -82,23 +82,23 @@ using namespace std;
 *	TODO: Remove inline from AddTrack and RemoveTrack and others.
 */
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_MSC_VER)
 
 #include <list>
 
 struct ALLOC_INFO
 {
-	DWORD	address;
-	DWORD	size;
-	char	file[64];
-	DWORD	line;
+	unsigned long address;
+	unsigned long size;
+	char file[64];
+	unsigned long line;
 };
 
 typedef list<ALLOC_INFO*> AllocList;
 
 extern AllocList *allocList;
 
-inline void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
+inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fname, unsigned long lnum)
 {
 	ALLOC_INFO *info;
 
@@ -113,25 +113,25 @@ inline void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
 	allocList->insert(allocList->begin(), info);
 };
 
-void RemoveTrack(DWORD addr);
+void RemoveTrack(unsigned long addr);
 void DumpUnfreed();
 
-inline void * __cdecl operator new(unsigned int size, const char *file, int line)
+inline void * operator new(unsigned int size, const char *file, int line)
 {
 	void *ptr = (void *)malloc(size);
-	AddTrack((DWORD)ptr, size, file, line);
+	AddTrack((unsigned long)ptr, size, file, line);
 	return(ptr);
 };
 
-inline void __cdecl operator delete(void *p)
+inline void operator delete(void *p)
 {
-	RemoveTrack((DWORD)p);
+	RemoveTrack((unsigned long)p);
 	free(p);
 };
 
-inline void __cdecl operator delete[](void *p)
+inline void operator delete[](void *p)
 {
-	RemoveTrack((DWORD)p);
+	RemoveTrack((unsigned long)p);
 	free(p);
 };
 
@@ -141,7 +141,8 @@ inline void __cdecl operator delete[](void *p)
 	#define DEBUG_NEW new
 #endif
 	#define new DEBUG_NEW
-#endif
+
+#endif // defined(_DEBUG) && defined(_MSC_VER)
 
 
 typedef unsigned char		byte;
@@ -532,24 +533,24 @@ public:
 		SEEK_ORIGIN_END,
 	};
 
-	CFile() : File(NULL) {}
+	CFile();
 	CFile(const string AFileName, EOpenMode Mode);
 	~CFile();
 
 	bool Open(const string AFileName, EOpenMode Mode);
 	bool Close();
-	bool ReadByte(unsigned char *Buffer) const;
-	bool WriteByte(unsigned char *Buffer) const;
-	bool WriteByte(unsigned char Buffer) const;
-	bool Read(void *Buffer, unsigned long BytesCount) const;
-	bool Write(const void *Buffer, unsigned long BytesCount) const;
-	bool ReadString(char *Buffer) const;
-	bool ReadString(string &Buffer) const;
-	bool WriteString(const char *Buffer) const;
-	bool WriteString(const string Buffer) const;
-	bool ReadLine(char* &Data) const;
-	bool WriteLine(string Buffer) const;
-	bool Seek(unsigned int Offset, ESeekOrigin Origin) const;
+	bool ReadByte(unsigned char *Buffer);
+	bool WriteByte(unsigned char *Buffer);
+	bool WriteByte(unsigned char Buffer);
+	bool Read(void *Buffer, unsigned long BytesCount);
+	bool Write(const void *Buffer, unsigned long BytesCount);
+	bool ReadString(char *Buffer);
+	bool ReadString(string &Buffer);
+	bool WriteString(const char *Buffer);
+	bool WriteString(const string Buffer);
+	bool ReadLine(char* &Data);
+	bool WriteLine(string Buffer);
+	bool Seek(unsigned int Offset, ESeekOrigin Origin);
 	bool Eof() const;
 	size_t Size() const;
 

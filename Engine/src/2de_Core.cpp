@@ -15,11 +15,11 @@ bool Enabled = true;
 static int CObjectCount = 0;
 CList CObjectManager; // Ultimate!!!!111!!11
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_MSC_VER)
 
 AllocList *allocList = NULL;
 
-void RemoveTrack(DWORD addr)
+void RemoveTrack(unsigned long addr)
 {
 	AllocList::iterator i;
 
@@ -39,7 +39,7 @@ void DumpUnfreed()
 {
 	FILE *fo = fopen("Memory.log", "w");
 	AllocList::iterator i;
-	DWORD totalSize = 0;
+	unsigned long totalSize = 0;
 	char buf[1024];
 
 	if (allocList == NULL)
@@ -60,7 +60,7 @@ void DumpUnfreed()
 
 
 
-#endif
+#endif // defined(_DEBUG) && defined(_MSC_VER)
 
 CObject::CObject()
 {
@@ -127,13 +127,23 @@ ostream& operator<<(ostream &Stream, CObject Object)
 	return Stream;
 }
 
+
 /************************************************************************/
 /* CFile                                                                */
 /************************************************************************/
+CFile::CFile() : File(NULL)
+{
+}
+
 CFile::CFile(const string AFileName, EOpenMode Mode)
 {
 	File = NULL;
 	Open(AFileName, Mode);
+}
+
+CFile::~CFile()
+{
+	Close();
 }
 
 bool CFile::Open(const string AFileName, EOpenMode Mode)
@@ -190,7 +200,7 @@ bool CFile::Close()
 	return true;
 }
 
-bool CFile::ReadByte(unsigned char *Buffer) const
+bool CFile::ReadByte(unsigned char *Buffer)
 {
 	if (Buffer == NULL)
 		return false;
@@ -205,17 +215,17 @@ bool CFile::ReadByte(unsigned char *Buffer) const
 	return true;
 }
 
-bool CFile::WriteByte(unsigned char *Buffer) const
+bool CFile::WriteByte(unsigned char *Buffer)
 {
 	return Write(Buffer, 1);
 }
 
-bool CFile::WriteByte(unsigned char Buffer) const
+bool CFile::WriteByte(unsigned char Buffer)
 {
 	return WriteByte(&Buffer);
 }
 
-bool CFile::Read(void *Buffer, unsigned long BytesCount) const
+bool CFile::Read(void *Buffer, unsigned long BytesCount)
 {
 	if (Buffer == NULL)
 		return false;
@@ -233,7 +243,7 @@ bool CFile::Read(void *Buffer, unsigned long BytesCount) const
 	return true;
 }
 
-bool CFile::Write(const void *Buffer, unsigned long BytesCount) const
+bool CFile::Write(const void *Buffer, unsigned long BytesCount)
 {
 	if (Buffer == NULL)
 		return false;
@@ -251,7 +261,7 @@ bool CFile::Write(const void *Buffer, unsigned long BytesCount) const
 	return true;
 }
 
-bool CFile::ReadString(char *Buffer) const
+bool CFile::ReadString(char *Buffer)
 {
 	if (File == NULL)
 		return false;
@@ -273,7 +283,7 @@ bool CFile::ReadString(char *Buffer) const
 	return true;
 }
 
-bool CFile::ReadString(string &Buffer) const
+bool CFile::ReadString(string &Buffer)
 {
 	if (File == NULL)
 		return false;
@@ -297,7 +307,7 @@ bool CFile::ReadString(string &Buffer) const
 }
 
 //note buffer must exists!!!!
-bool CFile::WriteString(const char *Buffer) const
+bool CFile::WriteString(const char *Buffer)
 {
 	if (File == NULL)
 		return false;
@@ -312,7 +322,7 @@ bool CFile::WriteString(const char *Buffer) const
 	return true;
 }
 
-bool CFile::WriteString(const string Buffer) const
+bool CFile::WriteString(const string Buffer)
 {
 	if (File == NULL)
 		return false;
@@ -327,7 +337,7 @@ bool CFile::WriteString(const string Buffer) const
 	return true;
 }
 
-bool CFile::ReadLine(char* &Data) const
+bool CFile::ReadLine(char* &Data)
 {
 	if (File == NULL)
 		return false;
@@ -354,7 +364,7 @@ bool CFile::ReadLine(char* &Data) const
 	return true;
 }
 
-bool CFile::WriteLine(string Buffer) const
+bool CFile::WriteLine(string Buffer)
 {
 	if (File == NULL)
 		return false;
@@ -375,7 +385,7 @@ bool CFile::WriteLine(string Buffer) const
 	return true;
 }
 
-bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin) const
+bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
 {
 	if (File == NULL)
 		return false;
@@ -416,10 +426,6 @@ size_t CFile::Size() const
 	return FileStat.st_size;
 }
 
-CFile::~CFile()
-{
-	Close();
-}
 
 /************************************************************************/
 /* CList, CListNode                                                     */

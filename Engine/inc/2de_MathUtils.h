@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include <algorithm>
+#include <stdexcept>
 #include "2de_Core.h"
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
