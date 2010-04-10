@@ -22,7 +22,6 @@ bool Draw()
 	return true;
 }
 
-
 int	main(int argc, char *argv[])
 {
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
