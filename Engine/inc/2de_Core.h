@@ -57,11 +57,13 @@ using namespace std;
 // раскомментировать, если устраивает то, как работает SDL_EnableKeyRepeat и связанные с этим вещи
 //#define I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
 
-#ifdef _MSC_VER
-#define __INLINE __forceinline
+#if defined(_MSC_VER)
+	#define __INLINE __forceinline
+#elif defined(__GNUC__)
+	#define __INLINE __inline __attribute__ ((always_inline))
 #else
-#define __INLINE inline
-#endif //_MSC_VER
+	#define __INLINE inline
+#endif
 
 #define CFILE_MAX_STRING_LENGTH	1024
 
