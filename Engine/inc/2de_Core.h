@@ -336,20 +336,21 @@ public:
 	bool				DelObject(CObject *AObject);
 	bool				DelObject(const string *AObjectName);
 	bool				DelObject(const char *AObjectName);
-	bool				DelObject(int AId);			
+	bool				DelObject(int AId);
 	void				Reset();
 	bool				Enum(CObject* &result);
-	CObject*			Next();	
+	CObject*			Next();
 	void				Clear();
-	CObject*			GetObject(const string* AObjectName);					
-	CObject*			GetObject(const char* AObjectName);					
+	CObject*			GetObject(const string* AObjectName);
+	CObject*			GetObject(const char* AObjectName);
 	CObject*			GetObject(int AId);
 	CListNode*			GetListNode(const CObject* AObject);
 	CListNode*			GetListNode(const string* AObjectName);
-	CListNode*			GetListNode(unsigned int AId);	
+	CListNode*			GetListNode(unsigned int AId);
 	int					GetObjectsCount();
 	CListNode*			GetFirst();
-	CListNode*			GetLast();																	
+	CListNode*			GetLast();
+
 	bool				Call(ObjCall callproc);							
 	void				Sort(ObjCompCall comp);							
 	void				DumpToLog();
@@ -394,7 +395,7 @@ public:
 	virtual bool Update(float dt) = 0;
 };
 
-typedef CObject* (*CreateFunc)();
+//typedef CObject* (*CreateFunc)();
 
 
 class CGarbageCollector : public CList

@@ -1,17 +1,18 @@
+#include "2de_Resource.h"
+
+#include "2de_Core.h"
+#include "2de_Engine.h"
+
 #ifdef _WIN32
 #include "dirent/dirent.h"
 #else
 #include <dirent.h>
 #endif
 
-#include "2de_Resource.h"
-#include "2de_Core.h"
-#include "2de_Engine.h"
-
 //////////////////////////////////////////////////////////////////////////
-//	CFactory
+// CFactory
 
-CFactory::CFactory():initialized(true)
+CFactory::CFactory()
 {
 	SetName("Factory");
 }
@@ -19,16 +20,15 @@ CFactory::CFactory():initialized(true)
 CFactory::~CFactory()
 {
 	CObject *obj;
-	Reset();
-	while (Enum(obj))
+	List.Reset();
+	while (List.Enum(obj))
 	{
 		Log.Log("INFO", "Deleting object %s", obj->GetName());
 		delete obj;
 	}
-
 }
 
-CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
+/*CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 {
 	if (!initialized)
 	{
@@ -121,38 +121,33 @@ CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
 		}
 	}
 	return tmp;
+}*/
+
+
+//////////////////////////////////////////////////////////////////////////
+// CResourceSectionLoaderBase
+
+CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &name, CXMLTable *AResourceList) : Name(name), ResourceList(AResourceList)
+{
 }
 
-bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
+string CResourceSectionLoaderBase::GetName() const
 {
-	if (ResourceList == NULL)
+	return Name;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CResourceManager
+
+CResourceManager::~CResourceManager()
+{
+	if (ResourceList != NULL)
+		delete ResourceList;
+	
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 	{
-		Log.Log("WARNING", "Trying to load section %s while Resource list has not been loaded", SectionName);
-		return false;
+		delete *it;
 	}
-	XMLNode x = ResourceList->First->Get(SectionName);
-	if (x == NULL)
-	{
-		Log.Log("WARNING", "Section %s has not been found", SectionName);
-		return false;
-	}
-	string key, val;
-	int Result;
-	CFactory *Factory = CFactory::Instance(); 
-	CResource *Resource;
-	x->ResetEnum( XMLENUM_ATTRSONLY );
-	while (x->Enum(key, val, Result))
-	{
-		Resource = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
-		if (Resource == NULL)
-		{
-			Log.Log("ERROR","Error loading section %s", SectionName);
-			return false;
-		}
-		Resource->SetName(key);
-		Resource->filename = val;
-	}
-	return true;
 }
 
 bool CResourceManager::LoadResources()
@@ -164,15 +159,17 @@ bool CResourceManager::LoadResources()
 	
 	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
 
-	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
-		if (LoadSection(strSections[i], fncInitializers[i]))
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
+	{
+		if ((*it)->Load())
 		{
-			Log.Log("INFO", "Default section %s loaded", strSections[i]);
+			Log.Log("INFO", "Default section %s loaded", (*it)->GetName().c_str()); 
 		}
+	}
 	return true;
 }
 
-CObject* CResourceManager::LoadResource(char* section, char *AResourceName, CreateFunc creator)
+/*CObject* CResourceManager::LoadResource(char* section, char *AResourceName, CreateFunc creator)
 {
 	if (ResourceList == NULL)
 	{
@@ -190,7 +187,21 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 	result->LoadFromFile();
 
 	return result;
+}*/
+
+CResourceManager::CResourceManager()
+{
+	SetName("ResourceManager");
+	ResourceList = new CXMLTable;
+	SectionsLoaders.push_back(new CResourceSectionLoader<CFont>("Fonts", ResourceList));
+	SectionsLoaders.push_back(new CResourceSectionLoader<CTexture>("Textures", ResourceList));
+	SectionsLoaders.push_back(new CResourceSectionLoader<CTileset>("Tilesets", ResourceList));
+	SectionsLoaders.push_back(new CResourceSectionLoader<CSound>("Sounds", ResourceList));
+	SectionsLoaders.push_back(new CResourceSectionLoader<CMusic>("Music", ResourceList));
 }
+
+//////////////////////////////////////////////////////////////////////////
+// CDataLister
 
 // CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
@@ -231,6 +242,7 @@ void CDataLister::ExploreDirectory(string Path)
 			CurNode = CurNode->Add(entry->d_name, entry->d_name);
 			ExploreDirectory(Path + "/" + string(entry->d_name));
 			CurNode = PreviousNode;
+			closedir(testdir);
 		}
 		//else if (entry->d_type == DT_REG)
 		else
@@ -239,7 +251,6 @@ void CDataLister::ExploreDirectory(string Path)
 				     Path + "/" + string(entry->d_name));
 		}
 
-		closedir(testdir);
 	}
 	closedir(dirp);
 }

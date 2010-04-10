@@ -178,7 +178,7 @@ bool CLevelMap::LoadFromFile()
 	if (TileSetName == NULL)
 		return false;
 	TileSet = NULL;
-	TileSet = dynamic_cast<CTileset*>(Factory->GetObject((string*)TileSetName));
+	TileSet = Factory->Get<CTileset>(TileSetName);
 	if (TileSet == NULL)
 	{
 		Log.Log("Error", "Tileset %s for map %s not found in resources", GetName(), TileSetName);
