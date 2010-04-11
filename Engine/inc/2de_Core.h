@@ -350,6 +350,7 @@ public:
 	int					GetObjectsCount() const;
 	CListNode*			GetFirst();
 	CListNode*			GetLast();
+	bool				Contains(const string &AObjectName) const;
 
 	bool				Call(ObjCall callproc);							
 	void				Sort(ObjCompCall comp);							

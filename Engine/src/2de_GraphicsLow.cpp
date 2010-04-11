@@ -274,6 +274,7 @@ bool CFont::LoadFromFile()
 	}
 	char *FontImageName = NULL;
 	file.ReadLine(FontImageName);	
+
 	CTextureManager *TexMan = CTextureManager::Instance();
 	Texture = TexMan->GetTextureByName(FontImageName);
 

@@ -177,7 +177,7 @@ CFontEditor::CFontEditor()
 
 	edFontTextureName = new CEdit();
 	edFontTextureName->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT);
-	edFontTextureName->Text = "Font";
+	edFontTextureName->Text = "Font_font";
 	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edFontname = new CEdit();

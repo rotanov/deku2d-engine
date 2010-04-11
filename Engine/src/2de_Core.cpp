@@ -643,6 +643,18 @@ CListNode* CList::GetLast()
 	return last;
 }
 
+bool CList::Contains(const string &AObjectName) const
+{
+	CListNode* TempNode = first;
+	while (TempNode)
+	{
+		if (SDL_strcasecmp(TempNode->GetData()->GetName(), AObjectName.c_str()) == 0)
+			return true;
+		TempNode = TempNode->next;
+	}
+	return false;
+}
+
 bool CList::Call(ObjCall callproc)
 {
 	CListNode *tmp = first;

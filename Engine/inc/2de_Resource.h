@@ -32,7 +32,7 @@ protected:
 template<typename T>
 T* CFactory::New(const string &AName)
 {
-	if (List.GetObject(&AName))
+	if (List.Contains(AName))
 	{
 		throw std::logic_error("Object with this name already exists.");
 	}
