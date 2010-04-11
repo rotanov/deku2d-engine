@@ -172,8 +172,7 @@ void GlobalLuaState::innerFunction1()
 	
 
 
-	ps = dynamic_cast<CParticleSystem*>(Factory->Create(OBJ_PSYSTEM, NULL));
-	ps->SetName("psysaaaa");
+	ps = Factory->New<CParticleSystem>("psysaaaa");
 	ps->Init();
 	ps->ColorStart = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
 	ps->ColorOver = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);

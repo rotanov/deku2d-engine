@@ -198,7 +198,7 @@ bool Init()
 	SDL_ShowCursor(0);
 	//Ninja->RenderManager.SortByAlpha();
 	//Ninja->RenderManager.SortByZ();	
-	TileSet = dynamic_cast<CTileset*>(CResourceManager::Instance()->LoadResource("Tilesets", "TileSet02-Snow01", CTileset::NewTileset));
+	TileSet = CFactory::Instance()->Get<CTileset>("TileSet02-Snow01");
 	gSetBlendingMode();
 	CFontManager::Instance()->SetCurrentFont("Font");
 	CFontManager* fm = CFontManager::Instance();

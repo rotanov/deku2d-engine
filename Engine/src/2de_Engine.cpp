@@ -169,7 +169,9 @@ bool CEngine::Init()
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
 	SetState(CEngine::STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
-	CResourceManager::Instance()->DataPath	= (Config.First->Get("DataPath"))->GetValue();
+
+	CResourceManager *ResourceManager = CResourceManager::Instance();
+	ResourceManager->DataPath	= (Config.First->Get("DataPath"))->GetValue();
 	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
 
 	SetState(CEngine::STATE_SCREEN_WIDTH, (void*)wwidth);
@@ -199,9 +201,16 @@ bool CEngine::Init()
 
 	gToggleScissor(false);
 
+	// Default sections:
+	ResourceManager->AddSection<CFont>("Fonts");
+	ResourceManager->AddSection<CTexture>("Textures");
+	ResourceManager->AddSection<CTileset>("Tilesets");
+	ResourceManager->AddSection<CSound>("Sounds");
+	ResourceManager->AddSection<CMusic>("Music");
+
 	if (doLoadDefaultResourceList)
 	{
-		if (!CResourceManager::Instance()->LoadResources())
+		if (!ResourceManager->LoadResources())
 			return false;
 	}
 

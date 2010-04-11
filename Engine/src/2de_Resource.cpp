@@ -1,17 +1,22 @@
+#include "2de_Resource.h"
+
+#include "2de_Core.h"
+#include "2de_Engine.h"
+#include "2de_GraphicsLow.h"
+#include "2de_GraphicsHigh.h"
+#include "2de_GameUtils.h"
+#include "2de_Sound.h"
+
 #ifdef _WIN32
 #include "dirent/dirent.h"
 #else
 #include <dirent.h>
 #endif
 
-#include "2de_Resource.h"
-#include "2de_Core.h"
-#include "2de_Engine.h"
-
 //////////////////////////////////////////////////////////////////////////
-//	CFactory
+// CFactory
 
-CFactory::CFactory():initialized(true)
+CFactory::CFactory()
 {
 	SetName("Factory");
 }
@@ -19,140 +24,42 @@ CFactory::CFactory():initialized(true)
 CFactory::~CFactory()
 {
 	CObject *obj;
-	Reset();
-	while (Enum(obj))
+	List.Reset();
+	while (List.Enum(obj))
 	{
 		Log.Log("INFO", "Deleting object %s", obj->GetName());
 		delete obj;
 	}
-
 }
 
-CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
-{
-	if (!initialized)
-	{
-		Log.Log("WARNING", "Trying to create object while factory has not been initialized");
-		return NULL;
-	}
+//////////////////////////////////////////////////////////////////////////
+// CResourceSectionLoaderBase
 
-	CObject *tmp = NULL;
-	switch(ObjectId)
-	{	
-	case OBJ_FONT_M:
-		{
-			CFont *creation = new CFont;
-			CFontManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_SPRITE:
-		{
-			CSprite* creation = new CSprite;
-			CRenderManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_PSYSTEM:
-		{
-			CParticleSystem* creation = new CParticleSystem;			
-			CRenderManager::Instance()->AddObject(creation);
-			CUpdateManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_TEXTURE_RES:
-		{
-			CTexture* creation = new CTexture;
-			CTextureManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_SOUND_RES:
-		{
-			CSound* creation = new CSound;
-			CSoundManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_MUSIC_RES:
-		{
-			CMusic* creation = new CMusic;
-			CMusicManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_USER_DEFINED:
-		{
-			tmp = creator();
-			AddObject(tmp);
-			switch(tmp->type & T_LEFT_MASK)
-			{
-			case T_COBJECT:
-				{
-					break;
-				}
-			case T_RENDERABLE:
-				{
-					CRenderManager::Instance()->AddObject(tmp);
-					break;
-				}
-			case T_RENDERABLE | T_COBJECT:
-				{
-					CRenderManager::Instance()->AddObject(tmp);
-					break;
-				}
-			}
-			switch(tmp->type & T_RIGHT_MASK)
-			{
-			case T_UPDATABLE:
-				{
-					CUpdateManager::Instance()->AddObject(tmp);
-					break;
-				}
-			}
-			break;
-		}
-	}
-	return tmp;
+CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName, CXMLTable *AResourceList) : Name(AName), ResourceList(AResourceList)
+{
 }
 
-bool CResourceManager::LoadSection(const char *SectionName, CreateFunc creator)
+CResourceSectionLoaderBase::~CResourceSectionLoaderBase()
 {
-	if (ResourceList == NULL)
+}
+
+string CResourceSectionLoaderBase::GetName() const
+{
+	return Name;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CResourceManager
+
+CResourceManager::~CResourceManager()
+{
+	if (ResourceList != NULL)
+		delete ResourceList;
+	
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 	{
-		Log.Log("WARNING", "Trying to load section %s while Resource list has not been loaded", SectionName);
-		return false;
+		delete *it;
 	}
-	XMLNode x = ResourceList->First->Get(SectionName);
-	if (x == NULL)
-	{
-		Log.Log("WARNING", "Section %s has not been found", SectionName);
-		return false;
-	}
-	string key, val;
-	int Result;
-	CFactory *Factory = CFactory::Instance(); 
-	CResource *Resource;
-	x->ResetEnum( XMLENUM_ATTRSONLY );
-	while (x->Enum(key, val, Result))
-	{
-		Resource = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
-		if (Resource == NULL)
-		{
-			Log.Log("ERROR","Error loading section %s", SectionName);
-			return false;
-		}
-		Resource->SetName(key);
-		Resource->filename = val;
-	}
-	return true;
 }
 
 bool CResourceManager::LoadResources()
@@ -164,15 +71,17 @@ bool CResourceManager::LoadResources()
 	
 	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
 
-	for(int i = 0; i < DEFAULT_SECTION_COUNT; i++)
-		if (LoadSection(strSections[i], fncInitializers[i]))
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
+	{
+		if ((*it)->Load())
 		{
-			Log.Log("INFO", "Default section %s loaded", strSections[i]);
+			Log.Log("INFO", "Section '%s' loaded", (*it)->GetName().c_str()); 
 		}
+	}
 	return true;
 }
 
-CObject* CResourceManager::LoadResource(char* section, char *AResourceName, CreateFunc creator)
+/*CObject* CResourceManager::LoadResource(char* section, char *AResourceName, CreateFunc creator)
 {
 	if (ResourceList == NULL)
 	{
@@ -190,7 +99,16 @@ CObject* CResourceManager::LoadResource(char* section, char *AResourceName, Crea
 	result->LoadFromFile();
 
 	return result;
+}*/
+
+CResourceManager::CResourceManager()
+{
+	SetName("ResourceManager");
+	ResourceList = new CXMLTable;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// CDataLister
 
 // CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
