@@ -15,6 +15,7 @@
 
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
+#include "2de_GameUtils.h"
 #include "2de_Xml.h"
 #include "2de_Resource.h"
 #include "2de_Sound.h"

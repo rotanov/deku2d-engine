@@ -60,7 +60,8 @@ $(TNL_DIR)/obj/*.o:
 	$(MAKE) -C $(TNL_DIR)
 
 # maybe replace this implicit rule by explicit one, that uses ar
-$(TARGET_STATIC): $(TARGET_STATIC)($(OBJECTS) $(TC_TNL_OBJECTS))
+# should TC_TNL_OBJECTS be included? I don't think so...
+$(TARGET_STATIC): $(TARGET_STATIC)($(OBJECTS))
 
 $(TARGET_SHARED): $(OBJECTS) $(TC_TNL_OBJECTS)
 	g++ $(DEBUGFLAG) $(STRICTFLAG) -shared -fPIC $(LDFLAGS) -o $(TARGET_SHARED) $(OBJECTS) $(TC_TNL_OBJECTS)

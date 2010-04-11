@@ -2,6 +2,10 @@
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
+#include "2de_GraphicsLow.h"
+#include "2de_GraphicsHigh.h"
+#include "2de_GameUtils.h"
+#include "2de_Sound.h"
 
 #ifdef _WIN32
 #include "dirent/dirent.h"
@@ -28,106 +32,14 @@ CFactory::~CFactory()
 	}
 }
 
-/*CObject* CFactory::Create(int ObjectId, CreateFunc creator = NULL)
-{
-	if (!initialized)
-	{
-		Log.Log("WARNING", "Trying to create object while factory has not been initialized");
-		return NULL;
-	}
-
-	CObject *tmp = NULL;
-	switch(ObjectId)
-	{	
-	case OBJ_FONT_M:
-		{
-			CFont *creation = new CFont;
-			CFontManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_SPRITE:
-		{
-			CSprite* creation = new CSprite;
-			CRenderManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_PSYSTEM:
-		{
-			CParticleSystem* creation = new CParticleSystem;			
-			CRenderManager::Instance()->AddObject(creation);
-			CUpdateManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_TEXTURE_RES:
-		{
-			CTexture* creation = new CTexture;
-			CTextureManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_SOUND_RES:
-		{
-			CSound* creation = new CSound;
-			CSoundManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_MUSIC_RES:
-		{
-			CMusic* creation = new CMusic;
-			CMusicManager::Instance()->AddObject(creation);
-			AddObject(creation);
-			tmp = creation;
-			break;
-		}
-	case OBJ_USER_DEFINED:
-		{
-			tmp = creator();
-			AddObject(tmp);
-			switch(tmp->type & T_LEFT_MASK)
-			{
-			case T_COBJECT:
-				{
-					break;
-				}
-			case T_RENDERABLE:
-				{
-					CRenderManager::Instance()->AddObject(tmp);
-					break;
-				}
-			case T_RENDERABLE | T_COBJECT:
-				{
-					CRenderManager::Instance()->AddObject(tmp);
-					break;
-				}
-			}
-			switch(tmp->type & T_RIGHT_MASK)
-			{
-			case T_UPDATABLE:
-				{
-					CUpdateManager::Instance()->AddObject(tmp);
-					break;
-				}
-			}
-			break;
-		}
-	}
-	return tmp;
-}*/
-
-
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
 CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &name, CXMLTable *AResourceList) : Name(name), ResourceList(AResourceList)
+{
+}
+
+CResourceSectionLoaderBase::~CResourceSectionLoaderBase()
 {
 }
 
