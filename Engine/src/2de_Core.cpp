@@ -106,7 +106,7 @@ const char* CObject::GetName() const
 	return name.c_str();
 }
 
-unsigned int CObject::GetID()
+unsigned int CObject::GetID() const
 {
 	return id;
 }
@@ -560,25 +560,25 @@ void CList::Clear()
 	current = NULL;
 }
 
-CObject* CList::GetObject(const string* AObjectName)
+CObject* CList::GetObject(const string* AObjectName) const
 {
 	CListNode* ListNode = GetListNode(AObjectName);	
 	return ListNode?ListNode->GetData():NULL;
 }
 
-CObject* CList::GetObject(const char* AObjectName)
+CObject* CList::GetObject(const char* AObjectName) const
 {
 	CListNode* ListNode = GetListNode(&((string)AObjectName));	
 	return ListNode?ListNode->GetData():NULL;
 }
 
-CObject* CList::GetObject(int AId)
+CObject* CList::GetObject(int AId) const
 {
 	CListNode* ListNode = GetListNode(AId);	
 	return ListNode?ListNode->GetData():NULL;
 }
 
-CListNode* CList::GetListNode(const CObject* AObject)
+CListNode* CList::GetListNode(const CObject* AObject) const
 {
 	if (!AObject)
 	{
@@ -596,7 +596,7 @@ CListNode* CList::GetListNode(const CObject* AObject)
 	return NULL;
 }
 
-CListNode* CList::GetListNode(const string* AObjectName)
+CListNode* CList::GetListNode(const string* AObjectName) const
 {
 	if (!AObjectName)
 	{
@@ -615,7 +615,7 @@ CListNode* CList::GetListNode(const string* AObjectName)
 	return NULL;
 }
 
-CListNode* CList::GetListNode(unsigned int AId)
+CListNode* CList::GetListNode(unsigned int AId) const
 {
 	CListNode* TempNode = first;
 	while (TempNode)
@@ -628,7 +628,7 @@ CListNode* CList::GetListNode(unsigned int AId)
 	return NULL;
 }
 
-int CList::GetObjectsCount()
+int CList::GetObjectsCount() const
 {
 	return NodeCount;
 }

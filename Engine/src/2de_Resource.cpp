@@ -35,7 +35,7 @@ CFactory::~CFactory()
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
-CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &name, CXMLTable *AResourceList) : Name(name), ResourceList(AResourceList)
+CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName, CXMLTable *AResourceList) : Name(AName), ResourceList(AResourceList)
 {
 }
 
@@ -75,7 +75,7 @@ bool CResourceManager::LoadResources()
 	{
 		if ((*it)->Load())
 		{
-			Log.Log("INFO", "Default section %s loaded", (*it)->GetName().c_str()); 
+			Log.Log("INFO", "Section '%s' loaded", (*it)->GetName().c_str()); 
 		}
 	}
 	return true;
@@ -105,11 +105,6 @@ CResourceManager::CResourceManager()
 {
 	SetName("ResourceManager");
 	ResourceList = new CXMLTable;
-	SectionsLoaders.push_back(new CResourceSectionLoader<CFont>("Fonts", ResourceList));
-	SectionsLoaders.push_back(new CResourceSectionLoader<CTexture>("Textures", ResourceList));
-	SectionsLoaders.push_back(new CResourceSectionLoader<CTileset>("Tilesets", ResourceList));
-	SectionsLoaders.push_back(new CResourceSectionLoader<CSound>("Sounds", ResourceList));
-	SectionsLoaders.push_back(new CResourceSectionLoader<CMusic>("Music", ResourceList));
 }
 
 //////////////////////////////////////////////////////////////////////////

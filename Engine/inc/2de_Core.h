@@ -214,7 +214,7 @@ public:
 	const char*		GetName() const;
 	void			SetName(const char* AObjectName);
 	void			SetName(const string &AObjectName);
-	unsigned int	GetID();
+	unsigned int	GetID() const;
 	friend ostream& operator<<(ostream &Stream, CObject Object);
 private:
 	string			name;
@@ -341,13 +341,13 @@ public:
 	bool				Enum(CObject* &result);
 	CObject*			Next();
 	void				Clear();
-	CObject*			GetObject(const string* AObjectName);
-	CObject*			GetObject(const char* AObjectName);
-	CObject*			GetObject(int AId);
-	CListNode*			GetListNode(const CObject* AObject);
-	CListNode*			GetListNode(const string* AObjectName);
-	CListNode*			GetListNode(unsigned int AId);
-	int					GetObjectsCount();
+	CObject*			GetObject(const string* AObjectName) const;
+	CObject*			GetObject(const char* AObjectName) const;
+	CObject*			GetObject(int AId) const;
+	CListNode*			GetListNode(const CObject* AObject) const;
+	CListNode*			GetListNode(const string* AObjectName) const;
+	CListNode*			GetListNode(unsigned int AId) const;
+	int					GetObjectsCount() const;
 	CListNode*			GetFirst();
 	CListNode*			GetLast();
 

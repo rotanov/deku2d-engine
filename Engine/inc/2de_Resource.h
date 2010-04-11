@@ -2,6 +2,7 @@
 #define _2DE_RESOURCE_H
 
 #include <list>
+#include <stdexcept>
 
 #include "2de_Core.h"
 #include "2de_Xml.h"
@@ -16,10 +17,10 @@ class CFactory : public CTSingleton<CFactory>
 {
 public:
 	template<typename T>
-	T* New(const string &name);
+	T* New(const string &AName);
 
 	template<typename T>
-	T* Get(const string &name);
+	T* Get(const string &AName) const;
 
 protected:
 	CFactory();
@@ -29,22 +30,27 @@ protected:
 };
 
 template<typename T>
-T* CFactory::New(const string &name)
+T* CFactory::New(const string &AName)
 {
+	if (List.GetObject(&AName))
+	{
+		throw std::logic_error("Object with this name already exists.");
+	}
+
 	T* result = new T;
-	result->SetName(name);
+	result->SetName(AName);
 	List.AddObject(result);
 
 	return result;
 }
 
 template<typename T>
-T* CFactory::Get(const string &name)
+T* CFactory::Get(const string &AName) const
 {
-	T* result = dynamic_cast<T *>(List.GetObject(&name));
+	T* result = dynamic_cast<T *>(List.GetObject(&AName));
 	if (!result)
 	{
-		Log.Log("ERROR", "Factory can't find object named '%s'", name.c_str());
+		Log.Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
 	}
 
 	return result;
@@ -57,7 +63,7 @@ T* CFactory::Get(const string &name)
 class CResourceSectionLoaderBase
 {
 public:
-	CResourceSectionLoaderBase(const string &name, CXMLTable *AResourceList);
+	CResourceSectionLoaderBase(const string &AName, CXMLTable *AResourceList);
 	virtual ~CResourceSectionLoaderBase();
 	virtual bool Load() = 0;
 	string GetName() const;
@@ -76,13 +82,13 @@ template<typename T>
 class CResourceSectionLoader : public CResourceSectionLoaderBase
 {
 public:
-	CResourceSectionLoader(const string &name, CXMLTable *AResourceList);
+	CResourceSectionLoader(const string &AName, CXMLTable *AResourceList);
 	bool Load();
 
 };
 
 template<typename T>
-CResourceSectionLoader<T>::CResourceSectionLoader(const string &name, CXMLTable *AResourceList) : CResourceSectionLoaderBase(name, AResourceList)
+CResourceSectionLoader<T>::CResourceSectionLoader(const string &AName, CXMLTable *AResourceList) : CResourceSectionLoaderBase(AName, AResourceList)
 {
 }
 
@@ -91,14 +97,14 @@ bool CResourceSectionLoader<T>::Load()
 {
 	if (ResourceList == NULL)
 	{
-		Log.Log("ERROR", "Trying to load section %s while Resource list has not been loaded", Name.c_str());
+		Log.Log("ERROR", "Trying to load section '%s' while Resource list has not been loaded", Name.c_str());
 		return false;
 	}
 
 	XMLNode x = ResourceList->First->Get(Name.c_str());
 	if (x == NULL)
 	{
-		Log.Log("WARNING", "Section %s has not been found", Name.c_str());
+		Log.Log("WARNING", "Section '%s' has not been found", Name.c_str());
 		return false;
 	}
 
@@ -132,6 +138,10 @@ class CResourceManager : public CTSingleton<CResourceManager>
 public:
 	~CResourceManager();
 	bool LoadResources();
+
+	template<typename T>
+	void AddSection(const string &SectionName);
+
 	//CObject* LoadResource(char* section, char *name, CreateFunc creator);
 	string DataPath;
 protected:
@@ -141,6 +151,12 @@ protected:
 	CXMLTable *ResourceList;
 
 };
+
+template<typename T>
+void CResourceManager::AddSection(const string &SectionName)
+{
+	SectionsLoaders.push_back(new CResourceSectionLoader<T>(SectionName, ResourceList));
+}
 
 /**
  * CDataLister - перечислитель файлов ресурсов.
