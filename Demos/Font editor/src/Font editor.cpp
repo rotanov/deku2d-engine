@@ -499,8 +499,7 @@ bool ExitFontEditor(CObject *Caller)
 
 bool ShowTestPhrase(CObject *Caller)
 {
-	CRenderObject *Lbl = NULL;
-	Lbl = dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("lblSampleText"));
+	CLabel *Lbl = CGUIManager::Instance()->GetObject("lblSampleText");
 	Lbl->Visible = !Lbl->Visible;
 	return true;
 }

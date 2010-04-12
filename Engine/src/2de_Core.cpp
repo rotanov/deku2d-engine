@@ -74,6 +74,11 @@ CObject::CObject()
 	CObjectManager.AddObject(this);
 }
 
+CObject::~CObject()
+{
+	//Log.Log("INFO", "DESTRUCT %s, id: %d", name.c_str(), id); //debug
+}
+
 bool CObject::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
 {
 	return true;

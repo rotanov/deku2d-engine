@@ -205,7 +205,7 @@ public:
 							//	во-первых, не факт, что вообще нужен нам,
 							//	во-вторых - лучше заменить каким-нибудь другим.
 
-	virtual			~CObject(){};
+	virtual			~CObject();
 	CObject();
 	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void			IncListRefCount();
@@ -395,8 +395,6 @@ public:
 	~CUpdateObject();
 	virtual bool Update(float dt) = 0;
 };
-
-//typedef CObject* (*CreateFunc)();
 
 
 class CGarbageCollector : public CList

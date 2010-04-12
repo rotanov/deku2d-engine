@@ -13,6 +13,7 @@ CRenderObject::CRenderObject() : Position(V2_ZERO), Orientation(0.0f), Scaling(1
 
 CRenderObject::~CRenderObject()
 {
+	//Log.Log("INFO", "DESTRUCT RENDER: %s, id: %d, count: %d", GetName(), GetID(), CRenderManager::Instance()->GetObjectsCount()); // debug
 	CRenderManager::Instance()->DelObject(GetID());
 }
 //////////////////////////////////////////////////////////////////////////
@@ -908,7 +909,7 @@ CTexture::CTexture()
 
 CTexture::~CTexture()
 {
-
+	CTextureManager::Instance()->DelObject(GetID());
 }
 
 void CTexture::Bind()

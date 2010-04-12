@@ -178,6 +178,8 @@ bool CEngine::Init()
 	SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
 	SetState(CEngine::STATE_WINDOW_CAPTION, wcaption);
 
+	CFactory::Instance();
+
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
 	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
@@ -503,9 +505,13 @@ int CEngine::CfgGetInt( char* ParamName )
 
 bool CEngine::ClearLists()
 {
+	// какая к чёрту очистка списков?!
+	// 1. объекты сами удаляют указатели на себя из менеджеров в своих деструкторах
+	// 2. фабрика при своей смерти вызывает дестркуторы всех объектов (созданных через неё)
+
 	// Не так!!!1!адин!+!+!
 	// где-то в тектстовиках я видел шутку про менеджер менеджеров... так вот, он бы реально пригодился тут))
-	CObjectManager.Clear(); // Почему это не синглтон до сих пор?!
+	/*CObjectManager.Clear(); // Почему это не синглтон до сих пор?!
 	CRenderManager::Instance()->Reset();
 	CUpdateManager::Instance()->Reset();
 	CTextureManager::Instance()->Reset();
@@ -539,7 +545,7 @@ bool CEngine::ClearLists()
 			SAFE_DELETE(data);
 		data = CRenderManager::Instance()->Next();
 	}
-	CRenderManager::Instance()->Clear();
+	CRenderManager::Instance()->Clear();*/
 
 	return true;
 }

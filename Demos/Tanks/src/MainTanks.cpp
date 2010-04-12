@@ -161,9 +161,9 @@ bool Init()
 		FontEffect->Texture = CTextureManager::Instance()->GetTextureByName("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////
-	CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);
-	CGUIManager::Instance()->SetFont(Font);
-	CGUIManager::Instance()->Visible = false;
+	//CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);
+	//CGUIManager::Instance()->SetFont(Font);
+	//CGUIManager::Instance()->Visible = false;
 	TitleScreen = new CTitleScreen;
 	
 	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item");

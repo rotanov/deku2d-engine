@@ -78,6 +78,35 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 	return Result;
 }
 
+//////////////////////////////////////////////////////////////////////////
+// CGUIRootObject
+
+CGUIRootObject::CGUIRootObject()
+{
+	SetName("GUI Root Object");
+}
+
+bool CGUIRootObject::Render()
+{
+	glLoadIdentity();
+	CGUIObject *Focused = CGUIManager::Instance()->GetFocusedObject();
+	if (Focused)
+	{
+		PRender->LineStippleEnabled = true;
+		PRender->lwidth = Style->Metrics.FocusRectLineWidth;
+		PRender->lClr = Style->Colors.FocusRect;
+		PRender->grRectL(Focused->aabb.Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMin,
+			Focused->aabb.Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMax);	
+		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
+		PRender->lwidth = 1.0f;
+	}
+	return true;
+}
+
+bool CGUIRootObject::Update(float dt)
+{
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // CGUIObject
@@ -85,13 +114,18 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 CGUIObject::CGUIObject()
 {
 	CGUIManager::Instance()->AddObject(this);
-	SetParent(CGUIManager::Instance());
+	SetParent(CGUIManager::Instance()->GetRoot());
 }
 
 CGUIObject::CGUIObject(CGUIObjectBase *AParent)
 {
 	CGUIManager::Instance()->AddObject(this);
 	SetParent(AParent);
+}
+
+CGUIObject::~CGUIObject()
+{
+	CGUIManager::Instance()->DeleteObject(GetID());
 }
 
 bool CGUIObject::isFocused() const
@@ -109,8 +143,8 @@ void CGUIObject::SetParent(CGUIObjectBase *AParent)
 	Parent = AParent;
 	if (!AParent)
 	{
-		Parent = CGUIManager::Instance();	// if parent feels bad, reparent GUI object to CGUIManager
-		if (!Parent)				// even CGUIManager feels bad.. how terrible...
+		Parent = CGUIManager::Instance()->GetRoot();	// if parent feels bad, reparent GUI object to root object
+		if (!Parent)					// even root object feels bad.. how terrible...
 			return;
 	}
 	Style = Parent->GetStyle();
@@ -124,13 +158,16 @@ void CGUIObject::SetParent(CGUIObjectBase *AParent)
 
 CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), tabholded(false)
 {
-	SetName("CGUIManager");
+	SetName("GUI Manager");
 	FocusedOn = NULL;
 	FocusedOnListNode = NULL;
-	PRender = new CPrimitiveRender;
-	Style = new CGUIStyle;
+
+	Root = new CGUIRootObject;
+	Root->SetStyle(new CGUIStyle);
+	Root->SetPrimitiveRender(new CPrimitiveRender);
+	Root->SetFont(Root->GetStyle()->Font);
+
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
-	Font = Style->Font;
 }
 
 bool CGUIManager::Update(scalar dt)
@@ -165,23 +202,6 @@ bool CGUIManager::Update(scalar dt)
 	return true;
 }
 
-bool CGUIManager::Render()
-{
-	glLoadIdentity();
-	if (FocusedOn)
-	{
-		PRender->LineStippleEnabled = true;
-		PRender->lwidth = Style->Metrics.FocusRectLineWidth;
-		PRender->lClr = Style->Colors.FocusRect;
-		PRender->grRectL(FocusedOn->aabb.Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMin,
-			FocusedOn->aabb.Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMax);	
-		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
-		PRender->lwidth = 1.0f;
-	}
-	//FocusedOn->PRender->gDrawBBox(FocusedOn->aabb.Inflated(5, 5));
-	return true;
-}
-
 bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch(state)
@@ -206,9 +226,9 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 			if (FocusedOnListNode == NULL)
 			{
 				if (mod & KMOD_SHIFT)
-					FocusedOnListNode = GetLast();
+					FocusedOnListNode = List.GetLast();
 				else
-					FocusedOnListNode = GetFirst();
+					FocusedOnListNode = List.GetFirst();
 
 				if (FocusedOnListNode)
 					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
@@ -243,9 +263,9 @@ void CGUIManager::SetFocusedNodeTo(CListNode* AFocusedNode)
 		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
 }
 
-void CGUIManager::SetFocus(CObject* AObject)
+void CGUIManager::SetFocus(CGUIObject* AObject)
 {
-	CListNode* ListNode = GetListNode(AObject);
+	CListNode* ListNode = List.GetListNode(AObject);
 	if (ListNode)
 	{
 		FocusedOnListNode = ListNode;
@@ -253,10 +273,31 @@ void CGUIManager::SetFocus(CObject* AObject)
 	}
 }
 
+CGUIRootObject* CGUIManager::GetRoot() const
+{
+	return Root;
+}
+
+void CGUIManager::AddObject(CGUIObject *AObject)
+{
+	List.AddObject(AObject);
+}
+
+CGUIObject* CGUIManager::GetObject(const string &AObjectName) const
+{
+	return dynamic_cast<CGUIObject *>(List.GetObject(&AObjectName));
+}
+
+void CGUIManager::DeleteObject(int AId)
+{
+	List.DelObject(AId);
+}
+
 CGUIManager::~CGUIManager()
 {
-	delete Style;
-	SAFE_DELETE(PRender);   ///////// TODO: NONONONONONONONON DONT DOIT
+	delete Root->GetPrimitiveRender();
+	delete Root->GetStyle();
+	//delete Root;
 }
 
 

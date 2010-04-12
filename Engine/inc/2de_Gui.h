@@ -153,12 +153,26 @@ protected:
 	CMouseState WidgetState;
 };
 
+/**
+ * CGUIRootObject - корневой объект GUI, всеобщий родитель.
+ */
+
+class CGUIRootObject : public CGUIObjectBase
+{
+public:
+	CGUIRootObject();
+	bool Render();
+	bool Update(float dt);
+
+};
+
 
 class CGUIObject : public CGUIObjectBase
 {
 public:
 	CGUIObject();
 	CGUIObject(CGUIObjectBase *AParent);
+	~CGUIObject();
 
 	bool isFocused() const;
 	void Focus();
@@ -172,7 +186,7 @@ protected:
 
 // вот этот класс (CGUIManager) наследован одновременно и от синглтона, и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
 // получаем всякие гадости в логах при удалении, потому что его сначала удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
-class CGUIManager : public CList, public CGUIObjectBase, public CTSingleton<CGUIManager>
+class CGUIManager : public CTSingleton<CGUIManager>, public CUpdateObject
 {
 public:
 				~CGUIManager();
@@ -181,7 +195,11 @@ public:
 	bool		Render();
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocusedNodeTo(CListNode *AFocusedNode);
-	void		SetFocus(CObject *AObject);
+	void		SetFocus(CGUIObject *AObject);
+	CGUIRootObject* GetRoot() const;
+	void AddObject(CGUIObject *AObject);
+	CGUIObject* GetObject(const string &AObjectName) const;
+	void DeleteObject(int AId);
 private:
 	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
 	CListNode	*FocusedOnListNode;
@@ -190,6 +208,8 @@ private:
 	int			TimerAccum;
 	bool		tabholded;
 	bool		repeatstarted;
+	CList List;
+	CGUIRootObject *Root;
 protected:
 	CGUIManager();
 	friend class CTSingleton<CGUIManager>;
