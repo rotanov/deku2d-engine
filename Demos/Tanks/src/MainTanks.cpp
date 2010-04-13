@@ -1,7 +1,7 @@
 #include "2de_Engine.h"
 //#include "Game.h" 
 #include "Tanks.h"
-#include "TanksNetwork.h"
+/*#include "TanksNetwork.h"*/
 #include "2de_Gui.h"
 
 CEngine* Ninja = CEngine::Instance();
@@ -27,6 +27,7 @@ static bool pingLocalHost = false;
 
 
 
+/*
 class StdoutLogConsumer : public TNL::LogConsumer
 {
 public:
@@ -35,6 +36,7 @@ public:
 		Log.Log("NETWORK", "%s", string);
 	}
 } gStdoutLogConsumer;
+*/
 
 //////////////////////////////////////////////////////////////////////////
 ///!!!///Где-то в цикле обновления танчиков мы не освобождаем память и как результат - неебический memory leak
@@ -103,6 +105,7 @@ bool Options(CObject *Caller)
 
 CTitleScreen *TitleScreen;
 
+/*
 bool CreateServer(CObject *Caller)
 {
 	// create a server, listening on port 28999.
@@ -132,6 +135,7 @@ bool CreateClient(CObject *Caller)
 
 	return true;
 }
+*/
 
 bool Init()
 {	
@@ -199,11 +203,12 @@ bool Init()
 
 	next = new CMenuItem(MenuRoot, "Create server");
 	next->Position = Vector2(ScreenWidth*0.5f - 20,120);
-	next->SetCallback(&CreateServer, NULL);
+//	next->SetCallback(&CreateServer, NULL);
 
 	next = new CMenuItem(MenuRoot, "Create client");
 	next->Position = Vector2(ScreenWidth*0.5f - 20,100);
-	next->SetCallback(&CreateClient, NULL);
+
+//	next->SetCallback(&CreateClient, NULL);
 
 
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = true;

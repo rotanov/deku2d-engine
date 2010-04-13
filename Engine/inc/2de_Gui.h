@@ -236,7 +236,6 @@ public:
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 };
 
-
 class CEdit : public CGUIObject
 {
 public:
@@ -268,6 +267,21 @@ private:
 	int CursorPos;
 	CTextSelection Selection;
 	int VisibleTextOffset;
+};
+
+class CLabeledEdit : public CEdit
+{
+private:
+	CLabel Label;
+public:
+	CLabeledEdit(CAABB Aaabb, const string &ALabelText) : Label(ALabelText)
+	{
+		aabb = Aaabb;
+		Label.aabb = aabb;
+		Label.aabb.Offset(0.0f, aabb.Height() + 2.0f);
+		int TextHeight = Label.GetFont()->GetStringHeight(Label.Text.c_str());
+		Label.aabb.vMax.y = Label.aabb.vMin.y + TextHeight;
+	}
 };
 
 class CMenuItem : public CGUIObject, public CList

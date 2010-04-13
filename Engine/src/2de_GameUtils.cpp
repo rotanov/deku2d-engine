@@ -21,12 +21,13 @@ bool CTileset::LoadFromFile()
 	Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
 
 	file.Read(&TileWidth, sizeof(TileWidth));
-	file.Read(&TileHeight, sizeof(TileHeight) + 2);
+	file.Read(&TileHeight, sizeof(TileHeight));
 	file.Read(&HorNumTiles, sizeof(HorNumTiles));
 	file.Read(&VerNumTiles, sizeof(VerNumTiles));
 
 	if (BBox != NULL)
 		delete [] BBox;
+	BBox = new CAABB[HorNumTiles*VerNumTiles];
 	file.Read(BBox, sizeof(CAABB)*HorNumTiles*VerNumTiles);
 
 	file.Close();
@@ -94,7 +95,7 @@ CTileset::CTileset()
 	CTileSetManager::Instance()->AddObject(this);
 }
 
-void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData )
+void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles)
 {
 	HorNumTiles = _HorNumTiles;
 	VerNumTiles = _VerNumTiles;
@@ -107,12 +108,12 @@ void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 		BBox[i] = CAABB(0, 0, TileHeight, TileWidth);
 }
 
-Vector2* CTileset::GetCellTC(int CellIndex)
+Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 {
 	assert(Texture->width != 0 && Texture->height != 0);
 
-	Vector2 *tc, t;
-	tc = new Vector2[4];
+	Vector2 t;
+	Vector2Array<4> tc;
 	t.x = CellIndex % HorNumTiles;
 	t.y = CellIndex / HorNumTiles;
 	for (int i = 0; i < 4; i++)
@@ -129,15 +130,10 @@ Vector2* CTileset::GetCellTC(int CellIndex)
 //-------------------------------------------//
 	
 
-CObject * CLevelMap::NewLevelMap()
-{
-	return new CLevelMap;
-}
-
 bool CLevelMap::Render()
 {
-	if (!loaded)
-		LoadFromFile();
+// 	if (!loaded) And what if we can't load it? Write it to log every frame?
+// 		LoadFromFile();
 	
 	CMapCellInfo *t;
 	
@@ -145,7 +141,7 @@ bool CLevelMap::Render()
 	glEnable(GL_TEXTURE);
 	glDisable(GL_BLEND);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	TileSet->Texture->Bind();
+	TileSet->GetTexture()->Bind();
 	glBegin(GL_QUADS);
 	for(int i=0;i<numCellsVer;i++)
 		for(int j=0;j<numCellsHor;j++)
@@ -239,6 +235,14 @@ bool CLevelMap::GenCells()
 	return true;
 }
 
+CLevelMap::CLevelMap(int AnumCellsHor, int AnumCellsVer, const string &ATilesetName, const string &AName) : numCellsHor(AnumCellsHor), numCellsVer(AnumCellsVer)
+{
+	TileSet = 	CFactory::Instance()->Get<CTileset>(ATilesetName);
+	if (TileSet != NULL)
+		TileSet->CheckLoad();
+	Cells = new CMapCellInfo [numCellsVer * numCellsHor];
+	SetName(AName);
+}
 
 bool CCompas::Render()
 {

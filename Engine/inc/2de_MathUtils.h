@@ -279,6 +279,34 @@ public:
 #endif
 };
 
+template<typename T, size_t N>
+class CCoitus
+{
+private:
+	T Elements[N];
+public:
+	T& operator [](size_t Index)
+	{
+		if (Index >= N)
+			throw std::runtime_error("CCoitus or CReproductor or CBreeding or CPropagation index out of bounds");
+		return Elements[Index];
+	}
+};
+
+template<size_t N>
+class Vector2Array
+{
+private:
+	Vector2 Elements[N];
+public:
+	Vector2& operator [](size_t Index)
+	{
+		if (Index >= N)
+			throw std::runtime_error("CCoitus or CReproductor or CBreeding or CPropagation index out of bounds");
+		return Elements[Index];
+	}
+};
+
 const Vector2 V2_ZERO		= Vector2(0.0f, 0.0f);
 const Vector2 V2_DIR_LEFT	= Vector2(-1.0f, 0.0f);
 const Vector2 V2_DIR_RIGHT	= (-V2_DIR_LEFT);

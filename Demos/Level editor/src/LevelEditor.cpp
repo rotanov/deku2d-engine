@@ -79,7 +79,7 @@ void RenderTileList()
 	glEnable(GL_TEXTURE);
 	//glDisable(GL_BLEND);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	TileSet->Texture->Bind();
+	TileSet->GetTexture()->Bind();
 	glBegin(GL_QUADS);
 	CMapCellInfo *t;
 	while (next)
@@ -204,8 +204,8 @@ bool Init()
 	CFontManager* fm = CFontManager::Instance();
 	f = fm->CurrentFont;
 	Ninja->AddEventFunction(ProcessInput);
-	Level.numCellsHor = 20;
-	Level.numCellsVer = 10;
+	//Level.numCellsHor = 20;
+	//Level.numCellsVer = 10;
 	//Level.TileSet->name = "TileSet02-Snow01";
 	Level.Cells = new CMapCellInfo [20*10];
 	memset(Level.Cells, 0, 20*10*(sizeof(CMapCellInfo)));

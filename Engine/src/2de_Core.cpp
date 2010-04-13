@@ -79,7 +79,7 @@ CObject::~CObject()
 	//Log.Log("INFO", "DESTRUCT %s, id: %d", name.c_str(), id); //debug
 }
 
-bool CObject::InputHandling( Uint8 state, Uint16 key, SDLMod mod, char letter )
+bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	return true;
 }
@@ -718,8 +718,13 @@ void CList::DelNode(CListNode* AListNode)
 		last = AListNode->prev;
 	else
 		AListNode->next->prev = AListNode->prev;
-	AListNode->GetData()->DecListRefCount();
+	CObject * Data = AListNode->GetData();
+	if (Data !=	NULL)
+		Data->DecListRefCount();
+// 	if (Data->GetListRefCount() == 0)
+// 		SAFE_DELETE(Data);
 	SAFE_DELETE(AListNode);
+	NodeCount--;
 }
 
 void CList::SwapNodes(CListNode *Node0, CListNode *Node1)
@@ -916,7 +921,7 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 
 		if (DatedLogFileNames) {
 			tm TimeStruct = GetLocalTimeAndDate();
-			NewLogFileName += "_" + GetFormattedTime(TimeStruct, "%d%m%y_%H%M%S");
+			NewLogFileName += "-" + GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
 		}
 		NewLogFileName += ".log";
 

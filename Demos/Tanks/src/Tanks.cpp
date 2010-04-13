@@ -145,7 +145,7 @@ bool CTank::Render()
 	glTranslatef(-Position.x - 16, -Position.y - 16, 0.0f);
 	Color->glSet();
 	glEnable(GL_TEXTURE_2D);
-	Tileset->Texture->Bind();
+	Tileset->GetTexture()->Bind();
 	glBegin(GL_QUADS);
 		Tileset->GetCellTC(csTank)[0].glTexCoord();
 		glVertex2f(Position.x, Position.y);
@@ -161,7 +161,7 @@ bool CTank::Render()
 	glEnd();
 	glLoadIdentity();
 
-	Tileset->Texture->Bind();
+	Tileset->GetTexture()->Bind();
 	glColor4f(0.8f, 0.1f, 0.1f, 0.9f);
 	glBegin(GL_QUADS);
 	for(int i=0;i<BulletsCount;i++)
@@ -272,7 +272,7 @@ bool CTankMap::Render()
 	glLoadIdentity();
 	glScissor(0, 0, 640, 460);
 	gToggleScissor(true);
-	Tileset->Texture->Bind();
+	Tileset->GetTexture()->Bind();
 	glEnable(GL_TEXTURE_2D);
 	CellSize = DEFAULT_CELL_SIZE;
 	glBegin(GL_QUADS);

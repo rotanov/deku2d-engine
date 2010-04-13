@@ -314,14 +314,14 @@ bool CLabel::Render()
 	CEngine *engine = CEngine::Instance();
 
 	Font->tClr = Style->Colors.LabelText;
-	Font->Pos.x = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).x;
-	Font->Pos.y = (int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).y;
+	Font->Pos.x = aabb.vMin.x; //(int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).x;
+	Font->Pos.y = aabb.vMin.y; //(int)((aabb.vMin + aabb.vMax) / 2.0f - Vector2(Font->GetStringWidth(Text.c_str()), Font->GetStringHeight(Text.c_str())) / 2.0f).y;
 
 	PRender->sClr = Style->Colors.ButtonFace;
 	PRender->lClr = Style->Colors.ButtonBorder;
 
-	PRender->grRectS(aabb.vMin, aabb.vMax);
-	PRender->grRectL(aabb.vMin, aabb.vMax);
+// 	PRender->grRectS(aabb.vMin, aabb.vMax);
+// 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	Font->Print(Text.c_str());
 	return true;
 }

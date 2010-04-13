@@ -19,6 +19,7 @@
 CFactory::CFactory()
 {
 	SetName("Factory");
+	List.SetName("CFactory list");
 }
 
 CFactory::~CFactory()

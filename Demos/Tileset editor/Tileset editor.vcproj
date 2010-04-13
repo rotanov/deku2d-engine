@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="Tanks"
-	ProjectGUID="{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}"
-	RootNamespace="Tanks"
+	Name="Tileset editor"
+	ProjectGUID="{1E3D45B4-4AD1-4C7B-A8D2-826096479771}"
+	RootNamespace="Tileset editor"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -42,14 +42,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				EnableEnhancedInstructionSet="0"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -63,12 +63,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NODEFAULTLIB:&quot;LIBCMTD&quot; /NODEFAULTLIB:&quot;MSVCRT&quot;"
-				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcryptd.lib tnld.lib wsock32.lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
+				AdditionalOptions="/NODEFAULTLIB:msvcrt.lib"
+				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
-				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="2"
@@ -77,7 +76,6 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
-				Profile="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -107,7 +105,6 @@
 			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
-			ManagedExtensions="0"
 			WholeProgramOptimization="1"
 			BuildLogFile="$(IntDir)\$(ProjectName).BuildLog.htm"
 			>
@@ -128,14 +125,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zc:wchar_t-"
-				Optimization="2"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -149,11 +143,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NODEFAULTLIB:&quot;LIBCMT&quot;"
-				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib libtomcrypt.lib tnl.lib wsock32.lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
+				AdditionalOptions="OpenGl32.lib Glu32.lib"
+				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
-				GenerateManifest="true"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -188,30 +184,42 @@
 	</References>
 	<Files>
 		<Filter
-			Name="src"
+			Name="Headers"
 			>
 			<File
-				RelativePath=".\src\MainTanks.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Tanks.cpp"
+				RelativePath=".\src\Tileset editor.h"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="inc"
+			Name="Source"
 			>
 			<File
-				RelativePath=".\inc\Tanks.h"
+				RelativePath=".\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Tileset editor.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Resource"
+			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\Res\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Res\Resource.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\Res\Shroom.ico"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -231,7 +231,7 @@ bool CEngine::Init()
 bool CEngine::Suicide()
 {
 	ilShutDown();
-	ClearLists();
+//	ClearLists();
 	Log.Log("INFO", "Suicide success");
 	return true;
 }
@@ -247,6 +247,7 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 
 #else
 	// вообще говоря, наверное даже кроссплатформенно, если хотите - уберите WinAPI и #ifdef
+	// хорошо, как-нибудь уберём.
 	char *iconv_str_out = SDL_iconv_string("CP1251", "UTF16", (char *) &event.key.keysym.unicode, 2);
 	TempChar = iconv_str_out[0];
 	SDL_free(iconv_str_out);
@@ -441,10 +442,6 @@ bool CEngine::Run()
 #endif
 	Suicide();
 	SDL_Quit();
-
-#if defined(_DEBUG) && defined(_MSC_VER)
-	DumpUnfreed();
-#endif
 
 	return true;
 }

@@ -12,8 +12,9 @@ class CUnitBase : public CRenderObject, public CUpdateObject
 
 class CTileset : public CResource
 {
-public:
+private:
 	CTexture	*Texture;
+public:
 	byte		TileWidth;
 	byte		TileHeight;
 	int			HorNumTiles;
@@ -27,10 +28,20 @@ public:
 	}
 	
 
-	Vector2* GetCellTC(int CellIndex);
-	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles, char *_ImageData);
+	Vector2Array<4> GetCellTC(int CellIndex);
+	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles);
 	bool LoadFromFile();
 	bool SaveToFile();
+	CTexture * GetTexture() const
+	{
+		assert(Texture != NULL);
+		return Texture;
+	}
+	void SetTexture(const string &TextureName)
+	{
+		Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
+	}
+
 	void RenderTileSet(); //FOR DEBUGGING
 
 };
@@ -56,7 +67,7 @@ struct CMapCellInfo
 	int index;
 	int interaction;
 	float z; // if 0 then - check for collision; else z.0f = 1/256.0f;
-	Vector2 *tc; // Его размер тем не менее должен быть 4
+	Vector2Array<4> tc; // Его размер тем не менее должен быть 4
 	Vector2 pos[4];
 };
 
@@ -66,19 +77,15 @@ struct CMapCellInfo
 
 class CLevelMap : public CResource, public CRenderObject, public CUpdateObject, public CList
 {
-public:
+private:
 	int				numCellsHor, numCellsVer;
+public:
 	CMapCellInfo	*Cells;
 	CTileset		*TileSet;
 
-	static CObject *NewLevelMap();
-	CLevelMap()
-	{
-		numCellsHor = numCellsVer = 0;
-		Cells = NULL;
-		TileSet = NULL;	
-		SetName("CLevelMap");
-	}
+	CLevelMap(){};
+	CLevelMap(int AnumCellsHor, int AnumCellsVer, const string &ATilesetName,
+		const string &AName);
 	~CLevelMap(){}
 	
 	bool Update(float dt)
@@ -89,7 +96,7 @@ public:
 	bool LoadFromFile();
 	bool SaveToFile();
 	bool Render();
-private:
+//private:
 	int _Cell(int h, int v)
 	{
 		return v*numCellsHor + h;

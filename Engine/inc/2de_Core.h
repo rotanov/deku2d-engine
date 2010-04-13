@@ -409,6 +409,9 @@ public:
 			Log.Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
 			delete data;
 		}
+		#if defined(_DEBUG) && defined(_MSC_VER)
+				DumpUnfreed();
+		#endif
 	}
 };
 extern CGarbageCollector SingletoneKiller;
@@ -601,6 +604,15 @@ __INLINE string itos(int i)
 	stringstream s;
 	s << i;
 	return s.str();
+}
+
+__INLINE int stoi(const string &src)
+{
+	stringstream s;
+	s << src;
+	int i;
+	s >> i;
+	return i;
 }
 
 // And then
