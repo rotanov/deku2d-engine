@@ -445,20 +445,6 @@ void CPrimitiveRender::grQuarterCircle(const Vector2 &v0, scalar Radius)
 //////////////////////////////////////////////////////////////////////////
 //CSprite
 
-CSprite::CSprite()
-{
-	m_bFirstRendering = true;
-	Color = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-	animations = NULL;
-	anim = NULL;
-	numAnimations = 0;
-	ellapsedtime = 0;
-	lasttime = 0;
-	m_nFrameNumber = 0;
-	m_nCurrentRow = 0;
-	m_nCurrentColumn = 0;	
-	mirror_h = false;
-}
 
 CSprite::~CSprite()
 {
@@ -466,37 +452,28 @@ CSprite::~CSprite()
 		delete [] animations;
 }
 
-bool CSprite::LoadTexture(char *filename)
-{
-	CGLImageData temp;
-	temp.LoadTexture(filename);
-	m_textureID = temp.GetTexID();
-	m_nTextureWidth = temp.width;
-	m_nTextureHeight = temp.height;	
-	return true;
-}
 
 bool CSprite::LoadFromFile(char* filename)
 {
-	CFile file;
-	file.Open(filename, CFile::OPEN_MODE_READ);
-	file.ReadByte(&numAnimations);
-	if (animations != NULL)
-		delete [] animations;
-	animations = new SAnimationInfo[numAnimations];
-	file.Read(animations, sizeof(SAnimationInfo)*numAnimations);
-	file.Close();
-	anim = animations;
+// 	CFile file;
+// 	file.Open(filename, CFile::OPEN_MODE_READ);
+// 	file.Read(&AnimationsCount);
+// 	if (animations != NULL)
+// 		delete [] animations;
+// 	animations = new SAnimationInfo[AnimationsCount];
+// 	file.Read(animations, sizeof(SAnimationInfo)*AnimationsCount);
+// 	file.Close();
+// 	anim = animations;
 	return true;
 }
 
 bool CSprite::SaveToFile(char *filename)
 {
-	CFile file;
-	file.Open(filename, CFile::OPEN_MODE_WRITE);
-	file.WriteByte(&numAnimations);
-	file.Write(animations, numAnimations*sizeof(SAnimationInfo));
-	file.Close();
+// 	CFile file;
+// 	file.Open(filename, CFile::OPEN_MODE_WRITE);
+// 	file.WriteByte(&AnimationsCount);
+// 	file.Write(animations, AnimationsCount*sizeof(SAnimationInfo));
+// 	file.Close();
 	return true;
 }
 
@@ -505,26 +482,26 @@ bool CSprite::AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwid
 						   int _m_nTotalFrames, int _m_nFrameWidth, int _m_nFrameHeight,
 						   int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop)
 {
-	numAnimations++;
+	AnimationsCount++;
 	SAnimationInfo *temp;	
-	temp = new SAnimationInfo[numAnimations];
+	temp = new SAnimationInfo[AnimationsCount];
 
-	for(int i=0;i<numAnimations-1;i++)
+	for(int i=0;i<AnimationsCount-1;i++)
 		temp[i] = animations[i];
 	{
-		temp[numAnimations-1].isAnimated			= _isAnimated;
-		temp[numAnimations-1].m_fFrameDelay			= _m_fFrameDelay;
-		temp[numAnimations-1].m_fheight				= _m_fheight;
-		temp[numAnimations-1].m_fwidth				= _m_fwidth;
-		temp[numAnimations-1].m_nFrameHeight		= _m_nFrameHeight;
-		temp[numAnimations-1].m_nFrameWidth			= _m_nFrameWidth;
-		temp[numAnimations-1].m_nNumFrameColumns	= _m_nNumFrameColumns;
-		temp[numAnimations-1].m_nNumFrameRows		= _m_nNumFrameRows;
-		temp[numAnimations-1].m_nOffsetX			= _m_nOffsetX;
-		temp[numAnimations-1].m_nOffsetY			= _m_nOffsetY;
-		temp[numAnimations-1].m_nTotalFrames		= _m_nTotalFrames;
-		temp[numAnimations-1].AnimationIndex		= _AnimationIndex;
-		temp[numAnimations-1].isLoop				= _isLoop;
+		temp[AnimationsCount-1].isAnimated			= _isAnimated;
+		temp[AnimationsCount-1].m_fFrameDelay			= _m_fFrameDelay;
+		temp[AnimationsCount-1].m_fheight				= _m_fheight;
+		temp[AnimationsCount-1].m_fwidth				= _m_fwidth;
+		temp[AnimationsCount-1].m_nFrameHeight		= _m_nFrameHeight;
+		temp[AnimationsCount-1].m_nFrameWidth			= _m_nFrameWidth;
+		temp[AnimationsCount-1].m_nNumFrameColumns	= _m_nNumFrameColumns;
+		temp[AnimationsCount-1].m_nNumFrameRows		= _m_nNumFrameRows;
+		temp[AnimationsCount-1].m_nOffsetX			= _m_nOffsetX;
+		temp[AnimationsCount-1].m_nOffsetY			= _m_nOffsetY;
+		temp[AnimationsCount-1].m_nTotalFrames		= _m_nTotalFrames;
+		temp[AnimationsCount-1].AnimationIndex		= _AnimationIndex;
+		temp[AnimationsCount-1].isLoop				= _isLoop;
 	}
 	delete [] animations;
 	animations = temp;
@@ -534,8 +511,11 @@ bool CSprite::AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwid
 
 bool CSprite::Render()
 {
-	if (anim == NULL || numAnimations  == 0)
+	if (Texture == NULL)
 		return false;
+	if (anim == NULL || AnimationsCount  == 0)
+		return false;
+	Texture->CheckLoad();
 
 	float fSubRange_s, fSubRange_t,
 		fFrame_s, fFrame_t,
@@ -548,36 +528,36 @@ bool CSprite::Render()
 
 	//if(!isLoop && m_nFrameNumber < anim->m_nTotalFrames)
 	{
-		if (m_bFirstRendering == true)
+		if (isFirstTimeRendering == true)
 		{
-			m_bFirstRendering = false;
-			lasttime = SDL_GetTicks();
+			isFirstTimeRendering = false;
+			LastTime = SDL_GetTicks();
 		}
 		else
 		{
-			ellapsedtime = ellapsedtime + SDL_GetTicks() - lasttime;
-			lasttime = SDL_GetTicks();
+			EllapsedTime = EllapsedTime + SDL_GetTicks() - LastTime;
+			LastTime = SDL_GetTicks();
 		}
 	}
 
-	fSubRange_s = (1.0f/m_nTextureWidth)*(anim->m_nFrameWidth*anim->m_nNumFrameColumns);
-	fSubRange_t = (1.0f/m_nTextureHeight)*(anim->m_nFrameHeight*anim->m_nNumFrameRows);
+	fSubRange_s = (1.0f / Texture->width) * (anim->m_nFrameWidth * anim->m_nNumFrameColumns);
+	fSubRange_t = (1.0f / Texture->height) * (anim->m_nFrameHeight * anim->m_nNumFrameRows);
 	fFrame_s = fSubRange_s/anim->m_nNumFrameColumns;
 	fFrame_t = fSubRange_t/anim->m_nNumFrameRows;
 
-	fLowerLeft_s	= m_nCurrentColumn*fFrame_s;
-	fLowerLeft_t	= 1.0f - (m_nCurrentRow*fFrame_t) - fFrame_t;
-	fLowerRight_s	= (m_nCurrentColumn*fFrame_s) + fFrame_s;
-	fLowerRight_t	= 1.0f - (m_nCurrentRow*fFrame_t) - fFrame_t;
-	fUpperRight_s	= (m_nCurrentColumn*fFrame_s) + fFrame_s;
-	fUpperRight_t	= 1.0f - (m_nCurrentRow*fFrame_t);
-	fUpperLeft_s	= m_nCurrentColumn*fFrame_s;
-	fUpperLeft_t	= 1.0f - (m_nCurrentRow*fFrame_t);
+	fLowerLeft_s	= CurrentColumn*fFrame_s;
+	fLowerLeft_t	= 1.0f - (CurrentRow*fFrame_t) - fFrame_t;
+	fLowerRight_s	= (CurrentColumn*fFrame_s) + fFrame_s;
+	fLowerRight_t	= 1.0f - (CurrentRow*fFrame_t) - fFrame_t;
+	fUpperRight_s	= (CurrentColumn*fFrame_s) + fFrame_s;
+	fUpperRight_t	= 1.0f - (CurrentRow*fFrame_t);
+	fUpperLeft_s	= CurrentColumn*fFrame_s;
+	fUpperLeft_t	= 1.0f - (CurrentRow*fFrame_t);
 
 	if(anim->m_nOffsetX>0 || anim->m_nOffsetY > 0)
 	{
-		fOffset_s		= (1.0f/m_nTextureWidth )*anim->m_nOffsetX;
-		fOffset_t		= (1.0f/m_nTextureHeight)*anim->m_nOffsetY;
+		fOffset_s		= (1.0f / Texture->width ) * anim->m_nOffsetX;
+		fOffset_t		= (1.0f / Texture->height) * anim->m_nOffsetY;
 		fLowerLeft_s	= fLowerLeft_s + fOffset_s;
 		fLowerLeft_t	= fLowerLeft_t - fOffset_t;
 		fLowerRight_s	= fLowerRight_s + fOffset_s;
@@ -592,35 +572,44 @@ bool CSprite::Render()
 	fRelativeY = (anim->m_fheight);// * 0.5);
 
 
-	glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_LIGHTING);
+	//glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 	//glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	//glDisable(GL_LIGHTING);
+	Texture->Bind();
+	
+	glLoadIdentity();
+	Position.glTranslate();
+	glRotatef(Angle, 0.0f, 0.0f, 1.0f);
+	
+	//glTranslatef(anim->m_fwidth * 0.5f, anim->m_fheight * 0.5f, 0.0f);
+	
+	
+	
 
 	glBegin( GL_QUADS );
 	Color.glSet();
 	if (!mirror_h)
 	{
 		glTexCoord2f(fLowerLeft_s, fLowerLeft_t);
-		glVertex2i( 0, 0);
+			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * -0.5f);
 		glTexCoord2f(fLowerRight_s, fLowerRight_t);
-		glVertex2i( (int)fRelativeX, 0 );
+			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * -0.5f);
 		glTexCoord2f(fUpperRight_s, fUpperRight_t);
-		glVertex2i( (int)fRelativeX, (int)fRelativeY );
+			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * 0.5f);
 		glTexCoord2f(fUpperLeft_s, fUpperLeft_t);
-		glVertex2i(0, (int)fRelativeY );
+			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * 0.5f);
 	}
 	else
 	{
 		glTexCoord2f(fLowerRight_s, fLowerRight_t);
-		glVertex2i( 0, 0);
+			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * -0.5f);
 		glTexCoord2f(fLowerLeft_s, fLowerLeft_t);
-		glVertex2i( (int)fRelativeX, 0 );
+			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * -0.5f);
 		glTexCoord2f(fUpperLeft_s, fUpperLeft_t);
-		glVertex2i( (int)fRelativeX, (int)fRelativeY );
+			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * 0.5f);
 		glTexCoord2f(fUpperRight_s, fUpperRight_t);
-		glVertex2i(0, (int) fRelativeY );
+			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * 0.5f);
 	}
 	glColor4ub(255, 255, 255, 255);
 	glEnd();
@@ -628,64 +617,54 @@ bool CSprite::Render()
 	glPopAttrib();
 
 
-	if(ellapsedtime >= anim->m_fFrameDelay)
+	if(EllapsedTime >= anim->m_fFrameDelay)
 	{
-		ellapsedtime = 0;
-		m_nCurrentColumn++;
-		m_nFrameNumber++;
+		EllapsedTime = 0;
+		CurrentColumn++;
+		CurrentFrame++;
 
-		if (m_nFrameNumber >= anim->m_nTotalFrames)
+		if (CurrentFrame >= anim->m_nTotalFrames)
 			if (!anim->isLoop)
 			{
-				m_nCurrentColumn = anim->m_nNumFrameColumns-1;
-				m_nCurrentRow = anim->m_nNumFrameRows-1;
-				m_nFrameNumber = anim->m_nTotalFrames-1;
+				CurrentColumn = anim->m_nNumFrameColumns-1;
+				CurrentRow = anim->m_nNumFrameRows-1;
+				CurrentFrame = anim->m_nTotalFrames-1;
 				return true;
 			}
 
-			if(m_nCurrentColumn >= anim->m_nNumFrameColumns)
+			if(CurrentColumn >= anim->m_nNumFrameColumns)
 			{
-				m_nCurrentColumn = 0;
-				m_nCurrentRow++;
+				CurrentColumn = 0;
+				CurrentRow++;
 			}
 
-			if(m_nCurrentRow >= anim->m_nNumFrameRows)
+			if(CurrentRow >= anim->m_nNumFrameRows)
 			{
-				m_nCurrentRow		= 0;
-				m_nCurrentColumn	= 0;
+				CurrentRow		= 0;
+				CurrentColumn	= 0;
 			}
 
-			if(m_nFrameNumber >= anim->m_nTotalFrames)
+			if(CurrentFrame >= anim->m_nTotalFrames)
 			{
-				m_nCurrentRow		= 0;
-				m_nCurrentColumn	= 0;
-				m_nFrameNumber		= 0;
+				CurrentRow		= 0;
+				CurrentColumn	= 0;
+				CurrentFrame		= 0;
 			}
 	}
 	return true;
 }
 
-bool CSprite::Render(float x, float y)
-{
-	glPushMatrix();
-	glLoadIdentity();
-	glTranslatef(x, y, 0.0f);
-	Render();
-	glPopMatrix();
-	return true;
-}
-
 void CSprite::SetAnimation(int index)
 {
-	for(int i=0;i<numAnimations;i++)
+	for(int i=0;i<AnimationsCount;i++)
 		if (index == animations[i].AnimationIndex)
 		{	
 			if (anim != &(animations[i]))
 			{
 				anim = &(animations[i]);
-				m_nCurrentRow		= 0;
-				m_nCurrentColumn	= 0;
-				m_nFrameNumber		= 0;
+				CurrentRow		= 0;
+				CurrentColumn	= 0;
+				CurrentFrame		= 0;
 			}
 			break;
 		}
@@ -693,17 +672,17 @@ void CSprite::SetAnimation(int index)
 
 SAnimationInfo* CSprite::FindAnimation(int index)
 {
-	for(int i=0;i<numAnimations;i++)
+	for(int i=0;i<AnimationsCount;i++)
 		if (index == animations[i].AnimationIndex)		
 			return &(animations[i]);
 	return NULL;
 }
 
-CSprite* CSprite::Instance()
+bool CSprite::SetTexture(const string &TextureName)
 {
-	return this;
+	Texture = CFactory::Instance()->Get<CTexture>(TextureName);
+	return true;
 }
-
 //////////////////////////////////////////////////////////////////////////
 //CPartcleSystem
 

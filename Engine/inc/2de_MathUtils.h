@@ -81,16 +81,17 @@ __INLINE T Cube(const T &x)
 }
 
 template<typename T>
-__INLINE T Abs(const T &x)
+__INLINE T Abs(const T & const x)
 {
 	return x < 0 ? -x : x;
 }
 
 template<>
-__INLINE float Abs<float>(const float &x)
+__INLINE float Abs<float>(const float & const x)
 {
-	*(int *)&x &= 0x7fffffff;
-	return x;
+	float xx = x;	// TODO: Performance
+	*(int *)&xx &= 0x7fffffff;
+	return xx;
 }
 
 template<typename T>

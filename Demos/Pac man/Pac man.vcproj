@@ -186,12 +186,20 @@
 		<Filter
 			Name="Headers"
 			>
+			<File
+				RelativePath=".\src\Pacman.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Source"
 			>
 			<File
 				RelativePath=".\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Pacman.cpp"
 				>
 			</File>
 		</Filter>

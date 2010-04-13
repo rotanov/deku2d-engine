@@ -4,7 +4,6 @@
 #include "2de_GraphicsLow.h"
 #include "2de_MathUtils.h"
 
-
 //	Глобальные отладочные флаги
 // #define _DEBUG_DISABLE_PARTICLES_DRAW
 // #define _DEBUG_DISABLE_PARTICLES_UPDATE
@@ -138,66 +137,45 @@ struct SAnimationInfo				// структура определяющая пара
 
 class CSprite : public CRenderObject
 {
+private:
+	CTexture	*Texture;
+	RGBAf		Color;
+
+	unsigned long	EllapsedTime;
+	unsigned long	LastTime;
+	unsigned int	CurrentFrame;
+	unsigned int	CurrentRow;
+	unsigned int	CurrentColumn;
+
+	bool		isFirstTimeRendering;
+
+	size_t		AnimationsCount;
+	SAnimationInfo *animations;
+	SAnimationInfo *anim;
+
+	
+	float Angle;	
 public:
-	int			m_nTextureWidth,		// ширина текстуры в пикселях
-		m_nTextureHeight;		// тоже, но длина
-	RGBAf		Color;					// цвет
-	GLuint		m_textureID;			// опенгловская хрень идентиф. текстуру
-
-	unsigned long	ellapsedtime, lasttime;	// херь чтобы делать время между кадрами
-	int			m_nFrameNumber,			// номер текущего кадра
-		m_nCurrentRow,			// номер текущей строки
-		m_nCurrentColumn;		// номер текущей клонки
-
-	bool		m_bFirstRendering;		// первый ли раз происходит отрисовка спрайта
-	byte		numAnimations;			// кол-во анимаций для одного спрайта
-
-	SAnimationInfo *animations;		// настройки анимаций. загрузяются из файла
-	SAnimationInfo *anim;			// указатель на текущую анимацию
 	bool mirror_h;
-
-	/**
-	*	constructor && destructor
-	*/
-	CSprite();
+	CSprite() : isFirstTimeRendering(true), Color(COLOR_WHITE), animations(NULL),
+		anim(NULL), AnimationsCount(0), EllapsedTime(0), LastTime(0), CurrentFrame(0),
+		CurrentRow(0), CurrentColumn(0), mirror_h(false)
+	{
+	}
 	~CSprite();
-	CSprite* Instance();
-	/**
-	*	Load Animation Set file & use it as texture
-	*	filename is filename either.
-	*/
-	bool LoadTexture(char * filename);
-	/**
-	*	OMFG. I hate doing such things. But this function
-	*	is for testing and for editor.
-	*	No. Really there are too much arguments.
-	*/
+	bool SetTexture(const string &TextureName);
 	bool AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwidth,
 		float _m_fheight, int _m_nNumFrameColumns, int _m_nNumFrameRows,
 		int _m_nTotalFrames, int _m_nFrameWidth, int _m_nFrameHeight,
 		int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop);	
-	/**
-	*	function Render() draw an current frame of animation
-	*	to the screen. That's all.
-	*/
+	void SetAngle(float AAngle)
+	{
+		Angle = Clamp(AAngle, 0.0f, 360.0f);
+	}
 	bool Render();
-	bool Render(float x, float y);
-	/**
-	*	SetAnimation() sets the current animation. For now index is just an animation
-	*	index in array.
-	*/
 	void SetAnimation(int index);
-	/**
-	*	Finds address of animation with this index.
-	*/
 	SAnimationInfo* FindAnimation(int index);
-	/**
-	*	Loads an animation settings from file.
-	*/
 	bool LoadFromFile(char* filename);
-	/**
-	*	Saves animation settings to file.
-	*/
 	bool SaveToFile(char *filename);
 };
 
