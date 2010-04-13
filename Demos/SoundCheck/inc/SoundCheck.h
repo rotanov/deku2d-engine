@@ -7,9 +7,12 @@
 class CSoundObject : public CObject
 {
 public:
-	CSoundObject()
+	CSoundObject() : Volume(MIX_MAX_VOLUME)
 	{
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+		VolumeLabel = CFactory::Instance()->New<CLabel>("VolumeLabel");
+		VolumeLabel->aabb = CAABB(530, 270, 100, 32);
+		UpdateVolumeLabel();
 	}
 
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
@@ -26,16 +29,40 @@ public:
 				break;
 
 			case SDLK_a:
-				CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("bender1"));
+				CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("PacMan"));
 				break;
 			case SDLK_s:
 				CSoundMixer::Instance()->StopMusic();
+				break;
+
+			case SDLK_z:
+				if (Volume > 0)
+				{
+					Volume--;
+					UpdateVolumeLabel();
+				}
+				CSoundMixer::Instance()->SetMusicVolume(Volume);
+				break;
+			case SDLK_x:
+				if (Volume < MIX_MAX_VOLUME)
+				{
+					Volume++;
+					UpdateVolumeLabel();
+				}
+				CSoundMixer::Instance()->SetMusicVolume(Volume);
 				break;
 			}
 
 		}
 		return true;
 	}
+private:
+	void UpdateVolumeLabel()
+	{
+		VolumeLabel->Text = itos(Volume);		
+	}
+	int Volume;
+	CLabel *VolumeLabel;
 };
 
 class CHelpText : public CRenderObject
@@ -55,8 +82,9 @@ public:
 
 		FontManager->PrintEx(5, ScreenHeight - 30, 0.0f, "Sound: q - play, w - stop"); 
 		FontManager->PrintEx(5, ScreenHeight - 60, 0.0f, "Music: a - play, s - stop"); 
-		FontManager->PrintEx(5, ScreenHeight - 90, 0.0f, "You can try to enter file name and click Play");
-		FontManager->PrintEx(5, ScreenHeight - 120, 0.0f, "to play it as music");
+		FontManager->PrintEx(5, ScreenHeight - 90, 0.0f, "Music volume: z - down, x - up"); 
+		FontManager->PrintEx(5, ScreenHeight - 120, 0.0f, "You can try to enter file name and click Play");
+		FontManager->PrintEx(5, ScreenHeight - 150, 0.0f, "to play it as music");
 
 		return true;
 	}
@@ -80,12 +108,12 @@ public:
 	CLoadFileGUI()
 	{
 		LoadFileButton = CFactory::Instance()->New<CButton>("LoadFileButton");
-		LoadFileButton->aabb = CAABB(400, 300, 100, 32);
+		LoadFileButton->aabb = CAABB(400, 270, 100, 32);
 		LoadFileButton->Text = "Play";
 		LoadFileButton->SetCallback(&PlayFile, NULL);
 
 		FileNameEdit = CFactory::Instance()->New<CEdit>("FileNameEdit");
-		FileNameEdit->aabb = CAABB(80, 300, 300, 32);
+		FileNameEdit->aabb = CAABB(80, 270, 300, 32);
 		FileNameEdit->Text = "";
 
 

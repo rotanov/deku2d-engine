@@ -198,6 +198,34 @@ void CSoundMixer::StopMusic(int FadeOutTime /*= 0*/)
 		Mix_FadeOutMusic(FadeOutTime);
 }
 
+void CSoundMixer::SetMusicVolume(int AVolume)
+{
+	if (AVolume < 0 || AVolume > MIX_MAX_VOLUME) {
+		Log.Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
+	}
+
+	Mix_VolumeMusic(AVolume);
+}
+
+int CSoundMixer::GetMusicVolume() const
+{
+	return Mix_VolumeMusic(-1);
+}
+
+void CSoundMixer::SetSoundVolume(CSound *ASound, int AVolume)
+{
+	if (AVolume < 0 || AVolume > MIX_MAX_VOLUME) {
+		Log.Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
+	}
+
+	Mix_VolumeChunk(ASound->GetData(), AVolume);
+}
+
+int CSoundMixer::GetSoundVolume(CSound *ASound) const
+{
+	return Mix_VolumeChunk(ASound->GetData(), -1);
+}
+
 CSoundMixer::CSoundMixer()
 {
 	SetName("Sound mixer");

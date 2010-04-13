@@ -90,7 +90,7 @@ public:
 		Colors.EditText = COLOR_BLACK;
 		Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
 		Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
-		Colors.LabelText = COLOR_BLACK;
+		Colors.LabelText = COLOR_WHITE;
 
 		Metrics.FocusRectSpacing = 5.0f;
 		Metrics.FocusRectLineWidth = 0.5f;

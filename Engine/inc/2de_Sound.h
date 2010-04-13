@@ -88,6 +88,10 @@ public:
 	void StopAllSound();
 	bool PlayMusic(CMusic *Music, int FadeInTime = 0);
 	void StopMusic(int FadeOutTime = 0);
+	void SetMusicVolume(int AVolume);
+	int GetMusicVolume() const;
+	void SetSoundVolume(CSound *ASound, int AVolume);
+	int GetSoundVolume(CSound *ASound) const;
 
 	// well, there are many other features in SDL_mixer (like effects, channel groups, etc.), but i'm too lazy to implement interface to them now...
 
