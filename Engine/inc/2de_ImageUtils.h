@@ -7,14 +7,12 @@ class CImageData
 {
 public:
 	byte			*data;
-	unsigned int	height;
-	unsigned int	width;
+	size_t			height;
+	size_t			width;
 	byte			bpp;
-	RGBAub			Colorkey;
 
 	CImageData();
 	~CImageData();
-	bool	ProcessColorkey();
 	bool	LoadFromFile(const string &Filename);
 };
 

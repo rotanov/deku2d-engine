@@ -49,7 +49,7 @@ public:
 	static int glListQuarterCircle;
 	static int glListRingS;
 	static int glListHalfCircle;
-	scalar Angle, lwidth, depth, psize;
+	float Angle, lwidth, depth, psize;
 	int dash;
 	RGBAf *plClr, *psClr, *ppClr;
 	RGBAf lClr, sClr, pClr; 
@@ -85,22 +85,22 @@ public:
 	void grRectS(const Vector2 &v0, const Vector2 &v1);
 	void grRectC(const Vector2 &v0, const Vector2 &v1);
 
-	void grQuarterCircle(const Vector2 &v0, scalar Radius);
+	void grQuarterCircle(const Vector2 &v0, float Radius);
 
-	void grCircleL(const Vector2 &p, scalar Radius);
-	void grCircleS(const Vector2 &p, scalar Radius);
-	void grCircleC(const Vector2 &p, scalar Radius);
+	void grCircleL(const Vector2 &p, float Radius);
+	void grCircleS(const Vector2 &p, float Radius);
+	void grCircleC(const Vector2 &p, float Radius);
 
-	void grPolyC(const Vector2 &p, scalar angle, CPolygon *poly);
+	void grPolyC(const Vector2 &p, float angle, CPolygon *poly);
 
-	void grRingS(const Vector2 &p, scalar Radius);
-	void grRingC(const Vector2 &p, scalar Radius);
+	void grRingS(const Vector2 &p, float Radius);
+	void grRingC(const Vector2 &p, float Radius);
 
 	void grArrowL(const Vector2& v0, const Vector2& v1);
 	void grArrowC(const Vector2 &v0,const Vector2 &v1);
 
 	void gDrawBBox(CAABB box);
-	void grInYan(const Vector2 &p, scalar Radius);
+	void grInYan(const Vector2 &p, float Radius);
 private:
 	void BeforeRndr();
 	void AfterRndr();
@@ -153,8 +153,6 @@ private:
 	SAnimationInfo *animations;
 	SAnimationInfo *anim;
 
-	
-	float Angle;	
 public:
 	bool mirror_h;
 	CSprite() : isFirstTimeRendering(true), Color(COLOR_WHITE), animations(NULL),
@@ -168,10 +166,6 @@ public:
 		float _m_fheight, int _m_nNumFrameColumns, int _m_nNumFrameRows,
 		int _m_nTotalFrames, int _m_nFrameWidth, int _m_nFrameHeight,
 		int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop);	
-	void SetAngle(float AAngle)
-	{
-		Angle = Clamp(AAngle, 0.0f, 360.0f);
-	}
 	bool Render();
 	void SetAnimation(int index);
 	SAnimationInfo* FindAnimation(int index);

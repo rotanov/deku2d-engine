@@ -72,16 +72,17 @@ struct CMapCellInfo
 };
 
 /**
-* Cells: ^>
+* Cells: >^
 */
 
-class CLevelMap : public CResource, public CRenderObject, public CUpdateObject, public CList
+class CLevelMap : public CResource, public CRenderObject
 {
 private:
 	int				numCellsHor, numCellsVer;
 public:
+	float	CellScale;
 	CMapCellInfo	*Cells;
-	CTileset		*TileSet;
+	CTileset	*TileSet;
 
 	CLevelMap(){};
 	CLevelMap(int AnumCellsHor, int AnumCellsVer, const string &ATilesetName,

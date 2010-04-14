@@ -2,38 +2,12 @@
 
 #include <IL/il.h>
 
-CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0), Colorkey(255, 0, 255, 0)
-{
-
-}
+CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0){}
 
 CImageData::~CImageData()
 {
 	if (data != NULL)
 		delete [] data;
-}
-
-bool  CImageData::ProcessColorkey()
-{
-	if (data ==  NULL)
-		return false;
-	byte *Rs, *Gs, *Bs, *Ap, *Rp, *Gp, *Bp;
-	for(int i = 0;i < height*width; i++)
-	{
-		Rs = data + i*bpp;
-		Gs = data + i*bpp + 1;
-		Bs = data + i*bpp + 2;
-		Rp = data + i*bpp ;
-		Gp = data + i*bpp + 1;
-		Bp = data + i*bpp + 2;
-		Ap = data + i*bpp + 3;
-		if ( *Rs == Colorkey.r && *Gs == Colorkey.g && *Bs == Colorkey.b)
-			*Ap = 0;
-		*Rp =*Rs;
-		*Gp =*Gs;
-		*Bp =*Bs;
-	}
-    return true;
 }
 
 bool CImageData::LoadFromFile(const string &Filename)

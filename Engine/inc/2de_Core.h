@@ -18,11 +18,11 @@
 //after w4
 #pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
 #pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
- //#pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
+ #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
 #pragma warning (disable	:	4100)	//	unreferenced formal parameter
- //#pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
+ #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
 #pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
- //#pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
+ #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
 #pragma warning (disable	:	4389)	//	signed/unsigned mismatch
 #pragma warning (disable	:	4702)	//	unreachable code ^^"
 #pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
@@ -148,10 +148,9 @@ inline void operator delete[](void *p)
 
 
 typedef unsigned char		byte;
-typedef float				scalar;
 
 typedef bool (*Callback)();
-typedef bool (*UpdateProc)(scalar);
+typedef bool (*UpdateProc)(float);
 typedef bool (*EventFunc)(SDL_Event&);
 
 #define KEY_PRESSED		0x00

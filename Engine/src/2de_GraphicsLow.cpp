@@ -4,7 +4,7 @@
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-CRenderObject::CRenderObject() : Position(V2_ZERO), Orientation(0.0f), Scaling(1.0f), Depth(0.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
+CRenderObject::CRenderObject() : Position(V2_ZERO), Angle(0.0f), Scaling(1.0f), Depth(0.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
 	SetName("CRenderObject");
 	type |= T_RENDERABLE;
@@ -15,6 +15,16 @@ CRenderObject::~CRenderObject()
 {
 	//Log.Log("INFO", "DESTRUCT RENDER: %s, id: %d, count: %d", GetName(), GetID(), CRenderManager::Instance()->GetObjectsCount()); // debug
 	CRenderManager::Instance()->DelObject(GetID());
+}
+
+void CRenderObject::SetAngle(float AAngle /*= 0.0f*/)
+{
+	Angle = Clamp(AAngle, 0.0f, 360.0f);
+}
+
+float CRenderObject::GetAngle()
+{
+	return Angle;
 }
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
@@ -50,16 +60,11 @@ bool CGLImageData::MakeTexture()
 	return true;
 }
 
-bool CGLImageData::LoadTexture(const char *filename)
+bool CGLImageData::LoadTexture(const string &Filename)
 {
-	if (!LoadFromFile(filename))
+	if (!LoadFromFile(Filename))
 	{
 		Log.Log("ERROR", "Can't load image->");
-		return false;
-	}
-	if(!ProcessColorkey())
-	{
-		Log.Log("ERROR", "Can't load texture.");
 		return false;
 	}
 	if (!MakeTexture())
@@ -376,7 +381,7 @@ void CFont::Print(const char *text, ...)
 			CPrimitiveRender pr;
 			pr.psClr = &RGBAf(10, 50, 200, 150);
 			pr.depth = Depth;
-			pr.grRectS(Vector2(selx, Pos.y), Vector2(selx + selw, Pos.y + sheight));
+			pr.grRectS(Vector2(static_cast<float>(selx), Pos.y), Vector2(static_cast<float>(selx + selw), Pos.y + sheight));
 		}
 
 
@@ -567,7 +572,7 @@ void CFont::SetTexture(const string &TextureName)
 //////////////////////////////////////////////////////////////////////////
 //Camera
 
-void CCamera::Assign(scalar *x, scalar *y)
+void CCamera::Assign(float *x, float *y)
 {
 	CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
 	engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &h);
@@ -690,7 +695,9 @@ bool CRenderManager::DrawObjects()
 		{
 			glLoadIdentity();
 			Camera.gTranslate();
+			glScalef(data->Scaling, data->Scaling, 1.0f);
 			glTranslatef(data->Position.x, data->Position.y, data->Depth);
+			glRotatef(data->GetAngle(), 0.0f, 0.0f, 1.0f);
 			data->Render();
 		}
 		data = dynamic_cast<CRenderObject*>(Next());

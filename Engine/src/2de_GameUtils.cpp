@@ -55,10 +55,10 @@ void CTileset::RenderTileSet()
 	p.lwidth = 0.1f;
 	
 	for (int i = 0; i <= HorNumTiles; i++)
-		p.grSegment(Vector2(i*TileWidth, 0.0f),
+		p.grSegment(Vector2(i*TileWidth, 0),
 			Vector2(i*TileWidth, Texture->height));
 	for (int i = 0; i <= VerNumTiles; i++)
-		p.grSegment(Vector2(0.0f, i*TileHeight),
+		p.grSegment(Vector2(0, i*TileHeight),
 			Vector2(Texture->width, i*TileHeight));
 }
 
@@ -132,23 +132,17 @@ Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 
 bool CLevelMap::Render()
 {
-// 	if (!loaded) And what if we can't load it? Write it to log every frame?
-// 		LoadFromFile();
-	
 	CMapCellInfo *t;
-	
-	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
+	COLOR_WHITE.glSet();
 	glEnable(GL_TEXTURE);
-	glDisable(GL_BLEND);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	TileSet->GetTexture()->Bind();
 	glBegin(GL_QUADS);
-	for(int i=0;i<numCellsVer;i++)
-		for(int j=0;j<numCellsHor;j++)
+	for(int j = 0; j < numCellsHor; j++)
+		for(int i = 0; i < numCellsVer; i++)		
 		{
 			t = Cells + _Cell(j, i);
 
-			for(int k=0;k<4;k++)
+			for(int k = 0; k < 4; k++)
 			{
 				t->tc[k].glTexCoord();
 				glVertex3f(t->pos[k].x,	t->pos[k].y, t->z);
@@ -222,8 +216,8 @@ bool CLevelMap::GenCells()
 		{
 			CMapCellInfo *t = &(Cells[_Cell(j, i)]);
 			Vector2 ji = Vector2(j, i);
-			scalar w = TileSet->TileWidth;
-			scalar h = TileSet->TileHeight;
+			float w = TileSet->TileWidth;
+			float h = TileSet->TileHeight;
 			for(int k = 0; k < 4; k++)
 			{
 				t->pos[k] = (ji + V2_QuadBin[k]);

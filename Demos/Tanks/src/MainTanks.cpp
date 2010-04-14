@@ -66,7 +66,7 @@ public:
 		Font->Print(TITLE_TEXT);
 		return true;
 	}
-	bool Update(scalar dt)
+	bool Update(float dt)
 	{
 		if (begintimeout)
 		{

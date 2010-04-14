@@ -57,10 +57,10 @@ public:
 	};
 	struct CGUIStyleMetrics
 	{
-		scalar FocusRectSpacing;
-		scalar FocusRectLineWidth;
+		float FocusRectSpacing;
+		float FocusRectLineWidth;
 		Vector2 EditMargins;
-		scalar EditBorderWidth;
+		float EditBorderWidth;
 	};
 	// на данный момент я буду юзать один шрифт для всего ГУИ для простоты и потому что некоторые моменты использования шрифтов не до коцна ясны и требуют пересмотра
 	/*struct CGUIStyleFonts
@@ -191,7 +191,7 @@ class CGUIManager : public CTSingleton<CGUIManager>, public CUpdateObject
 public:
 				~CGUIManager();
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool		Update(scalar dt);
+	bool		Update(float dt);
 	bool		Render();
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocusedNodeTo(CListNode *AFocusedNode);
@@ -257,7 +257,7 @@ public:
 
 	CEdit();
 	bool Render();
-	bool Update(scalar dt);
+	bool Update(float dt);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 
 private:
@@ -292,7 +292,7 @@ public:
 				CMenuItem(CMenuItem* AParent, char* AMenuText);
 				~CMenuItem();
 	bool		Render();
-	bool		Update(scalar dt);
+	bool		Update(float dt);
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool		AddObject(CObject *AObject);
 private:

@@ -39,7 +39,7 @@ void CTank::SetPlayerControls(int PlayerIndex)
 		Controls[i] = AR_K_CONTRLS[i][PlayerIndex];
 }
 
-bool CTank::Update(scalar dt)
+bool CTank::Update(float dt)
 {
 	CAABB AABB = CAABB(0, 0, 32, 32);
 	if (isWalking)
@@ -132,7 +132,7 @@ bool CTank::Update(scalar dt)
 bool CTank::Render()
 {
 	glLoadIdentity();
-	scalar Angle = 0;
+	float Angle = 0;
 	if (Direction == V2_DIR_RIGHT)
 		Angle = 90;
 	if (Direction == V2_DIR_DOWN)
@@ -252,7 +252,7 @@ bool CTankManager::Render()
 	return true;
 }
 
-bool CTankManager::Update(scalar dt)
+bool CTankManager::Update(float dt)
 {
 	return true;
 }
@@ -299,7 +299,7 @@ bool CTankMap::Render()
 	return true;
 }
 
-bool CTankMap::Update(scalar dt)
+bool CTankMap::Update(float dt)
 {
 	return true;
 }

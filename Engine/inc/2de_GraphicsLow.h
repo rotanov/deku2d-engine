@@ -32,26 +32,28 @@ const Vector2 V2_QuadBinCenter[4] =
 };
 
 
-const scalar ROTATIONAL_AXIS_Z = 1.0f;
+const float ROTATIONAL_AXIS_Z = 1.0f;
 
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
 class CRenderObject : public virtual CObject
 {
-private:
-
+protected:
+	float				Angle;		//	Orientation angle (Degrees)
 public:
 	Vector2				Position;
-	scalar				Orientation;		//	Orientation angle.
-	scalar				Scaling;
-	scalar				Depth;				//	[-1; 1]?
+	
+	float				Scaling;
+	float				Depth;				//	[-1; 1]?
 	CAABB				aabb;				//	Axis Aligned Bounding Box
 	RGBAf				Color;
 	bool				Visible;
 	bool				doIgnoreCamera;
 
-	CRenderObject();	
+	CRenderObject();
+	void SetAngle(float AAngle = 0.0f);
+	float GetAngle();
 	virtual bool Render() = 0;
 	virtual ~CRenderObject();
 };
@@ -66,7 +68,7 @@ public:
 					CGLImageData();
 					~CGLImageData();
 	bool			MakeTexture();
-	bool			LoadTexture(const char *filename);
+	bool			LoadTexture(const string &Filename);
 	virtual GLuint	GetTexID();
 protected:
 	GLuint			TexID;
@@ -133,7 +135,7 @@ public:
 	RGBAf				tClr;						//	Цвет. Или указатель на цвет? Указатель!!! Или цвет? Блядь... ДА!
 	//	Пусть будут и цвет и указатель, причём по дефолту указатель будет указывать на этот цвет. Но добавить ф-ю реэссайн колор
 	RGBAf*				ptClr;						//	Вот он и есть указатель
-	scalar				Distance;					//	Расстояние между символами		
+	float				Distance;					//	Расстояние между символами		
 	Vector2				Pos;						//	координты текста, для присваивания, указатель по дефолту указывает на них
 	CAABB				aabb;						//	Вектор с шириной и высотой чего-то. Это для боксов. x - w, y - h
 	int					offset;						//	Смещение, с которого надо выводить в боксе, если мы выводим со смещением
@@ -209,14 +211,14 @@ public:
 	Vector2 Point;					//
 	CAABB	view, outer, world;		//
 	bool	Assigned;
-	scalar	*Atx, *Aty;
-	scalar	dx, dy;
+	float	*Atx, *Aty;
+	float	dx, dy;
 	int		w, h;
 	Vector2 p, v;
 
 	CCamera();
 	void SetWidthAndHeight(int AWidth, int AHeight);
-	void Assign(scalar *x, scalar *y);
+	void Assign(float *x, float *y);
 	void Free();
 	void gTranslate();
 	void DrawDebug();

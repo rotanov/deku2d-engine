@@ -30,17 +30,17 @@ public:
 	CGeometry G;	// Геометрическая интерпретация формы объекта	
 
 	Vector2 p;
-	scalar	a;
+	float	a;
 	Matrix2 o;
 
-	scalar	invMass;
-	scalar	inertiaMoment;
+	float	invMass;
+	float	inertiaMoment;
 
 	Vector2 lv;
 	Vector2 la;
 
-	scalar	av;
-	scalar	aa;
+	float	av;
+	float	aa;
 	
 	void IntegrateVelocity(float dt)
 	{

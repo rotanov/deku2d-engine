@@ -59,7 +59,7 @@ void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
 	AfterRndr();
 }
 
-void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
+void CPrimitiveRender::grCircleL(const Vector2 &p, float Radius)
 {
 	if (!glIsList(glListCircleL))
 		return;
@@ -71,7 +71,7 @@ void CPrimitiveRender::grCircleL(const Vector2 &p, scalar Radius)
 	AfterRndr();
 }
 
-void CPrimitiveRender::grCircleS(const Vector2 &p, scalar Radius)
+void CPrimitiveRender::grCircleS(const Vector2 &p, float Radius)
 {
 	if (!glIsList(glListCircleL))
 		return;
@@ -83,7 +83,7 @@ void CPrimitiveRender::grCircleS(const Vector2 &p, scalar Radius)
 	AfterRndr();
 }
 
-void CPrimitiveRender::grCircleC(const Vector2 &p, scalar Radius)
+void CPrimitiveRender::grCircleC(const Vector2 &p, float Radius)
 {
 	grCircleS(p, Radius);
 	grCircleL(p, Radius);
@@ -187,7 +187,7 @@ void CPrimitiveRender::grArrowC(const Vector2 &v0,const Vector2 &v1)
 	grArrowL(v0, v1);
 }
 
-void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
+void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, CPolygon *poly)
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
@@ -227,7 +227,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, scalar angle, CPolygon *poly)
 	AfterRndr();
 }
 
-void CPrimitiveRender::grRingS(const Vector2 &p, scalar Radius)
+void CPrimitiveRender::grRingS(const Vector2 &p, float Radius)
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
@@ -237,7 +237,7 @@ void CPrimitiveRender::grRingS(const Vector2 &p, scalar Radius)
 	AfterRndr();
 }
 
-void CPrimitiveRender::grRingC( const Vector2 &p, scalar Radius )
+void CPrimitiveRender::grRingC( const Vector2 &p, float Radius )
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
@@ -385,7 +385,7 @@ void CPrimitiveRender::Init()  // TODO: вынести качество гене
 
 }
 
-void CPrimitiveRender::grInYan(const Vector2 &p, scalar Radius)
+void CPrimitiveRender::grInYan(const Vector2 &p, float Radius)
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
@@ -429,7 +429,7 @@ void CPrimitiveRender::gDrawBBox( CAABB box )
 	AfterRndr();
 }
 
-void CPrimitiveRender::grQuarterCircle(const Vector2 &v0, scalar Radius)
+void CPrimitiveRender::grQuarterCircle(const Vector2 &v0, float Radius)
 {
 	if (!glIsList(glListQuarterCircle))
 		return;
@@ -578,15 +578,7 @@ bool CSprite::Render()
 	//glDisable(GL_LIGHTING);
 	Texture->Bind();
 	
-	glLoadIdentity();
-	Position.glTranslate();
-	glRotatef(Angle, 0.0f, 0.0f, 1.0f);
 	
-	//glTranslatef(anim->m_fwidth * 0.5f, anim->m_fheight * 0.5f, 0.0f);
-	
-	
-	
-
 	glBegin( GL_QUADS );
 	Color.glSet();
 	if (!mirror_h)
@@ -716,7 +708,7 @@ void CParticleSystem::Init()
 	ColorVariability = RGBAf(0.0f,0.0f,0.0f,0.0f);
 }
 
-bool CParticleSystem::Update(scalar dt)
+bool CParticleSystem::Update(float dt)
 {
 #ifdef _DEBUG_DISABLE_PARTICLES_UPDATE
 	return false;

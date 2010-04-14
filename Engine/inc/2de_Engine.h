@@ -100,7 +100,7 @@ private:
 	bool						(*procUserSuicide)();		// wrong design
 	bool						(*procFocusLostFunc)();		// ok
 	bool						(*procFocusGainFunc)();		// ok
-	bool						(*procUpdateFunc)(scalar);	// ok, yeah
+	bool						(*procUpdateFunc)(float);	// ok, yeah
 	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
 protected:
 	friend class CTSingleton<CEngine>;

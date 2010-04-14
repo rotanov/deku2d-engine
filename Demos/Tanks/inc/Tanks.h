@@ -14,16 +14,16 @@ enum EActionKind {akLeft=0, akRight=1, akUp=2, akDown=3, akFire=4, akItem=5};
 enum ETanksTileIndex {csFree1=7, csFree2=6, csFree3=3, csFree4=2, csBlock=5, csDestr=1, csTank=4, csBullet=0};
 
 const Vector2	Directions[4] = {V2_DIR_LEFT, V2_DIR_RIGHT, V2_DIR_UP, V2_DIR_DOWN};
-const scalar	DEFAULT_TANK_HEALTH = 100;
-const scalar	DEFAULT_TANK_DAMAGE = 10;
-const scalar	DEFAULT_TANK_VELOCITY = 3;
+const float	DEFAULT_TANK_HEALTH = 100;
+const float	DEFAULT_TANK_DAMAGE = 10;
+const float	DEFAULT_TANK_VELOCITY = 3;
 const int		MAX_PLAYERS_COUNT = 2;
 const int		MAP_SIZE_X = 20;
 const int		MAP_SIZE_Y = 15;
 const int		DEFAULT_CELL_SIZE = 32;
 const int		CONTROLS_COUNT = 6;
 const int		MAX_BULLETS_PER_TANK = 128;
-const scalar	DEFAULT_FIRING_INTERVAL = 0.2f;
+const float	DEFAULT_FIRING_INTERVAL = 0.2f;
 
 static RGBAf	COLOR_P1 = RGBAf(0.5f, 0.8f, 0.4f, 1.0f);
 static RGBAf	COLOR_P2 = RGBAf(0.9f, 0.9f, 0.4f, 1.0f);
@@ -52,8 +52,8 @@ public:
 	};
 	Vector2			Direction;
 	int				Health;
-	scalar			Velocity;
-	scalar			Damage;
+	float			Velocity;
+	float			Damage;
 	//////////////////////////////////////////////////////////////////////////
 	CTankMap*		Map;
 	CTankManager*	Host;
@@ -70,8 +70,8 @@ public:
 	Bullet			Bullets[MAX_BULLETS_PER_TANK];
 	
 	int				BulletsCount;
-	scalar			FiringInterval;
-	scalar			FiringTimeout;
+	float			FiringInterval;
+	float			FiringTimeout;
 
 	CTank(CTankMap* AMap, CTankManager* AHost, CTankAI* AAI) : Map(AMap), Host(AHost), AI(AAI)
 	{
@@ -104,7 +104,7 @@ public:
 	CAABB GetAABB();
 	Vector2 GetCenter();
 	void SetPlayerControls(int PlayerIndex);
-	bool Update(scalar dt);
+	bool Update(float dt);
 	bool Render();
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 };
@@ -163,10 +163,10 @@ public:
 
 	CTankMapCell* GetCell(Vector2& V);
 	CAABB GetCellAABB(Vector2 V);
-	scalar IsFPTWA(int ADir, Vector2 Position);
+	float IsFPTWA(int ADir, Vector2 Position);
 	Vector2 GetNewTankLocation();
 	bool Render();
-	bool Update(scalar dt);
+	bool Update(float dt);
 };
 
 class CTankManager : public CList, public CUpdateObject, public CRenderObject
@@ -184,7 +184,7 @@ public:
 
 	CTank* GetPlayer(int PlayerIndex);
 	bool Render();
-	bool Update(scalar dt);
+	bool Update(float dt);
 	void AddPlayer();
 	void AddAI();
 };

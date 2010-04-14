@@ -170,7 +170,7 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
-bool CGUIManager::Update(scalar dt)
+bool CGUIManager::Update(float dt)
 {
 #ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
 	if (tabholded)
@@ -509,7 +509,7 @@ bool CEdit::Render()
 	return true;
 }
 
-bool CEdit::Update(scalar dt)
+bool CEdit::Update(float dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
@@ -830,7 +830,7 @@ bool CMenuItem::Render()
 	return true;
 }
 
-bool CMenuItem::Update(scalar dt)
+bool CMenuItem::Update(float dt)
 {
 	return true;
 }

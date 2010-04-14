@@ -59,8 +59,8 @@ void AddTile(int TileIndex, int x, int y)
 	next->info.z = 0.0f;
 	next->info.tc = TileSet->GetCellTC(TileIndex);
 	Vector2 ji = Vector2(x, y);
-	scalar w = TileSet->TileWidth;
-	scalar h = TileSet->TileHeight;
+	float w = TileSet->TileWidth;
+	float h = TileSet->TileHeight;
 	for(int k = 0; k < 4; k++)
 	{
 		next->info.pos[k] = (ji + V2_QuadBin[k]);
@@ -110,7 +110,7 @@ void SetZoom(int _Zoom)
 	Zoom = Clamp(_Zoom, MIN_ZOOM, MAX_ZOOM);
 }
 
-int CalcF1(scalar p, scalar size)
+int CalcF1(float p, float size)
 {
 	return 1;
 }

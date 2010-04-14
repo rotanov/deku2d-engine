@@ -50,13 +50,13 @@ Vector2& Vector2::operator ^=(const Matrix2& M)
 	return *this;
 }
 
-void CalcFrustumVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar, Vector3 cpos, Vector3 cat, Vector3 cup, Vector3 v[8])
+void CalcFrustumVertices(float fovy, float aspect, float znear, float zfar, Vector3 cpos, Vector3 cat, Vector3 cup, Vector3 v[8])
 {
-	scalar y1 = znear * tan(fovy*0.5f);
-	scalar x1 = y1 * aspect;
+	float y1 = znear * tan(fovy*0.5f);
+	float x1 = y1 * aspect;
 
-	scalar y2 = zfar * tan(fovy*0.5f);
-	scalar x2 = y2 * aspect;
+	float y2 = zfar * tan(fovy*0.5f);
+	float x2 = y2 * aspect;
 
 	Vector3 nz = cat - cpos, ny = cup, nx;
 	nz.Normalise();
@@ -89,10 +89,10 @@ void CalcFrustumVertices(scalar fovy, scalar aspect, scalar znear, scalar zfar, 
 
 int PointsPlaneSide(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum)
 {
-	scalar sign = n * (offset + points[0]*R - a);
+	float sign = n * (offset + points[0]*R - a);
 	for(int i=1; i < pnum; i++)
 	{
-		scalar t = n * (offset + points[i]*R - a);
+		float t = n * (offset + points[i]*R - a);
 		if ((t >= 0 && sign <= 0) || (t <= 0 && sign >= 0)) return 0;
 		sign = t;
 	}
@@ -101,8 +101,8 @@ int PointsPlaneSide(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *poin
 }
 int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth)
 {
-	scalar d = 1; 
-	scalar min = 99999999;
+	float d = 1; 
+	float min = 99999999;
 	for(int i = 0; i < fnum; i++)
 	{
 		d = n[i] * (offset + point - a[iV[i*3]]); // *R
@@ -120,8 +120,8 @@ int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, V
 
 int PointPlanesSideEx(Vector3 *a, Vector3 *n, unsigned short *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth, Vector3 scaling)
 {
-	scalar d = 1; 
-	scalar min = 99999999;
+	float d = 1; 
+	float min = 99999999;
 	for(int i = 0; i < fnum; i++)
 	{
 		d = (n[i]*R)  
@@ -143,12 +143,12 @@ int PointPlanesSideEx(Vector3 *a, Vector3 *n, unsigned short *iV, Vector3 offset
 	if (d <= 0) return min;
 }
 
-scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum)
+float FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum)
 {
-	scalar sign = n * (offset + points[0]*R - a);
+	float sign = n * (offset + points[0]*R - a);
 	for(int i=1; i < pnum; i++)
 	{
-		scalar t = n * (offset + points[i]*R - a);
+		float t = n * (offset + points[i]*R - a);
 		if (t < sign)
 		sign = t;
 	}
@@ -156,7 +156,7 @@ scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, i
 }
 
  bool CullBox(Vector3 _min, Vector3 _max,Vector3 pos, Vector3 scaling, Matrix3 R,
-                        scalar fovy, scalar aspect, scalar znear, scalar zfar,
+                        float fovy, float aspect, float znear, float zfar,
                         Vector3 cpos, Vector3 cat, Vector3 cup)
 {
     Vector3 v[8];
@@ -177,7 +177,7 @@ scalar FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, i
     p[7] = Vector3(_min.x, _max.y, _max.z);
     
     CalcFrustumVertices(fovy, aspect, znear, zfar, cpos, cat, cup, v);
-    scalar sign[6];
+    float sign[6];
     sign[0] = PointsPlaneSide(v[0], CalcNorm(v[0], v[1], v[2]), pos, //Vector3(0,0,0)
                                 R ,p, 8);
     sign[1] = PointsPlaneSide(v[1], CalcNorm(v[1], v[5], v[6]), pos, 
@@ -615,23 +615,23 @@ bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
 	return (mini != -1);
 }
 
-scalar HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Кстати, это площадь тругольника на этих трёх точках. // Или параллелограма.
+float HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Кстати, это площадь тругольника на этих трёх точках. // Или параллелограма.
 {
 	return (u0.x - p.x) * (u1.y - p.y) - (u0.y - p.y) * (u1.x - p.x);
 }
 
 bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
 {
-	scalar a1 = u1.y - u0.y;
-	scalar b1 = u0.x - u1.x; 
-	scalar a2 = v1.y - v0.y;
-	scalar b2 = v0.x - v1.x;
+	float a1 = u1.y - u0.y;
+	float b1 = u0.x - u1.x; 
+	float a2 = v1.y - v0.y;
+	float b2 = v0.x - v1.x;
 	Matrix2 deltaMatrix(a1, b1, a2, b2);
-	scalar deltaDet = deltaMatrix.Determinant();
+	float deltaDet = deltaMatrix.Determinant();
 	if (Equal(deltaDet, 0.0f))
 		return false;	// Прямые параллельны, т.е. a1b2 - a2b1 == 0; Кстати, условие перпендикулярности: a1a2 == -b1b2;
-	scalar c1 = u1.y * u0.x - u1.x * u0.y;	//a1 * u0.x + b1 * u0.y;
-	scalar c2 = v1.y * v0.x - v1.x * v0.y;	//a2 * v0.x + b2 * v0.y;
+	float c1 = u1.y * u0.x - u1.x * u0.y;	//a1 * u0.x + b1 * u0.y;
+	float c2 = v1.y * v0.x - v1.x * v0.y;	//a2 * v0.x + b2 * v0.y;
 	Result = Vector2(Matrix2(c1, b1, c2, b2).Determinant() / deltaDet, Matrix2(a1, c1, a2, c2).Determinant() / deltaDet);
 	return true;
 }
@@ -647,7 +647,7 @@ bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, 
 	return true;
 }
 
-bool IntersectCircles(const Vector2 &p0, const scalar r0, const Vector2 &p1, const scalar r1, Vector2 &Normal, scalar &Depth)
+bool IntersectCircles(const Vector2 &p0, const float r0, const Vector2 &p1, const float r1, Vector2 &Normal, float &Depth)
 {
 	Vector2 p0p1 = p1 - p0;
 	if ((Sqr(p0p1.x) + Sqr(p0p1.y)) >= Sqr(r0 + r1))
@@ -659,21 +659,21 @@ bool IntersectCircles(const Vector2 &p0, const scalar r0, const Vector2 &p1, con
 
 bool PointInsidePolygon();
 
-scalar DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
+float DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
 {
 	return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
 }
 
-scalar DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
+float DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
 {
 	Vector2 v = u1 - u0;
 	Vector2 w = p - u0;
 
-	scalar c1 = w * v;
+	float c1 = w * v;
 	if (c1 <= 0)
 		return (p - u0).Length() * Sign(HalfPlaneSign(u0, u1, p)); // Мы же хотим получить расстояние со знаком даже если это расстояние до концов отрезка.
 
-	scalar c2 = v * v;
+	float c2 = v * v;
 	if (c2 <= c1)
 		return (p - u1).Length() * Sign(HalfPlaneSign(u0, u1, p));
 
