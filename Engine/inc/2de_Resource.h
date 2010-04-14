@@ -50,7 +50,7 @@ T* CFactory::Get(const string &AName) const
 	T* result = dynamic_cast<T *>(List.GetObject(&AName));
 	if (!result)
 	{
-		Log.Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
+		Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
 	}
 
 	return result;
@@ -97,14 +97,14 @@ bool CResourceSectionLoader<T>::Load()
 {
 	if (ResourceList == NULL)
 	{
-		Log.Log("ERROR", "Trying to load section '%s' while Resource list has not been loaded", Name.c_str());
+		Log("ERROR", "Trying to load section '%s' while Resource list has not been loaded", Name.c_str());
 		return false;
 	}
 
 	XMLNode x = ResourceList->First->Get(Name.c_str());
 	if (x == NULL)
 	{
-		Log.Log("WARNING", "Section '%s' has not been found", Name.c_str());
+		Log("WARNING", "Section '%s' has not been found", Name.c_str());
 		return false;
 	}
 
@@ -120,7 +120,7 @@ bool CResourceSectionLoader<T>::Load()
 		Resource = Factory->New<T>(key);
 		if (Resource == NULL)
 		{
-			Log.Log("WARNING", "Error loading resource: '%s'", key.c_str());
+			Log("WARNING", "Error loading resource: '%s'", key.c_str());
 			continue;
 		}
 		Resource->filename = val;

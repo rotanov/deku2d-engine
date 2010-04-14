@@ -705,6 +705,8 @@ void CParticleSystem::Init()
 	ColorStart = RGBAf(1.0,0.0,0.0,0.5);
 	ColorOver = RGBAf(0.0,0.0,1.0,0.5);
 	ColorVariability = RGBAf(0.0f,0.0f,0.0f,0.0f);
+	GeometryPointsCount = 0;
+	GeometryVertices  = NULL;
 }
 
 void CParticleSystem::Update(float dt)
@@ -744,7 +746,12 @@ void CParticleSystem::Update(float dt)
 	{
 		Age += dt;
 		if (Age >= Life)
+			Emission = 0;
+		if (Age >= Life && ParticlesActive == 0)
+		{
+			Dead = true;
 			return;
+		}
 	}
 
 	int t = ParticlesActive;
@@ -820,7 +827,7 @@ void CParticleSystem::Render()
 		glEnable(GL_TEXTURE_2D);
 
 
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
 
 		Texture->Bind();
@@ -898,7 +905,7 @@ CParticle* CParticleSystem::CreateParticle()
 				else
 				{
 					Particles[i].Position = Position;
-					Particles[i].Velocity = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
+					Particles[i].Velocity = Vector2( (rand()%1000 - rand()%1000) / 10.0f, (rand()%1000 - rand()%1000) / 10.0f); 
 				}
 
 				Particles[i].Size = Random_Int(SizeStart, SizeStart + SizeVariability);

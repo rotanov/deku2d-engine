@@ -11,7 +11,7 @@ bool CTileset::LoadFromFile()
 	CFile file;
 	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
-		Log.Log("ERROR", "Can't open TileSet file %s", filename.c_str());
+		Log("ERROR", "Can't open TileSet file %s", filename.c_str());
 		return false;
 	}
 
@@ -67,7 +67,7 @@ bool CTileset::SaveToFile()
 	CFile file;
 	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
 	{
-		Log.Log("ERROR", "Can't open TileSet file %s", filename.c_str());
+		Log("ERROR", "Can't open TileSet file %s", filename.c_str());
 		return false;
 	}
 
@@ -159,7 +159,7 @@ bool CLevelMap::LoadFromFile()
 	CFactory *Factory = CFactory::Instance();
 	if (!File.Open(filename, CFile::OPEN_MODE_READ))
 	{
-		Log.Log("ERROR", "Can't load level %s", filename.c_str());
+		Log("ERROR", "Can't load level %s", filename.c_str());
 		return false;
 	}
 
@@ -171,7 +171,7 @@ bool CLevelMap::LoadFromFile()
 	TileSet = Factory->Get<CTileset>(TileSetName);
 	if (TileSet == NULL)
 	{
-		Log.Log("Error", "Tileset %s for map %s not found in resources", GetName(), TileSetName);
+		Log("Error", "Tileset %s for map %s not found in resources", GetName(), TileSetName);
 		return false;
 	}
 	//TileSet->Texture->Load();
@@ -196,7 +196,7 @@ bool CLevelMap::SaveToFile()
 	CFile file;
 	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
 	{
-		Log.Log("ERROR", "Can't open file %s to save the map", filename.c_str());
+		Log("ERROR", "Can't open file %s to save the map", filename.c_str());
 		return false;
 	}
 	

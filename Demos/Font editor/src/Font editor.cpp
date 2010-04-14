@@ -426,7 +426,7 @@ bool LoadFont(CObject *Caller)
 	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->Text.c_str());
 	if (FontEditor->Font == NULL)
 	{
-		Log.Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->Text);
+		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->Text);
 		return false;
 	}
 	FontEditor->FontTexture = FontEditor->Font->GetTexture();
@@ -480,7 +480,7 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). *
 	CTexture *TempFontTexture = CTextureManager::Instance()->GetTextureByName(FontEditor->edFontTextureName->Text);
 	if (TempFontTexture == NULL)
 	{
-		Log.Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->Text);
+		Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->Text);
 		// Создать объект текст с таймером здесь, выдавать ошибки с его помощью прямо на экран.
 		return false;
 	}

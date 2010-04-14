@@ -44,10 +44,7 @@ public:
 		CFontManager::Instance()->Print(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f, 0.0f, "team");
 		return;
 	}
-	void Update(float dt)
-	{
-		return;
-	}
+	void Update(float dt){}
 };
 
 

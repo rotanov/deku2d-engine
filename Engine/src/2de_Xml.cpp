@@ -32,13 +32,13 @@ CXMLNode::CXMLNode()
 CXMLNode *CXMLNode::Get(const char* Str)
 {
 	if (Str==NULL){
-		Log.Log("ERROR", "Cannot get XML node for because string pointer has NULL value", Str);
+		Log("ERROR", "Cannot get XML node for because string pointer has NULL value", Str);
 		return NULL;
 	}
 	CXMLNode *result = NULL;
 	CXMLNode *ptr = this->Child;
 	if (ptr==NULL){
-		Log.Log("ERROR", "Cannot get XML node for \"%s\"", Str);
+		Log("ERROR", "Cannot get XML node for \"%s\"", Str);
 		return NULL;
 	}
 	while (ptr != NULL && result == NULL)
@@ -91,7 +91,7 @@ CXMLNode *CXMLNode::Add(string name, string value)
 			return Last;
 		}
 		else
-			Log.Log("XMLERROR", XML_ERROR6);
+			Log("XMLERROR", XML_ERROR6);
 	}
 	return NULL;
 }
@@ -332,7 +332,7 @@ unsigned int XMLParse(string Str, string &Buff1, string &Buff2){
 		int ind = GetString(Str, pos1, Buff1, '>', 1, 0, 0);
 		if (ind == -1)
 		{
-			Log.Log("XMLERROR", XML_ERROR2);
+			Log("XMLERROR", XML_ERROR2);
 			return XML_ERROR_STRING;
 		}
 		pos1 = ind;
@@ -353,20 +353,20 @@ unsigned int XMLParse(string Str, string &Buff1, string &Buff2){
 			int ind = GetString(Str, pos, Buff1, '=', true, false, /* hello it's me again. there was 0 befor me*/ 1);
 			if (ind == -1)
 			{
-				Log.Log("XMLERROR", XML_ERROR2);
+				Log("XMLERROR", XML_ERROR2);
 				return XML_ERROR_STRING;
 			}
 			ind++;
 			SkipWhite(Str, ind);
 			if (Str.c_str()[ind] != '"')
 			{
-				Log.Log("XMLERROR", XML_ERROR2);
+				Log("XMLERROR", XML_ERROR2);
 				return XML_ERROR_STRING;
 			}
 			ind = GetString(Str, ind+1, Buff2, '"', false, false, 1);
 			if (ind == -1)
 			{
-				Log.Log("XMLERROR", XML_ERROR2);
+				Log("XMLERROR", XML_ERROR2);
 				return XML_ERROR_STRING;
 			}
 			return XML_NODE_ATTRIBUTE;
@@ -403,14 +403,14 @@ bool CXMLTable::LoadFromFile(const char *fname)
 	CFile f;
 	if (!f.Open(fname, CFile::OPEN_MODE_READ))
 	{
-		Log.Log("XMLERROR", "Cannot load xml file \"%s\".", fname);
+		Log("XMLERROR", "Cannot load xml file \"%s\".", fname);
 		return false;
 	}
 	string Buffer;//max allowed string - 4096
 	string Key;//max allowed string - 4096
 	string Value;//max allowed string - 4096
 //	memset(Buffer, 0, 4096);
-	//Log.Log("XML", "Preparing");
+	//Log("XML", "Preparing");
 	// int strstart = 0; // unused variable
 	First->Clear();
 	XMLNode _tmp = new CXMLNode;
@@ -423,7 +423,7 @@ bool CXMLTable::LoadFromFile(const char *fname)
 		Value="";
 		//now reading string
 		byte b = 0;
-		//Log.Log("XML","Reading");
+		//Log("XML","Reading");
 		while (b != '\n' && !f.Eof())
 		{			
 			if (f.Read(&b, 1) && !f.Eof())
@@ -436,15 +436,15 @@ bool CXMLTable::LoadFromFile(const char *fname)
 		if (Buffer.length >= 4096)
 		{
 			//error
-			Log.Log("XMLERROR", XML_ERROR3);
+			Log("XMLERROR", XML_ERROR3);
 			f.Close();
 			return 0;
 		}
 #endif
 		//now parsing
-		//Log.Log("XML","Parsing");
+		//Log("XML","Parsing");
 		int ty = XMLParse(Buffer, Key, Value);
-		//Log.Log("XML","Analysing %s %d", Buffer, Buffer[strlen(Buffer) - 1]);
+		//Log("XML","Analysing %s %d", Buffer, Buffer[strlen(Buffer) - 1]);
 		//checking type
 		switch (ty)
 		{
@@ -465,7 +465,7 @@ bool CXMLTable::LoadFromFile(const char *fname)
 				else
 				{
 					//error
-					Log.Log("XMLERROR", XML_ERROR0);
+					Log("XMLERROR", XML_ERROR0);
 					f.Close();
 					return 0;
 				}
@@ -475,13 +475,13 @@ bool CXMLTable::LoadFromFile(const char *fname)
 			{
 				if (cnt==0)
 				{
-					Log.Log("XMLERROR", XML_ERROR1);
+					Log("XMLERROR", XML_ERROR1);
 					f.Close();
 					return false;
 				}
 				if (ptr->Name!= Key)
 				{
-					Log.Log("XMLERROR", XML_ERROR7);
+					Log("XMLERROR", XML_ERROR7);
 					f.Close();
 					return false;
 				}
@@ -517,7 +517,7 @@ bool CXMLTable::SaveToFile(const char *fname)
 {
 	CFile f;
 	if (!f.Open(fname, CFile::OPEN_MODE_WRITE)){
-		Log.Log("XMLERROR",XML_ERROR8);
+		Log("XMLERROR",XML_ERROR8);
 		return 0;
 	}
 	First->Write(f,0);

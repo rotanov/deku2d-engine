@@ -28,7 +28,7 @@ CFactory::~CFactory()
 	List.Reset();
 	while (List.Enum(obj))
 	{
-		Log.Log("INFO", "Deleting object %s", obj->GetName());
+		Log("INFO", "Deleting object %s", obj->GetName());
 		delete obj;
 	}
 }
@@ -76,7 +76,7 @@ bool CResourceManager::LoadResources()
 	{
 		if ((*it)->Load())
 		{
-			Log.Log("INFO", "Section '%s' loaded", (*it)->GetName().c_str()); 
+			Log("INFO", "Section '%s' loaded", (*it)->GetName().c_str()); 
 		}
 	}
 	return true;
@@ -127,7 +127,7 @@ void CDataLister::ExploreDirectory(string Path)
 	DIR *dirp = opendir(Path.c_str());
 	if (!dirp)
 	{
-		Log.Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());
+		Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());
 		return;
 	}
 

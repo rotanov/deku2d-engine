@@ -257,12 +257,62 @@ typedef bool (*ObjCompCall)(CObject*, CObject*);
 */
 typedef bool (*ObjCall)(CObject*);
 
+/**
+ * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
+ *
+ * Для использования нужно наследовать класс от него следующим образом:
+ * 	class CSomeClass : public CTSingleton<CSomeClass>
+ * 	{
+ * 	public:
+ * 		<...>
+ * 	private:
+ * 		<...>
+ *	protected:
+ *		friend class CTSingleton<CSomeClass>;
+ *		CSomeClass() { }
+ * 	};
+ *
+ * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
+ */
+
+template <typename T>
+class CTSingleton : public virtual CObject
+{
+public:
+	static T* Instance();
+
+protected:
+	CTSingleton() { }
+	virtual ~CTSingleton()
+	{
+		_instance = 0;
+	}
+
+private:
+	static T * _instance;
+};
+
+template <typename T>
+T* CTSingleton<T>::Instance()
+{
+	if (!_instance)
+	{
+		_instance = new T;
+		SingletoneKiller.AddObject(_instance);
+	}
+	return _instance;
+}
+
+template <typename T>
+T* CTSingleton<T>::_instance = 0;
+
+
 
 /**
  * CLog - класс для работы с логом.
  */
 
-class CLog
+class CLog : public CTSingleton<CLog>
 {
 public:
 	enum ELogMode
@@ -278,11 +328,9 @@ public:
 		LOG_FILE_WRITE_MODE_APPEND,
 	};
 
-	CLog();
-
 	~CLog();
 
-	void Log(const char *Event, const char *Format, ...);
+	void WriteToLog(const char *Event, const char *Format, ...);
 
 	__INLINE void Toggle(bool AEnabled) { Enabled = AEnabled; }
 	__INLINE bool isEnabled() const { return Enabled; }
@@ -310,11 +358,12 @@ private:
 	ostream *Stream;
 	string LogFilePath;
 	string LogName;
+protected:
+	friend class CTSingleton<CLog>;
+	CLog();
 };
 
-// CLog global instance
-extern CLog Log;
-
+#define Log CLog::Instance()->WriteToLog
 
 /**
 *	CObjectList - список объектов. Двусвязный.
@@ -365,8 +414,6 @@ protected:
 	CListNode*			RelativePrev(CListNode* AListNode);
 };
 
-extern CList CObjectManager;
-
 /**
 *	Стэк объектов.
 */
@@ -405,7 +452,7 @@ public:
 		CObject *data;
 		while(Enum(data))
 		{
-			Log.Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
+			Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
 			delete data;
 		}
 		#if defined(_DEBUG) && defined(_MSC_VER)
@@ -417,51 +464,6 @@ extern CGarbageCollector SingletoneKiller;
 typedef CGarbageCollector CSingletoneKiller;
 
 
-/**
- * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
- *
- * Для использования нужно наследовать класс от него следующим образом:
- * 	class CSomeClass : public CTSingleton<CSomeClass>
- * 	{
- * 	public:
- * 		<...>
- * 	private:
- * 		<...>
- *	protected:
- *		friend class CTSingleton<CSomeClass>;
- *		CSomeClass() { }
- * 	};
- *
- * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
- */
-
-template <typename T>
-class CTSingleton : public virtual CObject
-{
-public:
-	static T* Instance();
-
-protected:
-	CTSingleton() { }
-	virtual ~CTSingleton() { }
-
-private:
-	static T * _instance;
-};
-
-template <typename T>
-T* CTSingleton<T>::Instance()
-{
-	if (!_instance)
-	{
-		_instance = new T;
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
-
-template <typename T>
-T* CTSingleton<T>::_instance = 0;
 
 
 /**
@@ -624,10 +626,6 @@ __INLINE int stoi(const string &src)
 // 	ss << t;
 // 	return ss.str();
 // }
-
-
-extern CList CObjectManager;
-
 
 #endif // _2DE_CORE_H
 

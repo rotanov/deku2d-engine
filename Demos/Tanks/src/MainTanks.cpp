@@ -33,7 +33,7 @@ class StdoutLogConsumer : public TNL::LogConsumer
 public:
 	void logString(const char *string)
 	{
-		Log.Log("NETWORK", "%s", string);
+		Log("NETWORK", "%s", string);
 	}
 } gStdoutLogConsumer;
 */
@@ -81,7 +81,6 @@ public:
 				Tanks = new CTankManager;	
 			}
 		}
-		return;
 	}
 };
 

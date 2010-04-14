@@ -46,7 +46,7 @@ void CEngine::CalcFps()
 	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
 	
 	unsigned long ct = SDL_GetTicks();
-	DTime = ct-_llt;
+	DTime = ct - _llt;
 	dt = (float)DTime * 0.001f;
 	_llt = ct;
 	if (ct-lt >= 1000)
@@ -85,7 +85,7 @@ void CEngine::SetState(CEngine::EState state, void* value)
 				// И потом переинициализировать всё что нужно и пользовательскую инициализацию
 //					ClearLists();  
 				if (!(Initialized = procUserInit()))
-					Log.Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
+					Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
 			}
 			break;
 		case STATE_UPDATE_FUNC:
@@ -147,17 +147,17 @@ bool CEngine::Init()
 	}
 #endif //_WIN32
 
-	Log.SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
-	Log.SetLogName("System");
+	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
+	CLog::Instance()->SetLogName("System");
 
-	Log.Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
+	Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
 
 	SDL_putenv("SDL_VIDEO_CENTERED=1");
 
 	CXMLTable Config;
 	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
-		Log.Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
+		Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
 		return false;
 	}
 	
@@ -188,7 +188,7 @@ bool CEngine::Init()
 	window->bpp = 32;
 	if (!window->gCreateWindow())
 	{
-		Log.Log("ERROR", "Window creation failed");
+		Log("ERROR", "Window creation failed");
 		return false;
 	}
 
@@ -219,12 +219,12 @@ bool CEngine::Init()
 	if (procUserInit != NULL)
 		if (!procUserInit())
 		{
-			Log.Log("ERROR", "User init failed.");
+			Log("ERROR", "User init failed.");
 			return false;
 		}
 
 	Initialized = true;
-	Log.Log("INFO","Initialization success");
+	Log("INFO","Initialization success");
 	return true;
 }
 
@@ -232,7 +232,7 @@ bool CEngine::Suicide()
 {
 	ilShutDown();
 //	ClearLists();
-	Log.Log("INFO", "Suicide success");
+	Log("INFO", "Suicide success");
 	return true;
 }
 
@@ -347,7 +347,7 @@ bool CEngine::Run()
 {
 	if(!(Initialized = Init()))
 	{
-		Log.Log("ERROR", "Initialization failed");
+		Log("ERROR", "Initialization failed");
 		SDLGLExit(-1);
 		return false;
 	}
@@ -435,13 +435,10 @@ bool CEngine::Run()
 		}
 		catch(...)
 		{
-			Log.Log("ERROR", "A critical error in main loop occured. Exiting");
+			Log("ERROR", "A critical error in main loop occured. Exiting");
 			throw;
 		}
 	}	
-#ifdef _DEBUG
-	CObjectManager.DumpToLog();
-#endif
 	Suicide();
 	SDL_Quit();
 
@@ -496,7 +493,7 @@ int CEngine::CfgGetInt( char* ParamName )
 	CXMLTable Config;
 	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
-		Log.Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
+		Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
 		return false;
 	}
 	return atoi((Config.First->Get(ParamName))->GetValue());

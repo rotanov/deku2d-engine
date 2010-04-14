@@ -42,7 +42,7 @@ bool CSound::LoadFromFile()
 	Data = Mix_LoadWAV(filename.c_str());
 	if (Data == NULL)
 	{
-		Log.Log("ERROR", "Can't load sound '%s': %s", filename.c_str(), Mix_GetError());
+		Log("ERROR", "Can't load sound '%s': %s", filename.c_str(), Mix_GetError());
 	}
 
 	return true;
@@ -86,7 +86,7 @@ bool CMusic::LoadFromFile()
 	Data = Mix_LoadMUS(filename.c_str());
 	if (Data == NULL)
 	{
-		Log.Log("ERROR", "Can't load music '%s': %s", filename.c_str(), Mix_GetError());
+		Log("ERROR", "Can't load music '%s': %s", filename.c_str(), Mix_GetError());
 	}
 
 	return true;
@@ -142,7 +142,7 @@ bool CSoundMixer::PlaySound(CSound *Sound, int Time /*= -1*/)
 
 	if (Mix_PlayChannelTimed(-1, SoundChunk, 0, Time) == -1)
 	{
-		Log.Log("ERROR", "Can't play sound '%s': %s", Sound->GetName(), Mix_GetError());
+		Log("ERROR", "Can't play sound '%s': %s", Sound->GetName(), Mix_GetError());
 		return false;
 	}
 
@@ -180,7 +180,7 @@ bool CSoundMixer::PlayMusic(CMusic *Music, int FadeInTime /*= 0*/)
 
 	if (result == -1)
 	{
-		Log.Log("ERROR", "Can't play music '%s': %s", Music->GetName(), Mix_GetError());
+		Log("ERROR", "Can't play music '%s': %s", Music->GetName(), Mix_GetError());
 		return false;
 	}
 
@@ -201,7 +201,7 @@ void CSoundMixer::StopMusic(int FadeOutTime /*= 0*/)
 void CSoundMixer::SetMusicVolume(int AVolume)
 {
 	if (AVolume < 0 || AVolume > MIX_MAX_VOLUME) {
-		Log.Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
+		Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
 	}
 
 	Mix_VolumeMusic(AVolume);
@@ -215,7 +215,7 @@ int CSoundMixer::GetMusicVolume() const
 void CSoundMixer::SetSoundVolume(CSound *ASound, int AVolume)
 {
 	if (AVolume < 0 || AVolume > MIX_MAX_VOLUME) {
-		Log.Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
+		Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
 	}
 
 	Mix_VolumeChunk(ASound->GetData(), AVolume);
@@ -237,19 +237,19 @@ CSoundMixer::CSoundMixer()
 		// 	1. we should notice user in some way (may be log is sufficent)
 		// 	2. all methods of this class should check Initialized value before attempting to use sound device
 		//
-		Log.Log("ERROR", "Can't initialize audio subsystem: %s", SDL_GetError());
+		Log("ERROR", "Can't initialize audio subsystem: %s", SDL_GetError());
 		return;
 	}
 
 	// TODO: replace by values from config
 	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) < 0)
 	{
-		Log.Log("ERROR", "Can't open audio device: %s", Mix_GetError());
+		Log("ERROR", "Can't open audio device: %s", Mix_GetError());
 		return;
 	}
 	
 	Mix_AllocateChannels(SOUND_MIXING_CHANNELS_COUNT);
-	Log.Log("INFO", "Audio mixing channels allocated: %d", Mix_AllocateChannels(-1));
+	Log("INFO", "Audio mixing channels allocated: %d", Mix_AllocateChannels(-1));
 
 	Initialized = true;
 }

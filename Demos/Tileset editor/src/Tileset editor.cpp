@@ -301,7 +301,7 @@ bool LoadTileset(CObject *Caller)
 	TilesetEditor->Tileset = CTileSetManager::Instance()->GetTileset(TilesetEditor->edTilesetName->Text.c_str());
 	if (TilesetEditor->Tileset == NULL)
 	{
-		Log.Log("Error", "Tileset %s not found within data/fonts", TilesetEditor->edTilesetName->Text);
+		Log("Error", "Tileset %s not found within data/fonts", TilesetEditor->edTilesetName->Text);
 		return false;
 	}
 	TilesetEditor->TilesetTexture = TilesetEditor->Tileset->GetTexture();
@@ -337,7 +337,7 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). */
 	CTexture *TempFontTexture = CTextureManager::Instance()->GetTextureByName(TilesetEditor->edTilesetTextureName->Text);
 	if (TempFontTexture == NULL)
 	{
-		Log.Log("ERROR", "Font texture %s not found", TilesetEditor->edTilesetTextureName->Text);
+		Log("ERROR", "Font texture %s not found", TilesetEditor->edTilesetTextureName->Text);
 		// Создать объект текст с таймером здесь, выдавать ошибки с его помощью прямо на экран.
 		return false;
 	}

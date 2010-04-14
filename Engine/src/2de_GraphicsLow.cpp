@@ -13,7 +13,7 @@ CRenderObject::CRenderObject() : Position(V2_ZERO), Angle(0.0f), Scaling(1.0f), 
 
 CRenderObject::~CRenderObject()
 {
-	//Log.Log("INFO", "DESTRUCT RENDER: %s, id: %d, count: %d", GetName(), GetID(), CRenderManager::Instance()->GetObjectsCount()); // debug
+	//Log("INFO", "DESTRUCT RENDER: %s, id: %d, count: %d", GetName(), GetID(), CRenderManager::Instance()->GetObjectsCount()); // debug
 	CRenderManager::Instance()->DelObject(GetID());
 }
 
@@ -64,12 +64,12 @@ bool CGLImageData::LoadTexture(const string &Filename)
 {
 	if (!LoadFromFile(Filename))
 	{
-		Log.Log("ERROR", "Can't load image->");
+		Log("ERROR", "Can't load image->");
 		return false;
 	}
 	if (!MakeTexture())
 	{
-		Log.Log("ERROR", "Can't load texture in video memory.");
+		Log("ERROR", "Can't load texture in video memory.");
 		return false;
 	}
 	if (doCleanData)
@@ -83,7 +83,7 @@ bool CGLImageData::LoadTexture(const string &Filename)
 GLuint CGLImageData::GetTexID()
 {
 	if (TexID == 0)
-		Log.Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
+		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
 	return TexID;
 }
 
@@ -108,8 +108,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 {
 	if( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 )
 	{
-		Log.Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
-		Log.Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
+		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -128,8 +128,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 
 	if (info == NULL)
 	{
-		Log.Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
-		Log.Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
+		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);
 	}
 
@@ -155,8 +155,8 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	SDL_Surface * screen = SDL_SetVideoMode(width, height, bpp, flags);
 	if (screen == NULL)
 	{
-		Log.Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
-		Log.Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
+		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDLGLExit(1);		
 	}
 
@@ -232,7 +232,7 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 
 
-	setVSync(0);
+	setVSync(1);
 }
 CGLWindow *CGLWindow::_instance = NULL;
 CGLWindow* CGLWindow::Instance()
@@ -275,7 +275,7 @@ bool CFont::LoadFromFile()
 	CFile			file;
 	if (!file.Open(filename, CFile::OPEN_MODE_READ))
 	{
-		Log.Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: filename wrte too.
+		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: filename wrte too.
 		return false;
 	}
 	char *FontImageName = NULL;
@@ -767,12 +767,12 @@ void gToggleScissor( bool State )
 	if (State)
 	{
 		glEnable(GL_SCISSOR_TEST);
-		//		Log.Log("GLINFO", "Enabled Scissor test");
+		//		Log("GLINFO", "Enabled Scissor test");
 	}
 	else
 	{
 		glDisable(GL_SCISSOR_TEST);
-		//		Log.Log("GLINFO", "Disabled Scissor test");
+		//		Log("GLINFO", "Disabled Scissor test");
 	}
 }
 
@@ -891,7 +891,7 @@ GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
-		Log.Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
+		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
 		if (!loaded)
 		{
 			LoadFromFile();
@@ -933,7 +933,7 @@ bool CTexture::LoadFromFile()
 {
 	if (filename == "")
 	{
-		Log.Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
+		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
 		return false;
 	}
 	if (!loaded)
@@ -990,7 +990,7 @@ void setVSync(int interval)
 	}
 	else
 	{
-		Log.Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer.");
+		Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer.");
 	}
 #endif                        // </platforms, that support swap interval control>
 }

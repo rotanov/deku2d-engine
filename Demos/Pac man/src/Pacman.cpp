@@ -17,7 +17,19 @@ void CPacmanBonus::Update(float dt)
 	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
 	if ( (AABB.Intersect(AABBself)))
+	{
+		CParticleSystem *Ps = new CParticleSystem;
+		Ps->Init();
+		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 0.0f);
+		Ps->ColorOver = RGBAf(0.3f, 0.3f, 0.9f, 1.0f);
+		Ps->SizeStart = 64;
+		Ps->SizeOver = 64;
+		Ps->Emission = 10;
+		Ps->Life = 0.5;
+		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
+		Ps->Position = Position - Vector2(32, 32);
 		Dead = true;
+	}
 	return;
 }
 
@@ -95,8 +107,8 @@ CPakmanGame::CPakmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 				Factor = rand() % 100;
 				Map->GetMapCell(i, j)->index = Factor < 25 ? 1 : 0;
 				if (Factor >= 25 && (i != 1 || j != 1))
-					if (rand() % 10 < 2);
-						//(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32)))->Player = Player;
+					if (rand() % 10 < 2)
+						(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32)))->Player = Player;
 			}
 
 			Map->GenCells();

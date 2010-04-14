@@ -92,7 +92,7 @@ bool PlayFile(CObject *Caller)
 {
 	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->Text;
 	//string test = dynamic_cast<CEdit*>(CGUIManager::Instance()->GetLast()->GetData())->Text;
-	Log.Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
+	Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
 	CMusic *mus = CFactory::Instance()->New<CMusic>("mus");
 	mus->filename = test;
 	mus->LoadFromFile();

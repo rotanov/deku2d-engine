@@ -13,7 +13,6 @@
 
 bool Enabled = true;
 static int CObjectCount = 0;
-CList CObjectManager; // Ultimate!!!!111!!11
 
 #if defined(_DEBUG) && defined(_MSC_VER)
 
@@ -71,13 +70,10 @@ CObject::CObject()
 	name += (string)itos(CObjectCount) + " CObject ";
 	//delete [] tmp;
 	id = CObjectCount;
-	CObjectManager.AddObject(this);
 }
 
 CObject::~CObject()
 {
-	CObjectManager.DelObject(this);
-	//Log.Log("INFO", "DESTRUCT %s, id: %d", name.c_str(), id); //debug
 }
 
 bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
@@ -95,7 +91,7 @@ void CObject::DecListRefCount()
 	ListRefCount--;
 	if (ListRefCount < 0)
 	{
-		Log.Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name.c_str(), id, ListRefCount);
+		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name.c_str(), id, ListRefCount);
 #ifdef CRITICAL_ERRORS_MESSAGE_BOXES
 		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
 #endif // CRITICAL_ERRORS_MESSAGE_BOXES
@@ -151,12 +147,12 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 {
 	if (AFileName.empty())
 	{
-		Log.Log("ERROR", "Can't open file. Invalid filename");
+		Log("ERROR", "Can't open file. Invalid filename");
 		return false;
 	}
 	if (File != NULL)
 	{
-		Log.Log("ERROR", "Can't open file %s: another file is already opened.", AFileName.c_str());
+		Log("ERROR", "Can't open file %s: another file is already opened.", AFileName.c_str());
 		return false;
 	}
 
@@ -168,7 +164,7 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 		File = fopen(Filename.c_str(), "rb");
 		if (File == NULL)
 		{
-			Log.Log("ERROR", "Can't open file %s.", Filename.c_str());
+			Log("ERROR", "Can't open file %s.", Filename.c_str());
 			return false;
 		}
 		break;
@@ -176,12 +172,12 @@ bool CFile::Open(const string AFileName, EOpenMode Mode)
 		File = fopen(Filename.c_str(), "wb");
 		if (File == NULL)
 		{
-			Log.Log("ERROR", "Can't open file %s.", Filename.c_str());
+			Log("ERROR", "Can't open file %s.", Filename.c_str());
 			return false;
 		}
 		break;
 	default:
-		Log.Log("ERROR", "Can't open file %s: invalid mode.", Filename.c_str());
+		Log("ERROR", "Can't open file %s: invalid mode.", Filename.c_str());
 		return false;
 	}
 
@@ -210,7 +206,7 @@ bool CFile::ReadByte(unsigned char *Buffer)
 	if (fread(Buffer, 1, 1, File) != 1)
 	{
 		if (!Eof())
-			Log.Log("ERROR", "FILE IO Error. Can't read byte.");
+			Log("ERROR", "FILE IO Error. Can't read byte.");
 		return false;
 	}
 	return true;
@@ -238,7 +234,7 @@ bool CFile::Read(void *Buffer, unsigned long BytesCount)
 	if (fread(Buffer, 1, BytesCount, File) != BytesCount)
 	{
 		if (!Eof())
-			Log.Log("ERROR", "FILE IO Error. Can't read data.");
+			Log("ERROR", "FILE IO Error. Can't read data.");
 		return false;
 	}
 	return true;
@@ -256,7 +252,7 @@ bool CFile::Write(const void *Buffer, unsigned long BytesCount)
 	if (fwrite(Buffer, 1, BytesCount, File) != BytesCount)
 	{
 		if (!Eof())
-			Log.Log("ERROR", "FILE IO Error. Can't write data.");
+			Log("ERROR", "FILE IO Error. Can't write data.");
 		return false;
 	}
 	return true;
@@ -420,7 +416,7 @@ size_t CFile::Size() const
 
 	if(stat(Filename.c_str(), &FileStat))
 	{
-		Log.Log("ERROR", "Can't get size of %s.", Filename.c_str());
+		Log("ERROR", "Can't get size of %s.", Filename.c_str());
 		return 0;
 	}
 
@@ -481,7 +477,7 @@ bool CList::DelObject(CObject *AObject)
 	CListNode *ListNode = GetListNode(AObject);
 	if (!ListNode)
 	{
-		Log.Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->GetName(), GetName(), GetID());
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->GetName(), GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -493,7 +489,7 @@ bool CList::DelObject(const string *AObjectName)
 	CListNode *ListNode = GetListNode(AObjectName);
 	if (!ListNode)
 	{
-		Log.Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -505,7 +501,7 @@ bool CList::DelObject(const char *AObjectName)
 	CListNode *ListNode = GetListNode(&((string)AObjectName));
 	if (!ListNode)
 	{
-		Log.Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
+		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -517,7 +513,7 @@ bool CList::DelObject(int AId)
 	CListNode *ListNode = GetListNode(AId);
 	if (!ListNode)
 	{
-		Log.Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, GetName(), GetID());
+		Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, GetName(), GetID());
 		return false;
 	}
 	DelNode(ListNode);
@@ -583,7 +579,7 @@ CListNode* CList::GetListNode(const CObject* AObject) const
 {
 	if (!AObject)
 	{
-		Log.Log("ERROR", "CList::GetListNode: Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
+		Log("ERROR", "CList::GetListNode: Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -593,7 +589,7 @@ CListNode* CList::GetListNode(const CObject* AObject) const
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log.Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObject->GetName(), this->GetName(), this->GetID());
+	Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObject->GetName(), this->GetName(), this->GetID());
 	return NULL;
 }
 
@@ -601,7 +597,7 @@ CListNode* CList::GetListNode(const string* AObjectName) const
 {
 	if (!AObjectName)
 	{
-		Log.Log("ERROR", "CList::GetListNode: Trying to find object with NULL name pointer in %s id: %u", GetName(), GetID());
+		Log("ERROR", "CList::GetListNode: Trying to find object with NULL name pointer in %s id: %u", GetName(), GetID());
 		return NULL;
 	}
 	CListNode* TempNode = first;
@@ -612,7 +608,7 @@ CListNode* CList::GetListNode(const string* AObjectName) const
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log.Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObjectName->c_str(), GetName(), GetID());
+	Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObjectName->c_str(), GetName(), GetID());
 	return NULL;
 }
 
@@ -625,7 +621,7 @@ CListNode* CList::GetListNode(unsigned int AId) const
 			return TempNode;
 		TempNode = TempNode->next;
 	}
-	Log.Log("ERROR", "CList::GetListNode: Object with id: %d not found in %s id: %u", AId, GetName(), GetID());
+	Log("ERROR", "CList::GetListNode: Object with id: %d not found in %s id: %u", AId, GetName(), GetID());
 	return NULL;
 }
 
@@ -697,7 +693,7 @@ void CList::DumpToLog()
 	CObject *Temp = NULL;
 	Reset();
 	while (Enum(Temp))
-		Log.Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->GetName(), Temp->GetID());
+		Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->GetName(), Temp->GetID());
 }
 
 void CList::DelNode(CListNode* AListNode)
@@ -786,7 +782,7 @@ void CPSingleTone::FreeInst()
 	if (!_refcount)
 	{
 		delete this;
-		Log.Log("INFO", "Singletone deleted from memory.");
+		Log("INFO", "Singletone deleted from memory.");
 		_instance = NULL;
 	}
 }
@@ -838,7 +834,7 @@ CLog::~CLog()
 	}
 }
 
-void CLog::Log(const char *Event, const char *Format, ...)
+void CLog::WriteToLog(const char *Event, const char *Format, ...)
 {
 	if (!Enabled)
 	{
@@ -932,9 +928,6 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 	}
 	LogMode = ALogMode;
 }
-
-// CLog global instance
-CLog Log;
 
 
 string GetWorkingDir()
@@ -1033,7 +1026,7 @@ void MemCheck()
 {
 	if (!MemState1 || !MemState2)
 	{
-		Log.Log("CAUTION", "Invalid MemCheck call: MemChp1() or MemChp2() has not been called");
+		Log("CAUTION", "Invalid MemCheck call: MemChp1() or MemChp2() has not been called");
 		return;
 	}
 	if (!MemState3)
