@@ -104,8 +104,8 @@ public:
 	CAABB GetAABB();
 	Vector2 GetCenter();
 	void SetPlayerControls(int PlayerIndex);
-	bool Update(float dt);
-	bool Render();
+	void Update(float dt);
+	void Render();
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 };
 
@@ -165,8 +165,8 @@ public:
 	CAABB GetCellAABB(Vector2 V);
 	float IsFPTWA(int ADir, Vector2 Position);
 	Vector2 GetNewTankLocation();
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 };
 
 class CTankManager : public CList, public CUpdateObject, public CRenderObject
@@ -183,8 +183,8 @@ public:
 	}
 
 	CTank* GetPlayer(int PlayerIndex);
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 	void AddPlayer();
 	void AddAI();
 };

@@ -396,6 +396,8 @@ bool CEngine::Run()
 				PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле.. но по дефолту оставим круглешок.. */
 
 				PRender.grCircleL(MousePos, 5);
+				glEnable(GL_DEPTH_TEST);
+				gSetBlendingMode();
 				gEndFrame();	
 
 				/**/

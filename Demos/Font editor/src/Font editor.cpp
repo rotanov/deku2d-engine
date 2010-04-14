@@ -201,7 +201,7 @@ CFontEditor::CFontEditor()
 	glVertexPointer(2, GL_FLOAT, 0, SelectionBoxes);
 }
 
-bool CFontEditor::Render()
+void CFontEditor::Render()
 {
 
 	glLoadIdentity();
@@ -317,10 +317,9 @@ bool CFontEditor::Render()
 	}
 	gToggleScissor(false);
 	glEnable(GL_DEPTH_TEST);
-	return true;
 }
 
-bool CFontEditor::Update(float dt)
+void CFontEditor::Update(float dt)
 {
 	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &MousePosition);
 
@@ -385,7 +384,7 @@ bool CFontEditor::Update(float dt)
 		break;
 	}
 	
-	return true;
+	return;
 }
 
 CFontEditor::~CFontEditor()

@@ -38,15 +38,15 @@ public:
 			break;
 		}
 	}
-	bool Render()
+	void Render()
 	{
 		CPrimitiveRender pr;
 		pr.sClr = RGBAf(1.0f, 1.0f , 1.0f, 1.0f);
 		pr.doUseGlobalCoordSystem = false;
 		pr.grRectS(Vector2(0, 0), Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
-		return true;
+		return;
 	}
-	bool Update(float dt)
+	void Update(float dt)
 	{
 		if (PlayerKind == PLAYER_KIND_ONE)
 		{
@@ -83,7 +83,7 @@ public:
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		return true;	
+		return;	
 	}
 };
 
@@ -100,15 +100,15 @@ public:
 	{
 		Iinitialize();
 	}
-	bool Render()
+	void Render()
 	{
 		CPrimitiveRender pr;
 		pr.sClr = RGBAf(1.0f, 1.0f , 1.0f, 1.0f);
 		pr.doUseGlobalCoordSystem = false;
 		pr.grCircleS((Vector2(0, 0)+ Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE))*0.5f, PONG_BALL_SIZE * 0.5f);
-		return true;
+		return;
 	}
-	bool Update(float dt)
+	void Update(float dt)
 	{
 		Position += Velocity * dt;
 
@@ -124,7 +124,7 @@ public:
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		return true;
+		return;
 	}
 };
 
@@ -148,16 +148,16 @@ public:
 		SAFE_DELETE(PlayerTwo);
 		SAFE_DELETE(Ball);
 	}
-	bool Render()
+	void Render()
 	{
 		glLoadIdentity();
 		glColor3f(1.0f, 1.0f, 1.0f);
 		CFontManager::Instance()->PrintEx(10, 450, 0.0f, "Score: %d", PlayerOneScore);
 		CFontManager::Instance()->PrintEx(1170, 450, 0.0f, "Score: %d", PlayerTwoScore);
-		return true;
+		return;
 	}
 
-	bool Update(float dt)
+	void Update(float dt)
 	{
 		CAABB BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;
 		BallBox = CAABB(Ball->Position, Ball->Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
@@ -198,7 +198,7 @@ public:
 			Ball->Iinitialize();
 			PlayerOneScore++;
 		}
-		return true;
+		return;
 	}
 
 };
@@ -215,13 +215,13 @@ class CPongTitleScreen : public CRenderObject, public CUpdateObject
 	{
 
 	}
-	bool Render()
+	void Render()
 	{
-		return true;
+		return;
 	}
-	bool Update(float dt)
+	void Update(float dt)
 	{
-		return true;
+		return;
 	}
 };
 

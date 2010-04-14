@@ -24,7 +24,7 @@ public:
 		shroom.MakeTexture();
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
-	bool Render()
+	void Render()
 	{
 		int ScrWidth, ScrHeight;
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
@@ -42,11 +42,11 @@ public:
 
 		CFontManager::Instance()->Print(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f, 0.0f, "Deku");
 		CFontManager::Instance()->Print(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f, 0.0f, "team");
-		return true;
+		return;
 	}
-	bool Update(float dt)
+	void Update(float dt)
 	{
-		return true;
+		return;
 	}
 };
 

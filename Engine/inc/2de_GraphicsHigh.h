@@ -166,7 +166,7 @@ public:
 		float _m_fheight, int _m_nNumFrameColumns, int _m_nNumFrameRows,
 		int _m_nTotalFrames, int _m_nFrameWidth, int _m_nFrameHeight,
 		int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop);	
-	bool Render();
+	void Render();
 	void SetAnimation(int index);
 	SAnimationInfo* FindAnimation(int index);
 	bool LoadFromFile(char* filename);
@@ -242,8 +242,8 @@ public:
 	CParticleSystem();
 	~CParticleSystem();
 	void					Init();	
-	bool					Update(float dt);
-	bool					Render();
+	void					Update(float dt);
+	void					Render();
 
 	CParticle*				CreateParticle();
 	void					SetGeometry(Vector2 * points, int numPoints);

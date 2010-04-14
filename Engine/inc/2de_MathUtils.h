@@ -162,17 +162,10 @@ public:
 	}
 	__INLINE Vector2 operator /(float a) const
 	{
-		try
-		{
-			if(a == 0)
-				throw std::runtime_error("Division by zero encountered in Vector2 operator / ");
-			float t = 1.0f / a;
-			return Vector2(x * t, y * t);
-		}
-		catch(const std::runtime_error& e)
-		{
-			cout << e.what() << endl;
-		}
+		if(a == 0)
+			throw std::runtime_error("Division by zero encountered in Vector2 operator / ");
+		float t = 1.0f / a;
+		return Vector2(x * t, y * t);
 		return Vector2(); // What we should return if we tried to divide by zero?
 	}
 	friend __INLINE  Vector2 operator *(float k, const Vector2& V)
@@ -327,15 +320,8 @@ public:
 
 	__INLINE float operator[](int i)
 	{
-		try
-		{
 			if (i < 0 || i > 2)
 				throw std::runtime_error("Access vector3 components: indx out of bounds");		
-		}
-		catch(const std::runtime_error& e)
-		{
-			cout << e.what() << endl;
-		}
 		return *(&x + i);
 	}
 
@@ -366,18 +352,10 @@ public:
 
 	__INLINE Vector3 operator /(float s) const
 	{
-		try
-		{
-			if(s == 0)
-				throw std::runtime_error("Division by zero encountered in Vector3 operator / ");
-			float t = 1.0f / s;
-			return Vector3(x * t, y * t, z * t);
-		}
-		catch(const std::runtime_error& e)
-		{
-			cout << e.what() << endl;
-		}
-		return Vector3();
+		if(s == 0)
+			throw std::runtime_error("Division by zero encountered in Vector3 operator / ");
+		float t = 1.0f / s;
+		return Vector3(x * t, y * t, z * t);
 	}
 
 	friend Vector3 operator *(float s, const Vector3 &v) 
@@ -578,7 +556,7 @@ public:
 		vMax.y = ymax;
 	}
 	// Если используется для кнопок и прочей еботы в экранных координатах, то этот конструктор удобнее для человеческого существа  // ОМГ, кто это писал?
-	CAABB(int x, int y, int width, int height)  
+	CAABB(int x, int y, size_t width, size_t height)  
 	{
 		vMin.x = x;
 		vMin.y = y;

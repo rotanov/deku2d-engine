@@ -76,7 +76,7 @@ void RenderTileList()
 	glTranslatef(Offset.x, Offset.y, 0.0f);
 	glScalef((float)Zoom / (float)TileSet->TileWidth , (float)Zoom / (float)TileSet->TileHeight , 0.0f);
 	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
-	glEnable(GL_TEXTURE);
+	glEnable(GL_TEXTURE_2D);
 	//glDisable(GL_BLEND);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	TileSet->GetTexture()->Bind();
@@ -207,19 +207,19 @@ bool Init()
 	//Level.numCellsHor = 20;
 	//Level.numCellsVer = 10;
 	//Level.TileSet->name = "TileSet02-Snow01";
-	Level.Cells = new CMapCellInfo [20*10];
-	memset(Level.Cells, 0, 20*10*(sizeof(CMapCellInfo)));
-	Level.TileSet = TileSet;
-	for (int i=0;i<20*10;i++)
-	{
-		Level.Cells[i].index = Random_Int(2, 2);
-		Level.Cells[i].z = -0.0f;
-		Level.Cells[i].interaction = 0;
-
-	}
-	Level.GenCells();
-	Level.Visible = true;
-	Level.Depth = -0.6f;
+	//Level.Cells = new CMapCellInfo [20*10];
+	//memset(Level.Cells, 0, 20*10*(sizeof(CMapCellInfo)));
+	//Level.TileSet = TileSet;
+// 	for (int i=0;i<20*10;i++)
+// 	{
+// 		Level.Cells[i].index = Random_Int(2, 2);
+// 		Level.Cells[i].z = -0.0f;
+// 		Level.Cells[i].interaction = 0;
+// 
+// 	}
+// 	Level.GenCells();
+// 	Level.Visible = true;
+// 	Level.Depth = -0.6f;
 
 	return true;
 }

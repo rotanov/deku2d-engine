@@ -77,8 +77,8 @@ public:
 	void SetZoom(float AZoom);
 	void SetSelectedBoxTo(int Index);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 	
 	friend bool LoadFont(CObject *Caller);
 	friend bool SaveFont(CObject *Caller);

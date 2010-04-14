@@ -161,8 +161,8 @@ class CGUIRootObject : public CGUIObjectBase
 {
 public:
 	CGUIRootObject();
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 
 };
 
@@ -191,8 +191,7 @@ class CGUIManager : public CTSingleton<CGUIManager>, public CUpdateObject
 public:
 				~CGUIManager();
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool		Update(float dt);
-	bool		Render();
+	void		Update(float dt);
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocusedNodeTo(CListNode *AFocusedNode);
 	void		SetFocus(CGUIObject *AObject);
@@ -219,11 +218,8 @@ class CLabel : public CGUIObject
 {
 public:
 	CLabel(const string &AText = "");
-	bool Render();
-	bool Update(float dt)
-	{
-		return true;
-	}
+	void Render();
+	void Update(float dt){}
 };
 
 class CButton : public CGUIObject
@@ -231,8 +227,8 @@ class CButton : public CGUIObject
 public:
 	CButton();
 	CButton(CAABB ARect, const char* AText, RGBAf AColor);
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 };
 
@@ -256,8 +252,8 @@ public:
 	};
 
 	CEdit();
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 
 private:
@@ -291,8 +287,8 @@ public:
 				CMenuItem();
 				CMenuItem(CMenuItem* AParent, char* AMenuText);
 				~CMenuItem();
-	bool		Render();
-	bool		Update(float dt);
+	void		Render();
+	void		Update(float dt);
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool		AddObject(CObject *AObject);
 private:

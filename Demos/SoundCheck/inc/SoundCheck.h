@@ -72,7 +72,7 @@ public:
 	{
 		CFontManager::Instance()->SetCurrentFont("hge");
 	}
-	bool Render()
+	void Render()
 	{
 		CFontManager *FontManager = CFontManager::Instance();
 
@@ -85,8 +85,6 @@ public:
 		FontManager->PrintEx(5, ScreenHeight - 90, 0.0f, "Music volume: z - down, x - up"); 
 		FontManager->PrintEx(5, ScreenHeight - 120, 0.0f, "You can try to enter file name and click Play");
 		FontManager->PrintEx(5, ScreenHeight - 150, 0.0f, "to play it as music");
-
-		return true;
 	}
 };
 

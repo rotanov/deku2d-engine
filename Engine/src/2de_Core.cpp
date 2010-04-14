@@ -76,6 +76,7 @@ CObject::CObject()
 
 CObject::~CObject()
 {
+	CObjectManager.DelObject(this);
 	//Log.Log("INFO", "DESTRUCT %s, id: %d", name.c_str(), id); //debug
 }
 
@@ -126,11 +127,6 @@ void CObject::SetName(const string &AObjectName)
 	name = AObjectName;
 }
 
-ostream& operator<<(ostream &Stream, CObject Object)
-{
-	Stream << Object.name << "(" << Object.id << ")";
-	return Stream;
-}
 
 
 /************************************************************************/
@@ -1083,7 +1079,7 @@ bool CObjectStack::Empty()
 	return last == -1;
 }
 
-CUpdateObject::CUpdateObject() : Active(true)
+CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 {
 	type |= T_UPDATABLE;
 	SetName("CUpdateObject");
@@ -1108,7 +1104,17 @@ bool CUpdateManager::UpdateObjects()
 	while (data)
 	{
 		if (!data->Active)
+		{
+			data = dynamic_cast<CUpdateObject*>(Next());
 			continue;
+		}
+		if (data->Dead)
+		{
+//			CList::DelObject(data->GetID());
+			delete data;
+			data = dynamic_cast<CUpdateObject*>(Next());
+			continue;
+		}
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);

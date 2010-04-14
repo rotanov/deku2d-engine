@@ -75,33 +75,27 @@ struct CMapCellInfo
 * Cells: >^
 */
 
-class CLevelMap : public CResource, public CRenderObject
+class CLevelMap : /*public CResource,*/ public CRenderObject
 {
 private:
-	int				numCellsHor, numCellsVer;
-public:
-	float	CellScale;
-	CMapCellInfo	*Cells;
-	CTileset	*TileSet;
+	size_t HorizontalCellsCount;
+	size_t VerticalCellsCount;
+	CMapCellInfo *Cells;
+	CTileset *TileSet;
 
-	CLevelMap(){};
-	CLevelMap(int AnumCellsHor, int AnumCellsVer, const string &ATilesetName,
-		const string &AName);
-	~CLevelMap(){}
+	int GetCellIndex(int h, int v);
+public:
+	CLevelMap();;
+	CLevelMap(size_t AHorizontalCellsCount, size_t AVerticalCellsCount,
+		const string &ATilesetName, const string &AName);
+	virtual ~CLevelMap();
 	
-	bool Update(float dt)
-	{
-		return true;
-	}
 	bool GenCells();
-	bool LoadFromFile();
-	bool SaveToFile();
-	bool Render();
-//private:
-	int _Cell(int h, int v)
-	{
-		return v*numCellsHor + h;
-	}
+// 	bool LoadFromFile();
+// 	bool SaveToFile();
+	void Render();
+	CMapCellInfo* GetMapCell(size_t HorizontalIndex, size_t VerticalIndex);
+	CAABB GetCellAABB(const Vector2 &V);
 
 };
 
@@ -110,7 +104,7 @@ class CCompas : public CRenderObject
 public:
 	CCompas();
 	~CCompas();
-	bool Render();	
+	void Render();	
 };
 
 #endif // _2DE_GAME_UTILS_H

@@ -509,12 +509,12 @@ bool CSprite::AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwid
 	return true;
 }
 
-bool CSprite::Render()
+void CSprite::Render()
 {
 	if (Texture == NULL)
-		return false;
+		return;
 	if (anim == NULL || AnimationsCount  == 0)
-		return false;
+		return;
 	Texture->CheckLoad();
 
 	float fSubRange_s, fSubRange_t,
@@ -621,7 +621,7 @@ bool CSprite::Render()
 				CurrentColumn = anim->m_nNumFrameColumns-1;
 				CurrentRow = anim->m_nNumFrameRows-1;
 				CurrentFrame = anim->m_nTotalFrames-1;
-				return true;
+				return;
 			}
 
 			if(CurrentColumn >= anim->m_nNumFrameColumns)
@@ -643,7 +643,6 @@ bool CSprite::Render()
 				CurrentFrame		= 0;
 			}
 	}
-	return true;
 }
 
 void CSprite::SetAnimation(int index)
@@ -708,7 +707,7 @@ void CParticleSystem::Init()
 	ColorVariability = RGBAf(0.0f,0.0f,0.0f,0.0f);
 }
 
-bool CParticleSystem::Update(float dt)
+void CParticleSystem::Update(float dt)
 {
 #ifdef _DEBUG_DISABLE_PARTICLES_UPDATE
 	return false;
@@ -745,7 +744,7 @@ bool CParticleSystem::Update(float dt)
 	{
 		Age += dt;
 		if (Age >= Life)
-			return true;
+			return;
 	}
 
 	int t = ParticlesActive;
@@ -792,10 +791,9 @@ bool CParticleSystem::Update(float dt)
 		// 
 		// 		particles[i].dc = (info.ec - particles[i].c)/particles[i].life;
 	}
-	return true;
 }
 
-bool CParticleSystem::Render()
+void CParticleSystem::Render()
 {
 #ifdef _DEBUG_DISABLE_PARTICLES_DRAW
 	return false;
@@ -841,7 +839,6 @@ bool CParticleSystem::Render()
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-	return true;
 }
 
 bool CParticleSystem::SaveToFile()

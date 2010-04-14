@@ -54,7 +54,7 @@ public:
 	CRenderObject();
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle();
-	virtual bool Render() = 0;
+	virtual void Render() = 0;
 	virtual ~CRenderObject();
 };
 

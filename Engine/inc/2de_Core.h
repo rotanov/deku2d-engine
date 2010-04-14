@@ -214,7 +214,6 @@ public:
 	void			SetName(const char* AObjectName);
 	void			SetName(const string &AObjectName);
 	unsigned int	GetID() const;
-	friend ostream& operator<<(ostream &Stream, CObject Object);
 private:
 	string			name;
 	int				ListRefCount;
@@ -390,9 +389,10 @@ class CUpdateObject : public virtual CObject
 {
 public:
 	bool Active;
+	bool Dead;
 	CUpdateObject();
-	~CUpdateObject();
-	virtual bool Update(float dt) = 0;
+	virtual ~CUpdateObject();
+	virtual void Update(float dt) = 0;
 };
 
 

@@ -86,7 +86,7 @@ CGUIRootObject::CGUIRootObject()
 	SetName("GUI Root Object");
 }
 
-bool CGUIRootObject::Render()
+void CGUIRootObject::Render()
 {
 	glLoadIdentity();
 	CGUIObject *Focused = CGUIManager::Instance()->GetFocusedObject();
@@ -100,12 +100,12 @@ bool CGUIRootObject::Render()
 		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
 		PRender->lwidth = 1.0f;
 	}
-	return true;
+	return;
 }
 
-bool CGUIRootObject::Update(float dt)
+void CGUIRootObject::Update(float dt)
 {
-	return true;
+	return;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
-bool CGUIManager::Update(float dt)
+void CGUIManager::Update(float dt)
 {
 #ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
 	if (tabholded)
@@ -199,7 +199,6 @@ bool CGUIManager::Update(float dt)
 		repeatstarted = false;
 	}
 #endif
-	return true;
 }
 
 bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
@@ -309,7 +308,7 @@ CLabel::CLabel(const string &AText /*= ""*/)
 	Text = AText;
 }
 
-bool CLabel::Render()
+void CLabel::Render()
 {
 	CEngine *engine = CEngine::Instance();
 
@@ -323,7 +322,6 @@ bool CLabel::Render()
 // 	PRender->grRectS(aabb.vMin, aabb.vMax);
 // 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	Font->Print(Text.c_str());
-	return true;
 }
 
 
@@ -345,7 +343,7 @@ CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor)
 	Text = AText;
 }
 
-bool CButton::Render()
+void CButton::Render()
 {	
 	CEngine *engine = CEngine::Instance();
 
@@ -371,11 +369,10 @@ bool CButton::Render()
 	PRender->grRectS(aabb.vMin, aabb.vMax);
 	PRender->grRectL(aabb.vMin, aabb.vMax);
 	Font->Print(Text.c_str());
-	return true;
 }
 
 
-bool CButton::Update(float dt)
+void CButton::Update(float dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
@@ -415,7 +412,6 @@ bool CButton::Update(float dt)
 	}
 
 	PreviousMouseState = MouseState;
-	return true;
 }
 
 bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
@@ -458,7 +454,7 @@ CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
 	Selection.Clear(CursorPos);
 }
 
-bool CEdit::Render()
+void CEdit::Render()
 {
 	CEngine *engine = CEngine::Instance();
 
@@ -506,10 +502,9 @@ bool CEdit::Render()
 		PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -Style->Metrics.EditMargins.y).vMax.y),
 			Vector2(Font->Pos.x + CursorDistance, aabb.Inflated(0.0f, -Style->Metrics.EditMargins.y).vMin.y));
 	}
-	return true;
 }
 
-bool CEdit::Update(float dt)
+void CEdit::Update(float dt)
 {
 	Vector2 mouse;
 	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
@@ -554,8 +549,6 @@ bool CEdit::Update(float dt)
 	}
 
 	PreviousMouseState = MouseState;
-
-	return true;
 }
 
 bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
@@ -811,7 +804,7 @@ CMenuItem::~CMenuItem()
 
 }
 
-bool CMenuItem::Render()
+void CMenuItem::Render()
 {
 	Reset();
 	CMenuItem *ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
@@ -827,13 +820,9 @@ bool CMenuItem::Render()
 	glLoadIdentity();
 	Color = COLOR_WHITE;
 	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
-	return true;
 }
 
-bool CMenuItem::Update(float dt)
-{
-	return true;
-}
+void CMenuItem::Update(float dt){}
 
 bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {

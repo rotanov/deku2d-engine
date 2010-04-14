@@ -39,7 +39,7 @@ void CTank::SetPlayerControls(int PlayerIndex)
 		Controls[i] = AR_K_CONTRLS[i][PlayerIndex];
 }
 
-bool CTank::Update(float dt)
+void CTank::Update(float dt)
 {
 	CAABB AABB = CAABB(0, 0, 32, 32);
 	if (isWalking)
@@ -124,12 +124,10 @@ bool CTank::Update(float dt)
 			Host->GetPlayer(1)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
 		}
-
 	}
-	return true;
 }
 
-bool CTank::Render()
+void CTank::Render()
 {
 	glLoadIdentity();
 	float Angle = 0;
@@ -188,7 +186,7 @@ bool CTank::Render()
 	CPrimitiveRender PRender;
 	PRender.plClr = Color;
 	PRender.gDrawBBox(Map->GetCellAABB(GetCenter()));
-	return true;
+	return;
 }
 
 CAABB CTank::GetAABB()
@@ -236,7 +234,7 @@ void CTankManager::AddAI()
 	return;
 }
 
-bool CTankManager::Render()
+void CTankManager::Render()
 {
 	glLoadIdentity();
 	gSetBlendingMode();	
@@ -249,12 +247,12 @@ bool CTankManager::Render()
 	Font->Pos = Vector2(490, 460);
 	Font->Print("Player2 health: %d", GetPlayer(1)->Health);
 	COLOR_WHITE.glSet();
-	return true;
+	return;
 }
 
-bool CTankManager::Update(float dt)
+void CTankManager::Update(float dt)
 {
-	return true;
+	return;
 }
 
 Vector2 CTankMap::GetNewTankLocation()
@@ -267,7 +265,7 @@ Vector2 CTankMap::GetNewTankLocation()
 		}
 }
 
-bool CTankMap::Render()
+void CTankMap::Render()
 {
 	glLoadIdentity();
 	glScissor(0, 0, 640, 460);
@@ -296,12 +294,12 @@ bool CTankMap::Render()
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 	gToggleScissor(false);
-	return true;
+	return;
 }
 
-bool CTankMap::Update(float dt)
+void CTankMap::Update(float dt)
 {
-	return true;
+	return;
 }
 
 CAABB CTankMap::GetCellAABB(Vector2 V)

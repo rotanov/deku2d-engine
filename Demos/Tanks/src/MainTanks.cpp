@@ -53,7 +53,7 @@ public:
 	{		
 		
 	}
-	bool Render()
+	void Render()
 	{
 		glLoadIdentity();
 		Font->Pos = fPosition;
@@ -64,9 +64,9 @@ public:
 		FontEffect->Render();
 		Font->tClr = FadeClr;
 		Font->Print(TITLE_TEXT);
-		return true;
+		return;
 	}
-	bool Update(float dt)
+	void Update(float dt)
 	{
 		if (begintimeout)
 		{
@@ -81,7 +81,7 @@ public:
 				Tanks = new CTankManager;	
 			}
 		}
-		return true;
+		return;
 	}
 };
 

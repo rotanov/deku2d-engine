@@ -130,17 +130,17 @@ Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 //-------------------------------------------//
 	
 
-bool CLevelMap::Render()
+void CLevelMap::Render()
 {
 	CMapCellInfo *t;
 	COLOR_WHITE.glSet();
-	glEnable(GL_TEXTURE);
+	glEnable(GL_TEXTURE_2D);
 	TileSet->GetTexture()->Bind();
 	glBegin(GL_QUADS);
-	for(int j = 0; j < numCellsHor; j++)
-		for(int i = 0; i < numCellsVer; i++)		
+	for(int j = 0; j < HorizontalCellsCount; j++)
+		for(int i = 0; i < VerticalCellsCount; i++)		
 		{
-			t = Cells + _Cell(j, i);
+			t = Cells + GetCellIndex(j, i);
 
 			for(int k = 0; k < 4; k++)
 			{
@@ -150,9 +150,9 @@ bool CLevelMap::Render()
 		}
 	glEnd();
 	glPopAttrib();
-	return true;
 }
 
+/*
 bool CLevelMap::LoadFromFile()
 {
 	CFile File;
@@ -176,12 +176,12 @@ bool CLevelMap::LoadFromFile()
 	}
 	//TileSet->Texture->Load();
 
-	File.Read(&numCellsHor, sizeof(numCellsHor));
-	File.Read(&numCellsVer, sizeof(numCellsVer));
+	File.Read(&HorizontalCellsCount, sizeof(HorizontalCellsCount));
+	File.Read(&VerticalCellsCount, sizeof(VerticalCellsCount));
 	if (Cells != NULL)
 		delete [] Cells;
-	Cells = new CMapCellInfo [numCellsVer*numCellsHor];
-	File.Read(Cells, numCellsVer*numCellsHor*sizeof(CMapCellInfo));
+	Cells = new CMapCellInfo [VerticalCellsCount*HorizontalCellsCount];
+	File.Read(Cells, VerticalCellsCount*HorizontalCellsCount*sizeof(CMapCellInfo));
 
 	GenCells();
 
@@ -201,20 +201,21 @@ bool CLevelMap::SaveToFile()
 	}
 	
 	file.Write(TileSet->GetName(), strlen(TileSet->GetName())+1);
-	file.Write(&numCellsHor, sizeof(numCellsHor));
-	file.Write(&numCellsVer, sizeof(numCellsVer));
-	file.Write(Cells, sizeof(CMapCellInfo)*numCellsHor*numCellsVer);
+	file.Write(&HorizontalCellsCount, sizeof(HorizontalCellsCount));
+	file.Write(&VerticalCellsCount, sizeof(VerticalCellsCount));
+	file.Write(Cells, sizeof(CMapCellInfo)*HorizontalCellsCount*VerticalCellsCount);
 	file.Close();
 	
 	return true;
-}
+}*/
+
 
 bool CLevelMap::GenCells()
 {
-	for(int i=0;i<numCellsVer;i++)
-		for(int j=0;j<numCellsHor;j++)
+	for(int i=0;i<VerticalCellsCount;i++)
+		for(int j=0;j<HorizontalCellsCount;j++)
 		{
-			CMapCellInfo *t = &(Cells[_Cell(j, i)]);
+			CMapCellInfo *t = &(Cells[GetCellIndex(j, i)]);
 			Vector2 ji = Vector2(j, i);
 			float w = TileSet->TileWidth;
 			float h = TileSet->TileHeight;
@@ -223,22 +224,58 @@ bool CLevelMap::GenCells()
 				t->pos[k] = (ji + V2_QuadBin[k]);
 				t->pos[k].x *= w;
 				t->pos[k].y *= h;
+				t->z = Depth;
 			}
 			t->tc = TileSet->GetCellTC(t->index);
 		}
 	return true;
 }
 
-CLevelMap::CLevelMap(int AnumCellsHor, int AnumCellsVer, const string &ATilesetName, const string &AName) : numCellsHor(AnumCellsHor), numCellsVer(AnumCellsVer)
+CLevelMap::CLevelMap(size_t AHorizontalCellsCount, size_t AVerticalCellsCount,
+					 const string &ATilesetName, const string &AName) :
+HorizontalCellsCount(AHorizontalCellsCount), VerticalCellsCount(AVerticalCellsCount)
 {
-	TileSet = 	CFactory::Instance()->Get<CTileset>(ATilesetName);
+	TileSet = CFactory::Instance()->Get<CTileset>(ATilesetName);
 	if (TileSet != NULL)
 		TileSet->CheckLoad();
-	Cells = new CMapCellInfo [numCellsVer * numCellsHor];
+	Cells = new CMapCellInfo [VerticalCellsCount * HorizontalCellsCount];
 	SetName(AName);
 }
 
-bool CCompas::Render()
+CLevelMap::CLevelMap() : HorizontalCellsCount(0), VerticalCellsCount(0),
+Cells(NULL), TileSet(NULL)
+{
+
+}
+
+CLevelMap::~CLevelMap()
+{
+	SAFE_DELETE(Cells);
+}
+
+int CLevelMap::GetCellIndex(int h, int v)
+{
+	return v * HorizontalCellsCount + h;
+}
+
+CAABB CLevelMap::GetCellAABB(const Vector2 &V)
+{
+	size_t CellWidth = TileSet->TileWidth * Scaling;
+	size_t CellHeight = TileSet->TileWidth * Scaling;
+	if (GetMapCell((int)V.x / CellWidth, (int)V.y / CellHeight )->index != 0)
+		return CAABB( (((int)V.x / CellWidth)) * CellWidth,
+		(((int)V.y/CellHeight)) * CellHeight, 
+		CellWidth, CellHeight);
+	else 
+		return CAABB(0.0f, 0.0f, 0.0f, 0.0f);
+		//throw std::runtime_error("Outside of a map");
+}
+
+CMapCellInfo* CLevelMap::GetMapCell(size_t HorizontalIndex, size_t VerticalIndex)
+{
+	return &Cells[GetCellIndex(HorizontalIndex, VerticalIndex)];
+}
+void CCompas::Render()
 {
 		Vector2 v1, n;
 		CEngine *Ninja = CEngine::Instance();
@@ -259,7 +296,6 @@ bool CCompas::Render()
 //  		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth), 1.0f, RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		return true;
 }
 
 CCompas::CCompas()

@@ -64,8 +64,8 @@ public:
 	~CTilesetEditor();
 	void SetZoom(float AZoom);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	
-	bool Render();
-	bool Update(float dt);
+	void Render();
+	void Update(float dt);
 
 	friend bool LoadTileset(CObject *Caller);
 	friend bool SaveTileset(CObject *Caller);

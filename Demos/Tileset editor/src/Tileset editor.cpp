@@ -135,7 +135,7 @@ CTilesetEditor::CTilesetEditor()
 // 	glVertexPointer(2, GL_FLOAT, 0, SelectionBoxes);
 }
 
-bool CTilesetEditor::Render()
+void CTilesetEditor::Render()
 {
 
 	glLoadIdentity();
@@ -253,10 +253,9 @@ bool CTilesetEditor::Render()
 	}
 	gToggleScissor(false);
 	glEnable(GL_DEPTH_TEST);
-	return true;
 }
 
-bool CTilesetEditor::Update(float dt)
+void CTilesetEditor::Update(float dt)
 {
 	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &MousePosition);
 
@@ -287,8 +286,6 @@ bool CTilesetEditor::Update(float dt)
 
 		break;
 	}
-
-	return true;
 }
 
 CTilesetEditor::~CTilesetEditor()
