@@ -8,4 +8,5 @@
 	FpsLimit				= "60"			// todo: deprecate
 	DataPath               	= "../../../Data"
 	doLoadDefaultResourceList	= "true"	// todo: deprecate
+	BGMVolume				= "10"
 </configuration>

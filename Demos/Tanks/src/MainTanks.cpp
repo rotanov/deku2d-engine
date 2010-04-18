@@ -231,7 +231,7 @@ bool Init()
 // 	TanksTiles.BBox[5] = CAABB(0, 0, 32, 32);
 // 	TanksTiles.BBox[6] = CAABB(0, 0, 32, 32);
 // 	TanksTiles.BBox[7] = CAABB(0, 0, 32, 32);
-// 	TanksTiles.filename = "Data/Tilesets/TanksTileset.tls";
+// 	TanksTiles.Filename = "Data/Tilesets/TanksTileset.tls";
 // 	TanksTiles.SaveToFile();
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

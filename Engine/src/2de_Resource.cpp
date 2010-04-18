@@ -96,7 +96,7 @@ bool CResourceManager::LoadResources()
 
 	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
 	result->SetName(AResourceName);
-	result->filename = val;
+	result->Filename = val;
 	result->LoadFromFile();
 
 	return result;
@@ -189,16 +189,16 @@ string CDataLister::GetLastPathComponent(string Path)
 	return Path.substr(last_slash);
 }
 
-string CDataLister::GetFileNameWithoutExtension(string FileName)
+string CDataLister::GetFileNameWithoutExtension(string Filename)
 {
-	int last_dot = FileName.find_last_of('.');
+	int last_dot = Filename.find_last_of('.');
 
 	if (last_dot == string::npos)
 	{
-		return FileName;
+		return Filename;
 	}
 
-	FileName.erase(last_dot);
+	Filename.erase(last_dot);
 
-	return FileName;
+	return Filename;
 }

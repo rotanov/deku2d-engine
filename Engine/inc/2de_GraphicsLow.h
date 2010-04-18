@@ -15,20 +15,20 @@
 #include "2de_ImageUtils.h"
 #include "2de_MathUtils.h"
 
-const Vector2 V2_QuadBin[4] = 
+const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertices (0 0) (1 0) (1 1) (0 1)
 {
 	V2_ZERO,
 	V2_DIR_RIGHT,
 	V2_DIR_RIGHT + V2_DIR_UP,
-	V2_DIR_UP
+	V2_DIR_UP,
 };
 
-const Vector2 V2_QuadBinCenter[4] = 
+const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with vertices (-1 -1) (1 -1) (1 1) (-1 1)
 {
 	V2_DIR_LEFT + V2_DIR_DOWN,
 	V2_DIR_RIGHT + V2_DIR_DOWN,
 	V2_DIR_RIGHT + V2_DIR_UP,
-	V2_DIR_LEFT + V2_DIR_UP
+	V2_DIR_LEFT + V2_DIR_UP,
 };
 
 
@@ -37,25 +37,42 @@ const float ROTATIONAL_AXIS_Z = 1.0f;
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
+/**
+*	Виртуально унаследовать от этой гадости - это первый вариант.
+*	Второй вариант - аггрегировать указатель на неё в классы.
+*/
+
+/*
+class CPlacing 
+{
+	float Angle;
+	Vector2 Position;
+	float Scaling;
+	CAABB aabb;
+};
+*/
+
 class CRenderObject : public virtual CObject
 {
-protected:
-	float				Angle;		//	Orientation angle (Degrees)
-public:
-	Vector2				Position;
-	
-	float				Scaling;
+private:
+//protected:
+	float				Angle;		//	(Degrees)
 	float				Depth;				//	[-1; 1]?
+public:
+	Vector2				Position;		
+	float				Scaling;
 	CAABB				aabb;				//	Axis Aligned Bounding Box
 	RGBAf				Color;
 	bool				Visible;
 	bool				doIgnoreCamera;
 
 	CRenderObject();
+	virtual ~CRenderObject();
+	virtual void Render() = 0;
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle();
-	virtual void Render() = 0;
-	virtual ~CRenderObject();
+	void SetLayer(size_t Layer);
+	float GetDepth();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -63,12 +80,14 @@ public:
 
 class CGLImageData : public CImageData
 {
+private:
+	bool			MakeTexture();
 public:
 	bool			doCleanData;
 					CGLImageData();
-					~CGLImageData();
-	bool			MakeTexture();
+					virtual ~CGLImageData();
 	bool			LoadTexture(const string &Filename);
+	bool			LoadTexture(size_t AWidth, size_t AHeight, const byte* Address);	// From memory
 	virtual GLuint	GetTexID();
 protected:
 	GLuint			TexID;
@@ -81,12 +100,8 @@ class CTexture : public CGLImageData, public CResource
 {
 public:
 	CTexture();
-	~CTexture();
-	CTexture(char * vfilename);
-	static CObject* NewTexture()
-	{
-		return new CTexture;
-	}
+	virtual ~CTexture();
+	//CTexture(const string &AFilename);
 	void Bind();
 	bool LoadFromFile();
 protected:
@@ -268,10 +283,10 @@ public:
 		//glArrayElementEXT()
 	}
 
-	void SortByAlpha();
-	void SortByZ();
+// 	void SortByAlpha();
+// 	void SortByZ();
 	bool DrawObjects();
-	bool PushVertex(int type, Vector2 *that);
+//	bool PushVertex(int type, Vector2 *that);
 };
 
 //////////////////////////////////////////////////////////////////////////

@@ -12,8 +12,10 @@ const Vector2 DEFAULT_POSITION = Vector2(96.0f, 96.0f);
 class CPacmanPlayer : public CUpdateObject
 {
 public:
+	size_t Score;
 	Vector2 Position;
 	CSprite Sprite;
+	CText ScoreText;
 	Vector2 Velocity;
 	CPacmanPlayer();
 

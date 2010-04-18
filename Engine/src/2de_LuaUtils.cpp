@@ -55,7 +55,7 @@ namespace
 	}
 }
 
-GlobalLuaState::GlobalLuaState(const string& filename)
+GlobalLuaState::GlobalLuaState(const string& Filename)
 {
 	L_ = luaL_newstate();
 	luaL_openlibs(L_);
@@ -67,7 +67,7 @@ GlobalLuaState::GlobalLuaState(const string& filename)
 	lua_register(L_, "innerFunction3", fun3);
 
 	// загружаем скрипт
-	if(luaL_dofile(L_, filename.c_str()))
+	if(luaL_dofile(L_, Filename.c_str()))
 	{
 		string err(lua_tostring(L_, -1));
 

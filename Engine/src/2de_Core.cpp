@@ -132,10 +132,10 @@ CFile::CFile() : File(NULL)
 {
 }
 
-CFile::CFile(const string AFileName, EOpenMode Mode)
+CFile::CFile(const string AFilename, EOpenMode Mode)
 {
 	File = NULL;
-	Open(AFileName, Mode);
+	Open(AFilename, Mode);
 }
 
 CFile::~CFile()
@@ -143,20 +143,20 @@ CFile::~CFile()
 	Close();
 }
 
-bool CFile::Open(const string AFileName, EOpenMode Mode)
+bool CFile::Open(const string AFilename, EOpenMode Mode)
 {
-	if (AFileName.empty())
+	if (AFilename.empty())
 	{
-		Log("ERROR", "Can't open file. Invalid filename");
+		Log("ERROR", "Can't open file. Invalid Filename");
 		return false;
 	}
 	if (File != NULL)
 	{
-		Log("ERROR", "Can't open file %s: another file is already opened.", AFileName.c_str());
+		Log("ERROR", "Can't open file %s: another file is already opened.", AFilename.c_str());
 		return false;
 	}
 
-	Filename = AFileName;
+	Filename = AFilename;
 
 	switch (Mode)
 	{
@@ -1129,13 +1129,10 @@ bool CBaseResource::SaveToFile()
 
 bool CBaseResource::CheckLoad()
 {
-	return loaded = !loaded ? LoadFromFile() : true;
+	return Loaded = !Loaded ? LoadFromFile() : true;
 }
 
-CBaseResource::CBaseResource() :loaded(false), filename("")
-{
-
-}
+CBaseResource::CBaseResource() : Loaded(false), Filename(""){}
 
 CResource::CResource()
 {

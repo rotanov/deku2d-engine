@@ -319,7 +319,7 @@ bool SaveTileset(CObject *Caller)
 		return false;
 	if (TilesetEditor->Tileset == NULL)
 		TilesetEditor->Tileset = CFactory::Instance()->New<CTileset>(TilesetEditor->edTilesetName->Text);
-	TilesetEditor->Tileset->filename = TilesetEditor->edTilesetName->Text + ".tls";
+	TilesetEditor->Tileset->Filename = TilesetEditor->edTilesetName->Text + ".tls";
 	TilesetEditor->Tileset->SetTexture(TilesetEditor->TilesetTexture->GetName());
 	TilesetEditor->Tileset->SetSettings(stoi(TilesetEditor->edTileWidth->Text.c_str()), stoi(TilesetEditor->edTileHeight->Text.c_str()),
 	stoi(TilesetEditor->edHorNumTiles->Text.c_str()), stoi(TilesetEditor->edVerNumTiles->Text.c_str()) );

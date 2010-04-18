@@ -19,15 +19,15 @@ public:
 		}
 	};
 
-	GlobalLuaState(const std::string& filename);
+	GlobalLuaState(const std::string& Filename);
 	~GlobalLuaState();
 
-	// функции, определенные внутри скрипта filename
+	// функции, определенные внутри скрипта Filename
 	void outerFunction1();
 	int outerFunction2();
 	std::string outerFunction3();
 
-	// функции, которые могут быть вызваны из скрипта filename
+	// функции, которые могут быть вызваны из скрипта Filename
 	void innerFunction1();
 	int innerFunction2();
 	std::string innerFunction3();

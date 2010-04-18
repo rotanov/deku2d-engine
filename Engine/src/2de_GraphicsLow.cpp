@@ -26,6 +26,16 @@ float CRenderObject::GetAngle()
 {
 	return Angle;
 }
+
+void CRenderObject::SetLayer(size_t Layer)
+{
+	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
+}
+
+float CRenderObject::GetDepth()
+{
+	return Depth;
+}
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
 
@@ -80,6 +90,19 @@ bool CGLImageData::LoadTexture(const string &Filename)
 	return true;
 }
 
+bool CGLImageData::LoadTexture(size_t AWidth, size_t AHeight, const byte* Address)
+{
+	data = const_cast<byte *>(Address);
+	width = AWidth;
+	height = AHeight;
+	bpp = 4;
+	if (!MakeTexture())
+	{
+		Log("ERROR", "Can't load texture in video memory.");
+		return false;
+	}
+	return true;
+}
 GLuint CGLImageData::GetTexID()
 {
 	if (TexID == 0)
@@ -270,12 +293,12 @@ CFont::~CFont()
 
 bool CFont::LoadFromFile()
 {
-	if (filename == "")
+	if (Filename == "")
 		return false;
 	CFile			file;
-	if (!file.Open(filename, CFile::OPEN_MODE_READ))
+	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: filename wrte too.
+		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: Filename wrte too.
 		return false;
 	}
 	char *FontImageName = NULL;
@@ -319,12 +342,12 @@ bool CFont::LoadFromFile()
 
 bool CFont::SaveToFile()
 {
-	if (filename == "")
+	if (Filename == "")
 		return false;
 	if (!Texture)
 		return false;
 	CFile file;
-	file.Open(filename, CFile::OPEN_MODE_WRITE);
+	file.Open(Filename, CFile::OPEN_MODE_WRITE);
 	file.Write(Texture->GetName(), (unsigned long)strlen(Texture->GetName()));
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
@@ -334,8 +357,7 @@ bool CFont::SaveToFile()
 
 void CFont::_Print(const unsigned char *text)
 {
-	glPushAttrib(GL_TEXTURE_BIT);
-	glPushMatrix();
+	
 	tClr.glSet();
 	//ptClr->glSet();
 	glEnable(GL_TEXTURE_2D);
@@ -345,11 +367,8 @@ void CFont::_Print(const unsigned char *text)
 	glListBase(base-32);
 	const char *temptext = reinterpret_cast<const char*>(text);
 	glCallLists((GLsizei)strlen(temptext), GL_UNSIGNED_BYTE, text);
- 	glPopMatrix();
- 	glPopAttrib(); 
 	//GLenum err = glGetError() ;
 }
-
 
 
 
@@ -694,9 +713,10 @@ bool CRenderManager::DrawObjects()
 		if (data->Visible)
 		{
 			glLoadIdentity();
-			Camera.gTranslate();
-			glScalef(data->Scaling, data->Scaling, 1.0f);
-			glTranslatef(data->Position.x, data->Position.y, data->Depth);
+			if (!data->doIgnoreCamera)
+				Camera.gTranslate();
+			glScalef(data->Scaling, data->Scaling, ROTATIONAL_AXIS_Z);
+			glTranslatef(data->Position.x, data->Position.y, data->GetDepth());
 			glRotatef(data->GetAngle(), 0.0f, 0.0f, 1.0f);
 			data->Render();
 		}
@@ -709,27 +729,6 @@ bool CRenderManager::DrawObjects()
 #endif 
 
 	return true;
-}
-
-bool CompAlpha(CObject *a, CObject *b)
-{
-	return (dynamic_cast<CRenderObject*>(a))->Color.w >= (dynamic_cast<CRenderObject*>(b))->Color.w;
-}
-
-bool CompZ(CObject *a, CObject *b)
-{
-	return (dynamic_cast<CRenderObject*>(a))->Depth <= (dynamic_cast<CRenderObject*>(b)->Depth);
-}
-
-
-void CRenderManager::SortByAlpha()
-{
-	this->Sort(CompAlpha);
-}
-
-void CRenderManager::SortByZ()
-{
-	this->Sort(CompZ);
 }
 
 //-------------------------------------------//
@@ -892,7 +891,7 @@ GLuint CTexture::GetTexID()
 	if (TexID == 0)
 	{
 		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
-		if (!loaded)
+		if (!Loaded)
 		{
 			LoadFromFile();
 		}		
@@ -900,13 +899,12 @@ GLuint CTexture::GetTexID()
 	return TexID;
 }
 
-CTexture::CTexture(char * vfilename)
-{	
-	filename = vfilename;
-	SetName("CTexture");
-	CTextureManager *TexMan = CTextureManager::Instance();
-	TexMan->AddObject(this);
-}
+// CTexture::CTexture(const string &AFilename) : CBaseResource::Filename(AFilename)
+// {	
+// 	SetName("CTexture");
+// 	CTextureManager *TexMan = CTextureManager::Instance();
+// 	TexMan->AddObject(this);
+// }
 
 CTexture::CTexture()
 {
@@ -931,15 +929,15 @@ void CTexture::Unload()
 
 bool CTexture::LoadFromFile()
 {
-	if (filename == "")
+	if (Filename == "")
 	{
 		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
 		return false;
 	}
-	if (!loaded)
-		if (LoadTexture(filename.c_str()))
-			loaded = true;
-	return loaded;
+	if (!Loaded)
+		if (LoadTexture(Filename))
+			Loaded = true;
+	return Loaded;
 }
 
 

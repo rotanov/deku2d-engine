@@ -88,10 +88,10 @@ public:
 	void StopAllSound();
 	bool PlayMusic(CMusic *Music, int FadeInTime = 0);
 	void StopMusic(int FadeOutTime = 0);
-	void SetMusicVolume(int AVolume);
-	int GetMusicVolume() const;
-	void SetSoundVolume(CSound *ASound, int AVolume);
-	int GetSoundVolume(CSound *ASound) const;
+	void SetMusicVolume(size_t AVolume);
+	size_t GetMusicVolume() const;
+	void SetSoundVolume(CSound *ASound, size_t AVolume);
+	size_t GetSoundVolume(CSound *ASound) const;
 
 	// well, there are many other features in SDL_mixer (like effects, channel groups, etc.), but i'm too lazy to implement interface to them now...
 
@@ -102,6 +102,8 @@ protected:
 
 private:
 	bool Initialized;
+	//size_t DefaultBGMVolume;	// Could be named DefaultMusicVolume // И вообще нужно ли это хранить здесь? Вот это - точно не нужно.
+	//size_t DefaultSFXVolume;	// Could be named DefaultSoundVolume // А это - нужно, я считаю, так как громкость устанавливается для каждого отдельного звука.
 
 };
 

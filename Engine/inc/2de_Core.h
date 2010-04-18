@@ -489,38 +489,27 @@ protected:
 
 class CBaseResource
 {
+protected:
+	bool Loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
 public:
-	bool loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
-	string filename;	// Полный^W хоть-какой-нибуть путь к файлу.
-	virtual bool LoadFromFile();;
-	virtual bool SaveToFile();;
+	string Filename;	// Полный^W хоть-какой-нибуть путь к файлу.
+	virtual bool LoadFromFile();
+	virtual bool SaveToFile();
 	bool CheckLoad();
-	CBaseResource();
+	CBaseResource();	// const string &AFilename
+	virtual ~CBaseResource(){};
 };
 
 class CResource : public CBaseResource, virtual public CObject
 {
 public:
 	CResource();
+	virtual ~CResource(){};
 };
 
-
-struct CRectub
-{
-	byte x0, x1, y0, y1;
-};
-
-struct CRecti
+struct CRecti	// TODO: Избавиться от этого типа.
 {
 	int x0, x1, y0, y1;
-};
-
-class RGBAub
-{
-public:
-	byte r, g, b, a;
-	RGBAub(byte _r, byte _g, byte _b, byte _a) : r(_r), g(_g), b(_b), a(_a){}
-	RGBAub(){}
 };
 
 class CFile
@@ -540,10 +529,10 @@ public:
 	};
 
 	CFile();
-	CFile(const string AFileName, EOpenMode Mode);
+	CFile(const string AFilename, EOpenMode Mode);
 	~CFile();
 
-	bool Open(const string AFileName, EOpenMode Mode);
+	bool Open(const string AFilename, EOpenMode Mode);
 	bool Close();
 	bool ReadByte(unsigned char *Buffer);
 	bool WriteByte(unsigned char *Buffer);

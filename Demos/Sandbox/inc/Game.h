@@ -15,13 +15,14 @@ public:
 	CTexture shroom;
 	CTestUnit()
 	{
-		//SetName((string)"CTestUnit" + GetID());
-		void *temp = IMAGE_SHROOM_DATA;
-		shroom.width = IMAGE_SHROOM_WIDTH;
-		shroom.height = IMAGE_SHROOM_HEIGHT;
-		shroom.data = (byte*)temp;
-		shroom.bpp = 4;
-		shroom.MakeTexture();
+// 		//		SetName((string)"CTestUnit" + GetID());
+// 		// 		void *temp = IMAGE_SHROOM_DATA;
+// 		// 		shroom.width = IMAGE_SHROOM_WIDTH;
+// 		// 		shroom.height = IMAGE_SHROOM_HEIGHT;
+// 		// 		shroom.data = (byte*)temp;
+// 		// 		shroom.bpp = 4;
+// 		// 		shroom.MakeTexture();
+		shroom.LoadTexture(IMAGE_SHROOM_WIDTH, IMAGE_SHROOM_HEIGHT, reinterpret_cast<byte *>(IMAGE_SHROOM_DATA));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 	void Render()

@@ -217,7 +217,7 @@ CTank* CTankManager::GetPlayer(int PlayerIndex)
 {
 	//char * tmp = new char[16];
 	//SDL_itoa(PlayerIndex+1, tmp, 10);
-	CTank *res = dynamic_cast<CTank*>(GetObject(((string)"TankPlayer" + itos(PlayerIndex+1)).c_str()));;	 
+	CTank *res = dynamic_cast<CTank*>(GetObject(((string)"TankPlayer" + itos(PlayerIndex+1)).c_str()));
 	//delete [] tmp;
 	return res;
 }

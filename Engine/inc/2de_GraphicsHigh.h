@@ -169,8 +169,8 @@ public:
 	void Render();
 	void SetAnimation(int index);
 	SAnimationInfo* FindAnimation(int index);
-	bool LoadFromFile(char* filename);
-	bool SaveToFile(char *filename);
+	bool LoadFromFile(char* Filename);
+	bool SaveToFile(char *Filename);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -261,11 +261,10 @@ protected:
 //CText not implemented yet
 class CText : public CRenderObject
 {
-private:
-	void Draw()
-	{
-
-	}
+public:
+	CFont *Font;
+	string Text;
+	CText();
+	void Render();
 };
-
 #endif // _2DE_GRAPHICS_HIGH_H_

@@ -9,9 +9,9 @@ bool CTileset::LoadFromFile()
 {
 	CFactory *Factory = CFactory::Instance();
 	CFile file;
-	if (!file.Open(filename, CFile::OPEN_MODE_READ))
+	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR", "Can't open TileSet file %s", filename.c_str());
+		Log("ERROR", "Can't open TileSet file %s", Filename.c_str());
 		return false;
 	}
 
@@ -65,9 +65,9 @@ void CTileset::RenderTileSet()
 bool CTileset::SaveToFile()
 {
 	CFile file;
-	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
+	if (!file.Open(Filename, CFile::OPEN_MODE_WRITE))
 	{
-		Log("ERROR", "Can't open TileSet file %s", filename.c_str());
+		Log("ERROR", "Can't open TileSet file %s", Filename.c_str());
 		return false;
 	}
 
@@ -157,9 +157,9 @@ bool CLevelMap::LoadFromFile()
 {
 	CFile File;
 	CFactory *Factory = CFactory::Instance();
-	if (!File.Open(filename, CFile::OPEN_MODE_READ))
+	if (!File.Open(Filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR", "Can't load level %s", filename.c_str());
+		Log("ERROR", "Can't load level %s", Filename.c_str());
 		return false;
 	}
 
@@ -194,9 +194,9 @@ bool CLevelMap::LoadFromFile()
 bool CLevelMap::SaveToFile()
 {
 	CFile file;
-	if (!file.Open(filename, CFile::OPEN_MODE_WRITE))
+	if (!file.Open(Filename, CFile::OPEN_MODE_WRITE))
 	{
-		Log("ERROR", "Can't open file %s to save the map", filename.c_str());
+		Log("ERROR", "Can't open file %s to save the map", Filename.c_str());
 		return false;
 	}
 	
@@ -224,7 +224,7 @@ bool CLevelMap::GenCells()
 				t->pos[k] = (ji + V2_QuadBin[k]);
 				t->pos[k].x *= w;
 				t->pos[k].y *= h;
-				t->z = Depth;
+				t->z = GetDepth();
 			}
 			t->tc = TileSet->GetCellTC(t->index);
 		}
@@ -289,7 +289,7 @@ void CCompas::Render()
 		CPrimitiveRender pr;
 		pr.doUseGlobalCoordSystem = true;
 		pr.plClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f);
-		pr.grCircleL(Vector2(100,100), depth);;
+		pr.grCircleL(Vector2(100,100), depth);
 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth));
 
 //  		pr.grCircleL(Vector2(100,100), depth, RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));

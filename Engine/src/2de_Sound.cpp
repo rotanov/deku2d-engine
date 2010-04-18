@@ -8,7 +8,7 @@
 
 CSound::CSound()
 {
-	filename = "";
+	Filename = "";
 	Data = NULL;
 	SetName("CSound");
 	CSoundManager::Instance()->AddObject(this);
@@ -16,7 +16,7 @@ CSound::CSound()
 
 CSound::CSound(const char *AFileName)
 {
-	filename = AFileName;
+	Filename = AFileName;
 	Data = NULL;
 	SetName("CSound");
 	CSoundManager::Instance()->AddObject(this);
@@ -24,7 +24,7 @@ CSound::CSound(const char *AFileName)
 
 CSound::~CSound()
 {
-	if (loaded && Data != NULL)
+	if (Loaded && Data != NULL)
 	{
 		// as written in SDL_mixer doc, it's a bad idea to free chunk being played, so maybe we should stop all sounds.. but i'm not sure...
 		// Mix_HaltChannel(-1);
@@ -36,13 +36,13 @@ CSound::~CSound()
 
 bool CSound::LoadFromFile()
 {
-	if (filename == "")
+	if (Filename == "")
 		return false;
 	
-	Data = Mix_LoadWAV(filename.c_str());
+	Data = Mix_LoadWAV(Filename.c_str());
 	if (Data == NULL)
 	{
-		Log("ERROR", "Can't load sound '%s': %s", filename.c_str(), Mix_GetError());
+		Log("ERROR", "Can't load sound '%s': %s", Filename.c_str(), Mix_GetError());
 	}
 
 	return true;
@@ -53,7 +53,7 @@ bool CSound::LoadFromFile()
 
 CMusic::CMusic()
 {
-	filename = "";
+	Filename = "";
 	Data = NULL;
 	SetName("CMusic");
 	CMusicManager::Instance()->AddObject(this);
@@ -61,7 +61,7 @@ CMusic::CMusic()
 
 CMusic::CMusic(const char *AFileName)
 {
-	filename = AFileName;
+	Filename = AFileName;
 	Data = NULL;
 	SetName("CMusic");
 	CMusicManager::Instance()->AddObject(this);
@@ -69,7 +69,7 @@ CMusic::CMusic(const char *AFileName)
 
 CMusic::~CMusic()
 {
-	if (loaded && Data != NULL)
+	if (Loaded && Data != NULL)
 	{
 		// Mix_HaltMusic();
 
@@ -80,13 +80,13 @@ CMusic::~CMusic()
 
 bool CMusic::LoadFromFile()
 {
-	if (filename == "")
+	if (Filename == "")
 		return false;
 	
-	Data = Mix_LoadMUS(filename.c_str());
+	Data = Mix_LoadMUS(Filename.c_str());
 	if (Data == NULL)
 	{
-		Log("ERROR", "Can't load music '%s': %s", filename.c_str(), Mix_GetError());
+		Log("ERROR", "Can't load music '%s': %s", Filename.c_str(), Mix_GetError());
 	}
 
 	return true;
@@ -145,7 +145,7 @@ bool CSoundMixer::PlaySound(CSound *Sound, int Time /*= -1*/)
 		Log("ERROR", "Can't play sound '%s': %s", Sound->GetName(), Mix_GetError());
 		return false;
 	}
-
+	// May be we have to set sound volume here?
 	return true;
 }
 
@@ -198,35 +198,46 @@ void CSoundMixer::StopMusic(int FadeOutTime /*= 0*/)
 		Mix_FadeOutMusic(FadeOutTime);
 }
 
-void CSoundMixer::SetMusicVolume(int AVolume)
+void CSoundMixer::SetMusicVolume(size_t AVolume)
 {
-	if (AVolume < 0 || AVolume > MIX_MAX_VOLUME) {
+	if (AVolume > MIX_MAX_VOLUME) {
 		Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
 	}
 
 	Mix_VolumeMusic(AVolume);
 }
 
-int CSoundMixer::GetMusicVolume() const
+size_t CSoundMixer::GetMusicVolume() const
 {
 	return Mix_VolumeMusic(-1);
 }
 
-void CSoundMixer::SetSoundVolume(CSound *ASound, int AVolume)
+void CSoundMixer::SetSoundVolume(CSound *ASound, size_t AVolume)
 {
-	if (AVolume < 0 || AVolume > MIX_MAX_VOLUME) {
+	if (!Initialized || ASound == NULL)	// What if ASound == NULL
+	{
+		Log("ERROR", "SetSoundVolume Mixer should be initialized, or ASound is NULL");
+		return;
+	}
+	if (AVolume > MIX_MAX_VOLUME) {
 		Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
 	}
 
 	Mix_VolumeChunk(ASound->GetData(), AVolume);
 }
 
-int CSoundMixer::GetSoundVolume(CSound *ASound) const
+size_t CSoundMixer::GetSoundVolume(CSound *ASound) const
 {
+	if (!Initialized || ASound == NULL)	// What if ASound == NULL
+	{
+		Log("ERROR", "SetSoundVolume Mixer should be initialized, or ASound is NULL");
+		return 0;
+	}
+
 	return Mix_VolumeChunk(ASound->GetData(), -1);
 }
 
-CSoundMixer::CSoundMixer()
+CSoundMixer::CSoundMixer()// : DefaultBGMVolume(MIX_MAX_VOLUME), DefaultSFXVolume(MIX_MAX_VOLUME)
 {
 	SetName("Sound mixer");
 	Initialized = false;

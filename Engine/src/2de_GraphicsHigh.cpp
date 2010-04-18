@@ -453,10 +453,10 @@ CSprite::~CSprite()
 }
 
 
-bool CSprite::LoadFromFile(char* filename)
+bool CSprite::LoadFromFile(char* Filename)
 {
 // 	CFile file;
-// 	file.Open(filename, CFile::OPEN_MODE_READ);
+// 	file.Open(Filename, CFile::OPEN_MODE_READ);
 // 	file.Read(&AnimationsCount);
 // 	if (animations != NULL)
 // 		delete [] animations;
@@ -467,10 +467,10 @@ bool CSprite::LoadFromFile(char* filename)
 	return true;
 }
 
-bool CSprite::SaveToFile(char *filename)
+bool CSprite::SaveToFile(char *Filename)
 {
 // 	CFile file;
-// 	file.Open(filename, CFile::OPEN_MODE_WRITE);
+// 	file.Open(Filename, CFile::OPEN_MODE_WRITE);
 // 	file.WriteByte(&AnimationsCount);
 // 	file.Write(animations, AnimationsCount*sizeof(SAnimationInfo));
 // 	file.Close();
@@ -851,7 +851,7 @@ void CParticleSystem::Render()
 bool CParticleSystem::SaveToFile()
 {
 	CFile file;
-	file.Open(filename, CFile::OPEN_MODE_WRITE);
+	file.Open(Filename, CFile::OPEN_MODE_WRITE);
 	//file.Write(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
@@ -860,7 +860,7 @@ bool CParticleSystem::SaveToFile()
 bool CParticleSystem::LoadFromFile()
 {
 	CFile file;
-	file.Open(filename, CFile::OPEN_MODE_READ);
+	file.Open(Filename, CFile::OPEN_MODE_READ);
 	//file.Read(&Info, sizeof(CPsysteminfo));
 	file.Close();
 	return true;
@@ -953,4 +953,16 @@ CParticleSystem::CParticleSystem()
 CParticleSystem::~CParticleSystem()
 {
 	SAFE_DELETE(Particles);
+}
+
+CText::CText()
+{
+	Font = CFactory::Instance()->Get<CFont>("Font");
+	Text = "";
+}
+
+void CText::Render()
+{
+	COLOR_WHITE.glSet();
+	Font->Print(Text.c_str());
 }

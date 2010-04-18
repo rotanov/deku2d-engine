@@ -162,13 +162,15 @@ bool CEngine::Init()
 	}
 	
 	// looks like shit
-	int				wwidth		= atoi((Config.First->Get("WindowWidth"))->GetValue());
-	int				wheight		= atoi((Config.First->Get("WindowHeight"))->GetValue());
-	int				wbpp		= atoi((Config.First->Get("WindowBpp"))->GetValue());
+	int				wwidth		= stoi((Config.First->Get("WindowWidth"))->GetValue());
+	int				wheight		= stoi((Config.First->Get("WindowHeight"))->GetValue());
+	int				wbpp		= stoi((Config.First->Get("WindowBpp"))->GetValue());
 	char			*wcaption	= (Config.First->Get("WindowCaption"))->GetValue();
 					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
 					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
-	SetState(CEngine::STATE_FPS_LIMIT, (void*)atoi((Config.First->Get("FpsLimit"))->GetValue()));
+	SetState(CEngine::STATE_FPS_LIMIT, (void*)stoi((Config.First->Get("FpsLimit"))->GetValue()));
+
+	
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
 	ResourceManager->DataPath	= (Config.First->Get("DataPath"))->GetValue();
@@ -193,7 +195,7 @@ bool CEngine::Init()
 	}
 
 	ilInit(); // Инициализация DevIL
-	CSoundMixer::Instance();
+	//CSoundMixer::Instance()->SetMusicVolume(stoi((Config.First->Get("BGMVolume"))->GetValue()));
 
 	SDL_EnableUNICODE(1);
 

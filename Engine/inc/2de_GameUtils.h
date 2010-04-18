@@ -85,7 +85,7 @@ private:
 
 	int GetCellIndex(int h, int v);
 public:
-	CLevelMap();;
+	CLevelMap();
 	CLevelMap(size_t AHorizontalCellsCount, size_t AVerticalCellsCount,
 		const string &ATilesetName, const string &AName);
 	virtual ~CLevelMap();

@@ -94,7 +94,7 @@ bool PlayFile(CObject *Caller)
 	//string test = dynamic_cast<CEdit*>(CGUIManager::Instance()->GetLast()->GetData())->Text;
 	Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
 	CMusic *mus = CFactory::Instance()->New<CMusic>("mus");
-	mus->filename = test;
+	mus->Filename = test;
 	mus->LoadFromFile();
 	CSoundMixer::Instance()->PlayMusic(mus);
 	return true;

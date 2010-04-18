@@ -123,7 +123,7 @@ bool CResourceSectionLoader<T>::Load()
 			Log("WARNING", "Error loading resource: '%s'", key.c_str());
 			continue;
 		}
-		Resource->filename = val;
+		Resource->Filename = val;
 	}
 	return true;
 
@@ -172,7 +172,7 @@ private:
 
 	void ExploreDirectory(string Path);
 	string GetLastPathComponent(string Path);
-	string GetFileNameWithoutExtension(string FileName);
+	string GetFileNameWithoutExtension(string Filename);
 };
 
 #endif // _2DE_RESOURCE_H

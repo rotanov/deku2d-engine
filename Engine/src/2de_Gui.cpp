@@ -789,6 +789,7 @@ CMenuItem::CMenuItem()
 
 CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
 {
+	doIgnoreCamera = true;
 	FocusedOnItem = NULL;
 	FocusedOnListNode = NULL;
 	Visible = false;
@@ -809,15 +810,13 @@ void CMenuItem::Render()
 	Reset();
 	CMenuItem *ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
 	while (ChildMenuItem)
-	{
-		glLoadIdentity();
+	{		
 		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
 		Font->scale = Vector2(1.0f, 1.0f);
 		Font->Pos = ChildMenuItem->Position;
 		Font->Print(ChildMenuItem->Text.c_str());
 		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
-	}
-	glLoadIdentity();
+	}	
 	Color = COLOR_WHITE;
 	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
 }

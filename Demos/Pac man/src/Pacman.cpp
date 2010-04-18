@@ -2,6 +2,7 @@
 
 CPacmanBonus::CPacmanBonus(Vector2 APosition) : Position(APosition), Angle(rand() % 360)
 {
+	Sprite.SetLayer(1);
 	Sprite.Position = Vector2(ceil(Position.x), ceil(Position.y));
 	Sprite.SetTexture("PacmanBonus");
 	Sprite.AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
@@ -18,6 +19,8 @@ void CPacmanBonus::Update(float dt)
 	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
 	if ( (AABB.Intersect(AABBself)))
 	{
+		Player->Score += 100;
+		Player->ScoreText.Text = "Score: " + itos(Player->Score);
 		CParticleSystem *Ps = new CParticleSystem;
 		Ps->Init();
 		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 0.0f);
@@ -33,10 +36,15 @@ void CPacmanBonus::Update(float dt)
 	return;
 }
 
-CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO)
+CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0)
 {
+	ScoreText.Text = "Score: " + itos(Score);
 	SetName("Pac-man player");
+	ScoreText.Position = Vector2(10.0f, 10.0f);
+	ScoreText.SetLayer(10);
+	ScoreText.doIgnoreCamera = true;
 	Position = DEFAULT_POSITION;
+	Sprite.SetLayer(1);
 	Sprite.SetTexture("PacmanFrames");
 	Sprite.AddAnimation(true, 50, 32, 32, 4, 2, 7, 32, 32, 0, 0, 0, true);
 	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 1, false);
@@ -94,7 +102,7 @@ CPakmanGame::CPakmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 	Tiles = CFactory::Instance()->Get<CTileset>("PacManTileset");
 	Tiles->CheckLoad();
 	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pacman map");
-	Map->Depth = -0.5f;
+	Map->SetLayer(0);
 	Map->Scaling = 2.0f;
 	//	Map.TileSet = Tiles;
 	for(int i = 0; i < LEVEL_WIDTH; i++)
@@ -112,7 +120,7 @@ CPakmanGame::CPakmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 			}
 
 			Map->GenCells();
-			CSoundMixer::Instance()->SetMusicVolume(50);
+			//CSoundMixer::Instance()->SetMusicVolume(100);
 }
 
 
