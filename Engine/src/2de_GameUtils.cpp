@@ -273,6 +273,8 @@ CAABB CLevelMap::GetCellAABB(const Vector2 &V)
 
 CMapCellInfo* CLevelMap::GetMapCell(size_t HorizontalIndex, size_t VerticalIndex)
 {
+	HorizontalIndex = Clamp<size_t>(HorizontalIndex, 0, HorizontalCellsCount-1);
+	VerticalIndex = Clamp<size_t>(VerticalIndex, 0, VerticalCellsCount-1);
 	return &Cells[GetCellIndex(HorizontalIndex, VerticalIndex)];
 }
 void CCompas::Render()

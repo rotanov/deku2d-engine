@@ -95,6 +95,10 @@ public:
 // 	bool SaveToFile();
 	void Render();
 	CMapCellInfo* GetMapCell(size_t HorizontalIndex, size_t VerticalIndex);
+	CMapCellInfo* GetMapCell(Vector2 APosition) // Position inside map with scaling in mind
+	{
+		return GetMapCell((int)APosition.x / (Scaling * TileSet->TileWidth), (int)APosition.y / (Scaling * TileSet->TileHeight));
+	}
 	CAABB GetCellAABB(const Vector2 &V);
 
 };

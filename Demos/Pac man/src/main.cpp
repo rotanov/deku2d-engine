@@ -15,7 +15,7 @@ bool Init()
 // 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = true;
 // 	CGUIManager::Instance()->SetFocus(MenuRoot);
 
-	new CPakmanGame(new CPacmanPlayer);
+	new CPacmanGame(new CPacmanPlayer);
 	CFactory::Instance()->Get<CFont>("Font")->LoadFromFile();	// ???
 	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("PacMan"), 5000);
 	return true;

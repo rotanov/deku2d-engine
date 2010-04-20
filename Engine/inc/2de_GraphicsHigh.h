@@ -139,7 +139,6 @@ class CSprite : public CRenderObject
 {
 private:
 	CTexture	*Texture;
-	RGBAf		Color;
 
 	unsigned long	EllapsedTime;
 	unsigned long	LastTime;
@@ -154,6 +153,7 @@ private:
 	SAnimationInfo *anim;
 
 public:
+	RGBAf		Color;
 	bool mirror_h;
 	CSprite() : isFirstTimeRendering(true), Color(COLOR_WHITE), animations(NULL),
 		anim(NULL), AnimationsCount(0), EllapsedTime(0), LastTime(0), CurrentFrame(0),
@@ -206,6 +206,8 @@ class CParticleSystem :  public CResource, public CRenderObject, public CUpdateO
 public:
 	CParticle			*Particles;
 	Vector2				Position;					//	позиция системы частиц
+	Vector2				*PtrPosition;
+	
 
 	RGBAf				ColorStart;					//	начальный цвет каждой частицы
 	RGBAf				ColorOver;					//	конечный цвет каждой частицы

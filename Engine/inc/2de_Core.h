@@ -159,18 +159,6 @@ typedef bool (*EventFunc)(SDL_Event&);
 //	"Forever" instead of "for(;;)", anyway, just kidding.
 #define Forever for(;;)
 
-/**
-*	Это дефайны для флагов свойств объекта 
-*	Как-то уныло вышло, вы не находите? Они же почти не используются. 
-*	Т.е. используются, но не так широко, как задуммывалось. И не так активно.
-*/
-#define T_COBJECT		0x01
-#define T_RENDERABLE	0x02
-#define T_UPDATABLE		0x10
-
-#define T_LEFT_MASK		0x0f
-#define T_RIGHT_MASK	0xf0
-
 template<typename T>
 __INLINE void SAFE_DELETE(T*& a) 
 {
@@ -187,23 +175,18 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
-// For sure, colors constants should be placed somewhere not there.
+// For sure, colors constants should be placed somewhere not there. // I lol'd: "somewhere not there", So where?
 #define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
 #define COLOR_RED	RGBAf(0.98f, 0.05f, 0.1f, 1.0f)
 
 /**
-*	CObject - базовый класс. <strike>Всё</strike> наследовать от него. На самом деле не всё.
+*	CObject - базовый класс для многих объектов.
 */
 
 class CObject
 {
 public:
-	unsigned int	type;	//	type - флаги свойств объекта. Я думаю,
-							//	что это устаревший С like подход, который
-							//	во-первых, не факт, что вообще нужен нам,
-							//	во-вторых - лучше заменить каким-нибудь другим.
-
 	virtual			~CObject();
 	CObject();
 	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
@@ -216,8 +199,8 @@ public:
 	unsigned int	GetID() const;
 private:
 	string			name;
-	int				ListRefCount;
-	unsigned int	id;
+	size_t			ListRefCount;
+	size_t			id;
 };
 
 typedef bool (*CObjectCallback)(CObject *Caller);

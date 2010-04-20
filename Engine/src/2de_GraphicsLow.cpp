@@ -7,7 +7,6 @@
 CRenderObject::CRenderObject() : Position(V2_ZERO), Angle(0.0f), Scaling(1.0f), Depth(0.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
 	SetName("CRenderObject");
-	type |= T_RENDERABLE;
 	CRenderManager::Instance()->AddObject(this);
 };
 

@@ -61,15 +61,9 @@ void DumpUnfreed()
 
 #endif // defined(_DEBUG) && defined(_MSC_VER)
 
-CObject::CObject()
+CObject::CObject() : ListRefCount(0), id(++CObjectCount)
 {
-	CObjectCount++;
-	type = ListRefCount = 0;
-	//char * tmp = new char[16];
-	//SDL_itoa(CObjectCount, tmp, 10);
-	name += (string)itos(CObjectCount) + " CObject ";
-	//delete [] tmp;
-	id = CObjectCount;
+	name = itos(CObjectCount) + " CObject ";
 }
 
 CObject::~CObject()
@@ -162,25 +156,19 @@ bool CFile::Open(const string AFilename, EOpenMode Mode)
 	{
 	case OPEN_MODE_READ:
 		File = fopen(Filename.c_str(), "rb");
-		if (File == NULL)
-		{
-			Log("ERROR", "Can't open file %s.", Filename.c_str());
-			return false;
-		}
 		break;
 	case OPEN_MODE_WRITE:
 		File = fopen(Filename.c_str(), "wb");
-		if (File == NULL)
-		{
-			Log("ERROR", "Can't open file %s.", Filename.c_str());
-			return false;
-		}
 		break;
 	default:
 		Log("ERROR", "Can't open file %s: invalid mode.", Filename.c_str());
 		return false;
 	}
-
+	if (File == NULL)
+	{
+		Log("ERROR", "Can't open file %s.", Filename.c_str());
+		return false;
+	}
 	return true;
 }
 
@@ -1074,7 +1062,6 @@ bool CObjectStack::Empty()
 
 CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 {
-	type |= T_UPDATABLE;
 	SetName("CUpdateObject");
 	CUpdateManager::Instance()->AddObject(this);
 }

@@ -217,6 +217,21 @@ private:
 	byte		GetValign();
 };
 
+class CRenderProxy : public CRenderObject
+{
+private:
+	CRenderObject *RenderSource;
+public:
+	CRenderProxy(CRenderObject *ARenderSource) : RenderSource(ARenderSource)
+	{
+		SetName("CRenderProxy");
+	}
+	void Render()
+	{
+		RenderSource->Render();
+	}
+};
+
 //////////////////////////////////////////////////////////////////////////
 //Camera
 

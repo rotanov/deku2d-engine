@@ -305,6 +305,8 @@ const Vector2 V2_DIR_RIGHT	= (-V2_DIR_LEFT);
 const Vector2 V2_DIR_UP		= Vector2(0.0f, 1.0f);
 const Vector2 V2_DIR_DOWN	= (-V2_DIR_UP);
 
+const Vector2 V2_DIRECTIONS[4] = {V2_DIR_LEFT, V2_DIR_DOWN, V2_DIR_RIGHT, V2_DIR_UP,};
+
 union Vector3{
 public:
 	struct

@@ -1,11 +1,12 @@
 #include "Pacman.h"
 
-CPacmanBonus::CPacmanBonus(Vector2 APosition) : Position(APosition), Angle(rand() % 360)
+CPacmanBonus::CPacmanBonus(Vector2 APosition, CSprite *ASprite) : Position(APosition),
+	Angle(rand() % 360), RenderProxy(NULL), Sprite(ASprite)
 {
-	Sprite.SetLayer(1);
-	Sprite.Position = Vector2(ceil(Position.x), ceil(Position.y));
-	Sprite.SetTexture("PacmanBonus");
-	Sprite.AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
+	RenderProxy = new CRenderProxy(Sprite);
+	RenderProxy->Position = Position;
+	RenderProxy->SetLayer(1);
+	SetName("Pacman bonus (mushroom)");
 }
 
 void CPacmanBonus::Update(float dt)
@@ -14,7 +15,7 @@ void CPacmanBonus::Update(float dt)
 	Angle += 10.0f;
 	if (Angle > 360.0f)
 		Angle = 0.0f;
-	Sprite.Position = Vector2(ceil(Position.x), ceil(Position.y + Period));
+	RenderProxy->Position = Vector2(ceil(Position.x), ceil(Position.y + Period));
 	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
 	if ( (AABB.Intersect(AABBself)))
@@ -23,26 +24,35 @@ void CPacmanBonus::Update(float dt)
 		Player->ScoreText.Text = "Score: " + itos(Player->Score);
 		CParticleSystem *Ps = new CParticleSystem;
 		Ps->Init();
-		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 0.0f);
-		Ps->ColorOver = RGBAf(0.3f, 0.3f, 0.9f, 1.0f);
-		Ps->SizeStart = 64;
-		Ps->SizeOver = 64;
+		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 1.0f);
+		Ps->ColorOver = RGBAf(0.3f, 0.3f, 0.9f, 0.0f);
+		Ps->SizeStart = 16;
+		Ps->SizeOver = 32;
 		Ps->Emission = 10;
 		Ps->Life = 0.5;
 		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
-		Ps->Position = Position - Vector2(32, 32);
+		Ps->Position = Position;
 		Dead = true;
 	}
 	return;
 }
 
-CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0)
+CPacmanBonus::~CPacmanBonus()
+{
+	delete RenderProxy;
+}
+CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
 {
 	ScoreText.Text = "Score: " + itos(Score);
+	DamageText.Text = "Damage: " + itos(Damage);
+	DamageText.Color = COLOR_RED;
 	SetName("Pac-man player");
+	DamageText.Position = Vector2(10.0f, 30.0f);
 	ScoreText.Position = Vector2(10.0f, 10.0f);
 	ScoreText.SetLayer(10);
 	ScoreText.doIgnoreCamera = true;
+	DamageText.doIgnoreCamera = true;
+	DamageText.SetLayer(10);
 	Position = DEFAULT_POSITION;
 	Sprite.SetLayer(1);
 	Sprite.SetTexture("PacmanFrames");
@@ -54,6 +64,7 @@ CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0)
 
 void CPacmanPlayer::Update(float dt)
 {
+	Sprite.Color += RGBAf(0.01f, 0.01, 0.01f, 0.01f);
 	Sprite.SetAnimation(0);
 	if (Velocity.Length() < 20.0f)
 		Sprite.SetAnimation(1);
@@ -97,8 +108,13 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 	return true;
 }
 
-CPakmanGame::CPakmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
+CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 {
+	BonusSprite.Visible = false;
+	BonusSprite.AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
+	BonusSprite.SetTexture("PacmanBonus");
+
+
 	Tiles = CFactory::Instance()->Get<CTileset>("PacManTileset");
 	Tiles->CheckLoad();
 	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pacman map");
@@ -116,7 +132,13 @@ CPakmanGame::CPakmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 				Map->GetMapCell(i, j)->index = Factor < 25 ? 1 : 0;
 				if (Factor >= 25 && (i != 1 || j != 1))
 					if (rand() % 10 < 2)
-						(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32)))->Player = Player;
+						(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), &BonusSprite))->Player = Player;
+					else if (rand() % 20 < 2)
+					{
+						CPacmanEnemy *Enemy = new CPacmanEnemy(Vector2(i * 64 + 32, j * 64 + 32));
+						Enemy->Player = Player;
+						Enemy->Map = Map;
+					}
 			}
 
 			Map->GenCells();
@@ -124,7 +146,7 @@ CPakmanGame::CPakmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 }
 
 
-void CPakmanGame::Update(float dt)
+void CPacmanGame::Update(float dt)
 {
 	if (Player == NULL)
 		return;
@@ -211,4 +233,49 @@ void CPakmanGame::Update(float dt)
 		}
 		break;
 	}
+}
+
+CPacmanEnemy::CPacmanEnemy(Vector2 APosition) : Position(APosition), Player(NULL),
+Direction(static_cast<EDirection>(rand()%4))
+{
+	Sprite.SetLayer(1);
+	Sprite.SetTexture("PacmanEnemy");
+	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 0, false);
+	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 0, 1, false);
+	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 32, 2, false);
+	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 32, 3, false);
+	Sprite.SetAnimation(Direction);
+	Sprite.Position = Position;
+}
+
+void CPacmanEnemy::Update(float dt)
+{
+	if (Map->GetMapCell(Position + V2_DIRECTIONS[Direction] * 32)->index == 1 || rand()%100 < 2)
+	{
+		Direction = static_cast<EDirection>((Direction + 1) % 4);
+	}
+	Position = Position + V2_DIRECTIONS[Direction] * 128 * dt;
+	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
+	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
+	if ( (AABB.Intersect(AABBself)) && Player->Sprite.Color.g >= 0.9f)
+	{
+		Player->Damage += 32;
+		Player->DamageText.Text = "Damage: " + itos(Player->Damage);
+
+		Player->Sprite.Color = COLOR_RED;
+		CParticleSystem *Ps = new CParticleSystem;
+		Ps->Init();
+		Ps->ColorStart = COLOR_RED;
+		Ps->ColorOver = COLOR_RED;
+		Ps->SizeStart = 4;
+		Ps->SizeOver = 4;
+		Ps->SizeVariability = 2;
+		Ps->Emission = 10;
+		Ps->Life = 0.5;
+		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");
+		//Ps->Position = Position;
+		Ps->PtrPosition = &Player->Position;
+
+	}
+	Sprite.Position = Position;
 }

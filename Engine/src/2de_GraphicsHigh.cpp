@@ -711,6 +711,11 @@ void CParticleSystem::Init()
 
 void CParticleSystem::Update(float dt)
 {
+	if (PtrPosition != NULL)
+	{
+		Position = *PtrPosition;
+		//CRenderObject::Position = *PtrPosition;
+	}
 #ifdef _DEBUG_DISABLE_PARTICLES_UPDATE
 	return false;
 #endif
@@ -730,7 +735,7 @@ void CParticleSystem::Update(float dt)
 			}
 			Particles[i].Position += Particles[i].Velocity*dt;
 			Particles[i].Color += (Particles[i].DeltaColor*dt);
-			Particles[i].Size += Particles[i].DeltaSize;
+			Particles[i].Size += Particles[i].DeltaSize*dt;
 
 		}
 		else
@@ -836,10 +841,14 @@ void CParticleSystem::Render()
 		for(int i = 0; i < ParticlesActive; i++)
 		{
 			Particles[i].Color.glSet();
-			glTexCoord2f(0.0f, 0.0f); glVertex2f(Particles[i].Position.x,						Particles[i].Position.y					);			
-			glTexCoord2f(1.0f, 0.0f); glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y					);			
-			glTexCoord2f(1.0f, 1.0f); glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);			
-			glTexCoord2f(0.0f, 1.0f); glVertex2f(Particles[i].Position.x,						Particles[i].Position.y + Particles[i].Size);			
+			glTexCoord2f(0.0f, 0.0f);
+				glVertex2f(Particles[i].Position.x - Particles[i].Size,	Particles[i].Position.y - Particles[i].Size);			
+			glTexCoord2f(1.0f, 0.0f);
+				glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y - Particles[i].Size);			
+			glTexCoord2f(1.0f, 1.0f);
+				glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);			
+			glTexCoord2f(0.0f, 1.0f);
+				glVertex2f(Particles[i].Position.x - Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);			
 		}
 		glEnd();
 		glPopAttrib();
@@ -942,7 +951,7 @@ void CParticleSystem::SetUserCreate( FCreateFunc func )
 	procUserCreate = func;
 }
 
-CParticleSystem::CParticleSystem()
+CParticleSystem::CParticleSystem() : PtrPosition(NULL)
 {
 	Texture = NULL;
 	Particles = NULL;
