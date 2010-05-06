@@ -304,7 +304,7 @@ bool CFont::LoadFromFile()
 	file.ReadLine(FontImageName);	
 
 	CTextureManager *TexMan = CTextureManager::Instance();
-	Texture = TexMan->GetTextureByName(FontImageName);
+	Texture = TexMan->GetObject(FontImageName);
 
 	file.Read(bbox, sizeof(bbox));
 	file.Close();
@@ -585,7 +585,7 @@ CTexture* CFont::GetTexture()
 
 void CFont::SetTexture(const string &TextureName)
 {
-	Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
+	Texture = CTextureManager::Instance()->GetObject(TextureName);
 }
 //////////////////////////////////////////////////////////////////////////
 //Camera
@@ -700,15 +700,12 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
-	Reset();
-	CRenderObject *data = dynamic_cast<CRenderObject*>(Next());
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // !!!
 	//glPushMatrix();
 	Camera.Update();
-
-
-	while (data)
+	for(ManagerConstIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
+		CRenderObject *data = *it;
 		if (data->Visible)
 		{
 			glLoadIdentity();
@@ -719,7 +716,6 @@ bool CRenderManager::DrawObjects()
 			glRotatef(data->GetAngle(), 0.0f, 0.0f, 1.0f);
 			data->Render();
 		}
-		data = dynamic_cast<CRenderObject*>(Next());
 	}
 	//glPopMatrix();
 
@@ -810,7 +806,7 @@ CFontManager::CFontManager()
 CFont* CFontManager::GetFont(const char* fontname)	
 {
 	CFont *TempFont = NULL;
-	TempFont = dynamic_cast<CFont*>(GetObject(&((string)fontname)));
+	TempFont = GetObject(fontname);
 	if (TempFont)
 		TempFont->CheckLoad();
 	return TempFont;
@@ -818,7 +814,7 @@ CFont* CFontManager::GetFont(const char* fontname)
 
 CFont* CFontManager::GetFontEx(string fontname)
 {
-	return dynamic_cast<CFont*>(GetObject(&fontname));
+	return (GetObject(fontname));
 }
 
 bool CFontManager::SetCurrentFont(const char* fontname)
@@ -855,11 +851,12 @@ bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 	return true;
 }
 
-bool CFontManager::AddObject(CObject *object)
+template<typename T>
+bool CFontManager::AddObject(T *AObject)
 {
-	CList::AddObject(object);
+	CSomeManager<CFont>::AddObject(AObject);
 	if (CurrentFont == NULL)
-		CurrentFont = dynamic_cast<CFont*>(object);
+		CurrentFont = AObject;
 	return true;
 }
 
@@ -872,14 +869,14 @@ CTextureManager::CTextureManager()
 	SetName("Texture manager");
 }
 
-CTexture* CTextureManager::GetTextureByName(const string &TextureName)
-{
-	CTexture *TempTexture = NULL;
-	TempTexture = dynamic_cast<CTexture*>(GetObject(&TextureName));
-	if (TempTexture)
-		TempTexture->CheckLoad();
-	return TempTexture;
-}
+// CTexture* CTextureManager::GetObject(const string &TextureName)
+// {
+// 	CTexture *TempTexture = NULL;
+// 	TempTexture = dynamic_cast<CTexture*>(GetObject(&TextureName));
+// 	if (TempTexture)
+// 		TempTexture->CheckLoad();
+// 	return TempTexture;
+// }
 
 
 //////////////////////////////////////////////////////////////////////////

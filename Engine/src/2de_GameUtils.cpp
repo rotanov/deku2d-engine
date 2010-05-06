@@ -18,7 +18,8 @@ bool CTileset::LoadFromFile()
 	char * TextureName = NULL;
 	file.ReadLine(TextureName);
 	//Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
-	Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
+	Texture = CTextureManager::Instance()->GetObject(TextureName);
+	Texture->CheckLoad();
 
 	file.Read(&TileWidth, sizeof(TileWidth));
 	file.Read(&TileHeight, sizeof(TileHeight));

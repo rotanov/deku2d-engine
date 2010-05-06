@@ -38,7 +38,7 @@ __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 	else
 	{
 		if (Sender!=NULL)
-			Log("ERROR", "Undefined event for object %s!", Sender->name);
+			Log("ERROR", "Undefined event for object %s!", Sender->Name);
 		else
 			Log("ERROR", "Undefined event for non existing object!");
 	}

@@ -195,7 +195,7 @@ bool CEngine::Init()
 	}
 
 	ilInit(); // Инициализация DevIL
-	CSoundMixer::Instance()->SetMusicVolume(stoi((Config.First->Get("BGMVolume"))->GetValue()));
+	CSoundMixer::Instance()->SetMusicVolume(stoi((Config.First->Get("MusicVolume"))->GetValue()));
 
 	SDL_EnableUNICODE(1);
 

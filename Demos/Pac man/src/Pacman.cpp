@@ -39,7 +39,7 @@ void CPacmanBonus::Update(float dt)
 
 CPacmanBonus::~CPacmanBonus()
 {
-	delete RenderProxy;
+	CDestroyer().Destroy(RenderProxy);  // delete RenderProxy worked just fine. BUT IT SHOULDN'T COMPILE. TODO: check, what's going on
 }
 CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
 {

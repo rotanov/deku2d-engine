@@ -161,7 +161,7 @@ bool Init()
 		FontEffect->SizeStart = 10;
 		FontEffect->SizeVariability = 2.0f;
 		FontEffect->Position = Vector2(0, 0);
-		FontEffect->Texture = CTextureManager::Instance()->GetTextureByName("Particle");
+		FontEffect->Texture = CTextureManager::Instance()->GetObject("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////
 	//CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);
@@ -211,7 +211,7 @@ bool Init()
 
 
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = true;
-	CGUIManager::Instance()->SetFocus(MenuRoot);
+//	CGUIManager::Instance()->SetFocus(MenuRoot);
 
 // 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.
 // 	new CButton(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// A этот будет работать!

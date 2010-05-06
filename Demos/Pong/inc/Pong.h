@@ -144,9 +144,9 @@ public:
 	}
 	~CPongGame()
 	{
-		SAFE_DELETE(PlayerOne);
-		SAFE_DELETE(PlayerTwo);
-		SAFE_DELETE(Ball);
+		CDestroyer().Destroy(PlayerOne);
+		CDestroyer().Destroy(PlayerTwo);
+		CDestroyer().Destroy(Ball);
 	}
 	void Render()
 	{

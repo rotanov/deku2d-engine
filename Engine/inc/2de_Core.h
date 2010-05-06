@@ -2,35 +2,34 @@
 #define _2DE_CORE_H
 
 #ifdef _MSC_VER
+	//#pragma warning (disable	:	4312)   //
+	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
+	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
+	#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
+	#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
+	#pragma warning (disable	:	4996)	
+	#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
+	#pragma warning (disable	:	4996)	//	rare
+	#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
+	#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
+	#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
+	#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
+	#pragma warning (disable	:	4291)	//	void *operator new(unsigned int,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
+	//after w4
+	#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
+	#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
+	 #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
+	#pragma warning (disable	:	4100)	//	unreferenced formal parameter
+	 #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
+	#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
+	 #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
+	#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
+	#pragma warning (disable	:	4702)	//	unreachable code ^^"
+	#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
 
-//#pragma warning (disable	:	4312)   //
-#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
-#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
-#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
-#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
-#pragma warning (disable	:	4996)	
-#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
-#pragma warning (disable	:	4996)	//	rare
-#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
-#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
-#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
-#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
-//after w4
-#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
-#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
- #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
-#pragma warning (disable	:	4100)	//	unreferenced formal parameter
- #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
-#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
- #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
-#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
-#pragma warning (disable	:	4702)	//	unreachable code ^^"
-#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
-
-#define VC_LEANMEAN
-#define _CRT_SECURE_NO_DEPRECATE
-#define NOMINMAX
-
+	#define VC_LEANMEAN
+	#define _CRT_SECURE_NO_DEPRECATE
+	#define NOMINMAX
 #endif // _MSC_VER
 
 #include <SDL/SDL.h>
@@ -42,12 +41,14 @@
 #include <sstream>
 #include <time.h>
 #include <assert.h>
+#include <vector>
 
 using namespace std;
 
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
+	#define GetObject  GetObject
 #endif  //_WIN32
 
 #define USE_SDL_OPENGL
@@ -74,7 +75,7 @@ using namespace std;
 #endif //_WIN32
 
 #ifdef _MSC_VER
-#define snprintf _snprintf
+	#define snprintf _snprintf
 #endif //_MSC_VER
 
 /**
@@ -175,37 +176,32 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
-// For sure, colors constants should be placed somewhere not there. // I lol'd: "somewhere not there", So where?
-#define COLOR_WHITE RGBAf(1.0f, 1.0f, 1.0f, 1.0f)
-#define COLOR_BLACK RGBAf(0.0f, 0.0f, 0.0f, 1.0f)
-#define COLOR_RED	RGBAf(0.98f, 0.05f, 0.1f, 1.0f)
-
 /**
 *	CObject - базовый класс для многих объектов.
 */
 
 class CObject
 {
+	friend class CDestroyer;
 public:
-	virtual			~CObject();
 	CObject();
 	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	void			IncListRefCount();
-	void			DecListRefCount();
-	const int		GetListRefCount() const;
+	void			IncRefCount();
+	void			DecRefCount();
+	const int		GetRefCount() const;
 	const char*		GetName() const;
 	void			SetName(const char* AObjectName);
 	void			SetName(const string &AObjectName);
 	unsigned int	GetID() const;
+protected:
+	virtual ~CObject();	
 private:
-	string			name;
+	bool			Deleted;
+	string			Name;
 	size_t			ListRefCount;
-	size_t			id;
+	size_t			ID;
 };
-
 typedef bool (*CObjectCallback)(CObject *Caller);
-
-
 /**
 *	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
 *	Первый параметр - произошло ли событие KEY_PRESSED или KEY_RELEASED
@@ -215,30 +211,94 @@ typedef bool (*CObjectCallback)(CObject *Caller);
 */
 typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);
 
-/**
-*	CNodeObject - это узел списка.
-*/
 
-class CListNode
+class CDestroyer
 {
 public:
-	CListNode *next, *prev;
-	CListNode();
-	CObject* GetData();
-	void SetData(CObject *AData);
-private:
-	CObject *Data;					// Содержимое узла.
+	__INLINE void Destroy(CObject* AObject)
+	{
+		if (AObject == NULL || AObject->Deleted /*|| AObject->ListRefCount > 0*/)
+			return;
+		AObject->Deleted = true;
+		delete AObject, AObject = NULL;
+	}
 };
 
-/**
-*	ObjCompCall - тип ф-и для сравнения двух объектов
-*/
-typedef bool (*ObjCompCall)(CObject*, CObject*);
+// Template class for some manager
 
-/**
-*	ObjCall - тип ф-и для выполнения действий над объектом
-*/
-typedef bool (*ObjCall)(CObject*);
+template<typename T>	// Тип объектов, которыми управляет менеджер
+class CSomeManager : public virtual CObject
+{
+public:
+	typedef list<T*> ManagerContainer;
+//protected:
+	ManagerContainer Objects;
+public:
+	
+	typedef ManagerContainer ManagerListType;
+	typedef typename ManagerContainer::iterator ManagerIterator;
+	typedef typename ManagerContainer::const_iterator ManagerConstIterator;
+	T* GetObject(const string &AName) const
+	{
+		for(ManagerConstIterator it = Objects.begin(); it != Objects.end(); it++)
+		{
+			if ((*it)->GetName() == AName)
+				return *it;
+		}
+		return NULL;
+	}
+	void AddObject(T *AObject)
+	{
+		AObject->IncRefCount();
+		Objects.push_back(AObject);
+	}
+	void DelObject(size_t AID)
+	{
+		T* temp = NULL;
+		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
+		{
+			if ((*it)->GetID() == AID)
+			{
+				temp = *it;
+				break;
+			}
+		}
+		if (temp == NULL)
+			return;
+		Objects.remove(temp);
+		temp->DecRefCount();
+		if (temp->GetRefCount() == 0)
+			CDestroyer().Destroy(temp);
+	}
+	void DelObject(const string &AName)
+	{
+		T* temp = NULL;
+		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
+		{
+			if ((*it)->GetName() == AName)
+			{
+				temp = *it;
+				break;
+			}
+		}
+		Objects.remove(temp);
+		temp->DecRefCount();
+		if (temp->GetRefCount() == 0)
+			CDestroyer().Destroy(temp);
+	}
+
+	virtual ~CSomeManager()
+	{
+		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
+		{
+			if (*it == NULL)
+				continue;
+			(*it)->DecRefCount();
+			if ((*it)->GetRefCount() == 0)
+				CDestroyer().Destroy((*it));
+		}
+	}
+};
 
 /**
  * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
@@ -348,73 +408,6 @@ protected:
 
 #define Log CLog::Instance()->WriteToLog
 
-/**
-*	CObjectList - список объектов. Двусвязный.
-*	Внимание, после лекции Лудова по спискам я заявляю, что эта реализация если не ГОВНО, то
-*	говно. Да-да, надо переписывать. Опять. Итераторы и всё такое. И концепция контейнеров.
-*/
-/**
-*	А после лекции Кленина - этот список точно ГОВНО. см. Issue #какой-то там.
-*/
-
-class CList : public virtual CObject
-{
-public:
-					CList();
-					~CList();
-	virtual bool		AddObject(CObject *AObject);
-	bool				DelObject(CObject *AObject);
-	bool				DelObject(const string *AObjectName);
-	bool				DelObject(const char *AObjectName);
-	bool				DelObject(int AId);
-	void				Reset();
-	bool				Enum(CObject* &result);
-	CObject*			Next();
-	void				Clear();
-	CObject*			GetObject(const string* AObjectName) const;
-	CObject*			GetObject(const char* AObjectName) const;
-	CObject*			GetObject(int AId) const;
-	CListNode*			GetListNode(const CObject* AObject) const;
-	CListNode*			GetListNode(const string* AObjectName) const;
-	CListNode*			GetListNode(unsigned int AId) const;
-	int					GetObjectsCount() const;
-	CListNode*			GetFirst();
-	CListNode*			GetLast();
-	bool				Contains(const string &AObjectName) const;
-
-	bool				Call(ObjCall callproc);							
-	void				Sort(ObjCompCall comp);							
-	void				DumpToLog();
-private:
-	CListNode			*first;					
-	CListNode			*last;					
-	CListNode			*current;					
-	int					NodeCount;
-	void				DelNode(CListNode* AListNode);
-	void				SwapNodes(CListNode *Node0, CListNode *Node1);
-protected:
-	CListNode*			RelativeNext(CListNode* AListNode);
-	CListNode*			RelativePrev(CListNode* AListNode);
-};
-
-/**
-*	Стэк объектов.
-*/
-
-const int MAX_STACK_ELEMENTS_COUNT = 16;
-
-class CObjectStack : public CObject
-{
-public:
-	CObjectStack();
-	bool Push(CObject* AObject);
-	CObject* Pop();
-	bool Empty();
-private:
-	CObject *Objects[MAX_STACK_ELEMENTS_COUNT];
-	int last;
-};
-
 class CUpdateObject : public virtual CObject
 {
 public:
@@ -426,17 +419,17 @@ public:
 };
 
 
-class CGarbageCollector : public CList
+class CGarbageCollector : public CSomeManager<CObject>
 {
 public:
 	CGarbageCollector();
-	~CGarbageCollector()
+	virtual ~CGarbageCollector()
 	{
-		CObject *data;
-		while(Enum(data))
+		//CObject *data;
+		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
 		{
-			Log("INFO", "Singletone killer deleting object named: %s id: %u", data->GetName(), data->GetID());
-			delete data;
+			Log("INFO", "Singletone killer deleting object named: %s id: %u", (*it)->GetName(), (*it)->GetID());
+			CDestroyer().Destroy(*it);
 		}
 		#if defined(_DEBUG) && defined(_MSC_VER)
 				DumpUnfreed();
@@ -455,7 +448,7 @@ typedef CGarbageCollector CSingletoneKiller;
 *	И вообще что-то мне подсказывает, что он не здесь должен быть.
 */
 
-class CUpdateManager : public CList, public CTSingleton<CUpdateManager>
+class CUpdateManager : public CSomeManager<CUpdateObject>/*public CList,*/, public CTSingleton<CUpdateManager>
 {
 public:	
 	bool UpdateObjects();
@@ -574,7 +567,7 @@ protected:
 
 __INLINE string itos(int i)
 {
-	stringstream s;
+	ostringstream s;
 	s << i;
 	return s.str();
 }
@@ -588,16 +581,13 @@ __INLINE int stoi(const string &src)
 	return i;
 }
 
-// And then
-// #include <sstream>
-// 
-// template <class T>
-// inline std::string to_string (const T& t)
-// {
-// 	std::stringstream ss;
-// 	ss << t;
-// 	return ss.str();
-// }
+template <typename T>
+__INLINE string to_string(const T& t)
+{
+	ostringstream s;
+	s << t;
+	return s.str();
+}
 
 #endif // _2DE_CORE_H
 

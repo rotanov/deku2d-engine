@@ -30,5 +30,5 @@ int	main(int argc, char *argv[])
 	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
 	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);	
 	Ninja->Run();
-	return 0x1;
+	return 0;
 }

@@ -8,4 +8,5 @@
 	FpsLimit					= "60"
 	DataPath					= "../../../Data"
 	doLoadDefaultResourceList	= "true" // temp
+	MusicVolume					= "10"
 </configuration>

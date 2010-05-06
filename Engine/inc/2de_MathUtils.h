@@ -1153,7 +1153,7 @@ union Vector4
 		m.m[2].z = 1.0f - (xx + yy);
     }
 #ifdef USING_OPENGL
-		__INLINE void glSet()
+		__INLINE void glSet() const
 		{
 			glColor4fv(&x);
 		}

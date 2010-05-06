@@ -169,7 +169,7 @@ public:
 	void Update(float dt);
 };
 
-class CTankManager : public CList, public CUpdateObject, public CRenderObject
+class CTankManager : CSomeManager<CObject>/*public CList*/, public CUpdateObject, public CRenderObject
 {
 public:	
 	CTankMap *Map;

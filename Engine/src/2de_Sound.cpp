@@ -98,7 +98,7 @@ bool CMusic::LoadFromFile()
 CSound* CSoundManager::GetSoundByName(const string &SoundName)
 {
 	CSound *Result = NULL;
-	Result = dynamic_cast<CSound*>(GetObject(&SoundName));
+	Result = GetObject(SoundName);
 	if (Result)
 		Result->CheckLoad();
 	return Result;
@@ -115,7 +115,7 @@ CSoundManager::CSoundManager()
 CMusic* CMusicManager::GetMusicByName(const string &MusicName)
 {
 	CMusic *Result = NULL;
-	Result = dynamic_cast<CMusic*>(GetObject(&MusicName));
+	Result = GetObject(MusicName);
 	if (Result)
 		Result->CheckLoad();
 	return Result;

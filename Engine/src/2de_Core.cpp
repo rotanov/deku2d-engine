@@ -61,9 +61,9 @@ void DumpUnfreed()
 
 #endif // defined(_DEBUG) && defined(_MSC_VER)
 
-CObject::CObject() : ListRefCount(0), id(++CObjectCount)
+CObject::CObject() : Deleted(false), ListRefCount(0), ID(++CObjectCount)
 {
-	name = itos(CObjectCount) + " CObject ";
+	Name = itos(CObjectCount) + " CObject ";
 }
 
 CObject::~CObject()
@@ -75,46 +75,46 @@ bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	return true;
 }
 
-void CObject::IncListRefCount()
+void CObject::IncRefCount()
 {
 	ListRefCount++;
 }
 
-void CObject::DecListRefCount()
+void CObject::DecRefCount()
 {
 	ListRefCount--;
 	if (ListRefCount < 0)
 	{
-		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", name.c_str(), id, ListRefCount);
+		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", Name.c_str(), ID, ListRefCount);
 #ifdef CRITICAL_ERRORS_MESSAGE_BOXES
 		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
 #endif // CRITICAL_ERRORS_MESSAGE_BOXES
 	}
 }
 
-const int CObject::GetListRefCount() const
+const int CObject::GetRefCount() const
 {
 	return ListRefCount;
 }
 
 const char* CObject::GetName() const
 {
-	return name.c_str();
+	return Name.c_str();
 }
 
 unsigned int CObject::GetID() const
 {
-	return id;
+	return ID;
 }
 
 void CObject::SetName(const char* AObjectName)
 {
-	name = AObjectName;
+	Name = AObjectName;
 }
 
 void CObject::SetName(const string &AObjectName)
 {
-	name = AObjectName;
+	Name = AObjectName;
 }
 
 
@@ -412,344 +412,6 @@ size_t CFile::Size() const
 }
 
 
-/************************************************************************/
-/* CList, CListNode                                                     */
-/************************************************************************/
-CListNode::CListNode()
-{
-	next = prev = NULL;
-	Data = NULL;
-}
-
-CObject* CListNode::GetData()
-{
-	return Data;
-}
-
-void CListNode::SetData(CObject *object)
-{
-	Data = object;
-}
-
-CList::CList()
-{
-	SetName("CList");
-	first = last = current = NULL;
-	NodeCount = 0;
-}
-
-CList::~CList()
-{
-	//Clear();
-}
-
-bool CList::AddObject(CObject *AObject)
-{
-	if (!AObject)
-		return false;
-	CListNode *ListNode = new CListNode;
-	ListNode->SetData(AObject);
-	ListNode->prev = last;
-	if (last)
-		last->next = ListNode;
-	else
-		first = ListNode;	
-	last = ListNode;
-	NodeCount++;
-	AObject->IncListRefCount();
-	return false;
-}
-
-bool CList::DelObject(CObject *AObject)
-{
-	CListNode *ListNode = GetListNode(AObject);
-	if (!ListNode)
-	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObject->GetName(), GetName(), GetID());
-		return false;
-	}
-	DelNode(ListNode);
-	return true;
-}
-
-bool CList::DelObject(const string *AObjectName)
-{
-	CListNode *ListNode = GetListNode(AObjectName);
-	if (!ListNode)
-	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
-		return false;
-	}
-	DelNode(ListNode);
-	return true;
-}
-
-bool CList::DelObject(const char *AObjectName)
-{
-	CListNode *ListNode = GetListNode(&((string)AObjectName));
-	if (!ListNode)
-	{
-		Log("ERROR", "Can't delete object named %s from %s id: %d: object not found", AObjectName, GetName(), GetID());
-		return false;
-	}
-	DelNode(ListNode);
-	return true;
-}
-
-bool CList::DelObject(int AId)
-{
-	CListNode *ListNode = GetListNode(AId);
-	if (!ListNode)
-	{
-		Log("ERROR", "Can't delete object id:%d from %s id: %d: object not found", AId, GetName(), GetID());
-		return false;
-	}
-	DelNode(ListNode);
-	return true;
-}
-
-void CList::Reset()
-{
-	current = NULL;
-}
-
-bool CList::Enum(CObject* &result)
-{
-	result = NULL;
-	if (!current)
-		result = (current = first)?current->GetData():NULL;
-	else
-		result = (current = current->next)?current->GetData():NULL;
-	return result;
-}
-
-CObject* CList::Next()
-{
-	if (!current)
-		return (current = first)?current->GetData():NULL;
-	return (current = current->next)?current->GetData():NULL;
-}
-
-void CList::Clear()
-{
-	while (first != NULL)
-	{
-		CListNode *tmp = first;
-		first = first->next;
-		//delete tmp;
-		DelNode(tmp);
-	}
-	NodeCount = 0;
-	first = NULL;
-	last = NULL;
-	current = NULL;
-}
-
-CObject* CList::GetObject(const string* AObjectName) const
-{
-	CListNode* ListNode = GetListNode(AObjectName);	
-	return ListNode?ListNode->GetData():NULL;
-}
-
-CObject* CList::GetObject(const char* AObjectName) const
-{
-	CListNode* ListNode = GetListNode(&((string)AObjectName));	
-	return ListNode?ListNode->GetData():NULL;
-}
-
-CObject* CList::GetObject(int AId) const
-{
-	CListNode* ListNode = GetListNode(AId);	
-	return ListNode?ListNode->GetData():NULL;
-}
-
-CListNode* CList::GetListNode(const CObject* AObject) const
-{
-	if (!AObject)
-	{
-		Log("ERROR", "CList::GetListNode: Trying to find object with NULL adress in %s id: %u", GetName(), GetID());
-		return NULL;
-	}
-	CListNode* TempNode = first;
-	while (TempNode)
-	{
-		if (TempNode->GetData() == AObject)
-			return TempNode;
-		TempNode = TempNode->next;
-	}
-	Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObject->GetName(), this->GetName(), this->GetID());
-	return NULL;
-}
-
-CListNode* CList::GetListNode(const string* AObjectName) const
-{
-	if (!AObjectName)
-	{
-		Log("ERROR", "CList::GetListNode: Trying to find object with NULL name pointer in %s id: %u", GetName(), GetID());
-		return NULL;
-	}
-	CListNode* TempNode = first;
-	while (TempNode)
-	{		
-		// case insensitive due to the fact that win32 filenames are too.
-		if (SDL_strcasecmp( TempNode->GetData()->GetName(),AObjectName->c_str()) == 0)  
-			return TempNode;
-		TempNode = TempNode->next;
-	}
-	Log("ERROR", "CList::GetListNode: Object named '%s' not found in %s id: %u", AObjectName->c_str(), GetName(), GetID());
-	return NULL;
-}
-
-CListNode* CList::GetListNode(unsigned int AId) const
-{
-	CListNode* TempNode = first;
-	while (TempNode)
-	{
-		if (TempNode->GetData()->GetID() == AId)
-			return TempNode;
-		TempNode = TempNode->next;
-	}
-	Log("ERROR", "CList::GetListNode: Object with id: %d not found in %s id: %u", AId, GetName(), GetID());
-	return NULL;
-}
-
-int CList::GetObjectsCount() const
-{
-	return NodeCount;
-}
-
-CListNode* CList::GetFirst()
-{
-	return first;
-}
-
-CListNode* CList::GetLast()
-{
-	return last;
-}
-
-bool CList::Contains(const string &AObjectName) const
-{
-	CListNode* TempNode = first;
-	while (TempNode)
-	{
-		if (SDL_strcasecmp(TempNode->GetData()->GetName(), AObjectName.c_str()) == 0)
-			return true;
-		TempNode = TempNode->next;
-	}
-	return false;
-}
-
-bool CList::Call(ObjCall callproc)
-{
-	CListNode *tmp = first;
-	while (tmp)
-	{
-		if (!(callproc)(tmp->GetData()))
-			return false;		
-		tmp = tmp->next;
-	}
-	return true;
-}
-
-void CList::Sort(ObjCompCall comp)
-{
-	if (first == NULL)
-		return;
-	bool b = true;
-	while (b)
-	{
-		b = false;
-		CListNode *tmp = first;
-		while (tmp != NULL)
-		{
-			if (tmp->next != NULL)
-			{
-				if (!(comp)(tmp->GetData(), tmp->next->GetData()))
-				{
-					b = true;
-					SwapNodes(tmp, tmp->next);
-				}
-			}
-			tmp = tmp->next;
-		}
-	}
-}
-
-void CList::DumpToLog()
-{
-	CObject *Temp = NULL;
-	Reset();
-	while (Enum(Temp))
-		Log("CObject full list", "\x9Name:\x9\x9%s\x9\x9ID:\x9%d", Temp->GetName(), Temp->GetID());
-}
-
-void CList::DelNode(CListNode* AListNode)
-{
-	if (!AListNode)
-		return;
-	if (current == AListNode)
-		current = AListNode->next;
-	if (!AListNode->prev)
-		first = AListNode->next;
-	else
-		AListNode->prev->next = AListNode->next;
-	if (!AListNode->next)
-		last = AListNode->prev;
-	else
-		AListNode->next->prev = AListNode->prev;
-	CObject * Data = AListNode->GetData();
-	if (Data !=	NULL)
-		Data->DecListRefCount();
-// 	if (Data->GetListRefCount() == 0)
-// 		SAFE_DELETE(Data);
-	SAFE_DELETE(AListNode);
-	NodeCount--;
-}
-
-void CList::SwapNodes(CListNode *Node0, CListNode *Node1)
-{
-	CListNode *lft = Node0->prev;
-	Node0->prev = Node1->prev;
-	Node1->prev = lft;
-	if (Node0->prev != NULL)
-		Node0->prev->next = Node0;
-	else
-		first = Node0;
-	if (Node1->prev != NULL)
-		Node1->prev->next = Node1;
-	else
-		first = Node1;
-	lft = Node0->next;
-	Node0->next = Node1->next;
-	Node1->next = lft;
-	if (Node0->next != NULL)
-		Node0->next->prev = Node0;
-	else
-		last = Node0;
-	if (Node1->next != NULL)
-		Node1->next->prev = Node1;
-	else
-		last = Node1;
-}
-
-CListNode* CList::RelativeNext(CListNode* AListNode)
-{
-	if (!AListNode)
-		return first;
-	if (!(AListNode->next))
-		return AListNode;
-	return AListNode->next;
-}
-
-CListNode* CList::RelativePrev(CListNode* AListNode)
-{
-	if (!AListNode)
-		return first;
-	if (!(AListNode->prev))
-		return AListNode;
-	return AListNode->prev;
-}
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -1035,31 +697,6 @@ void MemCheck()
 }
 #endif //_WIN32
 
-CObjectStack::CObjectStack() : last(-1)
-{
-
-}
-
-bool CObjectStack::Push(CObject* AObject)
-{
-	if (++last >= MAX_STACK_ELEMENTS_COUNT)
-		return false;
-	Objects[last] = AObject;
-	return true;
-}
-
-CObject* CObjectStack::Pop()
-{
-	if (last >= 0)
-		return Objects[last--];
-	return NULL;
-}
-
-bool CObjectStack::Empty()
-{
-	return last == -1;
-}
-
 CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 {
 	SetName("CUpdateObject");
@@ -1078,28 +715,26 @@ CUpdateManager::CUpdateManager()
 
 bool CUpdateManager::UpdateObjects()
 {
-	Reset();
+	ManagerListType toDelete;	
 	CEngine *engine = CEngine::Instance();
-	CUpdateObject *data = dynamic_cast<CUpdateObject*>(Next());
-	while (data)
+	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
+		CUpdateObject *data = (*it);
 		if (!data->Active)
-		{
-			data = dynamic_cast<CUpdateObject*>(Next());
 			continue;
-		}
 		if (data->Dead)
 		{
-//			CList::DelObject(data->GetID());
-			delete data;
-			data = dynamic_cast<CUpdateObject*>(Next());
+			toDelete.push_back(data);
 			continue;
 		}
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
 		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
-		data = dynamic_cast<CUpdateObject*>(Next());
+	}
+	for(ManagerIterator it = toDelete.begin(); it != toDelete.end(); ++it)
+	{
+		CDestroyer().Destroy(*it);
 	}
 	return true;
 }

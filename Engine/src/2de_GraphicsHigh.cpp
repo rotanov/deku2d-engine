@@ -197,7 +197,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, CPolygon *poly)
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject((string*)"cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
 	cells->Bind();
 #endif 
 
@@ -302,7 +302,7 @@ void CPrimitiveRender::CheckTexture()
 {
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject((string*)"cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
 	cells->Bind();
 }
 

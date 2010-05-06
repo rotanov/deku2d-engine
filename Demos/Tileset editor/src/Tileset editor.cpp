@@ -334,7 +334,7 @@ bool LoadTexture(CObject *Caller) /* ќп€ть же не Load() а Acquire(). */
 	CTilesetEditor *TilesetEditor = dynamic_cast<CTilesetEditor *>(Caller);
 	if (TilesetEditor == NULL)
 		return false;
-	CTexture *TempFontTexture = CTextureManager::Instance()->GetTextureByName(TilesetEditor->edTilesetTextureName->Text);
+	CTexture *TempFontTexture = CTextureManager::Instance()->GetObject(TilesetEditor->edTilesetTextureName->Text);
 	if (TempFontTexture == NULL)
 	{
 		Log("ERROR", "Font texture %s not found", TilesetEditor->edTilesetTextureName->Text);

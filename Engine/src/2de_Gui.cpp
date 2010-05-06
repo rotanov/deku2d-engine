@@ -135,7 +135,7 @@ bool CGUIObject::isFocused() const
 
 void CGUIObject::Focus()
 {
-	CGUIManager::Instance()->SetFocus(this);
+	//CGUIManager::Instance()->SetFocus(this);
 }
 
 void CGUIObject::SetParent(CGUIObjectBase *AParent)
@@ -160,8 +160,6 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 {
 	SetName("GUI Manager");
 	FocusedOn = NULL;
-	FocusedOnListNode = NULL;
-
 	Root = new CGUIRootObject;
 	Root->SetStyle(new CGUIStyle);
 	Root->SetPrimitiveRender(new CPrimitiveRender);
@@ -203,6 +201,7 @@ void CGUIManager::Update(float dt)
 
 bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
+	/*
 	switch(state)
 	{
 	case KEY_PRESSED:
@@ -247,6 +246,7 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 
 	if(FocusedOnListNode)
 		FocusedOn->InputHandling(state, key, mod, letter);
+		*/
 	return true;
 }
 
@@ -255,22 +255,22 @@ CGUIObject* CGUIManager::GetFocusedObject() const
 	return FocusedOn;
 }
 
-void CGUIManager::SetFocusedNodeTo(CListNode* AFocusedNode)
-{
-	FocusedOnListNode = AFocusedNode;
-	if (FocusedOnListNode)
-		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
-}
+// void CGUIManager::SetFocusedNodeTo(CListNode* AFocusedNode)
+// {
+// 	FocusedOnListNode = AFocusedNode;
+// 	if (FocusedOnListNode)
+// 		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
+// }
 
-void CGUIManager::SetFocus(CGUIObject* AObject)
-{
-	CListNode* ListNode = List.GetListNode(AObject);
-	if (ListNode)
-	{
-		FocusedOnListNode = ListNode;
-		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
-	}
-}
+// void CGUIManager::SetFocus(CGUIObject* AObject)
+// {
+// 	CListNode* ListNode = List.GetListNode(AObject);
+// 	if (ListNode)
+// 	{
+// 		FocusedOnListNode = ListNode;
+// 		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
+// 	}
+// }
 
 CGUIRootObject* CGUIManager::GetRoot() const
 {
@@ -279,17 +279,18 @@ CGUIRootObject* CGUIManager::GetRoot() const
 
 void CGUIManager::AddObject(CGUIObject *AObject)
 {
-	List.AddObject(AObject);
+//	List.AddObject(AObject);
 }
 
 CGUIObject* CGUIManager::GetObject(const string &AObjectName) const
 {
-	return dynamic_cast<CGUIObject *>(List.GetObject(&AObjectName));
+//	return dynamic_cast<CGUIObject *>(List.GetObject(&AObjectName));
+	return NULL;
 }
 
 void CGUIManager::DeleteObject(int AId)
 {
-	List.DelObject(AId);
+//	List.DelObject(AId);
 }
 
 CGUIManager::~CGUIManager()
@@ -779,19 +780,15 @@ CEdit::CTextSelection::CTextSelection()
 
 #define DEFAULT_DISTANCE_BEETWEEN_ITEMS 20
 
-CMenuItem::CMenuItem()
+CMenuItem::CMenuItem() : FocusedOnItem(NULL), isCycledMenuSwitch(true)
 {
-	FocusedOnItem = NULL;
-	FocusedOnListNode = NULL;
 	Visible = false;
-	isCycledMenuSwitch = true;
 }
 
 CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
 {
 	doIgnoreCamera = true;
 	FocusedOnItem = NULL;
-	FocusedOnListNode = NULL;
 	Visible = false;
 	isCycledMenuSwitch = true;
 	SetName(Text = AMenuText);
@@ -807,15 +804,13 @@ CMenuItem::~CMenuItem()
 
 void CMenuItem::Render()
 {
-	Reset();
-	CMenuItem *ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
-	while (ChildMenuItem)
+	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{		
+		CMenuItem *ChildMenuItem = *it;
 		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
 		Font->scale = Vector2(1.0f, 1.0f);
 		Font->Pos = ChildMenuItem->Position;
 		Font->Print(ChildMenuItem->Text.c_str());
-		ChildMenuItem = dynamic_cast<CMenuItem*>(Next());
 	}	
 	Color = COLOR_WHITE;
 	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
@@ -825,6 +820,7 @@ void CMenuItem::Update(float dt){}
 
 bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
+	/* BROKEN
 	if (!Visible)
 		return false;
 	if (state == KEY_PRESSED)
@@ -833,14 +829,12 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		{
 		case SDLK_UP:
 			// Вероятно эту логику можно записать и покороче TODO
-			if (FocusedOnListNode == GetFirst() && isCycledMenuSwitch)
+			if (FocusedOnItem == *Objects.begin() && isCycledMenuSwitch)
 			{
-				FocusedOnListNode = GetLast();
-				if (FocusedOnListNode)
-					FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+				FocusedOnItem = *Objects.end();
 				break;
 			}
-			FocusedOnListNode = RelativePrev(FocusedOnListNode);
+			FocusedOnItem = Objects.
 			if (FocusedOnListNode)
 				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
 			break;
@@ -880,15 +874,16 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
 
 	}
+	*/
 	return true;
 }
 
 bool CMenuItem::AddObject(CObject *AObject)
 {
-	CList::AddObject(AObject);
-	FocusedOnListNode = GetFirst();
-	if (FocusedOnListNode)
-		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
-	return true;
+// 	AddObject(AObject);
+// 	FocusedOnListNode = GetFirst();
+// 	if (FocusedOnListNode)
+// 		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+ 	return true;
 }
 

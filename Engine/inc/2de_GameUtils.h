@@ -22,10 +22,6 @@ public:
 	CAABB		*BBox;
 
 	CTileset ();
-	static CObject* NewTileset()
-	{
-		return new CTileset;
-	}
 	
 
 	Vector2Array<4> GetCellTC(int CellIndex);
@@ -39,20 +35,20 @@ public:
 	}
 	void SetTexture(const string &TextureName)
 	{
-		Texture = CTextureManager::Instance()->GetTextureByName(TextureName);
+		Texture = CTextureManager::Instance()->GetObject(TextureName);
 	}
 
 	void RenderTileSet(); //FOR DEBUGGING
 
 };
 
-class CTileSetManager : public CList, public CTSingleton<CTileSetManager>
+class CTileSetManager : public CSomeManager<CTileset>/*public CList*/, public CTSingleton<CTileSetManager>
 {
 public:
 	CTileset* GetTileset(const string &ATilesetName)
 	{
 		CTileset *Tileset = NULL;
-		Tileset = dynamic_cast<CTileset*>(GetObject(&ATilesetName));
+		Tileset = dynamic_cast<CTileset*>(GetObject(ATilesetName));
 		if (Tileset)
 			Tileset->CheckLoad();
 		return Tileset;

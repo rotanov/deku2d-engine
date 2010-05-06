@@ -9,6 +9,7 @@
 	XMLResourcesFilename    = "Config/Resources.xml"
     DataPath               	= "../../../Data"
 	doLoadDefaultResourceList	= "true"	
+	MusicVolume					= "10"	
 
 	DefaultCellSize			= "4"
 	GameVTiles				= "15"

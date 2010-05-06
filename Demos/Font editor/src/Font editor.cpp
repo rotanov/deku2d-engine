@@ -477,7 +477,7 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). *
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	CTexture *TempFontTexture = CTextureManager::Instance()->GetTextureByName(FontEditor->edFontTextureName->Text);
+	CTexture *TempFontTexture = CTextureManager::Instance()->GetObject(FontEditor->edFontTextureName->Text);
 	if (TempFontTexture == NULL)
 	{
 		Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->Text);

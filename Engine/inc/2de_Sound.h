@@ -17,10 +17,6 @@ public:
 	CSound();
 	CSound(const char *AFileName);
 	~CSound();
-	static CObject* NewSound()
-	{
-		return new CSound;
-	}
 	bool LoadFromFile();
 	__INLINE Mix_Chunk* GetData() { return Data; }
 
@@ -38,10 +34,7 @@ public:
 	CMusic();
 	CMusic(const char *AFileName);
 	~CMusic();
-	static CObject* NewMusic()
-	{
-		return new CMusic;
-	}
+
 	bool LoadFromFile();
 	__INLINE Mix_Music* GetData() { return Data; }
 
@@ -53,7 +46,7 @@ private:
  * CSoundManager - ресурсовый менеджер звуковых семплов.
  */
 
-class CSoundManager : public CList, public CTSingleton<CSoundManager>
+class CSoundManager : public CSomeManager<CSound>, public CTSingleton<CSoundManager>
 {
 public:
 	CSound* GetSoundByName(const string &SoundName);
@@ -67,7 +60,7 @@ protected:
  * CMusicManager - ресурсовый менеджер музыки.
  */
 
-class CMusicManager : public CList, public CTSingleton<CMusicManager>
+class CMusicManager : public CSomeManager<CMusic>, public CTSingleton<CMusicManager>
 {
 public:
 	CMusic* GetMusicByName(const string &MusicName);

@@ -34,6 +34,13 @@ const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with v
 
 const float ROTATIONAL_AXIS_Z = 1.0f;
 
+const RGBAf COLOR_WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
+const RGBAf COLOR_BLACK = RGBAf(0.00f, 0.00f, 0.00f, 1.00f);
+const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
+const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
+const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
+
+
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
@@ -58,6 +65,8 @@ private:
 //protected:
 	float				Angle;		//	(Degrees)
 	float				Depth;				//	[-1; 1]?
+protected:
+	virtual				~CRenderObject();
 public:
 	Vector2				Position;		
 	float				Scaling;
@@ -67,7 +76,6 @@ public:
 	bool				doIgnoreCamera;
 
 	CRenderObject();
-	virtual ~CRenderObject();
 	virtual void Render() = 0;
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle();
@@ -113,10 +121,8 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CTextureManager
 
-class CTextureManager : public CList, public CTSingleton<CTextureManager> 
+class CTextureManager : public CSomeManager<CTexture>/*public CList*/, public CTSingleton<CTextureManager> 
 {
-public:
-	CTexture* GetTextureByName(const string &TextureName);
 protected:
 	CTextureManager();
 	friend class CTSingleton<CTextureManager>;
@@ -164,10 +170,6 @@ public:
 	CRecti				bbox[256];		// Баундинг бокс каждого для каждого символа
 	Vector2				scale;
 
-	static CObject* NewFont()
-	{
-		return new CFont;
-	}
 	bool		LoadFromFile();
 	bool		SaveToFile();
 
@@ -256,7 +258,7 @@ public:
 };
 
 
-class CFontManager : public CList, public CTSingleton<CFontManager>
+class CFontManager : public CSomeManager<CFont>/*public CList*/, public CTSingleton<CFontManager>
 {
 public:
 	CFont					*CurrentFont;
@@ -265,14 +267,15 @@ public:
 	bool					Print(int x, int y, float depth, const string &text);
 	CFont*					GetFont(const char* fontname);
 	CFont*					GetFontEx(string fontname);
-	bool					AddObject(CObject *object);
+	template<typename T>
+	bool					AddObject(T *AObject);
 
 protected:
 	CFontManager();
 	friend class CTSingleton<CFontManager>;
 };
 
-class CRenderManager : public CList, public CTSingleton<CRenderManager>
+class CRenderManager : public CSomeManager<CRenderObject>/*public CList*/, public CTSingleton<CRenderManager>
 {
 protected:
 	CRenderManager();

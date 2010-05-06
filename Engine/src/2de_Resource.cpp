@@ -23,13 +23,12 @@ CFactory::CFactory()
 }
 
 CFactory::~CFactory()
-{
-	CObject *obj;
-	List.Reset();
-	while (List.Enum(obj))
+{	
+	for(CSomeManager<CObject>::ManagerIterator it = List.Objects.begin(); it != List.Objects.end(); ++it)
 	{
+		CObject *obj = *it;
 		Log("INFO", "Deleting object %s", obj->GetName());
-		delete obj;
+		CDestroyer().Destroy(obj);
 	}
 }
 
