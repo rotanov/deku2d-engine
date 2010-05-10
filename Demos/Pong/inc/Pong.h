@@ -144,9 +144,9 @@ public:
 	}
 	~CPongGame()
 	{
-		CDestroyer().Destroy(PlayerOne);
-		CDestroyer().Destroy(PlayerTwo);
-		CDestroyer().Destroy(Ball);
+		CObject::Destroy(PlayerOne);
+		CObject::Destroy(PlayerTwo);
+		CObject::Destroy(Ball);
 	}
 	void Render()
 	{

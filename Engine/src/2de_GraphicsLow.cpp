@@ -121,10 +121,6 @@ CGLWindow::CGLWindow()
 	bpp = 32;
 	caption = "Warning: CGLWindow class instance have not been initialized properly";
 }
-CGLWindow::~CGLWindow()
-{
-
-}
 
 bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption)
 {
@@ -249,23 +245,9 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-
-
-
-
-
 	setVSync(1);
 }
-CGLWindow *CGLWindow::_instance = NULL;
-CGLWindow* CGLWindow::Instance()
-{
-	if(!_instance)
-	{
-		_instance = new CGLWindow();
-		SingletoneKiller.AddObject(_instance);
-	}
-	return _instance;
-}
+
 //-------------------------------------------//
 //				Font stuff					 //
 //-------------------------------------------//
@@ -297,7 +279,7 @@ bool CFont::LoadFromFile()
 	CFile			file;
 	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR","Can't Load Font %s: file  couldn't be opened.", GetName()); //TODO: Filename wrte too.
+		Log("ERROR", "Can't Load Font %s: file  couldn't be opened.", GetName());
 		return false;
 	}
 	char *FontImageName = NULL;
@@ -347,14 +329,14 @@ bool CFont::SaveToFile()
 		return false;
 	CFile file;
 	file.Open(Filename, CFile::OPEN_MODE_WRITE);
-	file.Write(Texture->GetName(), (unsigned long)strlen(Texture->GetName()));
+	file.Write(Texture->GetName().c_str(), Texture->GetName().length());
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
 	file.Close();
 	return true;
 }
 
-void CFont::_Print(const unsigned char *text)
+void CFont::_Print(const byte *text)
 {
 	
 	tClr.glSet();
@@ -463,7 +445,7 @@ void CFont::Print(const char *text, ...)
 	va_start(ap, text);
 	vsprintf(temp, text, ap);
 	va_end(ap);
-	_Print(reinterpret_cast<unsigned char*>(temp));
+	_Print(reinterpret_cast<byte*>(temp));
 	delete [] temp;
 
 	if (doRenderToRect)
@@ -480,7 +462,7 @@ int CFont::GetStringWidth(const char *text)
 		return 0;
 	int r = 0, l = (int)strlen(text);
 	for (int i=0;i<l;i++)
-		r += width[(unsigned char)text[i]-32] + Distance;
+		r += width[(byte)text[i]-32] + Distance;
 	return r;
 }
 
@@ -496,7 +478,7 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 
 	int r = 0;
 	for (unsigned int i = t1; i <= t2; i++)
-		r += width[(unsigned char)text[i]-32] + Distance;
+		r += width[(byte)text[i]-32] + Distance;
 	return r;
 }
 
@@ -506,7 +488,7 @@ int CFont::GetStringHeight(const char *text)
 		return 0;
 	int r = 0, l = (unsigned int) strlen(text);
 	for (int i = 0; i < l; i++)
-		r = std::max(height[(unsigned char)text[i] - 32], r);
+		r = std::max(height[(byte)text[i] - 32], r);
 	return r;
 }
 
@@ -520,7 +502,7 @@ int CFont::GetStringHeightEx(int t1, int t2, const char *text)
 		return -1;
 	int r = 0, l = (unsigned int)strlen(text);
 	for (unsigned int i=0; i<l; i++)
-		r = std::max(height[(unsigned char)text[i] - 32], r);
+		r = std::max(height[(byte)text[i] - 32], r);
 	return r;
 }
 
@@ -538,7 +520,7 @@ int CFont::StringCoordToCursorPos(const char *text, int x, int y)
 	for (int i = 0; i < strlen(text); i++)
 	{
 		int SubstrWidth = GetStringWidthEx(0, i, text);
-		int SymbolCenterCoord = SubstrWidth - Distance - (width[(unsigned char)text[i] - 32] / 2);
+		int SymbolCenterCoord = SubstrWidth - Distance - (width[(byte)text[i] - 32] / 2);
 		if (Local.x < SymbolCenterCoord)
 			return (i - 1);
 	}
@@ -854,7 +836,7 @@ bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 template<typename T>
 bool CFontManager::AddObject(T *AObject)
 {
-	CSomeManager<CFont>::AddObject(AObject);
+	CCommonManager<CFont>::AddObject(AObject);
 	if (CurrentFont == NULL)
 		CurrentFont = AObject;
 	return true;

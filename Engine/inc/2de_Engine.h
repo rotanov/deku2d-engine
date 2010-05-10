@@ -84,8 +84,7 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-	CGLWindow					*window;	// ORLY We need it here? // For sure we are not.
-	
+
 	bool						ClearLists();
 	bool						Init();
 	void						CalcFps();

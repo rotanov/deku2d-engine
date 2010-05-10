@@ -26,6 +26,9 @@
 	#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
 	#pragma warning (disable	:	4702)	//	unreachable code ^^"
 	#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
+	#pragma warning (disable	:	4005)	// Macro redefinition
+	#pragma warning (disable	:	4714)	// __forceinline not inlined
+	#pragma warning (disable	:	4005)	// Macro redefinition
 
 	#define VC_LEANMEAN
 	#define _CRT_SECURE_NO_DEPRECATE
@@ -185,23 +188,23 @@ class CObject
 	friend class CDestroyer;
 public:
 	CObject();
-	virtual bool	InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	void			IncRefCount();
-	void			DecRefCount();
-	const int		GetRefCount() const;
-	const char*		GetName() const;
-	void			SetName(const char* AObjectName);
-	void			SetName(const string &AObjectName);
-	unsigned int	GetID() const;
+	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
+	void IncRefCount();
+	void DecRefCount();
+	size_t GetRefCount() const;
+	const string& GetName() const;
+	void SetName(const string &AObjectName);
+	size_t GetID() const;
+	static void Destroy(CObject* AObject);
 protected:
 	virtual ~CObject();	
 private:
-	bool			Deleted;
-	string			Name;
-	size_t			ListRefCount;
-	size_t			ID;
+	bool Destroyed;
+	size_t ID;
+	string Name;
+	size_t RefCount;
 };
-typedef bool (*CObjectCallback)(CObject *Caller);
+typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 /**
 *	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
 *	Первый параметр - произошло ли событие KEY_PRESSED или KEY_RELEASED
@@ -209,25 +212,12 @@ typedef bool (*CObjectCallback)(CObject *Caller);
 *	Третий параметр - модификатор, т.е. зажат ли Shift, Ctrl, Alt итд
 *	И четвёртый параметр - ASCII код.
 */
-typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);
-
-
-class CDestroyer
-{
-public:
-	__INLINE void Destroy(CObject* AObject)
-	{
-		if (AObject == NULL || AObject->Deleted /*|| AObject->ListRefCount > 0*/)
-			return;
-		AObject->Deleted = true;
-		delete AObject, AObject = NULL;
-	}
-};
+typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);	// FFFU~
 
 // Template class for some manager
 
 template<typename T>	// Тип объектов, которыми управляет менеджер
-class CSomeManager : public virtual CObject
+class CCommonManager : public virtual CObject
 {
 public:
 	typedef list<T*> ManagerContainer;
@@ -268,7 +258,7 @@ public:
 		Objects.remove(temp);
 		temp->DecRefCount();
 		if (temp->GetRefCount() == 0)
-			CDestroyer().Destroy(temp);
+			CObject::Destroy(temp);
 	}
 	void DelObject(const string &AName)
 	{
@@ -284,10 +274,10 @@ public:
 		Objects.remove(temp);
 		temp->DecRefCount();
 		if (temp->GetRefCount() == 0)
-			CDestroyer().Destroy(temp);
+			CObject::Destroy(temp);
 	}
 
-	virtual ~CSomeManager()
+	virtual ~CCommonManager()
 	{
 		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
 		{
@@ -295,7 +285,7 @@ public:
 				continue;
 			(*it)->DecRefCount();
 			if ((*it)->GetRefCount() == 0)
-				CDestroyer().Destroy((*it));
+				CObject::Destroy(*it);
 		}
 	}
 };
@@ -348,8 +338,6 @@ T* CTSingleton<T>::Instance()
 
 template <typename T>
 T* CTSingleton<T>::_instance = 0;
-
-
 
 /**
  * CLog - класс для работы с логом.
@@ -412,43 +400,31 @@ class CUpdateObject : public virtual CObject
 {
 public:
 	bool Active;
-	bool Dead;
 	CUpdateObject();
-	virtual ~CUpdateObject();
+	~CUpdateObject();
+	bool isDead() const;
+	void SetDead();
 	virtual void Update(float dt) = 0;
+private:
+	bool Dead;
 };
 
-
-class CGarbageCollector : public CSomeManager<CObject>
+class CGarbageCollector : public CCommonManager<CObject>
 {
 public:
 	CGarbageCollector();
-	virtual ~CGarbageCollector()
-	{
-		//CObject *data;
-		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
-		{
-			Log("INFO", "Singletone killer deleting object named: %s id: %u", (*it)->GetName(), (*it)->GetID());
-			CDestroyer().Destroy(*it);
-		}
-		#if defined(_DEBUG) && defined(_MSC_VER)
-				DumpUnfreed();
-		#endif
-	}
+	void AddObject(CObject *AObject);
+	~CGarbageCollector();
 };
 extern CGarbageCollector SingletoneKiller;
-typedef CGarbageCollector CSingletoneKiller;
-
-
-
 
 /**
-*	CUpdateManager - менеджер объектов, который следует обновлять. Такие дела.
+*	CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
 *	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
 *	И вообще что-то мне подсказывает, что он не здесь должен быть.
 */
 
-class CUpdateManager : public CSomeManager<CUpdateObject>/*public CList,*/, public CTSingleton<CUpdateManager>
+class CUpdateManager : public CCommonManager<CUpdateObject>, public CTSingleton<CUpdateManager>
 {
 public:	
 	bool UpdateObjects();
@@ -457,23 +433,18 @@ protected:
 	friend class CTSingleton<CUpdateManager>;
 };
 
-
-/**
-*	Все загружаемые из файла объекты следует наследовать от
-*	CResource. класс CBaseResource нужен чтобы всё работало и компилятор не ругался.
-*/
-
 class CBaseResource
 {
 protected:
 	bool Loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
 public:
-	string Filename;	// Полный^W хоть-какой-нибуть путь к файлу.
+	string Filename;	// Полный^W хоть-какой-нибудь путь к файлу.
+
+	CBaseResource();	// const string &AFilename
+	virtual ~CBaseResource(){};
 	virtual bool LoadFromFile();
 	virtual bool SaveToFile();
 	bool CheckLoad();
-	CBaseResource();	// const string &AFilename
-	virtual ~CBaseResource(){};
 };
 
 class CResource : public CBaseResource, virtual public CObject
@@ -505,23 +476,23 @@ public:
 	};
 
 	CFile();
-	CFile(const string AFilename, EOpenMode Mode);
+	CFile(const string &AFilename, EOpenMode Mode);
 	~CFile();
 
-	bool Open(const string AFilename, EOpenMode Mode);
+	bool Open(const string &AFilename, EOpenMode Mode);
 	bool Close();
-	bool ReadByte(unsigned char *Buffer);
-	bool WriteByte(unsigned char *Buffer);
-	bool WriteByte(unsigned char Buffer);
-	bool Read(void *Buffer, unsigned long BytesCount);
-	bool Write(const void *Buffer, unsigned long BytesCount);
+	bool ReadByte(byte *Buffer);
+	bool WriteByte(byte *Buffer);
+	bool WriteByte(byte Buffer);
+	bool Read(void *Buffer, size_t BytesCount);
+	bool Write(const void *Buffer, size_t BytesCount);
 	bool ReadString(char *Buffer);
 	bool ReadString(string &Buffer);
 	bool WriteString(const char *Buffer);
-	bool WriteString(const string Buffer);
+	bool WriteString(const string &Buffer);
 	bool ReadLine(char* &Data);
-	bool WriteLine(string Buffer);
-	bool Seek(unsigned int Offset, ESeekOrigin Origin);
+	bool WriteLine(string &Buffer);
+	bool Seek(size_t Offset, ESeekOrigin Origin);
 	bool Eof() const;
 	size_t Size() const;
 
@@ -535,35 +506,11 @@ private:
 // Agreed with you.
 
 string GetWorkingDir();
-
 tm GetLocalTimeAndDate();
-
 string GetFormattedTime(const tm TimeStruct, const char *Format);
-
-//
-
-// Ф-ии для работы со строками, в частности именами файлов и так далее
-
 void DelFNameFromFPath(char *src);
 void DelExtFromFName(char *src);
 void DelLastDirFromPath(char *src);
-
-/**
-*	здесь, чтобы не забыть как делать синглтон. Хотя чего там можно забыть, в гемсах же копипаста.
-*/ 
-
-class CPSingleTone
-{
-public:
-	static CPSingleTone* Instance();
-	void FreeInst();
-protected:
-	CPSingleTone();
-	~CPSingleTone();
-	static CPSingleTone * _instance;
-	static int _refcount;
-};
-
 
 __INLINE string itos(int i)
 {
@@ -590,5 +537,3 @@ __INLINE string to_string(const T& t)
 }
 
 #endif // _2DE_CORE_H
-
-

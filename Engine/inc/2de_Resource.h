@@ -26,7 +26,7 @@ protected:
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
-	CSomeManager<CObject> List;
+	CCommonManager<CObject> List;
 };
 
 template<typename T>

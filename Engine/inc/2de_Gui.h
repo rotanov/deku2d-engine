@@ -280,7 +280,7 @@ public:
 	}
 };
 
-class CMenuItem : public CGUIObject, public CSomeManager<CMenuItem>/*public CList*/
+class CMenuItem : public CGUIObject, public CCommonManager<CMenuItem>/*public CList*/
 {
 public:
 	bool		isCycledMenuSwitch;

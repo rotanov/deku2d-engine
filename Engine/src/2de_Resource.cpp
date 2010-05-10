@@ -24,11 +24,11 @@ CFactory::CFactory()
 
 CFactory::~CFactory()
 {	
-	for(CSomeManager<CObject>::ManagerIterator it = List.Objects.begin(); it != List.Objects.end(); ++it)
+	for(CCommonManager<CObject>::ManagerIterator it = List.Objects.begin(); it != List.Objects.end(); ++it)
 	{
 		CObject *obj = *it;
 		Log("INFO", "Deleting object %s", obj->GetName());
-		CDestroyer().Destroy(obj);
+		CObject::Destroy(obj);
 	}
 }
 

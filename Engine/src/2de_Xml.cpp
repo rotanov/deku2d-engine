@@ -229,14 +229,14 @@ void SkipWhite(string s, int &pos)
 	}
 }
 
-bool isAllowed(unsigned char c)
+bool isAllowed(byte c)
 {
 	if (((c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A')) || ((c <= '9' && c >= '0') || (c <= 46 && c >= 32))|| c == 9)
 		return 1;
 	return 0;
 }
 
-bool isAllowedEx(unsigned char c)
+bool isAllowedEx(byte c)
 {
 	if (((c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A')) || ((c <= '9' && c >= '0') || (c <= 46 && c >= 32))|| c == 9|| c =='\\' || c == '/' || c == '_' /* hello there it's me */ || c == ':')
 		return 1;

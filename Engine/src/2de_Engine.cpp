@@ -24,7 +24,6 @@ CEngine::CEngine()	// Переместить все инициализации �
 	procFocusGainFunc	=	NULL;
 	procUpdateFunc		=	NULL;
 	procRenderFunc		=	NULL;
-	window				=	CGLWindow::Instance();	//??
 	// temporary, until CConfig created..
 	// yes, it's defaults.. developer or maintainer of program should set this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
 	ConfigFilePath		=	"";
@@ -104,13 +103,13 @@ void CEngine::SetState(CEngine::EState state, void* value)
 			FpsLimit = 1000 / (unsigned long)value;
 			break;
 		case STATE_SCREEN_WIDTH:
-			window->width = (int)value;
+			CGLWindow::Instance()->width = (int)value;
 			break;
 		case STATE_SCREEN_HEIGHT:
-			window->height = (int)value;
+			CGLWindow::Instance()->height = (int)value;
 			break;
 		case STATE_WINDOW_CAPTION:
-			window->caption = (char*)value;
+			CGLWindow::Instance()->caption = (char*)value;
 			break;
 		case STATE_CONFIG_PATH:
 			ConfigFilePath = (char*)value;
@@ -187,8 +186,8 @@ bool CEngine::Init()
 	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
 	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height); // Update camera due to update of wh from config
 
-	window->bpp = 32;
-	if (!window->gCreateWindow())
+	CGLWindow::Instance()->bpp = 32;
+	if (!CGLWindow::Instance()->gCreateWindow())
 	{
 		Log("ERROR", "Window creation failed");
 		return false;
@@ -307,7 +306,7 @@ bool CEngine::ProcessEvents()
 			case SDL_MOUSEMOTION:
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
-				MousePos = Vector2(event.motion.x, window->height - event.motion.y);
+				MousePos = Vector2(event.motion.x, CGLWindow::Instance()->height - event.motion.y);
 				//SDL_Delay(2);
 				break;
 			}
@@ -331,7 +330,7 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_VIDEORESIZE:
 			{
-				window->glResize(event.resize.w, event.resize.h);
+				CGLWindow::Instance()->glResize(event.resize.w, event.resize.h);
 				break;
 			}
 			case SDL_QUIT:
@@ -378,7 +377,7 @@ bool CEngine::Run()
 				/*тестовый код*/
 				int x, y;
 				SDL_GetMouseState(&x, &y);
-				MousePos = Vector2(x, window->height - y);
+				MousePos = Vector2(x, CGLWindow::Instance()->height - y);
 				const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 				const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 				const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
@@ -452,10 +451,10 @@ void CEngine::GetState(CEngine::EState state, void* value)
 	switch (state)
 	{
 	case STATE_SCREEN_WIDTH:
-		*(int*)value = window->width;
+		*(int*)value = CGLWindow::Instance()->width;
 		break;
 	case STATE_SCREEN_HEIGHT:
-		*(int*)value = window->height;
+		*(int*)value = CGLWindow::Instance()->height;
 		break;
 	case STATE_MOUSE_X:
 		*(float*)value = MousePos.x;

@@ -42,19 +42,9 @@ public:
 	float	av;
 	float	aa;
 	
-	void IntegrateVelocity(float dt)
-	{
-		lv += la * dt;
-		av += aa * dt; 
-	}
+	void IntegrateVelocity(float dt);
 
-	void IntegratePosition(float dt)
-	{
-		p += lv * dt;
-		a += av * dt;
-		a = Clamp(a, 0.0f, PI*2);
-		o = Matrix2(a);
-	}
+	void IntegratePosition(float dt);
 
 	void ApplyForce(const Vector2 force, const Vector2 point) //применить силу к точке
 	{

@@ -121,7 +121,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CTextureManager
 
-class CTextureManager : public CSomeManager<CTexture>/*public CList*/, public CTSingleton<CTextureManager> 
+class CTextureManager : public CCommonManager<CTexture>/*public CList*/, public CTSingleton<CTextureManager> 
 {
 protected:
 	CTextureManager();
@@ -214,7 +214,7 @@ private:
 	CTexture*			Texture;				//	Указатель на текстуру шрфита. Очевидно же, да?
 	GLuint				base;					// Base List of 256 glLists for font
 
-	void		_Print(const unsigned char *text);
+	void		_Print(const byte *text);
 	byte		GetHalign();
 	byte		GetValign();
 };
@@ -258,7 +258,7 @@ public:
 };
 
 
-class CFontManager : public CSomeManager<CFont>/*public CList*/, public CTSingleton<CFontManager>
+class CFontManager : public CCommonManager<CFont>/*public CList*/, public CTSingleton<CFontManager>
 {
 public:
 	CFont					*CurrentFont;
@@ -275,7 +275,7 @@ protected:
 	friend class CTSingleton<CFontManager>;
 };
 
-class CRenderManager : public CSomeManager<CRenderObject>/*public CList*/, public CTSingleton<CRenderManager>
+class CRenderManager : public CCommonManager<CRenderObject>/*public CList*/, public CTSingleton<CRenderManager>
 {
 protected:
 	CRenderManager();
@@ -331,8 +331,9 @@ void setVSync(int interval=1);
 //////////////////////////////////////////////////////////////////////////
 //CGLWindow
 
-class CGLWindow : public CObject // Should be singleton
+class CGLWindow : public CTSingleton<CGLWindow>
 {
+	friend class CTSingleton<CGLWindow>;
 public:
 	int width;
 	int height;
@@ -340,7 +341,6 @@ public:
 	bool fullscreen;
 	char *caption;
 
-	static CGLWindow* Instance();
 	bool gCreateWindow(int _width, int _height, byte _bpp, char* _caption);
 	bool gCreateWindow();
 	void SetSize();
@@ -349,10 +349,7 @@ public:
 	void glResize(GLsizei Width, GLsizei Height);
 	void glInit(GLsizei Width, GLsizei Height);
 protected:
-	static CGLWindow *_instance;
 	CGLWindow();
-	~CGLWindow();
-
 };
 
 

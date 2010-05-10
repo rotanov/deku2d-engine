@@ -72,7 +72,7 @@ bool CTileset::SaveToFile()
 		return false;
 	}
 
-	file.Write(Texture->GetName(), strlen(Texture->GetName())+1);
+	file.Write(Texture->GetName().c_str(), Texture->GetName().length() + 1);
 	file.Write(&TileWidth, sizeof(TileWidth));
 	file.Write(&TileHeight, sizeof(TileHeight));
 	file.Write(&HorNumTiles, sizeof(HorNumTiles));

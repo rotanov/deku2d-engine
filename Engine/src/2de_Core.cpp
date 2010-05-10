@@ -61,9 +61,9 @@ void DumpUnfreed()
 
 #endif // defined(_DEBUG) && defined(_MSC_VER)
 
-CObject::CObject() : Deleted(false), ListRefCount(0), ID(++CObjectCount)
+CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)),RefCount(0)
 {
-	Name = itos(CObjectCount) + " CObject ";
+
 }
 
 CObject::~CObject()
@@ -77,39 +77,34 @@ bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 
 void CObject::IncRefCount()
 {
-	ListRefCount++;
+	RefCount++;
 }
 
 void CObject::DecRefCount()
 {
-	ListRefCount--;
-	if (ListRefCount < 0)
+	RefCount--;
+	if (RefCount < 0)
 	{
-		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", Name.c_str(), ID, ListRefCount);
+		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", Name.c_str(), ID, RefCount);
 #ifdef CRITICAL_ERRORS_MESSAGE_BOXES
 		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
 #endif // CRITICAL_ERRORS_MESSAGE_BOXES
 	}
 }
 
-const int CObject::GetRefCount() const
+size_t CObject::GetRefCount() const
 {
-	return ListRefCount;
+	return RefCount;
 }
 
-const char* CObject::GetName() const
+const string& CObject::GetName() const
 {
-	return Name.c_str();
+	return Name;
 }
 
-unsigned int CObject::GetID() const
+size_t CObject::GetID() const
 {
 	return ID;
-}
-
-void CObject::SetName(const char* AObjectName)
-{
-	Name = AObjectName;
 }
 
 void CObject::SetName(const string &AObjectName)
@@ -117,16 +112,19 @@ void CObject::SetName(const string &AObjectName)
 	Name = AObjectName;
 }
 
-
-
-/************************************************************************/
-/* CFile                                                                */
-/************************************************************************/
-CFile::CFile() : File(NULL)
+__INLINE void CObject::Destroy(CObject* AObject)
 {
+	if (AObject == NULL || AObject->Destroyed /*|| AObject->ListRefCount > 0*/)
+		return;
+	AObject->Destroyed = true;
+	delete AObject, AObject = NULL;
 }
 
-CFile::CFile(const string AFilename, EOpenMode Mode)
+//////////////////////////////////////////////////////////////////////////
+//	CFile
+CFile::CFile() : File(NULL){}
+
+CFile::CFile(const string &AFilename, EOpenMode Mode)
 {
 	File = NULL;
 	Open(AFilename, Mode);
@@ -137,7 +135,7 @@ CFile::~CFile()
 	Close();
 }
 
-bool CFile::Open(const string AFilename, EOpenMode Mode)
+bool CFile::Open(const string &AFilename, EOpenMode Mode)
 {
 	if (AFilename.empty())
 	{
@@ -185,7 +183,7 @@ bool CFile::Close()
 	return true;
 }
 
-bool CFile::ReadByte(unsigned char *Buffer)
+bool CFile::ReadByte(byte *Buffer)
 {
 	if (Buffer == NULL)
 		return false;
@@ -200,17 +198,17 @@ bool CFile::ReadByte(unsigned char *Buffer)
 	return true;
 }
 
-bool CFile::WriteByte(unsigned char *Buffer)
+bool CFile::WriteByte(byte *Buffer)
 {
 	return Write(Buffer, 1);
 }
 
-bool CFile::WriteByte(unsigned char Buffer)
+bool CFile::WriteByte(byte Buffer)
 {
 	return WriteByte(&Buffer);
 }
 
-bool CFile::Read(void *Buffer, unsigned long BytesCount)
+bool CFile::Read(void *Buffer, size_t BytesCount)
 {
 	if (Buffer == NULL)
 		return false;
@@ -228,7 +226,7 @@ bool CFile::Read(void *Buffer, unsigned long BytesCount)
 	return true;
 }
 
-bool CFile::Write(const void *Buffer, unsigned long BytesCount)
+bool CFile::Write(const void *Buffer, size_t BytesCount)
 {
 	if (Buffer == NULL)
 		return false;
@@ -251,7 +249,7 @@ bool CFile::ReadString(char *Buffer)
 	if (File == NULL)
 		return false;
 
-	unsigned char b;
+	byte b;
 	int i = 0;
 
 	if (!Read(&b, 1))
@@ -273,7 +271,7 @@ bool CFile::ReadString(string &Buffer)
 	if (File == NULL)
 		return false;
 
-	unsigned char b;
+	byte b;
 	Buffer = "";
 	int i = 0;
 
@@ -297,7 +295,7 @@ bool CFile::WriteString(const char *Buffer)
 	if (File == NULL)
 		return false;
 
-	unsigned char b = 0;
+	byte b = 0;
 	for (unsigned int i = 0; i < strlen(Buffer); i++)
 	{
 		Write(&Buffer[i], 1);
@@ -307,12 +305,12 @@ bool CFile::WriteString(const char *Buffer)
 	return true;
 }
 
-bool CFile::WriteString(const string Buffer)
+bool CFile::WriteString(const string &Buffer)
 {
 	if (File == NULL)
 		return false;
 
-	unsigned char b = 0;
+	byte b = 0;
 	for (unsigned int i = 0; i < Buffer.length(); i++)
 	{
 		Write(&Buffer[i], 1);
@@ -349,14 +347,14 @@ bool CFile::ReadLine(char* &Data)
 	return true;
 }
 
-bool CFile::WriteLine(string Buffer)
+bool CFile::WriteLine(string &Buffer)
 {
 	if (File == NULL)
 		return false;
 
 	char b;
 
-	Write((char*) Buffer.data(), (unsigned long) Buffer.length());
+	Write((char*) Buffer.data(), Buffer.length());
 
 #ifdef _WIN32
 	// почему это вообще надо?.. лишний байт для чтения в глупых редакторах, не поддерживающих LF онли? или что?.. 
@@ -411,52 +409,12 @@ size_t CFile::Size() const
 	return FileStat.st_size;
 }
 
-
 //////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-CPSingleTone* CPSingleTone::Instance()
-{
-	if (_instance == NULL)
-	{
-		_instance = new CPSingleTone;
-	}
-	_refcount++;
-	return _instance;
-}
-
-void CPSingleTone::FreeInst()
-{
-	_refcount--;
-	if (!_refcount)
-	{
-		delete this;
-		Log("INFO", "Singletone deleted from memory.");
-		_instance = NULL;
-	}
-}
-
-CPSingleTone::CPSingleTone()
-{
-
-}
-
-CPSingleTone::~CPSingleTone()
-{
-
-}
-
-CPSingleTone* CPSingleTone::_instance = 0;
-int CPSingleTone::_refcount = 0;
-
-
-/************************************************************************/
-/* CLog                                                                 */
-/************************************************************************/
+// CLog
 
 CLog::CLog()
 {
+	SetName("Log ID: " + itos(GetID()));
 	Enabled = true;
 	LogMode = LOG_MODE_FILE;	// well, usual default behaviour for user-space (non-system) programs is to log on a console,
 					// but for now i left the behaviour, some of us used to... may be changed any time by calling
@@ -708,6 +666,16 @@ CUpdateObject::~CUpdateObject()
 	CUpdateManager::Instance()->DelObject(GetID());
 }
 
+void CUpdateObject::SetDead()
+{
+	Dead = true;
+	Active = false;
+}
+
+bool CUpdateObject::isDead() const
+{
+	return Dead;
+}
 CUpdateManager::CUpdateManager()
 {
 	SetName("CUpdateManager");
@@ -722,7 +690,7 @@ bool CUpdateManager::UpdateObjects()
 		CUpdateObject *data = (*it);
 		if (!data->Active)
 			continue;
-		if (data->Dead)
+		if (data->isDead())
 		{
 			toDelete.push_back(data);
 			continue;
@@ -734,7 +702,7 @@ bool CUpdateManager::UpdateObjects()
 	}
 	for(ManagerIterator it = toDelete.begin(); it != toDelete.end(); ++it)
 	{
-		CDestroyer().Destroy(*it);
+		CObject::Destroy(*it);
 	}
 	return true;
 }
@@ -761,10 +729,28 @@ CResource::CResource()
 	SetName("CResource");
 }
 
-
-CGarbageCollector SingletoneKiller;
-
 CGarbageCollector::CGarbageCollector()
 {
 	SetName("Some CGarbageCollector");
 }
+
+CGarbageCollector::~CGarbageCollector()
+{
+	//CObject *data;
+	for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
+	{
+		Log("INFO", "Singletone killer deleting object named: %s id: %u", (*it)->GetName(), (*it)->GetID());
+		CObject *Object = *it;
+		CObject::Destroy(Object);
+	}
+#if defined(_DEBUG) && defined(_MSC_VER)
+	DumpUnfreed();
+#endif
+}
+
+void CGarbageCollector::AddObject(CObject *AObject)
+{
+	CCommonManager<CObject>::AddObject(AObject);
+	Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
+}
+CGarbageCollector SingletoneKiller;

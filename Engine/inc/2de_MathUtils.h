@@ -168,7 +168,7 @@ public:
 		return Vector2(x * t, y * t);
 		return Vector2(); // What we should return if we tried to divide by zero?
 	}
-	friend __INLINE  Vector2 operator *(float k, const Vector2& V)
+	friend __INLINE  Vector2 operator *(float k, const Vector2 &V)
 	{
 		return Vector2(V.x * k, V.y * k);
 	}
@@ -1344,7 +1344,7 @@ bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, con
 
 /**
 /	IntersectSegments - определяет точку пересечения отрезков, если они пересекаются.
-/	TODO: есть подозрения на рассмотрение случая совпадения прямых.
+/	TODO: есть подозрения на необходимость рассмотрения случая совпадения прямых.
 */
 bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);	// Feel the difference.
 
