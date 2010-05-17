@@ -61,6 +61,9 @@ void DumpUnfreed()
 
 #endif // defined(_DEBUG) && defined(_MSC_VER)
 
+//////////////////////////////////////////////////////////////////////////
+// CObject
+
 CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)),RefCount(0)
 {
 
@@ -112,7 +115,7 @@ void CObject::SetName(const string &AObjectName)
 	Name = AObjectName;
 }
 
-__INLINE void CObject::Destroy(CObject* AObject)
+void CObject::Destroy(CObject* AObject)
 {
 	if (AObject == NULL || AObject->Destroyed /*|| AObject->ListRefCount > 0*/)
 		return;
@@ -121,7 +124,8 @@ __INLINE void CObject::Destroy(CObject* AObject)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//	CFile
+// CFile
+
 CFile::CFile() : File(NULL){}
 
 CFile::CFile(const string &AFilename, EOpenMode Mode)
@@ -313,6 +317,7 @@ bool CFile::WriteString(const string &Buffer)
 	byte b = 0;
 	for (unsigned int i = 0; i < Buffer.length(); i++)
 	{
+		// посимвольная запись?!.. о, щи....
 		Write(&Buffer[i], 1);
 	}
 	Write(&b, 1);
@@ -347,7 +352,7 @@ bool CFile::ReadLine(char* &Data)
 	return true;
 }
 
-bool CFile::WriteLine(string &Buffer)
+bool CFile::WriteLine(const string &Buffer)
 {
 	if (File == NULL)
 		return false;

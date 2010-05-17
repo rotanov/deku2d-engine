@@ -78,7 +78,7 @@ public:
 	CRenderObject();
 	virtual void Render() = 0;
 	void SetAngle(float AAngle = 0.0f);
-	float GetAngle();
+	float GetAngle() const;
 	void SetLayer(size_t Layer);
 	float GetDepth();
 };
@@ -333,7 +333,6 @@ void setVSync(int interval=1);
 
 class CGLWindow : public CTSingleton<CGLWindow>
 {
-	friend class CTSingleton<CGLWindow>;
 public:
 	int width;
 	int height;
@@ -350,6 +349,8 @@ public:
 	void glInit(GLsizei Width, GLsizei Height);
 protected:
 	CGLWindow();
+	friend class CTSingleton<CGLWindow>;
+
 };
 
 

@@ -1,5 +1,5 @@
-#ifndef _2DE_SOUND_H
-#define _2DE_SOUND_H
+#ifndef _2DE_SOUND_H_
+#define _2DE_SOUND_H_
 
 #include <SDL/SDL_mixer.h>
 
@@ -80,6 +80,8 @@ public:
 	bool PlaySound(CSound *Sound, int Time = -1);
 	void StopAllSound();
 	bool PlayMusic(CMusic *Music, int FadeInTime = 0);
+	void PauseMusic();
+	void ResumeMusic();
 	void StopMusic(int FadeOutTime = 0);
 	void SetMusicVolume(size_t AVolume);
 	size_t GetMusicVolume() const;
@@ -100,4 +102,4 @@ private:
 
 };
 
-#endif // _2DE_SOUND_H
+#endif // _2DE_SOUND_H_

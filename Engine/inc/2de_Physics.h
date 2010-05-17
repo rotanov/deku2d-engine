@@ -1,5 +1,5 @@
-#ifndef _2DE_PHYSICS_H
-#define _2DE_PHYSICS_H
+#ifndef _2DE_PHYSICS_H_
+#define _2DE_PHYSICS_H_
 
 #include "2de_Core.h"
 #include "2de_MathUtils.h"
@@ -62,4 +62,4 @@ class CPhysicsManager // ...
 };
 
 
-#endif // _2DE_PHYSICS_H
+#endif // _2DE_PHYSICS_H_

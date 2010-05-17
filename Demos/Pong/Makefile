@@ -21,3 +21,4 @@ strict:
 distclean:
 	rm -f ${TARGET}
 	rm -f bin/Logs/*
+	rm -f bin/Config/Resources.xml 

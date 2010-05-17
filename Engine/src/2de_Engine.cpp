@@ -11,7 +11,7 @@
 	#include <windows.h>
 #endif // _WIN32
 
-CEngine::CEngine()	// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ...
+CEngine::CEngine()	// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ... // а зачем собственно? щас нормальный многострочный вид, читаемо, а будет длинная строчка не понять чего..
 {
 	SetName("Engine main class");
 	memset(keys, 0, sizeof(keys));
@@ -170,6 +170,14 @@ bool CEngine::Init()
 	SetState(CEngine::STATE_FPS_LIMIT, (void*)stoi((Config.First->Get("FpsLimit"))->GetValue()));
 
 	
+	// looks like shit.. but this is correct order of initializing singletons.. we need some way to do it in more beautiful sense..
+	CUpdateManager::Instance();
+	CTextureManager::Instance();
+	CFontManager::Instance();
+	CTileSetManager::Instance();
+	CSoundManager::Instance();
+	CMusicManager::Instance();
+	// CGUIManager::Instance(); // gui manager crashes it, because it's trying to get default font when no fonts are in font manager
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
 	ResourceManager->DataPath	= (Config.First->Get("DataPath"))->GetValue();
@@ -179,7 +187,6 @@ bool CEngine::Init()
 	SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
 	SetState(CEngine::STATE_WINDOW_CAPTION, wcaption);
 
-	CFactory::Instance();
 
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
@@ -216,6 +223,8 @@ bool CEngine::Init()
 		if (!ResourceManager->LoadResources())
 			return false;
 	}
+
+	CFactory::Instance(); // Factory should be initialized after all other managers
 
 	if (procUserInit != NULL)
 		if (!procUserInit())

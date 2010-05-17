@@ -1,5 +1,5 @@
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef _2DE_EVENT_H_
+#define _2DE_EVENT_H_
 #include "2de_Core.h"
 
 /*
@@ -51,4 +51,4 @@ __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 // 	void RegisterEvent(const CObject &Subscriber, const long int );
 // };
 
-#endif
+#endif // _2DE_EVENT_H_

@@ -1,5 +1,5 @@
-#ifndef _2DE_RESOURCE_H
-#define _2DE_RESOURCE_H
+#ifndef _2DE_RESOURCE_H_
+#define _2DE_RESOURCE_H_
 
 #include <list>
 #include <stdexcept>
@@ -175,7 +175,7 @@ private:
 	string GetFileNameWithoutExtension(string Filename);
 };
 
-#endif // _2DE_RESOURCE_H
+#endif // _2DE_RESOURCE_H_
 
 // конфетка. Читать александреску.
 // namespace

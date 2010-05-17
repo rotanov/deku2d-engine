@@ -29,7 +29,7 @@ public:
 				break;
 
 			case SDLK_a:
-				CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("PacMan"));
+				CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("bender1"));
 				break;
 			case SDLK_s:
 				CSoundMixer::Instance()->StopMusic();

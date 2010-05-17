@@ -1,5 +1,5 @@
-#ifndef _2DE_CORE_H
-#define _2DE_CORE_H
+#ifndef _2DE_CORE_H_
+#define _2DE_CORE_H_
 
 #ifdef _MSC_VER
 	//#pragma warning (disable	:	4312)   //
@@ -45,6 +45,7 @@
 #include <time.h>
 #include <assert.h>
 #include <vector>
+#include <list>
 
 using namespace std;
 
@@ -185,7 +186,6 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 
 class CObject
 {
-	friend class CDestroyer;
 public:
 	CObject();
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
@@ -289,6 +289,15 @@ public:
 		}
 	}
 };
+
+class CGarbageCollector : public CCommonManager<CObject>
+{
+public:
+	CGarbageCollector();
+	void AddObject(CObject *AObject);
+	~CGarbageCollector();
+};
+extern CGarbageCollector SingletoneKiller;
 
 /**
  * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
@@ -409,15 +418,6 @@ private:
 	bool Dead;
 };
 
-class CGarbageCollector : public CCommonManager<CObject>
-{
-public:
-	CGarbageCollector();
-	void AddObject(CObject *AObject);
-	~CGarbageCollector();
-};
-extern CGarbageCollector SingletoneKiller;
-
 /**
 *	CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
 *	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
@@ -436,7 +436,7 @@ protected:
 class CBaseResource
 {
 protected:
-	bool Loaded;		// loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
+	bool Loaded;		// Loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
 public:
 	string Filename;	// Полный^W хоть-какой-нибудь путь к файлу.
 
@@ -491,7 +491,7 @@ public:
 	bool WriteString(const char *Buffer);
 	bool WriteString(const string &Buffer);
 	bool ReadLine(char* &Data);
-	bool WriteLine(string &Buffer);
+	bool WriteLine(const string &Buffer);
 	bool Seek(size_t Offset, ESeekOrigin Origin);
 	bool Eof() const;
 	size_t Size() const;
@@ -536,4 +536,4 @@ __INLINE string to_string(const T& t)
 	return s.str();
 }
 
-#endif // _2DE_CORE_H
+#endif // _2DE_CORE_H_

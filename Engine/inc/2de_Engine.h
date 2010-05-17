@@ -19,6 +19,7 @@
 #include "2de_Xml.h"
 #include "2de_Resource.h"
 #include "2de_Sound.h"
+#include "2de_Gui.h"
 
 const float FIXED_DELTA_TIME		=	0.02f;
 const int ENGINE_VERSION			=	0x001;

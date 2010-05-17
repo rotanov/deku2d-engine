@@ -21,7 +21,7 @@ void CRenderObject::SetAngle(float AAngle /*= 0.0f*/)
 	Angle = Clamp(AAngle, 0.0f, 360.0f);
 }
 
-float CRenderObject::GetAngle()
+float CRenderObject::GetAngle() const
 {
 	return Angle;
 }

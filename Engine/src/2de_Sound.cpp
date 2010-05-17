@@ -187,6 +187,22 @@ bool CSoundMixer::PlayMusic(CMusic *Music, int FadeInTime /*= 0*/)
 	return true;
 }
 
+void CSoundMixer::PauseMusic()
+{
+	if (!Mix_PlayingMusic())
+		return;
+
+	Mix_PauseMusic();
+}
+
+void CSoundMixer::ResumeMusic()
+{
+	if (!Mix_PausedMusic())
+		return;
+
+	Mix_ResumeMusic();
+}
+
 void CSoundMixer::StopMusic(int FadeOutTime /*= 0*/)
 {
 	if (!Initialized)

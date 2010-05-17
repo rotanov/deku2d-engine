@@ -1,4 +1,5 @@
-SOURCES		=	src/main.cpp
+SOURCES		=	src/main.cpp \
+			src/Pacman.cpp
 
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
@@ -20,3 +21,4 @@ strict:
 distclean:
 	rm -f ${TARGET}
 	rm -f bin/Logs/*
+	rm -f bin/Config/Resources.xml 

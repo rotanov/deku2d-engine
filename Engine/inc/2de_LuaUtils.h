@@ -1,5 +1,5 @@
-#ifndef _2DE_LUA_UTILS_H
-#define _2DE_LUA_UTILS_H
+#ifndef _2DE_LUA_UTILS_H_
+#define _2DE_LUA_UTILS_H_
 
 #include <lua.hpp>
 
@@ -48,4 +48,4 @@ public:
 };
 
 
-#endif // _2DE_LUA_UTILS_H
+#endif // _2DE_LUA_UTILS_H_
