@@ -58,7 +58,7 @@ bool CGLImageData::MakeTexture()
 	if ((width&(width-1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
 		return false;				//	Ultimate - это использовать NOT_POWER_OF_TWO екстеншон, если он доступен;
 	if ((height&(height-1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
-		return false;				//	Ширина и выстоа стали ближайшими степенями двойки. Но это потом. И это TODO.
+		return false;				//	Ширина и выстоа стали ближайшими степенями двойки. Но это потом. И это @todo.
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &TexID);
 	glBindTexture(GL_TEXTURE_2D, TexID);
@@ -115,7 +115,7 @@ GLuint CGLImageData::GetTexID()
 CGLWindow::CGLWindow()
 {
 	SetName("GLWindow");
-	width = 640;	//TODO!!! Default magic numbers - delete them!
+	width = 640;	//@todo!!! Default magic numbers - delete them!
 	height = 480;
 	fullscreen = false;
 	bpp = 32;

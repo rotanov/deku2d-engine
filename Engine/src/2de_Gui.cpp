@@ -530,7 +530,7 @@ void CEdit::Update(float dt)
 
 		if (LeftScrollArea.Inside(mouse))
 		{
-			// TODO: move this copy-paste from here and from SDLK_LEFT handler to some function...
+			// @todo: move this copy-paste from here and from SDLK_LEFT handler to some function...
 			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
 				VisibleTextOffset--;
 		}
@@ -555,7 +555,7 @@ void CEdit::Update(float dt)
 bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	// this function has many copy-pasted blocks.. they're all marked with fN, where N is 1, 2, 3, ...
-	// TODO: move 'em all to separate functions
+	// @todo: move 'em all to separate functions
 	// or maybe selection will be handled by some CText or whatever... i just don't know yet..
 	switch(state)
 	{
@@ -828,7 +828,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		switch(key)
 		{
 		case SDLK_UP:
-			// Вероятно эту логику можно записать и покороче TODO
+			// Вероятно эту логику можно записать и покороче @todo
 			if (FocusedOnItem == *Objects.begin() && isCycledMenuSwitch)
 			{
 				FocusedOnItem = *Objects.end();

@@ -396,7 +396,7 @@ void CFontEditor::SetSelectedBoxTo(int Index)
 {
 	if (Font == NULL)
 		return;
-	CurrentSymbol = Index; // TODO: Add range check
+	CurrentSymbol = Index; // @todo: Add range check
 	lblCharachterSelectedASCIIIndex->Text = "ASCII Index: " + itos(CurrentSymbol + 32);
 
 	CRecti rect = Font->bbox[CurrentSymbol];

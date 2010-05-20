@@ -121,7 +121,7 @@ void CEngine::SetState(CEngine::EState state, void* value)
 		case STATE_GL_BG_COLOR:
 			{
 				RGBAf *t = (RGBAf*)value;
-				glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  TODO: INcapsulate
+				glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  @todo: INcapsulate
 			}
 			break;
 	}
@@ -268,7 +268,7 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
-	while(SDL_PollEvent(&event)) // TODO: Look here!!!!!! http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
+	while(SDL_PollEvent(&event)) // @todo: Look here!!!!!! http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
 	{
 		
 		switch(event.type)
@@ -380,7 +380,7 @@ bool CEngine::Run()
 					CUpdateManager::Instance()->UpdateObjects();
 					if (procUpdateFunc != NULL)
 						procUpdateFunc(dt);
-					// TODO: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
+					// @todo: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
 				}
 				SDL_ShowCursor(0);
 				/*тестовый код*/

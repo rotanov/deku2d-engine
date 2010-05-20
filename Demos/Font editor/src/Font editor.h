@@ -4,7 +4,7 @@
 #include "2de_Engine.h"
 #include "2de_Gui.h"
 
-// TODO: Extract some defines to config
+// @todo: Extract some defines to config
 
 // Константы, определяющие расположение некоторых элементов интерфейса.
 const int				INTERFACE_OFFSET_X	= 128;

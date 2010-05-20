@@ -12,7 +12,7 @@
 #include "2de_Engine.h"
 
 bool Enabled = true;
-static int CObjectCount = 0;
+unsigned int CObject::CObjectCount = 0;
 
 #if defined(_DEBUG) && defined(_MSC_VER)
 
@@ -703,7 +703,7 @@ bool CUpdateManager::UpdateObjects()
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
-		data->Update(dt); // TODO: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
+		data->Update(dt); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 	}
 	for(ManagerIterator it = toDelete.begin(); it != toDelete.end(); ++it)
 	{

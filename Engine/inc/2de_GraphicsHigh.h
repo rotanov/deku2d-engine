@@ -35,7 +35,7 @@ protected:
 #define G_POLY_OUTLINE_ENABLE			
 #define G_POLY_TEXTURE_ENABLE
 
-#define PRM_RNDR_OPT_BLEND_ONE		0x01	// TODO: нормальные названия для констант
+#define PRM_RNDR_OPT_BLEND_ONE		0x01	// @todo: нормальные названия для констант
 #define PRM_RNDR_OPT_BLEND_OTHER	0x02
 #define PRM_RNDR_OPT_BLEND_NO_ONE	0x03
 
@@ -195,7 +195,7 @@ typedef void (*FCreateFunc)(CParticle *);
 typedef void (*FUpdateFunc)(CParticle *, float);
 
 /**
-*	TODO:
+*	@todo:
 *		1. Добавить интерполяцию покруче, окоромя линейной
 *		2. Добавить установку экзмепляра объекта для рендера
 *		3. Добавить ещё что-нибуть

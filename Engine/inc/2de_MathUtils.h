@@ -4,10 +4,6 @@
 *	Started : 06.11.2007 2:03
 */
 
-/**
-* @todo Refactor & rewiev
-*/
-
 #ifndef _2DE_MATH_UTILS_H_
 #define _2DE_MATH_UTILS_H_
 
@@ -23,9 +19,9 @@ const double			HI_PI			=	3.1415926535897932;
 const double			HI_OOPI			=	0.3183098861837906;
 const float				PI				=	3.1415926f;
 const float				OOPI			=	0.3183f;
-const int				sincostable_dim	=	8192;
-static const float		deganglem		=	1.0f / (360.0f / (float)sincostable_dim);
-static const float		radanglem		=	1.0f / (PI * 2.0f / (float)sincostable_dim);
+const int				SINE_COSINE_TABLE_DIM	=	8192;
+static const float		deganglem		=	1.0f / (360.0f / (float)SINE_COSINE_TABLE_DIM);
+static const float		radanglem		=	1.0f / (PI * 2.0f / (float)SINE_COSINE_TABLE_DIM);
 static const float		PI_d180			=	PI / 180.0f;
 static const float		d180_PI			=	180.0f / PI;
 
@@ -111,35 +107,19 @@ __INLINE int Sign<float>(const float &x)
     return (signed((int&)x & 0x80000000) >> 31 ) | 1;
 }
 
-// __INLINE float Sign(const float x)
-// {
-// 	   if (((int&)f & 0x7FFFFFFF)==0) return 0.f; // test exponent & mantissa bits: is input zero?
-//     else {
-//         float r = 1.0f;
-//         (int&)r |= ((int&)f & 0x80000000); // mask sign bit in f, set it in r if necessary
-//         return r;
-// }
-// / fast floating point absolute value.
-// 
-// inline float abs(float v)
-// {
-// 	*(int *)&v &= 0x7fffffff;
-// 	return v;
-// }
-// 
-// / interpolate between interval [a,b] with t in [0,1].
-// 
-// inline float lerp(float a, float b, float t)
-// {
-// 	return a + (b - a) * t;
-// }
-// 
-// / snap floating point number to grid.
-// 
-// inline float snap(float p, float grid)
-// {
-// 	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
-// }
+// interpolate between interval [a,b] with t in [0,1].
+
+__INLINE float Lerp(float a, float b, float t)
+{
+	return a + (b - a) * t;
+}
+
+// snap floating point number to grid.
+
+__INLINE float snap(float p, float grid)
+{
+	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
+}
 
 class Vector2
 {
@@ -533,7 +513,7 @@ public:
 
 	__INLINE float AngleBeetweenVectors(Vector3 a, Vector3 b)
 	{
-		// TODO: Check if length of a || b == 0.0f
+		// @todo: Check if length of a || b == 0.0f
 		return acos((a*b)/(a.Length()*b.Length()));
 	}
 };
@@ -1071,7 +1051,7 @@ union Vector4
 	Vector4 Conjugate(){ return Vector4(-x,-y,-z,w);}
 	Vector4 Identity()
 	{
-		//TODO: Danger chek division by zero
+		//@todo: Danger chek division by zero
 		return (*this).Conjugate()/(*this).Norm();
 	};
 	float InnerProduct(const Vector4& q){return x*q.x+y*q.y+z*q.z+w*q.w;}
@@ -1124,7 +1104,7 @@ union Vector4
 		y = yAxis * sine;
 		z = zAxis * sine;
 		w = (float)cos(angle / 2.0f);
-		//TODO: division by zero check
+		//@todo: division by zero check
 		float length = 1 / (float)sqrt(x * x + y * y + z * z + w * w);
 		x *= length;
 		y *= length;
@@ -1332,8 +1312,8 @@ float DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p);
 
 /**
 /	DistanceToSegment - определяет расстояние со знаком от точки до отрезка.
-/	TODO: Возможно есть более быстрый способ определять знак расстояниея в случаях конца отрезка.
-	TODO: Возможно стоит возвращать ещё и найденный случай, т.е. первая точка отрезка, вторая или сам отрезок.
+/	@todo: Возможно есть более быстрый способ определять знак расстояниея в случаях конца отрезка.
+	@todo: Возможно стоит возвращать ещё и найденный случай, т.е. первая точка отрезка, вторая или сам отрезок.
 */
 float DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p);
 
@@ -1344,7 +1324,7 @@ bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, con
 
 /**
 /	IntersectSegments - определяет точку пересечения отрезков, если они пересекаются.
-/	TODO: есть подозрения на необходимость рассмотрения случая совпадения прямых.
+/	@todo: есть подозрения на необходимость рассмотрения случая совпадения прямых.
 */
 bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);	// Feel the difference.
 

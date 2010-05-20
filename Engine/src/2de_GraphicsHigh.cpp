@@ -179,7 +179,7 @@ void CPrimitiveRender::grArrowL(const Vector2& v0, const Vector2& v1)
 
 void CPrimitiveRender::grArrowC(const Vector2 &v0,const Vector2 &v1)
 {
-	// TODO: complete function
+	// @todo: complete function
 	//grCircleS()
 	grRingS(v0, 20);
 	grCircleL(v0, 20);
@@ -263,7 +263,7 @@ void CPrimitiveRender::BeforeRndr()
 	if (LineStippleEnabled)
 	{
 		glEnable(GL_LINE_STIPPLE);
-		glLineStipple(lwidth*4, 0x0F); // TODO Magic number
+		glLineStipple(lwidth*4, 0x0F); // @todo Magic number
 	}
 	else
 		glDisable(GL_LINE_STIPPLE);
@@ -306,7 +306,7 @@ void CPrimitiveRender::CheckTexture()
 	cells->Bind();
 }
 
-void CPrimitiveRender::Init()  // TODO: вынести качество генерации хотя бы в константу.
+void CPrimitiveRender::Init()  // @todo: вынести качество генерации хотя бы в константу.
 {
 	if (!glIsList(glListCircleL))
 	{

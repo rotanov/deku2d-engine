@@ -32,7 +32,7 @@ protected:
 template<typename T>
 T* CFactory::New(const string &AName)
 {
-	//if (List.Contains(AName)) TODO uncomment and fix
+	//if (List.Contains(AName)) @todo uncomment and fix
 	{
 //		throw std::logic_error("Object with this name already exists.");
 	}

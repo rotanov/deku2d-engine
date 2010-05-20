@@ -85,8 +85,8 @@ using namespace std;
 /**
 *	Отлов утечек памяти.
 *	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
-*	TODO: Implement new[] and delete []
-*	TODO: Remove inline from AddTrack and RemoveTrack and others.
+*	@todo: Implement new[] and delete []
+*	@todo: Remove inline from AddTrack and RemoveTrack and others.
 */
 
 #if defined(_DEBUG) && defined(_MSC_VER)
@@ -203,6 +203,7 @@ private:
 	size_t ID;
 	string Name;
 	size_t RefCount;
+	static unsigned int CObjectCount;
 };
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 /**
@@ -314,7 +315,7 @@ extern CGarbageCollector SingletoneKiller;
  *		CSomeClass() { }
  * 	};
  *
- * TODO: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
+ * @todo: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
  */
 
 template <typename T>
@@ -420,7 +421,7 @@ private:
 
 /**
 *	CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
-*	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. TODO!
+*	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. @todo!
 *	И вообще что-то мне подсказывает, что он не здесь должен быть.
 */
 
@@ -454,7 +455,7 @@ public:
 	virtual ~CResource(){};
 };
 
-struct CRecti	// TODO: Избавиться от этого типа.
+struct CRecti	// @todo: Избавиться от этого типа.
 {
 	int x0, x1, y0, y1;
 };
@@ -501,7 +502,7 @@ private:
 	string Filename;
 };
 
-// TODO: taking into account, that global functions is evil, may be we should move such kind of functions
+// @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment
 // Agreed with you.
 

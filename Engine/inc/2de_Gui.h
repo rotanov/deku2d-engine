@@ -104,7 +104,7 @@ public:
 	CFont *Font;
 	//CGUIStyleFonts Fonts;
 
-	// TODO: loading style from XML file (and even maybe saving)
+	// @todo: loading style from XML file (and even maybe saving)
 };
 
 class CGUIObjectBase : public CRenderObject, public CUpdateObject
@@ -200,7 +200,7 @@ public:
 	CGUIObject* GetObject(const string &AObjectName) const;
 	void DeleteObject(int AId);
 private:
-	int			KeyHoldRepeatDelay;				// множественный костыль! TODO: fix
+	int			KeyHoldRepeatDelay;				// множественный костыль! @todo: fix
 	//CListNode	*FocusedOnListNode;
 	CGUIObject	*FocusedOn;
 	int			KeyHoldRepeatInterval;

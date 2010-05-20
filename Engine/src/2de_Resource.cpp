@@ -69,7 +69,7 @@ bool CResourceManager::LoadResources()
 
 	ResourceList->LoadFromFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
 	
-	// TODO: see issue #12. Replace load from file by assigning table, returned by List.
+	// @todo: see issue #12. Replace load from file by assigning table, returned by List.
 
 	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 	{
@@ -110,7 +110,7 @@ CResourceManager::CResourceManager()
 //////////////////////////////////////////////////////////////////////////
 // CDataLister
 
-// CXMLTable CDataLister::List(string DataRoot) // TODO: implement operator= in CXMLTable to make it possible to assign tables
+// CXMLTable CDataLister::List(string DataRoot) // @todo: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
 {
 	CurNode = Table.First;
