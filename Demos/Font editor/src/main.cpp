@@ -1,10 +1,8 @@
 #include "Font editor.h"
 
-CEngine	*Ninja	=	CEngine::Instance();
-CFontEditor *FontEditor = NULL;
-
 bool Init()
 {	
+	CFontEditor *FontEditor = NULL;
 	FontEditor = new CFontEditor;
 	return true;
 }
@@ -12,6 +10,7 @@ bool Init()
 
 int	main(int argc, char *argv[])
 {
+	CEngine	*Ninja = CEngine::Instance();
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "FontEditor.xml");
 	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);

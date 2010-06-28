@@ -42,7 +42,7 @@ public:
 
 };
 
-class CTileSetManager : public CCommonManager<CTileset>/*public CList*/, public CTSingleton<CTileSetManager>
+class CTileSetManager : public CCommonManager <list <CTileset*> >/*public CList*/, public CTSingleton<CTileSetManager>
 {
 public:
 	CTileset* GetTileset(const string &ATilesetName)

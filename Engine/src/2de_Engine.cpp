@@ -224,6 +224,8 @@ bool CEngine::Init()
 			return false;
 	}
 
+	CFontManager::Instance()->SetCurrentFont("Font");
+
 	CFactory::Instance(); // Factory should be initialized after all other managers
 
 	if (procUserInit != NULL)

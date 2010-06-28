@@ -121,11 +121,11 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CTextureManager
 
-class CTextureManager : public CCommonManager<CTexture>/*public CList*/, public CTSingleton<CTextureManager> 
+class CTextureManager : public CCommonManager <list <CTexture*> >/*public CList*/, public CTSingleton <CTextureManager> 
 {
 protected:
 	CTextureManager();
-	friend class CTSingleton<CTextureManager>;
+	friend class CTSingleton <CTextureManager>;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -258,28 +258,28 @@ public:
 };
 
 
-class CFontManager : public CCommonManager<CFont>/*public CList*/, public CTSingleton<CFontManager>
+class CFontManager : public CCommonManager <list <CFont*> >, public CTSingleton <CFontManager>
 {
 public:
-	CFont					*CurrentFont;
-	bool					SetCurrentFont(const char* fontname);
-	bool					PrintEx(int x, int y, float depth, char* text, ...);
-	bool					Print(int x, int y, float depth, const string &text);
-	CFont*					GetFont(const char* fontname);
-	CFont*					GetFontEx(string fontname);
-	template<typename T>
-	bool					AddObject(T *AObject);
+	CFont* Font();
+	bool SetCurrentFont(const char* fontname);
+	bool PrintEx(int x, int y, float depth, char* text, ...);
+	bool Print(int x, int y, float depth, const string &text);
+	CFont* GetFont(const char* fontname);
+	CFont* GetFontEx(string fontname);
+	bool AddFont(CFont *AObject);
 
 protected:
+	CFont *CurrentFont;
 	CFontManager();
 	friend class CTSingleton<CFontManager>;
 };
 
-class CRenderManager : public CCommonManager<CRenderObject>/*public CList*/, public CTSingleton<CRenderManager>
+class CRenderManager : public CCommonManager <list <CRenderObject*> >/*public CList*/, public CTSingleton <CRenderManager>
 {
 protected:
 	CRenderManager();
-	friend class CTSingleton<CRenderManager>;
+	friend class CTSingleton <CRenderManager>;
 private:
 	Vector2	*v2Dots, *v2Lines, *v2Quads, *v2Triangles;
 

@@ -202,7 +202,7 @@ bool Init()
 	gSetBlendingMode();
 	CFontManager::Instance()->SetCurrentFont("Font");
 	CFontManager* fm = CFontManager::Instance();
-	f = fm->CurrentFont;
+	f = fm->Font();
 	Ninja->AddEventFunction(ProcessInput);
 	//Level.numCellsHor = 20;
 	//Level.numCellsVer = 10;

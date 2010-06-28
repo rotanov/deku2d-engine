@@ -216,41 +216,39 @@ typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);	// FFFU~
 
 // Template class for some manager
-
-template<typename T>	// Тип объектов, которыми управляет менеджер
-class CCommonManager : public virtual CObject
+template <typename C>	// C - container type
+class CCommonManager : public virtual CObject // is it necessary?
 {
 public:
-	typedef list<T*> ManagerContainer;
-//protected:
+	typedef C ManagerContainer;
+	typedef typename C::value_type T;
 	ManagerContainer Objects;
-public:
-	
-	typedef ManagerContainer ManagerListType;
+
+public:		
 	typedef typename ManagerContainer::iterator ManagerIterator;
 	typedef typename ManagerContainer::const_iterator ManagerConstIterator;
-	T* GetObject(const string &AName) const
+	T GetObject(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
 	{
-		for(ManagerConstIterator it = Objects.begin(); it != Objects.end(); it++)
+		for(ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 		{
-			if ((*it)->GetName() == AName)
-				return *it;
+			if ((*i)->GetName() == AName)
+				return *i;
 		}
 		return NULL;
 	}
-	void AddObject(T *AObject)
+	void AddObject(const T &AObject)
 	{
 		AObject->IncRefCount();
 		Objects.push_back(AObject);
 	}
 	void DelObject(size_t AID)
 	{
-		T* temp = NULL;
-		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
+		T temp = NULL;
+		for(ManagerIterator i = Objects.begin(); i != Objects.end(); i++)
 		{
-			if ((*it)->GetID() == AID)
+			if ((*i)->GetID() == AID)
 			{
-				temp = *it;
+				temp = *i;
 				break;
 			}
 		}
@@ -263,15 +261,15 @@ public:
 	}
 	void DelObject(const string &AName)
 	{
-		T* temp = NULL;
-		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
+		T temp = T();
+		for(ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 		{
-			if ((*it)->GetName() == AName)
+			if ((*i)->GetName() == AName)
 			{
-				temp = *it;
+				temp = *i;
 				break;
 			}
-		}
+		}		
 		Objects.remove(temp);
 		temp->DecRefCount();
 		if (temp->GetRefCount() == 0)
@@ -291,7 +289,7 @@ public:
 	}
 };
 
-class CGarbageCollector : public CCommonManager<CObject>
+class CGarbageCollector : public CCommonManager <list<CObject*> >
 {
 public:
 	CGarbageCollector();
@@ -425,7 +423,7 @@ private:
 *	И вообще что-то мне подсказывает, что он не здесь должен быть.
 */
 
-class CUpdateManager : public CCommonManager<CUpdateObject>, public CTSingleton<CUpdateManager>
+class CUpdateManager : public CCommonManager <list<CUpdateObject*> >, public CTSingleton <CUpdateManager>
 {
 public:	
 	bool UpdateObjects();

@@ -779,10 +779,9 @@ void gDrawBBox( CAABB box )
 //			Font Manager
 //////////////////////////////////////////////////////////////////////////
 
-CFontManager::CFontManager()
+CFontManager::CFontManager() : CurrentFont(NULL)
 {
 	SetName("Font manager");
-	CurrentFont = NULL;
 }
 
 CFont* CFontManager::GetFont(const char* fontname)	
@@ -833,15 +832,19 @@ bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 	return true;
 }
 
-template<typename T>
-bool CFontManager::AddObject(T *AObject)
-{
-	CCommonManager<CFont>::AddObject(AObject);
+bool CFontManager::AddFont(CFont *AObject)
+{	
+	CCommonManager <list <CFont*> >::AddObject(AObject);
 	if (CurrentFont == NULL)
 		CurrentFont = AObject;
 	return true;
 }
 
+CFont* CFontManager::Font()
+{
+	assert(CurrentFont);
+	return CurrentFont;
+}
 //////////////////////////////////////////////////////////////////////////
 //						CTexture Manager
 //////////////////////////////////////////////////////////////////////////

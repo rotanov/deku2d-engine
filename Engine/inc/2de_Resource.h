@@ -20,13 +20,13 @@ public:
 	T* New(const string &AName);
 
 	template<typename T>
-	T* Get(const string &AName) const;
+	T* Get(const string &AName);
 
 protected:
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
-	CCommonManager<CObject> List;
+	CCommonManager <list <CObject*> > List;
 };
 
 template<typename T>
@@ -45,7 +45,7 @@ T* CFactory::New(const string &AName)
 }
 
 template<typename T>
-T* CFactory::Get(const string &AName) const
+T* CFactory::Get(const string &AName)
 {
 	T* result = dynamic_cast<T *>(List.GetObject(AName));
 	if (!result)

@@ -5,7 +5,7 @@
 #include <string>
 #include <sys/stat.h>
 #ifndef _WIN32
-#include <unistd.h>
+	#include <unistd.h>
 #endif //_WIN32
 
 #include "2de_Core.h"
@@ -688,7 +688,7 @@ CUpdateManager::CUpdateManager()
 
 bool CUpdateManager::UpdateObjects()
 {
-	ManagerListType toDelete;	
+	ManagerContainer toDelete;	
 	CEngine *engine = CEngine::Instance();
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
@@ -755,7 +755,7 @@ CGarbageCollector::~CGarbageCollector()
 
 void CGarbageCollector::AddObject(CObject *AObject)
 {
-	CCommonManager<CObject>::AddObject(AObject);
+	CCommonManager <list <CObject*> >::AddObject(AObject);
 	Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
 }
 CGarbageCollector SingletoneKiller;

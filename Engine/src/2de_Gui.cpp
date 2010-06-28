@@ -135,7 +135,7 @@ bool CGUIObject::isFocused() const
 
 void CGUIObject::Focus()
 {
-	//CGUIManager::Instance()->SetFocus(this);
+	CGUIManager::Instance()->SetFocus(this);
 }
 
 void CGUIObject::SetParent(CGUIObjectBase *AParent)
@@ -156,10 +156,9 @@ void CGUIObject::SetParent(CGUIObjectBase *AParent)
 //////////////////////////////////////////////////////////////////////////
 // CGUIManager
 
-CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), tabholded(false)
+CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), TabHolded(false)
 {
 	SetName("GUI Manager");
-	FocusedOn = NULL;
 	Root = new CGUIRootObject;
 	Root->SetStyle(new CGUIStyle);
 	Root->SetPrimitiveRender(new CPrimitiveRender);
@@ -171,15 +170,15 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 void CGUIManager::Update(float dt)
 {
 #ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
-	if (tabholded)
+	if (TabHolded)
 	{
 		TimerAccum += dt*1000;
-		if (!repeatstarted)
+		if (!RepeatStarted)
 		{
 			if (TimerAccum > KeyHoldRepeatDelay)
 			{
 				TimerAccum = 0;
-				repeatstarted = true;
+				RepeatStarted = true;
 			}
 		}
 		else
@@ -194,42 +193,35 @@ void CGUIManager::Update(float dt)
 	else
 	{
 		TimerAccum = 0;
-		repeatstarted = false;
+		RepeatStarted = false;
 	}
 #endif
 }
 
 bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	/*
+	
 	switch(state)
 	{
 	case KEY_PRESSED:
 		switch(key)
 		{
 		case SDLK_TAB:
-			tabholded = true;
-			if (FocusedOnListNode != NULL)
+			TabHolded = true;
+			if (Focus != List.end()) // if iterator correct
 			{
 				if (mod & KMOD_SHIFT)
-					FocusedOnListNode = FocusedOnListNode->prev;
+					Focus--;
 				else
-					FocusedOnListNode = FocusedOnListNode->next;
-
-				if (FocusedOnListNode)
-					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
-
+					Focus++;									
 			}
 
-			if (FocusedOnListNode == NULL)
+			if (Focus == List.end()) // if iterator incorrect totally i.e. pointing to illegal object
 			{
 				if (mod & KMOD_SHIFT)
-					FocusedOnListNode = List.GetLast();
+					Focus = List.end();
 				else
-					FocusedOnListNode = List.GetFirst();
-
-				if (FocusedOnListNode)
-					FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
+					Focus = List.begin();
 			}
 			break;
 		}
@@ -238,39 +230,26 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		switch(key)
 		{
 		case SDLK_TAB:
-			tabholded =  false;
+			TabHolded =  false;
 			break;
 		}
 		break;
 	}
 
-	if(FocusedOnListNode)
-		FocusedOn->InputHandling(state, key, mod, letter);
-		*/
+	(*Focus)->InputHandling(state, key, mod, letter);
+		
 	return true;
 }
 
 CGUIObject* CGUIManager::GetFocusedObject() const
 {
-	return FocusedOn;
+	return *Focus;
 }
 
-// void CGUIManager::SetFocusedNodeTo(CListNode* AFocusedNode)
-// {
-// 	FocusedOnListNode = AFocusedNode;
-// 	if (FocusedOnListNode)
-// 		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
-// }
-
-// void CGUIManager::SetFocus(CGUIObject* AObject)
-// {
-// 	CListNode* ListNode = List.GetListNode(AObject);
-// 	if (ListNode)
-// 	{
-// 		FocusedOnListNode = ListNode;
-// 		FocusedOn = dynamic_cast<CGUIObject*>(FocusedOnListNode->GetData());
-// 	}
-// }
+void CGUIManager::SetFocus(CGUIObject* AObject)
+{
+	Focus = find(List.begin(), List.end(), AObject);;
+}
 
 CGUIRootObject* CGUIManager::GetRoot() const
 {
@@ -279,18 +258,21 @@ CGUIRootObject* CGUIManager::GetRoot() const
 
 void CGUIManager::AddObject(CGUIObject *AObject)
 {
-//	List.AddObject(AObject);
+	List.push_back(AObject);
+	Focus = List.begin();
 }
 
 CGUIObject* CGUIManager::GetObject(const string &AObjectName) const
 {
-//	return dynamic_cast<CGUIObject *>(List.GetObject(&AObjectName));
+	for(vector<CGUIObject*>::const_iterator i = List.begin(); i != List.end(); ++i)
+		if ((*i)->GetName() == AObjectName)
+			return *i;
 	return NULL;
 }
 
 void CGUIManager::DeleteObject(int AId)
 {
-//	List.DelObject(AId);
+	//List.remove(AId);
 }
 
 CGUIManager::~CGUIManager()
@@ -780,7 +762,7 @@ CEdit::CTextSelection::CTextSelection()
 
 #define DEFAULT_DISTANCE_BEETWEEN_ITEMS 20
 
-CMenuItem::CMenuItem() : FocusedOnItem(NULL), isCycledMenuSwitch(true)
+CMenuItem::CMenuItem() : Focus(Objects.begin()), isCycledMenuSwitch(true)
 {
 	Visible = false;
 }
@@ -788,7 +770,7 @@ CMenuItem::CMenuItem() : FocusedOnItem(NULL), isCycledMenuSwitch(true)
 CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
 {
 	doIgnoreCamera = true;
-	FocusedOnItem = NULL;
+	Focus = Objects.begin();
 	Visible = false;
 	isCycledMenuSwitch = true;
 	SetName(Text = AMenuText);
@@ -813,14 +795,13 @@ void CMenuItem::Render()
 		Font->Print(ChildMenuItem->Text.c_str());
 	}	
 	Color = COLOR_WHITE;
-	PRender->grCircleS(FocusedOnItem->Position - Vector2(20.0f, -10.0f), 5);
+	PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
 }
 
 void CMenuItem::Update(float dt){}
 
 bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	/* BROKEN
 	if (!Visible)
 		return false;
 	if (state == KEY_PRESSED)
@@ -829,44 +810,38 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		{
 		case SDLK_UP:
 			// Вероятно эту логику можно записать и покороче @todo
-			if (FocusedOnItem == *Objects.begin() && isCycledMenuSwitch)
+			if (Focus == Objects.begin() && isCycledMenuSwitch)
 			{
-				FocusedOnItem = *Objects.end();
+				Focus = Objects.end();
 				break;
 			}
-			FocusedOnItem = Objects.
-			if (FocusedOnListNode)
-				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+			Focus--;
 			break;
 		case SDLK_DOWN:
-			if (FocusedOnListNode == GetLast() && isCycledMenuSwitch)
+			if (Focus == Objects.end() && isCycledMenuSwitch)
 			{
-				FocusedOnListNode = GetFirst();
-				if (FocusedOnListNode)
-					FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+				Focus = Objects.begin();
 				break;
 			}
-			FocusedOnListNode = RelativeNext(FocusedOnListNode);
-			if (FocusedOnListNode)
-				FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+			Focus++;
 			break;
 		case SDLK_RETURN:
-			if (FocusedOnItem->CallProc)
-				FocusedOnItem->CallProc(Caller);
-			else
-				if (FocusedOnItem->GetFirst())
-				{
-					Visible = false;
-					FocusedOnItem->Visible = true;
-					CGUIManager::Instance()->SetFocus(FocusedOnItem);
-				}
+			if ((*Focus)->CallProc)
+				(*Focus)->CallProc(Caller);
+// 			else
+// 				if ((*Focus)->)
+// 				{
+// 					Visible = false;
+// 					(*Focus)->Visible = true;
+// 					CGUIManager::Instance()->SetFocus(Focus);
+// 				}
 				break;
 		case SDLK_ESCAPE:
-			if (!Parent)
-				break;
-			Visible = false;
-			(dynamic_cast<CMenuItem*>(Parent))->Visible = true;
-			CGUIManager::Instance()->SetFocus(dynamic_cast<CMenuItem*>(Parent));
+// 			if (!Parent)
+// 				break;
+// 			Visible = false;
+// 			(dynamic_cast<CMenuItem*>(Parent))->Visible = true;
+// 			CGUIManager::Instance()->SetFocus(dynamic_cast<CMenuItem*>(Parent));
 			break;
 		}
 	}
@@ -874,16 +849,14 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
 
 	}
-	*/
+	
 	return true;
 }
 
 bool CMenuItem::AddObject(CObject *AObject)
 {
-// 	AddObject(AObject);
-// 	FocusedOnListNode = GetFirst();
-// 	if (FocusedOnListNode)
-// 		FocusedOnItem = dynamic_cast<CMenuItem*>(FocusedOnListNode->GetData());
+ 	AddObject(AObject);
+ 	Focus = Objects.begin();
  	return true;
 }
 

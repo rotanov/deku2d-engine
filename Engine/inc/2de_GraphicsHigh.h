@@ -19,7 +19,7 @@ protected:
 private:
 };
 
-class CSceneManager : CCommonManager<CRenderObject>, public CRenderObject, public CUpdateObject
+class CSceneManager : CCommonManager <list<CRenderObject*> >, public CRenderObject, public CUpdateObject
 {
 public:
 

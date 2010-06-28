@@ -193,21 +193,19 @@ public:
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void		Update(float dt);
 	CGUIObject* GetFocusedObject() const;
-	//void		SetFocusedNodeTo(CListNode *AFocusedNode);
-	//void		SetFocus(CGUIObject *AObject);
+	void		SetFocus(CGUIObject *AObject);
 	CGUIRootObject* GetRoot() const;
 	void AddObject(CGUIObject *AObject);
 	CGUIObject* GetObject(const string &AObjectName) const;
 	void DeleteObject(int AId);
 private:
-	int			KeyHoldRepeatDelay;				// множественный костыль! @todo: fix
-	//CListNode	*FocusedOnListNode;
-	CGUIObject	*FocusedOn;
+	vector<CGUIObject*>::iterator Focus;
+	int			KeyHoldRepeatDelay;	
 	int			KeyHoldRepeatInterval;
 	int			TimerAccum;
-	bool		tabholded;
-	bool		repeatstarted;
-	//CList List;
+	bool		TabHolded;
+	bool		RepeatStarted;
+	vector<CGUIObject*> List;
 	CGUIRootObject *Root;
 protected:
 	CGUIManager();
@@ -280,7 +278,7 @@ public:
 	}
 };
 
-class CMenuItem : public CGUIObject, public CCommonManager<CMenuItem>/*public CList*/
+class CMenuItem : public CGUIObject, public CCommonManager <list <CMenuItem*> >/*public CList*/
 {
 public:
 	bool		isCycledMenuSwitch;
@@ -292,7 +290,7 @@ public:
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	bool		AddObject(CObject *AObject);
 private:
-	CMenuItem*	FocusedOnItem;
+	CCommonManager <list <CMenuItem*> >::ManagerIterator	Focus;
 };
 
 #endif // _2DE_GUI_H_

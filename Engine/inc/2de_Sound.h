@@ -46,28 +46,28 @@ private:
  * CSoundManager - ресурсовый менеджер звуковых семплов.
  */
 
-class CSoundManager : public CCommonManager<CSound>, public CTSingleton<CSoundManager>
+class CSoundManager : public CCommonManager <list <CSound*> >, public CTSingleton <CSoundManager>
 {
 public:
 	CSound* GetSoundByName(const string &SoundName);
 
 protected:
 	CSoundManager();
-	friend class CTSingleton<CSoundManager>;
+	friend class CTSingleton <CSoundManager>;
 };
 
 /**
  * CMusicManager - ресурсовый менеджер музыки.
  */
 
-class CMusicManager : public CCommonManager<CMusic>, public CTSingleton<CMusicManager>
+class CMusicManager : public CCommonManager <list <CMusic*> >, public CTSingleton <CMusicManager>
 {
 public:
 	CMusic* GetMusicByName(const string &MusicName);
 
 protected:
 	CMusicManager();
-	friend class CTSingleton<CMusicManager>;
+	friend class CTSingleton <CMusicManager>;
 };
 
 /**
