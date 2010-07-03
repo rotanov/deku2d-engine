@@ -22,6 +22,7 @@ public:
 	CAABB		*BBox;
 
 	CTileset ();
+	~CTileset();
 	
 
 	Vector2Array<4> GetCellTC(int CellIndex);

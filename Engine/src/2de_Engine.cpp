@@ -37,7 +37,9 @@ CEngine::CEngine()	// Переместить все инициализации �
 
 CEngine::~CEngine()
 {
-
+	ilShutDown();
+	SDL_Quit();
+	Log("INFO", "Engine exit success.");
 }
 
 void CEngine::CalcFps()
@@ -240,14 +242,6 @@ bool CEngine::Init()
 	return true;
 }
 
-bool CEngine::Suicide()
-{
-	ilShutDown();
-//	ClearLists();
-	Log("INFO", "Suicide success");
-	return true;
-}
-
 #define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
 
 char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
@@ -434,6 +428,7 @@ bool CEngine::Run()
 	// 			это не дословный код но общая идея именно такая.
 	//------------------
 	// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
+	// Экстраполяция же.
 
 			}
 			else
@@ -451,8 +446,6 @@ bool CEngine::Run()
 			throw;
 		}
 	}	
-	Suicide();
-	SDL_Quit();
 
 	return true;
 }
@@ -509,53 +502,6 @@ int CEngine::CfgGetInt( char* ParamName )
 		return false;
 	}
 	return atoi((Config.First->Get(ParamName))->GetValue());
-}
-
-bool CEngine::ClearLists()
-{
-	// какая к чёрту очистка списков?!
-	// 1. объекты сами удаляют указатели на себя из менеджеров в своих деструкторах
-	// 2. фабрика при своей смерти вызывает дестркуторы всех объектов (созданных через неё)
-
-	// Не так!!!1!адин!+!+!
-	// где-то в тектстовиках я видел шутку про менеджер менеджеров... так вот, он бы реально пригодился тут))
-	/*CObjectManager.Clear(); // Почему это не синглтон до сих пор?!
-	CRenderManager::Instance()->Reset();
-	CUpdateManager::Instance()->Reset();
-	CTextureManager::Instance()->Reset();
-	CObject *data = (CRenderManager::Instance()->Next());
-	while (data)
-	{
-		if (data && !data->GetListRefCount())
-		{
-			SAFE_DELETE(data);
-		}
-		
-		data = (CRenderManager::Instance()->Next());
-	}	
-	data = (CUpdateManager::Instance()->Next());
-	while (data)
-	{
-		if (data && !data->GetListRefCount())
-		{
-			SAFE_DELETE(data);
-		}
-			
-		data = (CUpdateManager::Instance()->Next());
-	}	
-	CRenderManager::Instance()->Clear();
-	CUpdateManager::Instance()->Clear();
-
-	data = CTextureManager::Instance()->Next();
-	while(data)
-	{
-		if (data && !data->GetListRefCount())
-			SAFE_DELETE(data);
-		data = CRenderManager::Instance()->Next();
-	}
-	CRenderManager::Instance()->Clear();*/
-
-	return true;
 }
 
 bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller)

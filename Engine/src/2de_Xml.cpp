@@ -67,7 +67,7 @@ CXMLNode *CXMLNode::Add(string name, string value)
 	}*/
 	if (Child == NULL)
 	{
-		Child = new CXMLNode;
+		Child = new CXMLNode; // @todo: Memory leak here.
 		Last = Child;
 		Last->Name = name;
 		Last->Value = value;
@@ -384,18 +384,18 @@ unsigned int XMLParse(string Str, string &Buff1, string &Buff2){
 CXMLTable::CXMLTable()
 {
 	First = NULL;
-	First = new CXMLNode;
+	First = new CXMLNode; // @todo: Memory leak here.
 }
 /*
 ------------------------------------------------
 *	bool XMLTable::LoadFromFile(char *fname)
 ------------------------------------------------
 *	Reading trunk structure with attributes from
-*	specifed file.
-*	Returns true if succeded, and false on failed.
+*	specified file.
+*	Returns true if succeeded, and false on failed.
 ------------------------------------------------
 *	Can be failed only if file doesn't exist or
-*	it blocket from reading and also can be failed
+*	it blocked from reading and also can be failed
 *	on parse error.
 */
 bool CXMLTable::LoadFromFile(const char *fname)

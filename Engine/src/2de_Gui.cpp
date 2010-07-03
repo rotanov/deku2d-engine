@@ -125,7 +125,7 @@ CGUIObject::CGUIObject(CGUIObjectBase *AParent)
 
 CGUIObject::~CGUIObject()
 {
-	CGUIManager::Instance()->DeleteObject(GetID());
+	//CGUIManager::Instance()->DeleteObject(GetID());
 }
 
 bool CGUIObject::isFocused() const
@@ -853,9 +853,9 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	return true;
 }
 
-bool CMenuItem::AddObject(CObject *AObject)
+bool CMenuItem::AddObject(CMenuItem *AObject)
 {
- 	AddObject(AObject);
+	CCommonManager <list <CMenuItem*> >::AddObject(AObject);
  	Focus = Objects.begin();
  	return true;
 }

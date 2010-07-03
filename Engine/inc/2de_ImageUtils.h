@@ -6,14 +6,15 @@
 class CImageData
 {
 public:
-	byte			*data;
-	size_t			height;
-	size_t			width;
-	byte			bpp;
+	byte			*Data;
+	size_t			Height;
+	size_t			Width;
+	byte			BPP;
+	bool			doCleanData;
 
 	CImageData();
 	~CImageData();
-	bool	LoadFromFile(const string &Filename);
+	bool LoadFromFile(const string &Filename);
 };
 
 #endif // _2DE_IMAGE_UTILS_H_

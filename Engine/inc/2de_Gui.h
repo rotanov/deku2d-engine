@@ -288,7 +288,7 @@ public:
 	void		Render();
 	void		Update(float dt);
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool		AddObject(CObject *AObject);
+	bool		AddObject(CMenuItem *AObject);
 private:
 	CCommonManager <list <CMenuItem*> >::ManagerIterator	Focus;
 };

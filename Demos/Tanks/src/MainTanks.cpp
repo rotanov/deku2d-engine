@@ -74,8 +74,8 @@ public:
 			FadeClr -= RGBAf(0.02, 0.02, 0.02, 0.02);
 			if (TimeOut >= TimeLimit)
 			{
-				CRenderManager::Instance()->DelObject("Title screen tanks");
-				CUpdateManager::Instance()->DelObject("Title screen tanks");
+				//CRenderManager::Instance()->DelObject("Title screen tanks");
+				//CUpdateManager::Instance()->DelObject("Title screen tanks");
 				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 				Tanks = new CTankManager;	
@@ -92,10 +92,10 @@ bool StartGame(CObject *Caller)
 
 bool EndGame(CObject *Caller)
 {
-	Ninja->Suicide();
-	SDLGLExit(1);
+	//SDLGLExit(1); NONONONONONONONO
 	return true;
 }
+
 bool Options(CObject *Caller)
 {
 	FadeClr = (Random_Int(0,1)==0)?COLOR_P1:COLOR_P2;
@@ -127,7 +127,7 @@ bool CreateClient(CObject *Caller)
 	serverGame = NULL;
 
 	CRenderManager::Instance()->DelObject("Title screen tanks");
-	CUpdateManager::Instance()->DelObject("Title screen tanks");
+	CUpdateManager::Instance()->eDlObject("Title screen tanks");
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
 

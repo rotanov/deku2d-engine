@@ -91,7 +91,6 @@ class CGLImageData : public CImageData
 private:
 	bool			MakeTexture();
 public:
-	bool			doCleanData;
 					CGLImageData();
 					virtual ~CGLImageData();
 	bool			LoadTexture(const string &Filename);
@@ -212,7 +211,7 @@ private:
 	Vector2				*pp;					//	Указатель на вектор с координатами текста
 	byte				align;					//	Флаги выравнивания
 	CTexture*			Texture;				//	Указатель на текстуру шрфита. Очевидно же, да?
-	GLuint				base;					// Base List of 256 glLists for font
+	GLuint				base;					//	Base List of 256 glLists for font
 
 	void		_Print(const byte *text);
 	byte		GetHalign();
@@ -223,11 +222,13 @@ class CRenderProxy : public CRenderObject
 {
 private:
 	CRenderObject *RenderSource;
+
 public:
 	CRenderProxy(CRenderObject *ARenderSource) : RenderSource(ARenderSource)
 	{
 		SetName("CRenderProxy");
 	}
+
 	void Render()
 	{
 		RenderSource->Render();

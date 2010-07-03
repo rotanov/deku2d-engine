@@ -12,8 +12,7 @@ CRenderObject::CRenderObject() : Position(V2_ZERO), Angle(0.0f), Scaling(1.0f), 
 
 CRenderObject::~CRenderObject()
 {
-	//Log("INFO", "DESTRUCT RENDER: %s, id: %d, count: %d", GetName(), GetID(), CRenderManager::Instance()->GetObjectsCount()); // debug
-	CRenderManager::Instance()->DelObject(GetID());
+	//CRenderManager::Instance()->DelObject(GetID());
 }
 
 void CRenderObject::SetAngle(float AAngle /*= 0.0f*/)
@@ -40,9 +39,9 @@ float CRenderObject::GetDepth()
 
 CGLImageData::CGLImageData()
 {
-	TexID = width = height = bpp = 0;
-	doCleanData = true;
-	data = NULL;
+	TexID = Width = Height = BPP = 0;
+	//doCleanData = true;
+	Data = NULL;
 }
 
 CGLImageData::~CGLImageData()
@@ -53,19 +52,19 @@ CGLImageData::~CGLImageData()
 
 bool CGLImageData::MakeTexture()
 {
-	if (data == NULL) 
+	if (Data == NULL) 
 		return false;
-	if ((width&(width-1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
+	if ((Width&(Width-1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
 		return false;				//	Ultimate - это использовать NOT_POWER_OF_TWO екстеншон, если он доступен;
-	if ((height&(height-1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
+	if ((Height&(Height-1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
 		return false;				//	Ширина и выстоа стали ближайшими степенями двойки. Но это потом. И это @todo.
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &TexID);
 	glBindTexture(GL_TEXTURE_2D, TexID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	int MODE = (bpp == 3) ? GL_RGB : GL_RGBA;
-	glTexImage2D(GL_TEXTURE_2D, 0, bpp, width, height, 0, MODE, GL_UNSIGNED_BYTE, data);
+	int MODE = (BPP == 3) ? GL_RGB : GL_RGBA;
+	glTexImage2D(GL_TEXTURE_2D, 0, BPP, Width, Height, 0, MODE, GL_UNSIGNED_BYTE, Data);
 	return true;
 }
 
@@ -83,18 +82,18 @@ bool CGLImageData::LoadTexture(const string &Filename)
 	}
 	if (doCleanData)
 	{
-		delete [] data;
-		data = NULL;
+		delete [] Data;
+		Data = NULL;
 	}
 	return true;
 }
 
 bool CGLImageData::LoadTexture(size_t AWidth, size_t AHeight, const byte* Address)
 {
-	data = const_cast<byte *>(Address);
-	width = AWidth;
-	height = AHeight;
-	bpp = 4;
+	Data = const_cast<byte *>(Address);
+	Width = AWidth;
+	Height = AHeight;
+	BPP = 4;
 	if (!MakeTexture())
 	{
 		Log("ERROR", "Can't load texture in video memory.");
@@ -269,6 +268,7 @@ CFont::~CFont()
 {
 	if (!base)
 		glDeleteLists(base, 256);
+	//CFontManager::Instance()->DelObject(GetID());
 }
 
 
@@ -292,7 +292,7 @@ bool CFont::LoadFromFile()
 	file.Close();
 	base = glGenLists(256);
 	Texture->Bind();
-	float TmpOOWdth = 1.0f/Texture->width, TmpOOHght = 1.0f/Texture->height;
+	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
 	for(int i=0;i<256;i++)
 	{
 		if (bbox[i].x0 > bbox[i].x1)
@@ -895,7 +895,7 @@ CTexture::CTexture()
 
 CTexture::~CTexture()
 {
-	CTextureManager::Instance()->DelObject(GetID());
+	//CTextureManager::Instance()->DelObject(GetID());
 }
 
 void CTexture::Bind()

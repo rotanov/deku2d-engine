@@ -15,7 +15,7 @@ void CTilesetEditor::SetZoom(float AZoom)
 	Vector2 Temp;
 	Vector2 TempWH;
 	if (TilesetTexture != NULL)
-		TempWH = Vector2(TilesetTexture->width, TilesetTexture->height);
+		TempWH = Vector2(TilesetTexture->Width, TilesetTexture->Height);
 // 	else
 // 		Temp = Vector2(Font->GetSymbolsBBOX().Width(), Font->GetSymbolsBBOX().Height());
 	Temp.x = (MousePosition.x - Offset.x) / (TempWH.x * OldZoom);
@@ -185,13 +185,13 @@ void CTilesetEditor::Render()
 		glVertex2f(.0f, .0f);
 
 		glTexCoord2f(1.0f, .0f);
-		glVertex2f(TilesetTexture->width, .0f);
+		glVertex2f(TilesetTexture->Width, .0f);
 
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(TilesetTexture->width, TilesetTexture->height);
+		glVertex2f(TilesetTexture->Width, TilesetTexture->Height);
 
 		glTexCoord2f(.0f, 1.0f);
-		glVertex2f(.0f, TilesetTexture->height);
+		glVertex2f(.0f, TilesetTexture->Height);
 		glEnd();
 	}
 

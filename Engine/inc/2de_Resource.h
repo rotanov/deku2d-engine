@@ -18,7 +18,6 @@ class CFactory : public CTSingleton<CFactory>
 public:
 	template<typename T>
 	T* New(const string &AName);
-
 	template<typename T>
 	T* Get(const string &AName);
 
@@ -26,31 +25,37 @@ protected:
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
-	CCommonManager <list <CObject*> > List;
+	list <CObject*> Objects;
 };
 
 template<typename T>
 T* CFactory::New(const string &AName)
 {
+	// Поддерживаем уникальность имени здесь, наверное, да.
 	//if (List.Contains(AName)) @todo uncomment and fix
 	{
 //		throw std::logic_error("Object with this name already exists.");
 	}
-
 	T* result = new T;
 	result->SetName(AName);
-	List.AddObject(result);
-
+	Objects.push_back(result); // not only this
+	result->IncRefCount();
 	return result;
 }
 
 template<typename T>
 T* CFactory::Get(const string &AName)
 {
-	T* result = dynamic_cast<T *>(List.GetObject(AName));
-	if (!result)
+	T* result = NULL;
+	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+		if ((*i)->GetName() == AName)
+		{
+			result = dynamic_cast<T *>(*i);
+			break;
+		}
+	if (result == NULL)
 	{
-		Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
+		Log("ERROR", "Factory can't find object named '%s'", AName.c_str()); // not only "can't find" case, but dynamic_case can also fail
 	}
 
 	return result;

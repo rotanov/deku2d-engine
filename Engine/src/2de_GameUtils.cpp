@@ -57,10 +57,10 @@ void CTileset::RenderTileSet()
 	
 	for (int i = 0; i <= HorNumTiles; i++)
 		p.grSegment(Vector2(i*TileWidth, 0),
-			Vector2(i*TileWidth, Texture->height));
+			Vector2(i*TileWidth, Texture->Height));
 	for (int i = 0; i <= VerNumTiles; i++)
 		p.grSegment(Vector2(0, i*TileHeight),
-			Vector2(Texture->width, i*TileHeight));
+			Vector2(Texture->Width, i*TileHeight));
 }
 
 bool CTileset::SaveToFile()
@@ -111,7 +111,7 @@ void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 
 Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 {
-	assert(Texture->width != 0 && Texture->height != 0);
+	assert(Texture->Width != 0 && Texture->Height != 0);
 
 	Vector2 t;
 	Vector2Array<4> tc;
@@ -120,12 +120,16 @@ Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 	for (int i = 0; i < 4; i++)
 	{
 		tc[i] = (t + V2_QuadBin[i]);
-		tc[i].x *= (float)TileWidth/Texture->width;
-		tc[i].y *= (float)TileHeight/Texture->height;
+		tc[i].x *= (float)TileWidth/Texture->Width;
+		tc[i].y *= (float)TileHeight/Texture->Height;
 	}
 	return tc;
 }
 
+CTileset::~CTileset()
+{
+	//CTileSetManager::Instance()->DelObject(GetID());
+}
 //-------------------------------------------//
 //				CMap functions				 //
 //-------------------------------------------//

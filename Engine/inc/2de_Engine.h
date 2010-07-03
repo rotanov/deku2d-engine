@@ -68,7 +68,6 @@ public:
 	//bool						Pause();
 	//bool						ShutDown();
 
-	bool						Suicide();  // Временно в паблике
 	string						ConfigFileName;
 	string						ConfigFilePath;		//Temporary, until CConfig created. // Or no. We are not have CEngine::Config now.
 	
@@ -85,8 +84,7 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-
-	bool						ClearLists();
+	
 	bool						Init();
 	void						CalcFps();
 	bool						LimitFps();

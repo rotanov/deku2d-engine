@@ -540,8 +540,8 @@ void CSprite::Render()
 		}
 	}
 
-	fSubRange_s = (1.0f / Texture->width) * (anim->m_nFrameWidth * anim->m_nNumFrameColumns);
-	fSubRange_t = (1.0f / Texture->height) * (anim->m_nFrameHeight * anim->m_nNumFrameRows);
+	fSubRange_s = (1.0f / Texture->Width) * (anim->m_nFrameWidth * anim->m_nNumFrameColumns);
+	fSubRange_t = (1.0f / Texture->Height) * (anim->m_nFrameHeight * anim->m_nNumFrameRows);
 	fFrame_s = fSubRange_s/anim->m_nNumFrameColumns;
 	fFrame_t = fSubRange_t/anim->m_nNumFrameRows;
 
@@ -556,8 +556,8 @@ void CSprite::Render()
 
 	if(anim->m_nOffsetX>0 || anim->m_nOffsetY > 0)
 	{
-		fOffset_s		= (1.0f / Texture->width ) * anim->m_nOffsetX;
-		fOffset_t		= (1.0f / Texture->height) * anim->m_nOffsetY;
+		fOffset_s		= (1.0f / Texture->Width ) * anim->m_nOffsetX;
+		fOffset_t		= (1.0f / Texture->Height) * anim->m_nOffsetY;
 		fLowerLeft_s	= fLowerLeft_s + fOffset_s;
 		fLowerLeft_t	= fLowerLeft_t - fOffset_t;
 		fLowerRight_s	= fLowerRight_s + fOffset_s;

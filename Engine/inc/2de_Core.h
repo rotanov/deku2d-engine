@@ -186,8 +186,18 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 
 class CObject
 {
-public:
+private:
+	bool Destroyed;
+	size_t ID;
+	string Name;
+	size_t RefCount;
+	static unsigned int CObjectCount;
+
+protected:
 	CObject();
+	virtual ~CObject();	
+
+public:
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
 	void IncRefCount();
 	void DecRefCount();
@@ -195,15 +205,11 @@ public:
 	const string& GetName() const;
 	void SetName(const string &AObjectName);
 	size_t GetID() const;
+	bool isDestroyed()
+	{
+		return Destroyed;
+	}
 	static void Destroy(CObject* AObject);
-protected:
-	virtual ~CObject();	
-private:
-	bool Destroyed;
-	size_t ID;
-	string Name;
-	size_t RefCount;
-	static unsigned int CObjectCount;
 };
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 /**
@@ -231,6 +237,13 @@ public:
 	{
 		for(ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 		{
+			if ((*i)->isDestroyed())
+			{
+				T temp = *i;
+				Objects.remove(*i);
+				CObject::Destroy(temp);
+				continue;
+			}
 			if ((*i)->GetName() == AName)
 				return *i;
 		}
@@ -286,6 +299,7 @@ public:
 			if ((*it)->GetRefCount() == 0)
 				CObject::Destroy(*it);
 		}
+		Objects.clear();
 	}
 };
 
@@ -294,6 +308,7 @@ class CGarbageCollector : public CCommonManager <list<CObject*> >
 public:
 	CGarbageCollector();
 	void AddObject(CObject *AObject);
+	void Genocide();
 	~CGarbageCollector();
 };
 extern CGarbageCollector SingletoneKiller;
@@ -314,6 +329,7 @@ extern CGarbageCollector SingletoneKiller;
  * 	};
  *
  * @todo: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
+ *	@todo: переделать всё это, как_у_александреску.
  */
 
 template <typename T>

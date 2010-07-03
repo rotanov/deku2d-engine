@@ -2,12 +2,12 @@
 
 #include <IL/il.h>
 
-CImageData::CImageData() : data(NULL), height(0), width(0), bpp(0){}
+CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0), doCleanData(false){}
 
 CImageData::~CImageData()
 {
-	if (data != NULL)
-		delete [] data;
+	if (doCleanData && Data != NULL)
+		delete [] Data;
 }
 
 bool CImageData::LoadFromFile(const string &Filename)
@@ -18,13 +18,13 @@ bool CImageData::LoadFromFile(const string &Filename)
 	ilBindImage(ILID);
 	if (!ilLoadImage(Filename.c_str()))
 		return false;
-	width = ilGetInteger(IL_IMAGE_WIDTH);
-	height = ilGetInteger(IL_IMAGE_HEIGHT);
+	Width = ilGetInteger(IL_IMAGE_WIDTH);
+	Height = ilGetInteger(IL_IMAGE_HEIGHT);
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	data = new byte[width * height * 4];
-	ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, data);
+	Data = new byte[Width * Height * 4];
+	ilCopyPixels(0, 0, 0, Width, Height, 1, IL_RGBA, IL_UNSIGNED_BYTE, Data);
 
 	// хорошо бы писать в лог что-то поумнее, но для того, чтобы достать вменяемый текст ошибки, нужно подключать ILU: iluGetErrorString(ilGetError())
 	// учитывая, что из него никаких больше функций не нужно, мне его подключать не охота..
@@ -33,7 +33,7 @@ bool CImageData::LoadFromFile(const string &Filename)
 
 	//bpp = ilGetInteger(IL_IMAGE_FORMAT);
 	//bpp = ilGetInteger(IL_IMAGE_BPP);	// если вдруг на будущее, то IL_IMAGE_BYTES_PER_PIXEL
-	bpp = 4;
+	BPP = 4;
 	ilDeleteImage(ILID);
 	return true;
 }

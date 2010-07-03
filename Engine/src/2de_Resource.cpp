@@ -19,17 +19,18 @@
 CFactory::CFactory()
 {
 	SetName("Factory");
-	List.SetName("CFactory list");
 }
 
 CFactory::~CFactory()
 {	
-	for(CCommonManager< list <CObject*> >::ManagerIterator it = List.Objects.begin(); it != List.Objects.end(); ++it)
+	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
-		CObject *obj = *it;
-		Log("INFO", "Deleting object %s", obj->GetName());
-		CObject::Destroy(obj);
+		// @todo: urgent
+// 		CObject *object = *i;
+// 		Log("INFO", "Deleting object %s", object->GetName().c_str());
+// 		CObject::Destroy(object);
 	}
+	Objects.clear();
 }
 
 //////////////////////////////////////////////////////////////////////////

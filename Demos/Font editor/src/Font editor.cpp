@@ -48,7 +48,7 @@ void CFontEditor::SetZoom(float AZoom)
 	Vector2 Temp;
 	Vector2 TempWH;
 	if (FontTexture != NULL)
-		TempWH = Vector2(FontTexture->width, FontTexture->height);
+		TempWH = Vector2(FontTexture->Width, FontTexture->Height);
 	else
 		Temp = Vector2(Font->GetSymbolsBBOX().Width(), Font->GetSymbolsBBOX().Height());
 	Temp.x = (MousePosition.x - Offset.x) / (TempWH.x * OldZoom);
@@ -251,13 +251,13 @@ void CFontEditor::Render()
 		glVertex2f(.0f, .0f);
 
 		glTexCoord2f(1.0f, .0f);
-		glVertex2f(FontTexture->width, .0f);
+		glVertex2f(FontTexture->Width, .0f);
 
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(FontTexture->width, FontTexture->height);
+		glVertex2f(FontTexture->Width, FontTexture->Height);
 
 		glTexCoord2f(.0f, 1.0f);
-		glVertex2f(.0f, FontTexture->height);
+		glVertex2f(.0f, FontTexture->Height);
 		glEnd();
 	}
 
@@ -526,10 +526,10 @@ bool ExposeRect(CObject *Caller)
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x0 = (FontEditor->Font->GetTexture())->width / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x1 = (FontEditor->Font->GetTexture())->width / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y0 = (FontEditor->Font->GetTexture())->height / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y1 = (FontEditor->Font->GetTexture())->height / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x0 = (FontEditor->Font->GetTexture())->Width / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x1 = (FontEditor->Font->GetTexture())->Width / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y0 = (FontEditor->Font->GetTexture())->Height / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y1 = (FontEditor->Font->GetTexture())->Height / 2;
 	
 	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x1 += 20;
 	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y1 += 20;

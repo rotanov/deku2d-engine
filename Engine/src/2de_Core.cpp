@@ -343,7 +343,7 @@ bool CFile::ReadLine(char* &Data)
 	if (Data != NULL)
 		delete [] Data;
 
-	Data = new char[count + 1];
+	Data = new char[count + 1]; // @todo: CFile should not allocate any memory for user. User should. There is leak there.
 	for (int i = 0; i < count; i++)
 		Data[i] = buffer[i];
 	Data[count] = 0x00;
@@ -438,12 +438,11 @@ CLog::~CLog()
 	{
 		Log("INFO", "Log finished\n");
 
-		if (LogMode == LOG_MODE_FILE)
+		//if (LogMode == LOG_MODE_FILE)
 		{
 			dynamic_cast<ofstream*>(Stream)->close();
 			delete Stream;
 		}
-
 	}
 }
 
@@ -586,6 +585,7 @@ string GetFormattedTime(const tm TimeStruct, const char *Format)
 	}
 	
 	string result = buffer;
+	SAFE_DELETE_ARRAY(buffer);
 	return result;
 }
 
@@ -668,7 +668,7 @@ CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 
 CUpdateObject::~CUpdateObject()
 {
-	CUpdateManager::Instance()->DelObject(GetID());
+	//CUpdateManager::Instance()->DelObject(GetID());
 }
 
 void CUpdateObject::SetDead()
@@ -741,21 +741,27 @@ CGarbageCollector::CGarbageCollector()
 
 CGarbageCollector::~CGarbageCollector()
 {
-	//CObject *data;
+	Genocide();
+}
+
+void CGarbageCollector::AddObject(CObject *AObject)
+{
+	AObject->IncRefCount();
+	Objects.push_front(AObject);
+	Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
+}
+
+void CGarbageCollector::Genocide()
+{
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
 	{
-		Log("INFO", "Singletone killer deleting object named: %s id: %u", (*it)->GetName(), (*it)->GetID());
+		Log("INFO", "Singletone killer deleting object named: %s id: %u", (*it)->GetName().c_str(), (*it)->GetID());
 		CObject *Object = *it;
+		*it = NULL;
 		CObject::Destroy(Object);
 	}
 #if defined(_DEBUG) && defined(_MSC_VER)
 	DumpUnfreed();
 #endif
-}
-
-void CGarbageCollector::AddObject(CObject *AObject)
-{
-	CCommonManager <list <CObject*> >::AddObject(AObject);
-	Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
 }
 CGarbageCollector SingletoneKiller;
