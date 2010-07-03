@@ -88,7 +88,10 @@ void CObject::DecRefCount(CObject* AObject)
 	assert(AObject != NULL);
 	AObject->RefCount--;
 	if (AObject->RefCount <= 0)
+	{
+		Log("INFO", "Deleting %s, with id: %d", AObject->GetName().c_str(), AObject->GetID());
 		delete AObject;
+	}
 }
 
 const string& CObject::GetName() const
@@ -430,7 +433,7 @@ CLog::~CLog()
 	{
 		Log("INFO", "Log finished\n");
 
-		//if (LogMode == LOG_MODE_FILE)
+		if (LogMode == LOG_MODE_FILE)
 		{
 			dynamic_cast<ofstream*>(Stream)->close();
 			delete Stream;

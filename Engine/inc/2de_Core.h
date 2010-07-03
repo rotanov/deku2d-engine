@@ -263,7 +263,7 @@ public:
 	void Remove(size_t AID)
 	{
 		T temp = NULL;
-		for (ManagerIterator i = Objects.begin(); i != Objects.end(); i++)
+		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 			if ((*i)->GetID() == AID)			
 			{
 				temp = *i;

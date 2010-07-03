@@ -530,10 +530,10 @@ void CEngine::Genocide()
 {
 	for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
 	{
-		Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
+		//Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
 		CObject *Object = *i;
 		*i = NULL;
-		delete Object; // CObject::DecRefCount();
+		CObject::DecRefCount(Object); // CObject::DecRefCount();
 	}
 #if defined(_DEBUG) && defined(_MSC_VER)
 	DumpUnfreed();
