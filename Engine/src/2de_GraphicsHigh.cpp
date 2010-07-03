@@ -754,7 +754,7 @@ void CParticleSystem::Update(float dt)
 			Emission = 0;
 		if (Age >= Life && ParticlesActive == 0)
 		{
-			SetDead();
+			SetDestroyed();
 			return;
 		}
 	}

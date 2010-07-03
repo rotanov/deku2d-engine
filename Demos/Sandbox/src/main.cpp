@@ -3,20 +3,21 @@
 #include "2de_MathUtils.h"
 //#include "LuaUtils.h"
 
+CText *FPSText = NULL;
+
 bool Init()
 {	
-// 	Vector2 V(1.0f, 1.0f), U(2.0f, 2.0f), W(3.0f, 3.0f);
-// 	(V += U) += W;
-// 	W  = V / 0.0f;
 	CTestUnit *Unit = new CTestUnit;
+	FPSText = new CText;
+	FPSText->Position = Vector2(0.0f, 0.0f);
 	return true;
 }
 
-bool Draw()
+bool Update()
 {	
 	unsigned long FPS = 0;
 	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &FPS);
-	CFontManager::Instance()->Print(0.0f, 0.0f, 0.0f, "FPS: " + itos(FPS));
+	FPSText->Text = "FPS: " + itos(FPS);
 	return true;
 }
 
@@ -26,7 +27,7 @@ int	main(int argc, char *argv[])
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Sandbox.xml");
 	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);	
+	Ninja->SetState(CEngine::STATE_UPDATE_FUNC, &Update);	
 	Ninja->Run();
 	return 0;
 }

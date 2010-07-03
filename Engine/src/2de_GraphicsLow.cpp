@@ -7,7 +7,7 @@
 CRenderObject::CRenderObject() : Position(V2_ZERO), Angle(0.0f), Scaling(1.0f), Depth(0.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
 	SetName("CRenderObject");
-	CRenderManager::Instance()->AddObject(this);
+	CRenderManager::Instance()->Add(this);
 };
 
 CRenderObject::~CRenderObject()
@@ -261,7 +261,7 @@ CFont::CFont()
 	Sel0 = Sel1 = 0;
 	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);	// MAGIC NUMBER
 	SetDepth(0.0f);
-	CFontManager::Instance()->AddObject(this);
+	CFontManager::Instance()->Add(this);
 }
 
 CFont::~CFont()
@@ -682,12 +682,17 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // !!!
-	//glPushMatrix();
+	ManagerContainer toDelete;
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // !!! there. it shouln't be there
 	Camera.Update();
-	for(ManagerConstIterator it = Objects.begin(); it != Objects.end(); ++it)
+	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
-		CRenderObject *data = *it;
+		CRenderObject *data = *i;
+		if (data->isDestroyed())
+		{
+			toDelete.push_back(data);
+			continue;
+		}
 		if (data->Visible)
 		{
 			glLoadIdentity();
@@ -699,12 +704,14 @@ bool CRenderManager::DrawObjects()
 			data->Render();
 		}
 	}
-	//glPopMatrix();
-
+	for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
+	{
+		Objects.remove(*i);
+		CObject::DecRefCount(*i);
+	}
 #ifdef _DEBUG
 	//	Camera.DrawDebug();
 #endif 
-
 	return true;
 }
 
@@ -834,7 +841,7 @@ bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
 
 bool CFontManager::AddFont(CFont *AObject)
 {	
-	CCommonManager <list <CFont*> >::AddObject(AObject);
+	CCommonManager <list <CFont*> >::Add(AObject);
 	if (CurrentFont == NULL)
 		CurrentFont = AObject;
 	return true;
@@ -890,7 +897,7 @@ GLuint CTexture::GetTexID()
 CTexture::CTexture()
 {
 	SetName("CTexture");
-	CTextureManager::Instance()->AddObject(this);
+	CTextureManager::Instance()->Add(this);
 }
 
 CTexture::~CTexture()

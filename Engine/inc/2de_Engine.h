@@ -26,7 +26,7 @@ const int ENGINE_VERSION			=	0x001;
 const int MAX_EVENT_FUNCTIONS		=	8;
 const int MAX_KEY_INPUT_FUNCTIONS	=	8;
 
-class CEngine : public CTSingleton<CEngine>
+class CEngine
 {
 public:
 	enum EState
@@ -59,6 +59,7 @@ public:
 	int							keys[SDLK_LAST];	//FFUUU~ for sure. Wait til the Event system.
 	Vector2						MousePos;
 
+	static CEngine*					Instance();
 	void						SetState(EState state, void* value);	// "void*" ??? FFFUUUUU~
 	void						GetState(EState state, void* value);	// Same.
 	bool						AddEventFunction(EventFunc func);		// Until event system created.
@@ -67,6 +68,7 @@ public:
 	bool						Run();	// If we have Run() we should have Pause() and ShutDown() or smthng.
 	//bool						Pause();
 	//bool						ShutDown();
+	void						RegisterSingletone(CObject *AObject);
 
 	string						ConfigFileName;
 	string						ConfigFilePath;		//Temporary, until CConfig created. // Or no. We are not have CEngine::Config now.
@@ -84,6 +86,12 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
+
+	list<CObject*>				Singletones;
+	
+	void						Genocide();
+
+
 	
 	bool						Init();
 	void						CalcFps();
@@ -100,8 +108,9 @@ private:
 	bool						(*procFocusGainFunc)();		// ok
 	bool						(*procUpdateFunc)(float);	// ok, yeah
 	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
-protected:
-	friend class CTSingleton<CEngine>;
+
+	static CEngine MainEngineInstance;
+protected:	
 	CEngine();
 	~CEngine();
 };

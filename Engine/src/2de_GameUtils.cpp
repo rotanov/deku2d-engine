@@ -93,7 +93,7 @@ CTileset::CTileset()
 	TileHeight	=	0;
 	HorNumTiles	=	0;
 	VerNumTiles	=	0;
-	CTileSetManager::Instance()->AddObject(this);
+	CTileSetManager::Instance()->Add(this);
 }
 
 void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles)
@@ -309,7 +309,7 @@ CCompas::CCompas()
 {
 	SetName("CCompas");
 	CEngine *Ninja = CEngine::Instance();
-	CRenderManager::Instance()->AddObject(this);
+	CRenderManager::Instance()->Add(this);
 }
 
 CCompas::~CCompas()

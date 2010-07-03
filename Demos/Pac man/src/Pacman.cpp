@@ -32,14 +32,14 @@ void CPacmanBonus::Update(float dt)
 		Ps->Life = 0.5;
 		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
 		Ps->Position = Position;
-		SetDead();
+		SetDestroyed();
 	}
 	return;
 }
 
 CPacmanBonus::~CPacmanBonus()
 {
-	CObject::Destroy(RenderProxy);  // delete RenderProxy worked just fine. BUT IT SHOULDN'T COMPILE. @todo: check, what's going on
+	RenderProxy->SetDestroyed();  // delete RenderProxy worked just fine. BUT IT SHOULDN'T COMPILE. @todo: check, what's going on
 }
 CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
 {

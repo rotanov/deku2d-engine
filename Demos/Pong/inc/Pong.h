@@ -144,9 +144,9 @@ public:
 	}
 	~CPongGame()
 	{
-		CObject::Destroy(PlayerOne);
-		CObject::Destroy(PlayerTwo);
-		CObject::Destroy(Ball);
+		PlayerOne->SetDestroyed();	// Not really
+		PlayerTwo->SetDestroyed();
+		Ball->SetDestroyed();
 	}
 	void Render()
 	{

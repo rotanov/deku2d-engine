@@ -193,23 +193,17 @@ private:
 	size_t RefCount;
 	static unsigned int CObjectCount;
 
-protected:
-	CObject();
-	virtual ~CObject();	
-
 public:
-	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
+	CObject();
+	virtual ~CObject();		
 	void IncRefCount();
-	void DecRefCount();
-	size_t GetRefCount() const;
+	static void DecRefCount(CObject* AObject);	
 	const string& GetName() const;
 	void SetName(const string &AObjectName);
 	size_t GetID() const;
-	bool isDestroyed()
-	{
-		return Destroyed;
-	}
-	static void Destroy(CObject* AObject);
+	bool isDestroyed() const;
+	void SetDestroyed();
+	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
 };
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 /**
@@ -233,85 +227,76 @@ public:
 public:		
 	typedef typename ManagerContainer::iterator ManagerIterator;
 	typedef typename ManagerContainer::const_iterator ManagerConstIterator;
+
 	T GetObject(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
 	{
-		for(ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
+		T temp = NULL;
+		ManagerContainer toDelete;
+		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 		{
+			temp = *i;
 			if ((*i)->isDestroyed())
 			{
-				T temp = *i;
-				Objects.remove(*i);
-				CObject::Destroy(temp);
+				toDelete.push_back(temp);
 				continue;
 			}
 			if ((*i)->GetName() == AName)
-				return *i;
+			{
+				temp = *i;
+				break;
+			}
 		}
-		return NULL;
+		for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
+		{
+			Objects.remove(*i);
+			CObject::DecRefCount(*i);
+		}
+		return temp;
 	}
-	void AddObject(const T &AObject)
+
+	void Add(const T &AObject)
 	{
 		AObject->IncRefCount();
 		Objects.push_back(AObject);
 	}
-	void DelObject(size_t AID)
+
+	void Remove(size_t AID)
 	{
 		T temp = NULL;
-		for(ManagerIterator i = Objects.begin(); i != Objects.end(); i++)
-		{
-			if ((*i)->GetID() == AID)
+		for (ManagerIterator i = Objects.begin(); i != Objects.end(); i++)
+			if ((*i)->GetID() == AID)			
 			{
 				temp = *i;
 				break;
 			}
-		}
 		if (temp == NULL)
 			return;
-		Objects.remove(temp);
-		temp->DecRefCount();
-		if (temp->GetRefCount() == 0)
-			CObject::Destroy(temp);
+		Objects.remove(temp);		
+		CObject::DecRefCount(temp);
 	}
-	void DelObject(const string &AName)
+
+	void Remove(const string &AName)
 	{
-		T temp = T();
-		for(ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
-		{
+		T temp = NULL;
+		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 			if ((*i)->GetName() == AName)
 			{
 				temp = *i;
 				break;
 			}
-		}		
+		if (temp == NULL)
+			return;
 		Objects.remove(temp);
-		temp->DecRefCount();
-		if (temp->GetRefCount() == 0)
-			CObject::Destroy(temp);
+		CObject::DecRefCount(temp);
 	}
 
 	virtual ~CCommonManager()
 	{
-		for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
-		{
-			if (*it == NULL)
-				continue;
-			(*it)->DecRefCount();
-			if ((*it)->GetRefCount() == 0)
-				CObject::Destroy(*it);
-		}
+		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
+			CObject::DecRefCount(*i);
 		Objects.clear();
 	}
 };
-
-class CGarbageCollector : public CCommonManager <list<CObject*> >
-{
-public:
-	CGarbageCollector();
-	void AddObject(CObject *AObject);
-	void Genocide();
-	~CGarbageCollector();
-};
-extern CGarbageCollector SingletoneKiller;
 
 /**
  * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
@@ -349,13 +334,15 @@ private:
 	static T * _instance;
 };
 
+void RegisterSingletoneInEngineMainClassMotherfuckers(CObject* Singletone);
+
 template <typename T>
 T* CTSingleton<T>::Instance()
 {
 	if (!_instance)
 	{
 		_instance = new T;
-		SingletoneKiller.AddObject(_instance);
+		RegisterSingletoneInEngineMainClassMotherfuckers(_instance);
 	}
 	return _instance;
 }
@@ -387,23 +374,56 @@ public:
 
 	void WriteToLog(const char *Event, const char *Format, ...);
 
-	__INLINE void Toggle(bool AEnabled) { Enabled = AEnabled; }
-	__INLINE bool isEnabled() const { return Enabled; }
+	__INLINE void Toggle(bool AEnabled)
+	{
+		Enabled = AEnabled;
+	}
+	__INLINE bool isEnabled() const
+	{
+		return Enabled;
+	}
 
 	void SetLogMode(ELogMode ALogMode);
-	__INLINE ELogMode GetLogMode() const { return LogMode; }
+	__INLINE ELogMode GetLogMode() const 
+	{
+		return LogMode;
+	}
 
-	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode) { LogFileWriteMode = ALogFileWriteMode; }
-	__INLINE ELogFileWriteMode GetLogFileWriteMode() const { return LogFileWriteMode; }
+	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode)
+	{
+		LogFileWriteMode = ALogFileWriteMode;
+	}
+	__INLINE ELogFileWriteMode GetLogFileWriteMode() const
+	{
+		return LogFileWriteMode;
+	}
 
-	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames) { DatedLogFileNames = ADatedLogFileNames; }
-	__INLINE bool GetDatedLogFileNames() const { return DatedLogFileNames; }
+	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames)
+	{
+		DatedLogFileNames = ADatedLogFileNames;
+	}
+	__INLINE bool GetDatedLogFileNames() const
+	{
+		return DatedLogFileNames;
+	}
 
-	__INLINE void SetLogFilePath(string ALogFilePath) { LogFilePath = ALogFilePath; }
-	__INLINE string GetLogFilePath() const { return LogFilePath; }
+	__INLINE void SetLogFilePath(string ALogFilePath)
+	{
+		LogFilePath = ALogFilePath;
+	}
+	__INLINE string GetLogFilePath() const
+	{
+		return LogFilePath;
+	}
 
-	__INLINE void SetLogName(string ALogName) { LogName = ALogName; }
-	__INLINE string GetLogName() const { return LogName; }
+	__INLINE void SetLogName(string ALogName)
+	{
+		LogName = ALogName;
+	}
+	__INLINE string GetLogName() const
+	{
+		return LogName;
+}
 
 private:
 	bool Enabled;

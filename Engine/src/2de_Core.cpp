@@ -83,21 +83,12 @@ void CObject::IncRefCount()
 	RefCount++;
 }
 
-void CObject::DecRefCount()
+void CObject::DecRefCount(CObject* AObject)
 {
-	RefCount--;
-	if (RefCount < 0)
-	{
-		Log("ERROR", "CObject named %s id: %d list reference broken, it is: ", Name.c_str(), ID, RefCount);
-#ifdef CRITICAL_ERRORS_MESSAGE_BOXES
-		MessageBox(0, "CObject list reference broken.", "ERROR", MB_OK);
-#endif // CRITICAL_ERRORS_MESSAGE_BOXES
-	}
-}
-
-size_t CObject::GetRefCount() const
-{
-	return RefCount;
+	assert(AObject != NULL);
+	AObject->RefCount--;
+	if (AObject->RefCount <= 0)
+		delete AObject;
 }
 
 const string& CObject::GetName() const
@@ -115,14 +106,15 @@ void CObject::SetName(const string &AObjectName)
 	Name = AObjectName;
 }
 
-void CObject::Destroy(CObject* AObject)
+void CObject::SetDestroyed()
 {
-	if (AObject == NULL || AObject->Destroyed /*|| AObject->ListRefCount > 0*/)
-		return;
-	AObject->Destroyed = true;
-	delete AObject, AObject = NULL;
+	Destroyed = true;
 }
 
+bool CObject::isDestroyed() const
+{
+	return Destroyed;
+}
 //////////////////////////////////////////////////////////////////////////
 // CFile
 
@@ -421,8 +413,8 @@ CLog::CLog()
 {
 	SetName("Log ID: " + itos(GetID()));
 	Enabled = true;
-	LogMode = LOG_MODE_FILE;	// well, usual default behaviour for user-space (non-system) programs is to log on a console,
-					// but for now i left the behaviour, some of us used to... may be changed any time by calling
+	LogMode = LOG_MODE_FILE;	// well, usual default behavior for user-space (non-system) programs is to log on a console,
+					// but for now i left the behavior, some of us used to... may be changed any time by calling
 					// CLog::SetLogMode(CLog::ELogMode ALogMode);
 
 	LogFileWriteMode = LOG_FILE_WRITE_MODE_TRUNCATE;
@@ -663,7 +655,7 @@ void MemCheck()
 CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 {
 	SetName("CUpdateObject");
-	CUpdateManager::Instance()->AddObject(this);
+	CUpdateManager::Instance()->Add(this);
 }
 
 CUpdateObject::~CUpdateObject()
@@ -695,7 +687,7 @@ bool CUpdateManager::UpdateObjects()
 		CUpdateObject *data = (*it);
 		if (!data->Active)
 			continue;
-		if (data->isDead())
+		if (data->isDestroyed())
 		{
 			toDelete.push_back(data);
 			continue;
@@ -705,9 +697,10 @@ bool CUpdateManager::UpdateObjects()
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
 		data->Update(dt); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 	}
-	for(ManagerIterator it = toDelete.begin(); it != toDelete.end(); ++it)
+	for(ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
-		CObject::Destroy(*it);
+		Objects.remove(*i);
+		CObject::DecRefCount(*i);
 	}
 	return true;
 }
@@ -734,34 +727,8 @@ CResource::CResource()
 	SetName("CResource");
 }
 
-CGarbageCollector::CGarbageCollector()
-{
-	SetName("Some CGarbageCollector");
-}
 
-CGarbageCollector::~CGarbageCollector()
+void RegisterSingletoneInEngineMainClassMotherfuckers(CObject* Singletone)
 {
-	Genocide();
+	CEngine::Instance()->RegisterSingletone(Singletone);
 }
-
-void CGarbageCollector::AddObject(CObject *AObject)
-{
-	AObject->IncRefCount();
-	Objects.push_front(AObject);
-	Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
-}
-
-void CGarbageCollector::Genocide()
-{
-	for(ManagerIterator it = Objects.begin(); it != Objects.end(); it++)
-	{
-		Log("INFO", "Singletone killer deleting object named: %s id: %u", (*it)->GetName().c_str(), (*it)->GetID());
-		CObject *Object = *it;
-		*it = NULL;
-		CObject::Destroy(Object);
-	}
-#if defined(_DEBUG) && defined(_MSC_VER)
-	DumpUnfreed();
-#endif
-}
-CGarbageCollector SingletoneKiller;

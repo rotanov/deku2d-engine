@@ -15,16 +15,19 @@ public:
 	CTexture *shroom;
 	CTestUnit()
 	{
+		int ScrWidth, ScrHeight;
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
+
+		CText *TitleText = new CText();
+		TitleText->Text = "Deku";
+		TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f);
+		TitleText = new CText();
+		TitleText->Text = "team";
+		TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f);
+
 		shroom = new CTexture;
-// 		//		SetName((string)"CTestUnit" + GetID());
-// 		// 		void *temp = IMAGE_SHROOM_DATA;
-// 		// 		shroom.width = IMAGE_SHROOM_WIDTH;
-// 		// 		shroom.height = IMAGE_SHROOM_HEIGHT;
-// 		// 		shroom.data = (byte*)temp;
-// 		// 		shroom.bpp = 4;
-// 		// 		shroom.MakeTexture();
 		shroom->LoadTexture(IMAGE_SHROOM_WIDTH, IMAGE_SHROOM_HEIGHT, reinterpret_cast<byte *>(IMAGE_SHROOM_DATA));
-		shroom->doCleanData = false;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 	void Render()
@@ -32,6 +35,7 @@ public:
 		int ScrWidth, ScrHeight;
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
+
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		glEnable(GL_TEXTURE_2D);
 		shroom->Bind();
@@ -42,10 +46,6 @@ public:
 			glTexCoord2f(1.0f, 1.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f + 50.0f);
 			glTexCoord2f(0.0f, 1.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f + 50.0f);
 		glEnd();
-
-		CFontManager::Instance()->Print(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f, 0.0f, "Deku");
-		CFontManager::Instance()->Print(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f, 0.0f, "team");
-		return;
 	}
 	void Update(float dt){}
 };

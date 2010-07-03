@@ -855,7 +855,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 
 bool CMenuItem::AddObject(CMenuItem *AObject)
 {
-	CCommonManager <list <CMenuItem*> >::AddObject(AObject);
+	CCommonManager <list <CMenuItem*> >::Add(AObject);
  	Focus = Objects.begin();
  	return true;
 }

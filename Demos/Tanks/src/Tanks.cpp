@@ -209,7 +209,7 @@ void CTankManager::AddPlayer()
 	//delete [] tmp;
 	Tank->Init(PlayerCount == 0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
 	Tank->SetPlayerControls(PlayerCount);
-	AddObject(Tank);
+	Add(Tank);
 	PlayerCount++;
 }
 
@@ -229,7 +229,7 @@ void CTankManager::AddAI()
 	Tank = new CTank(Map, this, AI);
 	Tank->SetName("Tank");	
 	Tank->Init(&COLOR_AI, Map->GetNewTankLocation());
-	AddObject(Tank);
+	Add(Tank);
 	PlayerCount++;
 	return;
 }

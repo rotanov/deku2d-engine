@@ -11,9 +11,10 @@
 	#include <windows.h>
 #endif // _WIN32
 
+CEngine  CEngine::MainEngineInstance;
+
 CEngine::CEngine()	// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ... // а зачем собственно? щас нормальный многострочный вид, читаемо, а будет длинная строчка не понять чего..
 {
-	SetName("Engine main class");
 	memset(keys, 0, sizeof(keys));
 	doLimitFps			=	false; 
 	isHaveFocus			=	true;
@@ -38,8 +39,7 @@ CEngine::CEngine()	// Переместить все инициализации �
 CEngine::~CEngine()
 {
 	ilShutDown();
-	SDL_Quit();
-	Log("INFO", "Engine exit success.");
+	SDL_Quit();	
 }
 
 void CEngine::CalcFps()
@@ -446,7 +446,7 @@ bool CEngine::Run()
 			throw;
 		}
 	}	
-
+	Genocide();
 	return true;
 }
 
@@ -512,4 +512,30 @@ bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKey
 	KeyFuncCallers[KeyInputFuncCount] = AKeyFuncCaller;
 	KeyInputFuncCount++;
 	return true;
+}
+
+CEngine* CEngine::Instance()
+{
+	return &MainEngineInstance;
+}
+
+void CEngine::RegisterSingletone(CObject *AObject)
+{
+	AObject->IncRefCount(); // is not necessary i think. it it is?
+	Singletones.push_front(AObject);
+	//Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
+}
+
+void CEngine::Genocide()
+{
+	for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
+	{
+		Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
+		CObject *Object = *i;
+		*i = NULL;
+		delete Object; // CObject::DecRefCount();
+	}
+#if defined(_DEBUG) && defined(_MSC_VER)
+	DumpUnfreed();
+#endif
 }

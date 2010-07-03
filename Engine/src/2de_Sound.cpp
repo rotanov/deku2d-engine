@@ -11,7 +11,7 @@ CSound::CSound()
 	Filename = "";
 	Data = NULL;
 	SetName("CSound");
-	CSoundManager::Instance()->AddObject(this);
+	CSoundManager::Instance()->Add(this);
 }
 
 CSound::CSound(const char *AFileName)
@@ -19,7 +19,7 @@ CSound::CSound(const char *AFileName)
 	Filename = AFileName;
 	Data = NULL;
 	SetName("CSound");
-	CSoundManager::Instance()->AddObject(this);
+	CSoundManager::Instance()->Add(this);
 }
 
 CSound::~CSound()
@@ -57,7 +57,7 @@ CMusic::CMusic()
 	Filename = "";
 	Data = NULL;
 	SetName("CMusic");
-	CMusicManager::Instance()->AddObject(this);
+	CMusicManager::Instance()->Add(this);
 }
 
 CMusic::CMusic(const char *AFileName)
@@ -65,7 +65,7 @@ CMusic::CMusic(const char *AFileName)
 	Filename = AFileName;
 	Data = NULL;
 	SetName("CMusic");
-	CMusicManager::Instance()->AddObject(this);
+	CMusicManager::Instance()->Add(this);
 }
 
 CMusic::~CMusic()

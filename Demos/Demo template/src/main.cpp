@@ -1,6 +1,6 @@
 #include "2de_Engine.h"
 
-CEngine	*Ninja	=	CEngine::Instance();
+CEngine	*Ninja = CEngine::Instance();
 
 bool Init()
 {	
