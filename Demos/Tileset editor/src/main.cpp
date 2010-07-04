@@ -1,7 +1,7 @@
 #include "2de_Engine.h"
 #include "Tileset editor.h"
 
-CEngine	*Ninja	=	CEngine::Instance();
+CEngine	*Ninja = CEngine::Instance();
 
 bool Init()
 {	
@@ -10,11 +10,11 @@ bool Init()
 }
 
 
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Demo template.xml");
 	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
 	Ninja->Run();
-	return 0x00;
+	return 0;
 }

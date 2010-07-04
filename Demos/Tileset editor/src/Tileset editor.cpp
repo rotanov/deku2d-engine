@@ -87,11 +87,10 @@ CTilesetEditor::CTilesetEditor()
 
 	for(int i = 0; i < BUTTONS_COUNT; i++)
 	{
-		CButton *temp = new CButton();
+		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
 		temp->aabb = CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT);
 		temp->Text = ButtonNames[i];
 		temp->SetCallback(ButtonCallers[i], this);
-		temp->SetName(ButtonNames[i]);
 	}
 
 	// 	CButton *temp = dynamic_cast<CButton*>(CGUIManager::Instance()->GetObject("<-"));
@@ -100,27 +99,33 @@ CTilesetEditor::CTilesetEditor()
 	//  	temp->aabb = CAABB(LEFT_MARGIN + BUTTON_WIDTH / 2 + 10, 20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, BUTTON_WIDTH / 2 - 5, BUTTON_HEIGHT);
 
 	edTilesetTextureName = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT), "Texture:");
+	CFactory::Instance()->Add<CLabeledEdit>(edTilesetTextureName, "edTilesetTexutreName");
 	edTilesetTextureName->Text = "Font_font";
 	edTilesetTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edTilesetName = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1) + 20, EDIT_WIDTH, BUTTON_HEIGHT), "Tileset:");
+	CFactory::Instance()->Add<CLabeledEdit>(edTilesetName, "edTilesetName");
 	//edTilesetName->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT);
 	edTilesetName->Text = "Font";
 	edTilesetName->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edHorNumTiles = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2) + 40, EDIT_WIDTH, BUTTON_HEIGHT), "HorNumTiles:");
+	CFactory::Instance()->Add<CLabeledEdit>(edHorNumTiles, "edHorNumTiles");
 	edHorNumTiles->Text = "4";
 	edHorNumTiles->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edVerNumTiles = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 3) + 60, EDIT_WIDTH, BUTTON_HEIGHT), "VerNumTiles:");
+	CFactory::Instance()->Add<CLabeledEdit>(edVerNumTiles, "edVerNumTiles");
 	edVerNumTiles->Text = "2";
 	edVerNumTiles->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edTileWidth = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 4) + 80, EDIT_WIDTH, BUTTON_HEIGHT), "TileWidth:");
+	CFactory::Instance()->Add<CLabeledEdit>(edTileWidth, "edTileWidth");
 	edTileWidth->Text = "32";
 	edTileWidth->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edTileHeight = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 5) + 100, EDIT_WIDTH, BUTTON_HEIGHT), "TileHeight:");
+	CFactory::Instance()->Add<CLabeledEdit>(edTileHeight, "edTileHeight");
 	edTileHeight->Text = "32";
 	edTileHeight->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 

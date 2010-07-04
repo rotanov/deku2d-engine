@@ -163,11 +163,10 @@ CFontEditor::CFontEditor()
 
 	for(int i = 0; i < BUTTONS_COUNT; i++)
 	{
-		CButton *temp = new CButton();
+		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
 		temp->aabb = CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT);
 		temp->Text = ButtonNames[i];
 		temp->SetCallback(ButtonCallers[i], this);
-		temp->SetName(ButtonNames[i]);
 	}
 
 // 	CButton *temp = dynamic_cast<CButton*>(CGUIManager::Instance()->GetObject("<-"));
@@ -175,26 +174,26 @@ CFontEditor::CFontEditor()
 //  	temp = dynamic_cast<CButton*>(CGUIManager::Instance()->GetObject("->"));
 //  	temp->aabb = CAABB(LEFT_MARGIN + BUTTON_WIDTH / 2 + 10, 20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, BUTTON_WIDTH / 2 - 5, BUTTON_HEIGHT);
 
-	edFontTextureName = new CEdit();
+	edFontTextureName = CFactory::Instance()->New<CEdit>("edFontTextureName");
 	edFontTextureName->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontTextureName->Text = "Font_font";
 	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
-	edFontname = new CEdit();
+	edFontname = CFactory::Instance()->New<CEdit>("edFontname");
 	edFontname->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT);
 	edFontname->Text = "Font";
 	edFontname->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
-	lblSampleText = new CLabel("The quick brown fox jumps over a lazy dog.");
+	lblSampleText = CFactory::Instance()->New<CLabel>("lblSampleText");
+	lblSampleText->Text = "The quick brown fox jumps over a lazy dog.";
 	lblSampleText->aabb = CAABB(INTERFACE_OFFSET_X + 20, 20 + (BUTTON_HEIGHT+10)*3, 500, 25);
 	lblSampleText->Color = COLOR_WHITE;
-	lblSampleText->SetName("lblSampleText");
 	lblSampleText->Visible = false;
 
-	lblCharachterSelectedASCIIIndex = new CLabel("ASCII index: " + itos(CurrentSymbol));
+	lblCharachterSelectedASCIIIndex = CFactory::Instance()->New<CLabel>("lblASCII");
+	lblCharachterSelectedASCIIIndex->Text = "ASCII index: " + itos(CurrentSymbol);
 	lblCharachterSelectedASCIIIndex->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2), EDIT_WIDTH, BUTTON_HEIGHT);
 	lblCharachterSelectedASCIIIndex->Color = COLOR_WHITE;
-	lblCharachterSelectedASCIIIndex->SetName("lblASCII");
 	lblCharachterSelectedASCIIIndex->Visible = true;
 
 	glEnableClientState(GL_VERTEX_ARRAY);

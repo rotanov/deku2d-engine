@@ -204,7 +204,10 @@ public:
 	bool isDestroyed() const;
 	void SetDestroyed();
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
+
+	bool Managed;	// temporary in public, todo: setter/getter
 };
+
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 /**
 *	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
@@ -342,6 +345,8 @@ T* CTSingleton<T>::Instance()
 	if (!_instance)
 	{
 		_instance = new T;
+		_instance->Managed = true;
+
 		RegisterSingletoneInEngineMainClassMotherfuckers(_instance);
 	}
 	return _instance;
@@ -349,96 +354,6 @@ T* CTSingleton<T>::Instance()
 
 template <typename T>
 T* CTSingleton<T>::_instance = 0;
-
-/**
- * CLog - класс для работы с логом.
- */
-
-class CLog : public CTSingleton<CLog>
-{
-public:
-	enum ELogMode
-	{
-		LOG_MODE_STDOUT,
-		LOG_MODE_STDERR,
-		LOG_MODE_FILE,
-	};
-
-	enum ELogFileWriteMode
-	{
-		LOG_FILE_WRITE_MODE_TRUNCATE,
-		LOG_FILE_WRITE_MODE_APPEND,
-	};
-
-	~CLog();
-
-	void WriteToLog(const char *Event, const char *Format, ...);
-
-	__INLINE void Toggle(bool AEnabled)
-	{
-		Enabled = AEnabled;
-	}
-	__INLINE bool isEnabled() const
-	{
-		return Enabled;
-	}
-
-	void SetLogMode(ELogMode ALogMode);
-	__INLINE ELogMode GetLogMode() const 
-	{
-		return LogMode;
-	}
-
-	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode)
-	{
-		LogFileWriteMode = ALogFileWriteMode;
-	}
-	__INLINE ELogFileWriteMode GetLogFileWriteMode() const
-	{
-		return LogFileWriteMode;
-	}
-
-	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames)
-	{
-		DatedLogFileNames = ADatedLogFileNames;
-	}
-	__INLINE bool GetDatedLogFileNames() const
-	{
-		return DatedLogFileNames;
-	}
-
-	__INLINE void SetLogFilePath(string ALogFilePath)
-	{
-		LogFilePath = ALogFilePath;
-	}
-	__INLINE string GetLogFilePath() const
-	{
-		return LogFilePath;
-	}
-
-	__INLINE void SetLogName(string ALogName)
-	{
-		LogName = ALogName;
-	}
-	__INLINE string GetLogName() const
-	{
-		return LogName;
-}
-
-private:
-	bool Enabled;
-	ELogMode LogMode;
-	ELogFileWriteMode LogFileWriteMode;
-	bool DatedLogFileNames;
-	ostream *Stream;
-	string LogFilePath;
-	string LogName;
-protected:
-	friend class CTSingleton<CLog>;
-	CLog();
-};
-
-#define Log CLog::Instance()->WriteToLog
 
 class CUpdateObject : public virtual CObject
 {
@@ -535,6 +450,165 @@ private:
 	FILE *File;
 	string Filename;
 };
+
+/**
+ * CLog - класс для работы с логом.
+ */
+
+class CLog : public CTSingleton<CLog>
+{
+public:
+	enum ELogMode
+	{
+		LOG_MODE_STDOUT,
+		LOG_MODE_STDERR,
+		LOG_MODE_FILE,
+	};
+
+	enum ELogFileWriteMode
+	{
+		LOG_FILE_WRITE_MODE_TRUNCATE,
+		LOG_FILE_WRITE_MODE_APPEND,
+	};
+
+	~CLog();
+
+	void WriteToLog(const char *Event, const char *Format, ...);
+
+	__INLINE void Toggle(bool AEnabled)
+	{
+		Enabled = AEnabled;
+	}
+	__INLINE bool isEnabled() const
+	{
+		return Enabled;
+	}
+
+	void SetLogMode(ELogMode ALogMode);
+	__INLINE ELogMode GetLogMode() const 
+	{
+		return LogMode;
+	}
+
+	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode)
+	{
+		LogFileWriteMode = ALogFileWriteMode;
+	}
+	__INLINE ELogFileWriteMode GetLogFileWriteMode() const
+	{
+		return LogFileWriteMode;
+	}
+
+	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames)
+	{
+		DatedLogFileNames = ADatedLogFileNames;
+	}
+	__INLINE bool GetDatedLogFileNames() const
+	{
+		return DatedLogFileNames;
+	}
+
+	__INLINE void SetLogFilePath(string ALogFilePath)
+	{
+		LogFilePath = ALogFilePath;
+	}
+	__INLINE string GetLogFilePath() const
+	{
+		return LogFilePath;
+	}
+
+	__INLINE void SetLogName(string ALogName)
+	{
+		LogName = ALogName;
+	}
+	__INLINE string GetLogName() const
+	{
+		return LogName;
+	}
+
+private:
+	bool Enabled;
+	ELogMode LogMode;
+	ELogFileWriteMode LogFileWriteMode;
+	bool DatedLogFileNames;
+	ostream *Stream;
+	string LogFilePath;
+	string LogName;
+protected:
+	friend class CTSingleton<CLog>;
+	CLog();
+};
+
+#define Log CLog::Instance()->WriteToLog
+
+/**
+*	Класс CFactory. Назначение классы - контроль создания любых объектов.
+*/
+
+class CFactory : public CTSingleton<CFactory>
+{
+public:
+	template<typename T>
+	T* New(const string &AName);
+	template<typename T>
+	void Add(T *AObject, const string &AName = "");
+	template<typename T>
+	T* Get(const string &AName);
+
+protected:
+	CFactory();
+	~CFactory();
+	friend class CTSingleton<CFactory>;
+	list <CObject*> Objects;
+};
+
+template<typename T>
+T* CFactory::New(const string &AName)
+{
+	// Поддерживаем уникальность имени здесь, наверное, да.
+	//if (List.Contains(AName)) @todo uncomment and fix
+	{
+//		throw std::logic_error("Object with this name already exists.");
+	}
+	T* result = new T;
+
+	Add<T>(result, AName);
+
+	return result;
+}
+
+template<typename T>
+void CFactory::Add(T *AObject, const string &AName /*= ""*/)
+{
+	// we generally allow passing empty name, when it set somewhere else
+	if (AName != "")
+	{
+		AObject->SetName(AName);
+	}
+
+	Objects.push_back(AObject); // not only this
+	AObject->IncRefCount();
+	AObject->Managed = true;
+}
+
+template<typename T>
+T* CFactory::Get(const string &AName)
+{
+	T* result = NULL;
+	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+		if ((*i)->GetName() == AName)
+		{
+			result = dynamic_cast<T *>(*i);
+			break;
+		}
+	if (result == NULL)
+	{
+		Log("ERROR", "Factory can't find object named '%s'", AName.c_str()); // not only "can't find" case, but dynamic_cast can also fail
+	}
+
+	return result;
+}
+
 
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment

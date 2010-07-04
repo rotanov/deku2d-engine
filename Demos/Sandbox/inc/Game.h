@@ -19,14 +19,14 @@ public:
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
 
-		CText *TitleText = new CText();
+		CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
 		TitleText->Text = "Deku";
 		TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f);
-		TitleText = new CText();
+		TitleText = CFactory::Instance()->New<CText>("txtTeam");
 		TitleText->Text = "team";
 		TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f);
 
-		shroom = new CTexture;
+		shroom = CFactory::Instance()->New<CTexture>("Shroom");
 		shroom->LoadTexture(IMAGE_SHROOM_WIDTH, IMAGE_SHROOM_HEIGHT, reinterpret_cast<byte *>(IMAGE_SHROOM_DATA));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}

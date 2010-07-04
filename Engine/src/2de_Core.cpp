@@ -64,7 +64,7 @@ void DumpUnfreed()
 //////////////////////////////////////////////////////////////////////////
 // CObject
 
-CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)),RefCount(0)
+CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0), Managed(false)
 {
 
 }
@@ -87,7 +87,7 @@ void CObject::DecRefCount(CObject* AObject)
 {
 	assert(AObject != NULL);
 	AObject->RefCount--;
-	if (AObject->RefCount <= 0)
+	if (AObject->RefCount <= 0 && AObject->Managed)
 	{
 		Log("INFO", "Deleting %s, with id: %d", AObject->GetName().c_str(), AObject->GetID());
 		delete AObject;
@@ -734,4 +734,23 @@ CResource::CResource()
 void RegisterSingletoneInEngineMainClassMotherfuckers(CObject* Singletone)
 {
 	CEngine::Instance()->RegisterSingletone(Singletone);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CFactory
+
+CFactory::CFactory()
+{
+	SetName("Factory");
+}
+
+CFactory::~CFactory()
+{	
+	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+	{
+ 		CObject *object = *i;
+ 		Log("INFO", "Deleting object %s", object->GetName().c_str());
+ 		CObject::DecRefCount(object);
+	}
+	Objects.clear();
 }

@@ -7,8 +7,8 @@ CText *FPSText = NULL;
 
 bool Init()
 {	
-	CTestUnit *Unit = new CTestUnit;
-	FPSText = new CText;
+	CTestUnit *Unit = CFactory::Instance()->New<CTestUnit>("TestUnit");
+	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->Position = Vector2(0.0f, 0.0f);
 	return true;
 }
@@ -21,7 +21,7 @@ bool Update()
 	return true;
 }
 
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	CEngine* Ninja = CEngine::Instance();
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");

@@ -118,12 +118,12 @@ CGLWindow::CGLWindow()
 	height = 480;
 	fullscreen = false;
 	bpp = 32;
-	caption = "Warning: CGLWindow class instance have not been initialized properly";
+	caption = "Warning: CGLWindow class instance have not been initialized properly"; // assigning string constant to unallocated pointer
 }
 
 bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption)
 {
-	if( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 )
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
 		Log("ERROR", "Last WARNING was critical. Now exiting...");
@@ -135,11 +135,11 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	bpp = _bpp;
 	if (caption == NULL && _caption != NULL)
 	{
-		caption = new char [strlen(_caption)];
+		caption = new char [strlen(_caption)]; // possibly leak
 		strcpy(caption, _caption);
 	}
 	SDL_WM_SetCaption(caption, NULL);
-	const SDL_VideoInfo* info = NULL;
+	const SDL_VideoInfo *info = NULL;
 
 	info = SDL_GetVideoInfo();
 
@@ -169,7 +169,7 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 		flags |= SDL_FULLSCREEN;
 	}
 
-	SDL_Surface * screen = SDL_SetVideoMode(width, height, bpp, flags);
+	SDL_Surface *screen = SDL_SetVideoMode(width, height, bpp, flags);
 	if (screen == NULL)
 	{
 		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
@@ -178,9 +178,9 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	}
 
 	SDL_Event resizeEvent;
-	resizeEvent.type=SDL_VIDEORESIZE;
-	resizeEvent.resize.w=width;
-	resizeEvent.resize.h=height;
+	resizeEvent.type = SDL_VIDEORESIZE;
+	resizeEvent.resize.w = width;
+	resizeEvent.resize.h = height;
 	SDL_PushEvent(&resizeEvent);
 
 	glInit(width, height);
@@ -287,6 +287,8 @@ bool CFont::LoadFromFile()
 
 	CTextureManager *TexMan = CTextureManager::Instance();
 	Texture = TexMan->GetObject(FontImageName);
+
+	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
 	file.Read(bbox, sizeof(bbox));
 	file.Close();

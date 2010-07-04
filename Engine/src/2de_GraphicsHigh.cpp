@@ -968,10 +968,13 @@ CText::CText()
 {
 	Font = CFactory::Instance()->Get<CFont>("Font");
 	Text = "";
+	Color = COLOR_WHITE;
 }
 
 void CText::Render()
 {
-	COLOR_WHITE.glSet();
+	//COLOR_WHITE.glSet();
+	Font->tClr = Color;
+	Font->Pos = Position;
 	Font->Print(Text.c_str());
 }

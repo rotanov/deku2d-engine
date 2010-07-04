@@ -34,14 +34,7 @@ CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -iquoteinc
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
 
-TC_TNL_STATIC	=	lib/libtomcrypt.a lib/libtnl.a
-
-TC_DIR		=	inc/libtomcrypt
-TNL_DIR		=	inc/tnl
-
-TC_TNL_OBJECTS	=	$(TC_DIR)/obj/*.o $(TNL_DIR)/obj/*.o
-
-LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lSDL_mixer $(TC_TNL_STATIC)
+LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lSDL_mixer
 
 TARGET_STATIC	=	lib/libDeku2d.a
 TARGET_SHARED	=	lib/libDeku2d.so
@@ -53,18 +46,11 @@ all: static
 obj/%.o: src/%.cpp
 	g++ $(DEBUGFLAG) $(STRICTFLAG) -c -o $@ $(CFLAGS) $<
 
-$(TC_DIR)/obj/*.o:
-	$(MAKE) -C $(TC_DIR)
-
-$(TNL_DIR)/obj/*.o:
-	$(MAKE) -C $(TNL_DIR)
-
 # maybe replace this implicit rule by explicit one, that uses ar
-# should TC_TNL_OBJECTS be included? I don't think so...
 $(TARGET_STATIC): $(TARGET_STATIC)($(OBJECTS))
 
-$(TARGET_SHARED): $(OBJECTS) $(TC_TNL_OBJECTS)
-	g++ $(DEBUGFLAG) $(STRICTFLAG) -shared -fPIC $(LDFLAGS) -o $(TARGET_SHARED) $(OBJECTS) $(TC_TNL_OBJECTS)
+$(TARGET_SHARED): $(OBJECTS)
+	g++ $(DEBUGFLAG) $(STRICTFLAG) -shared -fPIC $(LDFLAGS) -o $(TARGET_SHARED) $(OBJECTS)
 
 obj:
 	mkdir -p obj/
@@ -108,7 +94,6 @@ clean:
 distclean: clean
 	rm -f $(TARGET_STATIC)
 	rm -f $(TARGET_SHARED)
-	rm -f $(TC_TNL_OBJECTS)
 	rm -rf doc/html/
 
 .PHONY: clean distclean docs

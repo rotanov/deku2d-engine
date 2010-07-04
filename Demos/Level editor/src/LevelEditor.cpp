@@ -54,7 +54,7 @@ void AddTile(int TileIndex, int x, int y)
 	CCellNode* next = &root;
 	while (next->next)
 		next = next->next;
-	next->next = new CCellNode;
+	next->next = new CCellNode; // leak
 	next = next->next;
 	next->info.z = 0.0f;
 	next->info.tc = TileSet->GetCellTC(TileIndex);

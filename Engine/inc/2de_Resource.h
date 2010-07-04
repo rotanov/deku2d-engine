@@ -10,58 +10,6 @@
 #define DEFAULT_RESOURCE_LIST_FILE_NAME "Resources.xml"
 
 /**
-*	Класс CFactory. Назначение классы - контроль создания любых объектов.
-*/
-
-class CFactory : public CTSingleton<CFactory>
-{
-public:
-	template<typename T>
-	T* New(const string &AName);
-	template<typename T>
-	T* Get(const string &AName);
-
-protected:
-	CFactory();
-	~CFactory();
-	friend class CTSingleton<CFactory>;
-	list <CObject*> Objects;
-};
-
-template<typename T>
-T* CFactory::New(const string &AName)
-{
-	// Поддерживаем уникальность имени здесь, наверное, да.
-	//if (List.Contains(AName)) @todo uncomment and fix
-	{
-//		throw std::logic_error("Object with this name already exists.");
-	}
-	T* result = new T;
-	result->SetName(AName);
-	Objects.push_back(result); // not only this
-	result->IncRefCount();
-	return result;
-}
-
-template<typename T>
-T* CFactory::Get(const string &AName)
-{
-	T* result = NULL;
-	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-		if ((*i)->GetName() == AName)
-		{
-			result = dynamic_cast<T *>(*i);
-			break;
-		}
-	if (result == NULL)
-	{
-		Log("ERROR", "Factory can't find object named '%s'", AName.c_str()); // not only "can't find" case, but dynamic_case can also fail
-	}
-
-	return result;
-}
-
-/**
  * CResourceSectionLoaderBase - базовый класс загрузчика секций ресурсов для полиморфизма.
  */
 

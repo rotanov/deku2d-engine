@@ -65,33 +65,43 @@ private:
 	CLabel *VolumeLabel;
 };
 
-class CHelpText : public CRenderObject
+class CHelpText
 {
 public:
 	CHelpText()
 	{
 		CFontManager::Instance()->SetCurrentFont("hge");
-	}
-	void Render()
-	{
-		CFontManager *FontManager = CFontManager::Instance();
 
 		// i hate this fucking "State"... completely wrong, not type-safe, inconvenient design...
 		int ScreenHeight;
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScreenHeight);
 
-		FontManager->PrintEx(5, ScreenHeight - 30, 0.0f, "Sound: q - play, w - stop"); 
-		FontManager->PrintEx(5, ScreenHeight - 60, 0.0f, "Music: a - play, s - stop"); 
-		FontManager->PrintEx(5, ScreenHeight - 90, 0.0f, "Music volume: z - down, x - up"); 
-		FontManager->PrintEx(5, ScreenHeight - 120, 0.0f, "You can try to enter file name and click Play");
-		FontManager->PrintEx(5, ScreenHeight - 150, 0.0f, "to play it as music");
+		CText *HelpText = CFactory::Instance()->New<CText>("SoundControlsText");
+		//HelpText->Position = Vector2(5.0f, ScreenHeight - 30.0f);
+		HelpText->Position = Vector2(5.0f, ScreenHeight - 260.0f);
+		HelpText->Text = "Sound: q - play, w - stop";
+
+		HelpText = CFactory::Instance()->New<CText>("MusicControlsText");
+		HelpText->Position = Vector2(5.0f, ScreenHeight - 270.0f);
+		HelpText->Text = "Music: a - play, s - stop";
+
+		HelpText = CFactory::Instance()->New<CText>("MusicVolumeText");
+		HelpText->Position = Vector2(5.0f, ScreenHeight - 280.0f);
+		HelpText->Text = "Music volume: z - down, x - up";
+
+		HelpText = CFactory::Instance()->New<CText>("FileText1");
+		HelpText->Position = Vector2(5.0f, ScreenHeight - 290.0f);
+		HelpText->Text = "You can try to enter file name and click Play";
+
+		HelpText = CFactory::Instance()->New<CText>("FileText2");
+		HelpText->Position = Vector2(5.0f, ScreenHeight - 300.0f);
+		HelpText->Text = "to play it as music";
 	}
 };
 
 bool PlayFile(CObject *Caller)
 {
 	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->Text;
-	//string test = dynamic_cast<CEdit*>(CGUIManager::Instance()->GetLast()->GetData())->Text;
 	Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
 	CMusic *mus = CFactory::Instance()->New<CMusic>("mus");
 	mus->Filename = test;
@@ -122,7 +132,7 @@ private:
 
 };
 
-class CSoundCheck
+class CSoundCheck : public CObject
 {
 	CSoundObject SoundObject;
 	CHelpText HelpText;

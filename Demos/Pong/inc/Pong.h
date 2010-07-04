@@ -139,7 +139,12 @@ public:
 		PlayerTwoScore = PlayerOneScore = 0;
 		PlayerOne = new CPongPlayer(PLAYER_KIND_ONE);
 		PlayerTwo = new CPongPlayer(PLAYER_KIND_TWO);
-		Ball = new CPongBall;
+
+		CFactory::Instance()->Add<CPongPlayer>(PlayerOne, "PlayerOne");
+		CFactory::Instance()->Add<CPongPlayer>(PlayerTwo, "PlayerTwo");
+
+		Ball = CFactory::Instance()->New<CPongBall>("PongBall");
+
 		CFontManager::Instance()->SetCurrentFont("Font");
 	}
 	~CPongGame()

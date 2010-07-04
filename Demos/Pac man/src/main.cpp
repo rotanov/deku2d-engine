@@ -21,12 +21,12 @@ bool Init()
 	return true;
 }
 
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	CEngine	*Ninja = CEngine::Instance();
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Pac man.xml");
 	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
 	Ninja->Run();
-	return 0x00;
+	return 0;
 }

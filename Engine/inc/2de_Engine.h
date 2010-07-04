@@ -110,7 +110,7 @@ private:
 	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
 
 	static CEngine MainEngineInstance;
-protected:	
+protected:
 	CEngine();
 	~CEngine();
 };

@@ -6,7 +6,7 @@ CPongGame *PongGame = NULL;
 
 bool Init()
 {
-	PongGame = new CPongGame();
+	PongGame = CFactory::Instance()->New<CPongGame>("PongGame");
 	return true;
 }
 

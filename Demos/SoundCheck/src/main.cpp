@@ -7,7 +7,7 @@ CSoundCheck *SoundCheck = NULL;
 
 bool Init()
 {
-	SoundCheck = new CSoundCheck();
+	SoundCheck = CFactory::Instance()->New<CSoundCheck>("SoundCheck");
 	return true;
 }
 

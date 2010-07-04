@@ -269,4 +269,5 @@ public:
 	CText();
 	void Render();
 };
+
 #endif // _2DE_GRAPHICS_HIGH_H_

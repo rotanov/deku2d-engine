@@ -14,25 +14,6 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-// CFactory
-
-CFactory::CFactory()
-{
-	SetName("Factory");
-}
-
-CFactory::~CFactory()
-{	
-	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-	{
- 		CObject *object = *i;
- 		Log("INFO", "Deleting object %s", object->GetName().c_str());
- 		CObject::DecRefCount(object);
-	}
-	Objects.clear();
-}
-
-//////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
 CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName, CXMLTable *AResourceList) : Name(AName), ResourceList(AResourceList)
