@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <vector>
 #include <list>
+#include <algorithm>
 
 using namespace std;
 
@@ -232,7 +233,7 @@ public:
 	typedef typename ManagerContainer::const_iterator ManagerConstIterator;
 
 	T GetObject(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
-	{
+	{					// 	hashmap, anyone?...
 		T temp = NULL;
 		ManagerContainer toDelete;
 		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
@@ -550,17 +551,23 @@ class CFactory : public CTSingleton<CFactory>
 public:
 	template<typename T>
 	T* New(const string &AName);
-	template<typename T>
-	void Add(T *AObject, const string &AName = "");
+	void Add(CObject *AObject, const string &AName = "");
 	template<typename T>
 	T* Get(const string &AName);
+	template<typename T>
+	T* Remove(const string &AName);
+	void Destroy(CObject *AObject);
 
 protected:
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
-	list <CObject*> Objects;
+	list <CObject*> Objects; // таки хорошо бы сделать это map'ом от string'а
 };
+
+/**
+* CFactory::New - создаёт объект заданного класса, берёт управление его памятью на себя и возвращает указатель на созданный объект.
+*/
 
 template<typename T>
 T* CFactory::New(const string &AName)
@@ -572,24 +579,15 @@ T* CFactory::New(const string &AName)
 	}
 	T* result = new T;
 
-	Add<T>(result, AName);
+	Add(result, AName);
 
 	return result;
 }
 
-template<typename T>
-void CFactory::Add(T *AObject, const string &AName /*= ""*/)
-{
-	// we generally allow passing empty name, when it set somewhere else
-	if (AName != "")
-	{
-		AObject->SetName(AName);
-	}
-
-	Objects.push_back(AObject); // not only this
-	AObject->IncRefCount();
-	AObject->Managed = true;
-}
+/**
+* CFactory::Get - возвращает указатель на объект по его уникальному имени.
+* Ругается в лог и возвращает NULL в случае неудачи.
+*/
 
 template<typename T>
 T* CFactory::Get(const string &AName)
@@ -609,15 +607,67 @@ T* CFactory::Get(const string &AName)
 	return result;
 }
 
+/**
+* CFactory::Remove - прекращают управление памятью объекта и возвращает указатель на объект на растерзание программисту.
+* Ругается в лог и возвращает NULL в случае неудачи.
+*/
+
+template<typename T>
+T* CFactory::Remove(const string &AName)
+{
+	T* result = NULL;
+	list<CObject*>::iterator i;
+	for(i = Objects.begin(); i != Objects.end(); ++i)
+		if ((*i)->GetName() == AName)
+		{
+			result = dynamic_cast<T *>(*i);
+			break;
+		}
+	
+	if (result == NULL)
+	{
+		Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
+	}
+	else
+	{
+		result->Managed = false;
+		Objects.erase(i);
+		CObject::DecRefCount(result);
+	}
+
+	return result;
+}
+
+/**
+* Класс CEnvironment содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
+* В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
+*/
+
+class CEnvironment
+{
+public:
+	class DateTime
+	{
+	public:
+		static tm GetLocalTimeAndDate();
+		static string GetFormattedTime(const tm TimeStruct, const char *Format);
+	};
+
+	class Paths
+	{
+	public:
+		static string GetWorkingDirectory();
+		static void SetWorkingDirectory();
+	};
+
+};
 
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment
 // Agreed with you.
+// 	CEnvironment has been created. Some time/date and paths functions has already been moved there. It's good practice to move all platform-dependent code (basically, code with ifdefs) to one dedicated place, if it's possible, so we should continue this work.
 
-string GetWorkingDir();
-tm GetLocalTimeAndDate();
-string GetFormattedTime(const tm TimeStruct, const char *Format);
-void DelFNameFromFPath(char *src);
+void DelFNameFromFPath(char *src); // standard function "dirname", anyone?.. or does it work in another way?.. i dunno..
 void DelExtFromFName(char *src);
 void DelLastDirFromPath(char *src);
 

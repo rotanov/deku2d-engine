@@ -89,7 +89,7 @@ void CObject::DecRefCount(CObject* AObject)
 	AObject->RefCount--;
 	if (AObject->RefCount <= 0 && AObject->Managed)
 	{
-		Log("INFO", "Deleting %s, with id: %d", AObject->GetName().c_str(), AObject->GetID());
+		Log("INFO", "Destroying: %s, with id: %d", AObject->GetName().c_str(), AObject->GetID());
 		delete AObject;
 	}
 }
@@ -414,7 +414,7 @@ size_t CFile::Size() const
 
 CLog::CLog()
 {
-	SetName("Log ID: " + itos(GetID()));
+	SetName("Log");
 	Enabled = true;
 	LogMode = LOG_MODE_FILE;	// well, usual default behavior for user-space (non-system) programs is to log on a console,
 					// but for now i left the behavior, some of us used to... may be changed any time by calling
@@ -464,7 +464,7 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 	TimeAndEvent[sizeof(TimeAndEvent) - 1] = 0;
 #else
 	char TimeString[64];
-	strcpy(TimeString, asctime(&GetLocalTimeAndDate()));
+	strcpy(TimeString, asctime(&CEnvironment::DateTime::GetLocalTimeAndDate()));
 	TimeString[strlen(TimeString) - 1] = 0;
 	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%s] [%s] ", TimeString, Event);
 #endif
@@ -519,8 +519,8 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 		string NewLogFileName = LogFilePath + LogName;
 
 		if (DatedLogFileNames) {
-			tm TimeStruct = GetLocalTimeAndDate();
-			NewLogFileName += "-" + GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
+			tm TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
+			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
 		}
 		NewLogFileName += ".log";
 
@@ -534,80 +534,6 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 		break;
 	}
 	LogMode = ALogMode;
-}
-
-
-string GetWorkingDir()
-{
-	string result;
-	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
-
-#ifdef _WIN32
-	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
-#else
-	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
-#endif //_WIN32
-
-	result = dir;
-	return result;
-}
-
-tm GetLocalTimeAndDate()
-{
-	time_t RawTime;
-	tm *TimeStruct;
-	time(&RawTime);
-	TimeStruct = localtime(&RawTime);
-	return *TimeStruct;
-}
-
-string GetFormattedTime(const tm TimeStruct, const char *Format)
-{
-	int AllocSize = 128;
-	bool allocated = false;
-
-	char *buffer = NULL;
-
-	while (!allocated)
-	{
-		delete[] buffer;
-		buffer = new char[AllocSize];
-		if (!buffer)
-			return string("");
-
-		allocated = (strftime(buffer, AllocSize - 1, Format, &TimeStruct) != 0);
-		AllocSize *= 2;
-	}
-	
-	string result = buffer;
-	SAFE_DELETE_ARRAY(buffer);
-	return result;
-}
-
-void DelFNameFromFPath(char *src)
-{
-	int i = strlen(src)-1;
-	while(src[i] != '/' && src[i] != '\\' && src[i] != ':')
-		i--;
-	src[i+1] = 0;
-}
-
-void DelExtFromFName(char *src)
-{
-	int i = strlen(src)-1;
-	while(src[i] != '.')
-		i--;
-	src[i] = 0;
-}
-
-void DelLastDirFromPath(char *src)
-{
-	int i = strlen(src)-1;
-	while(src[i] == '\\' || src[i] == '/')
-		i--;
-	while(src[i] != '\\' && src[i] != '/')
-		i--;
-	src[i+1] = 0;
 }
 
 
@@ -663,7 +589,7 @@ CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 
 CUpdateObject::~CUpdateObject()
 {
-	//CUpdateManager::Instance()->DelObject(GetID());
+	//CUpdateManager::Instance()->Remove(GetID());
 }
 
 void CUpdateObject::SetDead()
@@ -749,8 +675,135 @@ CFactory::~CFactory()
 	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
  		CObject *object = *i;
- 		Log("INFO", "Deleting object %s", object->GetName().c_str());
+ 		Log("INFO", "Factory is deleting object: %s", object->GetName().c_str());
  		CObject::DecRefCount(object);
 	}
 	Objects.clear();
 }
+
+/**
+* CFactory::Add - берёт управление памятью объекта на себя. У объекта обязательно должно быть уникальное имя, но допускается его задание в другом месте.
+*/
+
+void CFactory::Add(CObject *AObject, const string &AName /*= ""*/)
+{
+	// we generally allow passing empty name, when it set somewhere else
+	if (AName != "")
+	{
+		AObject->SetName(AName);
+	}
+
+	Objects.push_back(AObject); // not only this
+	AObject->IncRefCount();
+	AObject->Managed = true;
+}
+
+/**
+* CFactory::Destroy - ставит объект в очередь на уничтожение и удаляет его из списка управляемых объектов (при этом не снимая флаг управляемости).
+*/
+
+void CFactory::Destroy(CObject *AObject)
+{
+	list<CObject*>::iterator i = find(Objects.begin(), Objects.end(), AObject);
+
+	if (i == Objects.end())
+	{
+		Log("ERROR", "Factory isn't managing object with given pointer");
+		return;
+	}
+	
+	AObject->SetDestroyed();
+	Objects.erase(i);
+	CObject::DecRefCount(AObject);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CEnvironment
+
+tm CEnvironment::DateTime::GetLocalTimeAndDate()
+{
+	time_t RawTime;
+	tm *TimeStruct;
+	time(&RawTime);
+	TimeStruct = localtime(&RawTime);
+	return *TimeStruct;
+}
+
+string CEnvironment::DateTime::GetFormattedTime(const tm TimeStruct, const char *Format)
+{
+	int AllocSize = 128;
+	bool allocated = false;
+
+	char *buffer = NULL;
+
+	while (!allocated)
+	{
+		delete[] buffer;
+		buffer = new char[AllocSize];
+		if (!buffer)
+			return string("");
+
+		allocated = (strftime(buffer, AllocSize - 1, Format, &TimeStruct) != 0);
+		AllocSize *= 2;
+	}
+	
+	string result = buffer;
+	SAFE_DELETE_ARRAY(buffer);
+	return result;
+}
+
+string CEnvironment::Paths::GetWorkingDirectory()
+{
+	string result;
+	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+
+#ifdef _WIN32
+	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
+#else
+	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
+#endif //_WIN32
+
+	result = dir;
+	return result;
+}
+
+void CEnvironment::Paths::SetWorkingDirectory()
+{
+#ifdef _WIN32
+	char *MainDir = new char[MAX_PATH];
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DelFNameFromFPath(MainDir);
+	SetCurrentDirectory(MainDir);
+	delete [] MainDir;
+#endif // _WIN32
+	// *nix-like systems don't need current directory to be set to executable path - they use different directory structure
+}
+
+
+void DelFNameFromFPath(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] != '/' && src[i] != '\\' && src[i] != ':')
+		i--;
+	src[i+1] = 0;
+}
+
+void DelExtFromFName(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] != '.')
+		i--;
+	src[i] = 0;
+}
+
+void DelLastDirFromPath(char *src)
+{
+	int i = strlen(src)-1;
+	while(src[i] == '\\' || src[i] == '/')
+		i--;
+	while(src[i] != '\\' && src[i] != '/')
+		i--;
+	src[i+1] = 0;
+}
+

@@ -140,8 +140,8 @@ public:
 		PlayerOne = new CPongPlayer(PLAYER_KIND_ONE);
 		PlayerTwo = new CPongPlayer(PLAYER_KIND_TWO);
 
-		CFactory::Instance()->Add<CPongPlayer>(PlayerOne, "PlayerOne");
-		CFactory::Instance()->Add<CPongPlayer>(PlayerTwo, "PlayerTwo");
+		CFactory::Instance()->Add(PlayerOne, "PlayerOne");
+		CFactory::Instance()->Add(PlayerTwo, "PlayerTwo");
 
 		Ball = CFactory::Instance()->New<CPongBall>("PongBall");
 

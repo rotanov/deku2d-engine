@@ -75,6 +75,7 @@ bool CEngine::LimitFps()
 
 void CEngine::SetState(CEngine::EState state, void* value)
 {
+	// думается мне, что надо сделать нормальные отдельные сеттеры/геттеры и не ебать мозг этим "стейтом" - куча независимых вещей никак не может быть состоянием
 	switch(state)
 	{
 		case STATE_USER_INIT_FUNC:
@@ -131,6 +132,7 @@ void CEngine::SetState(CEngine::EState state, void* value)
 
 bool CEngine::Init()
 {
+// delete this block, please, if it's not required anymore.. I moved platform-dependent working-directory-setting code to CEnvironment
 #ifdef _WIN32
 	{
 // 		HMODULE hmodule = GetModuleHandle(0);
@@ -139,19 +141,16 @@ bool CEngine::Init()
 // 		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
 // 		delete [] pathexe;
 // 		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // В ранней версии SDL всегда вылазило окно консоли, потом этот косяк убрали, а мой фикс тут остался
-
-		char *MainDir = new char[MAX_PATH];
-		GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-		DelFNameFromFPath(MainDir);
-		SetCurrentDirectory(MainDir);
-		delete [] MainDir;
 	}
 #endif //_WIN32
+//
+
+	CEnvironment::Paths::SetWorkingDirectory();
 
 	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
 	CLog::Instance()->SetLogName("System");
 
-	Log("INFO", "Working directory is \"%s\"", GetWorkingDir().c_str());
+	Log("INFO", "Working directory is \"%s\"", CEnvironment::Paths::GetWorkingDirectory().c_str());
 
 	SDL_putenv("SDL_VIDEO_CENTERED=1");
 
@@ -244,6 +243,7 @@ bool CEngine::Init()
 
 #define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
 
+// possibly move to CEnvironment
 char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 {
 	char TempChar = '\0';
@@ -430,6 +430,8 @@ bool CEngine::Run()
 	// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
 	// Экстраполяция же.
 
+	//  	перетяните уже кто-нибудь что-нибудь куда-нибудь... такие главные функции как Run() и Init() должны быть короткими, лаконичными и состоять в основном из вызовов других функций.. а тут блин даже "документация" валяется..
+
 			}
 			else
 			{
@@ -442,7 +444,7 @@ bool CEngine::Run()
 		}
 		catch(...)
 		{
-			Log("ERROR", "A critical error in main loop occured. Exiting");
+			Log("ERROR", "An unhandled exception occured in main loop. Exiting");
 			throw;
 		}
 	}	
