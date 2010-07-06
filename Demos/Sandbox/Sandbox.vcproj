@@ -199,10 +199,6 @@
 				RelativePath=".\src\main.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\src\Shroom.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="inc"

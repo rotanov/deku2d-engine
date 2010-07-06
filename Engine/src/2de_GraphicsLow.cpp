@@ -4,7 +4,8 @@
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-CRenderObject::CRenderObject() : Position(V2_ZERO), Angle(0.0f), Scaling(1.0f), Depth(0.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
+CRenderObject::CRenderObject() : Angle(0.0f), Depth(0.0f), Position(V2_ZERO), Scaling(1.0f),
+	aabb(0, 0, 0, 0), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
 	SetName("CRenderObject");
 	CRenderManager::Instance()->Add(this);
@@ -293,6 +294,51 @@ bool CFont::LoadFromFile()
 
 	file.Read(bbox, sizeof(bbox));
 	file.Close();
+	base = glGenLists(256);
+	Texture->Bind();
+	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
+	for(int i=0;i<256;i++)
+	{
+		if (bbox[i].x0 > bbox[i].x1)
+			swap(bbox[i].x0, bbox[i].x1);
+		if (bbox[i].y0 > bbox[i].y1)
+			swap(bbox[i].y0, bbox[i].y1);
+		glNewList(base+i, GL_COMPILE);
+		glBegin(GL_QUADS);		
+		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
+		glVertex2i(0, 0);
+
+		glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
+		glVertex2i(bbox[i].x1 - bbox[i].x0, 0);
+
+		glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
+		glVertex2i(bbox[i].x1 - bbox[i].x0, bbox[i].y1 - bbox[i].y0);
+
+		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
+		glVertex2i(0, bbox[i].y1 - bbox[i].y0);
+		glEnd();
+		glTranslated(bbox[i].x1 - bbox[i].x0 + Distance, 0, 0);
+		glEndList();
+		width[i] = (bbox[i].x1 - bbox[i].x0);
+		height[i] = (bbox[i].y1 - bbox[i].y0);
+	}
+	return true;
+}
+
+bool CFont::LoadFromMemory(const byte* Address)
+{
+	assert(Address != NULL);
+	while (*Address)
+		Address++;
+	Address++;
+
+	Texture = CTextureManager::Instance()->GetObject("DefaultFontTexture");
+
+	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
+
+	//file.Read(bbox, sizeof(bbox));
+	memcpy(bbox, Address, sizeof(bbox));
+	//file.Close();
 	base = glGenLists(256);
 	Texture->Bind();
 	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
@@ -789,10 +835,24 @@ void gDrawBBox( CAABB box )
 //			Font Manager
 //////////////////////////////////////////////////////////////////////////
 
-CFontManager::CFontManager() : CurrentFont(NULL)
+CFontManager::CFontManager() : DefaultFont(NULL), CurrentFont(NULL)
 {
 	SetName("Font manager");
 }
+
+
+void CFontManager::Init()
+{
+	CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
+	DefaultFontTexture->LoadTexture(IMAGE_DEFAULT_FONT_WIDTH, IMAGE_DEFAULT_FONT_HEIGHT, reinterpret_cast<byte *>(IMAGE_DEFAULT_FONT_DATA));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	DefaultFont = new CFont;
+	DefaultFont->SetName("DefaultFont");
+	DefaultFont->LoadFromMemory(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT));
+	CurrentFont = DefaultFont;
+	assert(DefaultFont != NULL);	
+}
+
 
 CFont* CFontManager::GetFont(const char* fontname)	
 {

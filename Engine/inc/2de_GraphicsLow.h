@@ -40,6 +40,9 @@ const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
 const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
 const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 
+extern const unsigned int BINARY_DATA_DEFAULT_FONT_SIZE;
+extern char BINARY_DATA_DEFAULT_FONT[];
+
 
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
@@ -62,20 +65,19 @@ class CPlacing
 class CRenderObject : public virtual CObject
 {
 private:
-//protected:
 	float				Angle;		//	(Degrees)
-	float				Depth;				//	[-1; 1]?
-protected:
-	virtual				~CRenderObject();
+	float				Depth;		//	[-1; 1]?
+
 public:
 	Vector2				Position;		
 	float				Scaling;
-	CAABB				aabb;				//	Axis Aligned Bounding Box
+	CAABB				aabb;				//	Axis Aligned Bounding Box; ORLY? Isn't it obvious
 	RGBAf				Color;
 	bool				Visible;
-	bool				doIgnoreCamera;
+	bool				doIgnoreCamera;		// if true, then object will be drawn in global coords, no matter where camera pointing;
 
 	CRenderObject();
+	virtual ~CRenderObject();
 	virtual void Render() = 0;
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle() const;
@@ -171,6 +173,7 @@ public:
 
 	bool		LoadFromFile();
 	bool		SaveToFile();
+	bool		LoadFromMemory(const byte* Address);
 
 	void		Print(const char *text, ...);
 
@@ -261,19 +264,28 @@ public:
 
 class CFontManager : public CCommonManager <list <CFont*> >, public CTSingleton <CFontManager>
 {
+private:
+	CFont *DefaultFont;
+	CFont *CurrentFont;
+
+protected:	
+	CFontManager();
+	friend class CTSingleton<CFontManager>;
+
 public:
-	CFont* Font();
+	void Init();
+	CFont* Font(); // @todo: rename
+	CFont* GetDefaultFont()
+	{
+		assert(DefaultFont != NULL);
+		return DefaultFont;
+	}
 	bool SetCurrentFont(const char* fontname);
 	bool PrintEx(int x, int y, float depth, char* text, ...);
 	bool Print(int x, int y, float depth, const string &text);
 	CFont* GetFont(const char* fontname);
 	CFont* GetFontEx(string fontname);
 	bool AddFont(CFont *AObject);
-
-protected:
-	CFont *CurrentFont;
-	CFontManager();
-	friend class CTSingleton<CFontManager>;
 };
 
 class CRenderManager : public CCommonManager <list <CRenderObject*> >/*public CList*/, public CTSingleton <CRenderManager>

@@ -158,6 +158,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\2de_DefaultFont.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\2de_Engine.cpp"
 				>
 			</File>
@@ -195,6 +199,10 @@
 			</File>
 			<File
 				RelativePath=".\src\2de_Resource.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\2de_ShroomTitle.cpp"
 				>
 			</File>
 			<File

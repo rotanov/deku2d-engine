@@ -1,9 +1,8 @@
-#include "Game.h"
+#include "2de_ImageUtils.h"
 
-const unsigned int IMAGE_SHROOM_WIDTH	=	256;
-const unsigned int IMAGE_SHROOM_HEIGHT	=	256;
-
-char IMAGE_SHROOM_DATA[] = 
+const unsigned int IMAGE_SHROOM_TITLE_WIDTH = 256;
+const unsigned int IMAGE_SHROOM_TITLE_HEIGHT = 256;
+char IMAGE_SHROOM_TITLE_DATA[] = 
 {
 	'\x0', '\x0', '\x0', '\xff', '\x0', '\x0', '\x0', '\xff', '\x0', '\x0', '\x0', '\xff', '\x0', '\x0', '\x0', '\xff', 
 	'\x0', '\x0', '\x0', '\xff', '\x0', '\x0', '\x0', '\xff', '\x0', '\x0', '\x0', '\xff', '\x0', '\x0', '\x0', '\xff', 

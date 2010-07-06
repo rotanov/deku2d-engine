@@ -264,11 +264,17 @@ protected:
 //CText not implemented yet
 class CText : public CRenderObject
 {
-public:
+private:
 	CFont *Font;
 	string Text;
+
+public:
 	CText();
 	void Render();
+	CFont* GetFont() const;
+	const string& GetText() const;
+	void SetFont(CFont *AFont);
+	void SetText(const string &AText);
 };
 
 #endif // _2DE_GRAPHICS_HIGH_H_

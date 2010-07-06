@@ -4,11 +4,6 @@
 #include "2de_Engine.h"
 #include <SDL/SDL_opengl.h>
 
-extern const unsigned int IMAGE_SHROOM_WIDTH;
-extern const unsigned int IMAGE_SHROOM_HEIGHT;
-extern char IMAGE_SHROOM_DATA[];
-
-
 class CTestUnit : public CRenderObject, public CUpdateObject
 {
 public:
@@ -20,14 +15,14 @@ public:
 		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
 
 		CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
-		TitleText->Text = "Deku";
+		TitleText->SetText("Deku");
 		TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f);
 		TitleText = CFactory::Instance()->New<CText>("txtTeam");
-		TitleText->Text = "team";
+		TitleText->SetText("team");
 		TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f);
 
 		shroom = CFactory::Instance()->New<CTexture>("Shroom");
-		shroom->LoadTexture(IMAGE_SHROOM_WIDTH, IMAGE_SHROOM_HEIGHT, reinterpret_cast<byte *>(IMAGE_SHROOM_DATA));
+		shroom->LoadTexture(IMAGE_SHROOM_TITLE_WIDTH, IMAGE_SHROOM_TITLE_HEIGHT, reinterpret_cast<byte *>(IMAGE_SHROOM_TITLE_DATA));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 	void Render()

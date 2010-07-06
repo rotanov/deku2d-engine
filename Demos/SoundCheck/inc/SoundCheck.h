@@ -79,23 +79,23 @@ public:
 		CText *HelpText = CFactory::Instance()->New<CText>("SoundControlsText");
 		//HelpText->Position = Vector2(5.0f, ScreenHeight - 30.0f);
 		HelpText->Position = Vector2(5.0f, ScreenHeight - 260.0f);
-		HelpText->Text = "Sound: q - play, w - stop";
+		HelpText->SetText("Sound: q - play, w - stop");
 
 		HelpText = CFactory::Instance()->New<CText>("MusicControlsText");
 		HelpText->Position = Vector2(5.0f, ScreenHeight - 270.0f);
-		HelpText->Text = "Music: a - play, s - stop";
+		HelpText->SetText("Music: a - play, s - stop");
 
 		HelpText = CFactory::Instance()->New<CText>("MusicVolumeText");
 		HelpText->Position = Vector2(5.0f, ScreenHeight - 280.0f);
-		HelpText->Text = "Music volume: z - down, x - up";
+		HelpText->SetText("Music volume: z - down, x - up");
 
 		HelpText = CFactory::Instance()->New<CText>("FileText1");
 		HelpText->Position = Vector2(5.0f, ScreenHeight - 290.0f);
-		HelpText->Text = "You can try to enter file name and click Play";
+		HelpText->SetText("You can try to enter file name and click Play");
 
 		HelpText = CFactory::Instance()->New<CText>("FileText2");
 		HelpText->Position = Vector2(5.0f, ScreenHeight - 300.0f);
-		HelpText->Text = "to play it as music";
+		HelpText->SetText("to play it as music");
 	}
 };
 

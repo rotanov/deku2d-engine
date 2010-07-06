@@ -17,7 +17,7 @@ bool Update()
 {	
 	unsigned long FPS = 0;
 	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &FPS);
-	FPSText->Text = "FPS: " + itos(FPS);
+	FPSText->SetText("FPS: " + itos(FPS));
 	return true;
 }
 

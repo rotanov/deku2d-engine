@@ -3,6 +3,15 @@
 
 #include "2de_Core.h"
 
+extern const unsigned int IMAGE_SHROOM_TITLE_WIDTH;
+extern const unsigned int IMAGE_SHROOM_TITLE_HEIGHT;
+extern char IMAGE_SHROOM_TITLE_DATA[];
+
+extern const unsigned int IMAGE_DEFAULT_FONT_WIDTH;
+extern const unsigned int IMAGE_DEFAULT_FONT_HEIGHT;
+extern char IMAGE_DEFAULT_FONT_DATA[];
+
+
 class CImageData
 {
 public:

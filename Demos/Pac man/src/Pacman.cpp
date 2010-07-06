@@ -1,5 +1,7 @@
 #include "Pacman.h"
 
+#define NewObject(A) CFactory::Instance()->New<A>("")
+
 CPacmanBonus::CPacmanBonus(Vector2 APosition, CSprite *ASprite) : Position(APosition),
 	Angle(rand() % 360), RenderProxy(NULL), Sprite(ASprite)
 {
@@ -21,8 +23,8 @@ void CPacmanBonus::Update(float dt)
 	if ( (AABB.Intersect(AABBself)))
 	{
 		Player->Score += 100;
-		Player->ScoreText->Text = "Score: " + itos(Player->Score);
-		CParticleSystem *Ps = new CParticleSystem;
+		Player->ScoreText->SetText("Score: " + itos(Player->Score));
+		CParticleSystem *Ps = NewObject(CParticleSystem);
 		Ps->Init();
 		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 1.0f);
 		Ps->ColorOver = RGBAf(0.3f, 0.3f, 0.9f, 0.0f);
@@ -32,23 +34,25 @@ void CPacmanBonus::Update(float dt)
 		Ps->Life = 0.5;
 		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
 		Ps->Position = Position;
-		//SetDestroyed();
-		Eleminate();
+		SetDestroyed();
 	}
 	return;
 }
 
 CPacmanBonus::~CPacmanBonus()
 {	
+	delete RenderProxy;
 }
+
 CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
 {
-	Sprite = new CSprite;
-	ScoreText = new CText;
-	DamageText = new CText;
 
-	ScoreText->Text = "Score: " + itos(Score);
-	DamageText->Text = "Damage: " + itos(Damage);
+	Sprite = NewObject(CSprite);
+	ScoreText = NewObject(CText);
+	DamageText = NewObject(CText);
+
+	ScoreText->SetText("Score: " + itos(Score));
+	DamageText->SetText("Damage: " + itos(Damage));
 	DamageText->Color = COLOR_RED;
 	SetName("Pac-man player");
 	DamageText->Position = Vector2(10.0f, 30.0f);
@@ -114,8 +118,8 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 
 CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 {
-	EnemySprite = new CSprite();
-	BonusSprite = new CSprite();
+	EnemySprite = NewObject(CSprite);
+	BonusSprite = NewObject(CSprite);
 
 	BonusSprite->Visible = false;
 	BonusSprite->AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
@@ -266,13 +270,12 @@ void CPacmanEnemy::Update(float dt)
 	Position = Position + V2_DIRECTIONS[Direction] * 128 * dt;
 	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
-	if ( (AABB.Intersect(AABBself)) && Player->Sprite->Color.g >= 0.9f)
+	if ((AABB.Intersect(AABBself)) && Player->Sprite->Color.g >= 0.9f)
 	{
 		Player->Damage += 32;
-		Player->DamageText->Text = "Damage: " + itos(Player->Damage);
-
+		Player->DamageText->SetText("Damage: " + itos(Player->Damage));
 		Player->Sprite->Color = COLOR_RED;
-		CParticleSystem *Ps = new CParticleSystem;
+		CParticleSystem *Ps = CFactory::Instance()->New<CParticleSystem>("CParticleSystem");
 		Ps->Init();
 		Ps->ColorStart = COLOR_RED;
 		Ps->ColorOver = COLOR_RED;
@@ -281,10 +284,8 @@ void CPacmanEnemy::Update(float dt)
 		Ps->SizeVariability = 2;
 		Ps->Emission = 10;
 		Ps->Life = 0.5;
-		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");
-		//Ps->Position = Position;
+		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");		
 		Ps->PtrPosition = &Player->Position;
-
 	}
 	Sprite->Position = Position;
 }

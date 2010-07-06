@@ -965,17 +965,39 @@ CParticleSystem::~CParticleSystem()
 	SAFE_DELETE(Particles);
 }
 
-CText::CText()
-{
-	Font = CFactory::Instance()->Get<CFont>("Font");
-	Text = "";
-	Color = COLOR_WHITE;
+CText::CText() : Text(""), Font(CFontManager::Instance()->GetDefaultFont())
+{	
+	assert(Font != NULL);
+	doIgnoreCamera = true;
 }
 
 void CText::Render()
 {
+	//assert(Text != "");
 	//COLOR_WHITE.glSet();
 	Font->tClr = Color;
 	Font->Pos = Position;
 	Font->Print(Text.c_str());
+}
+
+CFont* CText::GetFont() const
+{
+	assert(Font != NULL);
+	return Font;
+}
+
+const string& CText::GetText() const
+{
+	return Text;
+}
+
+void CText::SetFont(CFont *AFont)
+{
+	assert(AFont != NULL);
+	Font = AFont;
+}
+
+void CText::SetText(const string &AText)
+{
+	Text = AText;
 }

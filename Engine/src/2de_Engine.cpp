@@ -174,7 +174,7 @@ bool CEngine::Init()
 	// looks like shit.. but this is correct order of initializing singletons.. we need some way to do it in more beautiful sense..
 	CUpdateManager::Instance();
 	CTextureManager::Instance();
-	CFontManager::Instance();
+	CFontManager::Instance();	
 	CTileSetManager::Instance();
 	CSoundManager::Instance();
 	CMusicManager::Instance();
@@ -225,7 +225,8 @@ bool CEngine::Init()
 			return false;
 	}
 
-	CFontManager::Instance()->SetCurrentFont("Font");
+	//CFontManager::Instance()->SetCurrentFont("Font");
+	CFontManager::Instance()->Init();	// Initialize default font;
 
 	CFactory::Instance(); // Factory should be initialized after all other managers
 
