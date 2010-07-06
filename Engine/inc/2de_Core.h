@@ -47,6 +47,7 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <typeinfo>
 
 using namespace std;
 
@@ -206,7 +207,7 @@ public:
 	void SetDestroyed();
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
 
-	bool Managed;	// temporary in public, todo: setter/getter
+	bool Managed;	// temporary in public, todo: setter/getter.. or maybe make it completely private and make CFactory to be friend of CObject
 };
 
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~

@@ -128,7 +128,10 @@ Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 
 CTileset::~CTileset()
 {
-	//CTileSetManager::Instance()->DelObject(GetID());
+	if (BBox != NULL)
+		delete [] BBox;
+
+	CTileSetManager::Instance()->Remove(GetID());
 }
 //-------------------------------------------//
 //				CMap functions				 //
@@ -309,7 +312,6 @@ CCompas::CCompas()
 {
 	SetName("CCompas");
 	CEngine *Ninja = CEngine::Instance();
-	CRenderManager::Instance()->Add(this);
 }
 
 CCompas::~CCompas()

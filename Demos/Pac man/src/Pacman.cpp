@@ -6,6 +6,7 @@ CPacmanBonus::CPacmanBonus(Vector2 APosition, CSprite *ASprite) : Position(APosi
 	Angle(rand() % 360), RenderProxy(NULL), Sprite(ASprite)
 {
 	RenderProxy = new CRenderProxy(Sprite);
+	//CFactory::Instance()->Add(RenderProxy);
 	RenderProxy->Position = Position;
 	RenderProxy->SetLayer(1);
 	SetName("Pacman bonus (mushroom)");
@@ -25,6 +26,7 @@ void CPacmanBonus::Update(float dt)
 		Player->Score += 100;
 		Player->ScoreText->SetText("Score: " + itos(Player->Score));
 		CParticleSystem *Ps = NewObject(CParticleSystem);
+		CFactory::Instance()->Add(Ps);
 		Ps->Init();
 		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 1.0f);
 		Ps->ColorOver = RGBAf(0.3f, 0.3f, 0.9f, 0.0f);
@@ -34,22 +36,22 @@ void CPacmanBonus::Update(float dt)
 		Ps->Life = 0.5;
 		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
 		Ps->Position = Position;
-		SetDestroyed();
+		CFactory::Instance()->Destroy(this);
 	}
 	return;
 }
 
 CPacmanBonus::~CPacmanBonus()
 {	
+	//CFactory::Instance()->Destroy(RenderProxy);
 	delete RenderProxy;
 }
 
 CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
 {
-
-	Sprite = NewObject(CSprite);
-	ScoreText = NewObject(CText);
-	DamageText = NewObject(CText);
+	Sprite = CFactory::Instance()->New<CSprite>("Player sprite");
+	ScoreText = CFactory::Instance()->New<CText>("Score text");
+	DamageText = CFactory::Instance()->New<CText>("Damage text");
 
 	ScoreText->SetText("Score: " + itos(Score));
 	DamageText->SetText("Damage: " + itos(Damage));
@@ -118,8 +120,8 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 
 CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 {
-	EnemySprite = NewObject(CSprite);
-	BonusSprite = NewObject(CSprite);
+	EnemySprite = CFactory::Instance()->New<CSprite>("Enemy sprite");
+	BonusSprite = CFactory::Instance()->New<CSprite>("Bonus sprite");
 
 	BonusSprite->Visible = false;
 	BonusSprite->AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
@@ -129,6 +131,7 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 	Tiles = CFactory::Instance()->Get<CTileset>("PacManTileset");
 	Tiles->CheckLoad();
 	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pacman map");
+	CFactory::Instance()->Add(Map, "Pacman map");
 	Map->SetLayer(0);
 	Map->Scaling = 2.0f;
 	//	Map.TileSet = Tiles;
@@ -143,12 +146,17 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 				Map->GetMapCell(i, j)->index = Factor < 25 ? 1 : 0;
 				if (Factor >= 25 && (i != 1 || j != 1))
 					if (rand() % 10 < 2)
-						(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), BonusSprite))->Player = Player;
+					{
+						CPacmanBonus *Bonus = new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), BonusSprite);
+						Bonus->Player = Player;
+						CFactory::Instance()->Add(Bonus);
+					}
 					else if (rand() % 20 < 2)
 					{
 						CPacmanEnemy *Enemy = new CPacmanEnemy(Vector2(i * 64 + 32, j * 64 + 32));
 						Enemy->Player = Player;
 						Enemy->Map = Map;
+						CFactory::Instance()->Add(Enemy);
 					}
 			}
 
@@ -249,7 +257,7 @@ void CPacmanGame::Update(float dt)
 CPacmanEnemy::CPacmanEnemy(Vector2 APosition) : Position(APosition), Player(NULL),
 Direction(static_cast<EDirection>(rand()%4))
 {
-	Sprite = new CSprite();
+	Sprite = CFactory::Instance()->New<CSprite>("PacmanEnemy sprite");
 	SetName("Pacman enemy");
 	Sprite->SetLayer(1);
 	Sprite->SetTexture("PacmanEnemy");
@@ -276,6 +284,7 @@ void CPacmanEnemy::Update(float dt)
 		Player->DamageText->SetText("Damage: " + itos(Player->Damage));
 		Player->Sprite->Color = COLOR_RED;
 		CParticleSystem *Ps = CFactory::Instance()->New<CParticleSystem>("CParticleSystem");
+		CFactory::Instance()->Add(Ps);
 		Ps->Init();
 		Ps->ColorStart = COLOR_RED;
 		Ps->ColorOver = COLOR_RED;

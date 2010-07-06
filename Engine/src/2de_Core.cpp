@@ -589,7 +589,7 @@ CUpdateObject::CUpdateObject() : Active(true), Dead(false)
 
 CUpdateObject::~CUpdateObject()
 {
-	//CUpdateManager::Instance()->Remove(GetID());
+	CUpdateManager::Instance()->Remove(GetID());
 }
 
 void CUpdateObject::SetDead()

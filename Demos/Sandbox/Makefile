@@ -1,6 +1,5 @@
 SOURCES		=	src/main.cpp \
-			src/game.cpp \
-			src/Shroom.cpp
+			src/game.cpp
 
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)

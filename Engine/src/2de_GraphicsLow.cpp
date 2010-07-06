@@ -13,7 +13,7 @@ CRenderObject::CRenderObject() : Angle(0.0f), Depth(0.0f), Position(V2_ZERO), Sc
 
 CRenderObject::~CRenderObject()
 {
-	//CRenderManager::Instance()->DelObject(GetID());
+	CRenderManager::Instance()->Remove(GetID());
 }
 
 void CRenderObject::SetAngle(float AAngle /*= 0.0f*/)
@@ -270,7 +270,8 @@ CFont::~CFont()
 {
 	if (!base)
 		glDeleteLists(base, 256);
-	//CFontManager::Instance()->DelObject(GetID());
+
+	CFontManager::Instance()->Remove(GetID());
 }
 
 
@@ -289,6 +290,7 @@ bool CFont::LoadFromFile()
 
 	CTextureManager *TexMan = CTextureManager::Instance();
 	Texture = TexMan->GetObject(FontImageName);
+	delete[] FontImageName;	// temporary to prevent leak.. TODO: redesign CFile::ReadLine, it must NOT allocate memory..
 
 	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
@@ -334,7 +336,7 @@ bool CFont::LoadFromMemory(const byte* Address)
 
 	Texture = CTextureManager::Instance()->GetObject("DefaultFontTexture");
 
-	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
+	//Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
 	//file.Read(bbox, sizeof(bbox));
 	memcpy(bbox, Address, sizeof(bbox));
@@ -965,7 +967,7 @@ CTexture::CTexture()
 
 CTexture::~CTexture()
 {
-	//CTextureManager::Instance()->DelObject(GetID());
+	CTextureManager::Instance()->Remove(GetID());
 }
 
 void CTexture::Bind()

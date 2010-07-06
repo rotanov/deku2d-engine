@@ -1,4 +1,5 @@
 SOURCES		=	src/2de_Core.cpp \
+			src/2de_DefaultFont.cpp \
 			src/2de_Engine.cpp \
 			src/2de_GameUtils.cpp \
 			src/2de_GraphicsHigh.cpp \
@@ -9,10 +10,12 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_MathUtils.cpp \
 			src/2de_Physics.cpp \
 			src/2de_Resource.cpp \
+			src/2de_ShroomTitle.cpp \
 			src/2de_Sound.cpp \
 			src/2de_Xml.cpp
 
 OBJECTS		=	obj/2de_Core.o \
+			obj/2de_DefaultFont.o \
 			obj/2de_Engine.o \
 			obj/2de_GameUtils.o \
 			obj/2de_GraphicsHigh.o \
@@ -23,6 +26,7 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_MathUtils.o \
 			obj/2de_Physics.o \
 			obj/2de_Resource.o \
+			obj/2de_ShroomTitle.o \
 			obj/2de_Sound.o \
 			obj/2de_Xml.o
 

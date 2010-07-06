@@ -149,9 +149,12 @@ public:
 	}
 	~CPongGame()
 	{
-		PlayerOne->SetDestroyed();	// Not really
-		PlayerTwo->SetDestroyed();
-		Ball->SetDestroyed();
+		//CFactory::Instance()->Destroy(PlayerOne); // don't need it..
+		//CFactory::Instance()->Destroy(PlayerTwo);
+		//CFactory::Instance()->Destroy(Ball);
+		//PlayerOne->SetDestroyed();	// Not really
+		//PlayerTwo->SetDestroyed();
+		//Ball->SetDestroyed();
 	}
 	void Render()
 	{

@@ -122,6 +122,8 @@ void CDataLister::ExploreDirectory(string Path)
 		//if (entry->d_type == DT_DIR)
 		if (testdir)
 		{
+			closedir(testdir);
+
 			if (entry->d_name[0] == '.')
 			{
 				continue;
@@ -130,7 +132,6 @@ void CDataLister::ExploreDirectory(string Path)
 			CurNode = CurNode->Add(entry->d_name, entry->d_name);
 			ExploreDirectory(Path + "/" + string(entry->d_name));
 			CurNode = PreviousNode;
-			closedir(testdir);
 		}
 		//else if (entry->d_type == DT_REG)
 		else

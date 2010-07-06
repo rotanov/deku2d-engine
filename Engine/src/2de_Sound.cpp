@@ -32,7 +32,8 @@ CSound::~CSound()
 		Mix_FreeChunk(Data);
 		Data = NULL;
 	}
-	//CSoundManager::Instance()->DelObject(GetID());
+
+	CSoundManager::Instance()->Remove(GetID());
 }
 
 bool CSound::LoadFromFile()
@@ -77,7 +78,8 @@ CMusic::~CMusic()
 		Mix_FreeMusic(Data);
 		Data = NULL;
 	}
-	//CMusicManager::Instance()->DelObject(GetID());
+
+	CMusicManager::Instance()->Remove(GetID());
 }
 
 bool CMusic::LoadFromFile()

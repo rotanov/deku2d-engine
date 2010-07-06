@@ -31,11 +31,6 @@ private:
 	CSprite *Sprite;
 	CRenderProxy *RenderProxy;
 public:
-	void Eleminate()
-	{
-		SetDestroyed();
-		RenderProxy->SetDestroyed();  // delete RenderProxy worked just fine. BUT IT SHOULDN'T COMPILE. @todo: check, what's going on
-	}
 	CPacmanPlayer *Player;	
 	Vector2 Position;
 	float Period;

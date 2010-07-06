@@ -754,7 +754,7 @@ void CParticleSystem::Update(float dt)
 			Emission = 0;
 		if (Age >= Life && ParticlesActive == 0)
 		{
-			SetDestroyed();
+			CFactory::Instance()->Destroy(this);
 			return;
 		}
 	}
@@ -834,6 +834,7 @@ void CParticleSystem::Render()
 
 		//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
+		Texture->CheckLoad();
 
 		Texture->Bind();
 
@@ -962,7 +963,7 @@ CParticleSystem::CParticleSystem() : PtrPosition(NULL)
 
 CParticleSystem::~CParticleSystem()
 {
-	SAFE_DELETE(Particles);
+	SAFE_DELETE_ARRAY(Particles);
 }
 
 CText::CText() : Text(""), Font(CFontManager::Instance()->GetDefaultFont())

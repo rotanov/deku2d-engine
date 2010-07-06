@@ -9,10 +9,10 @@ LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lSDL_mixer -lIL ../.
 TARGET		=	bin/Demo\ template
 
 all:
-	g++ -fpermissive -w -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -w -fpermissive -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 debug:
-	g++ -g3 -fpermissive -w -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -g3 -w -fpermissive -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 strict:
 	g++ -Wall -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
