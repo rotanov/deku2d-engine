@@ -15,9 +15,9 @@ public:
 	size_t Score;
 	size_t Damage;
 	Vector2 Position;
-	CSprite Sprite;
-	CText ScoreText;
-	CText DamageText;
+	CSprite *Sprite;
+	CText *ScoreText;
+	CText *DamageText;
 	Vector2 Velocity;
 	CPacmanPlayer();
 
@@ -31,6 +31,11 @@ private:
 	CSprite *Sprite;
 	CRenderProxy *RenderProxy;
 public:
+	void Eleminate()
+	{
+		SetDestroyed();
+		RenderProxy->SetDestroyed();  // delete RenderProxy worked just fine. BUT IT SHOULDN'T COMPILE. @todo: check, what's going on
+	}
 	CPacmanPlayer *Player;	
 	Vector2 Position;
 	float Period;
@@ -54,7 +59,7 @@ public:
 	CLevelMap *Map;
 	Vector2 Position;
 	CPacmanPlayer *Player;
-	CSprite Sprite;
+	CSprite *Sprite;
 	EDirection Direction;
 
 	CPacmanEnemy(Vector2 APosition);
@@ -67,8 +72,8 @@ public:
 	CLevelMap *Map;
 	CTileset *Tiles;
 	CPacmanPlayer *Player;
-	CSprite EnemySprite;
-	CSprite BonusSprite;
+	CSprite *EnemySprite;
+	CSprite *BonusSprite;
 	CPacmanGame(CPacmanPlayer *APlayer);
 
 	void Update(float dt);

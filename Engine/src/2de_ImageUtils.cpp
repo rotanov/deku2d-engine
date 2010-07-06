@@ -2,7 +2,7 @@
 
 #include <IL/il.h>
 
-CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0), doCleanData(false){}
+CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0), doCleanData(true){}
 
 CImageData::~CImageData()
 {

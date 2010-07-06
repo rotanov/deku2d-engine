@@ -673,11 +673,7 @@ CFactory::CFactory()
 CFactory::~CFactory()
 {	
 	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-	{
- 		CObject *object = *i;
- 		Log("INFO", "Factory is deleting object: %s", object->GetName().c_str());
- 		CObject::DecRefCount(object);
-	}
+		CObject::DecRefCount(*i);
 	Objects.clear();
 }
 

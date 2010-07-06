@@ -90,6 +90,7 @@ bool CGLImageData::LoadTexture(const string &Filename)
 
 bool CGLImageData::LoadTexture(size_t AWidth, size_t AHeight, const byte* Address)
 {
+	doCleanData = false;
 	Data = const_cast<byte *>(Address);
 	Width = AWidth;
 	Height = AHeight;

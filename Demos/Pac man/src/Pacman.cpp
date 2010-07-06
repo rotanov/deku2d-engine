@@ -21,7 +21,7 @@ void CPacmanBonus::Update(float dt)
 	if ( (AABB.Intersect(AABBself)))
 	{
 		Player->Score += 100;
-		Player->ScoreText.Text = "Score: " + itos(Player->Score);
+		Player->ScoreText->Text = "Score: " + itos(Player->Score);
 		CParticleSystem *Ps = new CParticleSystem;
 		Ps->Init();
 		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 1.0f);
@@ -32,45 +32,49 @@ void CPacmanBonus::Update(float dt)
 		Ps->Life = 0.5;
 		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
 		Ps->Position = Position;
-		SetDestroyed();
+		//SetDestroyed();
+		Eleminate();
 	}
 	return;
 }
 
 CPacmanBonus::~CPacmanBonus()
-{
-	RenderProxy->SetDestroyed();  // delete RenderProxy worked just fine. BUT IT SHOULDN'T COMPILE. @todo: check, what's going on
+{	
 }
 CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
 {
-	ScoreText.Text = "Score: " + itos(Score);
-	DamageText.Text = "Damage: " + itos(Damage);
-	DamageText.Color = COLOR_RED;
+	Sprite = new CSprite;
+	ScoreText = new CText;
+	DamageText = new CText;
+
+	ScoreText->Text = "Score: " + itos(Score);
+	DamageText->Text = "Damage: " + itos(Damage);
+	DamageText->Color = COLOR_RED;
 	SetName("Pac-man player");
-	DamageText.Position = Vector2(10.0f, 30.0f);
-	ScoreText.Position = Vector2(10.0f, 10.0f);
-	ScoreText.SetLayer(10);
-	ScoreText.doIgnoreCamera = true;
-	DamageText.doIgnoreCamera = true;
-	DamageText.SetLayer(10);
+	DamageText->Position = Vector2(10.0f, 30.0f);
+	ScoreText->Position = Vector2(10.0f, 10.0f);
+	ScoreText->SetLayer(10);
+	ScoreText->doIgnoreCamera = true;
+	DamageText->doIgnoreCamera = true;
+	DamageText->SetLayer(10);
 	Position = DEFAULT_POSITION;
-	Sprite.SetLayer(1);
-	Sprite.SetTexture("PacmanFrames");
-	Sprite.AddAnimation(true, 50, 32, 32, 4, 2, 7, 32, 32, 0, 0, 0, true);
-	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 1, false);
+	Sprite->SetLayer(1);
+	Sprite->SetTexture("PacmanFrames");
+	Sprite->AddAnimation(true, 50, 32, 32, 4, 2, 7, 32, 32, 0, 0, 0, true);
+	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 1, false);
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 	CRenderManager::Instance()->Camera.Assign(&Position.x, &Position.y);
 }
 
 void CPacmanPlayer::Update(float dt)
 {
-	Sprite.Color += RGBAf(0.01f, 0.01, 0.01f, 0.01f);
-	Sprite.SetAnimation(0);
+	Sprite->Color += RGBAf(0.01f, 0.01, 0.01f, 0.01f);
+	Sprite->SetAnimation(0);
 	if (Velocity.Length() < 20.0f)
-		Sprite.SetAnimation(1);
+		Sprite->SetAnimation(1);
 	Position += Velocity * dt;
 	Velocity *= 0.998f;
-	Sprite.Position = Vector2(ceil(Position.x), ceil(Position.y));
+	Sprite->Position = Vector2(ceil(Position.x), ceil(Position.y));
 }
 
 bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
@@ -82,26 +86,26 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 		case SDLK_LEFT:
 			Velocity.x += -DEFAULT_VELOCITY;
 			Velocity.y = 0.0f;
-			Sprite.SetAngle(0.0f);
-			Sprite.mirror_h = true;
+			Sprite->SetAngle(0.0f);
+			Sprite->mirror_h = true;
 			break;
 		case SDLK_RIGHT:
 			Velocity.x += DEFAULT_VELOCITY;
 			Velocity.y = 0.0f;
-			Sprite.SetAngle(0.0f);
-			Sprite.mirror_h = false;
+			Sprite->SetAngle(0.0f);
+			Sprite->mirror_h = false;
 			break;
 		case SDLK_UP:
 			Velocity.y += DEFAULT_VELOCITY;
 			Velocity.x = 0.0f;
-			Sprite.SetAngle(90.0f);
-			Sprite.mirror_h = false;
+			Sprite->SetAngle(90.0f);
+			Sprite->mirror_h = false;
 			break;
 		case SDLK_DOWN:
 			Velocity.y += -DEFAULT_VELOCITY;
 			Velocity.x = 0.0f;
-			Sprite.SetAngle(90.0f);
-			Sprite.mirror_h = true;
+			Sprite->SetAngle(90.0f);
+			Sprite->mirror_h = true;
 			break;
 		}
 	}
@@ -110,9 +114,12 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 
 CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 {
-	BonusSprite.Visible = false;
-	BonusSprite.AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
-	BonusSprite.SetTexture("PacmanBonus");
+	EnemySprite = new CSprite();
+	BonusSprite = new CSprite();
+
+	BonusSprite->Visible = false;
+	BonusSprite->AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
+	BonusSprite->SetTexture("PacmanBonus");
 
 
 	Tiles = CFactory::Instance()->Get<CTileset>("PacManTileset");
@@ -132,7 +139,7 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 				Map->GetMapCell(i, j)->index = Factor < 25 ? 1 : 0;
 				if (Factor >= 25 && (i != 1 || j != 1))
 					if (rand() % 10 < 2)
-						(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), &BonusSprite))->Player = Player;
+						(new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), BonusSprite))->Player = Player;
 					else if (rand() % 20 < 2)
 					{
 						CPacmanEnemy *Enemy = new CPacmanEnemy(Vector2(i * 64 + 32, j * 64 + 32));
@@ -238,14 +245,16 @@ void CPacmanGame::Update(float dt)
 CPacmanEnemy::CPacmanEnemy(Vector2 APosition) : Position(APosition), Player(NULL),
 Direction(static_cast<EDirection>(rand()%4))
 {
-	Sprite.SetLayer(1);
-	Sprite.SetTexture("PacmanEnemy");
-	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 0, false);
-	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 0, 1, false);
-	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 32, 2, false);
-	Sprite.AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 32, 3, false);
-	Sprite.SetAnimation(Direction);
-	Sprite.Position = Position;
+	Sprite = new CSprite();
+	SetName("Pacman enemy");
+	Sprite->SetLayer(1);
+	Sprite->SetTexture("PacmanEnemy");
+	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 0, false);
+	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 0, 1, false);
+	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 32, 2, false);
+	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 32, 3, false);
+	Sprite->SetAnimation(Direction);
+	Sprite->Position = Position;
 }
 
 void CPacmanEnemy::Update(float dt)
@@ -257,12 +266,12 @@ void CPacmanEnemy::Update(float dt)
 	Position = Position + V2_DIRECTIONS[Direction] * 128 * dt;
 	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
-	if ( (AABB.Intersect(AABBself)) && Player->Sprite.Color.g >= 0.9f)
+	if ( (AABB.Intersect(AABBself)) && Player->Sprite->Color.g >= 0.9f)
 	{
 		Player->Damage += 32;
-		Player->DamageText.Text = "Damage: " + itos(Player->Damage);
+		Player->DamageText->Text = "Damage: " + itos(Player->Damage);
 
-		Player->Sprite.Color = COLOR_RED;
+		Player->Sprite->Color = COLOR_RED;
 		CParticleSystem *Ps = new CParticleSystem;
 		Ps->Init();
 		Ps->ColorStart = COLOR_RED;
@@ -277,5 +286,5 @@ void CPacmanEnemy::Update(float dt)
 		Ps->PtrPosition = &Player->Position;
 
 	}
-	Sprite.Position = Position;
+	Sprite->Position = Position;
 }

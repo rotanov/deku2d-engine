@@ -159,6 +159,7 @@ public:
 		anim(NULL), AnimationsCount(0), EllapsedTime(0), LastTime(0), CurrentFrame(0),
 		CurrentRow(0), CurrentColumn(0), mirror_h(false)
 	{
+		SetName("CSprite");
 	}
 	~CSprite();
 	bool SetTexture(const string &TextureName);
