@@ -10,8 +10,9 @@ public:
 	~CMLNode();
 	virtual bool HaveChildren();//return 0 by default;
 
-	void SetName(const string &AName);
 	const string& GetName() const;
+	void SetName(const string &AName);
+
 protected:
 	CXMLNode *Parent;
 private:
@@ -24,15 +25,65 @@ private:
 class CXMLNormalNode : public CXMLNode
 {
 public:
-	void AddChild(CXMLNode &ANode);
-	void RemoveChild(CXMLNode &ANode);
-	void HaveChildren(); // return 1
+	class CChildrenList
+	{
+	public:
+		class Iterator
+		{
+		public:
+			Iterator();
+			Iterator(CXMLNode &AXMLNode); // damn... mb add constructor by id later // what?! id?! noway..
+			Iterator(const iterator &AIterator);
+
+			Iterator& operator=(const Iterator &AIterator);
+
+			bool operator==(const Iterator &AIterator) const;
+			bool operator!=(const Iterator &AIterator) const;
+
+			Iterator& operator++();
+			Iterator operator++(int);
+			Iterator& operator--();
+			Iterator operator--(int);
+
+			void DeleteElement(); 		// i think iterator should not do this shit.. list should..
+			void InsertBefore(CXMLNode &ANode);
+			void InsertAfter(CXMLNode &ANode);
+
+			~Iterator(); // for what?
+		private:
+			list<CXMLNode *>::iterator Backend;
+		};
+
+		void AddFirst(CXMLNode &ANode);
+		void AddLast(CXMLNode &ANode);
+		void AddAfter(const Iterator &AIterator, CXMLNode &ANode);
+		void AddBefore(const Iterator &AIterator, CXMLNode &ANode);
+		void Remove(const Iterator &AIterator);
+
+		Iterator Begin();
+		Iterator End();
+
+		bool IsEmpty() const;
+		bool GetLength() const;
+
+	private:
+		list<CXMLNode *> Backend;
+
+	};
+
+	typedef CChildrenList::Iterator ChildrenIterator;	// maybe not required..
+
+	bool HaveChildren(); // return 1
 	// TODO: interface for iterating through children..
 
 	// TODO: interface for attributes..
+	const string& GetAttribute(const string &AName) const;
+	void SetAttribute(const string &AName, const string &AValue);
+	void DeleteAttribute(const string &AName);
+
+	CChildrenList Children;
 
 protected:		// do we really need protected here? maybe no..//of course we don't
-	list<CXMLNode *> Children;
 	map<string, string> Attributes;
 private:
 
@@ -43,38 +94,13 @@ class CXMLCommentNode : public CXMLNode
 public:
 	CXMLCommentNode();	// set Name to "!--" in constructor
 
-	void SetValue(const string &AValue);
 	const string& GetValue() const;
+	void SetValue(const string &AValue);
 private:
 	string Value;
 
 };
 
-class Iterator
-{
-public:
-	Iterator();
-	Iterator(CXMLNode *AXMLNode); // damn... mb add constructor by id later
-	Iterator(const iterator &AIterator);
-
-	Iterator &operator=(const Iterator &AIterator);
-
-	bool operator==(const Iterator &AIterator) const;
-	bool operator!=(const Iterator &AIterator) const;
-
-	Iterator &operator++();
-	Iterator operator++(int);
-	Iterator &operator--();
-	Iterator operator--(int);
-
-	void DeleteElement();
-	void InsertBefore(CXMLNode *elem);
-	void InsertAfter(CXMLNode *elem);
-
-	~Iterator(); // for what?
-private:
-	list<CXMLNode *>::iterator Backend;
-};
 
 class CXML
 {
@@ -87,13 +113,9 @@ public:
 	void LoadFromFile(const string &AFilename);
 	void SaveToFile(const string &AFilename);
 
-	// TODO: add some interface to root.. here we have 2 possibilities:
-	// 	1. CXMLNormalNode& GetRoot();
-	// 	2. AddChild, RemoveChild like in normal node
-	// 	I like the second way more..
+	CXMLNormalNode::CCChildrenList Root;	// <-- i found a way to store root children list..
 
 private:
-	CXMLNormalNode *Root;
 
 };
 
