@@ -7,8 +7,8 @@ class CXMLNode
 {
 public:
 	CXMLNode();
-	~CMLNode();
-	virtual bool HaveChildren();//return 0 by default;
+	~CXMLNode();
+	virtual bool HaveChildren(); // 0 by default
 
 	const string& GetName() const;
 	void SetName(const string &AName);
@@ -32,7 +32,7 @@ public:
 		{
 		public:
 			Iterator();
-			Iterator(CXMLNode &AXMLNode); // damn... mb add constructor by id later // what?! id?! noway..
+			Iterator(CXMLNode &AXMLNode);
 			Iterator(const iterator &AIterator);
 
 			Iterator& operator=(const Iterator &AIterator);
@@ -113,7 +113,7 @@ public:
 	void LoadFromFile(const string &AFilename);
 	void SaveToFile(const string &AFilename);
 
-	CXMLNormalNode::CCChildrenList Root;	// <-- i found a way to store root children list..
+	CXMLNormalNode::CChildrenList Root;	// <-- i found a way to store root children list..
 
 private:
 
