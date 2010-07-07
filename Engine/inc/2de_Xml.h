@@ -32,10 +32,10 @@ public:
 		{
 		public:
 			Iterator();
-			Iterator(CXMLNode &AXMLNode);
-			Iterator(const iterator &AIterator);
+			/*Iterator(CXMLNode &AXMLNode);
+			Iterator(const iterator &AIterator);*/
 
-			Iterator& operator=(const Iterator &AIterator);
+			//Iterator& operator=(const Iterator &AIterator); // standard (assigning corresponding members) is sufficent
 
 			bool operator==(const Iterator &AIterator) const;
 			bool operator!=(const Iterator &AIterator) const;
@@ -45,26 +45,30 @@ public:
 			Iterator& operator--();
 			Iterator operator--(int);
 
-			void DeleteElement(); 		// i think iterator should not do this shit.. list should..
-			void InsertBefore(CXMLNode &ANode);
-			void InsertAfter(CXMLNode &ANode);
+			CXMLNode* operator*();
 
-			~Iterator(); // for what?
+			/*void DeleteElement(); 		// i think iterator should not do this shit.. list should..
+			void InsertBefore(CXMLNode &ANode);
+			void InsertAfter(CXMLNode &ANode);*/
+
+			//~Iterator(); // for what?
 		private:
 			list<CXMLNode *>::iterator Backend;
+
+			friend class CXMLNormalNode::CChildrenList;
 		};
 
-		void AddFirst(CXMLNode &ANode);
-		void AddLast(CXMLNode &ANode);
-		void AddAfter(const Iterator &AIterator, CXMLNode &ANode);
-		void AddBefore(const Iterator &AIterator, CXMLNode &ANode);
-		void Remove(const Iterator &AIterator);
+		void AddFirst(CXMLNode *ANode);
+		void AddLast(CXMLNode *ANode);
+		void AddAfter(const Iterator &AIterator, CXMLNode *ANode);
+		void AddBefore(const Iterator &AIterator, CXMLNode *ANode);
+		CXMLNode* Remove(const Iterator &AIterator);
 
 		Iterator Begin();
 		Iterator End();
 
 		bool IsEmpty() const;
-		bool GetLength() const;
+		bool GetSize() const;
 
 	private:
 		list<CXMLNode *> Backend;
@@ -74,25 +78,23 @@ public:
 	typedef CChildrenList::Iterator ChildrenIterator;	// maybe not required..
 
 	bool HaveChildren(); // return 1
-	// TODO: interface for iterating through children..
 
-	// TODO: interface for attributes..
+	// TODO: maybe something like CChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
+
 	const string& GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);
 
 	CChildrenList Children;
 
-protected:		// do we really need protected here? maybe no..//of course we don't
-	map<string, string> Attributes;
 private:
-
+	map<string, string> Attributes;
 };
 
 class CXMLCommentNode : public CXMLNode
 {
 public:
-	CXMLCommentNode();	// set Name to "!--" in constructor
+	CXMLCommentNode();
 
 	const string& GetValue() const;
 	void SetValue(const string &AValue);
@@ -113,7 +115,7 @@ public:
 	void LoadFromFile(const string &AFilename);
 	void SaveToFile(const string &AFilename);
 
-	CXMLNormalNode::CChildrenList Root;	// <-- i found a way to store root children list..
+	CXMLNormalNode::CChildrenList Root;
 
 private:
 
