@@ -580,10 +580,11 @@ T* CFactory::New(const string &AName)
 //		throw std::logic_error("Object with this name already exists.");
 	}
 	T* result = new T;
+
 	string NewName = AName;
 	if (NewName.length() == 0)
 		NewName = typeid(T).name() + itos(result->GetID());
-	Add(result, AName);
+	Add(result, NewName);
 
 	return result;
 }

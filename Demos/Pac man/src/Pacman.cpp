@@ -26,7 +26,6 @@ void CPacmanBonus::Update(float dt)
 		Player->Score += 100;
 		Player->ScoreText->SetText("Score: " + itos(Player->Score));
 		CParticleSystem *Ps = NewObject(CParticleSystem);
-		CFactory::Instance()->Add(Ps);
 		Ps->Init();
 		Ps->ColorStart = RGBAf(0.8f, 0.3f, 0.9f, 1.0f);
 		Ps->ColorOver = RGBAf(0.3f, 0.3f, 0.9f, 0.0f);
@@ -283,8 +282,7 @@ void CPacmanEnemy::Update(float dt)
 		Player->Damage += 32;
 		Player->DamageText->SetText("Damage: " + itos(Player->Damage));
 		Player->Sprite->Color = COLOR_RED;
-		CParticleSystem *Ps = CFactory::Instance()->New<CParticleSystem>("CParticleSystem");
-		CFactory::Instance()->Add(Ps);
+		CParticleSystem *Ps = NewObject(CParticleSystem);
 		Ps->Init();
 		Ps->ColorStart = COLOR_RED;
 		Ps->ColorOver = COLOR_RED;

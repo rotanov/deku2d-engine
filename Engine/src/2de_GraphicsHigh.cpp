@@ -954,7 +954,7 @@ void CParticleSystem::SetUserCreate( FCreateFunc func )
 
 CParticleSystem::CParticleSystem() : PtrPosition(NULL)
 {
-	SetName("CparticleSystem");
+	SetName("CParticleSystem");
 	Texture = NULL;
 	Particles = NULL;
 	user_create = user_update = user_render = false;
