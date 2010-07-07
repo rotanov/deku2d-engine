@@ -8,6 +8,7 @@ class CXMLNode
 public:
 	CXMLNode();
 	~CMLNode();
+	virtual bool HaveChildren();//return 0 by default;
 
 	void SetName(const string &AName);
 	const string& GetName() const;
@@ -25,11 +26,12 @@ class CXMLNormalNode : public CXMLNode
 public:
 	void AddChild(CXMLNode &ANode);
 	void RemoveChild(CXMLNode &ANode);
+	void HaveChildren(); // return 1
 	// TODO: interface for iterating through children..
 
 	// TODO: interface for attributes..
 
-protected:		// do we really need protected here? maybe no..
+protected:		// do we really need protected here? maybe no..//of course we don't
 	list<CXMLNode *> Children;
 	map<string, string> Attributes;
 private:
@@ -46,6 +48,32 @@ public:
 private:
 	string Value;
 
+};
+
+class Iterator
+{
+public:
+	Iterator();
+	Iterator(CXMLNode *AXMLNode); // damn... mb add constructor by id later
+	Iterator(const iterator &AIterator);
+
+	Iterator &operator=(const Iterator &AIterator);
+
+	bool operator==(const Iterator &AIterator) const;
+	bool operator!=(const Iterator &AIterator) const;
+
+	Iterator &operator++();
+	Iterator operator++(int);
+	Iterator &operator--();
+	Iterator operator--(int);
+
+	void DeleteElement();
+	void InsertBefore(CXMLNode *elem);
+	void InsertAfter(CXMLNode *elem);
+
+	~Iterator(); // for what?
+private:
+	list<CXMLNode *>::iterator Backend;
 };
 
 class CXML
