@@ -36,7 +36,7 @@ public:
 	}
 	void SetTexture(const string &TextureName)
 	{
-		Texture = CTextureManager::Instance()->GetObject(TextureName);
+		Texture = CTextureManager::Instance()->Get(TextureName);
 	}
 
 	void RenderTileSet(); //FOR DEBUGGING
@@ -49,7 +49,7 @@ public:
 	CTileset* GetTileset(const string &ATilesetName)
 	{
 		CTileset *Tileset = NULL;
-		Tileset = dynamic_cast<CTileset*>(GetObject(ATilesetName));
+		Tileset = dynamic_cast<CTileset*>(Get(ATilesetName));
 		if (Tileset)
 			Tileset->CheckLoad();
 		return Tileset;
@@ -94,7 +94,7 @@ public:
 	CMapCellInfo* GetMapCell(size_t HorizontalIndex, size_t VerticalIndex);
 	CMapCellInfo* GetMapCell(Vector2 APosition) // Position inside map with scaling in mind
 	{
-		return GetMapCell((int)APosition.x / (Scaling * TileSet->TileWidth), (int)APosition.y / (Scaling * TileSet->TileHeight));
+		return GetMapCell((int)APosition.x / (GetScaling() * TileSet->TileWidth), (int)APosition.y / (GetScaling() * TileSet->TileHeight));
 	}
 	CAABB GetCellAABB(const Vector2 &V);
 

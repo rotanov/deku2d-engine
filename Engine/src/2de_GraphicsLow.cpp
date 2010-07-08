@@ -5,8 +5,8 @@
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-CRenderObject::CRenderObject() : Angle(0.0f), Depth(0.0f), Position(V2_ZERO), Scaling(1.0f),
-	aabb(0, 0, 0, 0), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
+CRenderObject::CRenderObject() : Angle(0.0f), aabb(0, 0, 0, 0), Depth(0.0f), Position(V2_ZERO),
+	Scaling(1.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
 	SetName("CRenderObject");
 	CRenderManager::Instance()->Add(this);
@@ -32,7 +32,7 @@ void CRenderObject::SetLayer(size_t Layer)
 	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
 }
 
-float CRenderObject::GetDepth()
+float CRenderObject::GetDepth() const
 {
 	return Depth;
 }
@@ -290,7 +290,7 @@ bool CFont::LoadFromFile()
 	file.ReadLine(FontImageName);	
 
 	CTextureManager *TexMan = CTextureManager::Instance();
-	Texture = TexMan->GetObject(FontImageName);
+	Texture = TexMan->Get(FontImageName);
 	delete[] FontImageName;	// temporary to prevent leak.. TODO: redesign CFile::ReadLine, it must NOT allocate memory..
 
 	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
@@ -335,7 +335,7 @@ bool CFont::LoadFromMemory(const byte* Address)
 		Address++;
 	Address++;
 
-	Texture = CTextureManager::Instance()->GetObject("DefaultFontTexture");
+	Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
 
 	//Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
@@ -508,25 +508,20 @@ void CFont::Print(const char *text, ...)
 }
 
 
-int CFont::GetStringWidth(const char *text)
+int CFont::GetStringWidth(const string &text)
 {
-	if (text == NULL)
-		return 0;
-	int r = 0, l = (int)strlen(text);
-	for (int i=0;i<l;i++)
-		r += width[(byte)text[i]-32] + Distance;
+	int r = 0;
+	for (int i = 0; i < text.length(); i++)
+		r += width[(byte)text[i] - 32] + Distance;
 	return r;
 }
 
-int CFont::GetStringWidthEx(int t1, int t2, const char *text)
+int CFont::GetStringWidthEx(int t1, int t2, const string &text)
 {
-	// if text doesn't exist (NULL or just ""), then its width is 0, not fucking -1
-	if (text == NULL)
-		return 0;
 	if (t1 > t2 || t2 < 0)
 		return 0;
-	if ((unsigned int)t2 >= strlen(text))
-		return -1;
+	if ((unsigned int)t2 >= text.length())
+		return 0;
 
 	int r = 0;
 	for (unsigned int i = t1; i <= t2; i++)
@@ -534,49 +529,43 @@ int CFont::GetStringWidthEx(int t1, int t2, const char *text)
 	return r;
 }
 
-int CFont::GetStringHeight(const char *text)
+int CFont::GetStringHeight(const string &text)
 {
-	if (text == NULL)
-		return 0;
-	int r = 0, l = (unsigned int) strlen(text);
-	for (int i = 0; i < l; i++)
+	int r = 0;
+	for (int i = 0; i < text.length(); i++)
 		r = std::max(height[(byte)text[i] - 32], r);
 	return r;
 }
 
-int CFont::GetStringHeightEx(int t1, int t2, const char *text)
+int CFont::GetStringHeightEx(int t1, int t2, const string &text)
 {
-	if (text == NULL)
-		return 0;
 	if (t1 > t2 || t2 < 0)
 		return 0;
-	if ((unsigned int)t2 >= strlen(text))
-		return -1;
-	int r = 0, l = (unsigned int)strlen(text);
-	for (unsigned int i=0; i<l; i++)
+	if ((unsigned int)t2 >= text.length())
+		return 0;
+	int r = 0, l = text.length();
+	for (unsigned int i = 0; i < text.length(); i++)
 		r = std::max(height[(byte)text[i] - 32], r);
 	return r;
 }
 
-int CFont::StringCoordToCursorPos(const char *text, int x, int y)
+int CFont::StringCoordToCursorPos(const string &text, int x, int y)
 {
-	if (text == NULL)
-		return -1;
-	if (strlen(text) == 0)
+	if (text.length() == 0)
 		return -1;
 	
 	Vector2 Local = Vector2(x, y) - Pos;
 	if (Local.x < 0)
 		return -1;
 
-	for (int i = 0; i < strlen(text); i++)
+	for (int i = 0; i < text.length(); i++)
 	{
 		int SubstrWidth = GetStringWidthEx(0, i, text);
 		int SymbolCenterCoord = SubstrWidth - Distance - (width[(byte)text[i] - 32] / 2);
 		if (Local.x < SymbolCenterCoord)
 			return (i - 1);
 	}
-	return (strlen(text) - 1);
+	return (text.length() - 1);
 }
 
 void CFont::SetDepth( float _depth )
@@ -619,7 +608,7 @@ CTexture* CFont::GetTexture()
 
 void CFont::SetTexture(const string &TextureName)
 {
-	Texture = CTextureManager::Instance()->GetObject(TextureName);
+	Texture = CTextureManager::Instance()->Get(TextureName);
 }
 //////////////////////////////////////////////////////////////////////////
 //Camera
@@ -750,7 +739,7 @@ bool CRenderManager::DrawObjects()
 			glLoadIdentity();
 			if (!data->doIgnoreCamera)
 				Camera.gTranslate();
-			glScalef(data->Scaling, data->Scaling, ROTATIONAL_AXIS_Z);
+			glScalef(data->GetScaling(), data->GetScaling(), ROTATIONAL_AXIS_Z);
 			glTranslatef(data->Position.x, data->Position.y, data->GetDepth());
 			glRotatef(data->GetAngle(), 0.0f, 0.0f, 1.0f);
 			data->Render();
@@ -853,23 +842,19 @@ void CFontManager::Init()
 	DefaultFont->SetName("DefaultFont");
 	DefaultFont->LoadFromMemory(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT));
 	CurrentFont = DefaultFont;
-	assert(DefaultFont != NULL);	
+	assert(DefaultFont != NULL);
 }
 
 
-CFont* CFontManager::GetFont(const char* fontname)	
+CFont* CFontManager::GetFont(const string &fontname)	
 {
 	CFont *TempFont = NULL;
-	TempFont = GetObject(fontname);
+	TempFont = Get(fontname);
 	if (TempFont)
 		TempFont->CheckLoad();
 	return TempFont;
 }
 
-CFont* CFontManager::GetFontEx(string fontname)
-{
-	return (GetObject(fontname));
-}
 
 bool CFontManager::SetCurrentFont(const char* fontname)
 {

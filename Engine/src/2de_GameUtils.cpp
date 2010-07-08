@@ -17,7 +17,7 @@ bool CTileset::LoadFromFile()
 	char * TextureName = NULL;
 	file.ReadLine(TextureName);
 	//Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
-	Texture = CTextureManager::Instance()->GetObject(TextureName);
+	Texture = CTextureManager::Instance()->Get(TextureName);
 	Texture->CheckLoad();
 
 	file.Read(&TileWidth, sizeof(TileWidth));
@@ -267,8 +267,8 @@ int CLevelMap::GetCellIndex(int h, int v)
 
 CAABB CLevelMap::GetCellAABB(const Vector2 &V)
 {
-	size_t CellWidth = TileSet->TileWidth * Scaling;
-	size_t CellHeight = TileSet->TileWidth * Scaling;
+	size_t CellWidth = TileSet->TileWidth * GetScaling();
+	size_t CellHeight = TileSet->TileWidth * GetScaling();
 	if (GetMapCell((int)V.x / CellWidth, (int)V.y / CellHeight )->index != 0)
 		return CAABB( (((int)V.x / CellWidth)) * CellWidth,
 		(((int)V.y/CellHeight)) * CellHeight, 

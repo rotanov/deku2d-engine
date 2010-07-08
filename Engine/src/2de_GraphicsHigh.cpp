@@ -196,7 +196,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, CPolygon *poly)
 #ifdef G_POLY_TEXTURE_ENABLE
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->Get("cells"));
 	cells->Bind();
 #endif 
 
@@ -301,7 +301,7 @@ void CPrimitiveRender::CheckTexture()
 {
 	glEnable(GL_TEXTURE_2D);
 	CTextureManager *Tman = CTextureManager::Instance();
-	CTexture *cells = dynamic_cast<CTexture*>(Tman->GetObject("cells"));
+	CTexture *cells = dynamic_cast<CTexture*>(Tman->Get("cells"));
 	cells->Bind();
 }
 
@@ -986,6 +986,11 @@ CFont* CText::GetFont() const
 	return Font;
 }
 
+string& CText::GetText()
+{
+	return Text;
+}
+
 const string& CText::GetText() const
 {
 	return Text;
@@ -1000,4 +1005,32 @@ void CText::SetFont(CFont *AFont)
 void CText::SetText(const string &AText)
 {
 	Text = AText;
+}
+
+int CText::Height()
+{
+	assert(Font != NULL);
+	return Font->GetStringHeight(Text);
+}
+
+int CText::Width()
+{
+	assert(Font != NULL);
+	return Font->GetStringWidth(Text);
+}
+
+CText& CText::operator=(const string &AText)
+{
+	Text = AText;
+	return *this;
+}
+
+std::string CText::operator+(const CText &Text) const
+{
+	return this->GetText() + Text.GetText();
+}
+
+std::string CText::operator+(const char *Text) const
+{
+	return this->GetText() + Text;
 }

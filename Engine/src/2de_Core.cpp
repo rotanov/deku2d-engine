@@ -66,6 +66,11 @@ CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + it
 
 }
 
+CObject::CObject(const CObject &AObject) : Destroyed(false), Name(" CObject " + itos(ID)), RefCount(0), Managed(false)
+{
+	ID = reinterpret_cast<int>(this);
+}
+
 CObject::~CObject()
 {
 }

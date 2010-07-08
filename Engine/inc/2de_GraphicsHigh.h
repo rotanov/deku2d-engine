@@ -272,11 +272,32 @@ private:
 
 public:
 	CText();
+	~CText()
+	{
+		// this is destructor. i can set breakpoint there
+	}
+	CText(const string &AText) : Text(AText), Font(CFontManager::Instance()->GetDefaultFont())
+	{
+		assert(Font != NULL);
+		doIgnoreCamera = true;
+	}
 	void Render();
 	CFont* GetFont() const;
+	string& GetText();
 	const string& GetText() const;
 	void SetFont(CFont *AFont);
 	void SetText(const string &AText);
+	int Height();	// @todo: вынести Height и Width в переменные и обновлять при изменении текста.
+	int Width();
+	CText& operator =(const string &AText);
+// 	CText& operator =(const CText &Atext)
+// 	{
+// 		if (this == &AText)
+// 			return *this;
+// 
+// 	}
+	string operator +(const CText &Text) const;
+	string operator +(const char *Text) const;
 };
 
 #endif // _2DE_GRAPHICS_HIGH_H_

@@ -1,12 +1,9 @@
 #include "2de_Engine.h"
-//#include "Game.h" 
 #include "Tanks.h"
-/*#include "TanksNetwork.h"*/
 #include "2de_Gui.h"
 
 CEngine* Ninja = CEngine::Instance();
 //////////////////////////////////////////////////////////////////////////
-CFont* Font;
 int ScreenWidth = 0;
 int ScreenHeight = 0;
 Vector2 fPosition = V2_ZERO;
@@ -19,55 +16,31 @@ CTankManager* Tanks;
 
 #define SCALE_TITLE 4.0f
 #define TITLE_TEXT "Tanks"
-//////////////////////////////////////////////////////////////////////////
-//NETWORKS VARS
-static const char *localBroadcastAddress = "IP:broadcast:28999";
-static const char *localHostAddress = "IP:localhost:28999";
-static bool pingLocalHost = false;
-
-
-
-/*
-class StdoutLogConsumer : public TNL::LogConsumer
-{
-public:
-	void logString(const char *string)
-	{
-		Log("NETWORK", "%s", string);
-	}
-} gStdoutLogConsumer;
-*/
 
 //////////////////////////////////////////////////////////////////////////
 ///!!!///Где-то в цикле обновления танчиков мы не освобождаем память и как результат - неебический memory leak
 //////////////////////////////////////////////////////////////////////////
 
-class CTitleScreen : public CRenderObject, public CUpdateObject
+class CTitleScreen : public CUpdateObject
 {
 public:
+	CText* TitleText;
 	CTitleScreen()
 	{
+		TitleText = new CText;
 		SetName("Title screen tanks");
+		TitleText->Position = fPosition;
+		TitleText->SetScaling(SCALE_TITLE);
+		TitleText->SetText(TITLE_TEXT);
+		FontEffect->ColorStart = FadeClr;
 	}
 	~CTitleScreen()
 	{		
-		
-	}
-	void Render()
-	{
-		glLoadIdentity();
-		Font->Pos = fPosition;
-		Font->scale = Vector2(SCALE_TITLE, SCALE_TITLE);
-
-		FadeClr.glSet();
-		FontEffect->ColorStart = FadeClr;
-		FontEffect->Render();
-		Font->tClr = FadeClr;
-		Font->Print(TITLE_TEXT);
-		return;
+		delete TitleText;
 	}
 	void Update(float dt)
-	{
+	{		
+		TitleText->Color = FadeClr;
 		if (begintimeout)
 		{
 			TimeOut += dt;
@@ -76,8 +49,8 @@ public:
 			{
 				//CRenderManager::Instance()->DelObject("Title screen tanks");
 				//CUpdateManager::Instance()->DelObject("Title screen tanks");
-				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
-				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
+				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->Visible = false;
+				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->Visible = false;
 				Tanks = new CTankManager;	
 			}
 		}
@@ -98,48 +71,15 @@ bool EndGame(CObject *Caller)
 
 bool Options(CObject *Caller)
 {
-	FadeClr = (Random_Int(0,1)==0)?COLOR_P1:COLOR_P2;
+	FadeClr = (Random_Int(0, 1) == 0) ? COLOR_P1 : COLOR_P2;
 	return true;
 }
 
 CTitleScreen *TitleScreen;
 
-/*
-bool CreateServer(CObject *Caller)
-{
-	// create a server, listening on port 28999.
-	clientGame = NULL;	
-	serverGame = new TestGame(true,TNL::Address(TNL::IPProtocol,TNL::Address::Any, 28999),TNL::Address(localBroadcastAddress));
-
-	CRenderManager::Instance()->DelObject("Title screen tanks");
-	CUpdateManager::Instance()->DelObject("Title screen tanks");
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
-
-
-	return true;
-}
-
-bool CreateClient(CObject *Caller)
-{
-	// create a client, by default pinging the LAN broadcast on port 28999
-	clientGame = new TestGame(false,TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),TNL::Address(pingLocalHost ? localHostAddress : localBroadcastAddress));
-	serverGame = NULL;
-
-	CRenderManager::Instance()->DelObject("Title screen tanks");
-	CUpdateManager::Instance()->eDlObject("Title screen tanks");
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = false;
-
-
-	return true;
-}
-*/
-
 bool Init()
 {	
-		Font = CFontManager::Instance()->GetFont("Font");
-		CFontManager::Instance()->SetCurrentFont("Font");
+		CFont* Font = CFontManager::Instance()->GetDefaultFont();
 	//////////////////////////////////////////////////////////////////////////
 		Ninja->GetState(CEngine::STATE_SCREEN_WIDTH, &ScreenWidth);
 		Ninja->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScreenHeight);
@@ -152,7 +92,7 @@ bool Init()
 		FontEffect->Init();
 		FontEffect->ColorStart = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
 		FontEffect->ColorOver = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
-		FontEffect->Visible = true;	
+		FontEffect->Visible = false;	
 		Vector2 *pnts2 = new Vector2 [2];
 		pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
 		pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
@@ -161,7 +101,7 @@ bool Init()
 		FontEffect->SizeStart = 10;
 		FontEffect->SizeVariability = 2.0f;
 		FontEffect->Position = Vector2(0, 0);
-		FontEffect->Texture = CTextureManager::Instance()->GetObject("Particle");
+		FontEffect->Texture = CTextureManager::Instance()->Get("Particle");
 		FontEffect->SetGeometry(pnts2, 2);
 	//////////////////////////////////////////////////////////////////////////
 	//CGUIManager::Instance()->SetPrimitiveRender(new CPrimitiveRender);
@@ -210,7 +150,7 @@ bool Init()
 //	next->SetCallback(&CreateClient, NULL);
 
 
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = true;
+	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->Get("Root menu item"))->Visible = true;
 //	CGUIManager::Instance()->SetFocus(MenuRoot);
 
 // 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.

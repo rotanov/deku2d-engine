@@ -117,13 +117,30 @@ public:
 		bool PressedInside;
 		bool PressedOutside;
 	};
-	string				Text;
 
 	CGUIObjectBase();
 	~CGUIObjectBase();
 
 	CFont* GetFont() const;
 	void SetFont(CFont *AFont);
+
+	const CText& GetText() const
+	{
+		return Text;
+	}
+
+	void SetText(const CText &AText)
+	{
+		Text = AText;
+		Text.Position = ((GetBox().vMin + GetBox().vMax) - Vector2(Text.Width(), Text.Height())) * 0.5f;
+	}
+
+	void SetBox(const CAABB &box)
+	{
+		CRenderObject::SetBox(box);
+		Text.SetLayer(10);
+		// maybe smthng else
+	}
 
 	CPrimitiveRender* GetPrimitiveRender() const;
 	void SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
@@ -139,6 +156,7 @@ public:
 
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
 protected:
+	CText Text;
 	CObjectCallback		CallProc;	//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
 	CObject			*Caller;
 
@@ -186,7 +204,7 @@ protected:
 
 // вот этот класс (CGUIManager) наследован одновременно и от синглтона, и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
 // получаем всякие гадости в логах при удалении, потому что его сначала удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
-class CGUIManager : public CTSingleton<CGUIManager>, public CUpdateObject
+class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingleton<CGUIManager>, public CUpdateObject
 {
 public:
 				~CGUIManager();
@@ -195,17 +213,15 @@ public:
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocus(CGUIObject *AObject);
 	CGUIRootObject* GetRoot() const;
-	void AddObject(CGUIObject *AObject);
-	CGUIObject* GetObject(const string &AObjectName) const;
-	void DeleteObject(int AId);
+	void		Add(CGUIObject *AObject);
+		
 private:
-	vector<CGUIObject*>::iterator Focus;
+	ManagerIterator Focus;
 	int			KeyHoldRepeatDelay;	
 	int			KeyHoldRepeatInterval;
 	int			TimerAccum;
 	bool		TabHolded;
 	bool		RepeatStarted;
-	vector<CGUIObject*> List;
 	CGUIRootObject *Root;
 protected:
 	CGUIManager();
@@ -216,6 +232,11 @@ class CLabel : public CGUIObject
 {
 public:
 	CLabel(const string &AText = "");
+	void SetBox(const CAABB &box)
+	{
+		CGUIObject::SetBox(box);
+		Text.Position = Vector2(box.vMin.x, box.vMin.y);
+	}
 	void Render();
 	void Update(float dt){}
 };
@@ -225,6 +246,12 @@ class CButton : public CGUIObject
 public:
 	CButton();
 	CButton(CAABB ARect, const char* AText, RGBAf AColor);
+	void SetBox(const CAABB &box)
+	{
+		CGUIObject::SetBox(box);
+		Text.Position.x = (int)((box.vMin + box.vMax) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).x;
+		Text.Position.y = (int)((box.vMin + box.vMax) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).y;
+	}
 	void Render();
 	void Update(float dt);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
@@ -250,11 +277,21 @@ public:
 	};
 
 	CEdit();
+	void SetBox(const CAABB &box)
+	{
+		float StringHeight = Text.Height();
+		CGUIObject::SetBox(box);
+		Font->Pos.x = (int)box.vMin.x + (int)Style->Metrics.EditMargins.x;
+		Font->Pos.y = (int)((box.vMin.y + box.vMax.y) / 2.0f - StringHeight / 2.0f);
+
+
+	}
 	void Render();
 	void Update(float dt);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
 
 private:
+	string ActualText;
 	int MouseToCursorPos(const Vector2& MousePosition) const;
 	string GetVisibleText() const;
 	bool isTextFits(const char *AText) const;
@@ -268,13 +305,18 @@ class CLabeledEdit : public CEdit
 private:
 	CLabel Label;
 public:
+	void SetBox(const CAABB &box)
+	{
+		CEdit::SetBox(box);		
+		CAABB tempBox = box;
+		tempBox.Offset(0.0f, box.Height() + 2.0f);
+		int TextHeight = Label.GetFont()->GetStringHeight(Label.GetText().GetText());
+		tempBox.vMax.y = tempBox.vMin.y + TextHeight;
+		Label.SetBox(tempBox);
+	}
 	CLabeledEdit(CAABB Aaabb, const string &ALabelText) : Label(ALabelText)
 	{
-		aabb = Aaabb;
-		Label.aabb = aabb;
-		Label.aabb.Offset(0.0f, aabb.Height() + 2.0f);
-		int TextHeight = Label.GetFont()->GetStringHeight(Label.Text.c_str());
-		Label.aabb.vMax.y = Label.aabb.vMin.y + TextHeight;
+		SetBox(Aaabb);
 	}
 };
 

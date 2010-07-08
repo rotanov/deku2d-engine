@@ -64,12 +64,12 @@ class CRenderObject : public virtual CObject
 {
 private:
 	float				Angle;		//	(Degrees)
-	float				Depth;		//	[-1; 1]?
+	CAABB				aabb;				//	Axis Aligned Bounding Box; ORLY? Isn't it obvious
+	float				Depth;		//	[-1; 1]?		
+	float				Scaling;	
 
 public:
 	Vector2				Position;		
-	float				Scaling;
-	CAABB				aabb;				//	Axis Aligned Bounding Box; ORLY? Isn't it obvious
 	RGBAf				Color;
 	bool				Visible;
 	bool				doIgnoreCamera;		// if true, then object will be drawn in global coords, no matter where camera pointing;
@@ -79,8 +79,26 @@ public:
 	virtual void Render() = 0;
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle() const;
+	const CAABB& GetBox() const
+	{
+		return aabb;
+	}
+	virtual void SetBox(const CAABB &box)
+	{
+		aabb = box;
+	}
+	float GetScaling() const
+	{
+		return Scaling;
+	}
+	void SetScaling(float AScaling)
+	{
+		Scaling = AScaling;
+		aabb.vMin *= Scaling;
+		aabb.vMax *= Scaling;
+	}
 	void SetLayer(size_t Layer);
-	float GetDepth();
+	float GetDepth() const;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -180,11 +198,11 @@ public:
 	void		PointBack();
 	void		SetAlign(const byte _Halign, const byte _Valign);
 
-	int			GetStringWidth(const char *text);
-	int			GetStringWidthEx(int t1, int t2, const char *text);
-	int			GetStringHeight(const char *text);
-	int			GetStringHeightEx(int t1, int t2, const char *text);
-	int			StringCoordToCursorPos(const char *text, int x, int y);
+	int			GetStringWidth(const string &text);
+	int			GetStringWidthEx(int t1, int t2, const string &text);
+	int			GetStringHeight(const string &text);
+	int			GetStringHeightEx(int t1, int t2, const string &text);
+	int			StringCoordToCursorPos(const string &text, int x, int y);
 	CTexture*	GetTexture();
 	void		SetTexture(const string &TextureName);
 	CAABB		GetSymbolsBBOX()
@@ -281,8 +299,7 @@ public:
 	bool SetCurrentFont(const char* fontname);
 	bool PrintEx(int x, int y, float depth, char* text, ...);
 	bool Print(int x, int y, float depth, const string &text);
-	CFont* GetFont(const char* fontname);
-	CFont* GetFontEx(string fontname);
+	CFont* GetFont(const string &fontname);	
 	bool AddFont(CFont *AObject);
 };
 
