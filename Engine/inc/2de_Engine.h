@@ -2,24 +2,14 @@
 #define _2DE_ENGINE_H_
 
 #include "2de_Core.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <malloc.h>
-#include <memory.h>
-#include <math.h>
-
-#ifdef _WIN32
-	#include <tchar.h>
-#endif // _WIN32
-
+#include "2de_GameUtils.h"
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
-#include "2de_GameUtils.h"
-#include "2de_Xml.h"
+#include "2de_Gui.h"
 #include "2de_Resource.h"
 #include "2de_Sound.h"
-#include "2de_Gui.h"
+#include "2de_Update.h"
+#include "2de_Xml.h"
 
 const float FIXED_DELTA_TIME		=	0.02f;
 const int ENGINE_VERSION			=	0x001;
@@ -68,7 +58,6 @@ public:
 	bool						Run();	// If we have Run() we should have Pause() and ShutDown() or smthng.
 	//bool						Pause();
 	//bool						ShutDown();
-	void						RegisterSingletone(CObject *AObject);
 
 	string						ConfigFileName;
 	string						ConfigFilePath;		//Temporary, until CConfig created. // Or no. We are not have CEngine::Config now.
@@ -86,11 +75,6 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-
-	list<CObject*>				Singletones;
-	
-	void						Genocide();
-
 
 	
 	bool						Init();

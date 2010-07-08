@@ -37,26 +37,32 @@
 
 #include <SDL/SDL.h>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
 #include <string>
 #include <sstream>
-#include <time.h>
-#include <assert.h>
 #include <vector>
 #include <list>
 #include <map>
 #include <algorithm>
 #include <typeinfo>
 
-using namespace std;
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <time.h>
+#include <malloc.h>
+#include <memory.h>
+#include <math.h>
 
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 	#define GetObject  GetObject
+
+	#include <tchar.h>
 #endif  //_WIN32
+
+using namespace std;
 
 #define USE_SDL_OPENGL
 #define USING_OPENGL
@@ -304,6 +310,23 @@ public:
 	}
 };
 
+class CSingletonManager
+{
+public:
+	static CSingletonManager* Instance();
+	static void Init();
+	void Add(CObject *AObject);
+	void Clear();
+	static void Finalize();
+
+private:
+	CSingletonManager()
+	{
+	}
+	static CSingletonManager *_instance;
+	list<CObject*> Singletones;
+};
+
 /**
  * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
  *
@@ -341,8 +364,6 @@ private:
 	bool Constructed;
 };
 
-void RegisterSingletoneInEngineMainClassMotherfuckers(CObject* Singletone);
-
 template <typename T>
 T* CTSingleton<T>::Instance()
 {
@@ -351,41 +372,13 @@ T* CTSingleton<T>::Instance()
 		_instance = new T;
 		_instance->Managed = true;
 
-		RegisterSingletoneInEngineMainClassMotherfuckers(_instance);
+		CSingletonManager::Instance()->Add(_instance);
 	}
 	return _instance;
 }
 
 template <typename T>
 T* CTSingleton<T>::_instance = 0;
-
-class CUpdateObject : public virtual CObject
-{
-public:
-	bool Active;
-	CUpdateObject();
-	~CUpdateObject();
-	bool isDead() const;
-	void SetDead();
-	virtual void Update(float dt) = 0;
-private:
-	bool Dead;
-};
-
-/**
-*	CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
-*	Да, тут мало кода, надо ещё какие-нибуть ф-ии нахерачить. @todo!
-*	И вообще что-то мне подсказывает, что он не здесь должен быть.
-*/
-
-class CUpdateManager : public CCommonManager <list<CUpdateObject*> >, public CTSingleton <CUpdateManager>
-{
-public:	
-	bool UpdateObjects();
-protected:
-	CUpdateManager();
-	friend class CTSingleton<CUpdateManager>;
-};
 
 class CBaseResource
 {

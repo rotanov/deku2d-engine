@@ -1,15 +1,12 @@
-#include <stdlib.h>
-#include <cstdio>
-#include <cstdarg>
+#include "2de_Core.h"
+
 #include <fstream>
-#include <string>
 #include <sys/stat.h>
+
 #ifndef _WIN32
 	#include <unistd.h>
 #endif //_WIN32
 
-#include "2de_Core.h"
-#include "2de_Engine.h"
 
 bool Enabled = true;
 unsigned int CObject::CObjectCount = 0;
@@ -537,102 +534,47 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 }
 
 
-#ifdef _WIN32
+//////////////////////////////////////////////////////////////////////////
+// CSingletonManager
 
-_CrtMemState *MemState1 = NULL, *MemState2 = NULL, *MemState3 = NULL;
+CSingletonManager *CSingletonManager::_instance = NULL;
 
-void MemChp1()
+CSingletonManager* CSingletonManager::Instance()
 {
-	if (!MemState1)
-		MemState1 = new _CrtMemState;
-	_CrtMemCheckpoint(MemState1);
+	return _instance;
 }
 
-void MemChp2()
+void CSingletonManager::Init()
 {
-	if (!MemState2)
-		MemState2 = new _CrtMemState;
-	_CrtMemCheckpoint(MemState2);
-
+	_instance = new CSingletonManager;
 }
 
-void MemCheck()
+void CSingletonManager::Add(CObject *AObject)
 {
-	if (!MemState1 || !MemState2)
+	AObject->IncRefCount(); // is not necessary i think. it it is?
+	Singletones.push_front(AObject);
+	//Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
+}
+
+void CSingletonManager::Clear()
+{
+	for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
 	{
-		Log("CAUTION", "Invalid MemCheck call: MemChp1() or MemChp2() has not been called");
-		return;
+		//Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
+		CObject *Object = *i;
+		*i = NULL;
+		CObject::DecRefCount(Object);
 	}
-	if (!MemState3)
-		MemState3 = new _CrtMemState;
-
-	HANDLE hLogFile;
-	hLogFile = CreateFile("Memlog.txt", GENERIC_WRITE, 
-		FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 
-		FILE_ATTRIBUTE_NORMAL, NULL);
-	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_WARN, hLogFile);
-
-	_RPT0(_CRT_WARN, "file message\n");
-
-	if ( _CrtMemDifference( MemState3, MemState1, MemState2 ) )
-		_CrtMemDumpStatistics( MemState3 );
-	CloseHandle(hLogFile);
 }
-#endif //_WIN32
 
-CUpdateObject::CUpdateObject() : Active(true), Dead(false)
+void CSingletonManager::Finalize()
 {
-	SetName("CUpdateObject");
-	CUpdateManager::Instance()->Add(this);
+	delete _instance;
+	_instance = NULL;
 }
 
-CUpdateObject::~CUpdateObject()
-{
-	CUpdateManager::Instance()->Remove(GetID());
-}
-
-void CUpdateObject::SetDead()
-{
-	Dead = true;
-	Active = false;
-}
-
-bool CUpdateObject::isDead() const
-{
-	return Dead;
-}
-CUpdateManager::CUpdateManager()
-{
-	SetName("CUpdateManager");
-}
-
-bool CUpdateManager::UpdateObjects()
-{
-	ManagerContainer toDelete;	
-	CEngine *engine = CEngine::Instance();
-	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
-	{
-		CUpdateObject *data = (*it);
-		if (!data->Active)
-			continue;
-		if (data->isDestroyed())
-		{
-			toDelete.push_back(data);
-			continue;
-		}
-		// FIXED_DELTA_TIME
-		float dt = 0;
-		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
-		data->Update(dt); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
-	}
-	for(ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
-	{
-		Objects.remove(*i);
-		CObject::DecRefCount(*i);
-	}
-	return true;
-}
+//////////////////////////////////////////////////////////////////////////
+// CBaseResource
 
 bool CBaseResource::LoadFromFile()
 {
@@ -651,15 +593,12 @@ bool CBaseResource::CheckLoad()
 
 CBaseResource::CBaseResource() : Loaded(false), Filename(""){}
 
+//////////////////////////////////////////////////////////////////////////
+// CResource
+
 CResource::CResource()
 {
 	SetName("CResource");
-}
-
-
-void RegisterSingletoneInEngineMainClassMotherfuckers(CObject* Singletone)
-{
-	CEngine::Instance()->RegisterSingletone(Singletone);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -802,4 +741,48 @@ void DelLastDirFromPath(char *src)
 		i--;
 	src[i+1] = 0;
 }
+
+#ifdef _WIN32
+
+_CrtMemState *MemState1 = NULL, *MemState2 = NULL, *MemState3 = NULL;
+
+void MemChp1()
+{
+	if (!MemState1)
+		MemState1 = new _CrtMemState;
+	_CrtMemCheckpoint(MemState1);
+}
+
+void MemChp2()
+{
+	if (!MemState2)
+		MemState2 = new _CrtMemState;
+	_CrtMemCheckpoint(MemState2);
+
+}
+
+void MemCheck()
+{
+	if (!MemState1 || !MemState2)
+	{
+		Log("CAUTION", "Invalid MemCheck call: MemChp1() or MemChp2() has not been called");
+		return;
+	}
+	if (!MemState3)
+		MemState3 = new _CrtMemState;
+
+	HANDLE hLogFile;
+	hLogFile = CreateFile("Memlog.txt", GENERIC_WRITE, 
+		FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 
+		FILE_ATTRIBUTE_NORMAL, NULL);
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_WARN, hLogFile);
+
+	_RPT0(_CRT_WARN, "file message\n");
+
+	if ( _CrtMemDifference( MemState3, MemState1, MemState2 ) )
+		_CrtMemDumpStatistics( MemState3 );
+	CloseHandle(hLogFile);
+}
+#endif //_WIN32
 

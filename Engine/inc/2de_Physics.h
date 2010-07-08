@@ -3,6 +3,7 @@
 
 #include "2de_Core.h"
 #include "2de_MathUtils.h"
+#include "2de_Update.h"
 
 class CPhysicalObject : public CUpdateObject
 {

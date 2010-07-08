@@ -210,6 +210,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\2de_Update.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\2de_Xml.cpp"
 				>
 			</File>
@@ -269,6 +273,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\2de_Sound.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Update.h"
 				>
 			</File>
 			<File
