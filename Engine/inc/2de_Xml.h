@@ -82,7 +82,7 @@ public:
 
 	// TODO: maybe something like CChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
 
-	const string GetAttribute(const string &AName) const;
+	const string& GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);
 

@@ -115,10 +115,11 @@ void CXMLNormalNode::CChildrenList::AddBefore(const Iterator &AIterator, CXMLNod
 
 CXMLNode* CXMLNormalNode::CChildrenList::Remove(const Iterator &AIterator)
 {
-	CXMLNode *result = *AIterator; // WTF?!!! AIterator is link <---------------
-	Backend.erase(AIterator.Backend); // may be so?
+	CXMLNode *result = *AIterator; // WTF?!!! AIterator is link // WTF?! you know nothing about operator*, don't you?
+	Backend.erase(AIterator.Backend); // may be so? // yes
 	// return iterator following right after deleted iterator
 	// is iterator check required or not?
+	// 	we don't need to do anything, we just wrap this shit around standard erase
 
 	return result;
 }
@@ -149,9 +150,7 @@ bool CXMLNormalNode::CChildrenList::GetSize() const
 //////////////////////////////////////////////////////////////////////////
 // CXMLNormalNode
 
-const string CXMLNormalNode::GetAttribute(const string &AName) const// here's damn shit with find function
-																	 // MSDN says that it returns const_iterator
-																	 // TODO: deal with it
+const string& CXMLNormalNode::GetAttribute(const string &AName) const
 {
 	map<string, string>::const_iterator iter = Attributes.find(AName);
 	if (iter == Attributes.end())
