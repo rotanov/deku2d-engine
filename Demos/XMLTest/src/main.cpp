@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
 	node->SetAttribute("attr2", "val2");
 	node->SetAttribute("attr3", "val3");
 	node->SetAttribute("attr4", "val4");
+	node->SetAttribute("a0", "val4");
 	node->Children.AddLast(new CXMLCommentNode("Some kind of comment1"));
 	node->Children.AddLast(new CXMLNormalNode("subelement2"));
 	node->Children.AddLast(new CXMLCommentNode("Some kind of comment2"));

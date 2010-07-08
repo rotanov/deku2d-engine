@@ -191,7 +191,7 @@ string CXMLNormalNode::GetText()
 	}
 
 	if (Children.IsEmpty())
-		res += "/";
+		res += " /";
 	else
 	{
 		res += ">\n";
@@ -254,7 +254,7 @@ void CXML::LoadFromFile(const string &AFilename)
 void CXML::SaveToFile(const string &AFilename)
 {
 	CFile f(AFilename, CFile::OPEN_MODE_WRITE);
-	f.WriteString(Root.GetText());
+	f.WriteLine(Root.GetText());
 	// damn shit with binary file
 	// in the end of the string it writes \0 - that's not the deal...
 	f.Close();
