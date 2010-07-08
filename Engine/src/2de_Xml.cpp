@@ -212,6 +212,11 @@ CXMLCommentNode::CXMLCommentNode()
 	SetName("!--");
 }
 
+CXMLCommentNode::CXMLCommentNode( const string &AValue )
+{
+	SetName("!--");
+	Value = AValue;
+}
 const string& CXMLCommentNode::GetValue() const
 {
 	return Value;
@@ -224,13 +229,13 @@ void CXMLCommentNode::SetValue(const string &AValue)
 
 string CXMLCommentNode::GetText()
 {
-	return "<" + GetName() + GetValue() + "-->";
+	return "<" + GetName() + GetValue() + "-->\n";
 }
 
 //////////////////////////////////////////////////////////////////////////
 // CXML
 
-CXML::CXML(const string &AFilename /*= " "*/)
+CXML::CXML(const string &AFilename /*= " "*/): Root("xml")
 {
 	if (!AFilename.empty())
 		LoadFromFile(AFilename);
@@ -239,4 +244,18 @@ CXML::CXML(const string &AFilename /*= " "*/)
 CXML::~CXML()
 {
 
+}
+
+void CXML::LoadFromFile(const string &AFilename)
+{
+
+}
+
+void CXML::SaveToFile(const string &AFilename)
+{
+	CFile f(AFilename, CFile::OPEN_MODE_WRITE);
+	f.WriteString(Root.GetText());
+	// damn shit with binary file
+	// in the end of the string it writes \0 - that's not the deal...
+	f.Close();
 }

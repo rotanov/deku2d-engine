@@ -100,6 +100,7 @@ class CXMLCommentNode : public CXMLNode
 {
 public:
 	CXMLCommentNode();
+	CXMLCommentNode(const string &AValue);
 
 	const string& GetValue() const;
 	void SetValue(const string &AValue);
@@ -121,7 +122,7 @@ public:
 	void LoadFromFile(const string &AFilename);
 	void SaveToFile(const string &AFilename);
 
-	CXMLNormalNode::CChildrenList Root;
+	CXMLNormalNode Root;
 
 private:
 
