@@ -1,8 +1,10 @@
 #ifndef _2DE_GRAPHICS_HIGH_H_
 #define _2DE_GRAPHICS_HIGH_H_
 
+#include "2de_Core.h"
 #include "2de_GraphicsLow.h"
 #include "2de_MathUtils.h"
+#include "2de_Update.h"
 
 //	Глобальные отладочные флаги
 // #define _DEBUG_DISABLE_PARTICLES_DRAW

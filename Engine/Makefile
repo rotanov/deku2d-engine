@@ -12,6 +12,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Resource.cpp \
 			src/2de_ShroomTitle.cpp \
 			src/2de_Sound.cpp \
+			src/2de_Update.cpp \
 			src/2de_Xml.cpp
 
 OBJECTS		=	obj/2de_Core.o \
@@ -28,6 +29,7 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_Resource.o \
 			obj/2de_ShroomTitle.o \
 			obj/2de_Sound.o \
+			obj/2de_Update.o \
 			obj/2de_Xml.o
 
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
