@@ -36,11 +36,11 @@ CXMLNormalNode::CChildrenList::Iterator::Iterator()
 {
 }*/
 
-CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator=(const CXMLNormalNode::CChildrenList::Iterator &AIterator)
+/*CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator=(const CXMLNormalNode::CChildrenList::Iterator &AIterator)
 {
 	Backend = AIterator.Backend;
 	return *this;
-}
+}*/
 
 bool CXMLNormalNode::CChildrenList::Iterator::operator==(const CXMLNormalNode::CChildrenList::Iterator &AIterator) const
 {
@@ -113,7 +113,7 @@ void CXMLNormalNode::CChildrenList::AddBefore(const Iterator &AIterator, CXMLNod
 	Backend.insert(AIterator.Backend, ANode);
 }
 
-CXMLNode* CXMLNormalNode::CChildrenList::Remove(const Iterator &AIterator)
+CXMLNode* CXMLNormalNode::CChildrenList::Remove(Iterator &AIterator)
 {
 	CXMLNode *result = *AIterator; // WTF?!!! AIterator is link // WTF?! you know nothing about operator*, don't you?
 	Backend.erase(AIterator.Backend); // may be so? // yes
@@ -150,7 +150,12 @@ bool CXMLNormalNode::CChildrenList::GetSize() const
 //////////////////////////////////////////////////////////////////////////
 // CXMLNormalNode
 
-const string& CXMLNormalNode::GetAttribute(const string &AName) const
+CXMLNormalNode::CXMLNormalNode(const string &AName)
+{
+	SetName(AName);
+}
+
+string CXMLNormalNode::GetAttribute(const string &AName) const
 {
 	map<string, string>::const_iterator iter = Attributes.find(AName);
 	if (iter == Attributes.end())
@@ -189,4 +194,18 @@ const string& CXMLCommentNode::GetValue() const
 void CXMLCommentNode::SetValue(const string &AValue)
 {
 	Value = AValue;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXML
+
+CXML::CXML(const string &AFilename /*= " "*/)
+{
+	if (!AFilename.empty())
+		LoadFromFile(AFilename);
+}
+
+CXML::~CXML()
+{
+
 }

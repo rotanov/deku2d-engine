@@ -7,8 +7,8 @@ class CXMLNode
 {
 public:
 	CXMLNode();
-	~CXMLNode();
-	virtual bool HaveChildren(); // 0 by default
+	virtual ~CXMLNode();
+	//virtual bool HaveChildren(); // 0 by default
 
 	const string& GetName() const;
 	void SetName(const string &AName);
@@ -63,7 +63,7 @@ public:
 		void AddLast(CXMLNode *ANode);
 		void AddAfter(const Iterator &AIterator, CXMLNode *ANode);
 		void AddBefore(const Iterator &AIterator, CXMLNode *ANode);
-		CXMLNode* Remove(const Iterator &AIterator);
+		CXMLNode* Remove(Iterator &AIterator);
 
 		Iterator Begin();
 		Iterator End();
@@ -78,11 +78,13 @@ public:
 
 	typedef CChildrenList::Iterator ChildrenIterator;	// maybe not required..
 
-	bool HaveChildren(); // return 1
+	CXMLNormalNode(const string &AName);
+
+	//bool HaveChildren(); // return 1
 
 	// TODO: maybe something like CChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
 
-	const string& GetAttribute(const string &AName) const;
+	string GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);
 
@@ -108,9 +110,9 @@ private:
 class CXML
 {
 public:
-	CXML();
+	CXML(const string &AFilename = "");
 	CXML(const CXML &ASource); // don't know, if it's really required...
-	~CXML();
+	~CXML(); // should delete (yeah, i mean free memory) all nodes recursively..
 	CXML& operator=(const CXML &ASource);
 
 	void LoadFromFile(const string &AFilename);
