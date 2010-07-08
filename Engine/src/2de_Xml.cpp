@@ -178,6 +178,32 @@ void CXMLNormalNode::DeleteAttribute(const string &AName)
 		Log("WARNING", "Attribute '%s' not found in XML node", AName.c_str());
 }
 
+string CXMLNormalNode::GetText()
+{
+	string res = "<" + GetName();
+
+	if (!Attributes.empty())
+	{
+		for (map<string, string>::iterator it = Attributes.begin(); it != Attributes.end(); ++it)
+		{
+			res += " " + it->first + "=\"" + it->second + "\"";
+		}
+	}
+
+	if (Children.IsEmpty())
+		res += "/";
+	else
+	{
+		res += ">\n";
+		for (ChildrenIterator it = Children.Begin(); it != Children.End(); ++it)
+			res += (*it)->GetText();
+		res += "</" + GetName();
+	}
+
+	res += ">\n";
+
+	return res;
+}
 //////////////////////////////////////////////////////////////////////////
 // CXMLCommentNode
 
@@ -194,6 +220,11 @@ const string& CXMLCommentNode::GetValue() const
 void CXMLCommentNode::SetValue(const string &AValue)
 {
 	Value = AValue;
+}
+
+string CXMLCommentNode::GetText()
+{
+	return "<" + GetName() + GetValue() + "-->";
 }
 
 //////////////////////////////////////////////////////////////////////////

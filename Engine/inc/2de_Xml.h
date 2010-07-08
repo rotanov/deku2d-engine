@@ -12,6 +12,7 @@ public:
 
 	const string& GetName() const;
 	void SetName(const string &AName);
+	virtual string GetText() = 0;
 
 protected:
 	CXMLNode *Parent;
@@ -88,6 +89,7 @@ public:
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);
 
+	string GetText();
 	CChildrenList Children;
 
 private:
@@ -101,6 +103,7 @@ public:
 
 	const string& GetValue() const;
 	void SetValue(const string &AValue);
+	string GetText();
 private:
 	string Value;
 
