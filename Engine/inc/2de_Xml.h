@@ -73,6 +73,7 @@ public:
 		};
 
 		CChildrenList(CXMLNode *ANode);
+		~CChildrenList();
 
 		void AddFirst(CXMLNode *ANode);
 		void AddLast(CXMLNode *ANode);

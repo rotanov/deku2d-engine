@@ -125,6 +125,16 @@ CXMLNormalNode::CChildrenList::CChildrenList(CXMLNode *ANode) : Node(ANode)
 {
 }
 
+CXMLNormalNode::CChildrenList::~CChildrenList()
+{
+	while (!IsEmpty())
+	{
+		CXMLNode *node = *Backend.begin();
+		delete node;
+		Backend.pop_front();
+	}
+}
+
 void CXMLNormalNode::CChildrenList::AddFirst(CXMLNode *ANode)
 {
 	ANode->SetParent(Node);
@@ -297,7 +307,7 @@ CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
 
 CXML::~CXML()
 {
-
+	
 }
 
 void CXML::LoadFromFile(const string &AFilename)
