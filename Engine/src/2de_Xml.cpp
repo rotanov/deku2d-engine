@@ -36,42 +36,42 @@ CXMLNormalNode::CChildrenList::Iterator::Iterator()
 {
 }*/
 
-Iterator& CXMLNormalNode::CChildrenList::Iterator::operator=(const Iterator &AIterator)
+CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator=(const CXMLNormalNode::CChildrenList::Iterator &AIterator)
 {
 	Backend = AIterator.Backend;
 	return *this;
 }
 
-bool CXMLNormalNode::CChildrenList::Iterator::operator==(const Iterator &AIterator) const
+bool CXMLNormalNode::CChildrenList::Iterator::operator==(const CXMLNormalNode::CChildrenList::Iterator &AIterator) const
 {
 	return (Backend == AIterator.Backend);
 }
 
-bool CXMLNormalNode::CChildrenList::Iterator::operator!=(const Iterator &AIterator) const
+bool CXMLNormalNode::CChildrenList::Iterator::operator!=(const CXMLNormalNode::CChildrenList::Iterator &AIterator) const
 {
 	return (Backend != AIterator.Backend);
 }
 
-Iterator& CXMLNormalNode::CChildrenList::Iterator::operator++()
+CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator++()
 {
 	++Backend;
 	return *this;
 }
 
-Iterator CXMLNormalNode::CChildrenList::Iterator::operator++(int)
+CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::Iterator::operator++(int)
 {
 	Iterator result = *this;
 	++Backend;
 	return result;
 }
 
-Iterator& CXMLNormalNode::CChildrenList::Iterator::operator--()
+CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator--()
 {
 	--Backend;
 	return *this;
 }
 
-Iterator CXMLNormalNode::CChildrenList::Iterator::operator--(int)
+CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::Iterator::operator--(int)
 {
 	Iterator result = *this;
 	--Backend;
@@ -115,22 +115,24 @@ void CXMLNormalNode::CChildrenList::AddBefore(const Iterator &AIterator, CXMLNod
 
 CXMLNode* CXMLNormalNode::CChildrenList::Remove(const Iterator &AIterator)
 {
-	CXMLNode *result = *AIterator;
-	Backend.erase(AIterator);
+	CXMLNode *result = *AIterator; // WTF?!!! AIterator is link <---------------
+	Backend.erase(AIterator.Backend); // may be so?
+	// return iterator following right after deleted iterator
+	// is iterator check required or not?
 
 	return result;
 }
 
-Iterator CXMLNormalNode::CChildrenList::Begin()
+CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::Begin()
 {
 	Iterator result;
 	result.Backend = Backend.begin();
 	return result;
 }
-Iterator CXMLNormalNode::CChildrenList::End()
+CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::End()
 {
 	Iterator result;
-	result.Backend = Backend.end():
+	result.Backend = Backend.end();
 	return result;
 }
 
@@ -147,9 +149,11 @@ bool CXMLNormalNode::CChildrenList::GetSize() const
 //////////////////////////////////////////////////////////////////////////
 // CXMLNormalNode
 
-const string& CXMLNormalNode::GetAttribute(const string &AName) const
+const string CXMLNormalNode::GetAttribute(const string &AName) const// here's damn shit with find function
+																	 // MSDN says that it returns const_iterator
+																	 // TODO: deal with it
 {
-	map<string, string>::iterator iter = Attributes.find(AName);
+	map<string, string>::const_iterator iter = Attributes.find(AName);
 	if (iter == Attributes.end())
 	{
 		Log("WARNING", "Attribute '%s' not found in XML node", AName.c_str());
@@ -164,7 +168,7 @@ void CXMLNormalNode::SetAttribute(const string &AName, const string &AValue)
 	Attributes[AName] = AValue;
 }
 
-void DeleteAttribute(const string &AName)
+void CXMLNormalNode::DeleteAttribute(const string &AName)
 {
 	if (!Attributes.erase(AName))
 		Log("WARNING", "Attribute '%s' not found in XML node", AName.c_str());
@@ -175,7 +179,7 @@ void DeleteAttribute(const string &AName)
 
 CXMLCommentNode::CXMLCommentNode()
 {
-	Name = "!--"
+	SetName("!--");
 }
 
 const string& CXMLCommentNode::GetValue() const

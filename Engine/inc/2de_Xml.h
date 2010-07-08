@@ -35,7 +35,8 @@ public:
 			/*Iterator(CXMLNode &AXMLNode);
 			Iterator(const iterator &AIterator);*/
 
-			//Iterator& operator=(const Iterator &AIterator); // standard (assigning corresponding members) is sufficent
+			//Iterator& operator=(const Iterator &AIterator); // standard (assigning corresponding members) is sufficient
+			// deal with operator= and delete or uncomment it
 
 			bool operator==(const Iterator &AIterator) const;
 			bool operator!=(const Iterator &AIterator) const;
@@ -81,7 +82,7 @@ public:
 
 	// TODO: maybe something like CChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
 
-	const string& GetAttribute(const string &AName) const;
+	const string GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);
 
