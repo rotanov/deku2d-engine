@@ -95,6 +95,7 @@ public:
 	typedef CChildrenList::Iterator ChildrenIterator;	// maybe not required..
 
 	CXMLNormalNode(const string &AName);
+	~CXMLNormalNode();
 
 	//bool HaveChildren(); // return 1
 
@@ -148,7 +149,7 @@ class CXML
 public:
 	CXML(const string &AFilename = "");
 	CXML(const CXML &ASource); // don't know, if it's really required...
-	~CXML(); // should delete (yeah, i mean free memory) all nodes recursively..
+	~CXML();
 	CXML& operator=(const CXML &ASource);
 
 	void LoadFromFile(const string &AFilename);

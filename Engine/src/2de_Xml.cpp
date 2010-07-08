@@ -127,12 +127,6 @@ CXMLNormalNode::CChildrenList::CChildrenList(CXMLNode *ANode) : Node(ANode)
 
 CXMLNormalNode::CChildrenList::~CChildrenList()
 {
-	while (!IsEmpty())
-	{
-		CXMLNode *node = *Backend.begin();
-		delete node;
-		Backend.pop_front();
-	}
 }
 
 void CXMLNormalNode::CChildrenList::AddFirst(CXMLNode *ANode)
@@ -202,6 +196,17 @@ bool CXMLNormalNode::CChildrenList::GetSize() const
 CXMLNormalNode::CXMLNormalNode(const string &AName) : Children(this)
 {
 	SetName(AName);
+}
+
+CXMLNormalNode::~CXMLNormalNode()
+{
+	ChildrenIterator del;
+	while (!Children.IsEmpty())
+	{
+		del = Children.Begin();
+		delete *del;
+		Children.Remove(del);
+	}
 }
 
 string CXMLNormalNode::GetAttribute(const string &AName) const
@@ -307,7 +312,13 @@ CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
 
 CXML::~CXML()
 {
-	
+	CXMLNormalNode::ChildrenIterator del;
+	while (!Root.IsEmpty())
+	{
+		del = Root.Begin();
+		delete *del;
+		Root.Remove(del);
+	}
 }
 
 void CXML::LoadFromFile(const string &AFilename)
