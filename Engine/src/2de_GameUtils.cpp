@@ -1,5 +1,4 @@
 #include "2de_GameUtils.h"
-#include "2de_Engine.h"
 
 //-------------------------------------------//
 //			CTileSet functions				 //
@@ -288,7 +287,7 @@ CMapCellInfo* CLevelMap::GetMapCell(size_t HorizontalIndex, size_t VerticalIndex
 void CCompas::Render()
 {
 		Vector2 v1, n;
-		CEngine *Ninja = CEngine::Instance();
+		//CEngine *Ninja = CEngine::Instance();
 		v1 = CRenderManager::Instance()->Camera.Point;
 		n = (-v1).Normalized();
 		float depth = v1.Length()/40.0f;
@@ -311,7 +310,7 @@ void CCompas::Render()
 CCompas::CCompas()
 {
 	SetName("CCompas");
-	CEngine *Ninja = CEngine::Instance();
+	//CEngine *Ninja = CEngine::Instance();
 }
 
 CCompas::~CCompas()

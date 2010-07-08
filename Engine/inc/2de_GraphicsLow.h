@@ -1,8 +1,6 @@
 #ifndef _2DE_GRAPHICS_LOW_H_
 #define _2DE_GRAPHICS_LOW_H_
 
-#include <stdarg.h>
-#include <SDL/SDL.h>
 #include "2de_Core.h"
 
 #ifdef USE_SDL_OPENGL

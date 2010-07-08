@@ -1,5 +1,5 @@
 #include "2de_LuaUtils.h"
-#include "2de_Engine.h"
+
 #include "2de_GraphicsLow.h"
 
 GlobalLuaState* globalLuaState = 0; // todo remove
@@ -165,7 +165,6 @@ Vector2 pnts2[2];
 
 void GlobalLuaState::innerFunction1()
 {
-	CEngine* Ninja = CEngine::Instance();
 	CFactory *Factory = CFactory::Instance();
 
 	CParticleSystem *ps;

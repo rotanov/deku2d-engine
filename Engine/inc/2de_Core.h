@@ -36,22 +36,23 @@
 #endif // _MSC_VER
 
 #include <SDL/SDL.h>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <list>
 #include <algorithm>
+#include <iostream>
+#include <list>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <typeinfo>
+#include <vector>
 
 #include <assert.h>
+#include <malloc.h>
+#include <math.h>
+#include <memory.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <time.h>
-#include <malloc.h>
-#include <memory.h>
-#include <math.h>
 
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN

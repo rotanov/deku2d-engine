@@ -1,9 +1,6 @@
 #ifndef _2DE_RESOURCE_H_
 #define _2DE_RESOURCE_H_
 
-#include <list>
-#include <stdexcept>
-
 #include "2de_Core.h"
 #include "2de_Xml.h"
 

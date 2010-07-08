@@ -2,15 +2,6 @@
 
 #include <IL/il.h>
 
-#include "2de_Core.h"
-#include "2de_Sound.h"
-#include "2de_GraphicsLow.h"
-
-#ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-#endif // _WIN32
-
 //////////////////////////////////////////////////////////////////////////
 // CEngine
 
