@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 // CXMLNode
 
-CXMLNode::CXMLNode()
+CXMLNode::CXMLNode() : Parent(NULL)
 {
 
 }
@@ -22,6 +22,35 @@ const string& CXMLNode::GetName() const
 void CXMLNode::SetName(const string &AName)
 {
 	Name = AName;
+}
+
+void CXMLNode::SetParent(CXMLNode *AParent)
+{
+	Parent = AParent;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLPrologNode
+
+CXMLPrologNode::CXMLPrologNode()
+{
+	SetName("xml");
+	Version = "1.0";
+}
+
+const string& CXMLPrologNode::GetVersion() const
+{
+	return Version;
+}
+
+void CXMLPrologNode::SetVersion(const string &AVersion)
+{
+	Version = AVersion;
+}
+
+string CXMLPrologNode::GetText()
+{
+	return "<?" + GetName() + " version=\"" + Version + "\"?>";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,35 +121,45 @@ void InsertAfter(CXMLNode &ANode);*/
 //////////////////////////////////////////////////////////////////////////
 // CXMLNormalNode::CChildrenList
 
+CXMLNormalNode::CChildrenList::CChildrenList(CXMLNode *ANode) : Node(ANode)
+{
+}
+
 void CXMLNormalNode::CChildrenList::AddFirst(CXMLNode *ANode)
 {
+	ANode->SetParent(Node);
 	Backend.push_front(ANode);
 }
 
 void CXMLNormalNode::CChildrenList::AddLast(CXMLNode *ANode)
 {
+	ANode->SetParent(Node);
 	Backend.push_back(ANode);
 }
 
 void CXMLNormalNode::CChildrenList::AddAfter(const Iterator &AIterator, CXMLNode *ANode)
 {
+	ANode->SetParent(Node);
 	list<CXMLNode *>::iterator iter = AIterator.Backend;
 	Backend.insert(++iter, ANode);
 }
 
 void CXMLNormalNode::CChildrenList::AddBefore(const Iterator &AIterator, CXMLNode *ANode)
 {
+	ANode->SetParent(Node);
 	Backend.insert(AIterator.Backend, ANode);
 }
 
 CXMLNode* CXMLNormalNode::CChildrenList::Remove(Iterator &AIterator)
 {
-	CXMLNode *result = *AIterator; // WTF?!!! AIterator is link // WTF?! you know nothing about operator*, don't you?
-	Backend.erase(AIterator.Backend); // may be so? // yes
+	CXMLNode *result = *AIterator;
+	Backend.erase(AIterator.Backend);
+
 	// return iterator following right after deleted iterator
 	// is iterator check required or not?
 	// 	we don't need to do anything, we just wrap this shit around standard erase
 
+	result->SetParent(NULL);
 	return result;
 }
 
@@ -150,7 +189,7 @@ bool CXMLNormalNode::CChildrenList::GetSize() const
 //////////////////////////////////////////////////////////////////////////
 // CXMLNormalNode
 
-CXMLNormalNode::CXMLNormalNode(const string &AName)
+CXMLNormalNode::CXMLNormalNode(const string &AName) : Children(this)
 {
 	SetName(AName);
 }
@@ -204,27 +243,30 @@ string CXMLNormalNode::GetText()
 
 	return res;
 }
+
 //////////////////////////////////////////////////////////////////////////
-// CXMLCommentNode
+// CXMLSingleValueNode
 
-CXMLCommentNode::CXMLCommentNode()
+CXMLSingleValueNode::CXMLSingleValueNode(const string &AValue /*= ""*/)
 {
-	SetName("!--");
-}
-
-CXMLCommentNode::CXMLCommentNode( const string &AValue )
-{
-	SetName("!--");
 	Value = AValue;
 }
-const string& CXMLCommentNode::GetValue() const
+const string& CXMLSingleValueNode::GetValue() const
 {
 	return Value;
 }
 
-void CXMLCommentNode::SetValue(const string &AValue)
+void CXMLSingleValueNode::SetValue(const string &AValue)
 {
 	Value = AValue;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLCommentNode
+
+CXMLCommentNode::CXMLCommentNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(AValue)
+{
+	SetName("!--");
 }
 
 string CXMLCommentNode::GetText()
@@ -233,9 +275,21 @@ string CXMLCommentNode::GetText()
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CXMLTextNode
+
+CXMLTextNode::CXMLTextNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(AValue)
+{
+}
+
+string CXMLTextNode::GetText()
+{
+	return GetValue();
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CXML
 
-CXML::CXML(const string &AFilename /*= " "*/): Root("xml")
+CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
 {
 	if (!AFilename.empty())
 		LoadFromFile(AFilename);
@@ -254,7 +308,10 @@ void CXML::LoadFromFile(const string &AFilename)
 void CXML::SaveToFile(const string &AFilename)
 {
 	CFile f(AFilename, CFile::OPEN_MODE_WRITE);
-	f.WriteLine(Root.GetText());
+	for (CXMLNormalNode::ChildrenIterator it = Root.Begin(); it != Root.End(); ++it)
+	{
+		f.WriteLine((*it)->GetText());
+	}
 	// damn shit with binary file
 	// in the end of the string it writes \0 - that's not the deal...
 	f.Close();

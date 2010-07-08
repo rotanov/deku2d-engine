@@ -14,14 +14,26 @@ public:
 	void SetName(const string &AName);
 	virtual string GetText() = 0;
 
+	void SetParent(CXMLNode *AParent); // i don't like, that it's in public, but it doesn't work otherwise..
+
 protected:
 	CXMLNode *Parent;
 private:
 	string Name;
-
 };
 
-// TODO: class for "prolog", "specification" or whatever node..
+class CXMLPrologNode : public CXMLNode
+{
+public:
+	CXMLPrologNode();
+
+	const string& GetVersion() const;
+	void SetVersion(const string &AVersion);
+
+	string GetText();
+private:
+	string Version;
+};
 
 class CXMLNormalNode : public CXMLNode
 {
@@ -60,6 +72,8 @@ public:
 			friend class CXMLNormalNode::CChildrenList;
 		};
 
+		CChildrenList(CXMLNode *ANode);
+
 		void AddFirst(CXMLNode *ANode);
 		void AddLast(CXMLNode *ANode);
 		void AddAfter(const Iterator &AIterator, CXMLNode *ANode);
@@ -74,7 +88,7 @@ public:
 
 	private:
 		list<CXMLNode *> Backend;
-
+		CXMLNode *Node;
 	};
 
 	typedef CChildrenList::Iterator ChildrenIterator;	// maybe not required..
@@ -90,24 +104,41 @@ public:
 	void DeleteAttribute(const string &AName);
 
 	string GetText();
+	
 	CChildrenList Children;
 
 private:
 	map<string, string> Attributes;
 };
 
-class CXMLCommentNode : public CXMLNode
+class CXMLSingleValueNode : public CXMLNode
 {
 public:
-	CXMLCommentNode();
-	CXMLCommentNode(const string &AValue);
+	CXMLSingleValueNode(const string &AValue = "");
 
 	const string& GetValue() const;
 	void SetValue(const string &AValue);
-	string GetText();
+
+	virtual string GetText() = 0;
 private:
 	string Value;
+};
 
+class CXMLCommentNode : public CXMLSingleValueNode
+{
+public:
+	CXMLCommentNode(const string &AValue = "");
+
+	string GetText();
+
+};
+
+class CXMLTextNode : public CXMLSingleValueNode
+{
+public:
+	CXMLTextNode(const string &AValue = "");
+
+	string GetText();
 };
 
 
@@ -122,7 +153,7 @@ public:
 	void LoadFromFile(const string &AFilename);
 	void SaveToFile(const string &AFilename);
 
-	CXMLNormalNode Root;
+	CXMLNormalNode::CChildrenList Root;
 
 private:
 

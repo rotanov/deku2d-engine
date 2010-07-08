@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Deku2d engine"
 PROJECT_NUMBER         = 
-OUTPUT_DIRECTORY       = /home/alex/dev/svn/deku2d-engine/Engine/doc/
+OUTPUT_DIRECTORY       = doc/
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -24,8 +24,8 @@ ABBREVIATE_BRIEF       = "The $name class" \
                          the
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
-FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = /home/alex/dev/svn/deku2d-engine/
+FULL_PATH_NAMES        = NO
+STRIP_FROM_PATH        = 
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
@@ -93,7 +93,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/alex/dev/svn/deku2d-engine/Engine/
+INPUT                  = ./
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
@@ -145,13 +145,9 @@ FILE_PATTERNS          = *.c \
                          *.VHD \
                          *.VHDL
 RECURSIVE              = YES
-EXCLUDE                = /home/alex/dev/svn/deku2d-engine/Engine/doc/ \
-                         /home/alex/dev/svn/deku2d-engine/Engine/inc/tnl/ \
-                         /home/alex/dev/svn/deku2d-engine/Engine/inc/gl/ \
-                         /home/alex/dev/svn/deku2d-engine/Engine/inc/dirent/ \
-                         /home/alex/dev/svn/deku2d-engine/Engine/inc/libtomcrypt/ \
-                         /home/alex/dev/svn/deku2d-engine/Engine/obj/ \
-                         /home/alex/dev/svn/deku2d-engine/Engine/lib/
+EXCLUDE                = ./doc/ \
+                         ./obj/ \
+                         ./lib/
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 

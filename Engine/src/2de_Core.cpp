@@ -291,12 +291,12 @@ bool CFile::WriteString(const char *Buffer)
 	if (File == NULL)
 		return false;
 
-	byte b = 0;
+	//byte b = 0;
 	for (unsigned int i = 0; i < strlen(Buffer); i++)
 	{
 		Write(&Buffer[i], 1);
 	}
-	Write(&b, 1);
+	//Write(&b, 1);
 
 	return true;
 }
@@ -306,13 +306,13 @@ bool CFile::WriteString(const string &Buffer)
 	if (File == NULL)
 		return false;
 
-	byte b = 0;
+	//byte b = 0;
 	for (unsigned int i = 0; i < Buffer.length(); i++)
 	{
 		// посимвольная запись?!.. о, щи....
 		Write(&Buffer[i], 1);
 	}
-	Write(&b, 1);
+	//Write(&b, 1);
 
 	return true;
 }
