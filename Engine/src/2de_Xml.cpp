@@ -298,7 +298,9 @@ CXMLTextNode::CXMLTextNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(
 
 string CXMLTextNode::GetText()
 {
-	return GetValue();
+	return GetValue() + "\n"; 
+	// according to current agreement all whitespace following after text
+	// ignored
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -323,7 +325,9 @@ CXML::~CXML()
 
 void CXML::LoadFromFile(const string &AFilename)
 {
+	CFile f(AFilename, CFile::OPEN_MODE_READ);
 
+	f.Close();
 }
 
 void CXML::SaveToFile(const string &AFilename)
@@ -333,7 +337,5 @@ void CXML::SaveToFile(const string &AFilename)
 	{
 		f.WriteLine((*it)->GetText());
 	}
-	// damn shit with binary file
-	// in the end of the string it writes \0 - that's not the deal...
 	f.Close();
 }
