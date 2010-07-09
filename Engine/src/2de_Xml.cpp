@@ -200,6 +200,7 @@ CXMLNormalNode::CXMLNormalNode(const string &AName) : Children(this)
 
 CXMLNormalNode::~CXMLNormalNode()
 {
+	// move it to some function.. destructor is not the only place, where we need to destroy all child nodes
 	ChildrenIterator del;
 	while (!Children.IsEmpty())
 	{
@@ -314,6 +315,7 @@ CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
 
 CXML::~CXML()
 {
+	// move it to some function.. destructor is not the only place, where we need to destroy all child nodes
 	CXMLNormalNode::ChildrenIterator del;
 	while (!Root.IsEmpty())
 	{
@@ -327,6 +329,10 @@ void CXML::LoadFromFile(const string &AFilename)
 {
 	CFile f(AFilename, CFile::OPEN_MODE_READ);
 
+	// string AllContent = // Get all file content in string somehow..
+	// destroy previous content
+	// Children = CParser().Parse(AllContent);
+
 	f.Close();
 }
 
@@ -338,4 +344,29 @@ void CXML::SaveToFile(const string &AFilename)
 		f.WriteLine((*it)->GetText());
 	}
 	f.Close();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLParser
+
+CXMLNormalNode::CChildrenList CXMLParser::Parse(const string &AText)
+{
+	CXMLNormalNode::CChildrenList result(NULL);
+
+	for (int pos = 0; pos < AText.length(); pos++)
+	{
+		switch (AText[pos])
+		{
+		case '<':
+			// element
+			break;
+		case '&':
+			// entity
+			break;
+		}
+	}
+
+
+
+	return result;
 }

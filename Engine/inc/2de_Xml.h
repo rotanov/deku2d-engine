@@ -143,7 +143,6 @@ public:
 	string GetText();
 };
 
-
 class CXML
 {
 public:
@@ -159,6 +158,12 @@ public:
 
 private:
 
+};
+
+class CXMLParser
+{
+public:
+	CXMLNormalNode::CChildrenList Parse(const string &AText);
 };
 
 
