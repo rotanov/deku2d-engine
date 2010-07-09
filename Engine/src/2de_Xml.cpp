@@ -10,8 +10,6 @@ CXMLNode::CXMLNode() : Parent(NULL)
 
 CXMLNode::~CXMLNode()
 {
-	//mb kill all children
-	// 	sure.. kill 'em all.. .. or not... i don't know, need to think about memory management and ownership...
 }
 
 const string& CXMLNode::GetName() const
@@ -54,9 +52,9 @@ string CXMLPrologNode::GetText()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CXMLNormalNode::CChildrenList::Iterator
+// CChildrenList::Iterator
 
-CXMLNormalNode::CChildrenList::Iterator::Iterator()
+CXMLChildrenList::Iterator::Iterator()
 {
 
 }
@@ -71,90 +69,84 @@ CXMLNormalNode::CChildrenList::Iterator::Iterator()
 	return *this;
 }*/
 
-bool CXMLNormalNode::CChildrenList::Iterator::operator==(const CXMLNormalNode::CChildrenList::Iterator &AIterator) const
+bool CXMLChildrenList::Iterator::operator==(const CXMLChildrenList::Iterator &AIterator) const
 {
 	return (Backend == AIterator.Backend);
 }
 
-bool CXMLNormalNode::CChildrenList::Iterator::operator!=(const CXMLNormalNode::CChildrenList::Iterator &AIterator) const
+bool CXMLChildrenList::Iterator::operator!=(const CXMLChildrenList::Iterator &AIterator) const
 {
 	return (Backend != AIterator.Backend);
 }
 
-CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator++()
+CXMLChildrenList::Iterator& CXMLChildrenList::Iterator::operator++()
 {
 	++Backend;
 	return *this;
 }
 
-CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::Iterator::operator++(int)
+CXMLChildrenList::Iterator CXMLChildrenList::Iterator::operator++(int)
 {
 	Iterator result = *this;
 	++Backend;
 	return result;
 }
 
-CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator--()
+CXMLChildrenList::Iterator& CXMLChildrenList::Iterator::operator--()
 {
 	--Backend;
 	return *this;
 }
 
-CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::Iterator::operator--(int)
+CXMLChildrenList::Iterator CXMLChildrenList::Iterator::operator--(int)
 {
 	Iterator result = *this;
 	--Backend;
 	return result;
 }
 
-CXMLNode* CXMLNormalNode::CChildrenList::Iterator::operator*()
+CXMLNode* CXMLChildrenList::Iterator::operator*()
 {
 	return *Backend;
 }
 
-/*void DeleteElement(); 		// i think iterator should not do this shit.. list should..
-void InsertBefore(CXMLNode &ANode);
-void InsertAfter(CXMLNode &ANode);*/
-
-//~Iterator(); // for what?
-
 //////////////////////////////////////////////////////////////////////////
-// CXMLNormalNode::CChildrenList
+// CChildrenList
 
-CXMLNormalNode::CChildrenList::CChildrenList(CXMLNode *ANode) : Node(ANode)
+CXMLChildrenList::CXMLChildrenList(CXMLNode *ANode) : Node(ANode)
 {
 }
 
-CXMLNormalNode::CChildrenList::~CChildrenList()
+CXMLChildrenList::~CXMLChildrenList()
 {
 }
 
-void CXMLNormalNode::CChildrenList::AddFirst(CXMLNode *ANode)
+void CXMLChildrenList::AddFirst(CXMLNode *ANode)
 {
 	ANode->SetParent(Node);
 	Backend.push_front(ANode);
 }
 
-void CXMLNormalNode::CChildrenList::AddLast(CXMLNode *ANode)
+void CXMLChildrenList::AddLast(CXMLNode *ANode)
 {
 	ANode->SetParent(Node);
 	Backend.push_back(ANode);
 }
 
-void CXMLNormalNode::CChildrenList::AddAfter(const Iterator &AIterator, CXMLNode *ANode)
+void CXMLChildrenList::AddAfter(const Iterator &AIterator, CXMLNode *ANode)
 {
 	ANode->SetParent(Node);
 	list<CXMLNode *>::iterator iter = AIterator.Backend;
 	Backend.insert(++iter, ANode);
 }
 
-void CXMLNormalNode::CChildrenList::AddBefore(const Iterator &AIterator, CXMLNode *ANode)
+void CXMLChildrenList::AddBefore(const Iterator &AIterator, CXMLNode *ANode)
 {
 	ANode->SetParent(Node);
 	Backend.insert(AIterator.Backend, ANode);
 }
 
-CXMLNode* CXMLNormalNode::CChildrenList::Remove(Iterator &AIterator)
+CXMLNode* CXMLChildrenList::Remove(Iterator &AIterator)
 {
 	CXMLNode *result = *AIterator;
 	Backend.erase(AIterator.Backend);
@@ -167,25 +159,40 @@ CXMLNode* CXMLNormalNode::CChildrenList::Remove(Iterator &AIterator)
 	return result;
 }
 
-CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::Begin()
+void CXMLChildrenList::DeleteAll()
+{
+	for (Iterator it = Begin(); it != End(); ++it)
+	{
+		delete *it;
+	}
+	Clear();
+}
+
+void CXMLChildrenList::Clear()
+{
+	Backend.clear();
+}
+
+CXMLChildrenList::Iterator CXMLChildrenList::Begin()
 {
 	Iterator result;
 	result.Backend = Backend.begin();
 	return result;
 }
-CXMLNormalNode::CChildrenList::Iterator CXMLNormalNode::CChildrenList::End()
+
+CXMLChildrenList::Iterator CXMLChildrenList::End()
 {
 	Iterator result;
 	result.Backend = Backend.end();
 	return result;
 }
 
-bool CXMLNormalNode::CChildrenList::IsEmpty() const
+bool CXMLChildrenList::IsEmpty() const
 {
 	return Backend.empty();
 }
 
-bool CXMLNormalNode::CChildrenList::GetSize() const
+bool CXMLChildrenList::GetSize() const
 {
 	return Backend.size();
 }
@@ -200,14 +207,7 @@ CXMLNormalNode::CXMLNormalNode(const string &AName) : Children(this)
 
 CXMLNormalNode::~CXMLNormalNode()
 {
-	// move it to some function.. destructor is not the only place, where we need to destroy all child nodes
-	ChildrenIterator del;
-	while (!Children.IsEmpty())
-	{
-		del = Children.Begin();
-		delete *del;
-		Children.Remove(del);
-	}
+	Children.DeleteAll();
 }
 
 string CXMLNormalNode::GetAttribute(const string &AName) const
@@ -315,14 +315,7 @@ CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
 
 CXML::~CXML()
 {
-	// move it to some function.. destructor is not the only place, where we need to destroy all child nodes
-	CXMLNormalNode::ChildrenIterator del;
-	while (!Root.IsEmpty())
-	{
-		del = Root.Begin();
-		delete *del;
-		Root.Remove(del);
-	}
+	Root.DeleteAll();
 }
 
 void CXML::LoadFromFile(const string &AFilename)
@@ -330,8 +323,9 @@ void CXML::LoadFromFile(const string &AFilename)
 	CFile f(AFilename, CFile::OPEN_MODE_READ);
 
 	// string AllContent = // Get all file content in string somehow..
-	// destroy previous content
-	// Children = CParser().Parse(AllContent);
+	// Root.DeleteAll();
+	// CXMLParser parser(AllContent);
+	// Root = parser.Parse();
 
 	f.Close();
 }
@@ -349,24 +343,134 @@ void CXML::SaveToFile(const string &AFilename)
 //////////////////////////////////////////////////////////////////////////
 // CXMLParser
 
-CXMLNormalNode::CChildrenList CXMLParser::Parse(const string &AText)
+CXMLParser::CXMLParser(const string &AText) : Result(NULL), Text(AText), Current(0)
 {
-	CXMLNormalNode::CChildrenList result(NULL);
+}
 
-	for (int pos = 0; pos < AText.length(); pos++)
+void CXMLParser::SetText(const string &AText)
+{
+	Text = AText;
+}
+
+bool CXMLParser::Good()
+{
+	return Current < Text.length();
+}
+
+void CXMLParser::SkipWhiteSpace()
+{
+	while (Good() && isWhiteSpace(Text[Current]))
+		Current++;
+}
+
+bool CXMLParser::isWhiteSpace(const char &c)
+{
+	return (c == ' ') || (c == '\n') || (c == '\t') || (c == '\r');
+}
+
+bool CXMLParser::isAnotherTag()
+{
+	return Text[Current] == '<';
+}
+
+CXMLNode* CXMLParser::ParseNode()
+{
+	SkipWhiteSpace();
+	if (!Good())
+		return NULL;
+
+	// определяем тип ноды
+	if (Text[Current] == '<')
 	{
-		switch (AText[pos])
+		Current++;
+		if (Text.substr(Current, 3) == "!--")
 		{
-		case '<':
-			// element
-			break;
-		case '&':
-			// entity
-			break;
+			return ParseComment();
+		}
+		else if (Text.substr(Current, 4) == "?xml")
+		{
+			return ParseProlog();
+		}
+		else
+		{
+			// Normal
 		}
 	}
+	else
+	{
+		// Text node
+		return ParseText();
+	}
+}
 
+CXMLNode *CXMLParser::ParseComment()
+{
+	Current += 3;
 
+	int Start = Current;
+	int EndMatch = 0;
 
-	return result;
+	while (Good() && !isAnotherTag())
+	{
+		if (Text[Current] == '-')
+			EndMatch++;
+		else if (EndMatch == 2 && Text[Current] == '>')
+			return new CXMLCommentNode(Text.substr(Start, Current - Start - 3));
+		else
+			EndMatch = 0;
+	}
+
+	ReportError("Unterminated comment found at", Current);
+
+	return NULL;
+}
+
+CXMLNode *CXMLParser::ParseProlog()
+{
+	Current += 4;
+	if (!isWhiteSpace(Text[Current]))
+		return NULL;
+
+	CXMLPrologNode *result = new CXMLPrologNode;
+
+	int Start = Current;
+	int EndMatch = 0;
+
+	while (Good() && !isAnotherTag())
+	{
+		Current++;
+		if (EndMatch == 0 && Text[Current] == '?')
+			EndMatch++;
+		else if (EndMatch == 1 && Text[Current] == '>')
+			return result;
+		else
+			EndMatch = 0;
+		pair<string, string> attr = ParseAttribute();
+		if (attr.first == "version")
+			result->SetVersion(attr.second);
+		//else if (attr.first == "encoding")
+			//result->SetEncoding(attr.second);
+		// else ignore..
+	}
+
+	ReportError("Unterminated prolog found at", Current);
+
+	delete result;
+	return NULL;
+}
+
+CXMLChildrenList CXMLParser::Parse()
+{
+	Result.Clear();
+
+	while (Good())
+	{
+		CXMLNode *node = ParseNode();
+		if (node)
+			Result.AddLast(node);
+	}
+
+	Text = "";
+
+	return Result;
 }

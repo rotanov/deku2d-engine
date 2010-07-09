@@ -35,71 +35,68 @@ private:
 	string Version;
 };
 
+class CXMLChildrenList
+{
+public:
+	class Iterator
+	{
+	public:
+		Iterator();
+		/*Iterator(CXMLNode &AXMLNode);
+		  Iterator(const iterator &AIterator);*/
+
+		//Iterator& operator=(const Iterator &AIterator); // standard (assigning corresponding members) is sufficient
+		// deal with operator= and delete or uncomment it
+
+		bool operator==(const Iterator &AIterator) const;
+		bool operator!=(const Iterator &AIterator) const;
+
+		Iterator& operator++();
+		Iterator operator++(int);
+		Iterator& operator--();
+		Iterator operator--(int);
+
+		CXMLNode* operator*();
+
+	private:
+		list<CXMLNode *>::iterator Backend;
+
+		friend class CXMLChildrenList;
+	};
+
+	CXMLChildrenList(CXMLNode *ANode);
+	~CXMLChildrenList();
+
+	void AddFirst(CXMLNode *ANode);
+	void AddLast(CXMLNode *ANode);
+	void AddAfter(const Iterator &AIterator, CXMLNode *ANode);
+	void AddBefore(const Iterator &AIterator, CXMLNode *ANode);
+	CXMLNode* Remove(Iterator &AIterator);
+	void DeleteAll();
+	void Clear();
+
+	Iterator Begin();
+	Iterator End();
+
+	bool IsEmpty() const;
+	bool GetSize() const;
+
+private:
+	list<CXMLNode *> Backend;
+	CXMLNode *Node;
+};
+
 class CXMLNormalNode : public CXMLNode
 {
 public:
-	class CChildrenList
-	{
-	public:
-		class Iterator
-		{
-		public:
-			Iterator();
-			/*Iterator(CXMLNode &AXMLNode);
-			Iterator(const iterator &AIterator);*/
-
-			//Iterator& operator=(const Iterator &AIterator); // standard (assigning corresponding members) is sufficient
-			// deal with operator= and delete or uncomment it
-
-			bool operator==(const Iterator &AIterator) const;
-			bool operator!=(const Iterator &AIterator) const;
-
-			Iterator& operator++();
-			Iterator operator++(int);
-			Iterator& operator--();
-			Iterator operator--(int);
-
-			CXMLNode* operator*();
-
-			/*void DeleteElement(); 		// i think iterator should not do this shit.. list should..
-			void InsertBefore(CXMLNode &ANode);
-			void InsertAfter(CXMLNode &ANode);*/
-
-			//~Iterator(); // for what?
-		private:
-			list<CXMLNode *>::iterator Backend;
-
-			friend class CXMLNormalNode::CChildrenList;
-		};
-
-		CChildrenList(CXMLNode *ANode);
-		~CChildrenList();
-
-		void AddFirst(CXMLNode *ANode);
-		void AddLast(CXMLNode *ANode);
-		void AddAfter(const Iterator &AIterator, CXMLNode *ANode);
-		void AddBefore(const Iterator &AIterator, CXMLNode *ANode);
-		CXMLNode* Remove(Iterator &AIterator);
-
-		Iterator Begin();
-		Iterator End();
-
-		bool IsEmpty() const;
-		bool GetSize() const;
-
-	private:
-		list<CXMLNode *> Backend;
-		CXMLNode *Node;
-	};
-
-	typedef CChildrenList::Iterator ChildrenIterator;	// maybe not required..
+	typedef CXMLChildrenList::Iterator ChildrenIterator;
 
 	CXMLNormalNode(const string &AName);
 	~CXMLNormalNode();
 
 	//bool HaveChildren(); // return 1
 
-	// TODO: maybe something like CChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
+	// TODO: maybe something like CXMLChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
 
 	string GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
@@ -107,7 +104,7 @@ public:
 
 	string GetText();
 	
-	CChildrenList Children;
+	CXMLChildrenList Children;
 
 private:
 	map<string, string> Attributes;
@@ -154,7 +151,7 @@ public:
 	void LoadFromFile(const string &AFilename);
 	void SaveToFile(const string &AFilename);
 
-	CXMLNormalNode::CChildrenList Root;
+	CXMLChildrenList Root;
 
 private:
 
@@ -163,8 +160,27 @@ private:
 class CXMLParser
 {
 public:
-	CXMLNormalNode::CChildrenList Parse(const string &AText);
-};
+	CXMLParser(const string &AText);
+	CXMLChildrenList Parse();
 
+private:
+	void SetText(const string &AText);
+
+	bool Good();
+
+	void SkipWhiteSpace();
+	bool isWhiteSpace(const char &c);
+
+	bool isAnotherTag();
+
+	CXMLNode* ParseNode();
+	CXMLNode* ParseComment();
+	CXMLNode* ParseProlog();
+
+
+	CXMLChildrenList Result;
+	int Current;
+	string Text;
+};
 
 #endif // _2DE_XML_H_
