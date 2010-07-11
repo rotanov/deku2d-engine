@@ -164,24 +164,28 @@ public:
 	CXMLChildrenList Parse();
 
 private:
-	void ReportError(const string &Message, const int &Position);
 	void SetText(const string &AText);
 
 	bool Good();
 
 	void SkipWhiteSpace();
-	bool isWhiteSpace(const char &c);
-	bool isValidNameChar(const char &c) ;
+	bool isWhiteSpace(char c);
+	bool isValidNameChar(char c) ;
 
 	bool isAnotherTag();
 
 	CXMLNode* ParseNode();
-	CXMLNode* ParseComment();
-	CXMLNode* ParseProlog();
-	CXMLNode* ParseText();
+	CXMLCommentNode* ParseComment();
+	CXMLPrologNode* ParseProlog();
+	CXMLTextNode* ParseText();
+	//CXMLNormalNode* ParseNormal(); // need to handle nesting, setting parent, etc....
 	pair<string, string> ParseAttribute();
 	string ParseName();
 	string ParseValue();
+	string ParseEntity();
+
+	void ReportError(const string &Message, int Position);
+
 	CXMLChildrenList Result;
 	int Current;
 	string Text;

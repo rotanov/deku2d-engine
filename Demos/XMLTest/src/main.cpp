@@ -36,5 +36,8 @@ int main(int argc, char* argv[])
 	// ну попрробуй.. сохрани меня!..
 	xml.SaveToFile("test.xml");
 
+	CXML parsetest;
+	parsetest.LoadFromFile("test.xml");
+
 	return 0;
 }
