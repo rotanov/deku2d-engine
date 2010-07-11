@@ -93,6 +93,7 @@ using namespace std;
 
 /**
 *	Отлов утечек памяти.
+*	Немного пофикшен, однако все равно нуждается в тестировании и улучшении.
 *	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
 *	@todo: Implement new[] and delete []
 *	@todo: Remove inline from AddTrack and RemoveTrack and others.
@@ -106,7 +107,7 @@ struct ALLOC_INFO
 {
 	unsigned long address;
 	unsigned long size;
-	char file[64];
+	char file[MAX_PATH];//bad but anyway... probably needs replacement with string type
 	unsigned long line;
 };
 
@@ -123,7 +124,7 @@ inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fnam
 
 	info = new(ALLOC_INFO);
 	info->address = addr;
-	strncpy(info->file, fname, 63);
+	strcpy(info->file, fname);
 	info->line = lnum;
 	info->size = asize;
 	allocList->insert(allocList->begin(), info);
