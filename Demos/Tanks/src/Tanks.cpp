@@ -239,13 +239,13 @@ void CTankManager::Render()
 	glLoadIdentity();
 	gSetBlendingMode();	
 	CFont *Font = CFontManager::Instance()->GetFont("Font");
-	Font->tClr = COLOR_P1;
-	Font->SetDepth(0.5f);
-	Font->Pos = Vector2(10, 460);
-	Font->Print("Player1 health: %d", GetPlayer(0)->Health);
-	Font->tClr = COLOR_P2;
-	Font->Pos = Vector2(490, 460);
-	Font->Print("Player2 health: %d", GetPlayer(1)->Health);
+// 	Font->tClr = COLOR_P1;
+// 	Font->SetDepth(0.5f);
+// 	Font->Pos = Vector2(10, 460);
+// 	Font->Print("Player1 health: %d", GetPlayer(0)->Health);
+// 	Font->tClr = COLOR_P2;
+// 	Font->Pos = Vector2(490, 460);
+// 	Font->Print("Player2 health: %d", GetPlayer(1)->Health);
 	COLOR_WHITE.glSet();
 	return;
 }

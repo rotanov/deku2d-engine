@@ -1,9 +1,11 @@
 #include "2de_Engine.h"
+#include "NinjaStory.h"
 
 CEngine	*Ninja	=	CEngine::Instance();
 
 bool Init()
 {	
+	CNinjaStoryGame *NinjaStoryGame = new CNinjaStoryGame();
 	return true;
 }
 

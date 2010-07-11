@@ -113,14 +113,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CSprite
 
-#define ANIM_NONE			-1
-#define ANIM_WALK_LEFT		0x01
-#define ANIM_WALK_RIGHT		0x02
-#define ANIM_STAND_LEFT		0x03
-#define ANIM_STAND_RIGHT	0x04
-#define	ANIM_ATTAK_DEMO		0x05
-
-struct SAnimationInfo				// структура определяющая параметры анимации
+struct SAnimationInfo				// структура определяющая параметры анимации // хуита
 {
 	bool	isAnimated;				// анимирован ли спрайт
 	bool	isLoop;					// залуплена ли анимация
@@ -137,7 +130,7 @@ struct SAnimationInfo				// структура определяющая пара
 	int AnimationIndex;				// индекс анимации
 };
 
-class CSprite : public CRenderObject
+class CSprite : public CRenderObject	// говно
 {
 private:
 	CTexture	*Texture;
@@ -262,42 +255,6 @@ protected:
 	void					_swap(int i, int j);
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CText not implemented yet
-class CText : public CRenderObject
-{
-private:
-	CFont *Font;
-	string Text;
 
-public:
-	CText();
-	~CText()
-	{
-		// this is destructor. i can set breakpoint there
-	}
-	CText(const string &AText) : Text(AText), Font(CFontManager::Instance()->GetDefaultFont())
-	{
-		assert(Font != NULL);
-		doIgnoreCamera = true;
-	}
-	void Render();
-	CFont* GetFont() const;
-	string& GetText();
-	const string& GetText() const;
-	void SetFont(CFont *AFont);
-	void SetText(const string &AText);
-	int Height();	// @todo: вынести Height и Width в переменные и обновлять при изменении текста.
-	int Width();
-	CText& operator =(const string &AText);
-// 	CText& operator =(const CText &Atext)
-// 	{
-// 		if (this == &AText)
-// 			return *this;
-// 
-// 	}
-	string operator +(const CText &Text) const;
-	string operator +(const char *Text) const;
-};
 
 #endif // _2DE_GRAPHICS_HIGH_H_

@@ -1,4 +1,5 @@
 #include "2de_GameUtils.h"
+#include "2de_GraphicsHigh.h"
 
 //-------------------------------------------//
 //			CTileSet functions				 //

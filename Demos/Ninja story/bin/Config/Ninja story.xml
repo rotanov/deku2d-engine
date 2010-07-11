@@ -6,7 +6,7 @@
 	DoCalcFps				= "true"		// todo: deprecate
 	DoLimitFps				= "false"		// todo: deprecate
 	FpsLimit				= "60"			// todo: deprecate
-	DataPath               	= "../../../Data"
+	DataPath               	= "Data"
 	doLoadDefaultResourceList	= "true"	// todo: deprecate
 	MusicVolume					= "10"
 </configuration>

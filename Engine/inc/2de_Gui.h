@@ -129,7 +129,7 @@ public:
 		return Text;
 	}
 
-	void SetText(const CText &AText)
+	void SetText(const string &AText)
 	{
 		Text = AText;
 		Text.Position = ((GetBox().vMin + GetBox().vMax) - Vector2(Text.Width(), Text.Height())) * 0.5f;
@@ -281,8 +281,8 @@ public:
 	{
 		float StringHeight = Text.Height();
 		CGUIObject::SetBox(box);
-		Font->Pos.x = (int)box.vMin.x + (int)Style->Metrics.EditMargins.x;
-		Font->Pos.y = (int)((box.vMin.y + box.vMax.y) / 2.0f - StringHeight / 2.0f);
+		Text.Position.x = (int)box.vMin.x + (int)Style->Metrics.EditMargins.x;
+		Text.Position.y = (int)((box.vMin.y + box.vMax.y) / 2.0f - StringHeight / 2.0f);
 
 
 	}

@@ -133,6 +133,7 @@ class CPongGame : public CRenderObject, public CUpdateObject
 public:
 	int PlayerOneScore, PlayerTwoScore;
 	CPongPlayer *PlayerOne, *PlayerTwo;
+	CText PlayerOneScoreText, PlayerTwoScoreText;
 	CPongBall *Ball;
 	CPongGame()
 	{
@@ -158,15 +159,17 @@ public:
 	}
 	void Render()
 	{
-		glLoadIdentity();
-		glColor3f(1.0f, 1.0f, 1.0f);
-		CFontManager::Instance()->PrintEx(10, 450, 0.0f, "Score: %d", PlayerOneScore);
-		CFontManager::Instance()->PrintEx(1170, 450, 0.0f, "Score: %d", PlayerTwoScore);
+		// NOTHING
 		return;
 	}
 
 	void Update(float dt)
 	{
+		PlayerOneScoreText.Position = Vector2(10.0f, 450.0f);
+		PlayerOneScoreText.SetText("Score: " + itos(PlayerOneScore));
+		PlayerTwoScoreText.Position = Vector2(1170.0f, 450.0f);
+		PlayerTwoScoreText.SetText("Score: " + itos(PlayerTwoScore));
+
 		CAABB BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;
 		BallBox = CAABB(Ball->Position, Ball->Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
 		PlayerOneBox = CAABB(PlayerOne->Position, PlayerOne->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));

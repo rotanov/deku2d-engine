@@ -153,8 +153,7 @@ void CTilesetEditor::Render()
 	PRender.grCircleL(MousePosition, 5);
 	int fps;
 	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
-	CFontManager::Instance()->Font()->tClr = COLOR_WHITE;
-	CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
+	//CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
 	glLoadIdentity();
 
 	gToggleScissor(true);

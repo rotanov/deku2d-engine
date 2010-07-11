@@ -291,6 +291,7 @@ void CLabel::Render()
 CButton::CButton()
 {
 	Text = "Button " + itos(GetID()); // @todo: think, then remove
+	Text.Color = Style->Colors.ButtonText;
 }
 
 CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor)
@@ -448,8 +449,8 @@ void CEdit::Render()
 		PRender->psize = 2.0f;
 		PRender->lClr = Style->Colors.EditText;
 		PRender->lwidth = 1.0f;
-		PRender->grSegment(Vector2(Font->Pos.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).vMax.y),
-			Vector2(Font->Pos.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).vMin.y));
+		PRender->grSegment(Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).vMax.y),
+			Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).vMin.y));
 	}
 }
 
@@ -497,8 +498,6 @@ void CEdit::Update(float dt)
 				RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
 			}
 		}
-
-
 	}
 
 	PreviousMouseState = MouseState;
@@ -760,9 +759,9 @@ void CMenuItem::Render()
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{		
 		CMenuItem *ChildMenuItem = *it;
-		Font->tClr = RGBAf(1.0,1.0,1.0,1.0);//ChildMenuItem->color;
-		Font->scale = Vector2(1.0f, 1.0f);
-		Font->Pos = ChildMenuItem->Position;
+		//Text.Color = RGBAf(1.0,1.0,1.0,1.0);
+		//Text.SetScaling(1.0f);
+		Text.Position  = ChildMenuItem->Position;
 		//Font->Print(ChildMenuItem->Text.c_str());
 	}	
 	Color = COLOR_WHITE;

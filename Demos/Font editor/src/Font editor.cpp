@@ -177,7 +177,7 @@ CFontEditor::CFontEditor()
 	edFontTextureName = CFactory::Instance()->New<CEdit>("edFontTextureName");
 	edFontTextureName->SetText(static_cast<string>("Font_font"));
 	edFontTextureName->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT));	
-	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
+//	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edFontname = CFactory::Instance()->New<CEdit>("edFontname");
 	edFontname->SetText(static_cast<string>("Font"));
@@ -213,8 +213,8 @@ void CFontEditor::Render()
 	PRender.grCircleL(MousePosition, 5);
 	int fps;
 	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
-	CFontManager::Instance()->Font()->tClr = COLOR_WHITE;
-	CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
+	FPSText.Position = Vector2(2.0f, WindowHeight - 20.0f);
+	FPSText.SetText("FPS: " + itos(fps));
 	glLoadIdentity();
 
 	gToggleScissor(true);

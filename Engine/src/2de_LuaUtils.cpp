@@ -1,6 +1,7 @@
 #include "2de_LuaUtils.h"
 
 #include "2de_GraphicsLow.h"
+#include "2de_GraphicsHigh.h"
 
 GlobalLuaState* globalLuaState = 0; // todo remove
 

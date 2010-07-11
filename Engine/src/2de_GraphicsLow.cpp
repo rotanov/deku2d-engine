@@ -36,6 +36,28 @@ float CRenderObject::GetDepth() const
 {
 	return Depth;
 }
+
+const CAABB& CRenderObject::GetBox() const
+{
+	return aabb;
+}
+
+void CRenderObject::SetBox(const CAABB &box)
+{
+	aabb = box;
+}
+
+float CRenderObject::GetScaling() const
+{
+	return Scaling;
+}
+
+void CRenderObject::SetScaling(float AScaling)
+{
+	Scaling = AScaling;
+	aabb.vMin *= Scaling;
+	aabb.vMax *= Scaling;
+}
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
 
@@ -255,15 +277,9 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 //-------------------------------------------//
 CFont::CFont()
 {
-	scale = Vector2(1.0f, 1.0f);
 	base = 0;
-	Distance = CFONT_DEFAULT_DISTANCE; // Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение. Пользователь потом сам попроавит, если надо.
-	pp = &Pos;
-	offset = 0;
-	isTextSelected = doRenderToRect = false;
-	Sel0 = Sel1 = 0;
-	tClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);	// MAGIC NUMBER
-	SetDepth(0.0f);
+	Distance = CFONT_DEFAULT_DISTANCE;	// Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение.
+										// Пользователь потом сам попроавит, если надо.
 	CFontManager::Instance()->Add(this);
 }
 
@@ -271,7 +287,6 @@ CFont::~CFont()
 {
 	if (!base)
 		glDeleteLists(base, 256);
-
 	CFontManager::Instance()->Remove(GetID());
 }
 
@@ -388,126 +403,6 @@ bool CFont::SaveToFile()
 	return true;
 }
 
-void CFont::_Print(const byte *text)
-{
-	
-	tClr.glSet();
-	//ptClr->glSet();
-	glEnable(GL_TEXTURE_2D);
-	Texture->Bind();
-	glTranslatef(pp->x, pp->y, Depth);
-//	scale.glScale();
-	glListBase(base-32);
-	const char *temptext = reinterpret_cast<const char*>(text);
-	glCallLists((GLsizei)strlen(temptext), GL_UNSIGNED_BYTE, text);
-	//GLenum err = glGetError() ;
-}
-
-
-
-void CFont::Print(const char *text, ...)
-{
-	if (text == NULL)
-		return;
-	if ((unsigned int)offset >= strlen(text) || offset < 0)
-		return;
-
-	int swidth = 0, sheight = 0, selx = 0;
-	if (isTextSelected)	// deprecated
-	{
-		if (Sel0 > Sel1+1)
-		{
-			swap(Sel0, Sel1);
-			Sel0++;
-			Sel1--;
-		}
-
-		swidth = GetStringWidth(text);
-		sheight = GetStringHeight(text);
-		selx = Pos.x + GetStringWidthEx(0, Sel0-1-offset, text);
-
-
-		if (!(Sel0 > Sel1 || Sel0 < 0 || (unsigned int) Sel1 >= strlen(text)))
-		{
-			int selw = GetStringWidthEx(max(Sel0, offset), Sel1, text);
-			CPrimitiveRender pr;
-			pr.psClr = &RGBAf(10, 50, 200, 150);
-			pr.depth = Depth;
-			pr.grRectS(Vector2(static_cast<float>(selx), Pos.y), Vector2(static_cast<float>(selx + selw), Pos.y + sheight));
-		}
-
-
-	}
-
-	int xpos, ypos;
-	if (doRenderToRect)	// maybe deprecated too.. but i'm not sure.. at least it's not used in GUI..
-	{
-
-		byte tempV = align & CFONT_VALIGN_MASK, tempH = align & CFONT_HALIGN_MASK;
-
-		if (tempV == CFONT_VALIGN_TOP)
-		{
-			ypos = Pos.y + aabb.vMin.y - sheight;
-		}
-		if (tempV == CFONT_VALIGN_BOTTOM)
-		{
-			ypos = Pos.y;
-		}
-		if (tempV == CFONT_VALIGN_CENTER)
-		{
-			ypos = Pos.y + aabb.vMin.y/2 - sheight/2;
-		}
-
-		if (tempH == CFONT_HALIGN_LEFT)
-		{
-			xpos = Pos.x;
-		}
-		if (tempH == CFONT_HALIGN_RIGHT)
-		{
-			xpos = Pos.x + aabb.vMin.x - swidth;
-		}
-
-		if (tempH == CFONT_HALIGN_CENTER)
-		{
-			xpos = Pos.x + aabb.vMin.x/2 - swidth/2;
-		}
-
-		glPushAttrib(GL_SCISSOR_TEST);
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(Pos.x, Pos.y, aabb.vMin.x, aabb.vMin.y);
-
-
-		CPrimitiveRender pr;
-		pr.depth = Depth;
-		pr.lClr = RGBAf(0.4f, 0.5f, 0.7f, 0.9f);
-		pr.sClr = RGBAf(0.5f, 0.7f, 0.4f, 0.9f);
-		pr.pClr = RGBAf(0.7f, 0.5f, 0.4f, 0.9f);
-
-		pr.grRectS(Vector2(selx - 1, ypos), Vector2(selx - 1 + 1, ypos + min(sheight, GetStringHeight("!\0")))); //  glRGBAub(10, 10, 10, 200)
-		pr.grRectS(Vector2(selx - 3, ypos), Vector2(selx - 3 + 5, ypos + 1)); // glRGBAub(10, 10, 10, 200)
-		//gSolidRectEx(selx - 2, ypos, 5, 1, depth, &glRGBAub(10, 10, 10, 200));
-		pr.grRectS(Vector2(selx - 3, ypos + min(sheight, GetStringHeight("!\0"))), Vector2(selx - 3 + 5,ypos + min(sheight, GetStringHeight("!\0"))+ 1)); // glRGBAub(10, 10, 10, 200)
-
-	}
-
-
-	static char	*temp;//[CFONT_MAX_STRING_LENGTH];
-	temp = new char [strlen(text)+CFONT_MAX_STRING_LENGTH];
-	va_list	ap;
-	va_start(ap, text);
-	vsprintf(temp, text, ap);
-	va_end(ap);
-	_Print(reinterpret_cast<byte*>(temp));
-	delete [] temp;
-
-	if (doRenderToRect)
-	{
-		glDisable(GL_SCISSOR_TEST);
-		glPopAttrib();
-	}
-}
-
-
 int CFont::GetStringWidth(const string &text)
 {
 	int r = 0;
@@ -551,10 +446,11 @@ int CFont::GetStringHeightEx(int t1, int t2, const string &text)
 
 int CFont::StringCoordToCursorPos(const string &text, int x, int y)
 {
+	// @todo: move this function to CText
 	if (text.length() == 0)
 		return -1;
 	
-	Vector2 Local = Vector2(x, y) - Pos;
+	Vector2 Local = Vector2(x, y);// - Pos;
 	if (Local.x < 0)
 		return -1;
 
@@ -568,38 +464,6 @@ int CFont::StringCoordToCursorPos(const string &text, int x, int y)
 	return (text.length() - 1);
 }
 
-void CFont::SetDepth( float _depth )
-{
-	Depth = _depth;
-	Depth = Clamp(Depth, CFONT_DEPTH_LOW, CFONT_DEPTH_HIGH);
-}
-
-void CFont::PointTo(Vector2 *_p)
-{
-	if (!_p)
-		return;
-	pp = _p;
-}
-
-void CFont::PointBack()
-{
-	pp = &Pos;
-}
-
-void CFont::SetAlign(const byte _Halign, const byte _Valign )
-{
-	align = _Valign || _Halign;
-}
-
-byte CFont::GetHalign()
-{
-	return align & CFONT_HALIGN_MASK;
-}
-
-byte CFont::GetValign()
-{
-	return align & CFONT_VALIGN_MASK;
-}
 
 CTexture* CFont::GetTexture()
 {
@@ -609,6 +473,25 @@ CTexture* CFont::GetTexture()
 void CFont::SetTexture(const string &TextureName)
 {
 	Texture = CTextureManager::Instance()->Get(TextureName);
+}
+
+CAABB CFont::GetSymbolsBBOX()
+{
+	CAABB Result;
+	Result.vMin = Vector2(9999.0f, 9999.0f);
+	Result.vMax = Vector2(0.0f, 0.0f);
+	for(int i = 0; i < 256; i++)
+	{
+		if (bbox[i].x0 < Result.vMin.x)
+			Result.vMin.x = bbox[i].x0;
+		if (bbox[i].y0 < Result.vMin.y)
+			Result.vMin.y = bbox[i].y0;
+		if (bbox[i].x1 > Result.vMax.x)
+			Result.vMax.x = bbox[i].x1;
+		if (bbox[i].y1 > Result.vMax.y)
+			Result.vMax.y = bbox[i].y1;		
+	}
+	return Result;
 }
 //////////////////////////////////////////////////////////////////////////
 //Camera
@@ -736,9 +619,10 @@ bool CRenderManager::DrawObjects()
 		}
 		if (data->Visible)
 		{
-			glLoadIdentity();
+			glLoadIdentity();			
 			if (!data->doIgnoreCamera)
 				Camera.gTranslate();
+			data->Color.glSet();
 			glScalef(data->GetScaling(), data->GetScaling(), ROTATIONAL_AXIS_Z);
 			glTranslatef(data->Position.x, data->Position.y, data->GetDepth());
 			glRotatef(data->GetAngle(), 0.0f, 0.0f, 1.0f);
@@ -756,6 +640,14 @@ bool CRenderManager::DrawObjects()
 	return true;
 }
 
+void CRenderManager::Print(const CText *Text) const
+{
+	//	_Print(reinterpret_cast<const byte*>(text));
+	glEnable(GL_TEXTURE_2D);
+	Text->GetFont()->Texture->Bind();
+	glListBase(Text->GetFont()->base-32);		
+	glCallLists(static_cast<GLsizei>(Text->GetText().length()), GL_UNSIGNED_BYTE, Text->GetText().c_str());
+}
 //-------------------------------------------//
 //				Common OpenGL stuff			 //
 //-------------------------------------------//
@@ -855,39 +747,10 @@ CFont* CFontManager::GetFont(const string &fontname)
 	return TempFont;
 }
 
-
 bool CFontManager::SetCurrentFont(const char* fontname)
 {
 	CurrentFont = GetFont(fontname);
 	return !!CurrentFont;
-}
-
-bool CFontManager::Print(int x, int y, float depth, const string &text)
-{
-	if (!CurrentFont || !CurrentFont->CheckLoad())
-		return false;
-
-	CurrentFont->SetDepth(depth);
-	CurrentFont->Pos  = Vector2(x, y);
-	CurrentFont->Print(text.c_str());
-	return true;
-}
-
-bool CFontManager::PrintEx(int x, int y, float depth, char* text, ...)
-{
-	if (!CurrentFont || !CurrentFont->CheckLoad())
-		return false;
-
-	char temp[256];
-	va_list	ap;
-	va_start(ap, text);
-	vsprintf(temp, text, ap);
-	va_end(ap);
-
-	CurrentFont->SetDepth(depth);
-	CurrentFont->Pos = Vector2(x, y);
-	CurrentFont->Print(temp);
-	return true;
 }
 
 bool CFontManager::AddFont(CFont *AObject)
@@ -1030,4 +893,75 @@ void setVSync(int interval)
 		Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer.");
 	}
 #endif                        // </platforms, that support swap interval control>
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CText
+
+CText::CText() : Text(""), Font(CFontManager::Instance()->GetDefaultFont())
+{	
+	assert(Font != NULL);
+	doIgnoreCamera = true;
+}
+
+void CText::Render()
+{
+	//assert(Text != "");
+	CRenderManager::Instance()->Print(this);
+}
+
+CFont* CText::GetFont() const
+{
+	assert(Font != NULL);
+	return Font;
+}
+
+string& CText::GetText()
+{
+	return Text;
+}
+
+const string& CText::GetText() const
+{
+	return Text;
+}
+
+void CText::SetFont(CFont *AFont)
+{
+	assert(AFont != NULL);
+	Font = AFont;
+}
+
+void CText::SetText(const string &AText)
+{
+	Text = AText;
+}
+
+int CText::Height()
+{
+	assert(Font != NULL);
+	return Font->GetStringHeight(Text);
+}
+
+int CText::Width()
+{
+	assert(Font != NULL);
+	return Font->GetStringWidth(Text);
+}
+
+CText& CText::operator=(const string &AText)
+{
+	Text = AText;
+	return *this;
+}
+
+std::string CText::operator+(const CText &Text) const
+{
+	return this->GetText() + Text.GetText();
+}
+
+std::string CText::operator+(const char *Text) const
+{
+	return this->GetText() + Text;
 }

@@ -202,10 +202,6 @@ private:
 	size_t RefCount;
 	static unsigned int CObjectCount;
 	CObject(const CObject &AObject);
-
-
-public:
-	CObject();
 	CObject& operator =(const CObject &AObject)
 	{
 		if (this == &AObject)
@@ -214,8 +210,10 @@ public:
 		ID = reinterpret_cast<int>(this);
 		Name = AObject.GetName() + " copy";
 		RefCount = 0;
-
 	}
+
+public:
+	CObject();
 	
 	virtual ~CObject();		
 	void IncRefCount();
