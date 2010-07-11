@@ -164,20 +164,24 @@ public:
 	CXMLChildrenList Parse();
 
 private:
+	void ReportError(const string &Message, const int &Position);
 	void SetText(const string &AText);
 
 	bool Good();
 
 	void SkipWhiteSpace();
 	bool isWhiteSpace(const char &c);
+	bool isValidNameChar(const char &c) ;
 
 	bool isAnotherTag();
 
 	CXMLNode* ParseNode();
 	CXMLNode* ParseComment();
 	CXMLNode* ParseProlog();
-
-
+	CXMLNode* ParseText();
+	pair<string, string> ParseAttribute();
+	string ParseName();
+	string ParseValue();
 	CXMLChildrenList Result;
 	int Current;
 	string Text;

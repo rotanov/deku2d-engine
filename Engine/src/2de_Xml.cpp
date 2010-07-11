@@ -373,6 +373,53 @@ bool CXMLParser::isAnotherTag()
 	return Text[Current] == '<';
 }
 
+
+bool CXMLParser::isValidNameChar(const char &c) 
+{
+	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+}
+
+string CXMLParser::ParseName()
+{
+	int start = Current;
+	while (Good() && isValidNameChar(Text[Current]))
+		Current;
+	return Text.substr(start, Current - start);
+}
+
+string CXMLParser::ParseValue()
+{
+	if (Text[Current] != '"')
+		return "";
+	int start = ++Current;
+	while (Good() && Text[Current++] != '"');
+	//if (!Good())
+	//	ReportError("Unterminated quoted string at", start);
+	return Text.substr(start, Current - start);
+}
+
+pair<string, string> CXMLParser::ParseAttribute()
+{
+	pair<string, string> result;
+
+	SkipWhiteSpace();
+
+	result.first = ParseName();
+
+	SkipWhiteSpace();//
+
+	if (Text[Current] != '=')
+	{
+		result.first = "";
+		return result;
+	}
+	Current++;
+
+	result.second = ParseValue();
+	// error handling here if needed
+	return result;
+}
+
 CXMLNode* CXMLParser::ParseNode()
 {
 	SkipWhiteSpace();
@@ -410,7 +457,7 @@ CXMLNode *CXMLParser::ParseComment()
 	int Start = Current;
 	int EndMatch = 0;
 
-	while (Good() && !isAnotherTag())
+	while (Good())
 	{
 		if (Text[Current] == '-')
 			EndMatch++;
@@ -446,6 +493,9 @@ CXMLNode *CXMLParser::ParseProlog()
 		else
 			EndMatch = 0;
 		pair<string, string> attr = ParseAttribute();
+		// error handling
+		//if (attr.first == "")
+		//	ReportError("Failed to read attribute at", Current/*wrong*/);
 		if (attr.first == "version")
 			result->SetVersion(attr.second);
 		//else if (attr.first == "encoding")
@@ -459,6 +509,18 @@ CXMLNode *CXMLParser::ParseProlog()
 	return NULL;
 }
 
+CXMLNode* CXMLParser::ParseText()
+{
+	SkipWhiteSpace();
+	int start = Current;
+	while (Good() && Text[Current++] != '<');
+	//if (!Good())
+	//	Some error handling
+	// TODO: deal with entity parsing
+
+	return new CXMLTextNode(ParseEntity(Text.substr(start, Current - start)));
+}
+
 CXMLChildrenList CXMLParser::Parse()
 {
 	Result.Clear();
@@ -470,7 +532,13 @@ CXMLChildrenList CXMLParser::Parse()
 			Result.AddLast(node);
 	}
 
-	Text = "";
+	Text = "";//why?
 
 	return Result;
+}
+
+void CXMLParser::ReportError( const string &Message, const int &Position )
+{
+	// temporary
+	Log("Parse Error", Message + " %d.", Position /* here may be an xml file name... or not... */);
 }
