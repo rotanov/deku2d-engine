@@ -124,7 +124,8 @@ inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fnam
 
 	info = new(ALLOC_INFO);
 	info->address = addr;
-	strcpy(info->file, fname);
+	strcpy(info->file, fname, MAX_PATH);
+	info->file[MAX_PATH] = 0;
 	info->line = lnum;
 	info->size = asize;
 	allocList->insert(allocList->begin(), info);
