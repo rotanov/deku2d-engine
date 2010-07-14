@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
 
 	CXML parsetest;
 	parsetest.LoadFromFile("test.xml");
+	parsetest.SaveToFile("test1.xml");
 
 	return 0;
 }

@@ -22,6 +22,10 @@ void CXMLNode::SetName(const string &AName)
 	Name = AName;
 }
 
+CXMLNode * CXMLNode::GetParent()
+{
+	return Parent;
+}
 void CXMLNode::SetParent(CXMLNode *AParent)
 {
 	Parent = AParent;
@@ -366,26 +370,42 @@ void CXML::SaveToFile(const string &AFilename)
 //////////////////////////////////////////////////////////////////////////
 // CXMLParser
 
-CXMLParser::CXMLParser(const string &AText) : Result(NULL), Text(AText), Current(0)
+CXMLParser::CXMLParser(const string &AText) : Result(NULL), Text(AText), Current(0), CurrentLevel(NULL)
 {
 }
 
 CXMLChildrenList CXMLParser::Parse()
 {
-	Result.Clear();
+// 	Result.Clear();
+// 
+// 	CXMLNode *Level = CurrentLevel;
+// 
+// 	while (Good() && Level == CurrentLevel)
+// 	{
+// 		CXMLNode *node = ParseNode();
+// 		if (node)
+// 			Result.AddLast(node);
+// 	}
+// 
+	ParseInside(&Result);
+ 	Text = "";//why? // to prevent parsing the same text again at subsequent calls to Parse
+ 
+ 	return Result;
+}
 
-	while (Good())
+void CXMLParser::ParseInside(CXMLChildrenList *List)
+{
+	List->Clear();
+
+	CXMLNode *Level = CurrentLevel;
+
+	while (Good() && Level == CurrentLevel)
 	{
 		CXMLNode *node = ParseNode();
 		if (node)
-			Result.AddLast(node);
+			List->AddLast(node);
 	}
-
-	Text = "";//why? // to prevent parsing the same text again at subsequent calls to Parse
-
-	return Result;
 }
-
 void CXMLParser::SetText(const string &AText)
 {
 	Text = AText;
@@ -407,14 +427,25 @@ bool CXMLParser::isWhiteSpace(char c)
 	return (c == ' ') || (c == '\n') || (c == '\t') || (c == '\r');
 }
 
-bool CXMLParser::isValidNameChar(char c) 
+bool CXMLParser::isValidAttributeNameChar(char c) 
 {
-	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) || (c >= '0' && c <= '9');
+}
+
+bool CXMLParser::isValidTagNameChar(char c)
+{
+	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) || (c >= '0' && c <= '9');
 }
 
 bool CXMLParser::isAnotherTag()
 {
 	return Text[Current] == '<';
+}
+
+bool CXMLParser::hasAttribute()
+{
+	SkipWhiteSpace();
+	return Good() && isValidAttributeNameChar(Text[Current]);
 }
 
 CXMLNode* CXMLParser::ParseNode()
@@ -435,25 +466,37 @@ CXMLNode* CXMLParser::ParseNode()
 		{
 			return ParseProlog();
 		}
-		else if (Text[Current + 1] == '/')
+		else if (Text[Current] == '/')
 		{
-			// Current += 2;
-			// string EndName = ParseNodeEndTagName(); // (pseudo-function)
-			// if (CurrentLevel && EndName != CurrentLevel->GetName()) // CXMLNode *CurrentLevel - class member - points to current level parent or NULL for root level
-			//
-			// {
-			// 	ReportError("Incorrect nesting: end tag doesn't match start tag at", Current);
-			// }
-			// else if (!CurrentLevel)
-			// {
-			// 	ReportError("Unexpected end tag without corresponding start tag at root level at", Current);
-			// }
-			//
-			// return NULL;	// always return NULL, because it's not real node
+			Current ++;
+			string EndName = ParseTagName();
+			if (CurrentLevel && EndName != CurrentLevel->GetName()) 
+			// CXMLNode *CurrentLevel - class member - points to current level parent or NULL for root level
+			{
+				ReportError("Incorrect nesting: end tag doesn't match start tag at", Current);
+			}
+			else if (!CurrentLevel)
+			{
+			 	ReportError("Unexpected end tag without corresponding start tag at root level at", Current);
+			}
+
+			SkipWhiteSpace();
+
+			int Pos = Current;
+			while (Good() && Text[Current++] != '>');
+
+			if (Pos + 1 != Current)
+			{
+				ReportError("TYPE YOUR TEXT HERE at", Pos);
+			}
+			else if (CurrentLevel)
+				CurrentLevel = CurrentLevel->GetParent();
+			
+			return NULL;	// always return NULL, because it's not real node
 		}
 		else
 		{
-			// return ParseNormal();
+			return ParseNormal();
 		}
 	}
 	else
@@ -461,6 +504,7 @@ CXMLNode* CXMLParser::ParseNode()
 		// Text node
 		return ParseText();
 	}
+	return NULL;
 }
 
 CXMLCommentNode* CXMLParser::ParseComment()
@@ -481,11 +525,57 @@ CXMLCommentNode* CXMLParser::ParseComment()
 		}
 		else
 			EndMatch = 0;
+		Current++;
 	}
 
 	ReportError("Unterminated comment found at", Current);
 
 	return NULL;
+}
+
+CXMLNormalNode* CXMLParser::ParseNormal()
+{
+	SkipWhiteSpace();
+
+	if (!Good())
+		return NULL;
+
+	CXMLNormalNode *result = new CXMLNormalNode(ParseTagName());
+	int AttrStart = 0;
+
+	while (Good() && Text[Current] != '>')
+	{
+		AttrStart = Current; // there may be whitespace, so it's not fully correct...
+		
+		if (hasAttribute())
+		{
+			pair<string, string> attr = ParseAttribute();
+
+			// error handling
+			if (attr.first == "")
+				ReportError("Failed to read attribute at", AttrStart);
+			else
+				result->SetAttribute(attr.first, attr.second);
+		}
+		//some error handling if following symbol is something veryyy baaaaad
+
+		Current++;
+
+	}
+
+	if (/*Current && */Text[Current] == '>' && Text[Current - 1] == '/')
+	{
+		//no child coming
+		Current++;
+		return result;
+	}
+	Current++;
+
+	result->SetParent(CurrentLevel);//shit
+	CurrentLevel = result;
+	// reading a childlist...
+	ParseInside(&result->Children);
+	return result;
 }
 
 CXMLPrologNode* CXMLParser::ParseProlog()
@@ -513,14 +603,17 @@ CXMLPrologNode* CXMLParser::ParseProlog()
 		{
 			EndMatch = 0;
 			AttrStart = Current; // there may be whitespace, so it's not fully correct...
-			pair<string, string> attr = ParseAttribute();
+			if (hasAttribute())
+			{
+				pair<string, string> attr = ParseAttribute();
 
-			// error handling
-			if (attr.first == "")
-				ReportError("Failed to read attribute at", AttrStart);
+				// error handling
+				if (attr.first == "")
+					ReportError("Failed to read attribute at", AttrStart);
 
-			if (attr.first == "version")
-				result->SetVersion(attr.second);
+				if (attr.first == "version")
+					result->SetVersion(attr.second);
+			}
 
 			//else if (attr.first == "encoding")
 			//result->SetEncoding(attr.second);
@@ -539,6 +632,8 @@ CXMLTextNode* CXMLParser::ParseText()
 	SkipWhiteSpace();
 
 	int start = Current;
+	int len = 0;
+
 	string buffer;
 
 	while (Good() && !isAnotherTag())
@@ -549,12 +644,16 @@ CXMLTextNode* CXMLParser::ParseText()
 			start = Current;
 			buffer += ParseEntity();
 		}
+		if (!isWhiteSpace(Text[Current]))
+		len = Current - start + 1;
 
 		Current++;
 	}
 	//	Some error handling // nothing needed, text nodes may end anywhere...
 
 	buffer += Text.substr(start, Current - start);
+
+	buffer = buffer.substr(0, len);
 
 	// need to right trim whitespace, btw.. if someone didn't get it, "right trim" means delete any whitespace from tail..
 	return new CXMLTextNode(buffer);
@@ -566,7 +665,7 @@ pair<string, string> CXMLParser::ParseAttribute()
 
 	SkipWhiteSpace();
 
-	result.first = ParseName();
+	result.first = ParseAttributeName();
 
 	SkipWhiteSpace();//
 
@@ -577,16 +676,16 @@ pair<string, string> CXMLParser::ParseAttribute()
 	}
 	Current++;
 
-	result.second = ParseValue();
+	result.second = ParseAttributeValue();
 	// error handling here if needed // can't do it properly.. value can be "", so we can't determine, whether it's parsed correctly..
 	return result;
 }
 
-string CXMLParser::ParseName()
+string CXMLParser::ParseAttributeName()
 {
 	int start = Current;
 
-	while (Good() && isValidNameChar(Text[Current]))
+	while (Good() && isValidAttributeNameChar(Text[Current]))
 		Current++;
 
 	if (!Good())
@@ -597,7 +696,7 @@ string CXMLParser::ParseName()
 	return Text.substr(start, Current - start);
 }
 
-string CXMLParser::ParseValue()
+string CXMLParser::ParseAttributeValue()
 {
 	if (Text[Current] != '"')
 		return "";
@@ -643,6 +742,21 @@ string CXMLParser::ParseEntity()
 	ReportError("Unterminated entity at", start - 1);
 
 	return "";
+}
+
+string CXMLParser::ParseTagName()
+{
+	int start = Current;
+
+	while (Good() && isValidTagNameChar(Text[Current]))
+		Current++;
+
+	if (!Good())
+	{
+		// no need to report error here - it's being handled in higher level.. am i right?..
+	}
+
+	return Text.substr(start, Current - start);
 }
 
 void CXMLParser::ReportError(const string &Message, int Position)

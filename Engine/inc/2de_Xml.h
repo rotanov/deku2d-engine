@@ -14,6 +14,7 @@ public:
 	void SetName(const string &AName);
 	virtual string GetText() = 0;
 
+	CXMLNode *GetParent();
 	void SetParent(CXMLNode *AParent); // i don't like, that it's in public, but it doesn't work otherwise..
 
 protected:
@@ -170,22 +171,28 @@ private:
 
 	void SkipWhiteSpace();
 	bool isWhiteSpace(char c);
-	bool isValidNameChar(char c) ;
+	bool isValidAttributeNameChar(char c);
+	bool isValidTagNameChar(char c);
 
 	bool isAnotherTag();
+	bool hasAttribute();
+
+	void ParseInside(CXMLChildrenList *List);
 
 	CXMLNode* ParseNode();
 	CXMLCommentNode* ParseComment();
+	CXMLNormalNode* ParseNormal();
 	CXMLPrologNode* ParseProlog();
 	CXMLTextNode* ParseText();
 	//CXMLNormalNode* ParseNormal(); // need to handle nesting, setting parent, etc....
 	pair<string, string> ParseAttribute();
-	string ParseName();
-	string ParseValue();
+	string ParseAttributeName();
+	string ParseAttributeValue();
 	string ParseEntity();
+	string ParseTagName();
 
 	void ReportError(const string &Message, int Position);
-
+	CXMLNode *CurrentLevel;
 	CXMLChildrenList Result;
 	int Current;
 	string Text;
