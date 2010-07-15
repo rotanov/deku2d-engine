@@ -22,7 +22,7 @@ void CXMLNode::SetName(const string &AName)
 	Name = AName;
 }
 
-CXMLNode * CXMLNode::GetParent()
+CXMLNode* CXMLNode::GetParent()
 {
 	return Parent;
 }
@@ -52,7 +52,7 @@ void CXMLPrologNode::SetVersion(const string &AVersion)
 
 string CXMLPrologNode::GetText()
 {
-	return "<?" + GetName() + " version=\"" + Version + "\"?>";
+	return "<?" + GetName() + " version=\"" + CXMLHelper::Instance()->EntitiesEncode(Version) + "\"?>";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ string CXMLNormalNode::GetText()
 	{
 		for (map<string, string>::iterator it = Attributes.begin(); it != Attributes.end(); ++it)
 		{
-			res += " " + it->first + "=\"" + it->second + "\"";
+			res += " " + it->first + "=\"" + CXMLHelper::Instance()->EntitiesEncode(it->second) + "\"";
 		}
 	}
 
@@ -303,9 +303,7 @@ CXMLTextNode::CXMLTextNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(
 
 string CXMLTextNode::GetText()
 {
-	return GetValue() + "\n"; 
-	// according to current agreement all whitespace following after text
-	// ignored
+	return CXMLHelper::Instance()->EntitiesEncode(GetValue()) + "\n"; 
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -376,19 +374,9 @@ CXMLParser::CXMLParser(const string &AText) : Result(NULL), Text(AText), Current
 
 CXMLChildrenList CXMLParser::Parse()
 {
-// 	Result.Clear();
-// 
-// 	CXMLNode *Level = CurrentLevel;
-// 
-// 	while (Good() && Level == CurrentLevel)
-// 	{
-// 		CXMLNode *node = ParseNode();
-// 		if (node)
-// 			Result.AddLast(node);
-// 	}
-// 
 	ParseInside(&Result);
- 	Text = "";//why? // to prevent parsing the same text again at subsequent calls to Parse
+
+ 	Text = "";
  
  	return Result;
 }
@@ -406,6 +394,7 @@ void CXMLParser::ParseInside(CXMLChildrenList *List)
 			List->AddLast(node);
 	}
 }
+
 void CXMLParser::SetText(const string &AText)
 {
 	Text = AText;
@@ -427,14 +416,10 @@ bool CXMLParser::isWhiteSpace(char c)
 	return (c == ' ') || (c == '\n') || (c == '\t') || (c == '\r');
 }
 
-bool CXMLParser::isValidAttributeNameChar(char c) 
+bool CXMLParser::isValidNameChar(char c, bool Initial /*= false*/)
 {
-	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) || (c >= '0' && c <= '9');
-}
-
-bool CXMLParser::isValidTagNameChar(char c)
-{
-	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) || (c >= '0' && c <= '9');
+	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' ||
+		(!Initial && ((c >= '0' && c <= '9') || c == '-' || c == '.')));
 }
 
 bool CXMLParser::isAnotherTag()
@@ -445,7 +430,7 @@ bool CXMLParser::isAnotherTag()
 bool CXMLParser::hasAttribute()
 {
 	SkipWhiteSpace();
-	return Good() && isValidAttributeNameChar(Text[Current]);
+	return Good() && isValidNameChar(Text[Current], true);
 }
 
 CXMLNode* CXMLParser::ParseNode()
@@ -458,6 +443,12 @@ CXMLNode* CXMLParser::ParseNode()
 	if (Text[Current] == '<')
 	{
 		Current++;
+		if (!Good())
+		{
+			ReportError("Unterminated tag encountered at", Current);
+			return NULL;
+		}
+
 		if (Text.substr(Current, 3) == "!--")
 		{
 			return ParseComment();
@@ -468,28 +459,35 @@ CXMLNode* CXMLParser::ParseNode()
 		}
 		else if (Text[Current] == '/')
 		{
-			Current ++;
+			Current++;
 			string EndName = ParseTagName();
+
 			if (CurrentLevel && EndName != CurrentLevel->GetName()) 
-			// CXMLNode *CurrentLevel - class member - points to current level parent or NULL for root level
-			{
 				ReportError("Incorrect nesting: end tag doesn't match start tag at", Current);
-			}
 			else if (!CurrentLevel)
-			{
 			 	ReportError("Unexpected end tag without corresponding start tag at root level at", Current);
-			}
 
-			SkipWhiteSpace();
-
-			int Pos = Current;
-			while (Good() && Text[Current++] != '>');
-
-			if (Pos + 1 != Current)
+			if (!Good())
 			{
-				ReportError("TYPE YOUR TEXT HERE at", Pos);
+				ReportError("Unterminated tag encountered at", Current);
+				return NULL;
 			}
-			else if (CurrentLevel)
+
+			if (Text[Current] != '>')
+				ReportError("Unexpected symbols in end tag at", Current);
+			
+			while (Good() && Text[Current] != '>')
+				Current++;
+
+			if (!Good())
+			{
+				ReportError("Unterminated tag encountered at", Current);
+				return NULL;
+			}
+
+			Current++;
+
+			if (CurrentLevel)
 				CurrentLevel = CurrentLevel->GetParent();
 			
 			return NULL;	// always return NULL, because it's not real node
@@ -540,7 +538,14 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 	if (!Good())
 		return NULL;
 
-	CXMLNormalNode *result = new CXMLNormalNode(ParseTagName());
+	string TagName = ParseTagName();
+	if (TagName.empty())
+	{
+		ReportError("Incorrect tag name encountered at", Current);
+		return NULL;
+	}
+
+	CXMLNormalNode *result = new CXMLNormalNode(TagName);
 	int AttrStart = 0;
 
 	while (Good() && Text[Current] != '>')
@@ -563,13 +568,18 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 
 	}
 
-	if (/*Current && */Text[Current] == '>' && Text[Current - 1] == '/')
+	if (!Good())
+	{
+		ReportError("Unexpected end of tag at", Current);
+		return NULL;
+	}
+
+	Current++;
+	if (Text[Current - 1] == '>' && Text[Current - 2] == '/')
 	{
 		//no child coming
-		Current++;
 		return result;
 	}
-	Current++;
 
 	result->SetParent(CurrentLevel);//shit
 	CurrentLevel = result;
@@ -581,7 +591,7 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 CXMLPrologNode* CXMLParser::ParseProlog()
 {
 	Current += 4;
-	if (!isWhiteSpace(Text[Current]))
+	if (!Good() || !isWhiteSpace(Text[Current]))
 		return NULL;
 
 	CXMLPrologNode *result = new CXMLPrologNode;
@@ -591,7 +601,6 @@ CXMLPrologNode* CXMLParser::ParseProlog()
 
 	while (Good() && !isAnotherTag())
 	{
-		Current++;
 		if (EndMatch == 0 && Text[Current] == '?')
 			EndMatch++;
 		else if (EndMatch == 1 && Text[Current] == '>')
@@ -619,6 +628,8 @@ CXMLPrologNode* CXMLParser::ParseProlog()
 			//result->SetEncoding(attr.second);
 			// else ignore..
 		}
+
+		Current++;
 	}
 
 	ReportError("Unterminated prolog found at", Current);
@@ -632,7 +643,6 @@ CXMLTextNode* CXMLParser::ParseText()
 	SkipWhiteSpace();
 
 	int start = Current;
-	int len = 0;
 
 	string buffer;
 
@@ -641,21 +651,19 @@ CXMLTextNode* CXMLParser::ParseText()
 		if (Text[Current] == '&')
 		{
 			buffer += Text.substr(start, Current - start);
-			start = Current;
 			buffer += ParseEntity();
+			start = Current + 1;
 		}
-		if (!isWhiteSpace(Text[Current]))
-		len = Current - start + 1;
+
+		if (isWhiteSpace(Text[Current]) && !isWhiteSpace(Text[Current - 1]))
+		{
+			buffer += Text.substr(start, Current - start);
+			start = Current;
+		}
 
 		Current++;
 	}
-	//	Some error handling // nothing needed, text nodes may end anywhere...
 
-	buffer += Text.substr(start, Current - start);
-
-	buffer = buffer.substr(0, len);
-
-	// need to right trim whitespace, btw.. if someone didn't get it, "right trim" means delete any whitespace from tail..
 	return new CXMLTextNode(buffer);
 }
 
@@ -667,16 +675,22 @@ pair<string, string> CXMLParser::ParseAttribute()
 
 	result.first = ParseAttributeName();
 
-	SkipWhiteSpace();//
+	if (result.first.empty())
+		return result;
 
-	if (Text[Current] != '=')
+	SkipWhiteSpace();
+
+	if (!Good() || Text[Current] != '=')
 	{
 		result.first = "";
 		return result;
 	}
+
 	Current++;
+	SkipWhiteSpace();
 
 	result.second = ParseAttributeValue();
+
 	// error handling here if needed // can't do it properly.. value can be "", so we can't determine, whether it's parsed correctly..
 	return result;
 }
@@ -685,26 +699,41 @@ string CXMLParser::ParseAttributeName()
 {
 	int start = Current;
 
-	while (Good() && isValidAttributeNameChar(Text[Current]))
+	if (!Good() || !isValidNameChar(Text[Current], true))
+		return "";
+	
+	Current++;
+
+	while (Good() && isValidNameChar(Text[Current]))
 		Current++;
 
 	if (!Good())
-	{
-		// no need to report error here - it's being handled in higher level.. am i right?..
-	}
+		return "";
 
 	return Text.substr(start, Current - start);
 }
 
 string CXMLParser::ParseAttributeValue()
 {
-	if (Text[Current] != '"')
+	// SPECS: attribute values should be normalized.. but we're not-validating parser, so just count all attributes as CDATA
+
+	if (!Good() || Text[Current] != '"')
 		return "";
 
 	int start = ++Current;
-
+	string buffer;
+	
 	while (Good() && Text[Current] != '"')
+	{
+		if (Text[Current] == '&')
+		{
+			buffer += Text.substr(start, Current - start);
+			buffer += ParseEntity();
+			start = Current + 1;
+		}
+
 		Current++;
+	}
 
 	if (!Good())
 	{
@@ -712,7 +741,9 @@ string CXMLParser::ParseAttributeValue()
 		return "";
 	}
 
-	return Text.substr(start, Current - start);
+	buffer += Text.substr(start, Current - start);
+
+	return buffer;
 }
 
 string CXMLParser::ParseEntity()
@@ -724,19 +755,18 @@ string CXMLParser::ParseEntity()
 		if (Text[Current] == ';')
 		{
 			string entity = Text.substr(start, Current - start);
-			string result;	// maybe char, but i'm not sure, can it be more than one char?.. in most cases - no, but who knows...
-			if (entity == "amp")
-				result = "&";
-			else if (entity == "lt")
-				result = "<";
-			else if (entity == "gt")
-				result = ">";
-			else if (entity == "quot")
-				result = "\"";
-			// there are many more entities.. these are basic ones..
-			
-			return result;
+			char result = CXMLHelper::Instance()->GetCharByEntity(entity);
+
+			if (result == 0)
+			{
+				ReportError("Unknown entity at", start - 1);
+				return '&' + entity + ';';
+			}
+
+			return string(1, result);
 		}
+
+		Current++;
 	}
 
 	ReportError("Unterminated entity at", start - 1);
@@ -748,13 +778,10 @@ string CXMLParser::ParseTagName()
 {
 	int start = Current;
 
-	while (Good() && isValidTagNameChar(Text[Current]))
-		Current++;
+	// SPECS: Disallowed initial characters for Names include digits, diacritics, the full stop and the hyphen. -- handle this
 
-	if (!Good())
-	{
-		// no need to report error here - it's being handled in higher level.. am i right?..
-	}
+	while (Good() && isValidNameChar(Text[Current]))
+		Current++;
 
 	return Text.substr(start, Current - start);
 }
@@ -762,8 +789,71 @@ string CXMLParser::ParseTagName()
 void CXMLParser::ReportError(const string &Message, int Position)
 {
 	// temporary
-	// add severity support.. sometimes it's warning, sometimes - error..
+	// TODO: add severity support.. sometimes it's warning, sometimes - error..
+
 	//Log("ERROR", string(Message + " %d.").c_str(), Position [> here may be an xml file name... or not... <]);
+
+	// TODO: correct error positions for all places... or may be even something like "line" and "column", if it's possible..
+
 	// CLog crashes everything when engine's not running... so we will temporary use cout
 	cout << Message << " " << Position << endl;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLHelper
+
+CXMLHelper* CXMLHelper::Instance()
+{
+	return &_instance;
+}
+
+string CXMLHelper::EntitiesEncode(const string &AText)
+{
+	string result;
+	int current = 0;
+	int start = 0;
+
+	while (current < AText.length())
+	{
+		if (Entities.count(AText[current]))
+		{
+			result += AText.substr(start, current - start);
+			start = current + 1;
+			result += '&' + Entities[AText[current]] + ';';
+		}
+		current++;
+	}
+
+	result += AText.substr(start, current - start);
+
+	return result;
+}
+
+string CXMLHelper::EntitiesDecode(const string &AText)
+{
+	// STUB, or maybe not needed.
+	return "";
+}
+
+char CXMLHelper::GetCharByEntity(const string &AEntity)
+{
+	// SPECS: add support for character references: &#a and &#xb, where a is decimal and b is hexadecimal
+	// 	but i think, they require unicode...
+
+	for (EntityMap::iterator it = Entities.begin(); it != Entities.end(); ++it)
+		if (it->second == AEntity)
+			return it->first;
+
+	return 0;
+}
+
+CXMLHelper::CXMLHelper()
+{
+	Entities['&'] = "amp";
+	Entities['"'] = "quot";
+	Entities['\''] = "apos";
+	Entities['<'] = "lt";
+	Entities['>'] = "gt";
+}
+
+CXMLHelper CXMLHelper::_instance;

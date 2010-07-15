@@ -8,13 +8,12 @@ class CXMLNode
 public:
 	CXMLNode();
 	virtual ~CXMLNode();
-	//virtual bool HaveChildren(); // 0 by default
 
 	const string& GetName() const;
 	void SetName(const string &AName);
 	virtual string GetText() = 0;
 
-	CXMLNode *GetParent();
+	CXMLNode* GetParent();
 	void SetParent(CXMLNode *AParent); // i don't like, that it's in public, but it doesn't work otherwise..
 
 protected:
@@ -95,9 +94,8 @@ public:
 	CXMLNormalNode(const string &AName);
 	~CXMLNormalNode();
 
-	//bool HaveChildren(); // return 1
-
 	// TODO: maybe something like CXMLChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
+	// TODO: add support for special "ID" attribute (see specs).. its values are unique for entire document.. add GetElementByID, that should return node by its ID
 
 	string GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
@@ -171,8 +169,7 @@ private:
 
 	void SkipWhiteSpace();
 	bool isWhiteSpace(char c);
-	bool isValidAttributeNameChar(char c);
-	bool isValidTagNameChar(char c);
+	bool isValidNameChar(char c, bool Initial = false);
 
 	bool isAnotherTag();
 	bool hasAttribute();
@@ -184,7 +181,6 @@ private:
 	CXMLNormalNode* ParseNormal();
 	CXMLPrologNode* ParseProlog();
 	CXMLTextNode* ParseText();
-	//CXMLNormalNode* ParseNormal(); // need to handle nesting, setting parent, etc....
 	pair<string, string> ParseAttribute();
 	string ParseAttributeName();
 	string ParseAttributeValue();
@@ -196,6 +192,25 @@ private:
 	CXMLChildrenList Result;
 	int Current;
 	string Text;
+};
+
+class CXMLHelper
+{
+public:
+	static CXMLHelper* Instance();
+
+	string EntitiesEncode(const string &AText);
+	string EntitiesDecode(const string &AText);
+
+	char GetCharByEntity(const string &AEntity);
+private:
+	typedef map<char, string> EntityMap;
+
+	CXMLHelper();
+
+	EntityMap Entities;
+
+	static CXMLHelper _instance;
 };
 
 #endif // _2DE_XML_H_

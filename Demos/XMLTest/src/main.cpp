@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[])
 {
- 	CXML xml;
+         /*CXML xml;
  
  	CXMLNormalNode *logical_root = new CXMLNormalNode("root"); // only logical root, not really
 	xml.Root.AddLast(new CXMLPrologNode);
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
  	logical_root->Children.AddLast(commentnode);
  
 	// ну попрробуй.. сохрани меня!..
-	xml.SaveToFile("test.xml");
+	xml.SaveToFile("test.xml");*/
 
 	CXML parsetest;
 	parsetest.LoadFromFile("test.xml");
