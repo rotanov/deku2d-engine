@@ -40,5 +40,11 @@ int main(int argc, char* argv[])
 	parsetest.LoadFromFile("test.xml");
 	parsetest.SaveToFile("test1.xml");
 
+	CXML somenewxml(parsetest);
+	somenewxml.SaveToFile("test2.xml");
+	CXML somenewxml2;
+	somenewxml2 = somenewxml;
+	somenewxml2.SaveToFile("test3.xml");
+
 	return 0;
 }

@@ -9,16 +9,17 @@ public:
 	CXMLNode();
 	virtual ~CXMLNode();
 
+	virtual CXMLNode* Copy() = 0;
+
 	const string& GetName() const;
 	void SetName(const string &AName);
 	virtual string GetText() = 0;
 
 	CXMLNode* GetParent();
-	void SetParent(CXMLNode *AParent); // i don't like, that it's in public, but it doesn't work otherwise..
+	void SetParent(CXMLNode *AParent);
 
 protected:
 	CXMLNode *Parent;
-private:
 	string Name;
 };
 
@@ -26,6 +27,8 @@ class CXMLPrologNode : public CXMLNode
 {
 public:
 	CXMLPrologNode();
+
+	CXMLPrologNode* Copy();
 
 	const string& GetVersion() const;
 	void SetVersion(const string &AVersion);
@@ -38,16 +41,28 @@ private:
 class CXMLChildrenList
 {
 public:
-	class Iterator
+	class ConstIterator
 	{
 	public:
-		Iterator();
-		/*Iterator(CXMLNode &AXMLNode);
-		  Iterator(const iterator &AIterator);*/
+		bool operator==(const ConstIterator &AIterator) const;
+		bool operator!=(const ConstIterator &AIterator) const;
 
-		//Iterator& operator=(const Iterator &AIterator); // standard (assigning corresponding members) is sufficient
-		// deal with operator= and delete or uncomment it
+		ConstIterator& operator++();
+		ConstIterator operator++(int);
+		ConstIterator& operator--();
+		ConstIterator operator--(int);
 
+		CXMLNode* operator*();
+
+	private:
+		list<CXMLNode *>::const_iterator Backend;
+
+		friend class CXMLChildrenList;
+	};
+
+	class Iterator : public ConstIterator
+	{
+	public:
 		bool operator==(const Iterator &AIterator) const;
 		bool operator!=(const Iterator &AIterator) const;
 
@@ -75,6 +90,8 @@ public:
 	void DeleteAll();
 	void Clear();
 
+	ConstIterator Begin() const;
+	ConstIterator End() const;
 	Iterator Begin();
 	Iterator End();
 
@@ -94,6 +111,8 @@ public:
 	CXMLNormalNode(const string &AName);
 	~CXMLNormalNode();
 
+	CXMLNormalNode* Copy();
+
 	// TODO: maybe something like CXMLChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
 	// TODO: add support for special "ID" attribute (see specs).. its values are unique for entire document.. add GetElementByID, that should return node by its ID
 
@@ -102,6 +121,7 @@ public:
 	void DeleteAttribute(const string &AName);
 
 	string GetText();
+	void SetInnerText(const string &AText);
 	
 	CXMLChildrenList Children;
 
@@ -127,6 +147,8 @@ class CXMLCommentNode : public CXMLSingleValueNode
 public:
 	CXMLCommentNode(const string &AValue = "");
 
+	CXMLCommentNode* Copy();
+
 	string GetText();
 
 };
@@ -136,6 +158,8 @@ class CXMLTextNode : public CXMLSingleValueNode
 public:
 	CXMLTextNode(const string &AValue = "");
 
+	CXMLTextNode* Copy();
+
 	string GetText();
 };
 
@@ -143,7 +167,7 @@ class CXML
 {
 public:
 	CXML(const string &AFilename = "");
-	CXML(const CXML &ASource); // don't know, if it's really required...
+	CXML(const CXML &ASource);
 	~CXML();
 	CXML& operator=(const CXML &ASource);
 
@@ -187,7 +211,7 @@ private:
 	string ParseEntity();
 	string ParseTagName();
 
-	void ReportError(const string &Message, int Position);
+	void ReportError(const string &Severity, const string &Message, int Position);
 	CXMLNode *CurrentLevel;
 	CXMLChildrenList Result;
 	int Current;

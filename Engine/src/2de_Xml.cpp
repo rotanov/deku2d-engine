@@ -40,6 +40,13 @@ CXMLPrologNode::CXMLPrologNode()
 	Version = "1.0";
 }
 
+CXMLPrologNode* CXMLPrologNode::Copy()
+{
+	CXMLPrologNode *result = new CXMLPrologNode;
+	*result = *this;
+	return result;
+}
+
 const string& CXMLPrologNode::GetVersion() const
 {
 	return Version;
@@ -56,22 +63,51 @@ string CXMLPrologNode::GetText()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CChildrenList::Iterator
+// CChildrenList::ConstIterator
 
-CXMLChildrenList::Iterator::Iterator()
+bool CXMLChildrenList::ConstIterator::operator==(const CXMLChildrenList::ConstIterator &AIterator) const
 {
-
+	return (Backend == AIterator.Backend);
 }
-/*Iterator(CXMLNode &AXMLNode);*/
-/*Iterator(const iterator &AIterator)
-{
-}*/
 
-/*CXMLNormalNode::CChildrenList::Iterator& CXMLNormalNode::CChildrenList::Iterator::operator=(const CXMLNormalNode::CChildrenList::Iterator &AIterator)
+bool CXMLChildrenList::ConstIterator::operator!=(const CXMLChildrenList::ConstIterator &AIterator) const
 {
-	Backend = AIterator.Backend;
+	return (Backend != AIterator.Backend);
+}
+
+CXMLChildrenList::ConstIterator& CXMLChildrenList::ConstIterator::operator++()
+{
+	++Backend;
 	return *this;
-}*/
+}
+
+CXMLChildrenList::ConstIterator CXMLChildrenList::ConstIterator::operator++(int)
+{
+	ConstIterator result = *this;
+	++Backend;
+	return result;
+}
+
+CXMLChildrenList::ConstIterator& CXMLChildrenList::ConstIterator::operator--()
+{
+	--Backend;
+	return *this;
+}
+
+CXMLChildrenList::ConstIterator CXMLChildrenList::ConstIterator::operator--(int)
+{
+	ConstIterator result = *this;
+	--Backend;
+	return result;
+}
+
+CXMLNode* CXMLChildrenList::ConstIterator::operator*()
+{
+	return *Backend;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CChildrenList::Iterator
 
 bool CXMLChildrenList::Iterator::operator==(const CXMLChildrenList::Iterator &AIterator) const
 {
@@ -177,6 +213,20 @@ void CXMLChildrenList::Clear()
 	Backend.clear();
 }
 
+CXMLChildrenList::ConstIterator CXMLChildrenList::Begin() const
+{
+	ConstIterator result;
+	result.Backend = Backend.begin();
+	return result;
+}
+
+CXMLChildrenList::ConstIterator CXMLChildrenList::End() const
+{
+	ConstIterator result;
+	result.Backend = Backend.end();
+	return result;
+}
+
 CXMLChildrenList::Iterator CXMLChildrenList::Begin()
 {
 	Iterator result;
@@ -212,6 +262,17 @@ CXMLNormalNode::CXMLNormalNode(const string &AName) : Children(this)
 CXMLNormalNode::~CXMLNormalNode()
 {
 	Children.DeleteAll();
+}
+
+CXMLNormalNode* CXMLNormalNode::Copy()
+{
+	CXMLNormalNode *result = new CXMLNormalNode(Name);
+	result->Attributes = Attributes;
+
+	for (ChildrenIterator it = Children.Begin(); it != Children.End(); ++it)
+		result->Children.AddLast((*it)->Copy());
+
+	return result;
 }
 
 string CXMLNormalNode::GetAttribute(const string &AName) const
@@ -264,6 +325,14 @@ string CXMLNormalNode::GetText()
 	return res;
 }
 
+void CXMLNormalNode::SetInnerText(const string &AText)
+{
+	Children.DeleteAll();
+
+	CXMLParser parser(AText);
+	Children = parser.Parse();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CXMLSingleValueNode
 
@@ -289,6 +358,13 @@ CXMLCommentNode::CXMLCommentNode(const string &AValue /*= ""*/) : CXMLSingleValu
 	SetName("!--");
 }
 
+CXMLCommentNode* CXMLCommentNode::Copy()
+{
+	CXMLCommentNode *result = new CXMLCommentNode;
+	*result = *this;
+	return result;
+}
+
 string CXMLCommentNode::GetText()
 {
 	return "<" + GetName() + GetValue() + "-->\n";
@@ -299,6 +375,13 @@ string CXMLCommentNode::GetText()
 
 CXMLTextNode::CXMLTextNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(AValue)
 {
+}
+
+CXMLTextNode* CXMLTextNode::Copy()
+{
+	CXMLTextNode *result = new CXMLTextNode;
+	*result = *this;
+	return result;
 }
 
 string CXMLTextNode::GetText()
@@ -315,9 +398,23 @@ CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
 		LoadFromFile(AFilename);
 }
 
+CXML::CXML(const CXML &ASource) : Root(NULL)
+{
+	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
+		Root.AddLast((*it)->Copy());
+}
+
 CXML::~CXML()
 {
 	Root.DeleteAll();
+}
+
+CXML& CXML::operator=(const CXML &ASource)
+{
+	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
+		Root.AddLast((*it)->Copy()); 
+	
+	return *this;
 }
 
 #include <fstream>
@@ -438,6 +535,8 @@ CXMLNode* CXMLParser::ParseNode()
 	SkipWhiteSpace();
 	if (!Good())
 		return NULL;
+	
+	int start = Current;
 
 	// определяем тип ноды
 	if (Text[Current] == '<')
@@ -445,7 +544,7 @@ CXMLNode* CXMLParser::ParseNode()
 		Current++;
 		if (!Good())
 		{
-			ReportError("Unterminated tag encountered at", Current);
+			ReportError("ERROR", "Unterminated tag encountered at", start);
 			return NULL;
 		}
 
@@ -463,25 +562,25 @@ CXMLNode* CXMLParser::ParseNode()
 			string EndName = ParseTagName();
 
 			if (CurrentLevel && EndName != CurrentLevel->GetName()) 
-				ReportError("Incorrect nesting: end tag doesn't match start tag at", Current);
+				ReportError("ERROR", "Incorrect nesting: end tag doesn't match start tag at", start);
 			else if (!CurrentLevel)
-			 	ReportError("Unexpected end tag without corresponding start tag at root level at", Current);
+			 	ReportError("ERROR", "Unexpected end tag without corresponding start tag at root level at", start);
 
 			if (!Good())
 			{
-				ReportError("Unterminated tag encountered at", Current);
+				ReportError("ERROR", "Unterminated tag encountered at", start);
 				return NULL;
 			}
 
 			if (Text[Current] != '>')
-				ReportError("Unexpected symbols in end tag at", Current);
+				ReportError("ERROR", "Unexpected symbols in end tag at", Current);
 			
 			while (Good() && Text[Current] != '>')
 				Current++;
 
 			if (!Good())
 			{
-				ReportError("Unterminated tag encountered at", Current);
+				ReportError("ERROR", "Unterminated tag encountered at", start);
 				return NULL;
 			}
 
@@ -526,22 +625,24 @@ CXMLCommentNode* CXMLParser::ParseComment()
 		Current++;
 	}
 
-	ReportError("Unterminated comment found at", Current);
+	ReportError("ERROR", "Unterminated comment found at", start - 4);
 
 	return NULL;
 }
 
 CXMLNormalNode* CXMLParser::ParseNormal()
 {
-	SkipWhiteSpace();
-
-	if (!Good())
+	int start = Current - 1;
+	if (!Good() || isWhiteSpace(Text[Current]))
+	{
+		ReportError("ERROR", "Incorrect tag at", start);
 		return NULL;
+	}
 
 	string TagName = ParseTagName();
 	if (TagName.empty())
 	{
-		ReportError("Incorrect tag name encountered at", Current);
+		ReportError("ERROR", "Incorrect tag at", start);
 		return NULL;
 	}
 
@@ -550,19 +651,17 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 
 	while (Good() && Text[Current] != '>')
 	{
-		AttrStart = Current; // there may be whitespace, so it's not fully correct...
-		
 		if (hasAttribute())
 		{
+			AttrStart = Current;
 			pair<string, string> attr = ParseAttribute();
 
-			// error handling
 			if (attr.first == "")
-				ReportError("Failed to read attribute at", AttrStart);
+				ReportError("ERROR", "Failed to read attribute at", AttrStart);
 			else
 				result->SetAttribute(attr.first, attr.second);
 		}
-		//some error handling if following symbol is something veryyy baaaaad
+		//some error handling if following symbol is something veryyy baaaaad // what? o_O
 
 		Current++;
 
@@ -570,7 +669,7 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 
 	if (!Good())
 	{
-		ReportError("Unexpected end of tag at", Current);
+		ReportError("ERROR", "Unexpected end of tag at", Current);
 		return NULL;
 	}
 
@@ -590,6 +689,7 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 
 CXMLPrologNode* CXMLParser::ParseProlog()
 {
+	int start = Current - 1;
 	Current += 4;
 	if (!Good() || !isWhiteSpace(Text[Current]))
 		return NULL;
@@ -611,14 +711,13 @@ CXMLPrologNode* CXMLParser::ParseProlog()
 		else
 		{
 			EndMatch = 0;
-			AttrStart = Current; // there may be whitespace, so it's not fully correct...
 			if (hasAttribute())
 			{
+				AttrStart = Current;
 				pair<string, string> attr = ParseAttribute();
 
-				// error handling
 				if (attr.first == "")
-					ReportError("Failed to read attribute at", AttrStart);
+					ReportError("ERROR", "Failed to read attribute at", AttrStart);
 
 				if (attr.first == "version")
 					result->SetVersion(attr.second);
@@ -632,7 +731,7 @@ CXMLPrologNode* CXMLParser::ParseProlog()
 		Current++;
 	}
 
-	ReportError("Unterminated prolog found at", Current);
+	ReportError("ERROR", "Unterminated prolog found at", start);
 
 	delete result;
 	return NULL;
@@ -737,7 +836,7 @@ string CXMLParser::ParseAttributeValue()
 
 	if (!Good())
 	{
-		ReportError("Unterminated quoted string at", start - 1);
+		ReportError("ERROR", "Unterminated quoted string at", start - 1);
 		return "";
 	}
 
@@ -759,7 +858,7 @@ string CXMLParser::ParseEntity()
 
 			if (result == 0)
 			{
-				ReportError("Unknown entity at", start - 1);
+				ReportError("ERROR", "Unknown entity at", start - 1);
 				return '&' + entity + ';';
 			}
 
@@ -769,7 +868,7 @@ string CXMLParser::ParseEntity()
 		Current++;
 	}
 
-	ReportError("Unterminated entity at", start - 1);
+	ReportError("ERROR", "Unterminated entity at", start - 1);
 
 	return "";
 }
@@ -786,17 +885,15 @@ string CXMLParser::ParseTagName()
 	return Text.substr(start, Current - start);
 }
 
-void CXMLParser::ReportError(const string &Message, int Position)
+void CXMLParser::ReportError(const string &Severity, const string &Message, int Position)
 {
 	// temporary
-	// TODO: add severity support.. sometimes it's warning, sometimes - error..
-
 	//Log("ERROR", string(Message + " %d.").c_str(), Position [> here may be an xml file name... or not... <]);
 
-	// TODO: correct error positions for all places... or may be even something like "line" and "column", if it's possible..
+	// TODO: may be even something like "line" and "column", if it's possible..
 
 	// CLog crashes everything when engine's not running... so we will temporary use cout
-	cout << Message << " " << Position << endl;
+	cout << "[" << Severity << "] " << Message << " " << Position << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
