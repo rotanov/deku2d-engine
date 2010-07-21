@@ -461,7 +461,7 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 	TimeAndEvent[sizeof(TimeAndEvent) - 1] = 0;
 #else
 	char TimeString[64];
-	strcpy(TimeString, asctime(&CEnvironment::DateTime::GetLocalTimeAndDate()));
+	strcpy(TimeString, asctime(CEnvironment::DateTime::GetLocalTimeAndDate()));
 	TimeString[strlen(TimeString) - 1] = 0;
 	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%s] [%s] ", TimeString, Event);
 #endif
@@ -516,8 +516,8 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 		string NewLogFileName = LogFilePath + LogName;
 
 		if (DatedLogFileNames) {
-			tm TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
-			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
+			tm* TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
+			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(*TimeStruct, "%y%m%d-%H%M%S");
 		}
 		NewLogFileName += ".log";
 
@@ -656,13 +656,11 @@ void CFactory::Destroy(CObject *AObject)
 //////////////////////////////////////////////////////////////////////////
 // CEnvironment
 
-tm CEnvironment::DateTime::GetLocalTimeAndDate()
+tm* CEnvironment::DateTime::GetLocalTimeAndDate()
 {
 	time_t RawTime;
-	tm *TimeStruct;
 	time(&RawTime);
-	TimeStruct = localtime(&RawTime);
-	return *TimeStruct;
+	return localtime(&RawTime);
 }
 
 string CEnvironment::DateTime::GetFormattedTime(const tm TimeStruct, const char *Format)

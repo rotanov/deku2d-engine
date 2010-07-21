@@ -648,7 +648,7 @@ public:
 	class DateTime
 	{
 	public:
-		static tm GetLocalTimeAndDate();
+		static tm* GetLocalTimeAndDate();
 		static string GetFormattedTime(const tm TimeStruct, const char *Format);
 	};
 
