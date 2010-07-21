@@ -59,7 +59,7 @@ void CXMLPrologNode::SetVersion(const string &AVersion)
 
 string CXMLPrologNode::GetText()
 {
-	return "<?" + GetName() + " version=\"" + CXMLHelper::Instance()->EntitiesEncode(Version) + "\"?>";
+	return "<?" + GetName() + " version=\"" + CXMLHelper::Instance()->EntitiesEncode(Version) + "\"?>\n";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -417,49 +417,26 @@ CXML& CXML::operator=(const CXML &ASource)
 	return *this;
 }
 
-#include <fstream>
-
 void CXML::LoadFromFile(const string &AFilename)
 {
-	//CFile f(AFilename, CFile::OPEN_MODE_READ);
-
-	// damn, CFile is just useless shit..
-	// temporary (i hope) using fstream...
-
-	ifstream temp(AFilename.c_str());
-
-	string tmpstr;
-	string AllContent;
-
-	while (temp.good())
-	{
-		getline(temp, tmpstr);
-		AllContent += tmpstr;
-	}
-	temp.close();
+	CFile file(AFilename, CFile::OPEN_MODE_READ);
+	string AllContent = file.GetContent();
+	file.Close();
 
 	Root.DeleteAll();
 
-	CXMLParser parser(AllContent);
-
+	CXMLParser parser(AllContent); 
 	Root = parser.Parse();
-
-	// string AllContent = // Get all file content in string somehow..
-	// Root.DeleteAll();
-	// CXMLParser parser(AllContent);
-	// Root = parser.Parse();
-
-	//f.Close();
 }
 
 void CXML::SaveToFile(const string &AFilename)
 {
-	CFile f(AFilename, CFile::OPEN_MODE_WRITE);
+	CFile file(AFilename, CFile::OPEN_MODE_WRITE);
+
 	for (CXMLNormalNode::ChildrenIterator it = Root.Begin(); it != Root.End(); ++it)
-	{
-		f.WriteLine((*it)->GetText());
-	}
-	f.Close();
+		file.WriteText((*it)->GetText());
+
+	file.Close();
 }
 
 //////////////////////////////////////////////////////////////////////////
