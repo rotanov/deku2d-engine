@@ -81,7 +81,7 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 //////////////////////////////////////////////////////////////////////////
 // CGUIRootObject
 
-CGUIRootObject::CGUIRootObject()
+CGUIRootObject::CGUIRootObject(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), TabHolded(false)
 {
 	SetName("GUI Root Object");
 }
@@ -105,7 +105,33 @@ void CGUIRootObject::Render()
 
 void CGUIRootObject::Update(float dt)
 {
-	return;
+#ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
+	if (TabHolded)
+	{
+		TimerAccum += dt*1000;
+		if (!RepeatStarted)
+		{
+			if (TimerAccum > KeyHoldRepeatDelay)
+			{
+				TimerAccum = 0;
+				RepeatStarted = true;
+			}
+		}
+		else
+		{
+			if (TimerAccum > KeyHoldRepeatInterval)
+			{
+				TimerAccum = 0;
+				CGUIManager::Instance()->InputHandling(KEY_PRESSED, SDLK_TAB, SDLMod(0), 0);
+			}
+		}
+	}
+	else
+	{
+		TimerAccum = 0;
+		RepeatStarted = false;
+	}
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -156,7 +182,7 @@ void CGUIObject::SetParent(CGUIObjectBase *AParent)
 //////////////////////////////////////////////////////////////////////////
 // CGUIManager
 
-CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), TabHolded(false)
+CGUIManager::CGUIManager()
 {
 	SetName("GUI Manager");
 	Root = new CGUIRootObject;
@@ -167,47 +193,16 @@ CGUIManager::CGUIManager(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), 
 	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
-void CGUIManager::Update(float dt)
-{
-#ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
-	if (TabHolded)
-	{
-		TimerAccum += dt*1000;
-		if (!RepeatStarted)
-		{
-			if (TimerAccum > KeyHoldRepeatDelay)
-			{
-				TimerAccum = 0;
-				RepeatStarted = true;
-			}
-		}
-		else
-		{
-			if (TimerAccum > KeyHoldRepeatInterval)
-			{
-				TimerAccum = 0;
-				InputHandling(KEY_PRESSED, SDLK_TAB, SDLMod(0), 0);
-			}
-		}
-	}
-	else
-	{
-		TimerAccum = 0;
-		RepeatStarted = false;
-	}
-#endif
-}
-
 bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	
+	// TODO: move this function to CGUIRootObject..	
 	switch(state)
 	{
 	case KEY_PRESSED:
 		switch(key)
 		{
 		case SDLK_TAB:
-			TabHolded = true;
+			Root->TabHolded = true;
 			if (Focus != Objects.end()) // if iterator correct
 			{
 				if (mod & KMOD_SHIFT)
@@ -230,7 +225,7 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		switch(key)
 		{
 		case SDLK_TAB:
-			TabHolded =  false;
+			Root->TabHolded =  false;
 			break;
 		}
 		break;

@@ -124,24 +124,6 @@ public:
 	CFont* GetFont() const;
 	void SetFont(CFont *AFont);
 
-	const CText& GetText() const
-	{
-		return Text;
-	}
-
-	void SetText(const string &AText)
-	{
-		Text = AText;
-		Text.Position = ((GetBox().vMin + GetBox().vMax) - Vector2(Text.Width(), Text.Height())) * 0.5f;
-	}
-
-	void SetBox(const CAABB &box)
-	{
-		CRenderObject::SetBox(box);
-		Text.SetLayer(10);
-		// maybe smthng else
-	}
-
 	CPrimitiveRender* GetPrimitiveRender() const;
 	void SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
 	
@@ -156,7 +138,6 @@ public:
 
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
 protected:
-	CText Text;
 	CObjectCallback		CallProc;	//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
 	CObject			*Caller;
 
@@ -182,6 +163,12 @@ public:
 	void Render();
 	void Update(float dt);
 
+	bool TabHolded; // temporary, ofcourse..
+private:
+	int KeyHoldRepeatDelay;	
+	int KeyHoldRepeatInterval;
+	int TimerAccum;
+	bool RepeatStarted;
 };
 
 
@@ -197,19 +184,37 @@ public:
 
 	void SetParent(CGUIObjectBase *AParent);
 
+	const CText& GetText() const
+	{
+		return Text;
+	}
+
+	void SetText(const string &AText)
+	{
+		Text = AText;
+		Text.Position = ((GetBox().vMin + GetBox().vMax) - Vector2(Text.Width(), Text.Height())) * 0.5f;
+	}
+
+	void SetBox(const CAABB &box)
+	{
+		CRenderObject::SetBox(box);
+		Text.SetLayer(10);
+		// maybe smthng else
+	}
+
 protected:
+	CText Text;
 	CGUIObjectBase *Parent;		//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
 					// 	ну она как бы есть, но не совсем иерархия.. и да, родителем объекта может быть и Base, поэтому тут будет он
 };
 
 // вот этот класс (CGUIManager) наследован одновременно и от синглтона, и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
 // получаем всякие гадости в логах при удалении, потому что его сначала удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
-class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingleton<CGUIManager>, public CUpdateObject
+class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingleton<CGUIManager>
 {
 public:
 				~CGUIManager();
 	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	void		Update(float dt);
 	CGUIObject* GetFocusedObject() const;
 	void		SetFocus(CGUIObject *AObject);
 	CGUIRootObject* GetRoot() const;
@@ -217,11 +222,6 @@ public:
 		
 private:
 	ManagerIterator Focus;
-	int			KeyHoldRepeatDelay;	
-	int			KeyHoldRepeatInterval;
-	int			TimerAccum;
-	bool		TabHolded;
-	bool		RepeatStarted;
 	CGUIRootObject *Root;
 protected:
 	CGUIManager();
