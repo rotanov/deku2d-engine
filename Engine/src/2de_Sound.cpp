@@ -1,7 +1,6 @@
 #include "2de_Sound.h"
 
 #include <SDL/SDL.h>
-#include <SDL/SDL_mixer.h>
 
 //////////////////////////////////////////////////////////////////////////
 // CSound
@@ -102,7 +101,7 @@ bool CMusic::LoadFromFile()
 CSound* CSoundManager::GetSoundByName(const string &SoundName)
 {
 	CSound *Result = NULL;
-	Result = GetObject(SoundName);
+	Result = Get(SoundName);
 	if (Result)
 		Result->CheckLoad();
 	return Result;
@@ -119,7 +118,7 @@ CSoundManager::CSoundManager()
 CMusic* CMusicManager::GetMusicByName(const string &MusicName)
 {
 	CMusic *Result = NULL;
-	Result = GetObject(MusicName);
+	Result = Get(MusicName);
 	if (Result)
 		Result->CheckLoad();
 	return Result;

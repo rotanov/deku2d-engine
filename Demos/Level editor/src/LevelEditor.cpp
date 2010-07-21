@@ -341,8 +341,8 @@ bool Draw()
 	p.grCircleL(MousePos, 5.0f);
 
 	glLoadIdentity();
-	f->Pos = Vector2((vx+1)*Zoom, vy*Zoom);
-	f->Print(" x:%d y:%d", (int)(vx - CellOffset.x), (int)(vy - CellOffset.y));
+	//f->Pos = Vector2((vx+1)*Zoom, vy*Zoom);
+	//f->Print(" x:%d y:%d", (int)(vx - CellOffset.x), (int)(vy - CellOffset.y));
 
 
 	DrawPanels();

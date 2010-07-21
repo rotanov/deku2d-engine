@@ -88,8 +88,8 @@ CTilesetEditor::CTilesetEditor()
 	for(int i = 0; i < BUTTONS_COUNT; i++)
 	{
 		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
-		temp->aabb = CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-		temp->Text = ButtonNames[i];
+		temp->SetText(static_cast<string>(ButtonNames[i]));
+		temp->SetBox(CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));		
 		temp->SetCallback(ButtonCallers[i], this);
 	}
 
@@ -100,33 +100,33 @@ CTilesetEditor::CTilesetEditor()
 
 	edTilesetTextureName = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT), "Texture:");
 	CFactory::Instance()->Add(edTilesetTextureName, "edTilesetTexutreName");
-	edTilesetTextureName->Text = "Font_font";
+	edTilesetTextureName->SetText(static_cast<string>("Font_font"));
 	edTilesetTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edTilesetName = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1) + 20, EDIT_WIDTH, BUTTON_HEIGHT), "Tileset:");
 	CFactory::Instance()->Add(edTilesetName, "edTilesetName");
 	//edTilesetName->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT);
-	edTilesetName->Text = "Font";
+	edTilesetName->SetText(static_cast<string>("Font"));
 	edTilesetName->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edHorNumTiles = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2) + 40, EDIT_WIDTH, BUTTON_HEIGHT), "HorNumTiles:");
 	CFactory::Instance()->Add(edHorNumTiles, "edHorNumTiles");
-	edHorNumTiles->Text = "4";
+	edHorNumTiles->SetText(static_cast<string>("4"));
 	edHorNumTiles->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edVerNumTiles = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 3) + 60, EDIT_WIDTH, BUTTON_HEIGHT), "VerNumTiles:");
 	CFactory::Instance()->Add(edVerNumTiles, "edVerNumTiles");
-	edVerNumTiles->Text = "2";
+	edVerNumTiles->SetText(static_cast<string>("2"));
 	edVerNumTiles->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edTileWidth = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 4) + 80, EDIT_WIDTH, BUTTON_HEIGHT), "TileWidth:");
 	CFactory::Instance()->Add(edTileWidth, "edTileWidth");
-	edTileWidth->Text = "32";
+	edTileWidth->SetText(static_cast<string>("32"));
 	edTileWidth->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	edTileHeight = new CLabeledEdit(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 5) + 100, EDIT_WIDTH, BUTTON_HEIGHT), "TileHeight:");
 	CFactory::Instance()->Add(edTileHeight, "edTileHeight");
-	edTileHeight->Text = "32";
+	edTileHeight->SetText(static_cast<string>("32"));
 	edTileHeight->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 
@@ -153,8 +153,7 @@ void CTilesetEditor::Render()
 	PRender.grCircleL(MousePosition, 5);
 	int fps;
 	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
-	CFontManager::Instance()->Font()->tClr = COLOR_WHITE;
-	CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
+	//CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
 	glLoadIdentity();
 
 	gToggleScissor(true);
@@ -303,17 +302,17 @@ bool LoadTileset(CObject *Caller)
 	CTilesetEditor *TilesetEditor = dynamic_cast<CTilesetEditor *>(Caller);
 	if (TilesetEditor == NULL)
 		return false;
-	TilesetEditor->Tileset = CTileSetManager::Instance()->GetTileset(TilesetEditor->edTilesetName->Text.c_str());
+	TilesetEditor->Tileset = CTileSetManager::Instance()->GetTileset(TilesetEditor->edTilesetName->GetText().GetText());
 	if (TilesetEditor->Tileset == NULL)
 	{
-		Log("Error", "Tileset %s not found within data/fonts", TilesetEditor->edTilesetName->Text);
+		Log("Error", "Tileset %s not found within data/fonts", TilesetEditor->edTilesetName->GetText().GetText().c_str());
 		return false;
 	}
 	TilesetEditor->TilesetTexture = TilesetEditor->Tileset->GetTexture();
-	TilesetEditor->edHorNumTiles->Text = itos(TilesetEditor->Tileset->HorNumTiles);
-	TilesetEditor->edVerNumTiles->Text = itos(TilesetEditor->Tileset->VerNumTiles);
-	TilesetEditor->edTileWidth->Text = itos(TilesetEditor->Tileset->TileWidth);
-	TilesetEditor->edTileHeight->Text = itos(TilesetEditor->Tileset->TileHeight);
+	TilesetEditor->edHorNumTiles->SetText(itos(TilesetEditor->Tileset->HorNumTiles));
+	TilesetEditor->edVerNumTiles->SetText(itos(TilesetEditor->Tileset->VerNumTiles));
+	TilesetEditor->edTileWidth->SetText(itos(TilesetEditor->Tileset->TileWidth));
+	TilesetEditor->edTileHeight->SetText(itos(TilesetEditor->Tileset->TileHeight));
 	return true;
 }
 
@@ -323,11 +322,11 @@ bool SaveTileset(CObject *Caller)
 	if (TilesetEditor == NULL)
 		return false;
 	if (TilesetEditor->Tileset == NULL)
-		TilesetEditor->Tileset = CFactory::Instance()->New<CTileset>(TilesetEditor->edTilesetName->Text);
-	TilesetEditor->Tileset->Filename = TilesetEditor->edTilesetName->Text + ".tls";
+		TilesetEditor->Tileset = CFactory::Instance()->New<CTileset>(TilesetEditor->edTilesetName->GetText().GetText());
+	TilesetEditor->Tileset->Filename = TilesetEditor->edTilesetName->GetText().GetText() + ".tls";
 	TilesetEditor->Tileset->SetTexture(TilesetEditor->TilesetTexture->GetName());
-	TilesetEditor->Tileset->SetSettings(stoi(TilesetEditor->edTileWidth->Text.c_str()), stoi(TilesetEditor->edTileHeight->Text.c_str()),
-	stoi(TilesetEditor->edHorNumTiles->Text.c_str()), stoi(TilesetEditor->edVerNumTiles->Text.c_str()) );
+	TilesetEditor->Tileset->SetSettings(stoi(TilesetEditor->edTileWidth->GetText().GetText()), stoi(TilesetEditor->edTileHeight->GetText().GetText()),
+	stoi(TilesetEditor->edHorNumTiles->GetText().GetText()), stoi(TilesetEditor->edVerNumTiles->GetText().GetText()) );
 
 
 	TilesetEditor->Tileset->SaveToFile();
@@ -339,10 +338,10 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). */
 	CTilesetEditor *TilesetEditor = dynamic_cast<CTilesetEditor *>(Caller);
 	if (TilesetEditor == NULL)
 		return false;
-	CTexture *TempFontTexture = CTextureManager::Instance()->GetObject(TilesetEditor->edTilesetTextureName->Text);
+	CTexture *TempFontTexture = CTextureManager::Instance()->Get(TilesetEditor->edTilesetTextureName->GetText().GetText());
 	if (TempFontTexture == NULL)
 	{
-		Log("ERROR", "Font texture %s not found", TilesetEditor->edTilesetTextureName->Text);
+		Log("ERROR", "Font texture %s not found", TilesetEditor->edTilesetTextureName->GetText().GetText().c_str());
 		// Создать объект текст с таймером здесь, выдавать ошибки с его помощью прямо на экран.
 		return false;
 	}

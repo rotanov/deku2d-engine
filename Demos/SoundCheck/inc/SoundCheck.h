@@ -11,7 +11,7 @@ public:
 	{
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		VolumeLabel = CFactory::Instance()->New<CLabel>("VolumeLabel");
-		VolumeLabel->aabb = CAABB(530, 270, 100, 32);
+		VolumeLabel->SetBox(CAABB(530, 270, 100, 32));
 		UpdateVolumeLabel();
 	}
 
@@ -59,7 +59,7 @@ public:
 private:
 	void UpdateVolumeLabel()
 	{
-		VolumeLabel->Text = itos(Volume);		
+		VolumeLabel->SetText(itos(Volume));
 	}
 	int Volume;
 	CLabel *VolumeLabel;
@@ -101,7 +101,7 @@ public:
 
 bool PlayFile(CObject *Caller)
 {
-	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->Text;
+	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->GetText().GetText();
 	Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
 	CMusic *mus = CFactory::Instance()->New<CMusic>("mus");
 	mus->Filename = test;
@@ -116,13 +116,13 @@ public:
 	CLoadFileGUI()
 	{
 		LoadFileButton = CFactory::Instance()->New<CButton>("LoadFileButton");
-		LoadFileButton->aabb = CAABB(400, 270, 100, 32);
-		LoadFileButton->Text = "Play";
+		LoadFileButton->SetBox(CAABB(400, 270, 100, 32));
+		LoadFileButton->SetText(static_cast<string>("Play"));
 		LoadFileButton->SetCallback(&PlayFile, NULL);
 
 		FileNameEdit = CFactory::Instance()->New<CEdit>("FileNameEdit");
-		FileNameEdit->aabb = CAABB(80, 270, 300, 32);
-		FileNameEdit->Text = "";
+		FileNameEdit->SetBox(CAABB(80, 270, 300, 32));
+		//FileNameEdit->SetText("");
 
 
 	}

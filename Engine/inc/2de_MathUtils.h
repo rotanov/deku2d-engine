@@ -7,10 +7,8 @@
 #ifndef _2DE_MATH_UTILS_H_
 #define _2DE_MATH_UTILS_H_
 
-#include <math.h>
-#include <algorithm>
-#include <stdexcept>
 #include "2de_Core.h"
+
 // If enabled then optimized version of 
 // Vector2.Length() used. It costs 5% accuracy.
 //#define OPTIMIZE_V2L

@@ -6,6 +6,8 @@
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
 #include "2de_Gui.h"
+#include "2de_ImageUtils.h"
+#include "2de_MathUtils.h"
 #include "2de_Resource.h"
 #include "2de_Sound.h"
 #include "2de_Update.h"

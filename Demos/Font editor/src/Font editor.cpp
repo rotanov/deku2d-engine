@@ -164,8 +164,8 @@ CFontEditor::CFontEditor()
 	for(int i = 0; i < BUTTONS_COUNT; i++)
 	{
 		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
-		temp->aabb = CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-		temp->Text = ButtonNames[i];
+		temp->SetText(static_cast<string>(ButtonNames[i]));
+		temp->SetBox(CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));		
 		temp->SetCallback(ButtonCallers[i], this);
 	}
 
@@ -175,24 +175,24 @@ CFontEditor::CFontEditor()
 //  	temp->aabb = CAABB(LEFT_MARGIN + BUTTON_WIDTH / 2 + 10, 20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, BUTTON_WIDTH / 2 - 5, BUTTON_HEIGHT);
 
 	edFontTextureName = CFactory::Instance()->New<CEdit>("edFontTextureName");
-	edFontTextureName->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT);
-	edFontTextureName->Text = "Font_font";
-	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
+	edFontTextureName->SetText(static_cast<string>("Font_font"));
+	edFontTextureName->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT));	
+//	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edFontname = CFactory::Instance()->New<CEdit>("edFontname");
-	edFontname->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT);
-	edFontname->Text = "Font";
+	edFontname->SetText(static_cast<string>("Font"));
+	edFontname->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT));	
 	edFontname->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	lblSampleText = CFactory::Instance()->New<CLabel>("lblSampleText");
-	lblSampleText->Text = "The quick brown fox jumps over a lazy dog.";
-	lblSampleText->aabb = CAABB(INTERFACE_OFFSET_X + 20, 20 + (BUTTON_HEIGHT+10)*3, 500, 25);
+	lblSampleText->SetText(static_cast<string>("The quick brown fox jumps over a lazy dog."));
+	lblSampleText->SetBox(CAABB(INTERFACE_OFFSET_X + 20, 20 + (BUTTON_HEIGHT+10)*3, 500, 25));
 	lblSampleText->Color = COLOR_WHITE;
 	lblSampleText->Visible = false;
 
 	lblCharachterSelectedASCIIIndex = CFactory::Instance()->New<CLabel>("lblASCII");
-	lblCharachterSelectedASCIIIndex->Text = "ASCII index: " + itos(CurrentSymbol);
-	lblCharachterSelectedASCIIIndex->aabb = CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2), EDIT_WIDTH, BUTTON_HEIGHT);
+	lblCharachterSelectedASCIIIndex->SetText("ASCII index: " + itos(CurrentSymbol));
+	lblCharachterSelectedASCIIIndex->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2), EDIT_WIDTH, BUTTON_HEIGHT));
 	lblCharachterSelectedASCIIIndex->Color = COLOR_WHITE;
 	lblCharachterSelectedASCIIIndex->Visible = true;
 
@@ -213,8 +213,8 @@ void CFontEditor::Render()
 	PRender.grCircleL(MousePosition, 5);
 	int fps;
 	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
-	CFontManager::Instance()->Font()->tClr = COLOR_WHITE;
-	CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
+	FPSText.Position = Vector2(2.0f, WindowHeight - 20.0f);
+	FPSText.SetText("FPS: " + itos(fps));
 	glLoadIdentity();
 
 	gToggleScissor(true);
@@ -396,7 +396,7 @@ void CFontEditor::SetSelectedBoxTo(int Index)
 	if (Font == NULL)
 		return;
 	CurrentSymbol = Index; // @todo: Add range check
-	lblCharachterSelectedASCIIIndex->Text = "ASCII Index: " + itos(CurrentSymbol + 32);
+	lblCharachterSelectedASCIIIndex->SetText("ASCII Index: " + itos(CurrentSymbol + 32));
 
 	CRecti rect = Font->bbox[CurrentSymbol];
 	Vector2 Vertices[5] = 
@@ -422,10 +422,10 @@ bool LoadFont(CObject *Caller)
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->Text.c_str());
+	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->GetText().GetText());
 	if (FontEditor->Font == NULL)
 	{
-		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->Text);
+		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->GetText().GetText());
 		return false;
 	}
 	FontEditor->FontTexture = FontEditor->Font->GetTexture();
@@ -476,10 +476,10 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). *
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	CTexture *TempFontTexture = CTextureManager::Instance()->GetObject(FontEditor->edFontTextureName->Text);
+	CTexture *TempFontTexture = CTextureManager::Instance()->Get(FontEditor->edFontTextureName->GetText().GetText());
 	if (TempFontTexture == NULL)
 	{
-		Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->Text);
+		Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->GetText().GetText().c_str());
 		// Создать объект текст с таймером здесь, выдавать ошибки с его помощью прямо на экран.
 		return false;
 	}
@@ -497,7 +497,7 @@ bool ExitFontEditor(CObject *Caller)
 
 bool ShowTestPhrase(CObject *Caller)
 {
-	CLabel *Lbl = dynamic_cast<CLabel*>(CGUIManager::Instance()->GetObject("lblSampleText"));
+	CLabel *Lbl = dynamic_cast<CLabel*>(CGUIManager::Instance()->Get("lblSampleText"));
 	Lbl->Visible = !Lbl->Visible;
 	return true;
 }

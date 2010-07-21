@@ -52,6 +52,7 @@ class CFontEditor : public CRenderObject, public CUpdateObject
 		SCK_NONE,
 	};
 public:
+	CText	FPSText;
 	Vector2					MousePosition;
 	Vector2					MouseDelta;
 	int						WindowWidth;

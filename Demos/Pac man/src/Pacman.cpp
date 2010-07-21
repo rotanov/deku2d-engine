@@ -132,7 +132,7 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pacman map");
 	CFactory::Instance()->Add(Map, "Pacman map");
 	Map->SetLayer(0);
-	Map->Scaling = 2.0f;
+	Map->SetScaling(2.0f);
 	//	Map.TileSet = Tiles;
 	for(int i = 0; i < LEVEL_WIDTH; i++)
 		for(int j = 0; j < LEVEL_HEIGHT; j++)

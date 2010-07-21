@@ -2,16 +2,12 @@
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
-#include "2de_GraphicsLow.h"
-#include "2de_GraphicsHigh.h"
-#include "2de_GameUtils.h"
-#include "2de_Sound.h"
 
 #ifdef _WIN32
 #include "dirent/dirent.h"
 #else
 #include <dirent.h>
-#endif
+#endif // _WIN32
 
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase

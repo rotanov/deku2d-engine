@@ -36,28 +36,29 @@
 #endif // _MSC_VER
 
 #include <SDL/SDL.h>
+#include <algorithm>
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <list>
 #include <map>
-#include <algorithm>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <typeinfo>
+#include <vector>
 
 #include <assert.h>
+#include <malloc.h>
+#include <math.h>
+#include <memory.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <time.h>
-#include <malloc.h>
-#include <memory.h>
-#include <math.h>
 
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
-	#define GetObject  GetObject
+	#define Get  Get
 
 	#include <tchar.h>
 #endif  //_WIN32
@@ -93,6 +94,7 @@ using namespace std;
 
 /**
 *	Отлов утечек памяти.
+*	Немного пофикшен, однако все равно нуждается в тестировании и улучшении.
 *	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
 *	@todo: Implement new[] and delete []
 *	@todo: Remove inline from AddTrack and RemoveTrack and others.
@@ -106,7 +108,7 @@ struct ALLOC_INFO
 {
 	unsigned long address;
 	unsigned long size;
-	char file[64];
+	char file[MAX_PATH];//bad but anyway... probably needs replacement with string type
 	unsigned long line;
 };
 
@@ -123,7 +125,8 @@ inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fnam
 
 	info = new(ALLOC_INFO);
 	info->address = addr;
-	strncpy(info->file, fname, 63);
+	strcpy(info->file, fname, MAX_PATH);
+	info->file[MAX_PATH] = 0;
 	info->line = lnum;
 	info->size = asize;
 	allocList->insert(allocList->begin(), info);
@@ -197,13 +200,24 @@ class CObject
 {
 private:
 	bool Destroyed;
-	size_t ID;
+	int ID;
 	string Name;
 	size_t RefCount;
 	static unsigned int CObjectCount;
+	CObject(const CObject &AObject);
+	CObject& operator =(const CObject &AObject)
+	{
+		if (this == &AObject)
+			return *this;
+		Destroyed = AObject.Destroyed;
+		ID = reinterpret_cast<int>(this);
+		Name = AObject.GetName() + " copy";
+		RefCount = 0;
+	}
 
 public:
 	CObject();
+	
 	virtual ~CObject();		
 	void IncRefCount();
 	static void DecRefCount(CObject* AObject);	
@@ -240,7 +254,7 @@ public:
 	typedef typename ManagerContainer::iterator ManagerIterator;
 	typedef typename ManagerContainer::const_iterator ManagerConstIterator;
 
-	T GetObject(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
+	T Get(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
 	{					// 	hashmap, anyone?...
 		T temp = NULL;
 		ManagerContainer toDelete;
@@ -266,7 +280,7 @@ public:
 		return temp;
 	}
 
-	void Add(const T &AObject)
+	virtual void Add(const T &AObject)
 	{
 		AObject->IncRefCount();
 		Objects.push_back(AObject);
@@ -361,7 +375,6 @@ protected:
 
 private:
 	static T * _instance;
-	bool Constructed;
 };
 
 template <typename T>

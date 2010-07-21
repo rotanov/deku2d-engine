@@ -1,4 +1,3 @@
-#include <math.h>
 #include "2de_MathUtils.h"
 
 unsigned int g_seed = 152406923;
