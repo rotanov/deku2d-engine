@@ -381,6 +381,9 @@ bool CFile::ReadLine(string &Buffer)
 		if (!ReadByte(&b))
 			return false;
 
+		if (b == 0)	// that's needed, because std::string is buggy in handling \0 in strings...
+			break;
+
 		Buffer += b;
 
 		if (b == 10)
@@ -580,9 +583,7 @@ CLog::~CLog()
 void CLog::WriteToLog(const char *Event, const char *Format, ...)
 {
 	if (!Enabled)
-	{
 		return;
-	}
 
 	if (Stream == NULL)
 	{
@@ -593,27 +594,28 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 		}
 	}
 
-	char TimeAndEvent[64];
-
-#ifdef LOG_TIME_TICK
-	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
-	TimeAndEvent[sizeof(TimeAndEvent) - 1] = 0;
-#else
-	char TimeString[64];
-	strcpy(TimeString, asctime(CEnvironment::DateTime::GetLocalTimeAndDate()));
-	TimeString[strlen(TimeString) - 1] = 0;
-	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%s] [%s] ", TimeString, Event);
-#endif
-
-	char buffer[1024];
-
 	va_list args;
 	va_start(args, Format);
-	vsnprintf(buffer, sizeof(buffer) - 1, Format, args);	// safe, but writes only first 1024 chars per log line...
-	buffer[sizeof(buffer) - 1] = 0;				// should be sufficent for all cases, though...
+
+	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+
+	char *buffer = new char[MessageLength + 1];
+
+	vsnprintf(buffer, MessageLength, Format, args);
+	buffer[MessageLength] = 0;
+
 	va_end(args);
 
-	*Stream << TimeAndEvent << buffer << endl;
+	*Stream << "[";
+#ifdef LOG_TIME_TICK
+	*Stream << SDL_GetTicks() << "]\t\t[";
+#else
+	*Stream << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] [";
+#endif // LOG_TIME_TICK
+
+	*Stream << Event << "] " << buffer << endl;
+
+	delete[] buffer;
 }
 
 void CLog::SetLogMode(CLog::ELogMode ALogMode)
@@ -656,7 +658,7 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 
 		if (DatedLogFileNames) {
 			tm* TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
-			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(*TimeStruct, "%y%m%d-%H%M%S");
+			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
 		}
 		NewLogFileName += ".log";
 
@@ -741,6 +743,91 @@ CResource::CResource()
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CEnvironment
+
+tm* CEnvironment::DateTime::GetLocalTimeAndDate()
+{
+	time_t RawTime;
+	time(&RawTime);
+	return localtime(&RawTime);
+}
+
+string CEnvironment::DateTime::GetFormattedTime(tm *TimeStruct, const char *Format)
+{
+	int AllocSize = 128;
+	bool allocated = false;
+
+	char *buffer = NULL;
+
+	while (!allocated)
+	{
+		delete[] buffer;
+		buffer = new char[AllocSize];
+		if (!buffer)
+			return string("");
+
+		allocated = (strftime(buffer, AllocSize - 1, Format, TimeStruct) != 0);
+		AllocSize *= 2;
+	}
+	
+	string result = buffer;
+	SAFE_DELETE_ARRAY(buffer);
+	return result;
+}
+
+string CEnvironment::Paths::GetWorkingDirectory()
+{
+	string result;
+	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+
+#ifdef _WIN32
+	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
+#else
+	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
+#endif //_WIN32
+
+	result = dir;
+	return result;
+}
+
+void CEnvironment::Paths::SetWorkingDirectory()
+{
+#ifdef _WIN32
+	char *MainDir = new char[MAX_PATH];
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DelFNameFromFPath(MainDir);
+	SetCurrentDirectory(MainDir);
+	delete [] MainDir;
+#endif // _WIN32
+	// *nix-like systems don't need current directory to be set to executable path - they use different directory structure
+}
+
+/**
+* CEnvironment::LogToStdOut - упрощённый лог на стандартный вывод, в обход синглтонного ада CLog'а.
+*
+* Эта функция используется макросом Log при задефайненом SIMPLIFIED_LOG (по-умолчанию это не так). Также можно использовать вручную.
+* В основном нужна при отладке, а также, когда движок не запущен, а залогировать что-то очень хочется.
+*/
+
+void CEnvironment::LogToStdOut(const char *Event, const char *Format, ...)
+{
+	va_list args;
+	va_start(args, Format);
+
+	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+
+	char *buffer = new char[MessageLength + 1];
+
+	vsnprintf(buffer, MessageLength, Format, args);
+	buffer[MessageLength] = 0;
+
+	va_end(args);
+
+	cout << "[" << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] ["
+		<< Event << "] " << buffer << endl;
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CFactory
 
 CFactory::CFactory()
@@ -789,67 +876,6 @@ void CFactory::Destroy(CObject *AObject)
 	AObject->SetDestroyed();
 	Objects.erase(i);
 	CObject::DecRefCount(AObject);
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-// CEnvironment
-
-tm* CEnvironment::DateTime::GetLocalTimeAndDate()
-{
-	time_t RawTime;
-	time(&RawTime);
-	return localtime(&RawTime);
-}
-
-string CEnvironment::DateTime::GetFormattedTime(const tm TimeStruct, const char *Format)
-{
-	int AllocSize = 128;
-	bool allocated = false;
-
-	char *buffer = NULL;
-
-	while (!allocated)
-	{
-		delete[] buffer;
-		buffer = new char[AllocSize];
-		if (!buffer)
-			return string("");
-
-		allocated = (strftime(buffer, AllocSize - 1, Format, &TimeStruct) != 0);
-		AllocSize *= 2;
-	}
-	
-	string result = buffer;
-	SAFE_DELETE_ARRAY(buffer);
-	return result;
-}
-
-string CEnvironment::Paths::GetWorkingDirectory()
-{
-	string result;
-	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
-
-#ifdef _WIN32
-	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
-#else
-	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
-#endif //_WIN32
-
-	result = dir;
-	return result;
-}
-
-void CEnvironment::Paths::SetWorkingDirectory()
-{
-#ifdef _WIN32
-	char *MainDir = new char[MAX_PATH];
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-	SetCurrentDirectory(MainDir);
-	delete [] MainDir;
-#endif // _WIN32
-	// *nix-like systems don't need current directory to be set to executable path - they use different directory structure
 }
 
 

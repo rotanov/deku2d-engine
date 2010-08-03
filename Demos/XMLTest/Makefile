@@ -2,7 +2,7 @@ SOURCES	=	src/main.cpp \
 		../../Engine/src/2de_Xml.cpp \
 		../../Engine/src/2de_Core.cpp
 
-CFLAGS	:=	${CFLAGS} -iquote../../Engine/inc/
+CFLAGS	:=	${CFLAGS} -iquote../../Engine/inc/ -DSIMPLIFIED_LOG
 
 TARGET	=	bin/XMLTest
 

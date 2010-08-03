@@ -3,44 +3,19 @@
 
 #include "2de_Core.h"
 
-class CXMLNode
-{
-public:
-	CXMLNode();
-	virtual ~CXMLNode();
+class CXMLNode; // forward declaration
 
-	virtual CXMLNode* Copy() = 0;
-
-	const string& GetName() const;
-	void SetName(const string &AName);
-	virtual string GetText() = 0;
-
-	CXMLNode* GetParent();
-	void SetParent(CXMLNode *AParent);
-
-protected:
-	CXMLNode *Parent;
-	string Name;
-};
-
-class CXMLPrologNode : public CXMLNode
-{
-public:
-	CXMLPrologNode();
-
-	CXMLPrologNode* Copy();
-
-	const string& GetVersion() const;
-	void SetVersion(const string &AVersion);
-
-	string GetText();
-private:
-	string Version;
-};
+/**
+* CXMLChildrenList - класс, представляющий собой список детей XML-узла.
+*
+* Является обёрткой над std::list<CXMLNode *>, расширяющей и дополняющей его специализированными функциями.
+*/
 
 class CXMLChildrenList
 {
 public:
+	typedef list<CXMLNode *> StorageType;
+
 	class ConstIterator
 	{
 	public:
@@ -55,7 +30,7 @@ public:
 		CXMLNode* operator*();
 
 	private:
-		list<CXMLNode *>::const_iterator Backend;
+		StorageType::const_iterator Backend;
 
 		friend class CXMLChildrenList;
 	};
@@ -74,13 +49,17 @@ public:
 		CXMLNode* operator*();
 
 	private:
-		list<CXMLNode *>::iterator Backend;
+		StorageType::iterator Backend;
 
 		friend class CXMLChildrenList;
 	};
 
-	CXMLChildrenList(CXMLNode *ANode);
+	CXMLChildrenList(CXMLNode *ANode = NULL);
 	~CXMLChildrenList();
+
+	CXMLNode* First(const string &AValue = "");
+	CXMLNode* Last(const string &AValue = "");
+	CXMLNode* operator[](size_t AID);
 
 	void AddFirst(CXMLNode *ANode);
 	void AddLast(CXMLNode *ANode);
@@ -99,48 +78,178 @@ public:
 	bool GetSize() const;
 
 private:
-	list<CXMLNode *> Backend;
+	StorageType Backend;
 	CXMLNode *Node;
+
+	friend class CXMLNode;
 };
 
-class CXMLNormalNode : public CXMLNode
+/**
+* CXMLNode - базовый класс XML-узла. Обеспечивает полиморфизм.
+*/
+
+class CXMLNode
 {
 public:
 	typedef CXMLChildrenList::Iterator ChildrenIterator;
 
-	CXMLNormalNode(const string &AName);
-	~CXMLNormalNode();
+	CXMLNode();
+	virtual ~CXMLNode();
 
-	CXMLNormalNode* Copy();
+	virtual CXMLNode* Copy() = 0;
 
-	// TODO: maybe something like CXMLChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
-	// TODO: add support for special "ID" attribute (see specs).. its values are unique for entire document.. add GetElementByID, that should return node by its ID
+	virtual string GetValue() const;
+	virtual void SetValue(const string &AValue);
+
+	virtual string GetName() const;
+	virtual void SetName(const string &AName);
+
+	virtual string GetText() const;
+	virtual void SetInnerText(const string &AText);
+
+	virtual CXMLNode* GetParent();
+	virtual void SetParent(CXMLNode *AParent);
+
+	virtual string GetAttribute(const string &AName) const;
+	virtual void SetAttribute(const string &AName, const string &AValue);
+	virtual void DeleteAttribute(const string &AName);
+
+	virtual bool IsErroneous() const;
+
+	CXMLNode* PreviousSibling(const string &AValue = "") const;
+	CXMLNode* NextSibling(const string &AValue = "") const;
+	CXMLNode* PreviousSimilarSibling() const;
+	CXMLNode* NextSimilarSibling() const;
+
+	CXMLChildrenList Children;
+
+protected:
+	virtual string GetStartingSequence() const;
+	virtual string GetEndingSequence() const;
+	virtual string GetContent() const;
+
+	CXMLNode *Parent;
+	string Name;
+
+	map<string, string> Attributes;
+};
+
+/**
+* CXMLErroneousNode - класс ошибочного XML-узла. Статический объект данного класса возвращается в тех случаях, где по смыслу возвращался бы NULL.
+*
+* С помощью статического объекта этого класса достигаются две цели:
+* 	1. Ошибочные действия пользователя над XML-деревом не вызывают падение из-за NULL-dereferencing'а.
+* 	2. Пользователь надёжно уведомляется о возникших ошибках посредством лога.
+*/
+
+class CXMLErroneousNode : public CXMLNode
+{
+public:
+	CXMLErroneousNode* Copy();
+
+	string GetValue() const;
+	void SetValue(const string &AValue);
+
+	string GetName() const;
+	void SetName(const string &AName);
+
+	string GetText() const;
+	void SetInnerText(const string &AText);
+
+	CXMLNode* GetParent();
+	void SetParent(CXMLNode *AParent);
 
 	string GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);
 
-	string GetText();
-	void SetInnerText(const string &AText);
-	
-	CXMLChildrenList Children;
-
-private:
-	map<string, string> Attributes;
+	bool IsErroneous() const;
 };
+
+static CXMLErroneousNode ErroneousNode;
+
+/**
+* CXMLNodeWithAttributes - класс XML-узла, имеющего аттрибуты. Используется как базовый класс для CXMLNormalNode и CXMLPrologNode.
+*/
+
+class CXMLNodeWithAttributes : public CXMLNode
+{
+public:
+	string GetAttribute(const string &AName) const;
+	void SetAttribute(const string &AName, const string &AValue);
+	void DeleteAttribute(const string &AName);
+
+	string GetValue() const;
+
+protected:
+	string GetContent() const;
+};
+
+/**
+* CXMLPrologNode - класс XML-узла - пролога.
+*/
+
+class CXMLPrologNode : public CXMLNodeWithAttributes
+{
+public:
+	CXMLPrologNode();
+
+	CXMLPrologNode* Copy();
+
+	string GetVersion() const;
+	void SetVersion(const string &AVersion);
+
+protected:
+	string GetStartingSequence() const;
+	string GetEndingSequence() const;
+};
+
+/**
+* CXMLNormalNode - класс XML-узла - элемента, то есть узла, который может иметь детей.
+*/
+
+class CXMLNormalNode : public CXMLNodeWithAttributes
+{
+public:
+	CXMLNormalNode(const string &AName);
+	~CXMLNormalNode();
+
+	CXMLNormalNode* Copy();
+
+	void SetName(const string &AName);
+
+	// TODO: maybe something like CXMLChildrenList GetElementsByName(const string &AName); (like in JavaScript: document.getElementsByTagName)
+	// TODO: add support for special "ID" attribute (see specs).. its values are unique for entire document.. add GetElementByID, that should return node by its ID
+
+	void SetInnerText(const string &AText);
+
+protected:
+	string GetStartingSequence() const;
+	string GetEndingSequence() const;
+	string GetContent() const;
+};
+
+/**
+* CXMLSingleValueNode - класс XML-узла с одиночным текстовым значением.
+*
+* Является базовым классом для комментариев и текстовых узлов.
+*/
 
 class CXMLSingleValueNode : public CXMLNode
 {
 public:
-	CXMLSingleValueNode(const string &AValue = "");
+	CXMLSingleValueNode(const string &AValue);
 
-	const string& GetValue() const;
+	string GetValue() const;
 	void SetValue(const string &AValue);
 
-	virtual string GetText() = 0;
-private:
+protected:
 	string Value;
 };
+
+/**
+* CXMLCommentNode - класс XML-узла - комментария.
+*/
 
 class CXMLCommentNode : public CXMLSingleValueNode
 {
@@ -149,9 +258,14 @@ public:
 
 	CXMLCommentNode* Copy();
 
-	string GetText();
-
+protected:
+	string GetStartingSequence() const;
+	string GetEndingSequence() const;
 };
+
+/**
+* CXMLTextNode - класс текстового узла XML.
+*/
 
 class CXMLTextNode : public CXMLSingleValueNode
 {
@@ -160,8 +274,12 @@ public:
 
 	CXMLTextNode* Copy();
 
-	string GetText();
+	string GetText() const;
 };
+
+/**
+* CXML - основной класс для работы с XML, представляющий объектную модель XML-документа как целое.
+*/
 
 class CXML
 {
@@ -179,6 +297,10 @@ public:
 private:
 
 };
+
+/**
+* CXMLParser - парсер XML.
+*/
 
 class CXMLParser
 {
@@ -217,6 +339,10 @@ private:
 	int Current;
 	string Text;
 };
+
+/**
+* CXMLHelper - класс, содержащий некоторые вспомогательные функции для XML, в частности для парсера.
+*/
 
 class CXMLHelper
 {

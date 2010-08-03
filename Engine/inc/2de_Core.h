@@ -596,7 +596,38 @@ protected:
 	CLog();
 };
 
-#define Log CLog::Instance()->WriteToLog
+// define SIMPLIFIED_LOG to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
+#ifdef SIMPLIFIED_LOG
+	#define Log CEnvironment::LogToStdOut
+#else
+	#define Log CLog::Instance()->WriteToLog
+#endif // SIMPLIFIED_LOG
+
+/**
+* Класс CEnvironment содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
+* В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
+*/
+
+class CEnvironment
+{
+public:
+	class DateTime
+	{
+	public:
+		static tm* GetLocalTimeAndDate();
+		static string GetFormattedTime(tm *TimeStruct, const char *Format);
+	};
+
+	class Paths
+	{
+	public:
+		static string GetWorkingDirectory();
+		static void SetWorkingDirectory();
+	};
+
+	static void LogToStdOut(const char *Event, const char *Format, ...);
+
+};
 
 /**
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
@@ -696,30 +727,6 @@ T* CFactory::Remove(const string &AName)
 
 	return result;
 }
-
-/**
-* Класс CEnvironment содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
-* В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
-*/
-
-class CEnvironment
-{
-public:
-	class DateTime
-	{
-	public:
-		static tm* GetLocalTimeAndDate();
-		static string GetFormattedTime(const tm TimeStruct, const char *Format);
-	};
-
-	class Paths
-	{
-	public:
-		static string GetWorkingDirectory();
-		static void SetWorkingDirectory();
-	};
-
-};
 
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment

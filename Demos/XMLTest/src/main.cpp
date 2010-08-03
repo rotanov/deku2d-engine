@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[])
 {
-         /*CXML xml;
+	CXML xml;
  
  	CXMLNormalNode *logical_root = new CXMLNormalNode("root"); // only logical root, not really
 	xml.Root.AddLast(new CXMLPrologNode);
@@ -15,26 +15,47 @@ int main(int argc, char* argv[])
 	logical_root->SetAttribute("attr3", "val3");
 	logical_root->SetAttribute("attr4", "val4");
 	logical_root->SetAttribute("a0", "val4");
+	logical_root->SetAttribute("attributewithentities", "\"test\"");
 
 	logical_root->Children.AddLast(new CXMLCommentNode("Some kind of comment1"));
 	logical_root->Children.AddLast(new CXMLNormalNode("subelement2"));
 	logical_root->Children.AddLast(new CXMLCommentNode("Some kind of comment2"));
 
-	CXMLNormalNode *subsub = new CXMLNormalNode("subsub");
-	CXMLNormalNode *subelement3 = new CXMLNormalNode("subelement3");
+/*
 
-	subelement3->Children.AddLast(subsub);
+<subsub>
+   test&quot;tetete&lt;   
+</subsub>
+<subsub>
+	test white space 	handling shit			   
+</subsub>
+<subsub>
+test&quot; this &lt;shit &gt; out	&lt;
+</subsub>
+
+*/
+	CXMLNormalNode *subelement3 = new CXMLNormalNode("subelement3");
 	logical_root->Children.AddLast(subelement3);
 
-	subsub->Children.AddLast(new CXMLTextNode("   test   "));
+	CXMLNormalNode *subsub = new CXMLNormalNode("subsub");
+	subsub->Children.AddLast(new CXMLTextNode("  test\"tetete<   "));
+	subelement3->Children.AddLast(subsub);
+
+	subsub = new CXMLNormalNode("subsub");
+	subsub->Children.AddLast(new CXMLTextNode("	test white space 	handling shit			   "));
+	subelement3->Children.AddLast(subsub);
+
+	subsub = new CXMLNormalNode("subsub");
+	subsub->Children.AddLast(new CXMLTextNode("test\" this <shit > out	<"));
+	subelement3->Children.AddLast(subsub);
  
- 	CXMLCommentNode *commentnode = new CXMLCommentNode;
+	CXMLCommentNode *commentnode = new CXMLCommentNode;
  	commentnode->SetValue("I'm comment");
  
  	logical_root->Children.AddLast(commentnode);
  
 	// ну попрробуй.. сохрани меня!..
-	xml.SaveToFile("test.xml");*/
+	xml.SaveToFile("test.xml");
 
 	CXML parsetest;
 	parsetest.LoadFromFile("test.xml");
@@ -45,6 +66,10 @@ int main(int argc, char* argv[])
 	CXML somenewxml2;
 	somenewxml2 = somenewxml;
 	somenewxml2.SaveToFile("test3.xml");
+
+	cout << somenewxml.Root.Last()->Children[0]->NextSibling()->NextSibling("subelement3")->Children.First("subsub")->NextSimilarSibling()->Children.First()->GetValue() << endl;
+
+	cout << somenewxml.Root.Last()->Children.Last()->Children.Last()->Children.Last()->GetParent()->GetParent()->GetParent()->GetValue() << endl;
 
 	return 0;
 }

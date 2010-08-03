@@ -1,68 +1,6 @@
 #include "2de_Xml.h"
 
 //////////////////////////////////////////////////////////////////////////
-// CXMLNode
-
-CXMLNode::CXMLNode() : Parent(NULL)
-{
-
-}
-
-CXMLNode::~CXMLNode()
-{
-}
-
-const string& CXMLNode::GetName() const
-{
-	return Name;
-}
-
-void CXMLNode::SetName(const string &AName)
-{
-	Name = AName;
-}
-
-CXMLNode* CXMLNode::GetParent()
-{
-	return Parent;
-}
-void CXMLNode::SetParent(CXMLNode *AParent)
-{
-	Parent = AParent;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CXMLPrologNode
-
-CXMLPrologNode::CXMLPrologNode()
-{
-	SetName("xml");
-	Version = "1.0";
-}
-
-CXMLPrologNode* CXMLPrologNode::Copy()
-{
-	CXMLPrologNode *result = new CXMLPrologNode;
-	*result = *this;
-	return result;
-}
-
-const string& CXMLPrologNode::GetVersion() const
-{
-	return Version;
-}
-
-void CXMLPrologNode::SetVersion(const string &AVersion)
-{
-	Version = AVersion;
-}
-
-string CXMLPrologNode::GetText()
-{
-	return "<?" + GetName() + " version=\"" + CXMLHelper::Instance()->EntitiesEncode(Version) + "\"?>\n";
-}
-
-//////////////////////////////////////////////////////////////////////////
 // CChildrenList::ConstIterator
 
 bool CXMLChildrenList::ConstIterator::operator==(const CXMLChildrenList::ConstIterator &AIterator) const
@@ -147,18 +85,70 @@ CXMLChildrenList::Iterator CXMLChildrenList::Iterator::operator--(int)
 
 CXMLNode* CXMLChildrenList::Iterator::operator*()
 {
-	return *Backend;
+	CXMLNode *result = *Backend;
+	return (result == NULL) ? &ErroneousNode : result; // not really sure 'bout this..
 }
 
 //////////////////////////////////////////////////////////////////////////
 // CChildrenList
 
-CXMLChildrenList::CXMLChildrenList(CXMLNode *ANode) : Node(ANode)
+CXMLChildrenList::CXMLChildrenList(CXMLNode *ANode /*= NULL*/) : Node(ANode)
 {
 }
 
 CXMLChildrenList::~CXMLChildrenList()
 {
+}
+
+CXMLNode* CXMLChildrenList::First(const string &AValue /*= ""*/)
+{
+	if (IsEmpty())
+		return &ErroneousNode;
+	
+	if (AValue.empty())
+		return Backend.front();
+
+	for (StorageType::const_iterator it = Backend.begin(); it != Backend.end(); ++it)
+	{
+		if ((*it)->GetValue() == AValue)
+			return *it;
+	}
+
+	return &ErroneousNode;
+}
+
+CXMLNode* CXMLChildrenList::Last(const string &AValue /*= ""*/)
+{
+	if (IsEmpty())
+		return &ErroneousNode;
+
+	if (AValue.empty())
+		return Backend.back();
+
+	for (StorageType::const_reverse_iterator it = Backend.rbegin(); it != Backend.rend(); ++it)
+	{
+		if ((*it)->GetValue() == AValue)
+			return *it;
+	}
+	
+	return &ErroneousNode;
+}
+
+CXMLNode* CXMLChildrenList::operator[](size_t AID)
+{
+	if (IsEmpty())
+		return &ErroneousNode;
+	
+	Iterator it = Begin();
+
+	for (size_t i = 0; i <= AID; i++)
+	{
+		++it;
+		if (it == End())
+			return &ErroneousNode;
+	}
+
+	return *it;
 }
 
 void CXMLChildrenList::AddFirst(CXMLNode *ANode)
@@ -176,7 +166,7 @@ void CXMLChildrenList::AddLast(CXMLNode *ANode)
 void CXMLChildrenList::AddAfter(const Iterator &AIterator, CXMLNode *ANode)
 {
 	ANode->SetParent(Node);
-	list<CXMLNode *>::iterator iter = AIterator.Backend;
+	StorageType::iterator iter = AIterator.Backend;
 	Backend.insert(++iter, ANode);
 }
 
@@ -252,9 +242,317 @@ bool CXMLChildrenList::GetSize() const
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CXMLNode
+
+CXMLNode::CXMLNode() : Children(this), Parent(NULL)
+{
+
+}
+
+CXMLNode::~CXMLNode()
+{
+}
+
+string CXMLNode::GetValue() const
+{
+	return "";
+}
+
+void CXMLNode::SetValue(const string &AValue)
+{
+	Log("WARNING", "This type of XML node doesn't support changing its value directly");
+}
+
+string CXMLNode::GetName() const
+{
+	return Name;
+}
+
+void CXMLNode::SetName(const string &AName)
+{
+	Log("WARNING", "This type of XML node doesn't support changing its name");
+}
+
+string CXMLNode::GetText() const
+{
+	return GetStartingSequence() + GetName() + GetContent() + GetEndingSequence() + "\n";
+}
+
+void CXMLNode::SetInnerText(const string &AText)
+{
+	Log("WARNING", "This type of XML node doesn't support setting inner text");
+}
+
+CXMLNode* CXMLNode::GetParent()
+{
+	return (Parent == NULL) ? &ErroneousNode : Parent;
+}
+
+void CXMLNode::SetParent(CXMLNode *AParent)
+{
+	Parent = AParent;
+}
+
+string CXMLNode::GetAttribute(const string &AName) const
+{
+	Log("WARNING", "This type of XML node can't have any attributes");
+	return "";
+}
+
+void CXMLNode::SetAttribute(const string &AName, const string &AValue)
+{
+	Log("WARNING", "This type of XML node can't have any attributes");
+}
+
+void CXMLNode::DeleteAttribute(const string &AName)
+{
+	Log("WARNING", "This type of XML node can't have any attributes");
+}
+
+bool CXMLNode::IsErroneous() const
+{
+	return false;
+}
+
+CXMLNode* CXMLNode::PreviousSibling(const string &AValue /*= ""*/) const
+{
+	if (!Parent)
+		return &ErroneousNode;
+
+	CXMLChildrenList::StorageType::const_reverse_iterator it = find(Parent->Children.Backend.rbegin(), Parent->Children.Backend.rend(), this);
+
+	if (it == Parent->Children.Backend.rend())
+		return &ErroneousNode;
+	
+	++it;
+
+	if (it == Parent->Children.Backend.rend())
+		return &ErroneousNode;
+
+	if (AValue.empty())
+		return  *it;
+
+	for (; it != Parent->Children.Backend.rend(); ++it)
+	{
+		if ((*it)->GetValue() == AValue)
+			return *it;
+	}
+
+	return &ErroneousNode;
+}
+
+CXMLNode* CXMLNode::NextSibling(const string &AValue /*= ""*/) const
+{
+	if (!Parent)
+		return &ErroneousNode;
+
+	CXMLChildrenList::StorageType::const_iterator it = find(Parent->Children.Backend.begin(), Parent->Children.Backend.end(), this);
+
+	if (it == Parent->Children.Backend.end())
+		return &ErroneousNode;
+	
+	++it;
+
+	if (it == Parent->Children.Backend.end())
+		return &ErroneousNode;
+
+	if (AValue.empty())
+		return  *it;
+
+	for (; it != Parent->Children.Backend.end(); ++it)
+	{
+		if ((*it)->GetValue() == AValue)
+			return *it;
+	}
+
+	return &ErroneousNode;
+}
+
+CXMLNode* CXMLNode::PreviousSimilarSibling() const
+{
+	return PreviousSibling(GetValue());
+}
+
+CXMLNode* CXMLNode::NextSimilarSibling() const
+{
+	return NextSibling(GetValue());
+}
+
+string CXMLNode::GetStartingSequence() const
+{
+	return "";
+}
+
+string CXMLNode::GetEndingSequence() const
+{
+	return "";
+}
+
+string CXMLNode::GetContent() const
+{
+	return GetValue();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLErroneousNode
+
+CXMLErroneousNode* CXMLErroneousNode::Copy()
+{
+	Log("WARNING", "You're trying to copy erronoues XML node");
+	return this;
+}
+
+string CXMLErroneousNode::GetValue() const
+{
+	Log("WARNING", "You're trying to get value of erronoues XML node");
+	return "";
+}
+
+void CXMLErroneousNode::SetValue(const string &AValue)
+{
+	Log("WARNING", "You're trying to set value of erronoues XML node");
+}
+
+string CXMLErroneousNode::GetName() const
+{
+	Log("WARNING", "You're trying to get name of erronoues XML node");
+	return "";
+}
+
+void CXMLErroneousNode::SetName(const string &AName)
+{
+	Log("WARNING", "You're trying to set name of erronoues XML node");
+}
+
+string CXMLErroneousNode::GetText() const
+{
+	Log("WARNING", "You're trying to get text of erroneous node");
+	return "";
+}
+
+void CXMLErroneousNode::SetInnerText(const string &AText)
+{
+	Log("WARNING", "You're trying to set inner text of erronoues XML node");
+}
+
+CXMLNode* CXMLErroneousNode::GetParent()
+{
+	Log("WARNING", "You're trying to get parent of erronoues XML node");
+	return this;
+}
+
+void CXMLErroneousNode::SetParent(CXMLNode *AParent)
+{
+	Log("WARNING", "You're trying to set parent of erronoues XML node");
+}
+
+string CXMLErroneousNode::GetAttribute(const string &AName) const
+{
+	Log("WARNING", "You're trying to get attribute of erronoues XML node");
+	return "";
+}
+
+void CXMLErroneousNode::SetAttribute(const string &AName, const string &AValue)
+{
+	Log("WARNING", "You're trying to set attribute of erronoues XML node");
+}
+
+void CXMLErroneousNode::DeleteAttribute(const string &AName)
+{
+	Log("WARNING", "You're trying to delete attribute of erronoues XML node");
+}
+
+bool CXMLErroneousNode::IsErroneous() const
+{
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLNodeWithAttributes
+
+string CXMLNodeWithAttributes::GetAttribute(const string &AName) const
+{
+	map<string, string>::const_iterator iter = Attributes.find(AName);
+	if (iter == Attributes.end())
+	{
+		Log("WARNING", "Attribute '%s' has not been found in XML node", AName.c_str());
+		return "";
+	}
+
+	return iter->second;
+}
+
+void CXMLNodeWithAttributes::SetAttribute(const string &AName, const string &AValue)
+{
+	Attributes[AName] = AValue;
+}
+
+void CXMLNodeWithAttributes::DeleteAttribute(const string &AName)
+{
+	if (!Attributes.erase(AName))
+		Log("WARNING", "Attribute '%s' has not been found in XML node", AName.c_str());
+}
+
+string CXMLNodeWithAttributes::GetValue() const
+{
+	return Name;
+}
+
+string CXMLNodeWithAttributes::GetContent() const
+{
+	string result;
+
+	if (!Attributes.empty())
+	{
+		for (map<string, string>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
+		{
+			result += " " + it->first + "=\"" + CXMLHelper::Instance()->EntitiesEncode(it->second) + "\"";
+		}
+	}
+
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CXMLPrologNode
+
+CXMLPrologNode::CXMLPrologNode()
+{
+	Name = "xml";
+	SetVersion("1.0");
+}
+
+CXMLPrologNode* CXMLPrologNode::Copy()
+{
+	CXMLPrologNode *result = new CXMLPrologNode;
+	*result = *this;
+	return result;
+}
+
+string CXMLPrologNode::GetVersion() const
+{
+	return GetAttribute("version");
+}
+
+void CXMLPrologNode::SetVersion(const string &AVersion)
+{
+	SetAttribute("version", AVersion);
+}
+
+string CXMLPrologNode::GetStartingSequence() const
+{
+	return "<?";
+}
+
+string CXMLPrologNode::GetEndingSequence() const
+{
+	return "?>";
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CXMLNormalNode
 
-CXMLNormalNode::CXMLNormalNode(const string &AName) : Children(this)
+CXMLNormalNode::CXMLNormalNode(const string &AName)
 {
 	SetName(AName);
 }
@@ -275,54 +573,9 @@ CXMLNormalNode* CXMLNormalNode::Copy()
 	return result;
 }
 
-string CXMLNormalNode::GetAttribute(const string &AName) const
+void CXMLNormalNode::SetName(const string &AName)
 {
-	map<string, string>::const_iterator iter = Attributes.find(AName);
-	if (iter == Attributes.end())
-	{
-		Log("WARNING", "Attribute '%s' not found in XML node", AName.c_str());
-		return "";
-	}
-
-	return iter->second;
-}
-
-void CXMLNormalNode::SetAttribute(const string &AName, const string &AValue)
-{
-	Attributes[AName] = AValue;
-}
-
-void CXMLNormalNode::DeleteAttribute(const string &AName)
-{
-	if (!Attributes.erase(AName))
-		Log("WARNING", "Attribute '%s' not found in XML node", AName.c_str());
-}
-
-string CXMLNormalNode::GetText()
-{
-	string res = "<" + GetName();
-
-	if (!Attributes.empty())
-	{
-		for (map<string, string>::iterator it = Attributes.begin(); it != Attributes.end(); ++it)
-		{
-			res += " " + it->first + "=\"" + CXMLHelper::Instance()->EntitiesEncode(it->second) + "\"";
-		}
-	}
-
-	if (Children.IsEmpty())
-		res += " /";
-	else
-	{
-		res += ">\n";
-		for (ChildrenIterator it = Children.Begin(); it != Children.End(); ++it)
-			res += (*it)->GetText();
-		res += "</" + GetName();
-	}
-
-	res += ">\n";
-
-	return res;
+	Name = AName;
 }
 
 void CXMLNormalNode::SetInnerText(const string &AText)
@@ -333,14 +586,41 @@ void CXMLNormalNode::SetInnerText(const string &AText)
 	Children = parser.Parse();
 }
 
+string CXMLNormalNode::GetStartingSequence() const
+{
+	return "<";
+}
+
+string CXMLNormalNode::GetEndingSequence() const
+{
+	return ">";
+}
+
+string CXMLNormalNode::GetContent() const
+{
+	string result = CXMLNodeWithAttributes::GetContent();
+
+	if (Children.IsEmpty())
+		result += " /";
+	else
+	{
+		result += ">\n";
+		for (CXMLChildrenList::ConstIterator it = Children.Begin(); it != Children.End(); ++it)
+			result += (*it)->GetText();
+		result += "</" + GetName();
+	}
+
+	return result;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CXMLSingleValueNode
 
-CXMLSingleValueNode::CXMLSingleValueNode(const string &AValue /*= ""*/)
+CXMLSingleValueNode::CXMLSingleValueNode(const string &AValue) : Value(AValue)
 {
-	Value = AValue;
 }
-const string& CXMLSingleValueNode::GetValue() const
+
+string CXMLSingleValueNode::GetValue() const
 {
 	return Value;
 }
@@ -355,7 +635,6 @@ void CXMLSingleValueNode::SetValue(const string &AValue)
 
 CXMLCommentNode::CXMLCommentNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(AValue)
 {
-	SetName("!--");
 }
 
 CXMLCommentNode* CXMLCommentNode::Copy()
@@ -365,9 +644,14 @@ CXMLCommentNode* CXMLCommentNode::Copy()
 	return result;
 }
 
-string CXMLCommentNode::GetText()
+string CXMLCommentNode::GetStartingSequence() const
 {
-	return "<" + GetName() + GetValue() + "-->\n";
+	return "<!--";
+}
+
+string CXMLCommentNode::GetEndingSequence() const
+{
+	return "-->";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -384,7 +668,7 @@ CXMLTextNode* CXMLTextNode::Copy()
 	return result;
 }
 
-string CXMLTextNode::GetText()
+string CXMLTextNode::GetText() const
 {
 	return CXMLHelper::Instance()->EntitiesEncode(GetValue()) + "\n"; 
 }
@@ -864,13 +1148,9 @@ string CXMLParser::ParseTagName()
 
 void CXMLParser::ReportError(const string &Severity, const string &Message, int Position)
 {
-	// temporary
-	//Log("ERROR", string(Message + " %d.").c_str(), Position [> here may be an xml file name... or not... <]);
+	Log(Severity.c_str(), string("XML parser: " + Message + " %d.").c_str(), Position);
 
-	// TODO: may be even something like "line" and "column", if it's possible..
-
-	// CLog crashes everything when engine's not running... so we will temporary use cout
-	cout << "[" << Severity << "] " << Message << " " << Position << endl;
+	// TODO: may be add something like "file", "line" and "column", if it's possible..
 }
 
 //////////////////////////////////////////////////////////////////////////
