@@ -85,6 +85,24 @@ private:
 };
 
 /**
+* CXML - основной класс для работы с XML, представляющий объектную модель XML-документа как целое.
+*/
+
+class CXML
+{
+public:
+	CXML(const string &AFilename = "");
+	CXML(const CXML &ASource);
+	~CXML();
+	CXML& operator=(const CXML &ASource);
+
+	void LoadFromFile(const string &AFilename);
+	void SaveToFile(const string &AFilename);
+
+	CXMLChildrenList Root;
+};
+
+/**
 * CXMLNode - базовый класс XML-узла. Обеспечивает полиморфизм.
 */
 
@@ -131,7 +149,7 @@ protected:
 	CXMLNode *Parent;
 	string Name;
 
-	map<string, string> Attributes;
+	map<string, string, CCaseInsensetiveComparison> Attributes;
 };
 
 /**
@@ -275,27 +293,6 @@ public:
 	CXMLTextNode* Copy();
 
 	string GetText() const;
-};
-
-/**
-* CXML - основной класс для работы с XML, представляющий объектную модель XML-документа как целое.
-*/
-
-class CXML
-{
-public:
-	CXML(const string &AFilename = "");
-	CXML(const CXML &ASource);
-	~CXML();
-	CXML& operator=(const CXML &ASource);
-
-	void LoadFromFile(const string &AFilename);
-	void SaveToFile(const string &AFilename);
-
-	CXMLChildrenList Root;
-
-private:
-
 };
 
 /**

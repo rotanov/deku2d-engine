@@ -761,4 +761,17 @@ __INLINE string to_string(const T& t)
 	return s.str();
 }
 
+/**
+* CCaseInsensetiveComparison - класс-функтор, сравнивающий строки регистро-независимо. Используется STL-контейнерами и т. п. вещами.
+*/
+
+class CCaseInsensetiveComparison
+{
+public:
+	bool operator()(const string &lhs, const string &rhs) const
+	{
+		return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
+	}
+};
+
 #endif // _2DE_CORE_H_

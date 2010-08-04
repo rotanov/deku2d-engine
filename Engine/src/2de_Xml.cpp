@@ -110,7 +110,7 @@ CXMLNode* CXMLChildrenList::First(const string &AValue /*= ""*/)
 
 	for (StorageType::const_iterator it = Backend.begin(); it != Backend.end(); ++it)
 	{
-		if ((*it)->GetValue() == AValue)
+		if (SDL_strcasecmp((*it)->GetValue().c_str(), AValue.c_str()) == 0)
 			return *it;
 	}
 
@@ -127,7 +127,7 @@ CXMLNode* CXMLChildrenList::Last(const string &AValue /*= ""*/)
 
 	for (StorageType::const_reverse_iterator it = Backend.rbegin(); it != Backend.rend(); ++it)
 	{
-		if ((*it)->GetValue() == AValue)
+		if (SDL_strcasecmp((*it)->GetValue().c_str(), AValue.c_str()) == 0)
 			return *it;
 	}
 	
@@ -242,6 +242,56 @@ bool CXMLChildrenList::GetSize() const
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CXML
+
+CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
+{
+	if (!AFilename.empty())
+		LoadFromFile(AFilename);
+}
+
+CXML::CXML(const CXML &ASource) : Root(NULL)
+{
+	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
+		Root.AddLast((*it)->Copy());
+}
+
+CXML::~CXML()
+{
+	Root.DeleteAll();
+}
+
+CXML& CXML::operator=(const CXML &ASource)
+{
+	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
+		Root.AddLast((*it)->Copy()); 
+	
+	return *this;
+}
+
+void CXML::LoadFromFile(const string &AFilename)
+{
+	CFile file(AFilename, CFile::OPEN_MODE_READ);
+	string AllContent = file.GetContent();
+	file.Close();
+
+	Root.DeleteAll();
+
+	CXMLParser parser(AllContent); 
+	Root = parser.Parse();
+}
+
+void CXML::SaveToFile(const string &AFilename)
+{
+	CFile file(AFilename, CFile::OPEN_MODE_WRITE);
+
+	for (CXMLNormalNode::ChildrenIterator it = Root.Begin(); it != Root.End(); ++it)
+		file.WriteText((*it)->GetText());
+
+	file.Close();
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CXMLNode
 
 CXMLNode::CXMLNode() : Children(this), Parent(NULL)
@@ -334,7 +384,7 @@ CXMLNode* CXMLNode::PreviousSibling(const string &AValue /*= ""*/) const
 
 	for (; it != Parent->Children.Backend.rend(); ++it)
 	{
-		if ((*it)->GetValue() == AValue)
+		if (SDL_strcasecmp((*it)->GetValue().c_str(), AValue.c_str()) == 0)
 			return *it;
 	}
 
@@ -361,7 +411,7 @@ CXMLNode* CXMLNode::NextSibling(const string &AValue /*= ""*/) const
 
 	for (; it != Parent->Children.Backend.end(); ++it)
 	{
-		if ((*it)->GetValue() == AValue)
+		if (SDL_strcasecmp((*it)->GetValue().c_str(), AValue.c_str()) == 0)
 			return *it;
 	}
 
@@ -472,7 +522,7 @@ bool CXMLErroneousNode::IsErroneous() const
 
 string CXMLNodeWithAttributes::GetAttribute(const string &AName) const
 {
-	map<string, string>::const_iterator iter = Attributes.find(AName);
+	map<string, string, CCaseInsensetiveComparison>::const_iterator iter = Attributes.find(AName);
 	if (iter == Attributes.end())
 	{
 		Log("WARNING", "Attribute '%s' has not been found in XML node", AName.c_str());
@@ -504,7 +554,7 @@ string CXMLNodeWithAttributes::GetContent() const
 
 	if (!Attributes.empty())
 	{
-		for (map<string, string>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
+		for (map<string, string, CCaseInsensetiveComparison>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
 		{
 			result += " " + it->first + "=\"" + CXMLHelper::Instance()->EntitiesEncode(it->second) + "\"";
 		}
@@ -674,59 +724,9 @@ string CXMLTextNode::GetText() const
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CXML
-
-CXML::CXML(const string &AFilename /*= " "*/) : Root(NULL)
-{
-	if (!AFilename.empty())
-		LoadFromFile(AFilename);
-}
-
-CXML::CXML(const CXML &ASource) : Root(NULL)
-{
-	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
-		Root.AddLast((*it)->Copy());
-}
-
-CXML::~CXML()
-{
-	Root.DeleteAll();
-}
-
-CXML& CXML::operator=(const CXML &ASource)
-{
-	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
-		Root.AddLast((*it)->Copy()); 
-	
-	return *this;
-}
-
-void CXML::LoadFromFile(const string &AFilename)
-{
-	CFile file(AFilename, CFile::OPEN_MODE_READ);
-	string AllContent = file.GetContent();
-	file.Close();
-
-	Root.DeleteAll();
-
-	CXMLParser parser(AllContent); 
-	Root = parser.Parse();
-}
-
-void CXML::SaveToFile(const string &AFilename)
-{
-	CFile file(AFilename, CFile::OPEN_MODE_WRITE);
-
-	for (CXMLNormalNode::ChildrenIterator it = Root.Begin(); it != Root.End(); ++it)
-		file.WriteText((*it)->GetText());
-
-	file.Close();
-}
-
-//////////////////////////////////////////////////////////////////////////
 // CXMLParser
 
-CXMLParser::CXMLParser(const string &AText) : Result(NULL), Text(AText), Current(0), CurrentLevel(NULL)
+CXMLParser::CXMLParser(const string &AText) : CurrentLevel(NULL), Result(NULL), Text(AText), Current(0)
 {
 }
 
@@ -942,6 +942,7 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 	}
 
 	result->SetParent(CurrentLevel);//shit
+
 	CurrentLevel = result;
 	// reading a childlist...
 	ParseInside(&result->Children);
