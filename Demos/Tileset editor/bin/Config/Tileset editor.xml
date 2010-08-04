@@ -4,7 +4,7 @@
 		<WindowWidth value="1000" />
 		<WindowHeight value="700" />
 		<WindowBPP value="32" />
-		<WindowCaption value="Level editor" />
+		<WindowCaption value="Tileset editor" />
 		<DoCalcFps value="true" />
 		<DoLimitFps value="false" />
 		<FpsLimit value="60" />
@@ -16,12 +16,4 @@
 		<DataPath value="../../../Data" />
 		<doLoadDefaultResourceList value="true" />
 	</Data>
-	<LevelEditor>
-		<DefaultCellSize value="4" />
-		<GameVTiles value="15" />
-		<GameHTiles value="20" />
-		<LeftPanel value="196" />
-		<BottomPanel value="196" />
-		<XMLResourcesFilename value="Config/Resources.xml" />
-	</LevelEditor>
 </Configuration>

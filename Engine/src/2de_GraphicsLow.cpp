@@ -301,12 +301,11 @@ bool CFont::LoadFromFile()
 		Log("ERROR", "Can't Load Font %s: file  couldn't be opened.", GetName());
 		return false;
 	}
-	char *FontImageName = NULL;
-	file.ReadLine(FontImageName);	
+	string FontImageName;
+	file.ReadString(FontImageName);	
 
 	CTextureManager *TexMan = CTextureManager::Instance();
 	Texture = TexMan->Get(FontImageName);
-	delete[] FontImageName;	// temporary to prevent leak.. TODO: redesign CFile::ReadLine, it must NOT allocate memory..
 
 	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
@@ -894,7 +893,6 @@ void setVSync(int interval)
 	}
 #endif                        // </platforms, that support swap interval control>
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 // CText

@@ -1,12 +1,19 @@
-<configuration>
-	WindowWidth					= "640"
-	WindowHeight				= "480"
-	WindowBpp					= "32"
-	WindowCaption				= "Sandbox"
-	DoCalcFps					= "true"
-	DoLimitFps					= "false"
-	FpsLimit					= "60"
-	DataPath					= "../../../Data"
-	doLoadDefaultResourceList	= "true" // temp
-	MusicVolume					= "10"
-</configuration>
+<?xml version="1.0"?>
+<Configuration>
+	<Video>
+		<WindowWidth value="640" />
+		<WindowHeight value="480" />
+		<WindowBPP value="32" />
+		<WindowCaption value="Sandbox" />
+		<DoCalcFps value="true" />
+		<DoLimitFps value="false" />
+		<FpsLimit value="60" />
+	</Video>
+	<Sound>
+		<MusicVolume value="10" />
+	</Sound>
+	<Data>
+		<DataPath value="../../../Data" />
+		<doLoadDefaultResourceList value="true" />
+	</Data>
+</Configuration>

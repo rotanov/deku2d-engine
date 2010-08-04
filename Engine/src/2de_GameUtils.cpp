@@ -16,9 +16,11 @@ bool CTileset::LoadFromFile()
 		return false;
 	}
 
-	char * TextureName = NULL;
-	file.ReadLine(TextureName);
+	string TextureName;
+	file.ReadString(TextureName);
+
 	//Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
+
 	Texture = CTextureManager::Instance()->Get(TextureName);
 	Texture->CheckLoad();
 
@@ -172,10 +174,8 @@ bool CLevelMap::LoadFromFile()
 		return false;
 	}
 
-	char *TileSetName = NULL;
-	File.ReadLine(TileSetName);
-	if (TileSetName == NULL)
-		return false;
+	string TileSetName;
+	File.ReadString(TileSetName);
 	TileSet = NULL;
 	TileSet = Factory->Get<CTileset>(TileSetName);
 	if (TileSet == NULL)

@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <iostream>
 #include <list>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -78,8 +79,6 @@ using namespace std;
 #else
 	#define __INLINE inline
 #endif
-
-#define CFILE_MAX_STRING_LENGTH	1024
 
 #ifdef _WIN32
 	#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
@@ -418,6 +417,14 @@ struct CRecti	// @todo: Избавиться от этого типа.
 	int x0, x1, y0, y1;
 };
 
+/**
+* CFile - класс, представляющий собой интерфейс к чтению и записи файлов.
+*
+* Каждый экземпляр класса управляет отдельным файлом, реализует принцип RAII.
+* Является надстройкой над stdio. Также дополняет его всякими функциями-ленивчиками, типа получить всё содержимое в строку и т. п.
+* Нельзя копировать и присваивать.
+*/
+
 class CFile
 {
 public:
@@ -440,29 +447,70 @@ public:
 
 	bool Open(const string &AFilename, EOpenMode Mode);
 	bool Close();
+
+	bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
+	bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
+	
+	// kinda-type-and-size-safe versions of Read and Write.. don't work with arrays, though..
+	template<typename T>
+	bool Read(T *Buffer)
+	{
+		return Read(Buffer, sizeof(T));
+	}
+
+	template<typename T>
+	bool Write(const T *Data)
+	{
+		return Write(Data, sizeof(T));
+	}
+
 	bool ReadByte(byte *Buffer);
-	bool WriteByte(byte *Buffer);
-	bool WriteByte(byte Buffer);
-	bool Read(void *Buffer, size_t BytesCount);
-	bool Write(const void *Buffer, size_t BytesCount);
-	bool ReadString(char *Buffer);
+	bool WriteByte(byte *Data);
+	bool WriteByte(byte Data);
+
+	// i think, that CFile should not provide posibility to read 0-terminated strings from files..
+	// formats should be developed in such way, that does NOT include reading variable-length strings from binary files.. it's bad design of data structures to do so..
+	// BUT even if someone ever need to store string in binary file, they should develop structure for storing string size too, together with string.. and then deal with it in higher level of abstraction..
+
+	bool ReadString(char *Buffer, int ASize);
 	bool ReadString(string &Buffer);
-	bool WriteString(const char *Buffer);
-	bool WriteString(const string &Buffer);
-	bool ReadLine(char* &Data);
-	bool WriteLine(const string &Buffer);
-	bool Seek(size_t Offset, ESeekOrigin Origin);
+	bool WriteString(const char *Data);
+	bool WriteString(const string &Data);
+
+	bool WriteText(const char *Data);
+	bool WriteText(const string &Data);
+
+	bool ReadLine(char *Buffer, int ASize);
+	bool ReadLine(string &Buffer);
+	bool WriteLine(const char *Data);
+	bool WriteLine(const string &Data);
+
+	string GetContent();
+	bool SetContent(const string &Data);
+
+	bool Seek(long Offset, ESeekOrigin Origin);
+	bool Rewind();
+	bool Flush();
+
 	bool Eof() const;
-	size_t Size() const;
+	long Size() const;
 
 private:
+	// CFile can't be copied or assigned.
+	CFile(const CFile &Source);
+	CFile& operator=(const CFile &Source);
+
+	bool WriteLine(const char *Data, size_t Size);
+
 	FILE *File;
 	string Filename;
+
+	const int READ_BUFFER_DEFAULT_SIZE;
 };
 
 /**
- * CLog - класс для работы с логом.
- */
+* CLog - класс для работы с логом.
+*/
 
 class CLog : public CTSingleton<CLog>
 {
@@ -548,7 +596,38 @@ protected:
 	CLog();
 };
 
-#define Log CLog::Instance()->WriteToLog
+// define SIMPLIFIED_LOG to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
+#ifdef SIMPLIFIED_LOG
+	#define Log CEnvironment::LogToStdOut
+#else
+	#define Log CLog::Instance()->WriteToLog
+#endif // SIMPLIFIED_LOG
+
+/**
+* Класс CEnvironment содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
+* В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
+*/
+
+class CEnvironment
+{
+public:
+	class DateTime
+	{
+	public:
+		static tm* GetLocalTimeAndDate();
+		static string GetFormattedTime(tm *TimeStruct, const char *Format);
+	};
+
+	class Paths
+	{
+	public:
+		static string GetWorkingDirectory();
+		static void SetWorkingDirectory();
+	};
+
+	static void LogToStdOut(const char *Event, const char *Format, ...);
+
+};
 
 /**
 *	Класс CFactory. Назначение классы - контроль создания любых объектов.
@@ -649,30 +728,6 @@ T* CFactory::Remove(const string &AName)
 	return result;
 }
 
-/**
-* Класс CEnvironment содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
-* В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
-*/
-
-class CEnvironment
-{
-public:
-	class DateTime
-	{
-	public:
-		static tm GetLocalTimeAndDate();
-		static string GetFormattedTime(const tm TimeStruct, const char *Format);
-	};
-
-	class Paths
-	{
-	public:
-		static string GetWorkingDirectory();
-		static void SetWorkingDirectory();
-	};
-
-};
-
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 // 	 in some class, named, for example, CEnvironment
 // Agreed with you.
@@ -705,5 +760,18 @@ __INLINE string to_string(const T& t)
 	s << t;
 	return s.str();
 }
+
+/**
+* CCaseInsensetiveComparison - класс-функтор, сравнивающий строки регистро-независимо. Используется STL-контейнерами и т. п. вещами.
+*/
+
+class CCaseInsensetiveComparison
+{
+public:
+	bool operator()(const string &lhs, const string &rhs) const
+	{
+		return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
+	}
+};
 
 #endif // _2DE_CORE_H_

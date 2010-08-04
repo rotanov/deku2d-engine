@@ -120,14 +120,16 @@ bool CObject::isDestroyed() const
 {
 	return Destroyed;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CFile
 
-CFile::CFile() : File(NULL){}
-
-CFile::CFile(const string &AFilename, EOpenMode Mode)
+CFile::CFile() : File(NULL), READ_BUFFER_DEFAULT_SIZE(256)
 {
-	File = NULL;
+}
+
+CFile::CFile(const string &AFilename, EOpenMode Mode) : File(NULL), READ_BUFFER_DEFAULT_SIZE(256)
+{
 	Open(AFilename, Mode);
 }
 
@@ -138,14 +140,15 @@ CFile::~CFile()
 
 bool CFile::Open(const string &AFilename, EOpenMode Mode)
 {
-	if (AFilename.empty())
-	{
-		Log("ERROR", "Can't open file. Invalid Filename");
-		return false;
-	}
 	if (File != NULL)
 	{
-		Log("ERROR", "Can't open file %s: another file is already opened.", AFilename.c_str());
+		Log("ERROR", "Can't open file '%s': another file is already opened.", AFilename.c_str());
+		return false;
+	}
+
+	if (AFilename.empty())
+	{
+		Log("ERROR", "Can't open file with empty filename.");
 		return false;
 	}
 
@@ -159,15 +162,14 @@ bool CFile::Open(const string &AFilename, EOpenMode Mode)
 	case OPEN_MODE_WRITE:
 		File = fopen(Filename.c_str(), "wb");
 		break;
-	default:
-		Log("ERROR", "Can't open file %s: invalid mode.", Filename.c_str());
-		return false;
 	}
+
 	if (File == NULL)
 	{
-		Log("ERROR", "Can't open file %s.", Filename.c_str());
+		Log("ERROR", "Can't open file '%s'.", Filename.c_str());
 		return false;
 	}
+
 	return true;
 }
 
@@ -184,195 +186,289 @@ bool CFile::Close()
 	return true;
 }
 
+/**
+* CFile::Read - читает из файла BytesCount байт ElementsCount раз и записывает в память по адресу Buffer.
+*/
+
+bool CFile::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
+{
+	if (Buffer == NULL || File == NULL || BytesCount == 0 || ElementsCount == 0)
+		return false;
+
+	if (fread(Buffer, BytesCount, ElementsCount, File) != ElementsCount && !Eof())
+	{
+		Log("ERROR", "File IO error occured in attempt to read data from '%s'.", Filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+/**
+* CFile::Write - записывает в файл данные из массива из ElementsCount элементов размером BytesCount байт каждый, находящегося по адресу Data.
+*/
+
+bool CFile::Write(const void *Data, size_t BytesCount, size_t ElementsCount /*= 1*/)
+{
+	if (Data == NULL || File == NULL || BytesCount == 0 || ElementsCount == 0)
+		return false;
+
+	if (fwrite(Data, BytesCount, ElementsCount, File) != ElementsCount)
+	{
+		Log("ERROR", "File IO error occured in attempt to write data to '%s'.", Filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
 bool CFile::ReadByte(byte *Buffer)
 {
-	if (Buffer == NULL)
-		return false;
-	if (File == NULL)
-		return false;
-	if (fread(Buffer, 1, 1, File) != 1)
-	{
-		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't read byte.");
-		return false;
-	}
-	return true;
+	return Read(Buffer, sizeof(byte));
 }
 
-bool CFile::WriteByte(byte *Buffer)
+bool CFile::WriteByte(byte *Data)
 {
-	return Write(Buffer, 1);
+	return Write(Data, sizeof(byte));
 }
 
-bool CFile::WriteByte(byte Buffer)
+bool CFile::WriteByte(byte Data)
 {
-	return WriteByte(&Buffer);
+	return WriteByte(&Data);
 }
 
-bool CFile::Read(void *Buffer, size_t BytesCount)
+/**
+* CFile::ReadString - читает из файла строку, завершённую нулевым байтом, максимальной длиной ASize и записывает её в память по адресу Buffer.
+*
+* \todo Хорошо бы либо вынести куда-нибудь эту логику, либо вообще перестать юзать подобные способы хранения строк.
+*/
+
+bool CFile::ReadString(char *Buffer, int ASize)
 {
-	if (Buffer == NULL)
+	if (File == NULL || Buffer == NULL || ASize == 0)
 		return false;
-	if (File == NULL)
-		return false;
-	if (BytesCount == 0)
-		return false;
-
-	if (fread(Buffer, 1, BytesCount, File) != BytesCount)
-	{
-		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't read data.");
-		return false;
-	}
-	return true;
-}
-
-bool CFile::Write(const void *Buffer, size_t BytesCount)
-{
-	if (Buffer == NULL)
-		return false;
-	if (File == NULL)
-		return false;
-	if (BytesCount == 0)
-		return false;
-
-	if (fwrite(Buffer, 1, BytesCount, File) != BytesCount)
-	{
-		if (!Eof())
-			Log("ERROR", "FILE IO Error. Can't write data.");
-		return false;
-	}
-	return true;
-}
-
-bool CFile::ReadString(char *Buffer)
-{
-	if (File == NULL)
-		return false;
-
+	
 	byte b;
 	int i = 0;
 
-	if (!Read(&b, 1))
-		return false;
-
-	while (b != 0)
+	do
 	{
+		if (!ReadByte(&b))
+			return false;
+
 		Buffer[i] = b;
 		i++;
-		if (!Read(&b, 1))
-			return false;
-	}
+	} while (b != 0 && i < ASize);
 
 	return true;
 }
+
+/**
+* CFile::ReadString - читает из файла строку, завершённую нулевым байтом и записывает её в строку Buffer.
+* В отличие от версии с char* не требует явного указания максимальной длины строки.
+*
+* \todo Хорошо бы либо вынести куда-нибудь эту логику, либо вообще перестать юзать подобные способы хранения строк.
+*/
 
 bool CFile::ReadString(string &Buffer)
 {
 	if (File == NULL)
 		return false;
+	
+	Buffer.clear();
 
 	byte b;
-	Buffer = "";
-	int i = 0;
 
-	if (!Read(&b, 1))
+	if (!ReadByte(&b))
 		return false;
+
+	// theoretically (not tested) makes processing somewhat faster on average strings, but consumes more memory..
+	Buffer.reserve(READ_BUFFER_DEFAULT_SIZE);
 
 	while (b != 0)
 	{
 		Buffer += b;
-		i++;
-		if (!Read(&b, 1))
+
+		if (!ReadByte(&b))
 			return false;
 	}
 
 	return true;
 }
 
-//note buffer must exists!!!!
-bool CFile::WriteString(const char *Buffer)
+/**
+* CFile::WriteString - записывает строку Data в файл и заканчивает запись нулевым байтом.
+*
+* \todo Хорошо бы либо вынести куда-нибудь эту логику, либо вообще перестать юзать подобные способы хранения строк.
+*/
+
+bool CFile::WriteString(const char *Data)
 {
-	if (File == NULL)
+	if (Data == NULL)
 		return false;
 
-	byte b = 0;
-	for (unsigned int i = 0; i < strlen(Buffer); i++)
+	return Write(Data, strlen(Data) + 1);
+}
+
+/** \copydoc WriteString(const char *) */
+
+bool CFile::WriteString(const string &Data)
+{
+	return Write(Data.c_str(), Data.length() + 1);
+}
+
+/**
+* CFile::WriteText - записывает текст из Data в файл, не завершая его ничем.
+*
+* В отличие от WriteString, эта функция добрая и полезная.
+*/
+
+bool CFile::WriteText(const char *Data)
+{
+	if (Data == NULL)
+		return false;
+	
+	return Write(Data, strlen(Data));
+}
+
+/** \copydoc WriteText(const char *) */
+
+bool CFile::WriteText(const string &Data)
+{
+	return Write(Data.c_str(), Data.length());
+}
+
+/**
+* CFile::ReadLine - читает строку, завершённую символом конца строки, из файла и записывает её в память по адресу Buffer.
+* Чтение заканчивается при достижении ASize символа, символа конца строки или конца файла, что встретится первее.
+* 
+* \param[out] Buffer указатель на участок памяти, в который будет записана строка, 
+* \param ASize максимальное число символов для чтения
+*/
+
+bool CFile::ReadLine(char *Buffer, int ASize)
+{
+	if (File == NULL || Buffer == NULL || ASize == 0)
+		return false;
+
+	if (fgets(Buffer, ASize, File) == NULL)
 	{
-		Write(&Buffer[i], 1);
+		Log("ERROR", "File IO error occurend in attempt to read line from '%s'", Filename.c_str());
+		return false;
 	}
-	Write(&b, 1);
 
 	return true;
 }
 
-bool CFile::WriteString(const string &Buffer)
+/**
+* CFile::ReadLine - читает строку из файла до символа конца строки или конца файла, что встретися первее, и записывает её в Buffer.
+*/
+
+bool CFile::ReadLine(string &Buffer)
 {
 	if (File == NULL)
 		return false;
+	
+	Buffer.clear();
 
-	byte b = 0;
-	for (unsigned int i = 0; i < Buffer.length(); i++)
+	byte b;
+
+	// theoretically (not tested) makes processing somewhat faster on average strings, but consumes more memory..
+	Buffer.reserve(READ_BUFFER_DEFAULT_SIZE);
+
+	while (!Eof())
 	{
-		// посимвольная запись?!.. о, щи....
-		Write(&Buffer[i], 1);
+		if (!ReadByte(&b))
+			return false;
+
+		if (b == 0)	// that's needed, because std::string is buggy in handling \0 in strings...
+			break;
+
+		Buffer += b;
+
+		if (b == 10)
+			break;
 	}
-	Write(&b, 1);
 
 	return true;
 }
 
-bool CFile::ReadLine(char* &Data)
+/**
+* CFile::WriteLine - записывает строку Data в файл и завршает запись символами конца строки, соответствующими текущей системе.
+*/
+
+bool CFile::WriteLine(const char *Data)
 {
-	if (File == NULL)
+	if (Data == NULL)
 		return false;
 
-	char *buffer = new char[CFILE_MAX_STRING_LENGTH];
-	int count = -1;
-	// unsigned long read = 0; // unused variable
+	return WriteLine(Data, strlen(Data));
+}
 
-	do
+/*! \copydoc WriteLine(const char *) */
+
+bool CFile::WriteLine(const string &Data)
+{
+	return WriteLine(Data.c_str(), Data.length());
+}
+
+/**
+* CFile::GetContent - возвращает всё содержимое файла в виде строки.
+*
+* Не влияет на позицию курсора для других операций чтения.
+*/
+
+string CFile::GetContent()
+{
+	if (File == NULL)
+		return "";
+
+	string result;
+	if (result.max_size() < Size())
 	{
-		fread(buffer + count + 1, 1, 1, File);
-		count++;
-	} while ((buffer[count] != 0x00) && (count < CFILE_MAX_STRING_LENGTH));
+		Log("ERROR", "File '%s' is too large to be stored in single string", Filename.c_str());
+		return "";
+	}
 
-	if (Data != NULL)
-		delete [] Data;
+	fpos_t OldPos;
+	fgetpos(File, &OldPos);
+	rewind(File);
 
-	Data = new char[count + 1]; // @todo: CFile should not allocate any memory for user. User should. There is leak there.
-	for (int i = 0; i < count; i++)
-		Data[i] = buffer[i];
-	Data[count] = 0x00;
-	delete [] buffer;
+	string tmp;
 
-	return true;
+	while (!Eof())
+	{
+		ReadLine(tmp);
+		result += tmp;
+	}
+
+	fsetpos(File, &OldPos);
+
+	return result;
 }
 
-bool CFile::WriteLine(const string &Buffer)
+/**
+* CFile::SetContent - записывает в файл строку Data с его начала.
+*
+* Позиция курсора остаётся в месте окончания записи, поэтому, очевидно, влияет на другие операции записи.
+*/
+
+bool CFile::SetContent(const string &Data)
 {
-	if (File == NULL)
-		return false;
-
-	char b;
-
-	Write((char*) Buffer.data(), Buffer.length());
-
-#ifdef _WIN32
-	// почему это вообще надо?.. лишний байт для чтения в глупых редакторах, не поддерживающих LF онли? или что?.. 
-	// а если уж и нужно, то вообще надо бы сделать константу, дефайн, зависящий от платформы..
-	b = 13;
-	Write(&b,1);
-#endif //_WIN32
-	b = 10;
-	Write(&b,1);
-
-	return true;
+	Rewind();
+	return WriteText(Data);
 }
 
-bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
+/**
+* CFile::Seek - перемещает внутренний указатель текущей позиции на указанное место.
+*
+* \param Offset смещение в байтах.
+* \param Origin показывает, откуда считать Offset.
+*/
+
+bool CFile::Seek(long Offset, ESeekOrigin Origin)
 {
-	if (File == NULL)
+	if (!File)
 		return false;
 
 	int origin_const;
@@ -393,22 +489,63 @@ bool CFile::Seek(unsigned int Offset, ESeekOrigin Origin)
 	return (fseek(File, Offset, origin_const) == 0);
 }
 
-bool CFile::Eof() const
+bool CFile::Rewind()
 {
-	return !!feof(File);
+	return Seek(0L, SEEK_ORIGIN_BEGINNING);
 }
 
-size_t CFile::Size() const
+bool CFile::Flush()
+{
+	if (!File)
+		return false;
+
+	return (fflush(File) == 0);
+}
+
+bool CFile::Eof() const
+{
+	if (!File)
+		return true;
+
+	return (feof(File) != 0);
+}
+
+long CFile::Size() const
 {
 	struct stat FileStat;
 
-	if(stat(Filename.c_str(), &FileStat))
+	if (stat(Filename.c_str(), &FileStat))
 	{
 		Log("ERROR", "Can't get size of %s.", Filename.c_str());
 		return 0;
 	}
 
 	return FileStat.st_size;
+}
+
+/**
+* CFile::WriteLine - внутренняя версия WriteLine, для выноса общего кода из версий с std::string и 0-terminated строкой.
+*/
+
+bool CFile::WriteLine(const char *Data, size_t Size)
+{
+	if (File == NULL || Data == NULL)
+		return false;
+
+	Write(Data, Size);
+
+	byte b;
+
+#ifdef _WIN32
+	b = 13;
+	WriteByte(&b);
+#endif //_WIN32
+
+	b = 10;
+	WriteByte(&b);
+
+	return true;
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -446,9 +583,7 @@ CLog::~CLog()
 void CLog::WriteToLog(const char *Event, const char *Format, ...)
 {
 	if (!Enabled)
-	{
 		return;
-	}
 
 	if (Stream == NULL)
 	{
@@ -459,27 +594,28 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 		}
 	}
 
-	char TimeAndEvent[64];
-
-#ifdef LOG_TIME_TICK
-	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%d]%c%c[%s] ", SDL_GetTicks(), 9, 9, Event);
-	TimeAndEvent[sizeof(TimeAndEvent) - 1] = 0;
-#else
-	char TimeString[64];
-	strcpy(TimeString, asctime(&CEnvironment::DateTime::GetLocalTimeAndDate()));
-	TimeString[strlen(TimeString) - 1] = 0;
-	snprintf(TimeAndEvent, sizeof(TimeAndEvent) - 1, "[%s] [%s] ", TimeString, Event);
-#endif
-
-	char buffer[1024];
-
 	va_list args;
 	va_start(args, Format);
-	vsnprintf(buffer, sizeof(buffer) - 1, Format, args);	// safe, but writes only first 1024 chars per log line...
-	buffer[sizeof(buffer) - 1] = 0;				// should be sufficent for all cases, though...
+
+	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+
+	char *buffer = new char[MessageLength + 1];
+
+	vsnprintf(buffer, MessageLength, Format, args);
+	buffer[MessageLength] = 0;
+
 	va_end(args);
 
-	*Stream << TimeAndEvent << buffer << endl;
+	*Stream << "[";
+#ifdef LOG_TIME_TICK
+	*Stream << SDL_GetTicks() << "]\t\t[";
+#else
+	*Stream << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] [";
+#endif // LOG_TIME_TICK
+
+	*Stream << Event << "] " << buffer << endl;
+
+	delete[] buffer;
 }
 
 void CLog::SetLogMode(CLog::ELogMode ALogMode)
@@ -521,7 +657,7 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 		string NewLogFileName = LogFilePath + LogName;
 
 		if (DatedLogFileNames) {
-			tm TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
+			tm* TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
 			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
 		}
 		NewLogFileName += ".log";
@@ -607,6 +743,91 @@ CResource::CResource()
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CEnvironment
+
+tm* CEnvironment::DateTime::GetLocalTimeAndDate()
+{
+	time_t RawTime;
+	time(&RawTime);
+	return localtime(&RawTime);
+}
+
+string CEnvironment::DateTime::GetFormattedTime(tm *TimeStruct, const char *Format)
+{
+	int AllocSize = 128;
+	bool allocated = false;
+
+	char *buffer = NULL;
+
+	while (!allocated)
+	{
+		delete[] buffer;
+		buffer = new char[AllocSize];
+		if (!buffer)
+			return string("");
+
+		allocated = (strftime(buffer, AllocSize - 1, Format, TimeStruct) != 0);
+		AllocSize *= 2;
+	}
+	
+	string result = buffer;
+	SAFE_DELETE_ARRAY(buffer);
+	return result;
+}
+
+string CEnvironment::Paths::GetWorkingDirectory()
+{
+	string result;
+	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+
+#ifdef _WIN32
+	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
+#else
+	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
+#endif //_WIN32
+
+	result = dir;
+	return result;
+}
+
+void CEnvironment::Paths::SetWorkingDirectory()
+{
+#ifdef _WIN32
+	char *MainDir = new char[MAX_PATH];
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DelFNameFromFPath(MainDir);
+	SetCurrentDirectory(MainDir);
+	delete [] MainDir;
+#endif // _WIN32
+	// *nix-like systems don't need current directory to be set to executable path - they use different directory structure
+}
+
+/**
+* CEnvironment::LogToStdOut - упрощённый лог на стандартный вывод, в обход синглтонного ада CLog'а.
+*
+* Эта функция используется макросом Log при задефайненом SIMPLIFIED_LOG (по-умолчанию это не так). Также можно использовать вручную.
+* В основном нужна при отладке, а также, когда движок не запущен, а залогировать что-то очень хочется.
+*/
+
+void CEnvironment::LogToStdOut(const char *Event, const char *Format, ...)
+{
+	va_list args;
+	va_start(args, Format);
+
+	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+
+	char *buffer = new char[MessageLength + 1];
+
+	vsnprintf(buffer, MessageLength, Format, args);
+	buffer[MessageLength] = 0;
+
+	va_end(args);
+
+	cout << "[" << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] ["
+		<< Event << "] " << buffer << endl;
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CFactory
 
 CFactory::CFactory()
@@ -655,69 +876,6 @@ void CFactory::Destroy(CObject *AObject)
 	AObject->SetDestroyed();
 	Objects.erase(i);
 	CObject::DecRefCount(AObject);
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-// CEnvironment
-
-tm CEnvironment::DateTime::GetLocalTimeAndDate()
-{
-	time_t RawTime;
-	tm *TimeStruct;
-	time(&RawTime);
-	TimeStruct = localtime(&RawTime);
-	return *TimeStruct;
-}
-
-string CEnvironment::DateTime::GetFormattedTime(const tm TimeStruct, const char *Format)
-{
-	int AllocSize = 128;
-	bool allocated = false;
-
-	char *buffer = NULL;
-
-	while (!allocated)
-	{
-		delete[] buffer;
-		buffer = new char[AllocSize];
-		if (!buffer)
-			return string("");
-
-		allocated = (strftime(buffer, AllocSize - 1, Format, &TimeStruct) != 0);
-		AllocSize *= 2;
-	}
-	
-	string result = buffer;
-	SAFE_DELETE_ARRAY(buffer);
-	return result;
-}
-
-string CEnvironment::Paths::GetWorkingDirectory()
-{
-	string result;
-	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
-
-#ifdef _WIN32
-	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
-#else
-	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
-#endif //_WIN32
-
-	result = dir;
-	return result;
-}
-
-void CEnvironment::Paths::SetWorkingDirectory()
-{
-#ifdef _WIN32
-	char *MainDir = new char[MAX_PATH];
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-	SetCurrentDirectory(MainDir);
-	delete [] MainDir;
-#endif // _WIN32
-	// *nix-like systems don't need current directory to be set to executable path - they use different directory structure
 }
 
 
