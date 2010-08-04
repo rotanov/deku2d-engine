@@ -150,21 +150,25 @@ bool CEngine::Init()
 
 	SDL_putenv("SDL_VIDEO_CENTERED=1");
 
-	CXMLTable Config;
-	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
+	// TODO: CConfig
+	CXML Config;
+	Config.LoadFromFile(ConfigFilePath + ConfigFileName);
+	/*if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
 	{
 		Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
 		return false;
-	}
+	}*/
+
+	CXMLNode *ConfigRoot = Config.Root.First("Configuration");
 	
-	// looks like shit
-	int				wwidth		= stoi((Config.First->Get("WindowWidth"))->GetValue());
-	int				wheight		= stoi((Config.First->Get("WindowHeight"))->GetValue());
-	int				wbpp		= stoi((Config.First->Get("WindowBpp"))->GetValue());
-	char			*wcaption	= (Config.First->Get("WindowCaption"))->GetValue();
-					doCalcFps	= !!((Config.First->Get("DoCalcFps"))->Value.compare("true")==0);
-					doLimitFps	= !!((Config.First->Get("DoLimitFps"))->Value.compare("true")==0);
-	SetState(CEngine::STATE_FPS_LIMIT, (void*)stoi((Config.First->Get("FpsLimit"))->GetValue()));
+	// still looks like shit
+	int wwidth = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowWidth")->GetAttribute("value"));
+	int wheight = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowHeight")->GetAttribute("value"));
+	int wbpp = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowBPP")->GetAttribute("value"));
+	string wcaption = ConfigRoot->Children.First("Video")->Children.First("WindowCaption")->GetAttribute("value");
+	doCalcFps = (ConfigRoot->Children.First("Video")->Children.First("DoCalcFps")->GetAttribute("value") == "true");
+	doLimitFps = (ConfigRoot->Children.First("Video")->Children.First("DoLimitFps")->GetAttribute("value") == "true");
+	SetState(CEngine::STATE_FPS_LIMIT, (void*) stoi(ConfigRoot->Children.First("Video")->Children.First("FpsLimit")->GetAttribute("value")));
 
 	
 	// looks like shit.. but this is correct order of initializing singletons.. we need some way to do it in more beautiful sense..
@@ -177,12 +181,12 @@ bool CEngine::Init()
 	// CGUIManager::Instance(); // gui manager crashes it, because it's trying to get default font when no fonts are in font manager
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
-	ResourceManager->DataPath	= (Config.First->Get("DataPath"))->GetValue();
-	doLoadDefaultResourceList	= !!(Config.First->Get("doLoadDefaultResourceList"))->Value.compare("true")==0;
+	ResourceManager->DataPath = ConfigRoot->Children.First("Data")->Children.First("DataPath")->GetAttribute("value");
+	doLoadDefaultResourceList = (ConfigRoot->Children.First("Data")->Children.First("doLoadDefaultResourceList")->GetAttribute("value") == "true");
 
 	SetState(CEngine::STATE_SCREEN_WIDTH, (void*)wwidth);
 	SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
-	SetState(CEngine::STATE_WINDOW_CAPTION, wcaption);
+	SetState(CEngine::STATE_WINDOW_CAPTION, (void*)wcaption.c_str());
 
 
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
@@ -198,7 +202,7 @@ bool CEngine::Init()
 	}
 
 	ilInit(); // Инициализация DevIL
-	CSoundMixer::Instance()->SetMusicVolume(stoi((Config.First->Get("MusicVolume"))->GetValue()));
+	CSoundMixer::Instance()->SetMusicVolume(stoi(ConfigRoot->Children.First("Sound")->Children.First("MusicVolume")->GetAttribute("value")));
 
 	SDL_EnableUNICODE(1);
 
@@ -500,13 +504,9 @@ bool CEngine::AddEventFunction(EventFunc func)
 
 int CEngine::CfgGetInt( char* ParamName )
 {
-	CXMLTable Config;
-	if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
-	{
-		Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
-		return false;
-	}
-	return atoi((Config.First->Get(ParamName))->GetValue());
+	// DEPRECATED
+	throw std::logic_error("CfgGetInt is deprecated - don't use it!! There is no way to get config parameters this way now.");
+	return 0;
 }
 
 bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller)

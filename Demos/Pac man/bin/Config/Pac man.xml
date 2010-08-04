@@ -1,12 +1,19 @@
-<configuration>
-	WindowWidth				= "1000"
-	WindowHeight			= "700"
-	WindowBpp				= "32"			// todo: deprecate
-	WindowCaption			= "Deku pac-man"
-	DoCalcFps				= "true"		// todo: deprecate
-	DoLimitFps				= "true"		// todo: deprecate
-	FpsLimit				= "60"			// todo: deprecate
-	DataPath               	= "../../../Data"
-	doLoadDefaultResourceList	= "true"	// todo: deprecate
-	MusicVolume				= "10"
-</configuration>
+<?xml version="1.0"?>
+<Configuration>
+	<Video>
+		<WindowWidth value="1000" />
+		<WindowHeight value="700" />
+		<WindowBPP value="32" />
+		<WindowCaption value="Deku pac-man" />
+		<DoCalcFps value="true" />
+		<DoLimitFps value="true" />
+		<FpsLimit value="60" />
+	</Video>
+	<Sound>
+		<MusicVolume value="10" />
+	</Sound>
+	<Data>
+		<DataPath value="../../../Data" />
+		<doLoadDefaultResourceList value="true" />
+	</Data>
+</Configuration>

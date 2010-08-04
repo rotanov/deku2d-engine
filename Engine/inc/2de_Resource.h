@@ -13,14 +13,14 @@
 class CResourceSectionLoaderBase
 {
 public:
-	CResourceSectionLoaderBase(const string &AName, CXMLTable *AResourceList);
+	CResourceSectionLoaderBase(const string &AName, CXML &AResourceList);
 	virtual ~CResourceSectionLoaderBase();
 	virtual bool Load() = 0;
 	string GetName() const;
 
 protected:
 	string Name;
-	CXMLTable *ResourceList;
+	CXML &ResourceList;
 
 };
 
@@ -32,51 +32,53 @@ template<typename T>
 class CResourceSectionLoader : public CResourceSectionLoaderBase
 {
 public:
-	CResourceSectionLoader(const string &AName, CXMLTable *AResourceList);
+	CResourceSectionLoader(const string &AName, CXML &AResourceList);
 	bool Load();
 
 };
 
 template<typename T>
-CResourceSectionLoader<T>::CResourceSectionLoader(const string &AName, CXMLTable *AResourceList) : CResourceSectionLoaderBase(AName, AResourceList)
+CResourceSectionLoader<T>::CResourceSectionLoader(const string &AName, CXML &AResourceList) : CResourceSectionLoaderBase(AName, AResourceList)
 {
 }
 
 template<typename T>
 bool CResourceSectionLoader<T>::Load()
 {
-	if (ResourceList == NULL)
-	{
-		Log("ERROR", "Trying to load section '%s' while Resource list has not been loaded", Name.c_str());
-		return false;
-	}
-
-	XMLNode x = ResourceList->First->Get(Name.c_str());
-	if (x == NULL)
+	CXMLNode *section = ResourceList.Root.First("Resources")->Children.First(Name);
+	if (section->IsErroneous())
 	{
 		Log("WARNING", "Section '%s' has not been found", Name.c_str());
 		return false;
 	}
 
-	string key, val;
-	int Result;
+	CXMLNode *ResNode = NULL;
+	string ResName;
 
-	CFactory *Factory = CFactory::Instance(); 
-	CResource *Resource;
+	CFactory *Factory = CFactory::Instance();
+	CResource *Resource = NULL;
 
-	x->ResetEnum(XMLENUM_ATTRSONLY);
-	while (x->Enum(key, val, Result))
+	for (CXMLNode::ChildrenIterator it = section->Children.Begin(); it != section->Children.End(); ++it)
 	{
-		Resource = Factory->New<T>(key);
-		if (Resource == NULL)
+		ResNode = *it;
+		ResName = ResNode->GetAttribute("name");
+		if (ResName.empty())
 		{
-			Log("WARNING", "Error loading resource: '%s'", key.c_str());
+			Log("WARNING", "Name isn't specified for resource in resource list XML");
 			continue;
 		}
-		Resource->Filename = val;
-	}
-	return true;
 
+		Resource = Factory->New<T>(ResName);
+		if (Resource == NULL)
+		{
+			Log("WARNING", "Error loading resource: '%s'", ResName.c_str());
+			continue;
+		}
+
+		Resource->Filename = ResNode->Children.First()->GetValue();
+	}
+
+	return true;
 }
 
 /**
@@ -92,13 +94,12 @@ public:
 	template<typename T>
 	void AddSection(const string &SectionName);
 
-	//CObject* LoadResource(char* section, char *name, CreateFunc creator);
 	string DataPath;
 protected:
 	CResourceManager();
 	friend class CTSingleton<CResourceManager>;
 	list<CResourceSectionLoaderBase *> SectionsLoaders;
-	CXMLTable *ResourceList;
+	CXML ResourceList;
 
 };
 
@@ -117,7 +118,7 @@ class CDataLister
 public:
 	void List(string ADataRoot);
 private:
-	CXMLTable Table;
+	CXML XML;
 	CXMLNode *CurNode;
 
 	void ExploreDirectory(string Path);

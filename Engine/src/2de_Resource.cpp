@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
-CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName, CXMLTable *AResourceList) : Name(AName), ResourceList(AResourceList)
+CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName, CXML &AResourceList) : Name(AName), ResourceList(AResourceList)
 {
 }
 
@@ -30,9 +30,6 @@ string CResourceSectionLoaderBase::GetName() const
 
 CResourceManager::~CResourceManager()
 {
-	if (ResourceList != NULL)
-		delete ResourceList;
-	
 	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 	{
 		delete *it;
@@ -44,7 +41,7 @@ bool CResourceManager::LoadResources()
 	CDataLister DataLister;
 	DataLister.List(DataPath);
 
-	ResourceList->LoadFromFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
+	ResourceList.LoadFromFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
 	
 	// @todo: see issue #12. Replace load from file by assigning table, returned by List.
 
@@ -58,30 +55,9 @@ bool CResourceManager::LoadResources()
 	return true;
 }
 
-/*CObject* CResourceManager::LoadResource(char* section, char *AResourceName, CreateFunc creator)
-{
-	if (ResourceList == NULL)
-	{
-		return false;
-	}
-	XMLNode x = ResourceList->First->Get(section);
-	string val;
-	CFactory *Factory = CFactory::Instance();
-	CResource *result;
-	val = x->Get(AResourceName)->GetValue();
-
-	result = dynamic_cast<CResource*>(Factory->Create(OBJ_USER_DEFINED, creator));
-	result->SetName(AResourceName);
-	result->Filename = val;
-	result->LoadFromFile();
-
-	return result;
-}*/
-
 CResourceManager::CResourceManager()
 {
 	SetName("ResourceManager");
-	ResourceList = new CXMLTable;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -90,10 +66,16 @@ CResourceManager::CResourceManager()
 // CXMLTable CDataLister::List(string DataRoot) // @todo: implement operator= in CXMLTable to make it possible to assign tables
 void CDataLister::List(string DataRoot)
 {
-	CurNode = Table.First;
+	XML.Root.DeleteAll();
+
+	XML.Root.AddLast(new CXMLPrologNode);
+	CXMLNode *ResourcesRoot = new CXMLNormalNode("Resources");
+	XML.Root.AddLast(ResourcesRoot);
+
+	CurNode = ResourcesRoot;
 	
 	ExploreDirectory(DataRoot);
-	Table.SaveToFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
+	XML.SaveToFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
 
 	// return Table;
 }
@@ -107,13 +89,15 @@ void CDataLister::ExploreDirectory(string Path)
 		return;
 	}
 
-	CurNode->Name = GetLastPathComponent(Path);
 
+	string CurrentPath;
 	dirent *entry = NULL;
+	DIR *testdir = NULL;
 
 	while (entry = readdir(dirp))
 	{
-		DIR *testdir = opendir(string(Path + "/" + string(entry->d_name)).c_str());
+		CurrentPath = Path + "/" + string(entry->d_name);
+		testdir = opendir(CurrentPath.c_str());
 
 		//if (entry->d_type == DT_DIR)
 		if (testdir)
@@ -124,16 +108,20 @@ void CDataLister::ExploreDirectory(string Path)
 			{
 				continue;
 			}
+
 			CXMLNode *PreviousNode = CurNode;
-			CurNode = CurNode->Add(entry->d_name, entry->d_name);
-			ExploreDirectory(Path + "/" + string(entry->d_name));
+			CurNode = new CXMLNormalNode(entry->d_name);
+			ExploreDirectory(CurrentPath);
+			PreviousNode->Children.AddLast(CurNode);
 			CurNode = PreviousNode;
 		}
 		//else if (entry->d_type == DT_REG)
 		else
 		{
-			CurNode->Add(GetFileNameWithoutExtension(string(entry->d_name)),
-				     Path + "/" + string(entry->d_name));
+			CXMLNode *ResNode = new CXMLNormalNode("Resource");
+			ResNode->SetAttribute("name", GetFileNameWithoutExtension(entry->d_name));
+			ResNode->Children.AddLast(new CXMLTextNode(CurrentPath));
+			CurNode->Children.AddLast(ResNode);
 		}
 
 	}

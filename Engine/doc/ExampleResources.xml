@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<Resources>
+	<Sounds>
+		<Resource name="chord">../../../Data/Sounds/chord.wav</Resource>
+	</Sounds>
+	<Music>
+		<Resource name="bender1">../../../Data/Music/bender1.mp3</Resource>
+		<Resource name="PacMan">../../../Data/Music/PacMan.mp3</Resource>
+	</Music>
+	<Scripts />
+	<Fonts>
+		<Resource name="hge">../../../Data/Fonts/hge.fif</Resource>
+	</Fonts>
+	<Tilesets>
+		<Resource name="TileSet01">../../../Data/Tilesets/TileSet01.tls</Resource>
+	</Tilesets>
+	<Levels />
+	<Textures>
+		<Resource name="ParticlePacmanBlood">../../../Data/Textures/ParticlePacmanBlood.PNG</Resource>
+	</Textures>
+</Resources>
