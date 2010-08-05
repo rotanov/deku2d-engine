@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Configuration>
 	<Video>
-		<WindowWidth value="1000" />
-		<WindowHeight value="700" />
+		<WindowWidth value="800" />
+		<WindowHeight value="600" />
 		<WindowBPP value="32" />
 		<WindowCaption value="Level editor" />
 		<DoCalcFps value="true" />

@@ -186,7 +186,7 @@ void CPrimitiveRender::grArrowC(const Vector2 &v0,const Vector2 &v1)
 	grArrowL(v0, v1);
 }
 
-void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, CPolygon *poly)
+void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, const CPolygon &poly)
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
@@ -201,12 +201,12 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, CPolygon *poly)
 #endif 
 
 	glBegin(GL_TRIANGLE_FAN);
-	for(int i = 0; i < poly->numV; i++)
+	for(unsigned int i = 0; i < poly.GetVertexCount(); i++)
 	{
 #ifdef G_POLY_TEXTURE_ENABLE
-		glTexCoord2f(poly->V[i].x/G_POLY_TEX_CELL_SIZE, poly->V[i].y/G_POLY_TEX_CELL_SIZE);
+		glTexCoord2f(poly[i].x/G_POLY_TEX_CELL_SIZE, poly[i].y/G_POLY_TEX_CELL_SIZE);
 #endif 
-		glVertex2fv(&(poly->V[i].x));
+		glVertex2fv(&(poly[i].x));
 	}
 	glEnd();
 
@@ -216,9 +216,9 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, CPolygon *poly)
 	glLineWidth(1.0f);
 	plClr->glSet();
 	glBegin(GL_LINE_LOOP);
-	for(int i = 0; i < poly->numV; i++)
+	for(unsigned int i = 0; i < poly.GetVertexCount(); i++)
 	{
-		glVertex2fv(&(poly->V[i].x));
+		glVertex2fv(&(poly[i].x));
 	}
 	glEnd();
 
@@ -417,10 +417,10 @@ void CPrimitiveRender::grInYan(const Vector2 &p, float Radius)
 	grCircleL(p, Radius/*+lwidth/2.0f*/);
 }
 
-void CPrimitiveRender::gDrawBBox( CAABB box )
+void CPrimitiveRender::gDrawBBox( CBox box )
 {
 	BeforeRndr();
-	float x0 = box.vMin.x, x1 = box.vMax.x, y0 = box.vMin.y, y1 = box.vMax.y; 
+	float x0 = box.Min.x, x1 = box.Max.x, y0 = box.Min.y, y1 = box.Max.y; 
 	grSegmentC(Vector2(x0, y0), Vector2(x1, y0));
 	grSegmentC(Vector2(x1, y0), Vector2(x1, y1));
 	grSegmentC(Vector2(x1, y1), Vector2(x0, y1));

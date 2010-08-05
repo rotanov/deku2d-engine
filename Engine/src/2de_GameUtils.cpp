@@ -31,8 +31,8 @@ bool CTileset::LoadFromFile()
 
 	if (BBox != NULL)
 		delete [] BBox;
-	BBox = new CAABB[HorNumTiles*VerNumTiles];
-	file.Read(BBox, sizeof(CAABB)*HorNumTiles*VerNumTiles);
+	BBox = new CBox[HorNumTiles*VerNumTiles];
+	file.Read(BBox, sizeof(CBox)*HorNumTiles*VerNumTiles);
 
 	file.Close();
 
@@ -74,17 +74,13 @@ bool CTileset::SaveToFile()
 		Log("ERROR", "Can't open TileSet file %s", Filename.c_str());
 		return false;
 	}
-
 	file.Write(Texture->GetName().c_str(), Texture->GetName().length() + 1);
 	file.Write(&TileWidth, sizeof(TileWidth));
 	file.Write(&TileHeight, sizeof(TileHeight));
 	file.Write(&HorNumTiles, sizeof(HorNumTiles));
 	file.Write(&VerNumTiles, sizeof(VerNumTiles));
-
-	file.Write(BBox, sizeof(CAABB)*HorNumTiles*VerNumTiles);
-
+	file.Write(BBox, sizeof(CBox) * HorNumTiles * VerNumTiles);
 	file.Close();
-
 	return true;
 }
 
@@ -107,9 +103,9 @@ void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles,
 	TileHeight = _TileHeight;
 	if (BBox != NULL)
 		delete [] BBox;
-	BBox = new CAABB [HorNumTiles*VerNumTiles];
+	BBox = new CBox [HorNumTiles*VerNumTiles];
 	for(int i=0; i<HorNumTiles*VerNumTiles; i++)
-		BBox[i] = CAABB(0, 0, TileHeight, TileWidth);
+		BBox[i] = CBox(0, 0, TileHeight, TileWidth);
 }
 
 Vector2Array<4> CTileset::GetCellTC(int CellIndex)
@@ -267,16 +263,16 @@ int CLevelMap::GetCellIndex(int h, int v)
 	return v * HorizontalCellsCount + h;
 }
 
-CAABB CLevelMap::GetCellAABB(const Vector2 &V)
+CBox CLevelMap::GetCellAABB(const Vector2 &V)
 {
 	size_t CellWidth = TileSet->TileWidth * GetScaling();
 	size_t CellHeight = TileSet->TileWidth * GetScaling();
 	if (GetMapCell((int)V.x / CellWidth, (int)V.y / CellHeight )->index != 0)
-		return CAABB( (((int)V.x / CellWidth)) * CellWidth,
+		return CBox( (((int)V.x / CellWidth)) * CellWidth,
 		(((int)V.y/CellHeight)) * CellHeight, 
 		CellWidth, CellHeight);
 	else 
-		return CAABB(0.0f, 0.0f, 0.0f, 0.0f);
+		return CBox(0.0f, 0.0f, 0.0f, 0.0f);
 		//throw std::runtime_error("Outside of a map");
 }
 

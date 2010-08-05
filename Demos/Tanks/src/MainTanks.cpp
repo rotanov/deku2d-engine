@@ -21,7 +21,7 @@ CTankManager* Tanks;
 ///!!!///Где-то в цикле обновления танчиков мы не освобождаем память и как результат - неебический memory leak
 //////////////////////////////////////////////////////////////////////////
 
-class CTitleScreen : public CUpdateObject
+class CTitleScreen : public CUpdatable
 {
 public:
 	CText* TitleText;
@@ -49,8 +49,8 @@ public:
 			{
 				//CRenderManager::Instance()->DelObject("Title screen tanks");
 				//CUpdateManager::Instance()->DelObject("Title screen tanks");
-				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->Visible = false;
-				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->Visible = false;
+				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->SetVisibility(false);
+				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->SetVisibility(false);
 				Tanks = new CTankManager;	
 			}
 		}
@@ -92,7 +92,7 @@ bool Init()
 		FontEffect->Init();
 		FontEffect->ColorStart = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
 		FontEffect->ColorOver = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
-		FontEffect->Visible = false;	
+		FontEffect->SetVisibility(false);	
 		Vector2 *pnts2 = new Vector2 [2];
 		pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
 		pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
@@ -150,7 +150,7 @@ bool Init()
 //	next->SetCallback(&CreateClient, NULL);
 
 
-	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->Get("Root menu item"))->Visible = true;
+	dynamic_cast<CRenderable*>(CGUIManager::Instance()->Get("Root menu item"))->SetVisibility(true);
 //	CGUIManager::Instance()->SetFocus(MenuRoot);
 
 // 	CButton Button(CAABB(10,10,100,50), "Satana.!", RGBAf(1.0f, 0.3f, 1.0f, 1.0f), NULL);	// Этот баттон будет удалён в конце инициализации, т.к. автоматическая память.

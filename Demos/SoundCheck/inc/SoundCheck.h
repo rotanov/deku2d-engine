@@ -11,7 +11,7 @@ public:
 	{
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		VolumeLabel = CFactory::Instance()->New<CLabel>("VolumeLabel");
-		VolumeLabel->SetBox(CAABB(530, 270, 100, 32));
+		VolumeLabel->SetBox(CBox(530, 270, 100, 32));
 		UpdateVolumeLabel();
 	}
 
@@ -101,10 +101,12 @@ public:
 
 bool PlayFile(CObject *Caller)
 {
-	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->GetText().GetText();
+	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->GetText();
 	Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
-	CMusic *mus = CFactory::Instance()->New<CMusic>("mus");
-	mus->Filename = test;
+	CMusic *mus = CFactory::Instance()->New<CMusic>("mus"); // WRONG, i think
+								// i mean we should specify just name of music file, that already
+								// lies int the music folder
+	mus->SetFilename(test);
 	mus->LoadFromFile();
 	CSoundMixer::Instance()->PlayMusic(mus);
 	return true;
@@ -116,12 +118,12 @@ public:
 	CLoadFileGUI()
 	{
 		LoadFileButton = CFactory::Instance()->New<CButton>("LoadFileButton");
-		LoadFileButton->SetBox(CAABB(400, 270, 100, 32));
+		LoadFileButton->SetBox(CBox(400, 270, 100, 32));
 		LoadFileButton->SetText(static_cast<string>("Play"));
 		LoadFileButton->SetCallback(&PlayFile, NULL);
 
 		FileNameEdit = CFactory::Instance()->New<CEdit>("FileNameEdit");
-		FileNameEdit->SetBox(CAABB(80, 270, 300, 32));
+		FileNameEdit->SetBox(CBox(80, 270, 300, 32));
 		//FileNameEdit->SetText("");
 
 

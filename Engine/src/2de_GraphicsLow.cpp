@@ -1,62 +1,128 @@
+#include "2de_MathUtils.h"
 #include "2de_GraphicsLow.h"
-
 #include "2de_Engine.h"
+
+#ifdef USE_SDL_OPENGL
+	#include <SDL/SDL_opengl.h>
+#else
+	#include <GL/gl.h>
+	#include <GL/glu.h>
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////
+//Vector2, Vector4 - some graphics integrated into math
+void Vector2::glTranslate() const
+{
+	glTranslatef(x, y, 0.0f);
+}
+
+void Vector2::glScale() const
+{
+	glScalef(x, y, 1.0f);
+}
+
+void Vector2::glVertex() const
+{
+	glVertex2f(x, y);
+}
+
+void Vector2::glTexCoord() const
+{
+	glTexCoord2f(x, y);
+}
+
+void Vector4::glSet() const
+{
+	glColor4fv(&x);
+}
 
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-CRenderObject::CRenderObject() : Angle(0.0f), aabb(0, 0, 0, 0), Depth(0.0f), Position(V2_ZERO),
+CRenderable::CRenderable() : Angle(0.0f), Box(0, 0, 0, 0), Depth(0.0f), Scene(NULL), Position(V2_ZERO),
 	Scaling(1.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
 	SetName("CRenderObject");
-	CRenderManager::Instance()->Add(this);
+	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 };
 
-CRenderObject::~CRenderObject()
+CRenderable::~CRenderable()
 {
 	CRenderManager::Instance()->Remove(GetID());
+//	Scene->RemoveRenderable(this);
 }
 
-void CRenderObject::SetAngle(float AAngle /*= 0.0f*/)
+void CRenderable::SetAngle(float AAngle /*= 0.0f*/)
 {
 	Angle = Clamp(AAngle, 0.0f, 360.0f);
 }
 
-float CRenderObject::GetAngle() const
+float CRenderable::GetAngle() const
 {
 	return Angle;
 }
 
-void CRenderObject::SetLayer(size_t Layer)
+void CRenderable::SetLayer(unsigned int Layer)
 {
 	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
 }
 
-float CRenderObject::GetDepth() const
+float CRenderable::GetDepth() const
 {
 	return Depth;
 }
 
-const CAABB& CRenderObject::GetBox() const
+const CBox& CRenderable::GetBox() const
 {
-	return aabb;
+	return Box;
 }
 
-void CRenderObject::SetBox(const CAABB &box)
+void CRenderable::SetBox(const CBox &box)
 {
-	aabb = box;
+	Box = box;
 }
 
-float CRenderObject::GetScaling() const
+float CRenderable::GetScaling() const
 {
 	return Scaling;
 }
 
-void CRenderObject::SetScaling(float AScaling)
+void CRenderable::SetScaling(float AScaling)
 {
 	Scaling = AScaling;
-	aabb.vMin *= Scaling;
-	aabb.vMax *= Scaling;
+	Box.Min *= Scaling;
+	Box.Max *= Scaling;
+}
+
+unsigned int CRenderable::GetLayer() const
+{
+	return Depth * 100.0f;
+}
+
+void CRenderable::PutIntoScene(CAbstractScene *AScene)
+{
+	assert(AScene != NULL);
+	if (Scene != NULL)
+		Scene->RemoveRenderable(this);
+	Scene = AScene;
+	Scene->AddRenderable(this);
+}
+
+CAbstractScene* CRenderable::GetScene() const
+{
+	assert(Scene != NULL);
+	return Scene;
+}
+
+bool CRenderable::GetVisibility() const
+{
+	return Visible;
+}
+
+void CRenderable::SetVisibility( bool AVisible )
+{
+	Visible = AVisible;
 }
 //////////////////////////////////////////////////////////////////////////
 //CGLImagedata
@@ -136,27 +202,29 @@ GLuint CGLImageData::GetTexID()
 //////////////////////////////////////////////////////////////////////////
 //CGLWindow
 
-CGLWindow::CGLWindow()
+CGLWindow::CGLWindow() : isCreated(false)
 {
 	SetName("GLWindow");
-	width = 640;	//@todo!!! Default magic numbers - delete them!
-	height = 480;
-	fullscreen = false;
+	Width = 640;	//@todo!!! Default magic numbers - delete them!
+	Height = 480;
+	Fullscreen = false;
 	bpp = 32;
-	caption = "Warning: CGLWindow class instance have not been initialized properly"; // assigning string constant to unallocated pointer
+	caption = "Warning: CGLWindow class instance have not been initialized properly"; 
+	// assigning string constant to unallocated pointer // WAT?!
 }
 
-bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption)
+bool CGLWindow::gCreateWindow(bool AisFullscreen, int _width, int _height, byte _bpp, char* _caption)
 {
+	Fullscreen = AisFullscreen;
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
 		Log("ERROR", "Last WARNING was critical. Now exiting...");
-		SDLGLExit(1);
+		SDL_Quit();
 	}
 
-	width = _width;
-	height = _height;
+	Width = _width;
+	Height = _height;
 	bpp = _bpp;
 	if (caption == NULL && _caption != NULL)
 	{
@@ -172,7 +240,7 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	{
 		Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
 		Log("ERROR", "Last WARNING was critical. Now exiting...");
-		SDLGLExit(1);
+		SDL_Quit();
 	}
 
 
@@ -185,39 +253,39 @@ bool CGLWindow::gCreateWindow(int _width, int _height, byte _bpp, char* _caption
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,		8);
 	// 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	// 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1);
-	// 
 	// 	glEnable(0x809D);
 
 	int flags = SDL_OPENGL;
-	if(fullscreen == true)
+	if(Fullscreen == true)
 	{
 		flags |= SDL_FULLSCREEN;
 	}
 
-	SDL_Surface *screen = SDL_SetVideoMode(width, height, bpp, flags);
+	SDL_Surface *screen = SDL_SetVideoMode(Width, Height, bpp, flags);
 	if (screen == NULL)
 	{
 		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
 		Log("ERROR", "Last WARNING was critical. Now exiting...");
-		SDLGLExit(1);		
+		SDL_Quit();
 	}
 
 	SDL_Event resizeEvent;
 	resizeEvent.type = SDL_VIDEORESIZE;
-	resizeEvent.resize.w = width;
-	resizeEvent.resize.h = height;
+	resizeEvent.resize.w = Width;
+	resizeEvent.resize.h = Height;
 	SDL_PushEvent(&resizeEvent);
 
-	glInit(width, height);
+	glInit(Width, Height);
 
 	CPrimitiveRender temp;
 	temp.Init();
+	isCreated = true;
 	return true;
 }
 
 bool CGLWindow::gCreateWindow()
 {
-	return gCreateWindow(width, height, bpp, caption);
+	return gCreateWindow(Fullscreen, Width, Height, bpp, caption);
 }
 
 bool CGLWindow::glInitSystem()
@@ -272,6 +340,27 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	setVSync(1);
 }
 
+unsigned int CGLWindow::GetWidth() const
+{
+	return Width;
+}
+
+unsigned int CGLWindow::GetHeight() const
+{
+	return Height;
+}
+
+void CGLWindow::SetWidth( unsigned int AWidth )
+{
+	assert(!isCreated);
+	Width = AWidth;
+}
+
+void CGLWindow::SetHeight( unsigned int AHeight )
+{
+	assert(!isCreated);
+	Height = AHeight;
+}
 //-------------------------------------------//
 //				Font stuff					 //
 //-------------------------------------------//
@@ -310,34 +399,38 @@ bool CFont::LoadFromFile()
 	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
 	file.Read(bbox, sizeof(bbox));
+
+
 	file.Close();
 	base = glGenLists(256);
 	Texture->Bind();
 	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
 	for(int i=0;i<256;i++)
 	{
-		if (bbox[i].x0 > bbox[i].x1)
-			swap(bbox[i].x0, bbox[i].x1);
-		if (bbox[i].y0 > bbox[i].y1)
-			swap(bbox[i].y0, bbox[i].y1);
-		glNewList(base+i, GL_COMPILE);
-		glBegin(GL_QUADS);		
-		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
-		glVertex2i(0, 0);
+		if (bbox[i].Min.x > bbox[i].Max.x)
+			swap(bbox[i].Min.x, bbox[i].Max.x);
+		if (bbox[i].Min.y > bbox[i].Max.y)
+			swap(bbox[i].Min.y, bbox[i].Max.y);
+		glNewList(base + i, GL_COMPILE);
+			float x0 = bbox[i].Min.x, x1 = bbox[i].Max.x;
+			float y0 = bbox[i].Min.y, y1 = bbox[i].Max.y;
+			glBegin(GL_QUADS);		
+				glTexCoord2f(x0 * TmpOOWdth, y0 * TmpOOHght);
+				glVertex2i(0, 0);
 
-		glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
-		glVertex2i(bbox[i].x1 - bbox[i].x0, 0);
+				glTexCoord2f(x1 * TmpOOWdth, y0 * TmpOOHght);
+				glVertex2i(x1 - x0, 0);
 
-		glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
-		glVertex2i(bbox[i].x1 - bbox[i].x0, bbox[i].y1 - bbox[i].y0);
+				glTexCoord2f(x1 * TmpOOWdth, y1 * TmpOOHght);
+				glVertex2i(x1 - x0, y1 - y0);
 
-		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
-		glVertex2i(0, bbox[i].y1 - bbox[i].y0);
-		glEnd();
-		glTranslated(bbox[i].x1 - bbox[i].x0 + Distance, 0, 0);
+				glTexCoord2f(x0 * TmpOOWdth, y1 * TmpOOHght);
+				glVertex2i(0, y1 - y0);
+			glEnd();
+			glTranslated(x1 - x0 + Distance, 0, 0);
 		glEndList();
-		width[i] = (bbox[i].x1 - bbox[i].x0);
-		height[i] = (bbox[i].y1 - bbox[i].y0);
+		Width[i] = (x1 - x0);
+		Height[i] = (y1 - y0);
 	}
 	return true;
 }
@@ -348,41 +441,38 @@ bool CFont::LoadFromMemory(const byte* Address)
 	while (*Address)
 		Address++;
 	Address++;
-
 	Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
-
-	//Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
-
-	//file.Read(bbox, sizeof(bbox));
+	
 	memcpy(bbox, Address, sizeof(bbox));
-	//file.Close();
 	base = glGenLists(256);
 	Texture->Bind();
 	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
 	for(int i=0;i<256;i++)
 	{
-		if (bbox[i].x0 > bbox[i].x1)
-			swap(bbox[i].x0, bbox[i].x1);
-		if (bbox[i].y0 > bbox[i].y1)
-			swap(bbox[i].y0, bbox[i].y1);
-		glNewList(base+i, GL_COMPILE);
+		if (bbox[i].Min.x > bbox[i].Max.x)
+			swap(bbox[i].Min.x, bbox[i].Max.x);
+		if (bbox[i].Min.y > bbox[i].Max.y)
+			swap(bbox[i].Min.y, bbox[i].Max.y);
+		glNewList(base + i, GL_COMPILE);
+		float x0 = bbox[i].Min.x, x1 = bbox[i].Max.x;
+		float y0 = bbox[i].Min.y, y1 = bbox[i].Max.y;
 		glBegin(GL_QUADS);		
-		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
+		glTexCoord2f(x0 * TmpOOWdth, y0 * TmpOOHght);
 		glVertex2i(0, 0);
 
-		glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y0*TmpOOHght);
-		glVertex2i(bbox[i].x1 - bbox[i].x0, 0);
+		glTexCoord2f(x1 * TmpOOWdth, y0 * TmpOOHght);
+		glVertex2i(x1 - x0, 0);
 
-		glTexCoord2f( (float)bbox[i].x1*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
-		glVertex2i(bbox[i].x1 - bbox[i].x0, bbox[i].y1 - bbox[i].y0);
+		glTexCoord2f(x1 * TmpOOWdth, y1 * TmpOOHght);
+		glVertex2i(x1 - x0, y1 - y0);
 
-		glTexCoord2f( (float)bbox[i].x0*TmpOOWdth, (float)bbox[i].y1*TmpOOHght);
-		glVertex2i(0, bbox[i].y1 - bbox[i].y0);
+		glTexCoord2f(x0 * TmpOOWdth, y1 * TmpOOHght);
+		glVertex2i(0, y1 - y0);
 		glEnd();
-		glTranslated(bbox[i].x1 - bbox[i].x0 + Distance, 0, 0);
+		glTranslated(x1 - x0 + Distance, 0, 0);
 		glEndList();
-		width[i] = (bbox[i].x1 - bbox[i].x0);
-		height[i] = (bbox[i].y1 - bbox[i].y0);
+		Width[i] = (x1 - x0);
+		Height[i] = (y1 - y0);
 	}
 	return true;
 }
@@ -402,15 +492,15 @@ bool CFont::SaveToFile()
 	return true;
 }
 
-int CFont::GetStringWidth(const string &text)
+float CFont::GetStringWidth(const string &text)
 {
-	int r = 0;
+	float r = 0;
 	for (int i = 0; i < text.length(); i++)
-		r += width[(byte)text[i] - 32] + Distance;
+		r += Width[(byte)text[i] - 32] + Distance;
 	return r;
 }
 
-int CFont::GetStringWidthEx(int t1, int t2, const string &text)
+float CFont::GetStringWidthEx(int t1, int t2, const string &text)
 {
 	if (t1 > t2 || t2 < 0)
 		return 0;
@@ -419,50 +509,29 @@ int CFont::GetStringWidthEx(int t1, int t2, const string &text)
 
 	int r = 0;
 	for (unsigned int i = t1; i <= t2; i++)
-		r += width[(byte)text[i]-32] + Distance;
+		r += Width[(byte)text[i]-32] + Distance;
 	return r;
 }
 
-int CFont::GetStringHeight(const string &text)
+float CFont::GetStringHeight(const string &text)
 {
-	int r = 0;
+	float r = 0;
 	for (int i = 0; i < text.length(); i++)
-		r = std::max(height[(byte)text[i] - 32], r);
+		r = std::max(Height[(byte)text[i] - 32], r);
 	return r;
 }
 
-int CFont::GetStringHeightEx(int t1, int t2, const string &text)
+float CFont::GetStringHeightEx(int t1, int t2, const string &text)
 {
 	if (t1 > t2 || t2 < 0)
 		return 0;
 	if ((unsigned int)t2 >= text.length())
 		return 0;
-	int r = 0, l = text.length();
+	float r = 0, l = text.length();
 	for (unsigned int i = 0; i < text.length(); i++)
-		r = std::max(height[(byte)text[i] - 32], r);
+		r = std::max(Height[(byte)text[i] - 32], r);
 	return r;
 }
-
-int CFont::StringCoordToCursorPos(const string &text, int x, int y)
-{
-	// @todo: move this function to CText
-	if (text.length() == 0)
-		return -1;
-	
-	Vector2 Local = Vector2(x, y);// - Pos;
-	if (Local.x < 0)
-		return -1;
-
-	for (int i = 0; i < text.length(); i++)
-	{
-		int SubstrWidth = GetStringWidthEx(0, i, text);
-		int SymbolCenterCoord = SubstrWidth - Distance - (width[(byte)text[i] - 32] / 2);
-		if (Local.x < SymbolCenterCoord)
-			return (i - 1);
-	}
-	return (text.length() - 1);
-}
-
 
 CTexture* CFont::GetTexture()
 {
@@ -474,23 +543,35 @@ void CFont::SetTexture(const string &TextureName)
 	Texture = CTextureManager::Instance()->Get(TextureName);
 }
 
-CAABB CFont::GetSymbolsBBOX()
+CBox CFont::GetSymbolsBBOX()
 {
-	CAABB Result;
-	Result.vMin = Vector2(9999.0f, 9999.0f);
-	Result.vMax = Vector2(0.0f, 0.0f);
+	CBox Result;
+	Result.Min = Vector2(9999.0f, 9999.0f);
+	Result.Max = Vector2(0.0f, 0.0f);
 	for(int i = 0; i < 256; i++)
 	{
-		if (bbox[i].x0 < Result.vMin.x)
-			Result.vMin.x = bbox[i].x0;
-		if (bbox[i].y0 < Result.vMin.y)
-			Result.vMin.y = bbox[i].y0;
-		if (bbox[i].x1 > Result.vMax.x)
-			Result.vMax.x = bbox[i].x1;
-		if (bbox[i].y1 > Result.vMax.y)
-			Result.vMax.y = bbox[i].y1;		
+		Result.Add(bbox[i].Min);
+		Result.Add(bbox[i].Max);
+// 		if (bbox[i].x0 < Result.Min.x)
+// 			Result.Min.x = bbox[i].x0;
+// 		if (bbox[i].y0 < Result.Min.y)
+// 			Result.Min.y = bbox[i].y0;
+// 		if (bbox[i].x1 > Result.Max.x)
+// 			Result.Max.x = bbox[i].x1;
+// 		if (bbox[i].y1 > Result.Max.y)
+// 			Result.Max.y = bbox[i].y1;		
 	}
 	return Result;
+}
+
+float CFont::GetDistance() const
+{
+	return Distance;
+}
+
+float CFont::SymbolWidth( unsigned int Index ) const
+{
+	return Width[Index];
 }
 //////////////////////////////////////////////////////////////////////////
 //Camera
@@ -572,12 +653,12 @@ void CCamera::gTranslate()
 CCamera::CCamera()
 {
 	SetName("CCamera");
-	view = world = CAABB(100, 100, 540, 380);
-	outer = CAABB(-1024, 0, 2048, 512);
+	view = world = CBox(100, 100, 540, 380);
+	outer = CBox(-1024, 0, 2048, 512);
 	Point = p = v = V2_ZERO;
 	Atx = Aty = NULL;
 	Assigned = false;
-	SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height);
+	SetWidthAndHeight(CGLWindow::Instance()->GetWidth(), CGLWindow::Instance()->GetHeight());
 }
 
 void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
@@ -592,10 +673,6 @@ void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
 CRenderManager::CRenderManager()
 {
 	SetName("Render Manager");
-	v2Dots		= NULL;
-	v2Lines		= NULL;
-	v2Quads		= NULL;
-	v2Triangles	= NULL;
 }
 
 CRenderManager::~CRenderManager()
@@ -610,15 +687,18 @@ bool CRenderManager::DrawObjects()
 	Camera.Update();
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
-		CRenderObject *data = *i;
+		CRenderable *data = *i;
 		if (data->isDestroyed())
 		{
 			toDelete.push_back(data);
 			continue;
 		}
-		if (data->Visible)
+		if (!CSceneManager::Instance()->InScope(data->GetScene()))
+			continue;
+		if (data->GetVisibility())
 		{
-			glLoadIdentity();			
+			glLoadIdentity();	
+			glTranslatef(0.375, 0.375, 0.0); //accuracy tip from MSDN help
 			if (!data->doIgnoreCamera)
 				Camera.gTranslate();
 			data->Color.glSet();
@@ -628,6 +708,12 @@ bool CRenderManager::DrawObjects()
 			data->Render();
 		}
 	}
+	//////////////////////////////////////////////////////////////////////////
+	glLoadIdentity();
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	glDisable(GL_DEPTH_TEST);
+	FontVertices.RenderPrimitive(GL_QUADS);
+	//////////////////////////////////////////////////////////////////////////
 	for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
 		Objects.remove(*i);
@@ -639,13 +725,24 @@ bool CRenderManager::DrawObjects()
 	return true;
 }
 
-void CRenderManager::Print(const CText *Text) const
+void CRenderManager::Print(const CText *Text)
 {
-	//	_Print(reinterpret_cast<const byte*>(text));
-	glEnable(GL_TEXTURE_2D);
-	Text->GetFont()->Texture->Bind();
-	glListBase(Text->GetFont()->base-32);		
-	glCallLists(static_cast<GLsizei>(Text->GetText().length()), GL_UNSIGNED_BYTE, Text->GetText().c_str());
+ 	glEnable(GL_TEXTURE_2D);
+ 	Text->GetFont()->Texture->Bind();
+// 	glListBase(Text->GetFont()->base-32);		
+// 	glCallLists(static_cast<GLsizei>(Text->GetText().length()), GL_UNSIGNED_BYTE, Text->GetText().c_str());
+	float dx = 0.0f;
+	for(int i = 0; i < Text->GetText().length(); i++)
+	{
+		float liwidth = Text->GetFont()->bbox[Text->GetText()[i] - 32].Width();
+		float liheight = Text->GetFont()->bbox[Text->GetText()[i] - 32].Height();
+		Vector2Array<4> TempTexCoords = Text->GetFont()->GetTexCoords(Text->GetText()[i]);
+		FontVertices.PushVertex(Text, Vector2(dx,			0.0f), Text->Color, TempTexCoords[0]);
+		FontVertices.PushVertex(Text, Vector2(liwidth + dx, 0.0f), Text->Color, TempTexCoords[1]);
+		FontVertices.PushVertex(Text, Vector2(liwidth + dx, liheight), Text->Color, TempTexCoords[2]);
+		FontVertices.PushVertex(Text, Vector2(dx,			liheight), Text->Color, TempTexCoords[3]);
+		dx += Text->GetFont()->bbox[Text->GetText()[i] - 32].Width() + 1;
+	}
 }
 //-------------------------------------------//
 //				Common OpenGL stuff			 //
@@ -671,12 +768,6 @@ void gSetBlendingMode(void)
 	glAlphaFunc			(GL_GREATER, 0);
 }
 
-
-void SDLGLExit(int code)
-{
-	SDL_Quit();
-}
-
 void gToggleScissor( bool State )
 {
 	if (State)
@@ -696,7 +787,7 @@ void gScissor( int x, int y, int width, int height )
 	glScissor(x, y, width, height);
 }
 
-void gDrawBBox( CAABB box )
+void gDrawBBox( CBox box )
 {
 	glPushMatrix();
 	glPushAttrib(GL_TEXTURE_2D);
@@ -706,10 +797,10 @@ void gDrawBBox( CAABB box )
 	glLineWidth(4);
 	glTranslatef(0.0f, 0.0f, 0.99f);
 	glBegin(GL_LINE_LOOP);
-	glVertex2f(box.vMin.x, box.vMin.y);	
-	glVertex2f(box.vMax.x, box.vMin.y);
-	glVertex2f(box.vMax.x, box.vMax.y);
-	glVertex2f(box.vMin.x, box.vMax.y);
+	glVertex2f(box.Min.x, box.Min.y);	
+	glVertex2f(box.Max.x, box.Min.y);
+	glVertex2f(box.Max.x, box.Max.y);
+	glVertex2f(box.Min.x, box.Max.y);
 	glEnd();
 	glPopAttrib();
 	glPopMatrix();
@@ -764,6 +855,12 @@ CFont* CFontManager::Font()
 {
 	assert(CurrentFont);
 	return CurrentFont;
+}
+
+CFontManager::~CFontManager()
+{
+	if (DefaultFont != NULL)
+		SAFE_DELETE(DefaultFont);
 }
 //////////////////////////////////////////////////////////////////////////
 //						CTexture Manager
@@ -903,6 +1000,11 @@ CText::CText() : Text(""), Font(CFontManager::Instance()->GetDefaultFont())
 	doIgnoreCamera = true;
 }
 
+CText::CText(const string &AText) : Text(AText), Font(CFontManager::Instance()->GetDefaultFont())
+{
+	assert(Font != NULL);
+	doIgnoreCamera = true;
+}
 void CText::Render()
 {
 	//assert(Text != "");
@@ -962,4 +1064,142 @@ std::string CText::operator+(const CText &Text) const
 std::string CText::operator+(const char *Text) const
 {
 	return this->GetText() + Text;
+}
+
+float CText::StringCoordToCursorPos(int x, int y) const
+{
+	// @todo: move this function to CText
+	if (Text.length() == 0)
+		return -1;
+	Vector2 Local = Vector2(x, y) - Position;
+	if (Local.x < 0)
+		return -1;
+
+	for (int i = 0; i < Text.length(); i++)
+	{
+		float SubstrWidth = Font->GetStringWidthEx(0, i, Text);
+		float SymbolCenterCoord = SubstrWidth - Font->GetDistance() - (Font->SymbolWidth((byte)Text[i] - 32) / 2.0f);
+		if (Local.x < SymbolCenterCoord)
+			return (i - 1);
+	}
+	return (Text.length() - 1.0f);
+}
+
+CText::~CText()
+{
+	// this is destructor. i can set breakpoint here
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CAbstractScene
+
+CAbstractScene::CAbstractScene()
+{
+	SetName("Some abstract scene");
+}
+
+//////////////////////////////////////////////////////////////////////////
+//CScene
+
+void CScene::Render()
+{
+	// блеадь, дублирование кода из CRenderManager::draw
+	// АХАХА, его нет.
+}
+
+void CScene::Update(float dt)
+{
+// 	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
+// 	{
+// 		(*i)->Color.a -= dt / 4.0f;
+// 
+// 	}
+}
+
+void CScene::AddRenderable(CRenderable *AObject)
+{
+	RenderableObjects.push_back(AObject);
+	CRenderManager::Instance()->Add(AObject);
+}
+
+void CScene::AddUpdatable( CUpdatable *AObject )
+{
+	UpdatableObjects.push_back(AObject);
+	CUpdateManager::Instance()->Add(AObject);
+}
+
+void CScene::RemoveUpdatable( CUpdatable *AObject )
+{
+	UpdatableObjects.erase(std::find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject));
+	//AObject->PutIntoScene()
+}
+
+void CScene::RemoveRenderable( CRenderable *AObject )
+{
+	RenderableObjects.erase(std::find(RenderableObjects.begin(), RenderableObjects.end(), AObject));
+}
+
+CScene::~CScene()
+{
+	for(vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
+		(*i)->SetDestroyed();
+	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
+		(*i)->SetDestroyed();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CGlobalScene
+
+void CGlobalScene::AddRenderable(CRenderable *AObject)
+{
+	CRenderManager::Instance()->Add(AObject);
+}
+
+void CGlobalScene::AddUpdatable(CUpdatable *AObject)
+{
+	CUpdateManager::Instance()->Add(AObject);
+}
+
+//////////////////////////////////////////////////////////////////////////
+//CSceneManager
+
+CSceneManager::CSceneManager() : CurrentScene(&GlobalScene)
+{
+
+}
+
+void CSceneManager::Render()
+{
+	CurrentScene->Render();
+}
+
+void CSceneManager::Update(float dt)
+{
+	CurrentScene->Update(dt);
+}
+
+CAbstractScene* CSceneManager::GetCurrentScene()
+{
+	return CurrentScene;
+}
+
+bool CSceneManager::InScope( CAbstractScene * AScene ) const
+{
+	// @todo: More complex check later.
+	return CurrentScene == AScene || AScene == &GlobalScene;
+}
+
+CAbstractScene* CSceneManager::CreateScene()
+{
+	CAbstractScene* NewScene = new CScene();
+	Scenes.push_back(NewScene);
+	return NewScene;
+}
+
+CSceneManager::~CSceneManager()
+{
+	for(vector<CAbstractScene*>::iterator i = Scenes.begin(); i != Scenes.end(); ++i)
+		delete (*i);
+	Scenes.clear();
 }

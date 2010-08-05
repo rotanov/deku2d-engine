@@ -19,8 +19,8 @@ void CPacmanBonus::Update(float dt)
 	if (Angle > 360.0f)
 		Angle = 0.0f;
 	RenderProxy->Position = Vector2(ceil(Position.x), ceil(Position.y + Period));
-	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
-	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
+	CBox AABB = CBox(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
+	CBox AABBself = CBox(Position - Vector2(16, 16), Position + Vector2(16, 16));
 	if ( (AABB.Intersect(AABBself)))
 	{
 		Player->Score += 100;
@@ -122,15 +122,15 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 	EnemySprite = CFactory::Instance()->New<CSprite>("Enemy sprite");
 	BonusSprite = CFactory::Instance()->New<CSprite>("Bonus sprite");
 
-	BonusSprite->Visible = false;
+	BonusSprite->SetVisibility(false);
 	BonusSprite->AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
 	BonusSprite->SetTexture("PacmanBonus");
 
 
 	Tiles = CFactory::Instance()->Get<CTileset>("PacManTileset");
 	Tiles->CheckLoad();
-	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pacman map");
-	CFactory::Instance()->Add(Map, "Pacman map");
+	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pac man map");
+	CFactory::Instance()->Add(Map, "Pac man map");
 	Map->SetLayer(0);
 	Map->SetScaling(2.0f);
 	//	Map.TileSet = Tiles;
@@ -169,13 +169,13 @@ void CPacmanGame::Update(float dt)
 	if (Player == NULL)
 		return;
 
-	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
+	CBox AABB = CBox(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 
-	Vector2 BottomLeft = AABB.vMin,
-		TopRight = AABB.vMax,
-		BottomRight = Vector2(AABB.vMax.x, AABB.vMin.y),
-		TopLeft = Vector2(AABB.vMin.x, AABB.vMax.y);
-	CAABB Pot1, Pot2;
+	Vector2 BottomLeft = AABB.Min,
+		TopRight = AABB.Max,
+		BottomRight = Vector2(AABB.Max.x, AABB.Min.y),
+		TopLeft = Vector2(AABB.Min.x, AABB.Max.y);
+	CBox Pot1, Pot2;
 	int Direction = -10;
 	if (Abs(Player->Velocity.x) > Abs(Player->Velocity.y))
 	{
@@ -200,12 +200,12 @@ void CPacmanGame::Update(float dt)
 		if (Pot1.Intersect(AABB))
 		{
 			Player->Velocity.x = 0.0f;
-			Player->Position.x = Pot1.vMax.x + 16;
+			Player->Position.x = Pot1.Max.x + 16;
 		}
 		if (Pot2.Intersect(AABB))
 		{
 			Player->Velocity.x = 0.0f;
-			Player->Position.x = Pot2.vMax.x + 16;
+			Player->Position.x = Pot2.Max.x + 16;
 		}
 		break;
 	case 1:	// right
@@ -214,12 +214,12 @@ void CPacmanGame::Update(float dt)
 		if (Pot1.Intersect(AABB))
 		{
 			Player->Velocity.x = 0.0f;
-			Player->Position.x = Pot1.vMin.x - 16;
+			Player->Position.x = Pot1.Min.x - 16;
 		}
 		if (Pot2.Intersect(AABB))
 		{
 			Player->Velocity.x = 0.0f;
-			Player->Position.x = Pot2.vMin.x - 16;
+			Player->Position.x = Pot2.Min.x - 16;
 		}
 		break;
 	case 2: // up
@@ -228,12 +228,12 @@ void CPacmanGame::Update(float dt)
 		if (Pot1.Intersect(AABB))
 		{
 			Player->Velocity.y = 0.0f;
-			Player->Position.y = Pot1.vMin.y - 16;
+			Player->Position.y = Pot1.Min.y - 16;
 		}
 		if (Pot2.Intersect(AABB))
 		{
 			Player->Velocity.y = 0.0f;
-			Player->Position.y = Pot2.vMin.y - 16;
+			Player->Position.y = Pot2.Min.y - 16;
 		}
 		break;
 	case 3: // down
@@ -242,12 +242,12 @@ void CPacmanGame::Update(float dt)
 		if (Pot1.Intersect(AABB))
 		{
 			Player->Velocity.y = 0.0f;
-			Player->Position.y = Pot1.vMax.y + 16;
+			Player->Position.y = Pot1.Max.y + 16;
 		}
 		if (Pot2.Intersect(AABB))
 		{
 			Player->Velocity.y = 0.0f;
-			Player->Position.y = Pot2.vMax.y + 16;
+			Player->Position.y = Pot2.Max.y + 16;
 		}
 		break;
 	}
@@ -275,8 +275,8 @@ void CPacmanEnemy::Update(float dt)
 		Direction = static_cast<EDirection>((Direction + 1) % 4);
 	}
 	Position = Position + V2_DIRECTIONS[Direction] * 128 * dt;
-	CAABB AABB = CAABB(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
-	CAABB AABBself = CAABB(Position - Vector2(16, 16), Position + Vector2(16, 16));
+	CBox AABB = CBox(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
+	CBox AABBself = CBox(Position - Vector2(16, 16), Position + Vector2(16, 16));
 	if ((AABB.Intersect(AABBself)) && Player->Sprite->Color.g >= 0.9f)
 	{
 		Player->Damage += 32;

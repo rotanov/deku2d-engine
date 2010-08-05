@@ -3,7 +3,7 @@
 
 #include "2de_Engine.h"
 
-class CLifeBarBase : public CRenderObject, public CUpdateObject
+class CLifeBarBase : public CRenderable, public CUpdatable
 {
 public:
 	void Render()
@@ -24,7 +24,7 @@ public:
 	// This is special life bar for our player
 };
 
-class CDamageIndicator : public CUpdateObject
+class CDamageIndicator : public CUpdatable
 {
 private:
 	CText DamageInfo;	 // aggregate or inherit @todo: think & meditate
@@ -48,7 +48,7 @@ class CNinjaUnit : public CUnitBase
 
 };
 
-class CPlayer : public CUpdateObject	// We will be playing for CNinja, 
+class CPlayer : public CUpdatable	// We will be playing for CNinja, 
 	// but such design should make it possible to play for any Enemy or someone with implemented interface for player
 {
 public:
@@ -63,7 +63,7 @@ public:
 // ... and finally
 
 
-class CNinjaStoryGame : public CUpdateObject
+class CNinjaStoryGame : public CUpdatable
 {
 public: 
 	CNinjaStoryGame()
@@ -75,6 +75,50 @@ public:
 	{
 
 	}
+};
+
+class CBouncingText : public CUpdatable
+{
+public:
+	CBouncingText() : Text(NULL), t0(0.0f, 0.0f),
+		t1(0.0f, 0.0f),
+		Life(4.0f), Age(0.0f)
+	{
+		Text = new CText;
+		Text->Color = RGBAf(0.1f, 0.7f, 0.2f, 0.4f);
+		float temp = Random_Float(0.0f, PI);
+		Vector2 mouse;
+		CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
+		t0 = mouse;
+		t1 = Vector2(cos(temp) * 400.0f, sin(temp) * 400.0f) + t0;
+		delta = (t1 - t0) / Life;
+		Text->SetAngle(Random_Float(0.0f, 360.0f));
+	}
+	~CBouncingText()
+	{
+		delete Text;
+	}
+	void SetText(const string &AText)
+	{
+		Text->SetText(AText);
+	}
+	void Update(float dt)
+	{		
+		Text->SetAngle(Clamp(Text->GetAngle() + dt * 100.0f, 0.0f, 360.0f));
+		Age += dt;
+		t0 += delta * dt * cos((Age * PI) / (2.0f * Life));
+		Text->Position = t0;
+		if (Age >= Life)
+		{
+			SetDestroyed();
+			Text->SetDestroyed();
+		}
+	}
+private:
+	CText *Text;
+	Vector2 t0, t1, delta;
+	float Life;
+	float Age;
 };
 
 #endif // _NINJA_STORY_H_

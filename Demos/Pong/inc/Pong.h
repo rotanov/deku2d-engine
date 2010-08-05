@@ -17,12 +17,13 @@ enum EPlayerKind
 	PLAYER_KIND_AI,
 };
 
-class CPongPlayer : public CRenderObject, public CUpdateObject
+class CPongPlayer : public CRenderable, public CUpdatable
 {
 	EPlayerKind PlayerKind;
 public:
 	Vector2 Velocity;
 	Vector2 Acceleration;
+
 	CPongPlayer(EPlayerKind APlayerKind) : PlayerKind(APlayerKind)
 	{
 		Acceleration = Velocity = V2_ZERO;
@@ -38,11 +39,12 @@ public:
 			break;
 		}
 	}
+
 	void Render()
 	{
 		CPrimitiveRender pr;
-		pr.sClr = RGBAf(1.0f, 1.0f , 1.0f, 1.0f);
 		pr.doUseGlobalCoordSystem = false;
+		pr.sClr = Color;
 		pr.grRectS(Vector2(0, 0), Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 		return;
 	}
@@ -77,9 +79,9 @@ public:
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		if (Position.y + PONG_PLAYER_HEIGHT > CGLWindow::Instance()->height)
+		if (Position.y + PONG_PLAYER_HEIGHT > CGLWindow::Instance()->GetHeight())
 		{
-			Position.y = CGLWindow::Instance()->height - PONG_PLAYER_HEIGHT;
+			Position.y = CGLWindow::Instance()->GetHeight() - PONG_PLAYER_HEIGHT;
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
@@ -87,14 +89,15 @@ public:
 	}
 };
 
-class CPongBall : public CRenderObject, public CUpdateObject
+class CPongBall : public CRenderable, public CUpdatable
 {
 public:
 	Vector2 Velocity;
 	void Iinitialize()
 	{
 		Velocity = Vector2(Random_Float(-500.0f, 500.0f), Random_Float(-500.0f, 500.0f));
-		Position = Vector2(CGLWindow::Instance()->width * 0.5f, CGLWindow::Instance()->height * 0.5f);
+		Position = Vector2(	CGLWindow::Instance()->GetWidth() * 0.5f,
+							CGLWindow::Instance()->GetHeight() * 0.5f);
 	}
 	CPongBall()
 	{
@@ -103,8 +106,8 @@ public:
 	void Render()
 	{
 		CPrimitiveRender pr;
-		pr.sClr = RGBAf(1.0f, 1.0f , 1.0f, 1.0f);
 		pr.doUseGlobalCoordSystem = false;
+		pr.sClr = Color;
 		pr.grCircleS((Vector2(0, 0)+ Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE))*0.5f, PONG_BALL_SIZE * 0.5f);
 		return;
 	}
@@ -118,9 +121,9 @@ public:
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		if (Position.y + PONG_BALL_SIZE > CGLWindow::Instance()->height)
+		if (Position.y + PONG_BALL_SIZE > CGLWindow::Instance()->GetHeight())
 		{
-			Position.y = CGLWindow::Instance()->height - PONG_BALL_SIZE;
+			Position.y = CGLWindow::Instance()->GetHeight() - PONG_BALL_SIZE;
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
@@ -128,7 +131,7 @@ public:
 	}
 };
 
-class CPongGame : public CRenderObject, public CUpdateObject
+class CPongGame : public CRenderable, public CUpdatable
 {
 public:
 	int PlayerOneScore, PlayerTwoScore;
@@ -170,10 +173,10 @@ public:
 		PlayerTwoScoreText.Position = Vector2(1170.0f, 450.0f);
 		PlayerTwoScoreText.SetText("Score: " + itos(PlayerTwoScore));
 
-		CAABB BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;
-		BallBox = CAABB(Ball->Position, Ball->Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
-		PlayerOneBox = CAABB(PlayerOne->Position, PlayerOne->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
-		PlayerTwoBox = CAABB(PlayerTwo->Position, PlayerTwo->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+		CBox BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;
+		BallBox = CBox(Ball->Position, Ball->Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
+		PlayerOneBox = CBox(PlayerOne->Position, PlayerOne->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+		PlayerTwoBox = CBox(PlayerTwo->Position, PlayerTwo->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 		CPongPlayer *CollidedPlayer = NULL;
 
 		float CollideFlagf = 0.0f;
@@ -192,7 +195,7 @@ public:
 			Ball->Velocity.y += Abs(CollidedPlayer->Velocity.y)*0.01f;
 		}
 
-		if (Ball->Position.x > 1100)
+		if (Ball->Position.x > CGLWindow::Instance()->GetWidth() - PONG_PLAYER_WIDTH - 50)
 			PlayerTwo->Velocity.y += (- PlayerTwo->Position.y - PONG_PLAYER_HEIGHT*0.5f + Ball->Position.y + PONG_BALL_SIZE * 0.5f)*0.34f;
 
 		if (CEngine::Instance()->keys[SDLK_SPACE])
@@ -204,7 +207,7 @@ public:
 			PlayerTwoScore++;
 		}
 
-		if (Ball->Position.x + PONG_BALL_SIZE > CGLWindow::Instance()->width)
+		if (Ball->Position.x + PONG_BALL_SIZE > CGLWindow::Instance()->GetWidth())
 		{
 			Ball->Iinitialize();
 			PlayerOneScore++;
@@ -216,7 +219,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class CPongTitleScreen : public CRenderObject, public CUpdateObject
+class CPongTitleScreen : public CRenderable, public CUpdatable
 {
 	CPongTitleScreen()
 	{

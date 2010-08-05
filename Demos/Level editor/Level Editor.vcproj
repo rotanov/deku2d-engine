@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="8,00"
 	Name="Level editor"
 	ProjectGUID="{B18211B0-4D50-4F93-A351-4530E915E979}"
 	RootNamespace="Level editor"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -42,14 +41,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				EnableEnhancedInstructionSet="0"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -68,14 +67,11 @@
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
-				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="2"
 				OptimizeReferences="1"
 				EnableCOMDATFolding="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -97,6 +93,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -106,7 +105,6 @@
 			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
-			ManagedExtensions="0"
 			WholeProgramOptimization="1"
 			BuildLogFile="$(IntDir)\$(ProjectName).BuildLog.htm"
 			>
@@ -127,14 +125,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zc:wchar_t-"
-				Optimization="2"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -148,15 +143,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="OpenGl32.lib Glu32.lib"
 				AdditionalDependencies="OpenGl32.lib Glu32.lib Sdl.lib SDLMain.lib Lua5.1.4.$(ConfigurationName).lib Deku2d.$(ConfigurationName).lib SDL_mixer.lib DevIL.lib"
 				OutputFile="$(OutDir)\$(ProjectName).$(ConfigurationName).exe"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)\Engine\lib\"
-				GenerateManifest="true"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(intDir)\$(TargetName).pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -178,6 +174,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -186,35 +185,43 @@
 	</References>
 	<Files>
 		<Filter
-			Name="src"
+			Name="Headers"
+			>
+		</Filter>
+		<Filter
+			Name="Source"
 			>
 			<File
-				RelativePath=".\src\LevelEditor.cpp"
+				RelativePath=".\src\main.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="inc"
-			>
-		</Filter>
-		<Filter
-			Name="Resource"
+			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\res\Planet.ico"
+				RelativePath=".\Res\Resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\res\Resource.h"
+				RelativePath=".\Res\Resource.rc"
 				>
 			</File>
 			<File
-				RelativePath=".\res\Resource.rc"
+				RelativePath=".\Res\Shroom.ico"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\src\LevelEditor.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\inc\LevelEditor.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

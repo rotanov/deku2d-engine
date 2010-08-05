@@ -30,7 +30,7 @@ bool SaveTileset(CObject *Caller);
 bool LoadTexture(CObject *Caller);
 bool ExitEditor(CObject *Caller);
 
-class CTilesetEditor : public CRenderObject, public CUpdateObject
+class CTilesetEditor : public CRenderable, public CUpdatable
 {
 	enum EEditorState
 	{

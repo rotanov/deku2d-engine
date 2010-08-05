@@ -7,30 +7,17 @@
 //Gui 
 
 /**
-*	Поскольку Gui петра хуй попользуешься, так как он развёз какую-то еботу 
-*	и не может доделать её уже год (сейчас август 09го), то тут будет мини гуи;
-*	это будет маленький и удобный и, я надеюсь, временный набор классов. Пока что
-*	будет Edit, Button и менеджер. Если будет пиздец, то буду его расширять, появятся табы
-*	и всякие свистоперделки жизнено необходимые.
-*/
-
-/**
-*	11.03.2010 Update. GUI Петра уничтожен. 
-*	>Если будет пиздец, то буду его расширять, появятся...
-*	Да, буду.
-*/
-
-/**
  * CGUIStyle - класс, представляющий стиль GUI, содержащий цвета и размеры стандартных элементов GUI.
  *
  * Для создания нового стиля можно либо наследовать и перегрузить конструктор, либо инстанцировать и изменить нужные значения.
  */
 
-// небольшой комментарий: возможно, кому-то не понравится эта идея, возможно, кто-то любит разукрашивать разные кнопки в разные цвета - и т. п.
-// 			  я предлагаю такое решение: у каждого элемента будет указатель на стиль
-// 			  поэтому, можно будет создать по стилю на каждую кнопку и указать его
-// 			  или же наследовать кнопку и перегрузить в ней конструктор, который будет создавать определённый стиль
-// 			  вобщем - гибкость рулит, но и унификация стиля - хорошая вещь
+//	небольшой комментарий: возможно, кому-то не понравится эта идея, возможно,
+//	кто-то любит разукрашивать разные кнопки в разные цвета - и т. п.
+//		я предлагаю такое решение: у каждого элемента будет указатель на стиль
+//		поэтому, можно будет создать по стилю на каждую кнопку и указать его
+//		или же наследовать кнопку и перегрузить в ней конструктор, который будет создавать определённый стиль
+//		вобщем - гибкость рулит, но и унификация стиля - хорошая вещь
 
 class CGUIStyle
 {
@@ -62,7 +49,8 @@ public:
 		Vector2 EditMargins;
 		float EditBorderWidth;
 	};
-	// на данный момент я буду юзать один шрифт для всего ГУИ для простоты и потому что некоторые моменты использования шрифтов не до коцна ясны и требуют пересмотра
+	// на данный момент я буду юзать один шрифт для всего ГУИ для простоты
+	// и потому что некоторые моменты использования шрифтов не до коцна ясны и требуют пересмотра
 	/*struct CGUIStyleFonts
 	{
 		CFont* ButtonFont;
@@ -97,7 +85,7 @@ public:
 		Metrics.EditMargins = Vector2(4.0f, 6.0f);
 		Metrics.EditBorderWidth = 2.0f;
 
-		Font = CFontManager::Instance()->GetFont("Font");
+		Font = CFontManager::Instance()->GetDefaultFont();
 	}
 	CGUIStyleColors Colors;
 	CGUIStyleMetrics Metrics;
@@ -107,7 +95,7 @@ public:
 	// @todo: loading style from XML file (and even maybe saving)
 };
 
-class CGUIObjectBase : public CRenderObject, public CUpdateObject
+class CGUIObjectBase : public CRenderable, public CUpdatable
 {
 public:
 	struct CMouseState
@@ -120,32 +108,27 @@ public:
 
 	CGUIObjectBase();
 	~CGUIObjectBase();
-
 	CFont* GetFont() const;
 	void SetFont(CFont *AFont);
-
 	CPrimitiveRender* GetPrimitiveRender() const;
 	void SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
-	
 	CGUIStyle* GetStyle() const;
 	void SetStyle(CGUIStyle *AStyle);
-
-	void SetCallback(CObjectCallback ACallProc, CObject *ACaller)
-	{
-		Caller = ACaller;
-		CallProc = ACallProc;
-	}
-
+	void SetCallback(CObjectCallback ACallProc, CObject *ACaller);
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
-protected:
-	CObjectCallback		CallProc;	//	Указатель на пользовательскую коллбэк ф-ю, будет вызываться для каждого наследника по своему
-	CObject			*Caller;
+//	virtual void SetVisibility(bool AVisible);
 
-				// вот зачем эти очвевидные комментарии? неужели кому-то не понятно, что CFont *Font - это указатель на шрифт?
-				// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
-				//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
-	CFont				*Font;				//	Указатель на шрифт. // deprecated, я считаю, ибо всегда можно взять из стиля
-	CPrimitiveRender	*PRender;			//	Указатель на рендер примитивов.
+protected:
+	CObjectCallback CallProc;	//	Указатель на пользовательскую коллбэк ф-ю,
+								//	будет вызываться для каждого наследника по своему
+	CObject *Caller;
+	// вот зачем эти очвевидные комментарии? неужели кому-то не понятно,
+	// что CFont *Font - это указатель на шрифт?
+	// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
+	//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
+	CFont *Font;	//	Указатель на шрифт.
+					// deprecated, я считаю, ибо всегда можно взять из стиля
+	CPrimitiveRender *PRender;	//	Указатель на рендер примитивов.
 	CGUIStyle *Style;
 	CMouseState MouseState;
 	CMouseState PreviousMouseState;
@@ -162,7 +145,6 @@ public:
 	CGUIRootObject();
 	void Render();
 	void Update(float dt);
-
 	bool TabHolded; // temporary, ofcourse..
 private:
 	int KeyHoldRepeatDelay;	
@@ -171,36 +153,35 @@ private:
 	bool RepeatStarted;
 };
 
-
 class CGUIObject : public CGUIObjectBase
 {
 public:
 	CGUIObject();
 	CGUIObject(CGUIObjectBase *AParent);
 	~CGUIObject();
-
 	bool isFocused() const;
 	void Focus();
-
 	void SetParent(CGUIObjectBase *AParent);
 
-	const CText& GetText() const
+	const string& GetText() const
 	{
-		return Text;
+		return Text.GetText();
 	}
 
 	void SetText(const string &AText)
 	{
 		Text = AText;
-		Text.Position = ((GetBox().vMin + GetBox().vMax) - Vector2(Text.Width(), Text.Height())) * 0.5f;
+		Text.Position = ((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f;
 	}
 
-	void SetBox(const CAABB &box)
+	void SetBox(const CBox &box)
 	{
-		CRenderObject::SetBox(box);
+		CRenderable::SetBox(box);
 		Text.SetLayer(10);
 		// maybe smthng else
 	}
+
+	virtual void SetVisibility( bool AVisible );
 
 protected:
 	CText Text;
@@ -208,21 +189,24 @@ protected:
 					// 	ну она как бы есть, но не совсем иерархия.. и да, родителем объекта может быть и Base, поэтому тут будет он
 };
 
-// вот этот класс (CGUIManager) наследован одновременно и от синглтона, и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
-// получаем всякие гадости в логах при удалении, потому что его сначала удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
+// вот этот класс (CGUIManager) наследован одновременно и от синглтона,
+// и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
+// получаем всякие гадости в логах при удалении, потому что его сначала
+// удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
 class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingleton<CGUIManager>
 {
 public:
-				~CGUIManager();
-	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	~CGUIManager();
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	CGUIObject* GetFocusedObject() const;
-	void		SetFocus(CGUIObject *AObject);
+	void SetFocus(CGUIObject *AObject);
 	CGUIRootObject* GetRoot() const;
-	void		Add(CGUIObject *AObject);
+	void Add(CGUIObject *AObject);
 		
 private:
 	ManagerIterator Focus;
 	CGUIRootObject *Root;
+
 protected:
 	CGUIManager();
 	friend class CTSingleton<CGUIManager>;
@@ -232,10 +216,10 @@ class CLabel : public CGUIObject
 {
 public:
 	CLabel(const string &AText = "");
-	void SetBox(const CAABB &box)
+	void SetBox(const CBox &box)
 	{
 		CGUIObject::SetBox(box);
-		Text.Position = Vector2(box.vMin.x, box.vMin.y);
+		Text.Position = Vector2(box.Min.x, box.Min.y);
 	}
 	void Render();
 	void Update(float dt){}
@@ -245,12 +229,12 @@ class CButton : public CGUIObject
 {
 public:
 	CButton();
-	CButton(CAABB ARect, const char* AText, RGBAf AColor);
-	void SetBox(const CAABB &box)
+	CButton(CBox ARect, const char* AText, RGBAf AColor);
+	void SetBox(const CBox &box)
 	{
 		CGUIObject::SetBox(box);
-		Text.Position.x = (int)((box.vMin + box.vMax) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).x;
-		Text.Position.y = (int)((box.vMin + box.vMax) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).y;
+		Text.Position.x = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).x;
+		Text.Position.y = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).y;
 	}
 	void Render();
 	void Update(float dt);
@@ -277,14 +261,11 @@ public:
 	};
 
 	CEdit();
-	void SetBox(const CAABB &box)
+	void SetBox(const CBox &box);
+	void SetText(const string &AText);
+	const string& GetText() const
 	{
-		float StringHeight = Text.Height();
-		CGUIObject::SetBox(box);
-		Text.Position.x = (int)box.vMin.x + (int)Style->Metrics.EditMargins.x;
-		Text.Position.y = (int)((box.vMin.y + box.vMax.y) / 2.0f - StringHeight / 2.0f);
-
-
+		return ActualText;
 	}
 	void Render();
 	void Update(float dt);
@@ -305,16 +286,16 @@ class CLabeledEdit : public CEdit
 private:
 	CLabel Label;
 public:
-	void SetBox(const CAABB &box)
+	void SetBox(const CBox &box)
 	{
 		CEdit::SetBox(box);		
-		CAABB tempBox = box;
+		CBox tempBox = box;
 		tempBox.Offset(0.0f, box.Height() + 2.0f);
-		int TextHeight = Label.GetFont()->GetStringHeight(Label.GetText().GetText());
-		tempBox.vMax.y = tempBox.vMin.y + TextHeight;
+		int TextHeight = Label.GetFont()->GetStringHeight(Label.GetText());
+		tempBox.Max.y = tempBox.Min.y + TextHeight;
 		Label.SetBox(tempBox);
 	}
-	CLabeledEdit(CAABB Aaabb, const string &ALabelText) : Label(ALabelText)
+	CLabeledEdit(CBox Aaabb, const string &ALabelText) : Label(ALabelText)
 	{
 		SetBox(Aaabb);
 	}
@@ -323,16 +304,25 @@ public:
 class CMenuItem : public CGUIObject, public CCommonManager <list <CMenuItem*> >/*public CList*/
 {
 public:
-	bool		isCycledMenuSwitch;
-				CMenuItem();
-				CMenuItem(CMenuItem* AParent, char* AMenuText);
-				~CMenuItem();
-	void		Render();
-	void		Update(float dt);
-	bool		InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
-	bool		AddObject(CMenuItem *AObject);
+	bool isCycledMenuSwitch;
+
+	CMenuItem();
+	CMenuItem(CMenuItem* AParent, char* AMenuText);
+	~CMenuItem();
+	void Render();
+	void Update(float dt);
+	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	bool AddObject(CMenuItem *AObject);
+
 private:
-	CCommonManager <list <CMenuItem*> >::ManagerIterator	Focus;
+	CCommonManager <list <CMenuItem*> >::ManagerIterator Focus;
 };
 
+//////////////////////////////////////////////////////////////////////////
+//CPanel
+
+class CPanel : CGUIObject
+{
+
+};
 #endif // _2DE_GUI_H_

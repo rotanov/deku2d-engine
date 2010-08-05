@@ -9,7 +9,7 @@ const size_t LEVEL_HEIGHT = 16;
 const float DEFAULT_VELOCITY = 100.0f;
 const Vector2 DEFAULT_POSITION = Vector2(96.0f, 96.0f);
 
-class CPacmanPlayer : public CUpdateObject
+class CPacmanPlayer : public CUpdatable
 {
 public:
 	size_t Score;
@@ -25,7 +25,7 @@ public:
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 };
 
-class CPacmanBonus : public CUpdateObject
+class CPacmanBonus : public CUpdatable
 {
 private:
 	CSprite *Sprite;
@@ -48,7 +48,7 @@ enum EDirection
 	DIRECTION_UP,
 };
 
-class CPacmanEnemy : public CUpdateObject
+class CPacmanEnemy : public CUpdatable
 {
 public:
 	CLevelMap *Map;
@@ -61,7 +61,7 @@ public:
 	void Update(float dt);
 };
 
-class CPacmanGame :  public CUpdateObject
+class CPacmanGame :  public CUpdatable
 {
 public:
 	CLevelMap *Map;

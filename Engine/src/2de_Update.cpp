@@ -1,30 +1,46 @@
 #include "2de_Update.h"
 
 #include "2de_Engine.h"
+#include "2de_GraphicsLow.h"
 
 //////////////////////////////////////////////////////////////////////////
 // CUpdateObject
 
-CUpdateObject::CUpdateObject() : Active(true), Dead(false)
+CUpdatable::CUpdatable() : Active(true), Dead(false), Scene(NULL)
 {
 	SetName("CUpdateObject");
-	CUpdateManager::Instance()->Add(this);
+	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 }
 
-CUpdateObject::~CUpdateObject()
+CUpdatable::~CUpdatable()
 {
 	CUpdateManager::Instance()->Remove(GetID());
 }
 
-void CUpdateObject::SetDead()
+void CUpdatable::SetDead()
 {
 	Dead = true;
 	Active = false;
 }
 
-bool CUpdateObject::isDead() const
+bool CUpdatable::isDead() const
 {
 	return Dead;
+}
+
+void CUpdatable::PutIntoScene(CAbstractScene *AScene)
+{
+	assert(AScene != NULL);
+	if (Scene != NULL)
+		Scene->RemoveUpdatable(this);
+	Scene = AScene;
+	Scene->AddUpdatable(this);
+}
+
+CAbstractScene* CUpdatable::GetScene() const
+{
+	assert(Scene != NULL);
+	return Scene;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -41,14 +57,16 @@ bool CUpdateManager::UpdateObjects()
 	CEngine *engine = CEngine::Instance();
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
-		CUpdateObject *data = (*it);
-		if (!data->Active)
-			continue;
+		CUpdatable *data = (*it);
 		if (data->isDestroyed())
 		{
 			toDelete.push_back(data);
 			continue;
 		}
+		if (!CSceneManager::Instance()->InScope(data->GetScene()))
+			continue;
+		if (!data->Active)
+			continue;
 		// FIXED_DELTA_TIME
 		float dt = 0;
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
@@ -61,3 +79,6 @@ bool CUpdateManager::UpdateObjects()
 	}
 	return true;
 }
+
+//////////////////////////////////////////////////////////////////////////
+//CTimeredAction

@@ -23,7 +23,8 @@ const float ZOOM_MAX = 16.0f;
 const float ZOOM_MIN = 0.5f;
 const float ZOOM_STEP = 0.5f;
 
-// прототипы, чёрт подери... не работает без них у меня.. то что они там где-то френды ещё не значит, что они видны при присваивании их адресов...
+// прототипы, чёрт подери... не работает без них у меня..
+// то что они там где-то френды ещё не значит, что они видны при присваивании их адресов...
 bool LoadFont(CObject *Caller);
 bool SaveFont(CObject *Caller);
 bool LoadTexture(CObject *Caller);
@@ -33,7 +34,7 @@ bool GoToPrevChar(CObject *Caller);
 bool GoToNextChar(CObject *Caller);
 bool ExposeRect(CObject *Caller);
 
-class CFontEditor : public CRenderObject, public CUpdateObject
+class CFontEditor : public CRenderable, public CUpdatable
 {
 	enum EEditorState
 	{
@@ -52,7 +53,6 @@ class CFontEditor : public CRenderObject, public CUpdateObject
 		SCK_NONE,
 	};
 public:
-	CText	FPSText;
 	Vector2					MousePosition;
 	Vector2					MouseDelta;
 	int						WindowWidth;

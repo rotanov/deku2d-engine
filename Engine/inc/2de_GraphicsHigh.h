@@ -11,26 +11,6 @@
 // #define _DEBUG_DISABLE_PARTICLES_UPDATE
 
 //////////////////////////////////////////////////////////////////////////
-//Scene manager
-//Should be singleton
-//Also, should be container In case of Scene manager O(N^2) will be enough for sure, i think.
-class CScene : public CObject
-{
-public:
-protected:
-private:
-};
-
-class CSceneManager : CCommonManager <list<CRenderObject*> >, public CRenderObject, public CUpdateObject
-{
-public:
-
-private:
-protected:
-};
-
-
-//////////////////////////////////////////////////////////////////////////
 //Primitive Render
 
 #define G_POLY_TEX_CELL_SIZE 20				//	Размер клетки текстуры шахматной доски для многоугольников.
@@ -93,7 +73,7 @@ public:
 	void grCircleS(const Vector2 &p, float Radius);
 	void grCircleC(const Vector2 &p, float Radius);
 
-	void grPolyC(const Vector2 &p, float angle, CPolygon *poly);
+	void grPolyC(const Vector2 &p, float angle, const CPolygon &poly);
 
 	void grRingS(const Vector2 &p, float Radius);
 	void grRingC(const Vector2 &p, float Radius);
@@ -101,7 +81,7 @@ public:
 	void grArrowL(const Vector2& v0, const Vector2& v1);
 	void grArrowC(const Vector2 &v0,const Vector2 &v1);
 
-	void gDrawBBox(CAABB box);
+	void gDrawBBox(CBox box);
 	void grInYan(const Vector2 &p, float Radius);
 private:
 	void BeforeRndr();
@@ -130,7 +110,7 @@ struct SAnimationInfo				// структура определяющая пара
 	int AnimationIndex;				// индекс анимации
 };
 
-class CSprite : public CRenderObject	// говно
+class CSprite : public CRenderable	// говно
 {
 private:
 	CTexture	*Texture;
@@ -197,7 +177,7 @@ typedef void (*FUpdateFunc)(CParticle *, float);
 *		3. Добавить ещё что-нибуть
 */
 
-class CParticleSystem :  public CResource, public CRenderObject, public CUpdateObject
+class CParticleSystem :  public CResource, public CRenderable, public CUpdatable
 {
 public:
 	CParticle			*Particles;
@@ -229,7 +209,7 @@ public:
 
 	CTexture			*Texture;
 
-	CRenderObject			*UserRenderSample;
+	CRenderable			*UserRenderSample;
 	bool					user_create;
 	bool					user_update;
 	bool					user_render;
@@ -254,7 +234,5 @@ public:
 protected:
 	void					_swap(int i, int j);
 };
-
-
 
 #endif // _2DE_GRAPHICS_HIGH_H_

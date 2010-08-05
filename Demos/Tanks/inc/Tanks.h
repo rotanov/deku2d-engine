@@ -3,15 +3,32 @@
 
 #include "2de_Engine.h"
 
-
-
 class CTank;
 class CTankMap;
 class CTankManager;
 class CTankAI;
 
-enum EActionKind {akLeft=0, akRight=1, akUp=2, akDown=3, akFire=4, akItem=5};
-enum ETanksTileIndex {csFree1=7, csFree2=6, csFree3=3, csFree4=2, csBlock=5, csDestr=1, csTank=4, csBullet=0};
+enum EActionKind 
+{
+	akLeft = 0,
+	akRight = 1,
+	akUp = 2,
+	akDown = 3,
+	akFire = 4,
+	akItem = 5
+};
+
+enum ETanksTileIndex
+{
+	csFree1 = 7,
+	csFree2 = 6,
+	csFree3 = 3,
+	csFree4 = 2, 
+	csBlock = 5,
+	csDestr = 1,
+	csTank = 4,
+	csBullet = 0
+};
 
 const Vector2	Directions[4] = {V2_DIR_LEFT, V2_DIR_RIGHT, V2_DIR_UP, V2_DIR_DOWN};
 const float	DEFAULT_TANK_HEALTH = 100;
@@ -44,7 +61,7 @@ __INLINE int Dir2AK(Vector2& V) // Direction to action kind
 			return EActionKind(i);
 }
 
-class CTank : public CRenderObject, public CUpdateObject
+class CTank : public CRenderable, public CUpdatable
 {
 public:
 	struct Bullet {
@@ -101,7 +118,7 @@ public:
 		Color = AColor;
 		Position = APosition;
 	}
-	CAABB GetAABB();
+	CBox GetAABB();
 	Vector2 GetCenter();
 	void SetPlayerControls(int PlayerIndex);
 	void Update(float dt);
@@ -119,7 +136,7 @@ public:
 	}
 };
 
-class CTankMap : public CRenderObject, public CUpdateObject
+class CTankMap : public CRenderable, public CUpdatable
 {
 public:
 	CTankMapCell Cells[MAP_SIZE_Y][MAP_SIZE_X];
@@ -162,14 +179,14 @@ public:
 	}
 
 	CTankMapCell* GetCell(Vector2& V);
-	CAABB GetCellAABB(Vector2 V);
+	CBox GetCellAABB(Vector2 V);
 	float IsFPTWA(int ADir, Vector2 Position);
 	Vector2 GetNewTankLocation();
 	void Render();
 	void Update(float dt);
 };
 
-class CTankManager : CCommonManager <list<CObject*> >/*public CList*/, public CUpdateObject, public CRenderObject
+class CTankManager : CCommonManager <list<CObject*> >/*public CList*/, public CUpdatable, public CRenderable
 {
 public:	
 	CTankMap *Map;

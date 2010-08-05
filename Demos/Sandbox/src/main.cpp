@@ -1,33 +1,38 @@
 #include "2de_Engine.h"
 #include "Game.h"
-#include "2de_MathUtils.h"
-//#include "LuaUtils.h"
 
-CText *FPSText = NULL;
+#define ENGINE CEngine::Instance()
+#define RENDER CRenderManager::Instance()
+CEngine* Ninja = ENGINE;
+
 
 bool Init()
 {	
-	CTestUnit *Unit = CFactory::Instance()->New<CTestUnit>("TestUnit");
-	FPSText = CFactory::Instance()->New<CText>("FPSText");
-	FPSText->Position = Vector2(0.0f, 0.0f);
+	// создать сцену, добавить в неё *нихера*, сделать её текущей
+	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
+	CSceneManager::Instance()->SetCurrentScene(NewScene);
 	return true;
 }
 
-bool Update()
-{	
-	unsigned long FPS = 0;
-	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &FPS);
-	FPSText->SetText("FPS: " + itos(FPS));
+bool Draw()
+{
+	
 	return true;
 }
+
+bool Update(float dt)
+{
+	return true;
+}
+
 
 int main(int argc, char *argv[])
 {
-	CEngine* Ninja = CEngine::Instance();
 	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Sandbox.xml");
 	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(CEngine::STATE_UPDATE_FUNC, &Update);	
+	Ninja->SetState(CEngine::STATE_UPDATE_FUNC, &Update);
+	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);
 	Ninja->Run();
 	return 0;
 }

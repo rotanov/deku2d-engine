@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="8,00"
 	Name="Demo template"
 	ProjectGUID="{9A05409E-A591-43B1-AF1F-3F5222771B15}"
 	RootNamespace="Demo template"

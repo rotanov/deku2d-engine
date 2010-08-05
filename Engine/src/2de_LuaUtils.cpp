@@ -176,7 +176,7 @@ void GlobalLuaState::innerFunction1()
 	ps->Init();
 	ps->ColorStart = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
 	ps->ColorOver = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);
-	ps->Visible = true;	
+	ps->SetVisibility(true);	
 	pnts2[0] = Vector2(0, 480);
 	pnts2[1] = Vector2(640, 480);
 	ps->ParticleLife = 3;

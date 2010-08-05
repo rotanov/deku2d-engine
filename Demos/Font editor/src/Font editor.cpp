@@ -69,10 +69,10 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 			PreviousState = State;
 			State = ES_GRIP_TOOL;
 			break;
-		case SDL_BUTTON_WHEELUP:
+		case SDL_BUTTON_WHEELUP: case SDLK_EQUALS:
 			SetZoom(Zoom + ZOOM_STEP);
 			break;
-		case SDL_BUTTON_WHEELDOWN:
+		case SDL_BUTTON_WHEELDOWN: case SDLK_MINUS:
 			SetZoom(Zoom - ZOOM_STEP);
 			break;
 		case SDL_BUTTON_LEFT:
@@ -80,8 +80,8 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 				break;
 			if (Font != NULL && CornerKind == SCK_NONE)
 				for(int i = 0; i < 256; i++)
-					if (Font->bbox[i].x0 < (MousePosition.x / Zoom - Offset.x / Zoom) && Font->bbox[i].x1 > (MousePosition.x / Zoom - Offset.x / Zoom) &&
-						Font->bbox[i].y0 < (MousePosition.y / Zoom - Offset.y / Zoom) && Font->bbox[i].y1 > (MousePosition.y / Zoom - Offset.y / Zoom))
+					if (Font->bbox[i].Min.x < (MousePosition.x / Zoom - Offset.x / Zoom) && Font->bbox[i].Max.x > (MousePosition.x / Zoom - Offset.x / Zoom) &&
+						Font->bbox[i].Min.y < (MousePosition.y / Zoom - Offset.y / Zoom) && Font->bbox[i].Max.y > (MousePosition.y / Zoom - Offset.y / Zoom))
 					{
 						bool tempbool = (i != CurrentSymbol);
 						SetSelectedBoxTo(i);
@@ -95,15 +95,15 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 					float Mx = MousePosition.x / Zoom - Offset.x / Zoom;
 					float My = MousePosition.y / Zoom - Offset.y / Zoom;
 					CornerKind = SCK_NONE;
-					if (CAABB(SelectionBoxes[0], SelectionBoxes[2]).Inside(Vector2(Mx, My)))
+					if (CBox(SelectionBoxes[0], SelectionBoxes[2]).Inside(Vector2(Mx, My)))
 						CornerKind = SCK_LEFT_BOTTOM;
-					if (CAABB(SelectionBoxes[4], SelectionBoxes[6]).Inside(Vector2(Mx, My)))
+					if (CBox(SelectionBoxes[4], SelectionBoxes[6]).Inside(Vector2(Mx, My)))
 						CornerKind = SCK_RIGHT_BOTTOM;
-					if (CAABB(SelectionBoxes[8], SelectionBoxes[10]).Inside(Vector2(Mx, My)))
+					if (CBox(SelectionBoxes[8], SelectionBoxes[10]).Inside(Vector2(Mx, My)))
 						CornerKind = SCK_RIGHT_TOP;
-					if (CAABB(SelectionBoxes[12], SelectionBoxes[14]).Inside(Vector2(Mx, My)))
+					if (CBox(SelectionBoxes[12], SelectionBoxes[14]).Inside(Vector2(Mx, My)))
 						CornerKind = SCK_LEFT_TOP;
-					if (CAABB(SelectionBoxes[16], SelectionBoxes[18]).Inside(Vector2(Mx, My)))
+					if (CBox(SelectionBoxes[16], SelectionBoxes[18]).Inside(Vector2(Mx, My)))
 						CornerKind = SCK_CENTER;
 					if (CornerKind != SCK_NONE)
 					{
@@ -165,7 +165,7 @@ CFontEditor::CFontEditor()
 	{
 		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
 		temp->SetText(static_cast<string>(ButtonNames[i]));
-		temp->SetBox(CAABB(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));		
+		temp->SetBox(CBox(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));		
 		temp->SetCallback(ButtonCallers[i], this);
 	}
 
@@ -176,25 +176,25 @@ CFontEditor::CFontEditor()
 
 	edFontTextureName = CFactory::Instance()->New<CEdit>("edFontTextureName");
 	edFontTextureName->SetText(static_cast<string>("Font_font"));
-	edFontTextureName->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT));	
+	edFontTextureName->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT));	
 //	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edFontname = CFactory::Instance()->New<CEdit>("edFontname");
-	edFontname->SetText(static_cast<string>("Font"));
-	edFontname->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT));	
+	edFontname->SetText(static_cast<string>("iich"));
+	edFontname->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT));	
 	edFontname->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	lblSampleText = CFactory::Instance()->New<CLabel>("lblSampleText");
 	lblSampleText->SetText(static_cast<string>("The quick brown fox jumps over a lazy dog."));
-	lblSampleText->SetBox(CAABB(INTERFACE_OFFSET_X + 20, 20 + (BUTTON_HEIGHT+10)*3, 500, 25));
+	lblSampleText->SetBox(CBox(INTERFACE_OFFSET_X + 20, 20 + (BUTTON_HEIGHT+10)*3, 500, 25));
 	lblSampleText->Color = COLOR_WHITE;
-	lblSampleText->Visible = false;
+	lblSampleText->SetVisibility(false);
 
 	lblCharachterSelectedASCIIIndex = CFactory::Instance()->New<CLabel>("lblASCII");
 	lblCharachterSelectedASCIIIndex->SetText("ASCII index: " + itos(CurrentSymbol));
-	lblCharachterSelectedASCIIIndex->SetBox(CAABB(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2), EDIT_WIDTH, BUTTON_HEIGHT));
+	lblCharachterSelectedASCIIIndex->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 2), EDIT_WIDTH, BUTTON_HEIGHT));
 	lblCharachterSelectedASCIIIndex->Color = COLOR_WHITE;
-	lblCharachterSelectedASCIIIndex->Visible = true;
+	lblCharachterSelectedASCIIIndex->SetVisibility(true);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(2, GL_FLOAT, 0, SelectionBoxes);
@@ -211,10 +211,6 @@ void CFontEditor::Render()
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
 	PRender.grCircleL(MousePosition, 5);
-	int fps;
-	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
-	FPSText.Position = Vector2(2.0f, WindowHeight - 20.0f);
-	FPSText.SetText("FPS: " + itos(fps));
 	glLoadIdentity();
 
 	gToggleScissor(true);
@@ -296,19 +292,22 @@ void CFontEditor::Render()
 		glBegin(GL_LINES);
 		for(int i=0;i<256;i++)
 		{
+			float x0 = Font->bbox[i].Min.x, x1 = Font->bbox[i].Max.x;
+			float y0 = Font->bbox[i].Min.y, y1 = Font->bbox[i].Max.y;
+
 			if (i == CurrentSymbol)
 				RGBAf(0.9f, 0.4f, 0.3f, 0.9f).glSet();
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
+			glVertex2f(x0, y0);
+			glVertex2f(x1, y0);
 
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y0);
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y1);
+			glVertex2f(x1, y0);
+			glVertex2f(x1, y1);
 
-			glVertex2i(Font->bbox[i].x1, Font->bbox[i].y1);
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
+			glVertex2f(x1, y1);
+			glVertex2f(x0, y1);
 
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y1);
-			glVertex2i(Font->bbox[i].x0, Font->bbox[i].y0);
+			glVertex2f(x0, y1);
+			glVertex2f(x0, y0);
 			if (i == CurrentSymbol)
 				COLOR_WHITE.glSet();
 		}
@@ -328,7 +327,7 @@ void CFontEditor::Update(float dt)
 		int x, y;
 		SDL_GetRelativeMouseState(&x, &y);
 		MouseDelta = Vector2(x, -y);
-		if (!CAABB(0, 0, INTERFACE_OFFSET_X, WindowHeight).Inside(MousePosition) &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
+		if (!CBox(0, 0, INTERFACE_OFFSET_X, WindowHeight).Inside(MousePosition) &&  ((SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1))))
 			Offset += MouseDelta;
 		break;
 	case ES_MOVE_TOOL:
@@ -341,41 +340,41 @@ void CFontEditor::Update(float dt)
 
 		int Mx = MousePosition.x / Zoom - Offset.x / Zoom;
 		int My = MousePosition.y / Zoom - Offset.y / Zoom;
-		int Dx0 = (Font->bbox[CurrentSymbol].x1 - Font->bbox[CurrentSymbol].x0) /2;
-		int Dx1 = (Font->bbox[CurrentSymbol].x1 - Font->bbox[CurrentSymbol].x0) - (Font->bbox[CurrentSymbol].x1 - Font->bbox[CurrentSymbol].x0) /2;
-		int Dy0 = (Font->bbox[CurrentSymbol].y1 - Font->bbox[CurrentSymbol].y0) /2;
-		int Dy1 = (Font->bbox[CurrentSymbol].y1 - Font->bbox[CurrentSymbol].y0) - (Font->bbox[CurrentSymbol].y1 - Font->bbox[CurrentSymbol].y0) /2;
+		int Dx0 = (Font->bbox[CurrentSymbol].Max.x - Font->bbox[CurrentSymbol].Min.x) /2;
+		int Dx1 = (Font->bbox[CurrentSymbol].Max.x - Font->bbox[CurrentSymbol].Min.x) - (Font->bbox[CurrentSymbol].Max.x - Font->bbox[CurrentSymbol].Min.x) /2;
+		int Dy0 = (Font->bbox[CurrentSymbol].Max.y - Font->bbox[CurrentSymbol].Min.y) /2;
+		int Dy1 = (Font->bbox[CurrentSymbol].Max.y - Font->bbox[CurrentSymbol].Min.y) - (Font->bbox[CurrentSymbol].Max.y - Font->bbox[CurrentSymbol].Min.y) /2;
 
 		if (CornerKind == SCK_CENTER)
 		{
-			Font->bbox[CurrentSymbol].x0 = Mx - Dx0;
-			Font->bbox[CurrentSymbol].x1 = Mx + Dx1;
-			Font->bbox[CurrentSymbol].y0 = My - Dy0;
-			Font->bbox[CurrentSymbol].y1 = My + Dy1;
+			Font->bbox[CurrentSymbol].Min.x = Mx - Dx0;
+			Font->bbox[CurrentSymbol].Max.x = Mx + Dx1;
+			Font->bbox[CurrentSymbol].Min.y = My - Dy0;
+			Font->bbox[CurrentSymbol].Max.y = My + Dy1;
 		}
 
 		if (CornerKind == SCK_LEFT_BOTTOM)
 		{
-			Font->bbox[CurrentSymbol].x0 = Mx;
-			Font->bbox[CurrentSymbol].y0 = My;
+			Font->bbox[CurrentSymbol].Min.x = Mx;
+			Font->bbox[CurrentSymbol].Min.y = My;
 		}
 
 		if (CornerKind == SCK_RIGHT_BOTTOM)
 		{
-			Font->bbox[CurrentSymbol].x1 = Mx;
-			Font->bbox[CurrentSymbol].y0 = My;
+			Font->bbox[CurrentSymbol].Max.x = Mx;
+			Font->bbox[CurrentSymbol].Min.y = My;
 		}
 
 		if (CornerKind == SCK_RIGHT_TOP)
 		{
-			Font->bbox[CurrentSymbol].x1 = Mx;
-			Font->bbox[CurrentSymbol].y1 = My;
+			Font->bbox[CurrentSymbol].Max.x = Mx;
+			Font->bbox[CurrentSymbol].Max.y = My;
 		}
 
 		if (CornerKind == SCK_LEFT_TOP)
 		{
-			Font->bbox[CurrentSymbol].x0 = Mx;
-			Font->bbox[CurrentSymbol].y1 = My;
+			Font->bbox[CurrentSymbol].Min.x = Mx;
+			Font->bbox[CurrentSymbol].Max.y = My;
 		}
 
 		if (CornerKind != SCK_NONE)
@@ -398,14 +397,14 @@ void CFontEditor::SetSelectedBoxTo(int Index)
 	CurrentSymbol = Index; // @todo: Add range check
 	lblCharachterSelectedASCIIIndex->SetText("ASCII Index: " + itos(CurrentSymbol + 32));
 
-	CRecti rect = Font->bbox[CurrentSymbol];
+	CBox rect = Font->bbox[CurrentSymbol];
 	Vector2 Vertices[5] = 
 	{
-		Vector2(rect.x0, rect.y0),
-		Vector2(rect.x1, rect.y0),
-		Vector2(rect.x1, rect.y1),
-		Vector2(rect.x0, rect.y1),
-		Vector2((rect.x0 + rect.x1) * 0.5f, (rect.y0 + rect.y1) * 0.5f),
+		Vector2(rect.Min.x, rect.Min.y),
+		Vector2(rect.Max.x, rect.Min.y),
+		Vector2(rect.Max.x, rect.Max.y),
+		Vector2(rect.Min.x, rect.Max.y),
+		Vector2((rect.Min.x + rect.Max.x) * 0.5f, (rect.Min.y + rect.Max.y) * 0.5f),
 	};
 	for(int i = 0; i < 5; i++)
 	{
@@ -422,10 +421,10 @@ bool LoadFont(CObject *Caller)
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->GetText().GetText());
+	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->GetText());
 	if (FontEditor->Font == NULL)
 	{
-		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->GetText().GetText());
+		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->GetText());
 		return false;
 	}
 	FontEditor->FontTexture = FontEditor->Font->GetTexture();
@@ -466,6 +465,7 @@ bool SaveFont(CObject *Caller)
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
+	FontEditor->Font->SetName(FontEditor->edFontname->GetText());
 	FontEditor->Font->SetTexture(FontEditor->FontTexture->GetName());
 	FontEditor->Font->SaveToFile();
 	return true;
@@ -476,10 +476,10 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). *
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	CTexture *TempFontTexture = CTextureManager::Instance()->Get(FontEditor->edFontTextureName->GetText().GetText());
+	CTexture *TempFontTexture = CTextureManager::Instance()->Get(FontEditor->edFontTextureName->GetText());
 	if (TempFontTexture == NULL)
 	{
-		Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->GetText().GetText().c_str());
+		Log("ERROR", "Font texture %s not found", FontEditor->edFontTextureName->GetText().c_str());
 		// Создать объект текст с таймером здесь, выдавать ошибки с его помощью прямо на экран.
 		return false;
 	}
@@ -489,16 +489,14 @@ bool LoadTexture(CObject *Caller) /* Опять же не Load() а Acquire(). *
 
 bool ExitFontEditor(CObject *Caller)
 {
-	SDL_Event Event;
-	Event.type = SDL_QUIT;
-	SDL_PushEvent(&Event); // Не так.
+	CEngine::Instance()->ShutDown();
 	return true;
 }
 
 bool ShowTestPhrase(CObject *Caller)
 {
 	CLabel *Lbl = dynamic_cast<CLabel*>(CGUIManager::Instance()->Get("lblSampleText"));
-	Lbl->Visible = !Lbl->Visible;
+	Lbl->SetVisibility(!Lbl->GetVisibility());
 	return true;
 }
 
@@ -525,13 +523,13 @@ bool ExposeRect(CObject *Caller)
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x0 = (FontEditor->Font->GetTexture())->Width / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x1 = (FontEditor->Font->GetTexture())->Width / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y0 = (FontEditor->Font->GetTexture())->Height / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y1 = (FontEditor->Font->GetTexture())->Height / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Min.x = (FontEditor->Font->GetTexture())->Width / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.x = (FontEditor->Font->GetTexture())->Width / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Min.y = (FontEditor->Font->GetTexture())->Height / 2;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.y = (FontEditor->Font->GetTexture())->Height / 2;
 	
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].x1 += 20;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].y1 += 20;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.x += 20;
+	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.y += 20;
 
 	FontEditor->SetSelectedBoxTo(FontEditor->CurrentSymbol);
 	return true;

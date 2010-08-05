@@ -5,7 +5,7 @@
 #include "2de_GraphicsLow.h"
 #include "2de_Update.h"
 
-class CUnitBase : public CRenderObject, public CUpdateObject
+class CUnitBase : public CRenderable, public CUpdatable
 {
 	
 };
@@ -14,17 +14,16 @@ class CTileset : public CResource
 {
 private:
 	CTexture	*Texture;
+
 public:
-	byte		TileWidth;
-	byte		TileHeight;
-	int			HorNumTiles;
-	int			VerNumTiles;
-	CAABB		*BBox;
+	unsigned int TileWidth;
+	unsigned int TileHeight;
+	unsigned int HorNumTiles;
+	unsigned int VerNumTiles;
+	CBox* BBox;
 
 	CTileset ();
 	~CTileset();
-	
-
 	Vector2Array<4> GetCellTC(int CellIndex);
 	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles);
 	bool LoadFromFile();
@@ -72,7 +71,7 @@ struct CMapCellInfo
 * Cells: >^
 */
 
-class CLevelMap : /*public CResource,*/ public CRenderObject
+class CLevelMap : /*public CResource,*/ public CRenderable
 {
 private:
 	size_t HorizontalCellsCount;
@@ -96,11 +95,11 @@ public:
 	{
 		return GetMapCell((int)APosition.x / (GetScaling() * TileSet->TileWidth), (int)APosition.y / (GetScaling() * TileSet->TileHeight));
 	}
-	CAABB GetCellAABB(const Vector2 &V);
+	CBox GetCellAABB(const Vector2 &V);
 
 };
 
-class CCompas : public CRenderObject
+class CCompas : public CRenderable
 {
 public:
 	CCompas();

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <Configuration>
 	<Video>
+		<Fullscreen value="false" />
 		<WindowWidth value="640" />
 		<WindowHeight value="480" />
 		<WindowBPP value="32" />

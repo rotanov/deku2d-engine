@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="8,00"
 	Name="Pac man"
 	ProjectGUID="{F62FF54C-88A4-47DE-9B48-6CCFAD444FE8}"
 	RootNamespace="Pac man"

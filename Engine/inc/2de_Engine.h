@@ -21,7 +21,7 @@ const int MAX_KEY_INPUT_FUNCTIONS	=	8;
 class CEngine
 {
 public:
-	enum EState
+	enum EState // @todo: избавиться от этих стейтов и придумать более хороший способ делать то же самое.
 	{
 		STATE_SCREEN_WIDTH,
 		STATE_SCREEN_HEIGHT,
@@ -48,7 +48,7 @@ public:
 		STATE_GL_BG_COLOR,
 	};
 
-	int							keys[SDLK_LAST];	//FFUUU~ for sure. Wait til the Event system.
+	int							keys[SDLK_LAST];	//FFUUU~ for sure. Wait till the Event system.
 	Vector2						MousePos;
 
 	static CEngine*					Instance();
@@ -56,15 +56,19 @@ public:
 	void						GetState(EState state, void* value);	// Same.
 	bool						AddEventFunction(EventFunc func);		// Until event system created.
 	bool						AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
-	int							CfgGetInt(char* ParamName);				// I think this one shouldn't be a member of CEnine. User knows the config name and path. But to do such from script. Should think more about it.
-	bool						Run();	// If we have Run() we should have Pause() and ShutDown() or smthng.
-	//bool						Pause();
-	//bool						ShutDown();
+	int							CfgGetInt(char* ParamName);				// I think this one shouldn't be
+			//	a member of CEnine. User knows the config name and path. 
+			//	But to do such from script. Should think more about it.
+	bool						Run();
+	void						Pause();
+	void						ShutDown();
+	void						ToggleExitOnEscape(bool AdoExitOnEscape);
 
 	string						ConfigFileName;
-	string						ConfigFilePath;		//Temporary, until CConfig created. // Or no. We are not have CEngine::Config now.
-	
+	string						ConfigFilePath;		//Temporary, until CConfig created. 
+													// Or no. We are not have CEngine::Config now.
 private:
+	bool						doExitOnEscape;
 	bool						doLimitFps;
 	bool						doLoadDefaultResourceList;
 	unsigned long				FpsCount;
@@ -77,7 +81,8 @@ private:
 	int							EventFuncCount;
 	int							KeyInputFuncCount;
 	CObject*					KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
-
+	CText*						FPSText;
+	bool						doShowFPS;
 	
 	bool						Init();
 	void						CalcFps();
@@ -93,9 +98,10 @@ private:
 	bool						(*procFocusLostFunc)();		// ok
 	bool						(*procFocusGainFunc)();		// ok
 	bool						(*procUpdateFunc)(float);	// ok, yeah
-	bool						(*procRenderFunc)();		// ok  NO wrong design; same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
-
+	bool						(*procRenderFunc)();		// ok  NO wrong design; 
+			// same for update and Init and so on. OOP MOTHERFUCKERS DO YOU USE IT!?
 	static CEngine MainEngineInstance;
+
 protected:
 	CEngine();
 	~CEngine();

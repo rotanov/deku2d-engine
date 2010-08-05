@@ -734,12 +734,32 @@ bool CBaseResource::CheckLoad()
 
 CBaseResource::CBaseResource() : Loaded(false), Filename(""){}
 
+const string& CBaseResource::GetFilename() const
+{
+	return Filename;
+}
+
+void CBaseResource::SetFilename( const string &AFilename )
+{
+	Filename = AFilename; // may be some check here
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CResource
-
 CResource::CResource()
 {
 	SetName("CResource");
+}
+
+void CResource::SetName(const string &AObjectName)
+{
+	CObject::SetName(AObjectName);
+	int t0 = Filename.length() - 1;
+	while(t0 > 0 && Filename[t0] != '/' && Filename[t0] != '\\')
+		t0--;
+	t0++;
+	Filename.insert(t0, AObjectName);
+	Filename.erase(t0 + AObjectName.length(), Filename.length() - t0 - AObjectName.length() - 4);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -799,7 +819,8 @@ void CEnvironment::Paths::SetWorkingDirectory()
 	SetCurrentDirectory(MainDir);
 	delete [] MainDir;
 #endif // _WIN32
-	// *nix-like systems don't need current directory to be set to executable path - they use different directory structure
+	// *nix-like systems don't need current directory to be 
+	// set to executable path - they use different directory structure
 }
 
 /**

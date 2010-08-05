@@ -1,7 +1,7 @@
 #ifndef _2DE_LUA_UTILS_H_
 #define _2DE_LUA_UTILS_H_
 
-#include <lua.hpp>
+#include <lua/lua.hpp>
 
 #include "2de_Core.h"
 

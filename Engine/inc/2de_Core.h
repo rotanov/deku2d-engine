@@ -46,20 +46,17 @@
 #include <typeinfo>
 #include <vector>
 
-#include <assert.h>
-#include <malloc.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 #include <memory.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 	#define Get  Get
-
 	#include <tchar.h>
 #endif  //_WIN32
 
@@ -186,14 +183,11 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 	delete [] a, a = NULL;
 }
 
-// I did it for teh lulz!
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
-/**
-*	CObject - базовый класс для многих объектов.
-*/
-
+//////////////////////////////////////////////////////////////////////////
+//CObject
 class CObject
 {
 private:
@@ -214,19 +208,16 @@ private:
 	}
 
 public:
-	CObject();
-	
-	virtual ~CObject();		
+	CObject();		virtual ~CObject();		
 	void IncRefCount();
 	static void DecRefCount(CObject* AObject);	
 	const string& GetName() const;
-	void SetName(const string &AObjectName);
-	size_t GetID() const;
+	virtual void SetName(const string &AObjectName);	size_t GetID() const;
 	bool isDestroyed() const;
 	void SetDestroyed();
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
-
-	bool Managed;	// temporary in public, todo: setter/getter.. or maybe make it completely private and make CFactory to be friend of CObject
+	bool Managed;	// temporary in public, todo: setter/getter.. or maybe make it		
+					// completely private and make CFactory to be friend of CObject
 };
 
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
@@ -365,14 +356,18 @@ public:
 	static T* Instance();
 
 protected:
-	CTSingleton() { }
-	virtual ~CTSingleton()
+	CTSingleton()	{	}	virtual ~CTSingleton()
 	{
 		_instance = 0;
 	}
 
 private:
 	static T * _instance;
+// #ifdef _DEBUG // 'cause Instance is static i don't know how 	
+				//to make recursive singleton constructor call check
+	// 	bool isCreationBeginned;
+	// 	bool isCreated;
+	// #endif // _DEBUG
 };
 
 template <typename T>
@@ -382,7 +377,6 @@ T* CTSingleton<T>::Instance()
 	{
 		_instance = new T;
 		_instance->Managed = true;
-
 		CSingletonManager::Instance()->Add(_instance);
 	}
 	return _instance;
@@ -393,28 +387,27 @@ T* CTSingleton<T>::_instance = 0;
 
 class CBaseResource
 {
-protected:
-	bool Loaded;		// Loaded должна быть истина если экземпляр объекта был РЕАЛЬНО загружен, а не просто проиндексирован.
 public:
-	string Filename;	// Полный^W хоть-какой-нибудь путь к файлу.
-
-	CBaseResource();	// const string &AFilename
+	CBaseResource();	// const string &AFilename?	
 	virtual ~CBaseResource(){};
 	virtual bool LoadFromFile();
 	virtual bool SaveToFile();
 	bool CheckLoad();
+	void SetFilename(const string &AFilename);	
+	const string& GetFilename() const;
+protected:	
+	bool Loaded;		// Loaded должна быть истина если экземпляр объекта						
+	// был РЕАЛЬНО загружен, а не просто проиндексирован.	
+	string Filename;	// Полный^W хоть-какой-нибудь путь к файлу.
 };
 
 class CResource : public CBaseResource, virtual public CObject
 {
 public:
+	void SetName(const string &AObjectName);	// Мы ведь хотим обновлять имя файла, оставляя
+	// полный путь к нему, при обновлении имени объекта.	
 	CResource();
 	virtual ~CResource(){};
-};
-
-struct CRecti	// @todo: Избавиться от этого типа.
-{
-	int x0, x1, y0, y1;
 };
 
 /**
@@ -729,10 +722,8 @@ T* CFactory::Remove(const string &AName)
 }
 
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
-// 	 in some class, named, for example, CEnvironment
-// Agreed with you.
-// 	CEnvironment has been created. Some time/date and paths functions has already been moved there. It's good practice to move all platform-dependent code (basically, code with ifdefs) to one dedicated place, if it's possible, so we should continue this work.
-
+//	in some class, named, for example, CEnvironment// Agreed with you.
+// CEnvironment has been created. Some time/date and paths functions has already been moved there.// It's good practice to move all platform-dependent code (basically, code with ifdefs)//	to one dedicated place, if it's possible, so we should continue this work.
 void DelFNameFromFPath(char *src); // standard function "dirname", anyone?.. or does it work in another way?.. i dunno..
 void DelExtFromFName(char *src);
 void DelLastDirFromPath(char *src);

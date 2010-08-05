@@ -1,18 +1,8 @@
 #include "2de_Gui.h"
-
 #include "2de_Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//GUI
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
 // CGUIObjectBase
-
 CGUIObjectBase::CGUIObjectBase()
 {
 	Font = NULL;
@@ -73,14 +63,24 @@ void CGUIObjectBase::SetStyle(CGUIStyle *AStyle)
 Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 {
 	Vector2 Result;
-	Result.x = std::max(Coords.x - GetBox().vMin.x, 0.0f);
-	Result.y = std::max(Coords.y - GetBox().vMin.y, 0.0f);
+	Result.x = std::max(Coords.x - GetBox().Min.x, 0.0f);
+	Result.y = std::max(Coords.y - GetBox().Min.y, 0.0f);
 	return Result;
 }
 
+void CGUIObjectBase::SetCallback( CObjectCallback ACallProc, CObject *ACaller )
+{
+	Caller = ACaller;
+	CallProc = ACallProc;
+}
+
+void CGUIObject::SetVisibility( bool AVisible )
+{
+	CRenderable::SetVisibility(AVisible);
+	Text.SetVisibility(AVisible);
+}
 //////////////////////////////////////////////////////////////////////////
 // CGUIRootObject
-
 CGUIRootObject::CGUIRootObject(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), TabHolded(false)
 {
 	SetName("GUI Root Object");
@@ -95,8 +95,8 @@ void CGUIRootObject::Render()
 		PRender->LineStippleEnabled = true;
 		PRender->lwidth = Style->Metrics.FocusRectLineWidth;
 		PRender->lClr = Style->Colors.FocusRect;
-		PRender->grRectL(Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMin,
-			Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).vMax);	
+		PRender->grRectL(Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Min,
+			Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Max);	
 		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
 		PRender->lwidth = 1.0f;
 	}
@@ -136,7 +136,6 @@ void CGUIRootObject::Update(float dt)
 
 //////////////////////////////////////////////////////////////////////////
 // CGUIObject
-
 CGUIObject::CGUIObject()
 {
 	CGUIManager::Instance()->Add(this);
@@ -176,7 +175,9 @@ void CGUIObject::SetParent(CGUIObjectBase *AParent)
 	Style = Parent->GetStyle();
 	Font = Parent->GetFont();
 	PRender = Parent->GetPrimitiveRender();
-	Color = Parent->Color;	// Color is deprecated for GUI objects (really not used in CButton, CEdit, but there is something related to Color in CMenuItem), use CGUIStyle instead
+	Color = Parent->Color;	// Color is deprecated for GUI objects 
+							// (really not used in CButton, CEdit, but there is something
+							// related to Color in CMenuItem), use CGUIStyle instead
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -289,7 +290,7 @@ CButton::CButton()
 	Text.Color = Style->Colors.ButtonText;
 }
 
-CButton::CButton(CAABB ARect, const char* AText, RGBAf AColor)
+CButton::CButton(CBox ARect, const char* AText, RGBAf AColor)
 {
 	SetBox(ARect);
 	Color = AColor;	// deprecated, use style
@@ -315,8 +316,8 @@ void CButton::Render()
 		PRender->sClr = Style->Colors.ButtonFacePressed;
 		PRender->lClr = Style->Colors.ButtonFacePressed;
 	}
-	PRender->grRectS(GetBox().vMin, GetBox().vMax);
-	PRender->grRectL(GetBox().vMin, GetBox().vMax);	
+	PRender->grRectS(GetBox().Min, GetBox().Max);
+	PRender->grRectL(GetBox().Min, GetBox().Max);	
 }
 
 
@@ -425,27 +426,27 @@ void CEdit::Render()
 		PRender->sClr = Style->Colors.EditBackground;
 	}
 	PRender->lwidth = Style->Metrics.EditBorderWidth;
-	PRender->grRectS(GetBox().vMin, GetBox().vMax);
-	PRender->grRectL(GetBox().vMin, GetBox().vMax);
+	PRender->grRectS(GetBox().Min, GetBox().Max);
+	PRender->grRectL(GetBox().Min, GetBox().Max);
 	if (isFocused())
 	{
 		if (Selection.Exists())
 		{
-			CAABB SelBox(GetBox().vMin.x + Style->Metrics.EditMargins.x +
+			CBox SelBox(GetBox().Min.x + Style->Metrics.EditMargins.x +
 				Font->GetStringWidthEx(0, std::max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
-				GetBox().vMin.y + Style->Metrics.EditMargins.y,
-				GetBox().vMin.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0,
+				GetBox().Min.y + Style->Metrics.EditMargins.y,
+				GetBox().Min.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0,
 				std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1), GetVisibleText().c_str()),
-				GetBox().vMax.y - Style->Metrics.EditMargins.y);
+				GetBox().Max.y - Style->Metrics.EditMargins.y);
 
 			PRender->sClr = Style->Colors.EditSelection;
-			PRender->grRectS(SelBox.vMin, SelBox.vMax);
+			PRender->grRectS(SelBox.Min, SelBox.Max);
 		}
 		PRender->psize = 2.0f;
 		PRender->lClr = Style->Colors.EditText;
 		PRender->lwidth = 1.0f;
-		PRender->grSegment(Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).vMax.y),
-			Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).vMin.y));
+		PRender->grSegment(Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
+			Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Min.y));
 	}
 }
 
@@ -470,11 +471,11 @@ void CEdit::Update(float dt)
 		else
 			Selection.End = CursorPos;
 
-		float Xmi = GetBox().vMin.x, Ymi = GetBox().vMin.y;
-		float Xma = GetBox().vMin.x, Yma = GetBox().vMin.y;
+		float Xmi = GetBox().Min.x, Ymi = GetBox().Min.y;
+		float Xma = GetBox().Min.x, Yma = GetBox().Min.y;
 
-		CAABB LeftScrollArea(Xmi, Ymi, Xmi + 5.0f, Yma);
-		CAABB RightScrollArea(Xma - 5.0f, Ymi, Xma, Yma);
+		CBox LeftScrollArea(Xmi, Ymi, Xmi + 5.0f, Yma);
+		CBox RightScrollArea(Xma - 5.0f, Ymi, Xma, Yma);
 
 		if (LeftScrollArea.Inside(mouse))
 		{
@@ -513,14 +514,14 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			{
 				// f1
 				CursorPos = Selection.RangeStart();
-				Text.GetText().erase(Selection.RangeStart() + 1, Selection.Length());
+				ActualText.erase(Selection.RangeStart() + 1, Selection.Length());
 				Selection.Clear();
 			}
 			else
 			{
 				if (CursorPos >= 0)
 				{
-					Text.GetText().erase(CursorPos, 1);
+					ActualText.erase(CursorPos, 1);
 					CursorPos--;
 
 					// f2
@@ -534,12 +535,12 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			{
 				// f1
 				CursorPos = Selection.RangeStart();
-				Text.GetText().erase(Selection.RangeStart() + 1, Selection.Length());
+				ActualText.erase(Selection.RangeStart() + 1, Selection.Length());
 				Selection.Clear();
 			}
 			else
 			{
-				Text.GetText().erase(CursorPos + 1, 1);
+				ActualText.erase(CursorPos + 1, 1);
 				// f2
 				if (VisibleTextOffset > 0)
 					VisibleTextOffset--;
@@ -560,7 +561,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			break;
 		case SDLK_RIGHT:
 			{
-				if (++CursorPos >= Text.GetText().length())
+				if (++CursorPos >= ActualText.length())
 					CursorPos--;
 
 				// f3
@@ -569,12 +570,12 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 				else
 					Selection.Clear(CursorPos);
 
-				string RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+				string RightIncText = ActualText.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
 
 				while (!isTextFits(RightIncText.c_str()))
 				{
 					VisibleTextOffset++;
-					RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+					RightIncText = ActualText.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
 				}
 				break;
 			}
@@ -591,7 +592,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			break;
 		case SDLK_END:
 			{
-				CursorPos = Text.GetText().length() - 1;
+				CursorPos = ActualText.length() - 1;
 
 				// f3
 				if (mod & KMOD_SHIFT)
@@ -599,12 +600,12 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 				else
 					Selection.Clear(CursorPos);
 
-				string RightEndText = Text.GetText().substr(VisibleTextOffset);
+				string RightEndText = ActualText.substr(VisibleTextOffset);
 
 				while (!isTextFits(RightEndText.c_str()))
 				{
 					VisibleTextOffset++;
-					RightEndText = Text.GetText().substr(VisibleTextOffset);
+					RightEndText = ActualText.substr(VisibleTextOffset);
 				}
 				break;
 			}
@@ -615,12 +616,11 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 				{
 					// f1
 					CursorPos = Selection.RangeStart();
-					Text.GetText().erase(Selection.RangeStart() + 1, Selection.Length());
+					ActualText.erase(Selection.RangeStart() + 1, Selection.Length());
 					Selection.Clear();
 				}
-				Text.GetText().insert(CursorPos + 1, &letter, 1);
+				ActualText.insert(CursorPos + 1, &letter, 1);
 				CursorPos++;
-
 				Selection.Clear(CursorPos);
 
 				string NewText = GetVisibleText() + letter;
@@ -629,6 +629,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 					VisibleTextOffset++;
 					NewText = GetVisibleText() + letter;
 				}
+				Text.SetText(NewText);
 			}
 		}
 		break;
@@ -649,19 +650,16 @@ int CEdit::MouseToCursorPos(const Vector2& MousePosition) const
 {
 	if (!GetBox().Inside(MousePosition))
 		return -1;
-
-	return Font->StringCoordToCursorPos(GetVisibleText().c_str(), MousePosition.x, MousePosition.y) + VisibleTextOffset;
+	return Text.StringCoordToCursorPos(MousePosition.x, MousePosition.y) + VisibleTextOffset;
 }
 
 string CEdit::GetVisibleText() const
 {
-	string VisibleText = Text.GetText();
+	string VisibleText = ActualText; //Text.GetText();
 	VisibleText = VisibleText.substr(VisibleTextOffset);
 	int i = 0;
-
 	while (isTextFits(VisibleText.substr(0, i + 1).c_str()) && (i < VisibleText.length()))
 		i++;
-
 	return VisibleText.substr(0, i);
 }
 
@@ -670,7 +668,24 @@ bool CEdit::isTextFits(const char *AText) const
 	return ((Font->GetStringWidth(AText) + 2.0f * Style->Metrics.EditMargins.x) < GetBox().Width());
 }
 
+void CEdit::SetBox( const CBox &box )
+{
+	float StringHeight = Text.Height();
+	CGUIObject::SetBox(box);
+	Text.Position.x = (int)box.Min.x + (int)Style->Metrics.EditMargins.x;
+	/*Text.Position.y = (int)((box.Min.y + box.Max.y) / 2.0f - StringHeight / 2.0f);*/
+	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
 
+}
+
+void CEdit::SetText( const string &AText )
+{
+	ActualText = AText;			
+	/*Text.Position.y = (int)((GetBox().Min.y + GetBox().Max.y) / 2.0f - Text.Height() / 2.0f);*/
+	Text = GetVisibleText();
+	Text.Position.x = (int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x;
+	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
+}
 //////////////////////////////////////////////////////////////////////////
 // CEdit::CTextSelection
 
@@ -729,14 +744,14 @@ CEdit::CTextSelection::CTextSelection()
 
 CMenuItem::CMenuItem() : Focus(Objects.begin()), isCycledMenuSwitch(true)
 {
-	Visible = false;
+	SetVisibility(false);
 }
 
 CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
 {
 	doIgnoreCamera = true;
 	Focus = Objects.begin();
-	Visible = false;
+	SetVisibility(false);
 	isCycledMenuSwitch = true;
 	SetName((Text = AMenuText).GetText());
 	SetParent(AParent);
@@ -767,7 +782,7 @@ void CMenuItem::Update(float dt){}
 
 bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	if (!Visible)
+	if (!GetVisibility())
 		return false;
 	if (state == KEY_PRESSED)
 	{

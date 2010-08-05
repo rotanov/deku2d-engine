@@ -13,24 +13,15 @@
 // Vector2.Length() used. It costs 5% accuracy.
 //#define OPTIMIZE_V2L
 const float				epsilon			=	0.00001f;
-const double			HI_PI			=	3.1415926535897932;
-const double			HI_OOPI			=	0.3183098861837906;
 const float				PI				=	3.1415926f;
-const float				OOPI			=	0.3183f;
+const float				PI_D2			=	PI / 2.0f;
+const float				PI2				=	PI * 2.0f;
+const float				OOPI			=	0.3183098f;
 const int				SINE_COSINE_TABLE_DIM	=	8192;
-static const float		deganglem		=	1.0f / (360.0f / (float)SINE_COSINE_TABLE_DIM);
-static const float		radanglem		=	1.0f / (PI * 2.0f / (float)SINE_COSINE_TABLE_DIM);
-static const float		PI_d180			=	PI / 180.0f;
-static const float		d180_PI			=	180.0f / PI;
-
-#ifdef USING_OPENGL	// ORLY we need ot here?
-	#ifdef USE_SDL_OPENGL
-		#include <SDL/SDL_opengl.h>
-	#else
-		#include <GL/gl.h>
-		#include <GL/glu.h>
-	#endif
-#endif
+const float				deganglem		=	static_cast<float>(SINE_COSINE_TABLE_DIM) / 360.0f;
+const float				radanglem		=	static_cast<float>(SINE_COSINE_TABLE_DIM) / PI2;
+const float				PI_d180			=	PI / 180.0f;
+const float				d180_PI			=	180.0f / PI;
 
 class Vector2;
 class Matrix2;
@@ -110,6 +101,11 @@ __INLINE int Sign<float>(const float &x)
 __INLINE float Lerp(float a, float b, float t)
 {
 	return a + (b - a) * t;
+}
+
+__INLINE float CosineInterpolation(float a, float b, float t)
+{
+	return a + (b - a) * cos(t * PI_D2);
 }
 
 // snap floating point number to grid.
@@ -229,23 +225,10 @@ public:
 	}
 
 #ifdef USING_OPENGL		// WTF is this? OpenGL in Math module?
-		__INLINE void glTranslate() const
-		{
-			glTranslatef(x, y, 0.0f);
-		}
-
-		__INLINE void glScale() const
-		{
-			glScalef(x, y, 1.0f);
-		}
-		__INLINE void glVertex() const
-		{
-			glVertex2f(x, y);
-		}
-		__INLINE void glTexCoord() const
-		{
-			glTexCoord2f(x, y);
-		}
+		void glTranslate() const;
+		void glScale() const;
+		void glVertex() const;
+		void glTexCoord() const;
 #endif
 };
 
@@ -517,191 +500,6 @@ public:
 };
 
 typedef Vector3 RGBf;
-
-class CAABB
-{
-public:
-	Vector2 vMin, vMax;
-
-	CAABB()
-	{
-		vMax = vMin = V2_ZERO;
-	}
-	CAABB(const Vector2 &_min, const Vector2 &_max) : vMin(_min), vMax(_max){}
-	CAABB(float xmin, float ymin, float xmax, float ymax)
-	{
-		vMin.x = xmin;
-		vMin.y = ymin;
-		vMax.x = xmax;
-		vMax.y = ymax;
-	}
-	// Если используется для кнопок и прочей еботы в экранных координатах, то этот конструктор удобнее для человеческого существа  // ОМГ, кто это писал?
-	CAABB(int x, int y, size_t width, size_t height)  
-	{
-		vMin.x = x;
-		vMin.y = y;
-		vMax.x = x + width;
-		vMax.y = y + height;
-	}
-
-
-	void Add(const Vector2 &point)
-	{
-		if (point.x > vMax.x)
-			vMax.x = point.x;
-		if (point.x < vMin.x)
-			vMin.x = point.x;
-		if (point.y > vMax.y)
-			vMax.y = point.y;
-		if (point.y > vMin.y)
-			vMin.y = point.y;
-	}
-
-	void Offset(float dx, float dy)
-	{
-		vMin.x += dx;
-		vMax.x += dx;
-		vMin.y += dy;
-		vMax.y += dy;
-	}
-
-	CAABB Offsetted(float dx, float dy) const
-	{
-		CAABB tmp;
-		tmp.vMin.x = vMin.x + dx;
-		tmp.vMax.x = vMax.x + dx;
-		tmp.vMin.y = vMin.y + dy;
-		tmp.vMax.y = vMax.y + dy;
-		return tmp;
-	}
-
-	void Add(float x, float y)
-	{
-		Add(Vector2(x, y));
-	}
-
-	void Inflate(float x, float y)
-	{
-		vMin.x -=x;
-		vMax.x +=x;
-		vMin.y -=y;
-		vMax.y +=y;		
-	}
-
-	CAABB Inflated(float x, float y) const
-	{
-		CAABB Result(vMin.x-x, vMin.y-y, vMax.x+x, vMax.y+y);
-		return Result;
-	}
-
-	bool Inside(const Vector2 &point) const
-	{
-		if (point.x >= vMax.x || point.x <= vMin.x)
-			return false;
-		if (point.y >= vMax.y || point.y <= vMin.y)
-			return false;
-		return true;
-	}
-
-	bool Inside(const Vector2 &point, float &MTD) const // MTD - is minimal translation distance
-	{
-		if (point.x >= vMax.x || point.x <= vMin.x)
-			return false;
-		if (point.y >= vMax.y || point.y <= vMin.y)
-			return false;
-		
-		//DistanceToLine
-		float d1, d2, d3, d4;
-		d1 =  vMax.x - point.x;
-		d2 =  vMax.y - point.y;
-		d3 = -vMin.x + point.x;
-		d4 = -vMin.y + point.y;
-		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
-		return true;
-	}
-
-	bool Inside(const Vector2 &point, float &MTD, Vector2 &n) const // MTD - is minimal translation distance // Ага блядь, одинаковые комменты рулят. OMG, там ещё третий внизу.
-	{
-		if (point.x >= vMax.x || point.x <= vMin.x)
-			return false;
-		if (point.y >= vMax.y || point.y <= vMin.y)
-			return false;
-
-		//DistanceToLine
-		float d1, d2, d3, d4;		
-		d1 =  vMax.x - point.x;
-		d2 =  vMax.y - point.y;
-		d3 = -vMin.x + point.x;
-		d4 = -vMin.y + point.y;
-		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
-
-		if (MTD == d1)
-			n = Vector2(1.0f, 0.0f);
-		if (MTD == d2)
-			n = Vector2(0.0f, 1.0f);
-		if (MTD == d3)
-			n = Vector2(-11.0f, 0.0f);
-		if (MTD == d4)
-			n = Vector2(0.0f, -1.0f);
-
-		return true;
-	}
-
-	bool Outside(const Vector2 &point, float &MTD, Vector2 &n) const // MTD - is minimal translation distance
-	{
-		if (point.x < vMax.x && point.x > vMin.x && point.y < vMax.y || point.y > vMin.y)
-			return false;
-
-		//DistanceToLine
-		float d1, d2, d3, d4;		
-		d1 = -vMax.x + point.x;
-		d2 = -vMax.y + point.y;
-		d3 =  vMin.x - point.x;
-		d4 =  vMin.y - point.y;
-		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
-
-		if (MTD == d1)
-			n = Vector2(1.0f, 0.0f);
-		if (MTD == d2)
-			n = Vector2(0.0f, 1.0f);
-		if (MTD == d3)
-			n = Vector2(-1.0f, 0.0f);
-		if (MTD == d4)
-			n = Vector2(0.0f, -1.0f);
-
-		return true;
-	}
-
-	bool Intersect(CAABB box) const
-	{
-		if (box.vMin.x >= vMax.x)
-			return false;
-		if (box.vMin.y >= vMax.y)
-			return false;
-		if (box.vMax.x <= vMin.x)
-			return false;
-		if (box.vMax.y <= vMin.y)
-			return false;		
-
-		return true;
-	}
-
-	void Union(CAABB other)
-	{
-		Add(other.vMax);
-		Add(other.vMin);
-	}
-
-	float Width() const
-	{
-		return vMax.x - vMin.x;
-	}
-
-	float Height() const
-	{
-		return vMax.y - vMin.y;
-	}
-};
 
 class Matrix3
 {
@@ -1131,10 +929,7 @@ union Vector4
 		m.m[2].z = 1.0f - (xx + yy);
     }
 #ifdef USING_OPENGL
-		__INLINE void glSet() const
-		{
-			glColor4fv(&x);
-		}
+		void glSet() const;
 #endif
 };
 
@@ -1164,104 +959,35 @@ typedef Vector4 RGBAf;
 
 // </чятик, чятик (радость)>
 
-/**
-*	MatrixNM - произвольная матрица. M строк, N столбцов
-*/ 
+//////////////////////////////////////////////////////////////////////////
+// CAABB - Axis Aligned Bounding Box. Maybe i should choose different name. This on isn't nice enough.
 
-class MatrixNM
+class CBox
 {
 public:
-	int n, m;
-	float **e;
+	Vector2 Min, Max;
 
-	MatrixNM():n(0), m(0), e(NULL){}
-	MatrixNM(int _n, int _m) : n(_n), m(_m)
-	{
-		e = new float* [m];
-		for(int i=0; i< m; e[i++] = new float [n]);
-	}
+	CBox();
+	CBox(const Vector2 &AMin, const Vector2 &AMax);
+	CBox(float xmin, float ymin, float xmax, float ymax);
+	CBox(int x, int y, unsigned int width, unsigned int height);
 
-	float  operator()(int i, int j) const 
-	{
-		return e[i][j];
-	}
-	float& operator()(int i, int j)       
-	{
-		return e[i][j]; 
-	}
-
-	void SwapC(int c0, int c1)
-	{
-		for(int i=0; i < m; ++i)
-			std::swap(e[i][c0], e[i][c1]);
-	}
-
-	void SwapR(int r0, int r1)
-	{
-		for(int i=0; i < n; ++i)
-			std::swap(e[r0][i], e[r1][i]);
-	}
-
-	float Determinant(int k)
-	{
-		if (n != m)
-			return -0.0f;
-		if (k == 2)
-		{
-			return e[0][0]*e[1][1] - e[0][1]*e[1][0];
-		}
-		float r = 0, t = 0;
-		for(int i = 0; i< k ; i++)
-		{
-			if (i%2 == 0) t = 1.0f; else t = -1.0f;
-			t *= e[0][i];
-			for (int j = i; j < k-1; j++)
-				SwapC(j, j+1);
-			for (int j = 0; j < k-1; j++)
-				SwapR(j, j+1);
-			r += t*Determinant(k-1); 
-			for (int j = k-1; j > 0; j--)
-				SwapR(j, j-1);
-			for (int j = k-1; j > i; j--)
-				SwapC(j, j-1);
-			t = 0.0f;
-		}
-		return r;
-	}
-
-	__INLINE MatrixNM operator *(const MatrixNM& M) const
-	{
-		if (n != M.m)
-			return *this;
-		MatrixNM R = MatrixNM(M.n, m);
-		for(int i = 0; i < m; i++)
-			for(int j = 0; j < M.n; j++)
-			{
-				R.e[i][j] = 0;
-				for(int k = 0; k < n ; k++)
-				{
-					R.e[i][j] += e[i][k]*M.e[k][j];
-				}
-			}
-		return R;
-	}
-
-	__INLINE MatrixNM operator * (float s) const
-	{
-		MatrixNM R = *this;
-		for(int i =0; i < R.n; ++i)
-			for(int j = 0; j < R.m; ++j)
-				R.e[i][j] *= s;
-		return R;
-	}
+	void Add(const Vector2 &point);
+	void Add(float x, float y);
+	void Offset(float dx, float dy);
+	CBox Offsetted(float dx, float dy) const;	
+	void Inflate(float x, float y);
+	CBox Inflated(float x, float y) const;
+	bool Inside(const Vector2 &point) const;
+	bool Inside(const Vector2 &point, float &MTD) const;
+	bool Inside(const Vector2 &point, float &MTD, Vector2 &n) const;
+	bool Outside(const Vector2 &point, float &MTD, Vector2 &n) const;
+	bool Intersect(const CBox &box) const;
+	void Union(const CBox &other);
+	float Width() const;
+	float Height() const;
 };
 
-__INLINE Vector3 CalcNorm(const Vector3 v1,const Vector3 v2,const Vector3 v3)
-{
-   Vector3 t = (v3-v2)^(v2-v1);
-   t.Normalise();
-   return t;
-}
 
 /**
 *	SqareEq(...) Решает квдратное уравнение.
@@ -1332,41 +1058,57 @@ bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, 
 class CGeometry
 {
 public:
-	int type;			// Определять тип одним интом как-то не очень хорошо. Да и вообще, чего это тип, я уже и забыл.
-	CAABB Box;
+	CBox Box;
 	CGeometry();
 	virtual void CalcBBOX(){}
 };
+
+//////////////////////////////////////////////////////////////////////////
+// CCircle
 
 class CCircle : public CGeometry
 {
 	Vector2 Position;
 	float Radius;
-	CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius(ARadius)
-	{
-		CalcBBOX();
-	}
+	CCircle(Vector2 APosition, float ARadius);
 	void CalcBBOX()
 	{
-		Box.vMin = Vector2(Position.x - Radius, Position.y - Radius);
-		Box.vMin = Vector2(Position.x + Radius, Position.y + Radius);
+		Box.Min = Vector2(Position.x - Radius, Position.y - Radius);
+		Box.Min = Vector2(Position.x + Radius, Position.y + Radius);
 	}
-};	
+};
+
+//////////////////////////////////////////////////////////////////////////
+//CPolygon @todo: decide: should we update BBOX each time, we add or remove vertices
+// or just leave it with possibility to update BBOX each time we need it correct
 
 class CPolygon : public CGeometry
 {
 public:
-	int numV;		// кол-во вершин
-	Vector2 *V;		// указатель на массив вершин // И кто их создаёт? Кто их удаляет? Где они хранятся? Можно ли их легко добавлять, удалять? Кто вообще так пишет классы? Стоит ли это вынести в отдельный класс? Кто решит все эти вопросы? Зачем эта строка такая длинная? Что я курил на этих выходных?
-	CPolygon(): numV(0), V(NULL){ }
-	CPolygon(int _numV);
-	void Reset(int _numV);
+	CPolygon();
+	CPolygon(unsigned int AVerticesCount);
+	~CPolygon();
+	void Reset(unsigned int AVerticesCount);
 	void CalcBBOX();
+	void AddVertex(const Vector2 &Vertex);
+	void RemoveVertex(unsigned int Index);
+	Vector2& operator [](unsigned int Index);
+	const Vector2& operator [](unsigned int Index) const;
+	unsigned int GetVertexCount() const;
 
-	static bool	Collide	(const CPolygon* A, const Vector2& Apos, const Vector2& Avel, const Matrix2& Aorient,
-						const CPolygon* B, const Vector2& Bpos, const Vector2& Bvel, const Matrix2& Borient,
-						Vector2& n, float& depth);
-
+	static bool	Collide	(	const CPolygon &A,
+							const Vector2 &Apos,
+							const Vector2 &Avel,
+							const Matrix2 &Aorient,
+							const CPolygon &B,
+							const Vector2 &Bpos, 
+							const Vector2 &Bvel, 
+							const Matrix2 &Borient,
+							Vector2& n,
+							float& depth);
+private:
+	unsigned int VerticesCount;
+	Vector2 *Vertices;							
 };
 
 class CRectangle : public CGeometry

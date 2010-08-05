@@ -7,7 +7,10 @@
 
 CEngine CEngine::MainEngineInstance;
 
-CEngine::CEngine()	// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ... // а зачем собственно? щас нормальный многострочный вид, читаемо, а будет длинная строчка не понять чего..
+CEngine::CEngine() : FPSText(NULL), doShowFPS(true), doExitOnEscape(true)
+// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ... 
+// а зачем собственно? щас нормальный многострочный вид, читаемо, 
+// а будет длинная строчка не понять чего..
 {
 	memset(keys, 0, sizeof(keys));
 	doLimitFps			=	false; 
@@ -20,7 +23,8 @@ CEngine::CEngine()	// Переместить все инициализации �
 	procUpdateFunc		=	NULL;
 	procRenderFunc		=	NULL;
 	// temporary, until CConfig created..
-	// yes, it's defaults.. developer or maintainer of program should set this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
+	// yes, it's defaults.. developer or maintainer of program should set
+	// this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
 	ConfigFilePath		=	"";
 	ConfigFileName		=	"Config.xml";
 	EventFuncCount		=	0;
@@ -35,7 +39,7 @@ CEngine::CEngine()	// Переместить все инициализации �
 CEngine::~CEngine()
 {
 	ilShutDown();
-	SDL_Quit();	
+	SDL_Quit();
 }
 
 void CEngine::CalcFps()
@@ -53,6 +57,7 @@ void CEngine::CalcFps()
 		fr = 0;
 	}		
 	fr++;
+	FPSText->SetText("FPS: " + itos(FpsCount));
 }
 
 bool CEngine::LimitFps()
@@ -71,7 +76,8 @@ bool CEngine::LimitFps()
 
 void CEngine::SetState(CEngine::EState state, void* value)
 {
-	// думается мне, что надо сделать нормальные отдельные сеттеры/геттеры и не ебать мозг этим "стейтом" - куча независимых вещей никак не может быть состоянием
+	//	думается мне, что надо сделать нормальные отдельные сеттеры/геттеры и 
+	//	не ебать мозг этим "стейтом" - куча независимых вещей никак не может быть состоянием
 	switch(state)
 	{
 		case STATE_USER_INIT_FUNC:
@@ -81,7 +87,7 @@ void CEngine::SetState(CEngine::EState state, void* value)
 				// Так как минимум один раз пользовательская инициализация уже была установлена,
 				// а следовательно вызвана, то здесь надо вообще всё остановить и подчистить.
 				// И потом переинициализировать всё что нужно и пользовательскую инициализацию
-//					ClearLists();  
+				
 				if (!(Initialized = procUserInit()))
 					Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
 			}
@@ -102,10 +108,10 @@ void CEngine::SetState(CEngine::EState state, void* value)
 			FpsLimit = 1000 / (unsigned long)value;
 			break;
 		case STATE_SCREEN_WIDTH:
-			CGLWindow::Instance()->width = (int)value;
+			CGLWindow::Instance()->SetWidth(reinterpret_cast<unsigned int>(value));
 			break;
 		case STATE_SCREEN_HEIGHT:
-			CGLWindow::Instance()->height = (int)value;
+			CGLWindow::Instance()->SetHeight(reinterpret_cast<unsigned int>(value));
 			break;
 		case STATE_WINDOW_CAPTION:
 			CGLWindow::Instance()->caption = (char*)value;
@@ -115,7 +121,8 @@ void CEngine::SetState(CEngine::EState state, void* value)
 			break;
 		case STATE_CONFIG_NAME:
 			ConfigFileName = (char*)value; // BAD!!!
-			// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!! that's not the way things should be done
+			// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!!
+			// that's not the way things should be done
 			break;
 		case STATE_GL_BG_COLOR:
 			{
@@ -126,30 +133,36 @@ void CEngine::SetState(CEngine::EState state, void* value)
 	}
 }
 
+class CTempTitleScreen : public CRenderable	// Existing of this class itself in a such manner is
+	// completely wrong
+{
+public:
+	CTexture *Texture;
+	void Render()
+	{
+		int ScrWidth, ScrHeight;
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
+		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
+
+		glEnable(GL_TEXTURE_2D);
+		Texture->Bind();
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f - 50.0f);
+			glTexCoord2f(1.0f, 0.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f - 50.0f);
+			glTexCoord2f(1.0f, 1.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f + 50.0f);
+			glTexCoord2f(0.0f, 1.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f + 50.0f);
+		glEnd();
+	}
+};
+
 bool CEngine::Init()
 {
-// delete this block, please, if it's not required anymore.. I moved platform-dependent working-directory-setting code to CEnvironment
-#ifdef _WIN32
-	{
-// 		HMODULE hmodule = GetModuleHandle(0);
-//  		char * pathexe = new char[1024];
-// 		GetModuleFileName(hmodule, pathexe, 256);
-// 		HWND hwnd = FindWindow("ConsoleWindowClass", pathexe);		
-// 		delete [] pathexe;
-// 		ShowWindow(hwnd, STATE_HIDE_CONSOLE_WINDOW);  // В ранней версии SDL всегда вылазило окно консоли, потом этот косяк убрали, а мой фикс тут остался
-	}
-#endif //_WIN32
-//
-
 	CEnvironment::Paths::SetWorkingDirectory();
-
 	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
 	CLog::Instance()->SetLogName("System");
-
 	Log("INFO", "Working directory is \"%s\"", CEnvironment::Paths::GetWorkingDirectory().c_str());
-
 	SDL_putenv("SDL_VIDEO_CENTERED=1");
-
 	// TODO: CConfig
 	CXML Config;
 	Config.LoadFromFile(ConfigFilePath + ConfigFileName);
@@ -169,16 +182,21 @@ bool CEngine::Init()
 	doCalcFps = (ConfigRoot->Children.First("Video")->Children.First("DoCalcFps")->GetAttribute("value") == "true");
 	doLimitFps = (ConfigRoot->Children.First("Video")->Children.First("DoLimitFps")->GetAttribute("value") == "true");
 	SetState(CEngine::STATE_FPS_LIMIT, (void*) stoi(ConfigRoot->Children.First("Video")->Children.First("FpsLimit")->GetAttribute("value")));
+	bool isFullscreen = false;
+	if (ConfigRoot->Children.First("Video")->Children.First("Fullscreen"))
+		isFullscreen = ConfigRoot->Children.First("Video")->Children.First("Fullscreen")->GetAttribute("value") == "true";
 
 	
-	// looks like shit.. but this is correct order of initializing singletons.. we need some way to do it in more beautiful sense..
+	//	looks like shit.. but this is correct order of initializing singletons.. 
+	//	we need some way to do it in more beautiful sense..
 	CUpdateManager::Instance();
 	CTextureManager::Instance();
 	CFontManager::Instance();	
 	CTileSetManager::Instance();
 	CSoundManager::Instance();
 	CMusicManager::Instance();
-	// CGUIManager::Instance(); // gui manager crashes it, because it's trying to get default font when no fonts are in font manager
+	// CGUIManager::Instance(); // gui manager crashes it, because it's trying to 
+	//	get default font when no fonts are in font manager
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
 	ResourceManager->DataPath = ConfigRoot->Children.First("Data")->Children.First("DataPath")->GetAttribute("value");
@@ -192,9 +210,12 @@ bool CEngine::Init()
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
 	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
 	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
-	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->width, CGLWindow::Instance()->height); // Update camera due to update of wh from config
+	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->GetWidth(),
+		CGLWindow::Instance()->GetHeight()); // Update camera due to update of wh from config
+
 
 	CGLWindow::Instance()->bpp = 32;
+	CGLWindow::Instance()->Fullscreen = isFullscreen;
 	if (!CGLWindow::Instance()->gCreateWindow())
 	{
 		Log("ERROR", "Window creation failed");
@@ -229,6 +250,43 @@ bool CEngine::Init()
 	CFontManager::Instance()->Init();	// Initialize default font;
 
 	CFactory::Instance(); // Factory should be initialized after all other managers
+	//////////////////////////////////////////////////////////////////////////
+	//Here goes high level initializations, like default scene as title screen
+	//and FPSText
+
+	FPSText = CFactory::Instance()->New<CText>("FPSText");
+	FPSText->SetText("FPS: 0");
+
+	//	
+	CTexture *TitleScreenShroomTexture;
+	TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
+	TitleScreenShroomTexture->LoadTexture(IMAGE_SHROOM_TITLE_WIDTH, IMAGE_SHROOM_TITLE_HEIGHT,
+		reinterpret_cast<byte *>(IMAGE_SHROOM_TITLE_DATA));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	CAbstractScene *TitleScreen = CSceneManager::Instance()->CreateScene();
+	CSceneManager::Instance()->SetCurrentScene(TitleScreen);
+
+	// I don't know where to put Title Screen initialization, so it will be here for now
+
+	unsigned int ScrWidth = CGLWindow::Instance()->GetWidth();
+	unsigned int ScrHeight = CGLWindow::Instance()->GetHeight();
+	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
+	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
+
+	CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
+	TitleText->SetText("Deku");
+	TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f);
+	TitleText = CFactory::Instance()->New<CText>("txtTeam");
+	TitleText->SetText("team");
+	TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f);
+
+//	void Render()
+
+	CTempTitleScreen *Tscn = CFactory::Instance()->New<CTempTitleScreen>("TitleScreenClassForInst");
+	Tscn->Texture = TitleScreenShroomTexture;
+	
+	
 
 	if (procUserInit != NULL)
 		if (!procUserInit())
@@ -242,7 +300,8 @@ bool CEngine::Init()
 	return true;
 }
 
-#define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
+#define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:\
+case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
 
 // possibly move to CEnvironment
 char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
@@ -265,7 +324,8 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
-	while(SDL_PollEvent(&event)) // @todo: Look here!!!!!! http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
+	while(SDL_PollEvent(&event)) // @todo: Look here!!!!!! :
+	//	http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
 	{
 		
 		switch(event.type)
@@ -282,14 +342,13 @@ bool CEngine::ProcessEvents()
 				SDL_keysym keysym = event.key.keysym;
 				for(int i = 0; i < KeyInputFuncCount; i++)
 					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);				
-				// Глобальная рекция на escape! Слишком большой хардкод, но пока сойдёт. Потом - либо вывести в опцию, либо убрать и предоставить программисту право выбора
-				//if(keysym.sym == SDLK_ESCAPE)	
-				//		return false;
 				keys[keysym.sym] = 1;
 				break;
 			}
 			case SDL_KEYUP:
 			{
+				if (doExitOnEscape && event.key.keysym.sym == SDLK_ESCAPE)
+					return false;			
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;				
 				for(int i=0;i<KeyInputFuncCount;i++)
@@ -312,7 +371,7 @@ bool CEngine::ProcessEvents()
 			case SDL_MOUSEMOTION:
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
-				MousePos = Vector2(event.motion.x, CGLWindow::Instance()->height - event.motion.y);
+				MousePos = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
 				//SDL_Delay(2);
 				break;
 			}
@@ -355,7 +414,7 @@ bool CEngine::Run()
 	if(!(Initialized = Init()))
 	{
 		Log("ERROR", "Initialization failed");
-		SDLGLExit(-1);
+		SDL_Quit();
 		return false;
 	}
 
@@ -363,27 +422,30 @@ bool CEngine::Run()
 	{
 		try
 		{
-			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом заниматься отдельно и вплотную.
+			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом 
+								//	заниматься отдельно и вплотную.
 			{
 				if (LimitFps())
 				{		
+					if (procUpdateFunc != NULL)
+						procUpdateFunc(dt);
+					CUpdateManager::Instance()->UpdateObjects();
+					CSceneManager::Instance()->Update(dt);
 					if (doCalcFps)
 						CalcFps();
 					gBeginFrame();
 					CRenderManager::Instance()->DrawObjects();
+					CSceneManager::Instance()->Render();
 					if (procRenderFunc != NULL)
-						procRenderFunc();
+						procRenderFunc();					
 					
-					CUpdateManager::Instance()->UpdateObjects();
-					if (procUpdateFunc != NULL)
-						procUpdateFunc(dt);
 					// @todo: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
 				}
 				SDL_ShowCursor(0);
 				/*тестовый код*/
 				int x, y;
 				SDL_GetMouseState(&x, &y);
-				MousePos = Vector2(x, CGLWindow::Instance()->height - y);
+				MousePos = Vector2(x, CGLWindow::Instance()->GetHeight() - y);
 				const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
 				const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 				const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
@@ -400,7 +462,8 @@ bool CEngine::Run()
 				/*PRender.lClr = PRender.pClr = RGBAf(0.8f, 0.8f, 0.8f, 1.0f);
 				PRender.lwidth = 4.0f;
 				PRender.psize = 4.0f;
-				PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле.. но по дефолту оставим круглешок.. */
+				PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле..
+				но по дефолту оставим круглешок.. */
 
 				PRender.grCircleL(MousePos, 5);
 				glEnable(GL_DEPTH_TEST);
@@ -408,7 +471,8 @@ bool CEngine::Run()
 				gEndFrame();	
 
 				/**/
-				// ZOMG There wasn't other choice, the next step is to put it all into separate thread. Or pseudo-thread.
+				// ZOMG There wasn't other choice, the next step is to put it all into separate thread.
+				// Or pseudo-thread.
 
 	// 			как уже подсказали, нужно 
 	// 				> Можно вынести опрос координат курсора в отдельный поток. 
@@ -428,10 +492,13 @@ bool CEngine::Run()
 	// 
 	// 			это не дословный код но общая идея именно такая.
 	//------------------
-	// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется, пока мы рисуем кадры под 60FPS
+	// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется,
+	//	пока мы рисуем кадры под 60FPS
 	// Экстраполяция же.
 
-	//  	перетяните уже кто-нибудь что-нибудь куда-нибудь... такие главные функции как Run() и Init() должны быть короткими, лаконичными и состоять в основном из вызовов других функций.. а тут блин даже "документация" валяется..
+	//  перетяните уже кто-нибудь что-нибудь куда-нибудь... такие главные функции как Run()
+	//	и Init() должны быть короткими, лаконичными и состоять в основном из вызовов других функций..
+	//	а тут блин даже "документация" валяется..
 
 			}
 			else
@@ -464,10 +531,10 @@ void CEngine::GetState(CEngine::EState state, void* value)
 	switch (state)
 	{
 	case STATE_SCREEN_WIDTH:
-		*(int*)value = CGLWindow::Instance()->width;
+		*(int*)value = CGLWindow::Instance()->GetWidth();
 		break;
 	case STATE_SCREEN_HEIGHT:
-		*(int*)value = CGLWindow::Instance()->height;
+		*(int*)value = CGLWindow::Instance()->GetHeight();
 		break;
 	case STATE_MOUSE_X:
 		*(float*)value = MousePos.x;
@@ -522,4 +589,23 @@ bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKey
 CEngine* CEngine::Instance()
 {
 	return &MainEngineInstance;
+}
+
+void CEngine::ShutDown()
+{
+	SDL_Event Event;
+	Event.type = SDL_QUIT;
+	SDL_PushEvent(&Event);
+}
+
+void CEngine::Pause()
+{
+	// PAUSE; lol i dunno wich level to pause here
+	// i mean full engine level pause or something else
+	// i think more about first
+}
+
+void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)
+{
+	doExitOnEscape = AdoExitOnEscape;
 }

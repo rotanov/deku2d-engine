@@ -4,9 +4,29 @@
 
 CPongGame *PongGame = NULL; 
 
+class CChangeSceneToPackMan : public CAbstractAction
+{
+public:
+	CAbstractScene *PongScn;
+	virtual void Execute()
+	{
+		CSceneManager::Instance()->SetCurrentScene(PongScn);
+	}	
+};
+
+
 bool Init()
 {
+	CAbstractScene *PongScene = CSceneManager::Instance()->CreateScene();
+	CAbstractScene *SomeScene = CSceneManager::Instance()->GetCurrentScene();
+	CSceneManager::Instance()->SetCurrentScene(PongScene);
 	PongGame = CFactory::Instance()->New<CPongGame>("PongGame");
+	CSceneManager::Instance()->SetCurrentScene(SomeScene);
+
+
+	CTimeredAction<CChangeSceneToPackMan> *Action = new CTimeredAction<CChangeSceneToPackMan>();
+	Action->Action.PongScn = PongScene;
+	Action->SetLife(5.0f);
 	return true;
 }
 

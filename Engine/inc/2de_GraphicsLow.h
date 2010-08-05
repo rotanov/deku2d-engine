@@ -2,6 +2,7 @@
 #define _2DE_GRAPHICS_LOW_H_
 
 #include "2de_Core.h"
+#include "2de_Update.h"
 
 #ifdef USE_SDL_OPENGL
 	#include <SDL/SDL_opengl.h>
@@ -58,32 +59,39 @@ class CPlacing
 	CAABB aabb;
 };
 */
+class CAbstractScene;
 
-class CRenderObject : public virtual CObject
+class CRenderable : public virtual CObject
 {
 private:
 	float				Angle;		//	(Degrees)
-	CAABB				aabb;				//	Axis Aligned Bounding Box; ORLY? Isn't it obvious
-	float				Depth;		//	[-1; 1]?		
+	CBox				Box;		//	Axis Aligned Bounding Box; ORLY? Isn't it obvious;
+	float				Depth;		//	[-1; 1]?
 	float				Scaling;	
+	CAbstractScene		*Scene;
+	bool				Visible;
 
 public:
-	Vector2				Position;		
-	RGBAf				Color;
-	bool				Visible;
-	bool				doIgnoreCamera;		// if true, then object will be drawn in global coords, no matter where camera pointing;
-
-	CRenderObject();
-	virtual ~CRenderObject();
+	Vector2				Position;
+	RGBAf				Color;	
+	bool				doIgnoreCamera;		// if true, then object will be drawn in global cords,
+											// no matter where camera pointing;
+	CRenderable();
+	virtual ~CRenderable();
 	virtual void Render() = 0;
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle() const;
-	const CAABB& GetBox() const;
-	virtual void SetBox(const CAABB &box);
+	const CBox& GetBox() const;
+	virtual void SetBox(const CBox &box);
 	float GetScaling() const;
 	void SetScaling(float AScaling);
-	void SetLayer(size_t Layer);
+	void SetLayer(unsigned int Layer);
+	unsigned int GetLayer() const;
 	float GetDepth() const;
+	void PutIntoScene(CAbstractScene *AScene);
+	CAbstractScene* GetScene() const;
+	bool GetVisibility() const;
+	virtual void SetVisibility(bool AVisible);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -131,11 +139,132 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
+// CIHaveNotDecidedHowToNameThisClassYet.
+
+/*
+
+1. A bunch of rectangles. Can use CAABB for representation;
+	A bunch => we need container to hold them.
+2. For each frame rectangle we have some geometery data, describing it contents
+	Geometry data is one or more than one of these primitives: sircle, rectangle, convex polygon, concave polygon, something else
+3. That's all? May be. But we also want to work with this structure.
+4. No that's not all. If we'll be indexing all frames together than each frame should know, to which texture it belongs. So texture name;
+5. Also, it'll be better if there will be some tag system, to say, e.g. "these are frames for some animation"
+
+>We want some global indexing of these frames.
+>Then want access by index, to get frame info
+>Also, to add new frames
+>And to check for data integrity. I mean if some places referring to some frames and we are changing these frames (e.g. deleting them)
+	we want to note it. (mb this is optional or not necessary)
+>And i thinking about to include those frames stuff directly into rendering, may be as some kind of bridge
+
+*/
+
+class CFrameInfo
+{
+	CBox Reactangle;
+	vector<CGeometry> Primitives;
+	vector<string> Tags;
+};
+
+class CFrameSequence
+{
+public:
+	vector<CFrameInfo> Rectangles;
+
+};
+
+//////////////////////////////////////////////////////////////////////////
+//CArrayHolder
+template <unsigned int StartSize = 65536>
+class CPrmitiveVertexDataHolder	// for any other non textured stuff
+{
+	friend class CRenderManager;
+public:
+	CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
+	{
+		Colors = new RGBAf [StartSize];
+		Vertices = new Vector3 [StartSize];
+
+	}
+	virtual ~CPrmitiveVertexDataHolder()
+	{
+		delete [] Colors;
+		delete [] Vertices;
+	}
+	virtual void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color)
+	{
+		assert(Sender != NULL);
+		// if VertexCount == ReservedCount then grow
+		Vector2 TempVector = Vertex + Sender->Position;
+		Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth()); // also apply rotation here
+		Colors[VertexCount] = Color;
+		VertexCount++;
+	}
+	virtual void RenderPrimitive(GLenum Type)
+	{
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, Vertices);
+		glColorPointer(4, GL_FLOAT, 0, Colors);
+		glDrawArrays(Type, 0, VertexCount);
+	}
+protected:
+	unsigned int VertexCount;
+	unsigned int ReservedCount;
+	RGBAf *Colors;
+	Vector3 *Vertices;
+
+private:
+
+};
+
+template <unsigned int StartSize = 65536>
+class CVertexDataHolder : public CPrmitiveVertexDataHolder<StartSize>
+{
+	friend class CRenderManager;
+public:
+	CVertexDataHolder()
+	{
+		TexCoords = new Vector2 [StartSize];
+	}
+	~CVertexDataHolder()
+	{
+		delete [] TexCoords;
+	}
+	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color)
+	{
+		assert(false);
+	}
+	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex,
+		const RGBAf &Color, const Vector2 &TexCoord)
+	{
+		CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
+		// if VertexCount == ReservedCount then grow here also
+		TexCoords[VertexCount - 1] = TexCoord;
+	}
+	virtual void RenderPrimitive(GLenum Type)
+	{
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, Vertices);
+		glColorPointer(4, GL_FLOAT, 0, Colors);
+		glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+		glDrawArrays(Type, 0, VertexCount);
+		VertexCount = 0;
+	}
+
+protected:
+	
+private:
+	Vector2 *TexCoords;
+};
+
+//////////////////////////////////////////////////////////////////////////
 //CFont
 
-#define CFONT_DEFAULT_DISTANCE	1
-
-
+#define CFONT_DEFAULT_DISTANCE	1				// FFFUUU~
 #define CFONT_MAX_STRING_LENGTH		256
 #define CFONT_MAX_SYMBOLS			256
 
@@ -143,48 +272,54 @@ class CFont : public CResource
 {
 	friend class CRenderManager;
 public:
-	CRecti				bbox[256];		// Баундинг бокс каждого для каждого символа
-	// CRecti - что за хуита - это тип только здесь используется. Нахуй нам инт, когда float is fine too;
-	// Временно в паблике, так как редактор шрифтов использует CFont напрямую и устанавливает ему параметры так же напрямую.
-	// А мне лень переписывать сейчас редактор шрифтов
+	CBox bbox[256];	// why 256?
 
 	CFont();
 	~CFont();
-	bool		LoadFromFile();
-	bool		SaveToFile();
-	bool		LoadFromMemory(const byte* Address);
-
-	void		Print(const char *text);
-
-
-	int			GetStringWidth(const string &text);
-	int			GetStringWidthEx(int t1, int t2, const string &text);
-	int			GetStringHeight(const string &text);
-	int			GetStringHeightEx(int t1, int t2, const string &text);
-	int			StringCoordToCursorPos(const string &text, int x, int y);
-	CTexture*	GetTexture();
-	void		SetTexture(const string &TextureName);
-	CAABB		GetSymbolsBBOX();
+	bool LoadFromFile();
+	bool SaveToFile();
+	bool LoadFromMemory(const byte* Address);
+	float GetStringWidth(const string &text);
+	float GetStringWidthEx(int t1, int t2, const string &text);
+	float GetStringHeight(const string &text);
+	float GetStringHeightEx(int t1, int t2, const string &text);
+	CTexture* GetTexture();
+	void SetTexture(const string &TextureName);
+	CBox GetSymbolsBBOX();
+	float GetDistance() const;
+	float SymbolWidth(unsigned int Index) const;
+	const Vector2Array<4>& GetTexCoords(unsigned int Charachter)
+	{
+		Vector2Array<4> result;
+		result[0] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
+							bbox[Charachter - 32].Min.y / Texture->Height);
+		result[1] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
+							bbox[Charachter - 32].Min.y / Texture->Height);
+		result[2] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
+							bbox[Charachter - 32].Max.y / Texture->Height);
+		result[3] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
+							bbox[Charachter - 32].Max.y / Texture->Height);
+		return result;
+	}
 
 private:
-	float				Distance;					//	Расстояние между символами		
-	int					width[CFONT_MAX_SYMBOLS];	//	Ширина символа
-	int					height[CFONT_MAX_SYMBOLS];	//	Высота символа
-	
-	CTexture*			Texture;				//	Указатель на текстуру шрфита. Очевидно же, да?
-	GLuint				base;					//	Base List of 256 glLists for font
-
-	byte		GetHalign();
-	byte		GetValign();
+	float Distance;
+	float Width[CFONT_MAX_SYMBOLS];
+	float Height[CFONT_MAX_SYMBOLS];
+	CTexture* Texture;
+	GLuint base;
 };
 
-class CRenderProxy : public CRenderObject
+//////////////////////////////////////////////////////////////////////////
+// CRenderProxy
+
+class CRenderProxy : public CRenderable
 {
 private:
-	CRenderObject *RenderSource;
+	CRenderable *RenderSource;
 
 public:
-	CRenderProxy(CRenderObject *ARenderSource) : RenderSource(ARenderSource)
+	CRenderProxy(CRenderable *ARenderSource) : RenderSource(ARenderSource)
 	{
 		SetName("CRenderProxy");
 	}
@@ -202,7 +337,7 @@ class CCamera : public CObject
 {
 public:
 	Vector2 Point;					//
-	CAABB	view, outer, world;		//
+	CBox	view, outer, world;		//
 	bool	Assigned;
 	float	*Atx, *Aty;
 	float	dx, dy;
@@ -227,6 +362,7 @@ private:
 
 protected:	
 	CFontManager();
+	~CFontManager();
 	friend class CTSingleton<CFontManager>;
 
 public:
@@ -244,88 +380,69 @@ public:
 
 class CText;
 
-class CRenderManager : public CCommonManager <list <CRenderObject*> >/*public CList*/, public CTSingleton <CRenderManager>
+class CRenderManager : public CCommonManager <list <CRenderable*> >, public CTSingleton <CRenderManager>
 {
 protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 private:
-	Vector2	*v2Dots, *v2Lines, *v2Quads, *v2Triangles;
-
+	CVertexDataHolder<> FontVertices;
 public:
 	CCamera	Camera;
 	~CRenderManager();
-
-	void Init()
-	{
-		// blahblhablha my personal OpenGL Sandbox here; Sorry();
-		//glEnableClientState(GL_VERTEX_ARRAY);
-		// GL_COLOR_ARRAY
-		// GL_TEXTURE_COORD_ARRAY
-		// --
-		// glVertexPointer();
-		// glColorPointer();
-		// glTexCoordPointer();
-		// --
-		//glArrayElement();
-		//glArrayElementEXT()
-	}
-
-// 	void SortByAlpha();
-// 	void SortByZ();
-//	bool PushVertex(int type, Vector2 *that);
 	bool DrawObjects();
-	void Print(const CText *Text) const;
+	void Print(const CText *Text);
 };
 
 //////////////////////////////////////////////////////////////////////////
 // OpenGl interface// Херня какая-то передумать и переделать нахуй...
 
-void SDLGLExit(int code);
 void gSetBlendingMode();
 void gBeginFrame();
 void gEndFrame();
-
-#if defined(_WIN32)
-#define SWAP_INTERVAL_PROC PFNWGLSWAPINTERVALFARPROC 
-#elif defined(__linux)
-#define SWAP_INTERVAL_PROC PFNGLXSWAPINTERVALSGIPROC
-#endif
-
-typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
-
 void gToggleScissor(bool State);
 void gScissor(int x, int y, int width, int height);
 
+#if defined(_WIN32)
+	#define SWAP_INTERVAL_PROC PFNWGLSWAPINTERVALFARPROC 
+#elif defined(__linux)
+	#define SWAP_INTERVAL_PROC PFNGLXSWAPINTERVALSGIPROC
+#endif
+typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
 void setVSync(int interval=1);
 
 //////////////////////////////////////////////////////////////////////////
-//CGLWindow // too old
+//CGLWindow // too old // not really
 
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
-	int width;
-	int height;
 	byte bpp;
-	bool fullscreen;
+	bool Fullscreen;
 	char *caption;
 
-	bool gCreateWindow(int _width, int _height, byte _bpp, char* _caption);
+	bool gCreateWindow(bool isFullscreen, int _width, int _height, byte _bpp, char* _caption);
 	bool gCreateWindow();
 	void SetSize();
 	bool glInitSystem();
 	void glSuicide();
 	void glResize(GLsizei Width, GLsizei Height);
 	void glInit(GLsizei Width, GLsizei Height);
+	unsigned int GetWidth() const;
+	unsigned int GetHeight() const;
+	void SetWidth(unsigned int AWidth);
+	void SetHeight(unsigned int AHeight);
 protected:
 	CGLWindow();
 	friend class CTSingleton<CGLWindow>;
-
+private:
+	unsigned int Width;
+	unsigned int Height;
+	bool isCreated;
 };
 //////////////////////////////////////////////////////////////////////////
 //CText
-class CText : public CRenderObject
+class CText : public CRenderable
 {
 private:
 	CFont *Font;
@@ -333,15 +450,8 @@ private:
 
 public:
 	CText();
-	~CText()
-	{
-		// this is destructor. i can set breakpoint there
-	}
-	CText(const string &AText) : Text(AText), Font(CFontManager::Instance()->GetDefaultFont())
-	{
-		assert(Font != NULL);
-		doIgnoreCamera = true;
-	}
+	~CText();
+	CText(const string &AText);
 	void Render();
 	CFont* GetFont() const;
 	string& GetText();
@@ -353,6 +463,93 @@ public:
 	CText& operator =(const string &AText);
 	string operator +(const CText &Text) const;
 	string operator +(const char *Text) const;
+	unsigned char operator [] (unsigned int index) const
+	{
+		return Text[index];
+	}
+	float StringCoordToCursorPos(int x, int y) const;
+};
+
+//////////////////////////////////////////////////////////////////////////
+//AbstractScene
+
+class CAbstractScene : public CObject
+{
+	friend class CSceneManager;
+public:
+	virtual void AddRenderable(CRenderable *AObject) = 0;
+	virtual void AddUpdatable(CUpdatable *AObject) = 0;
+	virtual void RemoveRenderable(CRenderable *AObject) = 0;
+	virtual void RemoveUpdatable(CUpdatable *AObject)= 0;
+
+protected:
+	virtual void Render() = 0;
+	virtual void Update(float dt) = 0;
+
+	CAbstractScene();
+	~CAbstractScene(){}
+
+private:
+	CAbstractScene(const CAbstractScene &AScene){}
+	CAbstractScene& operator =(const CAbstractScene &AScene){}
+};
+
+//////////////////////////////////////////////////////////////////////////
+//Scene
+
+class CScene : public CAbstractScene
+{
+	friend class CSceneManager;
+public:
+	virtual void AddRenderable(CRenderable *AObject);
+	virtual void AddUpdatable(CUpdatable *AObject);
+	virtual void RemoveRenderable(CRenderable *AObject);
+	virtual void RemoveUpdatable(CUpdatable *AObject);
+
+protected:
+	vector<CRenderable*> RenderableObjects;
+	vector<CUpdatable*> UpdatableObjects;
+	virtual void Render();
+	virtual void Update(float dt);
+	CScene(){}
+	~CScene();
+};
+
+//////////////////////////////////////////////////////////////////////////
+//Global Scene
+
+class CGlobalScene : public CScene
+{
+public:
+	void AddRenderable(CRenderable *AObject);
+	void AddUpdatable(CUpdatable *AObject);
+};
+
+//////////////////////////////////////////////////////////////////////////
+//Scene Manager
+
+class CSceneManager : CCommonManager <list<CScene*> >, public CTSingleton<CSceneManager>
+{
+	friend class CTSingleton<CSceneManager>;
+public:	
+	CAbstractScene* CreateScene();
+	void DestroyScene(CAbstractScene *AScene);
+	CAbstractScene* GetCurrentScene();
+	void SetCurrentScene(CAbstractScene *AScene)
+	{
+		assert(AScene != NULL);
+		CurrentScene = AScene;
+	}
+	bool InScope(CAbstractScene * AScene) const;
+	void Render();
+	void Update(float dt);
+private:
+	CAbstractScene *CurrentScene;
+	CGlobalScene GlobalScene;
+	vector<CAbstractScene*> Scenes;
+protected:
+	~CSceneManager();
+	CSceneManager();
 };
 
 #endif // _2DE_GRAPHICS_LOW_H_

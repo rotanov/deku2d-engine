@@ -74,8 +74,8 @@ bool CResourceSectionLoader<T>::Load()
 			Log("WARNING", "Error loading resource: '%s'", ResName.c_str());
 			continue;
 		}
-
-		Resource->Filename = ResNode->Children.First()->GetValue();
+		Resource->SetFilename(ResNode->Children.First()->GetValue()); // val was here
+		//Resource->Filename = ResNode->Children.First()->GetValue();
 	}
 
 	return true;

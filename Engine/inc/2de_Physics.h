@@ -5,10 +5,10 @@
 #include "2de_MathUtils.h"
 #include "2de_Update.h"
 
-class CPhysicalObject : public CUpdateObject
+class CPhysicalObject : public CUpdatable
 {
 public:
-	CAABB *box;
+	CBox *box;
 	CPhysicalObject(){};
 	virtual ~CPhysicalObject(){};
 };
