@@ -95,7 +95,7 @@ CTileset::CTileset()
 	CTileSetManager::Instance()->Add(this);
 }
 
-void CTileset::SetSettings( byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles)
+void CTileset::SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles)
 {
 	HorNumTiles = _HorNumTiles;
 	VerNumTiles = _VerNumTiles;

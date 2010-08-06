@@ -114,7 +114,7 @@ void CEngine::SetState(CEngine::EState state, void* value)
 			CGLWindow::Instance()->SetHeight(reinterpret_cast<unsigned int>(value));
 			break;
 		case STATE_WINDOW_CAPTION:
-			CGLWindow::Instance()->caption = (char*)value;
+			CGLWindow::Instance()->SetCaption((char*)value);
 			break;
 		case STATE_CONFIG_PATH:
 			ConfigFilePath = (char*)value;
@@ -162,17 +162,20 @@ bool CEngine::Init()
 	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
 	CLog::Instance()->SetLogName("System");
 	Log("INFO", "Working directory is \"%s\"", CEnvironment::Paths::GetWorkingDirectory().c_str());
+
 	SDL_putenv("SDL_VIDEO_CENTERED=1");
+
 	// TODO: CConfig
 	CXML Config;
 	Config.LoadFromFile(ConfigFilePath + ConfigFileName);
-	/*if (!Config.LoadFromFile(string(ConfigFilePath + ConfigFileName).c_str()))
-	{
-		Log("ERROR", "Can't load main configuration %s", string(ConfigFilePath + ConfigFileName).c_str());
-		return false;
-	}*/
 
 	CXMLNode *ConfigRoot = Config.Root.First("Configuration");
+
+	if (ConfigRoot->IsErroneous())
+	{
+		Log("ERROR", "Can't load main configuration '%s'", string(ConfigFilePath + ConfigFileName).c_str());
+		return false;
+	}
 	
 	// still looks like shit
 	int wwidth = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowWidth")->GetAttribute("value"));
@@ -182,9 +185,19 @@ bool CEngine::Init()
 	doCalcFps = (ConfigRoot->Children.First("Video")->Children.First("DoCalcFps")->GetAttribute("value") == "true");
 	doLimitFps = (ConfigRoot->Children.First("Video")->Children.First("DoLimitFps")->GetAttribute("value") == "true");
 	SetState(CEngine::STATE_FPS_LIMIT, (void*) stoi(ConfigRoot->Children.First("Video")->Children.First("FpsLimit")->GetAttribute("value")));
-	bool isFullscreen = false;
-	if (ConfigRoot->Children.First("Video")->Children.First("Fullscreen"))
-		isFullscreen = ConfigRoot->Children.First("Video")->Children.First("Fullscreen")->GetAttribute("value") == "true";
+	bool isFullscreen = (ConfigRoot->Children.First("Video")->Children.First("Fullscreen")->GetAttribute("value") == "true");
+
+	// as soon as CConfig will be created, it will look just like this:
+	// 	CConfig *Config = CConfig::Instance();
+	// 	CGLWindow *Window = CGLWindow::Instance();
+	// 	Window->SetWidth(Config->Section("Video")["WindowWidth"]);
+	// 	Window->SetHeight(Config->Section("Video")["WindowHeight"]);
+	// 	Window->BPP = Config->Section("Video")["WindowBPP"];
+	// 	Window->SetCaption(Config->Section("Video")["WindowCaption"]);
+	// 	doCalcFps = Config->Section("Video")["DoCalcFps"];
+	// 	doLimitFps = Config->Section("Video")["DoLimitFps"];
+	// 	etc.
+	// at least, I will try to achieve such functionality
 
 	
 	//	looks like shit.. but this is correct order of initializing singletons.. 
@@ -202,9 +215,12 @@ bool CEngine::Init()
 	ResourceManager->DataPath = ConfigRoot->Children.First("Data")->Children.First("DataPath")->GetAttribute("value");
 	doLoadDefaultResourceList = (ConfigRoot->Children.First("Data")->Children.First("doLoadDefaultResourceList")->GetAttribute("value") == "true");
 
-	SetState(CEngine::STATE_SCREEN_WIDTH, (void*)wwidth);
-	SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
-	SetState(CEngine::STATE_WINDOW_CAPTION, (void*)wcaption.c_str());
+	CGLWindow::Instance()->SetWidth(wwidth);
+	CGLWindow::Instance()->SetHeight(wheight);
+	CGLWindow::Instance()->SetCaption(wcaption);
+	//SetState(CEngine::STATE_SCREEN_WIDTH, (void*)wwidth);
+	//SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
+	//SetState(CEngine::STATE_WINDOW_CAPTION, (void*)wcaption.c_str());
 
 
 	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
@@ -214,7 +230,7 @@ bool CEngine::Init()
 		CGLWindow::Instance()->GetHeight()); // Update camera due to update of wh from config
 
 
-	CGLWindow::Instance()->bpp = 32;
+	CGLWindow::Instance()->BPP = 32;
 	CGLWindow::Instance()->Fullscreen = isFullscreen;
 	if (!CGLWindow::Instance()->gCreateWindow())
 	{

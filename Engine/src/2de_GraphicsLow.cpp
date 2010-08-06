@@ -38,18 +38,20 @@ void Vector4::glSet() const
 }
 
 //////////////////////////////////////////////////////////////////////////
-//RenderObject
+// CRenderable
 
 CRenderable::CRenderable() : Angle(0.0f), Box(0, 0, 0, 0), Depth(0.0f), Scene(NULL), Position(V2_ZERO),
 	Scaling(1.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
 {
-	SetName("CRenderObject");
+	SetName("CRenderable");
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 };
 
 CRenderable::~CRenderable()
 {
-	CRenderManager::Instance()->Remove(GetID());
+	if (!Managed) // one if-check is better than useless list-search..
+		CRenderManager::Instance()->Remove(GetID());
+
 //	Scene->RemoveRenderable(this);
 }
 
@@ -124,8 +126,9 @@ void CRenderable::SetVisibility( bool AVisible )
 {
 	Visible = AVisible;
 }
+
 //////////////////////////////////////////////////////////////////////////
-//CGLImagedata
+// CGLImagedata
 
 CGLImageData::CGLImageData()
 {
@@ -200,7 +203,7 @@ GLuint CGLImageData::GetTexID()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CGLWindow
+// CGLWindow
 
 CGLWindow::CGLWindow() : isCreated(false)
 {
@@ -208,14 +211,13 @@ CGLWindow::CGLWindow() : isCreated(false)
 	Width = 640;	//@todo!!! Default magic numbers - delete them!
 	Height = 480;
 	Fullscreen = false;
-	bpp = 32;
-	caption = "Warning: CGLWindow class instance have not been initialized properly"; 
-	// assigning string constant to unallocated pointer // WAT?!
+	BPP = 32;
+	Caption = "Warning: CGLWindow class instance have not been initialized properly";
 }
 
-bool CGLWindow::gCreateWindow(bool AisFullscreen, int _width, int _height, byte _bpp, char* _caption)
+bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte ABPP, const string &ACaption)
 {
-	Fullscreen = AisFullscreen;
+	Fullscreen = AFullscreen;
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
@@ -223,17 +225,13 @@ bool CGLWindow::gCreateWindow(bool AisFullscreen, int _width, int _height, byte 
 		SDL_Quit();
 	}
 
-	Width = _width;
-	Height = _height;
-	bpp = _bpp;
-	if (caption == NULL && _caption != NULL)
-	{
-		caption = new char [strlen(_caption)]; // possibly leak
-		strcpy(caption, _caption);
-	}
-	SDL_WM_SetCaption(caption, NULL);
-	const SDL_VideoInfo *info = NULL;
+	Width = AWidth;
+	Height = AHeight;
+	BPP = ABPP;
 
+	SetCaption(ACaption);
+
+	const SDL_VideoInfo *info = NULL;
 	info = SDL_GetVideoInfo();
 
 	if (info == NULL)
@@ -242,7 +240,6 @@ bool CGLWindow::gCreateWindow(bool AisFullscreen, int _width, int _height, byte 
 		Log("ERROR", "Last WARNING was critical. Now exiting...");
 		SDL_Quit();
 	}
-
 
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,		8);
@@ -261,7 +258,7 @@ bool CGLWindow::gCreateWindow(bool AisFullscreen, int _width, int _height, byte 
 		flags |= SDL_FULLSCREEN;
 	}
 
-	SDL_Surface *screen = SDL_SetVideoMode(Width, Height, bpp, flags);
+	SDL_Surface *screen = SDL_SetVideoMode(Width, Height, BPP, flags);
 	if (screen == NULL)
 	{
 		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
@@ -285,7 +282,7 @@ bool CGLWindow::gCreateWindow(bool AisFullscreen, int _width, int _height, byte 
 
 bool CGLWindow::gCreateWindow()
 {
-	return gCreateWindow(Fullscreen, Width, Height, bpp, caption);
+	return gCreateWindow(Fullscreen, Width, Height, BPP, Caption);
 }
 
 bool CGLWindow::glInitSystem()
@@ -350,20 +347,35 @@ unsigned int CGLWindow::GetHeight() const
 	return Height;
 }
 
-void CGLWindow::SetWidth( unsigned int AWidth )
+void CGLWindow::SetWidth(unsigned int AWidth)
 {
+	// bad, i think.. if window's already created, we should just resize it..
 	assert(!isCreated);
 	Width = AWidth;
 }
 
-void CGLWindow::SetHeight( unsigned int AHeight )
+void CGLWindow::SetHeight(unsigned int AHeight)
 {
+	// same as in SetWidth
 	assert(!isCreated);
 	Height = AHeight;
 }
-//-------------------------------------------//
-//				Font stuff					 //
-//-------------------------------------------//
+
+string CGLWindow::GetCaption() const
+{
+	return Caption;
+}
+
+void CGLWindow::SetCaption(const string &ACaption)
+{
+	Caption = ACaption;
+	SDL_WM_SetCaption(Caption.c_str(), NULL);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// CFont
+
 CFont::CFont()
 {
 	base = 0;
@@ -573,8 +585,9 @@ float CFont::SymbolWidth( unsigned int Index ) const
 {
 	return Width[Index];
 }
+
 //////////////////////////////////////////////////////////////////////////
-//Camera
+// CCamera
 
 void CCamera::Assign(float *x, float *y)
 {
@@ -820,9 +833,14 @@ void CFontManager::Init()
 	CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
 	DefaultFontTexture->LoadTexture(IMAGE_DEFAULT_FONT_WIDTH, IMAGE_DEFAULT_FONT_HEIGHT, reinterpret_cast<byte *>(IMAGE_DEFAULT_FONT_DATA));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	DefaultFont = new CFont;
-	DefaultFont->SetName("DefaultFont");
+	
+	DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
 	DefaultFont->LoadFromMemory(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT));
+
+	//DefaultFont = new CFont;
+	//DefaultFont->SetName("DefaultFont");
+	//DefaultFont->LoadFromMemory(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT));
+
 	CurrentFont = DefaultFont;
 	assert(DefaultFont != NULL);
 }
@@ -859,8 +877,9 @@ CFont* CFontManager::Font()
 
 CFontManager::~CFontManager()
 {
-	if (DefaultFont != NULL)
-		SAFE_DELETE(DefaultFont);
+	//if (DefaultFont != NULL)
+		//SAFE_DELETE(DefaultFont);
+	// DefaultFont is managed now..
 }
 //////////////////////////////////////////////////////////////////////////
 //						CTexture Manager
@@ -1123,19 +1142,19 @@ void CScene::AddRenderable(CRenderable *AObject)
 	CRenderManager::Instance()->Add(AObject);
 }
 
-void CScene::AddUpdatable( CUpdatable *AObject )
+void CScene::AddUpdatable(CUpdatable *AObject)
 {
 	UpdatableObjects.push_back(AObject);
 	CUpdateManager::Instance()->Add(AObject);
 }
 
-void CScene::RemoveUpdatable( CUpdatable *AObject )
+void CScene::RemoveUpdatable(CUpdatable *AObject)
 {
 	UpdatableObjects.erase(std::find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject));
 	//AObject->PutIntoScene()
 }
 
-void CScene::RemoveRenderable( CRenderable *AObject )
+void CScene::RemoveRenderable(CRenderable *AObject)
 {
 	RenderableObjects.erase(std::find(RenderableObjects.begin(), RenderableObjects.end(), AObject));
 }
@@ -1143,9 +1162,9 @@ void CScene::RemoveRenderable( CRenderable *AObject )
 CScene::~CScene()
 {
 	for(vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
-		(*i)->SetDestroyed();
+		CFactory::Instance()->Destroy(*i);	// (*i)->SetDestroyed();
 	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
-		(*i)->SetDestroyed();
+		CFactory::Instance()->Destroy(*i); 	// (*i)->SetDestroyed();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1184,7 +1203,7 @@ CAbstractScene* CSceneManager::GetCurrentScene()
 	return CurrentScene;
 }
 
-bool CSceneManager::InScope( CAbstractScene * AScene ) const
+bool CSceneManager::InScope(CAbstractScene *AScene) const
 {
 	// @todo: More complex check later.
 	return CurrentScene == AScene || AScene == &GlobalScene;

@@ -239,20 +239,20 @@ public:
 	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex,
 		const RGBAf &Color, const Vector2 &TexCoord)
 	{
-		CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
+		CPrmitiveVertexDataHolder<StartSize>::PushVertex(Sender, Vertex, Color);
 		// if VertexCount == ReservedCount then grow here also
-		TexCoords[VertexCount - 1] = TexCoord;
+		TexCoords[CPrmitiveVertexDataHolder<StartSize>::VertexCount - 1] = TexCoord;
 	}
-	virtual void RenderPrimitive(GLenum Type)
+	/*virtual*/ void RenderPrimitive(GLenum Type)
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0, Vertices);
-		glColorPointer(4, GL_FLOAT, 0, Colors);
+		glVertexPointer(3, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Vertices);
+		glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Colors);
 		glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
-		glDrawArrays(Type, 0, VertexCount);
-		VertexCount = 0;
+		glDrawArrays(Type, 0, CPrmitiveVertexDataHolder<StartSize>::VertexCount);
+		CPrmitiveVertexDataHolder<StartSize>::VertexCount = 0;
 	}
 
 protected:
@@ -417,11 +417,10 @@ void setVSync(int interval=1);
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
-	byte bpp;
+	byte BPP;
 	bool Fullscreen;
-	char *caption;
 
-	bool gCreateWindow(bool isFullscreen, int _width, int _height, byte _bpp, char* _caption);
+	bool gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte ABPP, const string &ACaption);
 	bool gCreateWindow();
 	void SetSize();
 	bool glInitSystem();
@@ -432,12 +431,16 @@ public:
 	unsigned int GetHeight() const;
 	void SetWidth(unsigned int AWidth);
 	void SetHeight(unsigned int AHeight);
+	string GetCaption() const;
+	void SetCaption(const string &ACaption);
+
 protected:
 	CGLWindow();
 	friend class CTSingleton<CGLWindow>;
 private:
 	unsigned int Width;
 	unsigned int Height;
+	string Caption;
 	bool isCreated;
 };
 //////////////////////////////////////////////////////////////////////////

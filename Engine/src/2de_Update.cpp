@@ -4,17 +4,18 @@
 #include "2de_GraphicsLow.h"
 
 //////////////////////////////////////////////////////////////////////////
-// CUpdateObject
+// CUpdatable
 
 CUpdatable::CUpdatable() : Active(true), Dead(false), Scene(NULL)
 {
-	SetName("CUpdateObject");
+	SetName("CUpdatable");
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 }
 
 CUpdatable::~CUpdatable()
 {
-	CUpdateManager::Instance()->Remove(GetID());
+	if (!Managed) // one if-check is better than useless list-search..
+		CUpdateManager::Instance()->Remove(GetID());
 }
 
 void CUpdatable::SetDead()
@@ -81,4 +82,4 @@ bool CUpdateManager::UpdateObjects()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CTimeredAction
+// CTimeredAction
