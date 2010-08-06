@@ -623,7 +623,7 @@ const Vector2& CPolygon::operator[](unsigned int Index) const
 	return Vertices[Index];
 }
 
-void CPolygon::RemoveVertex( unsigned int Index )
+void CPolygon::RemoveVertex(unsigned int Index)
 {
 	assert(Index >= 0 && Index < VerticesCount);
 	Vector2 *TempVertices = new Vector2 [VerticesCount - 1];

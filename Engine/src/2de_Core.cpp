@@ -80,18 +80,18 @@ bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 
 void CObject::IncRefCount()
 {
-	RefCount++;
+	/*RefCount++;*/
 }
 
 void CObject::DecRefCount(CObject* AObject)
 {
-	assert(AObject != NULL);
+	/*assert(AObject != NULL);
 	AObject->RefCount--;
 	if (AObject->RefCount <= 0 && AObject->Managed)
 	{
 		Log("INFO", "Destroying: %s, with id: %d", AObject->GetName().c_str(), AObject->GetID());
 		delete AObject;
-	}
+	}*/
 }
 
 const string& CObject::GetName() const
@@ -690,20 +690,29 @@ void CSingletonManager::Init()
 
 void CSingletonManager::Add(CObject *AObject)
 {
-	AObject->IncRefCount(); // is not necessary i think. it it is?
-	Singletones.push_front(AObject);
+	/*AObject->IncRefCount(); // is not necessary i think. it it is?*/
+	Singletones.push(AObject);
 	//Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
 }
 
 void CSingletonManager::Clear()
 {
-	for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
+	while (!Singletones.empty())
+	{
+		delete Singletones.top();
+		Singletones.pop();
+	}
+	/*for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
 	{
 		//Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
-		CObject *Object = *i;
+		
+		delete *i;
+		[>CObject *Object = *i;
 		*i = NULL;
-		CObject::DecRefCount(Object);
+		CObject::DecRefCount(Object);<]
 	}
+
+	Singletones.clear();*/
 }
 
 void CSingletonManager::Finalize()
@@ -730,7 +739,9 @@ bool CBaseResource::CheckLoad()
 	return Loaded = !Loaded ? LoadFromFile() : true;
 }
 
-CBaseResource::CBaseResource() : Loaded(false), Filename(""){}
+CBaseResource::CBaseResource() : Loaded(false), Filename("")
+{
+}
 
 const string& CBaseResource::GetFilename() const
 {
@@ -856,9 +867,11 @@ CFactory::CFactory()
 
 CFactory::~CFactory()
 {	
-	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-		CObject::DecRefCount(*i);
+	/*for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+		Deletion.push(*i);
+
 	Objects.clear();
+	CleanUp(); */
 }
 
 /**
@@ -868,13 +881,13 @@ CFactory::~CFactory()
 void CFactory::Add(CObject *AObject, const string &AName /*= ""*/)
 {
 	// we generally allow passing empty name, when it set somewhere else
-	if (AName != "")
+	if (!AName.empty())
 	{
 		AObject->SetName(AName);
 	}
 
 	Objects.push_back(AObject); // not only this
-	AObject->IncRefCount();
+	//AObject->IncRefCount();
 	AObject->Managed = true;
 }
 
@@ -893,20 +906,31 @@ void CFactory::Destroy(CObject *AObject)
 	}
 	
 	AObject->SetDestroyed();
+
 	Objects.erase(i);
-	CObject::DecRefCount(AObject);
+	Deletion.push(AObject);
+
+	//CObject::DecRefCount(AObject);
 }
 
-void CFactory::CheckForDeadItems()
+/**
+* CFactory::CleanUp - очищает очередь уничтожения объектов, освобождая память каждого объекта.
+*/
+
+void CFactory::CleanUp()
 {
-	list<CObject*> toDeletion;
-	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-		if ((*i)->isDestroyed())
-			toDeletion.push_back(*i);
-	for(list<CObject*>::iterator i = toDeletion.begin(); i != toDeletion.end(); ++i)
+	CObject *object;
+
+	// we can implement any additional logic here, based for example on size() of queue or whatever, if it's needed..
+	while (!Deletion.empty())
 	{
-		CObject::DecRefCount(*i);
-		Objects.remove(*i);
+		object = Deletion.front();
+		Log("INFO", "Destroying: %s, with id: %d", object->GetName().c_str(), object->GetID());
+
+		delete object;
+		// delete Deletion.front();
+
+		Deletion.pop();
 	}
 }
 

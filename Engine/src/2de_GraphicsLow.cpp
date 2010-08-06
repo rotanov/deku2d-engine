@@ -49,10 +49,9 @@ CRenderable::CRenderable() : Angle(0.0f), Box(0, 0, 0, 0), Depth(0.0f), Scene(NU
 
 CRenderable::~CRenderable()
 {
-	if (!Managed) // one if-check is better than useless list-search..
-		CRenderManager::Instance()->Remove(GetID());
+	CRenderManager::Instance()->Remove(this);
 
-//	Scene->RemoveRenderable(this);
+	Scene->RemoveRenderable(this);
 }
 
 void CRenderable::SetAngle(float AAngle /*= 0.0f*/)
@@ -388,7 +387,7 @@ CFont::~CFont()
 {
 	if (!base)
 		glDeleteLists(base, 256);
-	CFontManager::Instance()->Remove(GetID());
+	CFontManager::Instance()->Remove(this);
 }
 
 
@@ -695,17 +694,20 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
-	ManagerContainer toDelete;
+	//ManagerContainer toDelete;
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // !!! there. it shouln't be there
 	Camera.Update();
+
+	CRenderable *data;
+
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
-		CRenderable *data = *i;
-		if (data->isDestroyed())
+		data = *i;
+		/*if (data->isDestroyed())
 		{
 			toDelete.push_back(data);
 			continue;
-		}
+		}*/
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (data->GetVisibility())
@@ -727,11 +729,11 @@ bool CRenderManager::DrawObjects()
 	glDisable(GL_DEPTH_TEST);
 	FontVertices.RenderPrimitive(GL_QUADS);
 	//////////////////////////////////////////////////////////////////////////
-	for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
+	/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
 		Objects.remove(*i);
 		CObject::DecRefCount(*i);
-	}
+	}*/
 #ifdef _DEBUG
 	//	Camera.DrawDebug();
 #endif 
@@ -931,7 +933,7 @@ CTexture::CTexture()
 
 CTexture::~CTexture()
 {
-	CTextureManager::Instance()->Remove(GetID());
+	CTextureManager::Instance()->Remove(this);
 }
 
 void CTexture::Bind()
@@ -1150,21 +1152,38 @@ void CScene::AddUpdatable(CUpdatable *AObject)
 
 void CScene::RemoveUpdatable(CUpdatable *AObject)
 {
-	UpdatableObjects.erase(std::find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject));
+	vector<CUpdatable *>::iterator it = find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject);
+
+	if (it == UpdatableObjects.end())
+		return;
+	
+	UpdatableObjects.erase(it);
+
 	//AObject->PutIntoScene()
 }
 
 void CScene::RemoveRenderable(CRenderable *AObject)
 {
-	RenderableObjects.erase(std::find(RenderableObjects.begin(), RenderableObjects.end(), AObject));
+	vector<CRenderable *>::iterator it = find(RenderableObjects.begin(), RenderableObjects.end(), AObject);
+
+	if (it == RenderableObjects.end())
+		return;
+	
+	RenderableObjects.erase(it);
 }
 
 CScene::~CScene()
 {
 	for(vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
-		CFactory::Instance()->Destroy(*i);	// (*i)->SetDestroyed();
+	{
+		if ((*i)->Managed) 
+			CFactory::Instance()->Destroy(*i);
+	}
 	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
-		CFactory::Instance()->Destroy(*i); 	// (*i)->SetDestroyed();
+	{
+		if ((*i)->Managed) 
+			CFactory::Instance()->Destroy(*i); 
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1185,7 +1204,7 @@ void CGlobalScene::AddUpdatable(CUpdatable *AObject)
 
 CSceneManager::CSceneManager() : CurrentScene(&GlobalScene)
 {
-
+	SetName("Scene manager");
 }
 
 void CSceneManager::Render()

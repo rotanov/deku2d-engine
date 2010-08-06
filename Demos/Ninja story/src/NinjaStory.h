@@ -110,8 +110,7 @@ public:
 		Text->Position = t0;
 		if (Age >= Life)
 		{
-			SetDestroyed();
-			Text->SetDestroyed();
+			CFactory::Instance()->Destroy(this);
 		}
 	}
 private:

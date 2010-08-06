@@ -243,7 +243,7 @@ public:
 		// if VertexCount == ReservedCount then grow here also
 		TexCoords[CPrmitiveVertexDataHolder<StartSize>::VertexCount - 1] = TexCoord;
 	}
-	/*virtual*/ void RenderPrimitive(GLenum Type)
+	void RenderPrimitive(GLenum Type)
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);

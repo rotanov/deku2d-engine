@@ -37,21 +37,23 @@
 
 #include <SDL/SDL.h>
 #include <algorithm>
-#include <iostream>
-#include <list>
-#include <map>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <typeinfo>
-#include <vector>
 #include <cassert>
 #include <cmath>
-#include <memory.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory.h>
+#include <queue>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
@@ -248,33 +250,45 @@ public:
 	T Get(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
 	{					// 	hashmap, anyone?...
 		T temp = NULL;
-		ManagerContainer toDelete;
+		//ManagerContainer toDelete;
 		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 		{
 			temp = *i;
-			if ((*i)->isDestroyed())
+			/*if ((*i)->isDestroyed())
 			{
 				toDelete.push_back(temp);
 				continue;
-			}
+			}*/
 			if ((*i)->GetName() == AName)
 			{
 				temp = *i;
 				break;
 			}
 		}
-		for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
+		/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 		{
 			Objects.remove(*i);
 			CObject::DecRefCount(*i);
-		}
+		}*/
 		return temp;
 	}
 
 	virtual void Add(const T &AObject)
 	{
-		AObject->IncRefCount();
+		//AObject->IncRefCount();
 		Objects.push_back(AObject);
+	}
+
+	void Remove(const T &AObject)
+	{
+		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
+		{
+			if (*i == AObject)
+			{
+				Objects.erase(i);
+				return;
+			}
+		}
 	}
 
 	void Remove(size_t AID)
@@ -289,7 +303,7 @@ public:
 		if (temp == NULL)
 			return;
 		Objects.remove(temp);		
-		CObject::DecRefCount(temp);
+		//CObject::DecRefCount(temp);
 	}
 
 	void Remove(const string &AName)
@@ -304,13 +318,13 @@ public:
 		if (temp == NULL)
 			return;
 		Objects.remove(temp);
-		CObject::DecRefCount(temp);
+		//CObject::DecRefCount(temp);
 	}
 
 	virtual ~CCommonManager()
 	{
-		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
-			CObject::DecRefCount(*i);
+		/*for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
+			CObject::DecRefCount(*i);*/
 		Objects.clear();
 	}
 };
@@ -329,8 +343,106 @@ private:
 	{
 	}
 	static CSingletonManager *_instance;
-	list<CObject*> Singletones;
+	stack<CObject*> Singletones;
 };
+
+// SingletonHolder по Александреску
+// начал, но пока не осилил..
+/*template<class T>
+class CreateUsingNew
+{
+public:
+	T* Create()
+	{
+		return new T;
+	}
+};
+
+template<class T>
+class CreateUsingMalloc
+{
+public:
+	T* Create()
+	{
+		T *result = (T *) malloc(sizeof(T));
+		new(result) T();
+		return result;
+	}
+};
+
+template<class T>
+class CreateStatic
+{
+public:
+	T* Create()
+	{
+		static T instance;
+		return &instance;
+	}
+};
+
+template<class T>
+class DefaultLifetime
+{
+
+};
+
+
+template<class T>
+class SingleThreaded
+{
+public:
+	typedef T VolatileType;
+
+};
+
+template<class T,
+	template<class> class CreationPolicy = CreateUsingNew,
+	template<class> class LifetimePolicy = DefaultLifetime,
+	template<class> class ThreadingModel = SingleThreaded>
+class CSingletonHolder
+{
+public:
+	static T& Instance();
+
+private:
+	static void DestroySingleton();
+
+	CSingletonHolder();
+
+	typedef ThreadingModel<T>::VolatileType InstanceType;
+
+	static InstanceType* _instance;
+	static bool Destroyed;
+
+};
+
+template<...>
+T& CSingletonHolder<...>::Instance()
+{
+	if (!_instance)
+	{
+		if (Destroyed)
+		{
+			LifetimePolicy<T>::OnDeadReference();
+			Destroyed = false;
+		}
+		_instance = CreationPolicy<T>::Create();
+		LifetimePolicy<T>::SheduleCall(&DestroySingleton);
+	}
+
+	return *_instance;
+}
+
+template<...>
+void CSingletonHolder<...>::DestroySingleton()
+{
+	assert(!Destroyed);
+	CreationPolicy<T>::Destroy(_instance);
+	_instance = 0;
+	Destroyed = true;
+}*/
+
 
 /**
  * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
@@ -358,7 +470,11 @@ public:
 	static T* Instance();
 
 protected:
-	CTSingleton()	{	}	virtual ~CTSingleton()
+	CTSingleton()
+	{
+	}
+
+	virtual ~CTSingleton()
 	{
 		_instance = 0;
 	}
@@ -378,7 +494,6 @@ T* CTSingleton<T>::Instance()
 	if (!_instance)
 	{
 		_instance = new T;
-		_instance->Managed = true;
 		CSingletonManager::Instance()->Add(_instance);
 	}
 	return _instance;
@@ -386,6 +501,7 @@ T* CTSingleton<T>::Instance()
 
 template <typename T>
 T* CTSingleton<T>::_instance = 0;
+
 
 class CBaseResource
 {
@@ -639,13 +755,26 @@ public:
 	template<typename T>
 	T* Remove(const string &AName);
 	void Destroy(CObject *AObject);
-	void CheckForDeadItems();
+	void CleanUp();
+
+	// well.. there should be a better solution, so it's gonna be temporary function...
+	void DestroyAll()
+	{
+		for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+			Deletion.push(*i);
+
+		Objects.clear();
+		CleanUp(); 
+	}
 
 protected:
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
+
 	list <CObject*> Objects; // таки хорошо бы сделать это map'ом от string'а
+
+	queue<CObject *> Deletion;
 };
 
 /**
@@ -718,7 +847,7 @@ T* CFactory::Remove(const string &AName)
 	{
 		result->Managed = false;
 		Objects.erase(i);
-		CObject::DecRefCount(result);
+		//CObject::DecRefCount(result);
 	}
 
 	return result;

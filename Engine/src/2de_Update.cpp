@@ -14,8 +14,9 @@ CUpdatable::CUpdatable() : Active(true), Dead(false), Scene(NULL)
 
 CUpdatable::~CUpdatable()
 {
-	if (!Managed) // one if-check is better than useless list-search..
-		CUpdateManager::Instance()->Remove(GetID());
+	CUpdateManager::Instance()->Remove(this);
+
+	Scene->RemoveUpdatable(this);
 }
 
 void CUpdatable::SetDead()
@@ -54,16 +55,18 @@ CUpdateManager::CUpdateManager()
 
 bool CUpdateManager::UpdateObjects()
 {
-	ManagerContainer toDelete;	
+	//ManagerContainer toDelete;	
 	CEngine *engine = CEngine::Instance();
+	CUpdatable *data;
+
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
-		CUpdatable *data = (*it);
-		if (data->isDestroyed())
+		data = *it;
+		/*if (data->isDestroyed())
 		{
 			toDelete.push_back(data);
 			continue;
-		}
+		}*/
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (!data->Active)
@@ -73,11 +76,11 @@ bool CUpdateManager::UpdateObjects()
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
 		data->Update(dt); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 	}
-	for(ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
+	/*for(ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
 		Objects.remove(*i);
 		CObject::DecRefCount(*i);
-	}
+	}*/
 	return true;
 }
 

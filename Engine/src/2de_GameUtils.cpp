@@ -130,7 +130,7 @@ CTileset::~CTileset()
 	if (BBox != NULL)
 		delete [] BBox;
 
-	CTileSetManager::Instance()->Remove(GetID());
+	CTileSetManager::Instance()->Remove(this);
 }
 //-------------------------------------------//
 //				CMap functions				 //

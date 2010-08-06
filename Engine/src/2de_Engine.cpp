@@ -441,8 +441,7 @@ bool CEngine::Run()
 			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом 
 								//	заниматься отдельно и вплотную.
 			{
-				// Just sometimes do this:
-				CFactory::Instance()->CheckForDeadItems();
+				CFactory::Instance()->CleanUp();
 				if (LimitFps())
 				{		
 					if (procUpdateFunc != NULL)
@@ -535,6 +534,7 @@ bool CEngine::Run()
 		}
 	}	
 
+	CFactory::Instance()->DestroyAll();
 	CSingletonManager::Instance()->Clear();
 	CSingletonManager::Finalize();
 

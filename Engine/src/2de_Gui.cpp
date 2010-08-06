@@ -150,7 +150,7 @@ CGUIObject::CGUIObject(CGUIObjectBase *AParent)
 
 CGUIObject::~CGUIObject()
 {
-	CGUIManager::Instance()->Remove(GetID());
+	CGUIManager::Instance()->Remove(this);
 }
 
 bool CGUIObject::isFocused() const

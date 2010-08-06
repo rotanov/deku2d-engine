@@ -32,7 +32,7 @@ CSound::~CSound()
 		Data = NULL;
 	}
 
-	CSoundManager::Instance()->Remove(GetID());
+	CSoundManager::Instance()->Remove(this);
 }
 
 bool CSound::LoadFromFile()
@@ -78,7 +78,7 @@ CMusic::~CMusic()
 		Data = NULL;
 	}
 
-	CMusicManager::Instance()->Remove(GetID());
+	CMusicManager::Instance()->Remove(this);
 }
 
 bool CMusic::LoadFromFile()

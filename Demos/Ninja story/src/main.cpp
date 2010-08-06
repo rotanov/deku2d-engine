@@ -17,7 +17,7 @@ bool Update(float dt)
 	age += dt;
 	if (Ninja->keys[SDLK_SPACE] && age >= 0.001f)
 	{
-		CBouncingText *newbt = (CFactory::Instance()->New<CBouncingText>("")); //new CBouncingText(); 
+		CBouncingText *newbt = CFactory::Instance()->New<CBouncingText>(""); //new CBouncingText(); 
 		newbt->SetText(itos(Random_Int(1, 999)) + "dmg");
 		age = 0.0f;
 	}
