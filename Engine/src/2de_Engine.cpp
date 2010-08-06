@@ -441,6 +441,8 @@ bool CEngine::Run()
 			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом 
 								//	заниматься отдельно и вплотную.
 			{
+				// Just sometimes do this:
+				CFactory::Instance()->CheckForDeadItems();
 				if (LimitFps())
 				{		
 					if (procUpdateFunc != NULL)
@@ -536,7 +538,7 @@ bool CEngine::Run()
 	CSingletonManager::Instance()->Clear();
 	CSingletonManager::Finalize();
 
-#if defined(_DEBUG) && defined(_MSC_VER)
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 	DumpUnfreed();
 #endif
 	return true;

@@ -11,7 +11,7 @@
 bool Enabled = true;
 unsigned int CObject::CObjectCount = 0;
 
-#if defined(_DEBUG) && defined(_MSC_VER)
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
 AllocList *allocList = NULL;
 
@@ -45,6 +45,7 @@ void DumpUnfreed()
 		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
 			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
 		fprintf(fo, "%s", buf);
+		//Log("MEM", "%s", buf); - было бы неплохо.
 		totalSize += (*i)->size;
 	}
 	sprintf(buf, "-----------------------------------------------------------\n");
@@ -53,10 +54,7 @@ void DumpUnfreed()
 	fprintf(fo, "%s", buf);
 	fclose(fo);
 };
-
-
-
-#endif // defined(_DEBUG) && defined(_MSC_VER)
+#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(SOMETHING_ELSE)
 
 //////////////////////////////////////////////////////////////////////////
 // CObject
@@ -899,6 +897,18 @@ void CFactory::Destroy(CObject *AObject)
 	CObject::DecRefCount(AObject);
 }
 
+void CFactory::CheckForDeadItems()
+{
+	list<CObject*> toDeletion;
+	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+		if ((*i)->isDestroyed())
+			toDeletion.push_back(*i);
+	for(list<CObject*>::iterator i = toDeletion.begin(); i != toDeletion.end(); ++i)
+	{
+		CObject::DecRefCount(*i);
+		Objects.remove(*i);
+	}
+}
 
 void DelFNameFromFPath(char *src)
 {

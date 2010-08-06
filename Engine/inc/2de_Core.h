@@ -45,7 +45,6 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
-
 #include <cassert>
 #include <cmath>
 #include <memory.h>
@@ -53,6 +52,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
@@ -87,6 +87,8 @@ using namespace std;
 	#define snprintf _snprintf
 #endif //_MSC_VER
 
+//#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
+
 /**
 *	Отлов утечек памяти.
 *	Немного пофикшен, однако все равно нуждается в тестировании и улучшении.
@@ -95,7 +97,7 @@ using namespace std;
 *	@todo: Remove inline from AddTrack and RemoveTrack and others.
 */
 
-#if defined(_DEBUG) && defined(_MSC_VER)
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
 #include <list>
 
@@ -120,7 +122,7 @@ inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fnam
 
 	info = new(ALLOC_INFO);
 	info->address = addr;
-	strcpy(info->file, fname, MAX_PATH);
+	strncpy(info->file, fname, MAX_PATH);
 	info->file[MAX_PATH] = 0;
 	info->line = lnum;
 	info->size = asize;
@@ -637,6 +639,7 @@ public:
 	template<typename T>
 	T* Remove(const string &AName);
 	void Destroy(CObject *AObject);
+	void CheckForDeadItems();
 
 protected:
 	CFactory();
