@@ -25,7 +25,7 @@ CEngine::CEngine() : FPSText(NULL), doShowFPS(true), doExitOnEscape(true)
 	// temporary, until CConfig created..
 	// yes, it's defaults.. developer or maintainer of program should set
 	// this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
-	ConfigFilePath		=	"";
+	//ConfigFilePath		=	"";
 	ConfigFileName		=	"Config.xml";
 	EventFuncCount		=	0;
 	KeyInputFuncCount	=	0;
@@ -117,7 +117,7 @@ void CEngine::SetState(CEngine::EState state, void* value)
 			CGLWindow::Instance()->SetCaption((char*)value);
 			break;
 		case STATE_CONFIG_PATH:
-			ConfigFilePath = (char*)value;
+			CEnvironment::Paths::SetConfigPath((char*)value);
 			break;
 		case STATE_CONFIG_NAME:
 			ConfigFileName = (char*)value; // BAD!!!
@@ -167,13 +167,13 @@ bool CEngine::Init()
 
 	// TODO: CConfig
 	CXML Config;
-	Config.LoadFromFile(ConfigFilePath + ConfigFileName);
+	Config.LoadFromFile(CEnvironment::Paths::GetConfigPath() + ConfigFileName);
 
 	CXMLNode *ConfigRoot = Config.Root.First("Configuration");
 
 	if (ConfigRoot->IsErroneous())
 	{
-		Log("ERROR", "Can't load main configuration '%s'", string(ConfigFilePath + ConfigFileName).c_str());
+		Log("ERROR", "Can't load main configuration '%s'", string(CEnvironment::Paths::GetConfigPath() + ConfigFileName).c_str());
 		return false;
 	}
 	

@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
-CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName, CXML &AResourceList) : Name(AName), ResourceList(AResourceList)
+CResourceSectionLoaderBase::CResourceSectionLoaderBase(const string &AName) : Name(AName)
 {
 }
 
@@ -26,46 +26,24 @@ string CResourceSectionLoaderBase::GetName() const
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CResourceManager
-
-CResourceManager::~CResourceManager()
-{
-	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
-	{
-		delete *it;
-	}
-}
-
-bool CResourceManager::LoadResources()
-{
-	CDataLister DataLister;
-	DataLister.List(DataPath);
-
-	ResourceList.LoadFromFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
-	
-	// @todo: see issue #12. Replace load from file by assigning table, returned by List.
-
-	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
-	{
-		if ((*it)->Load())
-		{
-			Log("INFO", "Section '%s' loaded", (*it)->GetName().c_str()); 
-		}
-	}
-	return true;
-}
-
-CResourceManager::CResourceManager()
-{
-	SetName("ResourceManager");
-}
-
-//////////////////////////////////////////////////////////////////////////
 // CDataLister
 
-// CXMLTable CDataLister::List(string DataRoot) // @todo: implement operator= in CXMLTable to make it possible to assign tables
-void CDataLister::List(string DataRoot)
+CXML* CDataLister::List(string DataRoot, bool ForceReindex /*= false*/)
 {
+	string ResourcesListFile = CEnvironment::Paths::GetConfigPath() + DEFAULT_RESOURCE_LIST_FILE_NAME;
+
+	if (!ForceReindex && CFileSystem::Exists(ResourcesListFile))
+	{
+		XML.LoadFromFile(ResourcesListFile);
+		if (!XML.Root.First("Resources")->IsErroneous())
+		{
+			Log("INFO", "Used cached resources list file: '%s'", ResourcesListFile.c_str());
+			return &XML;
+		}
+		else
+			Log("WARNING", "Cached resources list file '%s' is invalid. Trying to regenerate it...", ResourcesListFile.c_str()); 
+	}
+
 	XML.Root.DeleteAll();
 
 	XML.Root.AddLast(new CXMLPrologNode);
@@ -75,9 +53,11 @@ void CDataLister::List(string DataRoot)
 	CurNode = ResourcesRoot;
 	
 	ExploreDirectory(DataRoot);
-	XML.SaveToFile(string(CEngine::Instance()->ConfigFilePath + DEFAULT_RESOURCE_LIST_FILE_NAME).c_str());
+	XML.SaveToFile(ResourcesListFile);
 
-	// return Table;
+	Log("INFO", "Resources list generated and cached to '%s'", ResourcesListFile.c_str());
+
+	return &XML;
 }
 
 void CDataLister::ExploreDirectory(string Path)
@@ -167,3 +147,34 @@ string CDataLister::GetFileNameWithoutExtension(string Filename)
 
 	return Filename;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// CResourceManager
+
+CResourceManager::~CResourceManager()
+{
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
+	{
+		delete *it;
+	}
+}
+
+bool CResourceManager::LoadResources()
+{
+	ResourceList = DataLister.List(DataPath);
+
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
+	{
+		if ((*it)->Load(ResourceList))
+		{
+			Log("INFO", "Resources section '%s' loaded", (*it)->GetName().c_str()); 
+		}
+	}
+	return true;
+}
+
+CResourceManager::CResourceManager()
+{
+	SetName("ResourceManager");
+}
+

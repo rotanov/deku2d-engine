@@ -547,6 +547,15 @@ bool CFile::WriteLine(const char *Data, size_t Size)
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CFileSystem
+
+bool CFileSystem::Exists(const string &APath)
+{
+	struct stat FileStat;
+	return (stat(APath.c_str(), &FileStat) == 0);
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CLog
 
 CLog::CLog()
@@ -831,6 +840,19 @@ void CEnvironment::Paths::SetWorkingDirectory()
 	// *nix-like systems don't need current directory to be 
 	// set to executable path - they use different directory structure
 }
+
+string CEnvironment::Paths::GetConfigPath()
+{
+	return ConfigPath;
+
+}
+
+void CEnvironment::Paths::SetConfigPath(const string &AConfigPath)
+{
+	ConfigPath = AConfigPath;
+}
+
+string CEnvironment::Paths::ConfigPath = "Config/";
 
 /**
 * CEnvironment::LogToStdOut - упрощённый лог на стандартный вывод, в обход синглтонного ада CLog'а.

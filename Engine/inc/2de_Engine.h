@@ -65,7 +65,7 @@ public:
 	void						ToggleExitOnEscape(bool AdoExitOnEscape);
 
 	string						ConfigFileName;
-	string						ConfigFilePath;		//Temporary, until CConfig created. 
+	//string						ConfigFilePath;		//Temporary, until CConfig created. 
 													// Or no. We are not have CEngine::Config now.
 private:
 	bool						doExitOnEscape;

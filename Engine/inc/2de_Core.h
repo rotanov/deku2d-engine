@@ -620,6 +620,19 @@ private:
 };
 
 /**
+* CFileSystem - класс, содержащий статические функции для кросслпатформенной работы с файловой системой.
+*/
+
+class CFileSystem
+{
+public:
+	static bool Exists(const string &APath);
+	
+	// TODO: extend, add more functions..
+
+};
+
+/**
 * CLog - класс для работы с логом.
 */
 
@@ -734,6 +747,12 @@ public:
 	public:
 		static string GetWorkingDirectory();
 		static void SetWorkingDirectory();
+
+		static string GetConfigPath();
+		static void SetConfigPath(const string &AConfigPath);
+
+	private:
+		static string ConfigPath;
 	};
 
 	static void LogToStdOut(const char *Event, const char *Format, ...);

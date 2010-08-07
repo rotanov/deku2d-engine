@@ -13,14 +13,13 @@
 class CResourceSectionLoaderBase
 {
 public:
-	CResourceSectionLoaderBase(const string &AName, CXML &AResourceList);
+	CResourceSectionLoaderBase(const string &AName);
 	virtual ~CResourceSectionLoaderBase();
-	virtual bool Load() = 0;
+	virtual bool Load(CXML *ResourceList) = 0;
 	string GetName() const;
 
 protected:
 	string Name;
-	CXML &ResourceList;
 
 };
 
@@ -32,20 +31,20 @@ template<typename T>
 class CResourceSectionLoader : public CResourceSectionLoaderBase
 {
 public:
-	CResourceSectionLoader(const string &AName, CXML &AResourceList);
-	bool Load();
+	CResourceSectionLoader(const string &AName);
+	bool Load(CXML *ResourceList);
 
 };
 
 template<typename T>
-CResourceSectionLoader<T>::CResourceSectionLoader(const string &AName, CXML &AResourceList) : CResourceSectionLoaderBase(AName, AResourceList)
+CResourceSectionLoader<T>::CResourceSectionLoader(const string &AName) : CResourceSectionLoaderBase(AName)
 {
 }
 
 template<typename T>
-bool CResourceSectionLoader<T>::Load()
+bool CResourceSectionLoader<T>::Load(CXML *ResourceList)
 {
-	CXMLNode *section = ResourceList.Root.First("Resources")->Children.First(Name);
+	CXMLNode *section = ResourceList->Root.First("Resources")->Children.First(Name);
 	if (section->IsErroneous())
 	{
 		Log("WARNING", "Section '%s' has not been found", Name.c_str());
@@ -74,12 +73,29 @@ bool CResourceSectionLoader<T>::Load()
 			Log("WARNING", "Error loading resource: '%s'", ResName.c_str());
 			continue;
 		}
-		Resource->SetFilename(ResNode->Children.First()->GetValue()); // val was here
-		//Resource->Filename = ResNode->Children.First()->GetValue();
+
+		Resource->SetFilename(ResNode->Children.First()->GetValue());
 	}
 
 	return true;
 }
+
+/**
+ * CDataLister - перечислитель файлов ресурсов.
+ */
+
+class CDataLister
+{
+public:
+	CXML* List(string ADataRoot, bool ForceReindex = false);
+private:
+	CXML XML;
+	CXMLNode *CurNode;
+
+	void ExploreDirectory(string Path);
+	string GetLastPathComponent(string Path);
+	string GetFileNameWithoutExtension(string Filename);
+};
 
 /**
  * CResourceManager - менеджер ресурсов.
@@ -99,32 +115,16 @@ protected:
 	CResourceManager();
 	friend class CTSingleton<CResourceManager>;
 	list<CResourceSectionLoaderBase *> SectionsLoaders;
-	CXML ResourceList;
+	CDataLister DataLister;
+	CXML *ResourceList;
 
 };
 
 template<typename T>
 void CResourceManager::AddSection(const string &SectionName)
 {
-	SectionsLoaders.push_back(new CResourceSectionLoader<T>(SectionName, ResourceList));
+	SectionsLoaders.push_back(new CResourceSectionLoader<T>(SectionName));
 }
-
-/**
- * CDataLister - перечислитель файлов ресурсов.
- */
-
-class CDataLister
-{
-public:
-	void List(string ADataRoot);
-private:
-	CXML XML;
-	CXMLNode *CurNode;
-
-	void ExploreDirectory(string Path);
-	string GetLastPathComponent(string Path);
-	string GetFileNameWithoutExtension(string Filename);
-};
 
 #endif // _2DE_RESOURCE_H_
 
