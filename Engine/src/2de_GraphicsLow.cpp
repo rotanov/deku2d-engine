@@ -591,8 +591,10 @@ float CFont::SymbolWidth( unsigned int Index ) const
 void CCamera::Assign(float *x, float *y)
 {
 	CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
-	engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &h);
-	engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &w);
+	h = CGLWindow::Instance()->GetHeight();
+	w = CGLWindow::Instance()->GetWidth();
+	//engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &h);
+	//engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &w); // OMG, HEIGHT to w? is it intentionally or accidentally? damn it, i don't know..
 
 	Atx = x;
 	Aty = y;

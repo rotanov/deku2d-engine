@@ -3,18 +3,23 @@
 
 CEngine	*Ninja = CEngine::Instance();
 
-bool Init()
-{	
-	CTilesetEditor *TilesetEditor = CFactory::Instance()->New<CTilesetEditor>("Tileset editor");
-	return true;
-}
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
 
+};
+
+void CCustomStateHandler::OnInitialize()
+{
+	CTilesetEditor *TilesetEditor = CFactory::Instance()->New<CTilesetEditor>("Tileset editor");
+}
 
 int main(int argc, char *argv[])
 {
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Tileset editor.xml");
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
 	return 0;
 }

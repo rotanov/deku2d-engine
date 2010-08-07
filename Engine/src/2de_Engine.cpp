@@ -1,77 +1,48 @@
 #include "2de_Engine.h"
 
-#include <IL/il.h>
-
 //////////////////////////////////////////////////////////////////////////
 // CEngine
 
 CEngine CEngine::MainEngineInstance;
 
-CEngine::CEngine() : FPSText(NULL), doShowFPS(true), doExitOnEscape(true)
+CEngine::CEngine() //: FPSText(NULL), doShowFPS(true), doExitOnEscape(true) // либо всё, либо ничего..
 // Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ... 
 // а зачем собственно? щас нормальный многострочный вид, читаемо, 
 // а будет длинная строчка не понять чего..
 {
 	memset(keys, 0, sizeof(keys));
-	doLimitFps			=	false; 
-	isHaveFocus			=	true;
-	doCalcFps			=	true;
-	procUserInit		=	NULL;
-	procUserSuicide		=	NULL;
-	procFocusLostFunc	=	NULL;
-	procFocusGainFunc	=	NULL;
-	procUpdateFunc		=	NULL;
-	procRenderFunc		=	NULL;
-	// temporary, until CConfig created..
-	// yes, it's defaults.. developer or maintainer of program should set
-	// this by calling CEngine::SetState with STATE_CONFIG_PATH and STATE_CONFIG_NAME
-	//ConfigFilePath		=	"";
-	ConfigFileName		=	"Config.xml";
-	EventFuncCount		=	0;
-	KeyInputFuncCount	=	0;
-	isHaveFocus			=	true;
-	userReInit			=	false;
-	Initialized			=	false;
+	ConfigFileName = "Config.xml"; 	// temporary, until CConfig created..
+
+	Initialized = false;
+	isHaveFocus = true;
+	userReInit = false;
+
+	doExitOnEscape = true;
+	doLimitFps = false; 
+	doCalcFps = true;
+	doShowFPS = true;
+
+	EventFuncCount = 0;
+	KeyInputFuncCount = 0;
+
+	FPSText = NULL;
+
+	procUpdateFunc = NULL;
+	procRenderFunc = NULL;
+
+	StateHandler = NULL;
+	SetStateHandler<CAbstractStateHandler>();
 
 	CSingletonManager::Init(); 
 }
 
 CEngine::~CEngine()
 {
-	ilShutDown();
-	SDL_Quit();
 }
 
-void CEngine::CalcFps()
+CEngine* CEngine::Instance()
 {
-	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
-	
-	unsigned long ct = SDL_GetTicks();
-	DTime = ct - _llt;
-	dt = (float)DTime * 0.001f;
-	_llt = ct;
-	if (ct-lt >= 1000)
-	{
-		FpsCount = fr*1000/(ct-lt);
-		lt = ct;
-		fr = 0;
-	}		
-	fr++;
-	FPSText->SetText("FPS: " + itos(FpsCount));
-}
-
-bool CEngine::LimitFps()
-{
-	if (!doLimitFps)
-		return true;
-	static unsigned long _lt = 0, _llt = 0;
-	_lt = SDL_GetTicks();
-	if (_lt - _llt >= FpsLimit)
-	{				
-		_llt = _lt;
-		return true;
-	}
-	return false;
+	return &MainEngineInstance;
 }
 
 void CEngine::SetState(CEngine::EState state, void* value)
@@ -80,18 +51,6 @@ void CEngine::SetState(CEngine::EState state, void* value)
 	//	не ебать мозг этим "стейтом" - куча независимых вещей никак не может быть состоянием
 	switch(state)
 	{
-		case STATE_USER_INIT_FUNC:
-			procUserInit = (Callback) value;
-			if (Initialized && procUserInit != NULL)
-			{
-				// Так как минимум один раз пользовательская инициализация уже была установлена,
-				// а следовательно вызвана, то здесь надо вообще всё остановить и подчистить.
-				// И потом переинициализировать всё что нужно и пользовательскую инициализацию
-				
-				if (!(Initialized = procUserInit()))
-					Log("ERROR", "Попытка выполнить пользовательскую инициализацию заново провалилась.");
-			}
-			break;
 		case STATE_UPDATE_FUNC:
 			procUpdateFunc = (UpdateProc) value;
 			break;
@@ -107,18 +66,6 @@ void CEngine::SetState(CEngine::EState state, void* value)
 		case STATE_FPS_LIMIT:
 			FpsLimit = 1000 / (unsigned long)value;
 			break;
-		case STATE_SCREEN_WIDTH:
-			CGLWindow::Instance()->SetWidth(reinterpret_cast<unsigned int>(value));
-			break;
-		case STATE_SCREEN_HEIGHT:
-			CGLWindow::Instance()->SetHeight(reinterpret_cast<unsigned int>(value));
-			break;
-		case STATE_WINDOW_CAPTION:
-			CGLWindow::Instance()->SetCaption((char*)value);
-			break;
-		case STATE_CONFIG_PATH:
-			CEnvironment::Paths::SetConfigPath((char*)value);
-			break;
 		case STATE_CONFIG_NAME:
 			ConfigFileName = (char*)value; // BAD!!!
 			// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!!
@@ -133,16 +80,36 @@ void CEngine::SetState(CEngine::EState state, void* value)
 	}
 }
 
+void CEngine::GetState(CEngine::EState state, void* value)
+{
+	switch (state)
+	{
+	case STATE_FPS_LIMIT:
+		*(unsigned long*)value = FpsLimit;
+		break;
+	case STATE_FPS_COUNT:
+		*(unsigned long*)value = FpsCount;
+		break;
+	case STATE_DELTA_TIME:
+		*(float*)value = dt;
+		break;
+	default:
+		value = NULL;
+		break;
+	}
+}
+
+
 class CTempTitleScreen : public CRenderable	// Existing of this class itself in a such manner is
 	// completely wrong
+	// 	i suggest you to move it to GraphicsHigh or GameUtils and make it "standard, default title screen".. and add some interface, like setting splash image and text or something like that..
 {
 public:
 	CTexture *Texture;
 	void Render()
 	{
-		int ScrWidth, ScrHeight;
-		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
-		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
+		int ScrWidth = CGLWindow::Instance()->GetWidth();
+		int ScrHeight = CGLWindow::Instance()->GetHeight();
 
 		glEnable(GL_TEXTURE_2D);
 		Texture->Bind();
@@ -156,10 +123,10 @@ public:
 	}
 };
 
-bool CEngine::Init()
+bool CEngine::Initialize()
 {
 	CEnvironment::Paths::SetWorkingDirectory();
-	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines
+	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines.. or maybe something like CEnvironment::Paths::GetLogsPath()..
 	CLog::Instance()->SetLogName("System");
 	Log("INFO", "Working directory is \"%s\"", CEnvironment::Paths::GetWorkingDirectory().c_str());
 
@@ -202,6 +169,7 @@ bool CEngine::Init()
 	
 	//	looks like shit.. but this is correct order of initializing singletons.. 
 	//	we need some way to do it in more beautiful sense..
+	//		this seems to be not needed anymore..
 	CUpdateManager::Instance();
 	CTextureManager::Instance();
 	CFontManager::Instance();	
@@ -218,14 +186,7 @@ bool CEngine::Init()
 	CGLWindow::Instance()->SetWidth(wwidth);
 	CGLWindow::Instance()->SetHeight(wheight);
 	CGLWindow::Instance()->SetCaption(wcaption);
-	//SetState(CEngine::STATE_SCREEN_WIDTH, (void*)wwidth);
-	//SetState(CEngine::STATE_SCREEN_HEIGHT, (void*)wheight);
-	//SetState(CEngine::STATE_WINDOW_CAPTION, (void*)wcaption.c_str());
 
-
-	//SetState(STATE_DO_CALC_FPS, (void*)wdocalcfps);
-	//SetState(STATE_DO_LIMIT_FPS, (void*)wdolimitfps);
-	//SetState(STATE_FPS_LIMIT, (void*) wFpsLimit);
 	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->GetWidth(),
 		CGLWindow::Instance()->GetHeight()); // Update camera due to update of wh from config
 
@@ -287,8 +248,6 @@ bool CEngine::Init()
 
 	unsigned int ScrWidth = CGLWindow::Instance()->GetWidth();
 	unsigned int ScrHeight = CGLWindow::Instance()->GetHeight();
-	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &ScrWidth);
-	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScrHeight);
 
 	CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
 	TitleText->SetText("Deku");
@@ -303,18 +262,68 @@ bool CEngine::Init()
 	Tscn->Texture = TitleScreenShroomTexture;
 	
 	
+	StateHandler->OnInitialize();	// maybe make it bool too and interrupt on errors like it was before..
 
-	if (procUserInit != NULL)
-		if (!procUserInit())
-		{
-			Log("ERROR", "User init failed.");
-			return false;
-		}
+	//if (procUserInit != NULL)
+		//if (!procUserInit())
+		//{
+			//Log("ERROR", "User init failed.");
+			//return false;
+		//}
 
 	Initialized = true;
 	Log("INFO","Initialization success");
 	return true;
 }
+
+void CEngine::Finalize()
+{
+	CFactory::Instance()->DestroyAll();
+	CSingletonManager::Instance()->Clear();
+	CSingletonManager::Finalize();
+
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
+	DumpUnfreed();
+#endif
+
+	ilShutDown();
+	SDL_Quit();
+
+	StateHandler->OnFinalize();
+}
+
+void CEngine::CalcFps()
+{
+	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
+	
+	unsigned long ct = SDL_GetTicks();
+	DTime = ct - _llt;
+	dt = (float)DTime * 0.001f;
+	_llt = ct;
+	if (ct - lt >= 1000)
+	{
+		FpsCount = fr * 1000 / (ct - lt);
+		lt = ct;
+		fr = 0;
+	}		
+	fr++;
+	FPSText->SetText("FPS: " + itos(FpsCount));
+}
+
+bool CEngine::LimitFps()
+{
+	if (!doLimitFps)
+		return true;
+	static unsigned long _lt = 0, _llt = 0;
+	_lt = SDL_GetTicks();
+	if (_lt - _llt >= FpsLimit)
+	{				
+		_llt = _lt;
+		return true;
+	}
+	return false;
+}
+
 
 #define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:\
 case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
@@ -340,24 +349,24 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
-	while(SDL_PollEvent(&event)) // @todo: Look here!!!!!! :
+	while (SDL_PollEvent(&event)) // @todo: Look here!!!!!! :
 	//	http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
 	{
 		
-		switch(event.type)
+		switch (event.type)
 		{
 			INPUT_FILTER
-				for(int i=0;i<EventFuncCount;i++)
+				for (int i = 0; i < EventFuncCount; i++)
 					(*EventFunctions[i])(event);
 		}
-		switch(event.type)
+		switch (event.type)
 		{
 			case SDL_KEYDOWN:
 			{
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;
 				for(int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);				
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);
 				keys[keysym.sym] = 1;
 				break;
 			}
@@ -367,21 +376,21 @@ bool CEngine::ProcessEvents()
 					return false;			
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;				
-				for(int i=0;i<KeyInputFuncCount;i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, keysym.sym, keysym.mod, TempChar);				
+				for (int i = 0; i < KeyInputFuncCount; i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, keysym.sym, keysym.mod, TempChar);
 				keys[keysym.sym] = 0;
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
 			{
-				for(int i=0;i<KeyInputFuncCount;i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, event.button.button, SDL_GetModState(), 0);				
+				for (int i = 0; i < KeyInputFuncCount; i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, event.button.button, SDL_GetModState(), 0);
 				break;
 			}
 			case SDL_MOUSEBUTTONUP:
 			{
-				for(int i=0;i<KeyInputFuncCount;i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, event.button.button, SDL_GetModState(), 0);				
+				for (int i = 0; i < KeyInputFuncCount; i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, event.button.button, SDL_GetModState(), 0);
 				break;
 			}
 			case SDL_MOUSEMOTION:
@@ -395,15 +404,13 @@ bool CEngine::ProcessEvents()
 			{
 				if (event.active.state != SDL_APPMOUSEFOCUS)
 				{
+					// бля, от двойного отрицания в глазах рябит... я бы написал (event.active.gain == 1), но по-моему так ещё хуже будет...
 					if (isHaveFocus != !!event.active.gain)
 					{
 						if (!!event.active.gain)
-							if (procFocusGainFunc)
-								procFocusGainFunc();
-							else;
+							StateHandler->OnFocusGain();
 						else
-							if (procFocusLostFunc)
-								procFocusLostFunc();
+							StateHandler->OnFocusLost();
 					}
 					isHaveFocus = !!event.active.gain;
 				}
@@ -427,7 +434,9 @@ bool CEngine::ProcessEvents()
 
 bool CEngine::Run()
 {
-	if(!(Initialized = Init()))
+	StateHandler->OnBeforeInitialize();
+
+	if(!(Initialized = Initialize()))
 	{
 		Log("ERROR", "Initialization failed");
 		SDL_Quit();
@@ -459,7 +468,8 @@ bool CEngine::Run()
 					// @todo: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
 				}
 				SDL_ShowCursor(0);
-				/*тестовый код*/
+				/*тестовый код*/	// надо сделать абстрактный класс CTestCode с единственной виртуальной функцией Execute
+							// и засовывать весь такой тестовый код в его наследников.. это такая - полу-шутка, полу-серьёзность..
 				int x, y;
 				SDL_GetMouseState(&x, &y);
 				MousePos = Vector2(x, CGLWindow::Instance()->GetHeight() - y);
@@ -527,55 +537,17 @@ bool CEngine::Run()
 	#endif //_WIN32
 			}
 		}
-		catch(...)
+		catch (...)
 		{
 			Log("ERROR", "An unhandled exception occured in main loop. Exiting");
 			throw;
 		}
 	}	
 
-	CFactory::Instance()->DestroyAll();
-	CSingletonManager::Instance()->Clear();
-	CSingletonManager::Finalize();
+	StateHandler->OnBeforeFinalize();
+	Finalize();
 
-#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
-	DumpUnfreed();
-#endif
 	return true;
-}
-
-void CEngine::GetState(CEngine::EState state, void* value)
-{
-	switch (state)
-	{
-	case STATE_SCREEN_WIDTH:
-		*(int*)value = CGLWindow::Instance()->GetWidth();
-		break;
-	case STATE_SCREEN_HEIGHT:
-		*(int*)value = CGLWindow::Instance()->GetHeight();
-		break;
-	case STATE_MOUSE_X:
-		*(float*)value = MousePos.x;
-		break;
-	case STATE_MOUSE_Y:
-		*(float*)value = MousePos.y;
-		break;
-	case STATE_MOUSE_XY:
-		*(Vector2*)value = MousePos;
-		break;
-	case STATE_FPS_LIMIT:
-		*(unsigned long*)value = FpsLimit;
-		break;
-	case STATE_FPS_COUNT:
-		*(unsigned long*)value = FpsCount;
-		break;
-	case STATE_DELTA_TIME:
-		*(float*)value = dt;
-		break;
-	default:
-		value = NULL;
-		break;
-	}
 }
 
 bool CEngine::AddEventFunction(EventFunc func)
@@ -587,14 +559,7 @@ bool CEngine::AddEventFunction(EventFunc func)
 	return true;
 }
 
-int CEngine::CfgGetInt( char* ParamName )
-{
-	// DEPRECATED
-	throw std::logic_error("CfgGetInt is deprecated - don't use it!! There is no way to get config parameters this way now.");
-	return 0;
-}
-
-bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller)
+bool CEngine::AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller)
 {
 	if (KeyInputFuncCount >= MAX_KEY_INPUT_FUNCTIONS)
 		return false;
@@ -602,11 +567,6 @@ bool CEngine::AddKeyInputFunction( KeyInputFunc AKeyInputFunction, CObject* AKey
 	KeyFuncCallers[KeyInputFuncCount] = AKeyFuncCaller;
 	KeyInputFuncCount++;
 	return true;
-}
-
-CEngine* CEngine::Instance()
-{
-	return &MainEngineInstance;
 }
 
 void CEngine::ShutDown()
@@ -621,6 +581,7 @@ void CEngine::Pause()
 	// PAUSE; lol i dunno wich level to pause here
 	// i mean full engine level pause or something else
 	// i think more about first
+	// 	i suppose that it may be pause of events processing
 }
 
 void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)

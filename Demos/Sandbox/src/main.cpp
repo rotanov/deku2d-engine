@@ -5,13 +5,18 @@
 #define RENDER CRenderManager::Instance()
 CEngine* Ninja = ENGINE;
 
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
 
-bool Init()
-{	
+};
+
+void CCustomStateHandler::OnInitialize()
+{
 	// создать сцену, добавить в неё *нихера*, сделать её текущей
 	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(NewScene);
-	return true;
 }
 
 bool Draw()
@@ -28,9 +33,9 @@ bool Update(float dt)
 
 int main(int argc, char *argv[])
 {
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Sandbox.xml");
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->SetState(CEngine::STATE_UPDATE_FUNC, &Update);
 	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);
 	Ninja->Run();

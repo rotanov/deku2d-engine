@@ -1,14 +1,20 @@
 #include "2de_Engine.h"
 #include "NinjaStory.h"
 
-CEngine	*Ninja	=	CEngine::Instance();
+CEngine *Ninja = CEngine::Instance();
 
-bool Init()
-{	
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
+
+};
+
+void CCustomStateHandler::OnInitialize()
+{
 	//CNinjaStoryGame *NinjaStoryGame = new CNinjaStoryGame();
 	CAbstractScene *SomeNewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(SomeNewScene);
-	return true;
 }
 
 bool Update(float dt)
@@ -25,11 +31,11 @@ bool Update(float dt)
 }
 
 
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Ninja story.xml");
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->SetState(CEngine::STATE_UPDATE_FUNC, &Update);
 	Ninja->Run();
 	return EXIT_SUCCESS;

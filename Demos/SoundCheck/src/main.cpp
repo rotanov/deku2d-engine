@@ -5,16 +5,22 @@ CEngine *Engine = CEngine::Instance();
 
 CSoundCheck *SoundCheck = NULL;
 
-bool Init()
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
+
+};
+
+void CCustomStateHandler::OnInitialize()
 {
 	SoundCheck = CFactory::Instance()->New<CSoundCheck>("SoundCheck");
-	return true;
 }
 
 int main(int argc, char* argv[])
 {
-	Engine->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
-	Engine->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	Engine->SetStateHandler<CCustomStateHandler>();
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Engine->SetState(CEngine::STATE_CONFIG_NAME, "SoundCheck.xml");
 	Engine->Run();
 

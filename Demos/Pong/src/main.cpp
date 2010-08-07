@@ -14,8 +14,14 @@ public:
 	}	
 };
 
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
 
-bool Init()
+};
+
+void CCustomStateHandler::OnInitialize()
 {
 	CAbstractScene *PongScene = CSceneManager::Instance()->CreateScene();
 	CAbstractScene *SomeScene = CSceneManager::Instance()->GetCurrentScene();
@@ -27,14 +33,13 @@ bool Init()
 	CTimeredAction<CChangeSceneToPackMan> *Action = new CTimeredAction<CChangeSceneToPackMan>();
 	Action->Action.PongScn = PongScene;
 	Action->SetLife(5.0f);
-	return true;
 }
 
 int main(int argc, char* argv[])
 {
 	CEngine *Ninja = CEngine::Instance();
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	Ninja->SetStateHandler<CCustomStateHandler>();
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Pong.xml");
 	Ninja->Run();
 	return 0;

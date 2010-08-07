@@ -35,6 +35,7 @@
 	#define NOMINMAX
 #endif // _MSC_VER
 
+#include <IL/il.h>
 #include <SDL/SDL.h>
 #include <algorithm>
 #include <cassert>

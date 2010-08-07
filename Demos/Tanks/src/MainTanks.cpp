@@ -77,12 +77,19 @@ bool Options(CObject *Caller)
 
 CTitleScreen *TitleScreen;
 
-bool Init()
-{	
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
+
+};
+
+void CCustomStateHandler::OnInitialize()
+{
 		CFont* Font = CFontManager::Instance()->GetDefaultFont();
 	//////////////////////////////////////////////////////////////////////////
-		Ninja->GetState(CEngine::STATE_SCREEN_WIDTH, &ScreenWidth);
-		Ninja->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScreenHeight);
+		ScreenWidth = CGLWindow::Instance()->GetWidth();
+		ScreenHeight = CGLWindow::Instance()->GetHeight();
 		fPosition.x = ScreenWidth - Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE;
 		fPosition.y = ScreenHeight - Font->GetStringHeight(TITLE_TEXT)*SCALE_TITLE;
 		fPosition *= 0.5f;
@@ -200,17 +207,15 @@ bool Init()
 	//delete clientGame;
 	//delete serverGame;
 
-	return true;
 }
 
-
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Tanks.xml");
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
-	return 0x1;
+	return 0;
 }
 
 

@@ -72,9 +72,7 @@ public:
 	{
 		CFontManager::Instance()->SetCurrentFont("hge");
 
-		// i hate this fucking "State"... completely wrong, not type-safe, inconvenient design...
-		int ScreenHeight;
-		CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &ScreenHeight);
+		int ScreenHeight = CGLWindow::Instance()->GetHeight();
 
 		CText *HelpText = CFactory::Instance()->New<CText>("SoundControlsText");
 		//HelpText->Position = Vector2(5.0f, ScreenHeight - 30.0f);

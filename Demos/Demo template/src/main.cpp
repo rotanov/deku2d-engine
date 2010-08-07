@@ -1,11 +1,19 @@
 #include "2de_Engine.h"
 
-CEngine	*Ninja = CEngine::Instance();
+CEngine *Engine = CEngine::Instance();
 
-bool Init()
-{	
-	return true;
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
+};
+
+void CCustomStateHandler::OnInitialize()
+{
+	// do something..
+	// i put it here just to show how it works and as placeholder for user's code..
 }
+
 
 bool Draw()
 {
@@ -19,11 +27,11 @@ bool Update(float dt)
 
 int main(int argc, char *argv[])
 {
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
-	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Demo template.xml");
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
-	Ninja->SetState(CEngine::STATE_UPDATE_FUNC, &Update);
-	Ninja->SetState(CEngine::STATE_RENDER_FUNC, &Draw);
-	Ninja->Run();
+	CEnvironment::Paths::SetConfigPath("Config/");
+	Engine->SetState(CEngine::STATE_CONFIG_NAME, "Demo template.xml");
+	Engine->SetStateHandler<CCustomStateHandler>();
+	Engine->SetState(CEngine::STATE_UPDATE_FUNC, &Update);
+	Engine->SetState(CEngine::STATE_RENDER_FUNC, &Draw);
+	Engine->Run();
 	return 0;
 }

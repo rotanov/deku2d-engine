@@ -64,8 +64,8 @@ bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char let
 
 CTilesetEditor::CTilesetEditor()
 {
-	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_HEIGHT, &WindowHeight);
-	CEngine::Instance()->GetState(CEngine::STATE_SCREEN_WIDTH, &WindowWidth);
+	WindowWidth = CGLWindow::Instance()->GetWidth();
+	WindowHeight = CGLWindow::Instance()->GetHeight();
 	PRender.lClr			= COLOR_FIRST;
 	PRender.sClr			= COLOR_THIRD;
 	PRender.pClr			= COLOR_FIRST;
@@ -263,7 +263,7 @@ void CTilesetEditor::Render()
 
 void CTilesetEditor::Update(float dt)
 {
-	CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &MousePosition);
+	MousePosition = CEngine::Instance()->MousePos;
 
 	switch (State)
 	{

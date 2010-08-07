@@ -87,8 +87,7 @@ public:
 		Text = new CText;
 		Text->Color = RGBAf(0.1f, 0.7f, 0.2f, 0.4f);
 		float temp = Random_Float(0.0f, PI);
-		Vector2 mouse;
-		CEngine::Instance()->GetState(CEngine::STATE_MOUSE_XY, &mouse);
+		Vector2 mouse = CEngine::Instance()->MousePos;
 		t0 = mouse;
 		t1 = Vector2(cos(temp) * 400.0f, sin(temp) * 400.0f) + t0;
 		delta = (t1 - t0) / Life;

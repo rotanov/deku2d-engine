@@ -1,7 +1,5 @@
 #include "2de_ImageUtils.h"
 
-#include <IL/il.h>
-
 CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0), doCleanData(true){}
 
 CImageData::~CImageData()

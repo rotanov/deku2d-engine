@@ -3,8 +3,15 @@
 #include "Pacman.h"
 #include "2de_Gui.h"
 
-bool Init()
-{	
+class CCustomStateHandler : public CAbstractStateHandler
+{
+public:
+	void OnInitialize();
+
+};
+
+void CCustomStateHandler::OnInitialize()
+{
 // 	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item");
 // 	MenuRoot->SetLayer(10);
 // 	MenuRoot->SetFont(CFactory::Instance()->Get<CFont>("Font"));
@@ -18,15 +25,14 @@ bool Init()
 	CFactory::Instance()->Add(new CPacmanGame(CFactory::Instance()->New<CPacmanPlayer>("CPacmanPlayer")), "CPacmanGame");
 	CFactory::Instance()->Get<CFont>("Font")->LoadFromFile();	// ???
 	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("PacMan"), 5000);
-	return true;
 }
 
 int main(int argc, char *argv[])
 {
 	CEngine	*Ninja = CEngine::Instance();
-	Ninja->SetState(CEngine::STATE_CONFIG_PATH, "Config/");
+	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Pac man.xml");
-	Ninja->SetState(CEngine::STATE_USER_INIT_FUNC, &Init);
+	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
 	return 0;
 }
