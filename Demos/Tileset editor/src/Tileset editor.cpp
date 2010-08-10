@@ -153,8 +153,7 @@ void CTilesetEditor::Render()
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
 	PRender.grCircleL(MousePosition, 5);
-	int fps;
-	CEngine::Instance()->GetState(CEngine::STATE_FPS_COUNT, &fps);
+	int fps = CEngine::Instance()->GetFPS();
 	//CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
 	glLoadIdentity();
 

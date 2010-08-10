@@ -452,7 +452,7 @@ CSprite::~CSprite()
 }
 
 
-bool CSprite::LoadFromFile(char* Filename)
+bool CSprite::LoadFromFile(const string &Filename)
 {
 // 	CFile file;
 // 	file.Open(Filename, CFile::OPEN_MODE_READ);
@@ -466,7 +466,7 @@ bool CSprite::LoadFromFile(char* Filename)
 	return true;
 }
 
-bool CSprite::SaveToFile(char *Filename)
+bool CSprite::SaveToFile(const string &Filename)
 {
 // 	CFile file;
 // 	file.Open(Filename, CFile::OPEN_MODE_WRITE);

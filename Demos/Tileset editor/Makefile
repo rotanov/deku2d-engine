@@ -12,10 +12,10 @@ LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lSDL_mixer -lIL ../.
 TARGET		=	bin/Tileset\ editor
 
 all:
-	g++ -fpermissive -w -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 debug:
-	g++ -g3 -fpermissive -w -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+	g++ -g3 -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 strict:
 	g++ -Wall -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}

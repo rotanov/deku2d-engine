@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 {
 	Engine->SetStateHandler<CCustomStateHandler>();
 	CEnvironment::Paths::SetConfigPath("Config/");
-	Engine->SetState(CEngine::STATE_CONFIG_NAME, "SoundCheck.xml");
+	Engine->SetProgramName("SoundCheck");
 	Engine->Run();
 
 	return 0;

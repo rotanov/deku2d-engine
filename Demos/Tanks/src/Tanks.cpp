@@ -263,6 +263,8 @@ Vector2 CTankMap::GetNewTankLocation()
 			if (Cells[j][i].TileIndex == csFree1)
 				return Vector2(i*CellSize, j*CellSize);
 		}
+
+	return Vector2(); // just to prevent warning..
 }
 
 void CTankMap::Render()

@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
 	CEngine	*Ninja = CEngine::Instance();
 	CEnvironment::Paths::SetConfigPath("Config/");
-	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Pac man.xml");
+	Ninja->SetProgramName("Pac man");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
 	return 0;

@@ -11,24 +11,22 @@ CEngine::CEngine() //: FPSText(NULL), doShowFPS(true), doExitOnEscape(true) // �
 // а будет длинная строчка не понять чего..
 {
 	memset(keys, 0, sizeof(keys));
-	ConfigFileName = "Config.xml"; 	// temporary, until CConfig created..
 
 	Initialized = false;
 	isHaveFocus = true;
 	userReInit = false;
 
 	doExitOnEscape = true;
-	doLimitFps = false; 
-	doCalcFps = true;
+	doLimitFPS = false; 
+	doCalcFPS = true;
 	doShowFPS = true;
+
+	ProgramName = "Some Deku2D-using program";
 
 	EventFuncCount = 0;
 	KeyInputFuncCount = 0;
 
 	FPSText = NULL;
-
-	procUpdateFunc = NULL;
-	procRenderFunc = NULL;
 
 	StateHandler = NULL;
 	SetStateHandler<CAbstractStateHandler>();
@@ -44,61 +42,6 @@ CEngine* CEngine::Instance()
 {
 	return &MainEngineInstance;
 }
-
-void CEngine::SetState(CEngine::EState state, void* value)
-{
-	//	думается мне, что надо сделать нормальные отдельные сеттеры/геттеры и 
-	//	не ебать мозг этим "стейтом" - куча независимых вещей никак не может быть состоянием
-	switch(state)
-	{
-		case STATE_UPDATE_FUNC:
-			procUpdateFunc = (UpdateProc) value;
-			break;
-		case STATE_RENDER_FUNC:
-			procRenderFunc = (Callback) value;
-			break;
-		case STATE_DO_LIMIT_FPS:
-			doLimitFps = !!value;
-			break;
-		case STATE_DO_CALC_FPS:
-			doCalcFps = !!value;
-			break;
-		case STATE_FPS_LIMIT:
-			FpsLimit = 1000 / (unsigned long)value;
-			break;
-		case STATE_CONFIG_NAME:
-			ConfigFileName = (char*)value; // BAD!!!
-			// let me tell what is really BAD... EVERYTHING in this GetState/SetState is BAD!!!
-			// that's not the way things should be done
-			break;
-		case STATE_GL_BG_COLOR:
-			{
-				RGBAf *t = (RGBAf*)value;
-				glClearColor(t->x, t->y, t->z, t->w); // BAD!!!  @todo: INcapsulate
-			}
-			break;
-	}
-}
-
-void CEngine::GetState(CEngine::EState state, void* value)
-{
-	switch (state)
-	{
-	case STATE_FPS_LIMIT:
-		*(unsigned long*)value = FpsLimit;
-		break;
-	case STATE_FPS_COUNT:
-		*(unsigned long*)value = FpsCount;
-		break;
-	case STATE_DELTA_TIME:
-		*(float*)value = dt;
-		break;
-	default:
-		value = NULL;
-		break;
-	}
-}
-
 
 class CTempTitleScreen : public CRenderable	// Existing of this class itself in a such manner is
 	// completely wrong
@@ -134,13 +77,13 @@ bool CEngine::Initialize()
 
 	// TODO: CConfig
 	CXML Config;
-	Config.LoadFromFile(CEnvironment::Paths::GetConfigPath() + ConfigFileName);
+	Config.LoadFromFile(CEnvironment::Paths::GetConfigPath() + ProgramName + ".xml");
 
 	CXMLNode *ConfigRoot = Config.Root.First("Configuration");
 
 	if (ConfigRoot->IsErroneous())
 	{
-		Log("ERROR", "Can't load main configuration '%s'", string(CEnvironment::Paths::GetConfigPath() + ConfigFileName).c_str());
+		Log("ERROR", "Can't load main configuration '%s'", string(CEnvironment::Paths::GetConfigPath() + ProgramName + ".xml").c_str());
 		return false;
 	}
 	
@@ -149,9 +92,9 @@ bool CEngine::Initialize()
 	int wheight = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowHeight")->GetAttribute("value"));
 	int wbpp = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowBPP")->GetAttribute("value"));
 	string wcaption = ConfigRoot->Children.First("Video")->Children.First("WindowCaption")->GetAttribute("value");
-	doCalcFps = (ConfigRoot->Children.First("Video")->Children.First("DoCalcFps")->GetAttribute("value") == "true");
-	doLimitFps = (ConfigRoot->Children.First("Video")->Children.First("DoLimitFps")->GetAttribute("value") == "true");
-	SetState(CEngine::STATE_FPS_LIMIT, (void*) stoi(ConfigRoot->Children.First("Video")->Children.First("FpsLimit")->GetAttribute("value")));
+	doCalcFPS = (ConfigRoot->Children.First("Video")->Children.First("DoCalcFps")->GetAttribute("value") == "true");
+	doLimitFPS = (ConfigRoot->Children.First("Video")->Children.First("DoLimitFps")->GetAttribute("value") == "true");
+	SetFPSLimit(stoi(ConfigRoot->Children.First("Video")->Children.First("FpsLimit")->GetAttribute("value")));
 	bool isFullscreen = (ConfigRoot->Children.First("Video")->Children.First("Fullscreen")->GetAttribute("value") == "true");
 
 	// as soon as CConfig will be created, it will look just like this:
@@ -292,7 +235,7 @@ void CEngine::Finalize()
 	StateHandler->OnFinalize();
 }
 
-void CEngine::CalcFps()
+void CEngine::CalcFPS()
 {
 	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
 	
@@ -302,21 +245,21 @@ void CEngine::CalcFps()
 	_llt = ct;
 	if (ct - lt >= 1000)
 	{
-		FpsCount = fr * 1000 / (ct - lt);
+		FPSCount = fr * 1000 / (ct - lt);
 		lt = ct;
 		fr = 0;
 	}		
 	fr++;
-	FPSText->SetText("FPS: " + itos(FpsCount));
+	FPSText->SetText("FPS: " + itos(FPSCount));
 }
 
-bool CEngine::LimitFps()
+bool CEngine::LimitFPS()
 {
-	if (!doLimitFps)
+	if (!doLimitFPS)
 		return true;
 	static unsigned long _lt = 0, _llt = 0;
 	_lt = SDL_GetTicks();
-	if (_lt - _llt >= FpsLimit)
+	if (_lt - _llt >= FPSLimit)
 	{				
 		_llt = _lt;
 		return true;
@@ -451,19 +394,15 @@ bool CEngine::Run()
 								//	заниматься отдельно и вплотную.
 			{
 				CFactory::Instance()->CleanUp();
-				if (LimitFps())
+				if (LimitFPS())
 				{		
-					if (procUpdateFunc != NULL)
-						procUpdateFunc(dt);
 					CUpdateManager::Instance()->UpdateObjects();
 					CSceneManager::Instance()->Update(dt);
-					if (doCalcFps)
-						CalcFps();
+					if (doCalcFPS)
+						CalcFPS();
 					gBeginFrame();
 					CRenderManager::Instance()->DrawObjects();
 					CSceneManager::Instance()->Render();
-					if (procRenderFunc != NULL)
-						procRenderFunc();					
 					
 					// @todo: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
 				}
@@ -550,6 +489,21 @@ bool CEngine::Run()
 	return true;
 }
 
+void CEngine::Pause()
+{
+	// PAUSE; lol i dunno wich level to pause here
+	// i mean full engine level pause or something else
+	// i think more about first
+	// 	i suppose that it may be pause of events processing
+}
+
+void CEngine::ShutDown()
+{
+	SDL_Event Event;
+	Event.type = SDL_QUIT;
+	SDL_PushEvent(&Event);
+}
+
 bool CEngine::AddEventFunction(EventFunc func)
 {
 	if (EventFuncCount >= MAX_EVENT_FUNCTIONS)
@@ -569,22 +523,48 @@ bool CEngine::AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyF
 	return true;
 }
 
-void CEngine::ShutDown()
-{
-	SDL_Event Event;
-	Event.type = SDL_QUIT;
-	SDL_PushEvent(&Event);
-}
-
-void CEngine::Pause()
-{
-	// PAUSE; lol i dunno wich level to pause here
-	// i mean full engine level pause or something else
-	// i think more about first
-	// 	i suppose that it may be pause of events processing
-}
-
 void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)
 {
 	doExitOnEscape = AdoExitOnEscape;
+}
+
+void CEngine::ToggleLimitFPS(bool AdoLimitFPS)
+{
+	doLimitFPS = AdoLimitFPS;
+}
+
+void CEngine::ToggleCalcFPS(bool AdoCalcFPS)
+{
+	doCalcFPS = AdoCalcFPS;
+}
+
+float CEngine::GetDeltaTime() const
+{
+	return dt;
+}
+
+string CEngine::GetProgramName() const
+{
+	return ProgramName;
+}
+
+void CEngine::SetProgramName(const string &AProgramName)
+{
+	ProgramName = AProgramName; 
+}
+
+// well, getter and setter do different things.. something wrong here..
+unsigned long CEngine::GetFPSLimit() const
+{
+	return FPSLimit;
+}
+
+void CEngine::SetFPSLimit(unsigned long AFPSLimit)
+{
+	FPSLimit = 1000 / AFPSLimit;
+}
+
+unsigned long CEngine::GetFPS() const
+{
+	return FPSCount;
 }

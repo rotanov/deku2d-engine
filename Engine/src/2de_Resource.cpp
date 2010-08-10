@@ -74,7 +74,7 @@ void CDataLister::ExploreDirectory(string Path)
 	dirent *entry = NULL;
 	DIR *testdir = NULL;
 
-	while (entry = readdir(dirp))
+	while ((entry = readdir(dirp)))
 	{
 		CurrentPath = Path + "/" + string(entry->d_name);
 		testdir = opendir(CurrentPath.c_str());

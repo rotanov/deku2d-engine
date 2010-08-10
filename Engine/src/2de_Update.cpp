@@ -56,7 +56,6 @@ CUpdateManager::CUpdateManager()
 bool CUpdateManager::UpdateObjects()
 {
 	//ManagerContainer toDelete;	
-	CEngine *engine = CEngine::Instance();
 	CUpdatable *data;
 
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
@@ -72,9 +71,9 @@ bool CUpdateManager::UpdateObjects()
 		if (!data->Active)
 			continue;
 		// FIXED_DELTA_TIME
-		float dt = 0;
-		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);
-		data->Update(dt); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
+		/*float dt = 0;
+		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);*/
+		data->Update(CEngine::Instance()->GetDeltaTime()); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 	}
 	/*for(ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{

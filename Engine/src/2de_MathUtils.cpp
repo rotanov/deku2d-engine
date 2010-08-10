@@ -495,6 +495,7 @@ bool CBox::Inside(const Vector2 &point, float &MTD, Vector2 &n) const /* MTD - i
 
 bool CBox::Outside(const Vector2 &point, float &MTD, Vector2 &n) const /* MTD - is minimal translation distance */
 {
+	// FIXME: warning: suggest parentheses around && within || // i was too lazy to parse this logic expression..
 	if (point.x < Max.x && point.x > Min.x && point.y < Max.y || point.y > Min.y)
 		return false;
 

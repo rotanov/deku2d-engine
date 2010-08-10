@@ -760,7 +760,7 @@ void CXMLParser::SetText(const string &AText)
 
 bool CXMLParser::Good()
 {
-	return Current < Text.length();
+	return (Current < Text.length());
 }
 
 void CXMLParser::SkipWhiteSpace()

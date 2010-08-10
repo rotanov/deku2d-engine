@@ -1,7 +1,5 @@
 #include "2de_Sound.h"
 
-#include <SDL/SDL.h>
-
 //////////////////////////////////////////////////////////////////////////
 // CSound
 
@@ -145,7 +143,7 @@ bool CSoundMixer::PlaySound(CSound *Sound, int Time /*= -1*/)
 
 	if (Mix_PlayChannelTimed(-1, SoundChunk, 0, Time) == -1)
 	{
-		Log("ERROR", "Can't play sound '%s': %s", Sound->GetName(), Mix_GetError());
+		Log("ERROR", "Can't play sound '%s': %s", Sound->GetName().c_str(), Mix_GetError());
 		return false;
 	}
 	// May be we have to set sound volume here?
@@ -183,7 +181,7 @@ bool CSoundMixer::PlayMusic(CMusic *Music, int FadeInTime /*= 0*/)
 
 	if (result == -1)
 	{
-		Log("ERROR", "Can't play music '%s': %s", Music->GetName(), Mix_GetError());
+		Log("ERROR", "Can't play music '%s': %s", Music->GetName().c_str(), Mix_GetError());
 		return false;
 	}
 

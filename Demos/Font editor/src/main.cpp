@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 {
 	CEngine	*Ninja = CEngine::Instance();
 	CEnvironment::Paths::SetConfigPath("Config/");
-	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "FontEditor.xml");
+	Ninja->SetProgramName("Font editor");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
 	return 0;

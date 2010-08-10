@@ -59,6 +59,8 @@ __INLINE int Dir2AK(Vector2& V) // Direction to action kind
 	for (int i=0;i<4;i++)
 		if (V == Directions[i])
 			return EActionKind(i);
+	
+	return -1; // just to prevent warning
 }
 
 class CTank : public CRenderable, public CUpdatable
@@ -216,4 +218,4 @@ public:
 };
 
 
-#endif _TANKS_H_
+#endif // _TANKS_H_

@@ -59,23 +59,12 @@ class CPlacing
 	CAABB aabb;
 };
 */
+
 class CAbstractScene;
 
 class CRenderable : public virtual CObject
 {
-private:
-	float				Angle;		//	(Degrees)
-	CBox				Box;		//	Axis Aligned Bounding Box; ORLY? Isn't it obvious;
-	float				Depth;		//	[-1; 1]?
-	float				Scaling;	
-	CAbstractScene		*Scene;
-	bool				Visible;
-
 public:
-	Vector2				Position;
-	RGBAf				Color;	
-	bool				doIgnoreCamera;		// if true, then object will be drawn in global cords,
-											// no matter where camera pointing;
 	CRenderable();
 	virtual ~CRenderable();
 	virtual void Render() = 0;
@@ -92,6 +81,18 @@ public:
 	CAbstractScene* GetScene() const;
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
+
+	Vector2				Position;
+	RGBAf				Color;	
+	bool				doIgnoreCamera;		// if true, then object will be drawn in global cords,
+
+private:
+	float				Angle;		//	(Degrees)
+	CBox				Box;		//	Axis Aligned Bounding Box; ORLY? Isn't it obvious;
+	float				Depth;		//	[-1; 1]?
+	float				Scaling;	
+	CAbstractScene		*Scene;
+	bool				Visible;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -288,7 +289,7 @@ public:
 	CBox GetSymbolsBBOX();
 	float GetDistance() const;
 	float SymbolWidth(unsigned int Index) const;
-	const Vector2Array<4>& GetTexCoords(unsigned int Charachter)
+	Vector2Array<4> GetTexCoords(unsigned int Charachter)	//const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable ‘result’ returned
 	{
 		Vector2Array<4> result;
 		result[0] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
@@ -433,6 +434,7 @@ public:
 	void SetHeight(unsigned int AHeight);
 	string GetCaption() const;
 	void SetCaption(const string &ACaption);
+	void SetBackgroundColor(const RGBAf &AColor);
 
 protected:
 	CGLWindow();
@@ -447,10 +449,6 @@ private:
 //CText
 class CText : public CRenderable
 {
-private:
-	CFont *Font;
-	string Text;
-
 public:
 	CText();
 	~CText();
@@ -471,6 +469,10 @@ public:
 		return Text[index];
 	}
 	float StringCoordToCursorPos(int x, int y) const;
+
+private:
+	string Text;
+	CFont *Font;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -493,8 +495,8 @@ protected:
 	~CAbstractScene(){}
 
 private:
-	CAbstractScene(const CAbstractScene &AScene){}
-	CAbstractScene& operator =(const CAbstractScene &AScene){}
+	CAbstractScene(const CAbstractScene &AScene);
+	CAbstractScene& operator=(const CAbstractScene &AScene);
 };
 
 //////////////////////////////////////////////////////////////////////////

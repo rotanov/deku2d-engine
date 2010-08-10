@@ -7,58 +7,10 @@
 	#include <unistd.h>
 #endif //_WIN32
 
-
-bool Enabled = true;
-unsigned int CObject::CObjectCount = 0;
-
-#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
-
-AllocList *allocList = NULL;
-
-void RemoveTrack(unsigned long addr)
-{
-	AllocList::iterator i;
-
-	if (allocList == NULL)
-		return;
-	for(i = allocList->begin(); i != allocList->end(); i++)
-	{
-		if((*i)->address == addr)
-		{
-			allocList->remove((*i));
-			break;
-		}
-	}
-};
-
-void DumpUnfreed()
-{
-	FILE *fo = fopen("Memory.log", "w");
-	AllocList::iterator i;
-	unsigned long totalSize = 0;
-	char buf[1024];
-
-	if (allocList == NULL)
-		return;
-
-	for(i = allocList->begin(); i != allocList->end(); i++) {
-		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
-			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
-		fprintf(fo, "%s", buf);
-		//Log("MEM", "%s", buf); - было бы неплохо.
-		totalSize += (*i)->size;
-	}
-	sprintf(buf, "-----------------------------------------------------------\n");
-	fprintf(fo, "%s", buf);
-	sprintf(buf, "Total Unfreed: %d bytes\n", totalSize);
-	fprintf(fo, "%s", buf);
-	fclose(fo);
-};
-#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(SOMETHING_ELSE)
-
 //////////////////////////////////////////////////////////////////////////
 // CObject
 
+unsigned int CObject::CObjectCount = 0;
 CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0), Managed(false)
 {
 
@@ -117,6 +69,105 @@ void CObject::SetDestroyed()
 bool CObject::isDestroyed() const
 {
 	return Destroyed;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CSingletonManager
+
+CSingletonManager *CSingletonManager::_instance = NULL;
+
+CSingletonManager* CSingletonManager::Instance()
+{
+	return _instance;
+}
+
+void CSingletonManager::Init()
+{
+	_instance = new CSingletonManager;
+}
+
+void CSingletonManager::Add(CObject *AObject)
+{
+	/*AObject->IncRefCount(); // is not necessary i think. it it is?*/
+	Singletones.push(AObject);
+	//Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
+}
+
+void CSingletonManager::Clear()
+{
+	while (!Singletones.empty())
+	{
+		delete Singletones.top();
+		Singletones.pop();
+	}
+	/*for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
+	{
+		//Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
+		
+		delete *i;
+		[>CObject *Object = *i;
+		*i = NULL;
+		CObject::DecRefCount(Object);<]
+	}
+
+	Singletones.clear();*/
+}
+
+void CSingletonManager::Finalize()
+{
+	delete _instance;
+	_instance = NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CBaseResource
+
+bool CBaseResource::LoadFromFile()
+{
+	return false;
+}
+
+bool CBaseResource::SaveToFile()
+{
+	return false;
+}
+
+bool CBaseResource::CheckLoad()
+{
+	return Loaded = !Loaded ? LoadFromFile() : true;
+}
+
+CBaseResource::CBaseResource() : Loaded(false), Filename("")
+{
+}
+
+const string& CBaseResource::GetFilename() const
+{
+	return Filename;
+}
+
+void CBaseResource::SetFilename( const string &AFilename )
+{
+	Filename = AFilename; // may be some check here
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CResource
+
+CResource::CResource()
+{
+	SetName("CResource");
+}
+
+void CResource::SetName(const string &AObjectName)
+{
+	CObject::SetName(AObjectName);
+	int t0 = Filename.length() - 1;
+	while(t0 > 0 && Filename[t0] != '/' && Filename[t0] != '\\')
+		t0--;
+	t0++;
+	Filename.insert(t0, AObjectName);
+	Filename.erase(t0 + AObjectName.length(), Filename.length() - t0 - AObjectName.length() - 4);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -683,104 +734,6 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 
 
 //////////////////////////////////////////////////////////////////////////
-// CSingletonManager
-
-CSingletonManager *CSingletonManager::_instance = NULL;
-
-CSingletonManager* CSingletonManager::Instance()
-{
-	return _instance;
-}
-
-void CSingletonManager::Init()
-{
-	_instance = new CSingletonManager;
-}
-
-void CSingletonManager::Add(CObject *AObject)
-{
-	/*AObject->IncRefCount(); // is not necessary i think. it it is?*/
-	Singletones.push(AObject);
-	//Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
-}
-
-void CSingletonManager::Clear()
-{
-	while (!Singletones.empty())
-	{
-		delete Singletones.top();
-		Singletones.pop();
-	}
-	/*for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
-	{
-		//Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
-		
-		delete *i;
-		[>CObject *Object = *i;
-		*i = NULL;
-		CObject::DecRefCount(Object);<]
-	}
-
-	Singletones.clear();*/
-}
-
-void CSingletonManager::Finalize()
-{
-	delete _instance;
-	_instance = NULL;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CBaseResource
-
-bool CBaseResource::LoadFromFile()
-{
-	return false;
-}
-
-bool CBaseResource::SaveToFile()
-{
-	return false;
-}
-
-bool CBaseResource::CheckLoad()
-{
-	return Loaded = !Loaded ? LoadFromFile() : true;
-}
-
-CBaseResource::CBaseResource() : Loaded(false), Filename("")
-{
-}
-
-const string& CBaseResource::GetFilename() const
-{
-	return Filename;
-}
-
-void CBaseResource::SetFilename( const string &AFilename )
-{
-	Filename = AFilename; // may be some check here
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CResource
-CResource::CResource()
-{
-	SetName("CResource");
-}
-
-void CResource::SetName(const string &AObjectName)
-{
-	CObject::SetName(AObjectName);
-	int t0 = Filename.length() - 1;
-	while(t0 > 0 && Filename[t0] != '/' && Filename[t0] != '\\')
-		t0--;
-	t0++;
-	Filename.insert(t0, AObjectName);
-	Filename.erase(t0 + AObjectName.length(), Filename.length() - t0 - AObjectName.length() - 4);
-}
-
-//////////////////////////////////////////////////////////////////////////
 // CEnvironment
 
 tm* CEnvironment::DateTime::GetLocalTimeAndDate()
@@ -956,6 +909,14 @@ void CFactory::CleanUp()
 	}
 }
 
+
+ostream& operator<<(ostream &AStream, const CVariant &AData)
+{
+	AStream << AData.Data;
+	return AStream;
+}
+
+
 void DelFNameFromFPath(char *src)
 {
 	int i = strlen(src)-1;
@@ -1026,3 +987,47 @@ void MemCheck()
 }
 #endif //_WIN32
 
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
+
+AllocList *allocList = NULL;
+
+void RemoveTrack(unsigned long addr)
+{
+	AllocList::iterator i;
+
+	if (allocList == NULL)
+		return;
+	for(i = allocList->begin(); i != allocList->end(); i++)
+	{
+		if((*i)->address == addr)
+		{
+			allocList->remove((*i));
+			break;
+		}
+	}
+};
+
+void DumpUnfreed()
+{
+	FILE *fo = fopen("Memory.log", "w");
+	AllocList::iterator i;
+	unsigned long totalSize = 0;
+	char buf[1024];
+
+	if (allocList == NULL)
+		return;
+
+	for(i = allocList->begin(); i != allocList->end(); i++) {
+		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
+			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
+		fprintf(fo, "%s", buf);
+		//Log("MEM", "%s", buf); - было бы неплохо.
+		totalSize += (*i)->size;
+	}
+	sprintf(buf, "-----------------------------------------------------------\n");
+	fprintf(fo, "%s", buf);
+	sprintf(buf, "Total Unfreed: %d bytes\n", totalSize);
+	fprintf(fo, "%s", buf);
+	fclose(fo);
+};
+#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)

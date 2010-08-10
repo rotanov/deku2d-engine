@@ -20,8 +20,8 @@ public:
 	CAbstractScene* GetScene() const;
 
 private:
-	CAbstractScene *Scene;
 	bool Dead;
+	CAbstractScene *Scene;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,9 +49,7 @@ template <typename ActionT>
 class CTimeredAction : public CUpdatable
 {
 public:	
-	ActionT Action;
-
-	CTimeredAction() : Life(0.0f), Age(0.0f), Action()
+	CTimeredAction() : Action(), Life(0.0f), Age(0.0f)
 	{
 
 	}
@@ -69,9 +67,10 @@ public:
 		}
 	}
 
+	ActionT Action;
 private:
-	float Age;
 	float Life;
+	float Age;
 };
 
 #endif // _2DE_UPDATE_H_

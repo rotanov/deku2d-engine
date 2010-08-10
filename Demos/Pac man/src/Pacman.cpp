@@ -46,7 +46,7 @@ CPacmanBonus::~CPacmanBonus()
 	delete RenderProxy;
 }
 
-CPacmanPlayer::CPacmanPlayer() : Velocity(V2_ZERO), Score(0), Damage(0)
+CPacmanPlayer::CPacmanPlayer() : Score(0), Damage(0), Velocity(V2_ZERO)
 {
 	Sprite = CFactory::Instance()->New<CSprite>("Player sprite");
 	ScoreText = CFactory::Instance()->New<CText>("Score text");
@@ -144,6 +144,7 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 				Factor = rand() % 100;
 				Map->GetMapCell(i, j)->index = Factor < 25 ? 1 : 0;
 				if (Factor >= 25 && (i != 1 || j != 1))
+				{
 					if (rand() % 10 < 2)
 					{
 						CPacmanBonus *Bonus = new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), BonusSprite);
@@ -157,6 +158,7 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 						Enemy->Map = Map;
 						CFactory::Instance()->Add(Enemy);
 					}
+				}
 			}
 
 			Map->GenCells();

@@ -45,7 +45,7 @@ LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lSDL_mixer
 TARGET_STATIC	=	lib/libDeku2d.a
 TARGET_SHARED	=	lib/libDeku2d.so
 
-STRICTFLAG	=	-w
+STRICTFLAG	=	-Wno-write-strings
 
 all: static
 

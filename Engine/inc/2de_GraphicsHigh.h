@@ -128,11 +128,9 @@ private:
 	SAnimationInfo *anim;
 
 public:
-	RGBAf		Color;
-	bool mirror_h;
-	CSprite() : isFirstTimeRendering(true), Color(COLOR_WHITE), animations(NULL),
-		anim(NULL), AnimationsCount(0), EllapsedTime(0), LastTime(0), CurrentFrame(0),
-		CurrentRow(0), CurrentColumn(0), mirror_h(false)
+	CSprite() : EllapsedTime(0), LastTime(0), CurrentFrame(0), CurrentRow(0), CurrentColumn(0),
+		isFirstTimeRendering(true), AnimationsCount(0), animations(NULL), anim(NULL),
+		Color(COLOR_WHITE), mirror_h(false)
 	{
 		SetName("CSprite");
 	}
@@ -145,8 +143,11 @@ public:
 	void Render();
 	void SetAnimation(int index);
 	SAnimationInfo* FindAnimation(int index);
-	bool LoadFromFile(char* Filename);
-	bool SaveToFile(char *Filename);
+	bool LoadFromFile(const string &Filename);
+	bool SaveToFile(const string &Filename);
+
+	RGBAf		Color;
+	bool mirror_h;
 };
 
 //////////////////////////////////////////////////////////////////////////

@@ -81,7 +81,7 @@ void CGUIObject::SetVisibility( bool AVisible )
 }
 //////////////////////////////////////////////////////////////////////////
 // CGUIRootObject
-CGUIRootObject::CGUIRootObject(): KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0), TabHolded(false)
+CGUIRootObject::CGUIRootObject() : TabHolded(false), KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0)
 {
 	SetName("GUI Root Object");
 }
@@ -300,8 +300,6 @@ CButton::CButton(CBox ARect, const char* AText, RGBAf AColor)
 
 void CButton::Render()
 {	
-	CEngine *engine = CEngine::Instance();
-
 	// Font = Style->Fonts.ButtonFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
 
 	PRender->sClr = Style->Colors.ButtonFace;
@@ -405,8 +403,6 @@ CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
 
 void CEdit::Render()
 {
-	CEngine *engine = CEngine::Instance();
-
 	float StringWidth = Text.Width();
 	float StringHeight = Text.Height();
 	float CursorDistance = Font->GetStringWidthEx(0, (CursorPos - VisibleTextOffset), GetVisibleText().c_str());
@@ -740,12 +736,12 @@ CEdit::CTextSelection::CTextSelection()
 
 #define DEFAULT_DISTANCE_BEETWEEN_ITEMS 20
 
-CMenuItem::CMenuItem() : Focus(Objects.begin()), isCycledMenuSwitch(true)
+CMenuItem::CMenuItem() : isCycledMenuSwitch(true), Focus(Objects.begin())
 {
 	SetVisibility(false);
 }
 
-CMenuItem::CMenuItem(CMenuItem* AParent, char* AMenuText)
+CMenuItem::CMenuItem(CMenuItem *AParent, const string &AMenuText)
 {
 	doIgnoreCamera = true;
 	Focus = Objects.begin();

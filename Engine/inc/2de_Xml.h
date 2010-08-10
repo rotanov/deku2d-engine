@@ -333,8 +333,8 @@ private:
 	void ReportError(const string &Severity, const string &Message, int Position);
 	CXMLNode *CurrentLevel;
 	CXMLChildrenList Result;
-	int Current;
 	string Text;
+	int Current;
 };
 
 /**

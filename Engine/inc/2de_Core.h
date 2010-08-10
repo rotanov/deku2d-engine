@@ -49,6 +49,7 @@
 #include <map>
 #include <memory.h>
 #include <queue>
+#include <set>
 #include <sstream>
 #include <stack>
 #include <stdexcept>
@@ -92,82 +93,10 @@ using namespace std;
 
 //#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
-/**
-*	Отлов утечек памяти.
-*	Немного пофикшен, однако все равно нуждается в тестировании и улучшении.
-*	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
-*	@todo: Implement new[] and delete []
-*	@todo: Remove inline from AddTrack and RemoveTrack and others.
-*/
-
-#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
-
-#include <list>
-
-struct ALLOC_INFO
-{
-	unsigned long address;
-	unsigned long size;
-	char file[MAX_PATH];//bad but anyway... probably needs replacement with string type
-	unsigned long line;
-};
-
-typedef list<ALLOC_INFO*> AllocList;
-
-extern AllocList *allocList;
-
-inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fname, unsigned long lnum)
-{
-	ALLOC_INFO *info;
-
-	if (allocList == NULL)
-		allocList = new(AllocList);
-
-	info = new(ALLOC_INFO);
-	info->address = addr;
-	strncpy(info->file, fname, MAX_PATH);
-	info->file[MAX_PATH] = 0;
-	info->line = lnum;
-	info->size = asize;
-	allocList->insert(allocList->begin(), info);
-};
-
-void RemoveTrack(unsigned long addr);
-void DumpUnfreed();
-
-inline void * operator new(unsigned int size, const char *file, int line)
-{
-	void *ptr = (void *)malloc(size);
-	AddTrack((unsigned long)ptr, size, file, line);
-	return(ptr);
-};
-
-inline void operator delete(void *p)
-{
-	RemoveTrack((unsigned long)p);
-	free(p);
-};
-
-inline void operator delete[](void *p)
-{
-	RemoveTrack((unsigned long)p);
-	free(p);
-};
-
-#ifdef _DEBUG
-	#define DEBUG_NEW new(__FILE__, __LINE__)
-#else
-	#define DEBUG_NEW new
-#endif
-	#define new DEBUG_NEW
-
-#endif // defined(_DEBUG) && defined(_MSC_VER)
 
 
 typedef unsigned char		byte;
 
-typedef bool (*Callback)();
-typedef bool (*UpdateProc)(float);
 typedef bool (*EventFunc)(SDL_Event&);
 
 #define KEY_PRESSED		0x00
@@ -191,8 +120,10 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
-//////////////////////////////////////////////////////////////////////////
-//CObject
+/**
+* Класс CObject - базовый класс для многих классов.
+*/
+
 class CObject
 {
 private:
@@ -213,11 +144,13 @@ private:
 	}
 
 public:
-	CObject();		virtual ~CObject();		
+	CObject();
+	virtual ~CObject();
 	void IncRefCount();
 	static void DecRefCount(CObject* AObject);	
 	const string& GetName() const;
-	virtual void SetName(const string &AObjectName);	size_t GetID() const;
+	virtual void SetName(const string &AObjectName);
+	size_t GetID() const;
 	bool isDestroyed() const;
 	void SetDestroyed();
 	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
@@ -482,26 +415,38 @@ protected:
 
 private:
 	static T * _instance;
-// #ifdef _DEBUG // 'cause Instance is static i don't know how 	
-				//to make recursive singleton constructor call check
-	// 	bool isCreationBeginned;
-	// 	bool isCreated;
-	// #endif // _DEBUG
+
+	static set<const type_info *> UnderConstruction;
 };
 
 template <typename T>
 T* CTSingleton<T>::Instance()
 {
+	if (UnderConstruction.count(&typeid(T)) == 1)
+	{
+		// well, we can't log it....
+		//Log("ERROR", "Recursive singleton constructor call has been discovered, typeid: '%s'", typeid(T).name());
+
+		throw std::logic_error(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name());
+	}
+
 	if (!_instance)
 	{
+		UnderConstruction.insert(&typeid(T));
+
 		_instance = new T;
 		CSingletonManager::Instance()->Add(_instance);
+
+		UnderConstruction.erase(&typeid(T));
 	}
 	return _instance;
 }
 
 template <typename T>
 T* CTSingleton<T>::_instance = 0;
+
+template <typename T>
+set<const type_info *> CTSingleton<T>::UnderConstruction;
 
 
 class CBaseResource
@@ -873,9 +818,149 @@ T* CFactory::Remove(const string &AName)
 	return result;
 }
 
+/**
+* Класс CVariant служит для хранения любых данных простых типов с автоматической конвертации в нужный.
+*/
+
+class CVariant
+{
+#define CVARIANT_CONVERSION_TO(TYPE) \
+	operator TYPE() \
+	{ \
+		TYPE result; \
+		Converter.clear(); \
+		Converter.str(Data); \
+		Converter >> result; \
+		if (Converter.fail()) \
+		{ \
+			return (TYPE)(0); \
+		} \
+		return result; \
+	}
+
+#define CVARIANT_CONVERSION_FROM(TYPE) \
+	CVariant(const TYPE &ASource) \
+	{ \
+		Converter << fixed << ASource; \
+		Data = Converter.str(); \
+	}; \
+	CVariant& operator=(const TYPE &ASource) \
+	{ \
+		Converter.clear(); \
+		Converter.str(""); \
+		Converter << fixed << ASource; \
+		Data = Converter.str(); \
+		return *this; \
+	}
+		
+public:
+	CVariant()
+	{
+	}
+	CVariant(const CVariant &ASource)
+	{
+		Data = ASource.Data;
+	}
+	CVariant& operator=(const CVariant &ASource)
+	{
+		Data = ASource.Data;
+		return *this;
+	}
+
+	CVARIANT_CONVERSION_TO(char);
+	CVARIANT_CONVERSION_TO(short);
+	CVARIANT_CONVERSION_TO(int);
+	CVARIANT_CONVERSION_TO(long);
+	CVARIANT_CONVERSION_TO(unsigned char);
+	CVARIANT_CONVERSION_TO(unsigned short);
+	CVARIANT_CONVERSION_TO(unsigned int);
+	CVARIANT_CONVERSION_TO(unsigned long);
+	CVARIANT_CONVERSION_TO(float);
+	CVARIANT_CONVERSION_TO(double);
+	CVARIANT_CONVERSION_TO(long double);
+
+	CVARIANT_CONVERSION_FROM(char);
+	CVARIANT_CONVERSION_FROM(short);
+	CVARIANT_CONVERSION_FROM(int);
+	CVARIANT_CONVERSION_FROM(long);
+	CVARIANT_CONVERSION_FROM(unsigned char);
+	CVARIANT_CONVERSION_FROM(unsigned short);
+	CVARIANT_CONVERSION_FROM(unsigned int);
+	CVARIANT_CONVERSION_FROM(unsigned long);
+	CVARIANT_CONVERSION_FROM(float);
+	CVARIANT_CONVERSION_FROM(double);
+	CVARIANT_CONVERSION_FROM(long double);
+
+	operator string()
+	{
+		return Data;
+	}
+	CVariant(const string &ASource)
+	{
+		Data = ASource;
+	}
+	CVariant& operator=(const string &ASource)
+	{
+		Data = ASource;
+		return *this;
+	}
+
+	operator const char*()
+	{
+		return Data.c_str();
+	}
+	CVariant(const char *ASource)
+	{
+		Data = ASource;
+	}
+	CVariant& operator=(const char *ASource)
+	{
+		Data = ASource;
+		return *this;
+	}
+
+	operator bool()
+	{
+		if (Data == "false")
+			return false;
+
+		long double result;
+		Converter.clear();
+		Converter.str(Data);
+		Converter >> result;
+
+		if (Converter.fail())
+			return true;
+
+		return ((int) result != 0);
+	}
+	CVariant(bool ASource)
+	{
+		Converter << noboolalpha << ASource;
+		Data = Converter.str();
+	}
+	CVariant& operator=(bool ASource)
+	{
+		Converter.clear();
+		Converter.str("");
+		Converter << noboolalpha << ASource;
+		Data = Converter.str();
+		return *this;
+	}
+
+	friend ostream& operator<<(ostream &AStream, const CVariant &AData);
+
+private:
+	string Data;
+	stringstream Converter;
+};
+
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 //	in some class, named, for example, CEnvironment// Agreed with you.
-// CEnvironment has been created. Some time/date and paths functions has already been moved there.// It's good practice to move all platform-dependent code (basically, code with ifdefs)//	to one dedicated place, if it's possible, so we should continue this work.
+// CEnvironment has been created. Some time/date and paths functions has already been moved there.
+// It's good practice to move all platform-dependent code (basically, code with ifdefs)
+// 	to one dedicated place, if it's possible, so we should continue this work.
+
 void DelFNameFromFPath(char *src); // standard function "dirname", anyone?.. or does it work in another way?.. i dunno..
 void DelExtFromFName(char *src);
 void DelLastDirFromPath(char *src);
@@ -916,5 +1001,76 @@ public:
 		return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
 	}
 };
+
+/**
+*	Отлов утечек памяти.
+*	Немного пофикшен, однако все равно нуждается в тестировании и улучшении.
+*	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
+*	@todo: Implement new[] and delete []
+*	@todo: Remove inline from AddTrack and RemoveTrack and others.
+*/
+
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
+
+#include <list>
+
+struct ALLOC_INFO
+{
+	unsigned long address;
+	unsigned long size;
+	char file[MAX_PATH];//bad but anyway... probably needs replacement with string type
+	unsigned long line;
+};
+
+typedef list<ALLOC_INFO*> AllocList;
+
+extern AllocList *allocList;
+
+inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fname, unsigned long lnum)
+{
+	ALLOC_INFO *info;
+
+	if (allocList == NULL)
+		allocList = new(AllocList);
+
+	info = new(ALLOC_INFO);
+	info->address = addr;
+	strncpy(info->file, fname, MAX_PATH);
+	info->file[MAX_PATH] = 0;
+	info->line = lnum;
+	info->size = asize;
+	allocList->insert(allocList->begin(), info);
+};
+
+void RemoveTrack(unsigned long addr);
+void DumpUnfreed();
+
+inline void * operator new(unsigned int size, const char *file, int line)
+{
+	void *ptr = (void *)malloc(size);
+	AddTrack((unsigned long)ptr, size, file, line);
+	return(ptr);
+};
+
+inline void operator delete(void *p)
+{
+	RemoveTrack((unsigned long)p);
+	free(p);
+};
+
+inline void operator delete[](void *p)
+{
+	RemoveTrack((unsigned long)p);
+	free(p);
+};
+
+#ifdef _DEBUG
+	#define DEBUG_NEW new(__FILE__, __LINE__)
+#else
+	#define DEBUG_NEW new
+#endif
+	#define new DEBUG_NEW
+
+#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
 #endif // _2DE_CORE_H_

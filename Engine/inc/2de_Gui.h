@@ -307,7 +307,7 @@ public:
 	bool isCycledMenuSwitch;
 
 	CMenuItem();
-	CMenuItem(CMenuItem* AParent, char* AMenuText);
+	CMenuItem(CMenuItem *AParent, const string &AMenuText);
 	~CMenuItem();
 	void Render();
 	void Update(float dt);

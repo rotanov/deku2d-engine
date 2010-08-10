@@ -1,14 +1,7 @@
-#include "2de_MathUtils.h"
 #include "2de_GraphicsLow.h"
+
+#include "2de_MathUtils.h"
 #include "2de_Engine.h"
-
-#ifdef USE_SDL_OPENGL
-	#include <SDL/SDL_opengl.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-#endif
-
 
 //////////////////////////////////////////////////////////////////////////
 //Vector2, Vector4 - some graphics integrated into math
@@ -40,8 +33,8 @@ void Vector4::glSet() const
 //////////////////////////////////////////////////////////////////////////
 // CRenderable
 
-CRenderable::CRenderable() : Angle(0.0f), Box(0, 0, 0, 0), Depth(0.0f), Scene(NULL), Position(V2_ZERO),
-	Scaling(1.0f), Color(COLOR_WHITE), Visible(true), doIgnoreCamera(false)
+CRenderable::CRenderable() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f),
+	Box(0, 0, 0, 0), Depth(0.0f), Scaling(1.0f), Scene(NULL), Visible(true)
 {
 	SetName("CRenderable");
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
@@ -309,7 +302,8 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glShadeModel(GL_SMOOTH);	//GL_SMOOTH GL_FLAT
 
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClearColor(0.0, 0.0, 0.0, 0.5);
+	//glClearColor(0.0, 0.0, 0.0, 0.5);
+	SetBackgroundColor(RGBAf(0.0, 0.0, 0.0, 0.5));
 
 	glEnable(GL_BLEND);
 
@@ -371,6 +365,11 @@ void CGLWindow::SetCaption(const string &ACaption)
 	SDL_WM_SetCaption(Caption.c_str(), NULL);
 }
 
+void CGLWindow::SetBackgroundColor(const RGBAf &AColor)
+{
+	glClearColor(AColor.x, AColor.y, AColor.z, AColor.w);
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // CFont
@@ -398,7 +397,7 @@ bool CFont::LoadFromFile()
 	CFile			file;
 	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR", "Can't Load Font %s: file  couldn't be opened.", GetName());
+		Log("ERROR", "Can't Load Font %s: file  couldn't be opened.", GetName().c_str());
 		return false;
 	}
 	string FontImageName;
@@ -911,7 +910,7 @@ GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
-		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName());
+		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName().c_str());
 		if (!Loaded)
 		{
 			LoadFromFile();
@@ -952,7 +951,7 @@ bool CTexture::LoadFromFile()
 {
 	if (Filename == "")
 	{
-		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName());
+		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName().c_str());
 		return false;
 	}
 	if (!Loaded)

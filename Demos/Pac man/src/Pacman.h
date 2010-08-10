@@ -4,8 +4,8 @@
 #include "2de_Engine.h"
 #include "2de_GameUtils.h"
 
-const size_t LEVEL_WIDTH = 32;
-const size_t LEVEL_HEIGHT = 16;
+const int LEVEL_WIDTH = 32;
+const int LEVEL_HEIGHT = 16;
 const float DEFAULT_VELOCITY = 100.0f;
 const Vector2 DEFAULT_POSITION = Vector2(96.0f, 96.0f);
 
@@ -27,9 +27,6 @@ public:
 
 class CPacmanBonus : public CUpdatable
 {
-private:
-	CSprite *Sprite;
-	CRenderProxy *RenderProxy;
 public:
 	CPacmanPlayer *Player;	
 	Vector2 Position;
@@ -38,6 +35,9 @@ public:
 	CPacmanBonus(Vector2 APosition, CSprite *ASprite);
 	~CPacmanBonus();
 	void Update(float dt);
+private:
+	CRenderProxy *RenderProxy;
+	CSprite *Sprite;
 };
 
 enum EDirection

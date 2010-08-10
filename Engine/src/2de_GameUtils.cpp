@@ -8,7 +8,6 @@
 
 bool CTileset::LoadFromFile()
 {
-	CFactory *Factory = CFactory::Instance();
 	CFile file;
 	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
@@ -18,8 +17,6 @@ bool CTileset::LoadFromFile()
 
 	string TextureName;
 	file.ReadString(TextureName);
-
-	//Texture = dynamic_cast<CTexture*>((dynamic_cast<CTextureManager*>(Factory->GetManager(MANAGER_TYPE_TEX)))->GetObject(TextureName));
 
 	Texture = CTextureManager::Instance()->Get(TextureName);
 	Texture->CheckLoad();
@@ -295,7 +292,8 @@ void CCompas::Render()
 		glLineWidth(3.0f);
 		CPrimitiveRender pr;
 		pr.doUseGlobalCoordSystem = true;
-		pr.plClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f);
+		//pr.plClr = &RGBAf(0.6f, 0.9f, 0.7f, 0.9f); // warning: taking address of temporary
+		pr.lClr = RGBAf(0.6f, 0.9f, 0.7f, 0.9f); // <- replaced by this to fix it.. don't know, is it correct..
 		pr.grCircleL(Vector2(100,100), depth);
 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth));
 

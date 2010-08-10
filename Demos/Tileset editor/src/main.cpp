@@ -18,7 +18,7 @@ void CCustomStateHandler::OnInitialize()
 int main(int argc, char *argv[])
 {
 	CEnvironment::Paths::SetConfigPath("Config/");
-	Ninja->SetState(CEngine::STATE_CONFIG_NAME, "Tileset editor.xml");
+	Ninja->SetProgramName("Tileset editor");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
 	return 0;

@@ -424,7 +424,7 @@ bool LoadFont(CObject *Caller)
 	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->GetText());
 	if (FontEditor->Font == NULL)
 	{
-		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->GetText());
+		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->GetText().c_str());
 		return false;
 	}
 	FontEditor->FontTexture = FontEditor->Font->GetTexture();
