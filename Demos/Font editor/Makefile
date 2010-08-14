@@ -1,10 +1,10 @@
 SOURCES		=	src/main.cpp \
 			src/Font\ editor.cpp
 
-LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
-
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
+
+LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 
 CFLAGS		:= 	${CFLAGS} $(LUA_CFLAGS) -iquoteinc -iquote../../Engine/inc
 LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lSDL_mixer -lIL ../../Engine/lib/libDeku2d.a

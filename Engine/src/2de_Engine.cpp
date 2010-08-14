@@ -382,7 +382,7 @@ bool CEngine::Run()
 	if(!(Initialized = Initialize()))
 	{
 		Log("ERROR", "Initialization failed");
-		SDL_Quit();
+		SDL_Quit();	// maybe Finalize() to clean-up already initialized systems?
 		return false;
 	}
 

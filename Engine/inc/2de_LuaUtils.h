@@ -5,47 +5,26 @@
 
 #include "2de_Core.h"
 
-//using namespace std;
+/** 
+* Класс CLuaVirtualMachine - синглтон, предоставляющий доступ к единой виртуальной машине Lua. Регистрирует Lua API функции движка, а также позволяет выполнять Lua-скрипты по имени файла.
+*/
 
-struct lua_State;
-class GlobalLuaState
+class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
 {
 public:
-	struct Exception : public std::exception
-	{
-		//Exception(const std::string& what) : std::exception(what.c_str())
-		Exception(const std::string& what) : std::exception()
-		{
-		}
-	};
-
-	GlobalLuaState(const std::string& Filename);
-	~GlobalLuaState();
-
-	// функции, определенные внутри скрипта Filename
-	void outerFunction1();
-	int outerFunction2();
-	std::string outerFunction3();
-
-	// функции, которые могут быть вызваны из скрипта Filename
-	void innerFunction1();
-	int innerFunction2();
-	std::string innerFunction3();
+	bool RunFile(const string &AFilename);
+	void RegisterAPIFunction(const string &AName, lua_CFunction AFunc);
 
 protected:
-	lua_State* L_;
+	CLuaVirtualMachine();
+	~CLuaVirtualMachine();
+
+private:
+	void RegisterStandardAPI();
+
+	lua_State *State;
+
+	friend class CTSingleton<CLuaVirtualMachine>;
 };
-
-// кто-то где-то должен создать этот указатель
-extern GlobalLuaState* globalLuaState;
-
-//////////////////////////////////////////////////////////////////////////
-
-class CLuaTest
-{
-public:
-	CLuaTest(){}
-};
-
 
 #endif // _2DE_LUA_UTILS_H_

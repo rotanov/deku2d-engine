@@ -17,6 +17,9 @@ void CCustomStateHandler::OnInitialize()
 	// создать сцену, добавить в неё *нихера*, сделать её текущей
 	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(NewScene);
+
+	// Lua scripting test
+	CLuaVirtualMachine::Instance()->RunFile(CResourceManager::Instance()->DataPath + "/Scripts/test.lua");
 }
 
 int main(int argc, char *argv[])

@@ -1,211 +1,138 @@
 #include "2de_LuaUtils.h"
 
-#include "2de_GraphicsLow.h"
-#include "2de_GraphicsHigh.h"
+#include "2de_Engine.h"
 
-GlobalLuaState* globalLuaState = 0; // todo remove
+/**
+* LuaAPI - пространство имён для функций, вызываемых из Lua-скриптов. Самим движком эти функции не используются.
+*/
 
-namespace
+namespace LuaAPI
 {
-	// маленький помощник, чтобы самим не считать количество lua_push...() и lua_pop()
-	class LuaStackGuard
+	// часть из этих функций действительно останется в API, другая - просто временные для теста..
+
+	// void Log(string Event, string Text)
+	int WriteToLog(lua_State *L)
 	{
-	public:
-		LuaStackGuard(lua_State* L) : luaState_(L)
-		{
-			top_ = lua_gettop(L);
-		}
+		::Log(lua_tostring(L, -2), lua_tostring(L, -1));
+		return 0;
+	}
 
-		~LuaStackGuard()
-		{
-			lua_settop(luaState_, top_);
-		}
-
-	private:
-		lua_State* luaState_;
-		int top_;
-	};
-
-	int fun1(lua_State* L)
+	// bool IsSpacePressed()
+	int IsSpacePressed(lua_State *L)
 	{
-		globalLuaState->innerFunction1();
+		lua_pushboolean(L, (::CEngine::Instance()->keys[SDLK_SPACE]) ? true : false);
+		return 1;
+	}
+
+	// number GetDeltaTime()
+	int GetDeltaTime(lua_State *L)
+	{
+		lua_pushnumber(L, ::CEngine::Instance()->GetDeltaTime());
+		return 1;
+	}
+
+	// example of using light user data objects
+	
+	// userdata CreateNewText(string Name)
+	int CreateNewText(lua_State *L)
+	{
+		::CText *text = ::CFactory::Instance()->New< ::CText>(lua_tostring(L, -1));
+
+		lua_pushlightuserdata(L, text);
+
+		return 1;
+	}
+
+	// void SetText(userdata TextObject, string NewText)
+	int SetText(lua_State *L)
+	{
+		::CText *text = static_cast< ::CText *>(lua_touserdata(L, -2));
+		if (!text)
+			::Log("LUAERROR", "Incorrect usage of light user data in SetText API call");
+		else
+			text->SetText(lua_tostring(L, -1));
 
 		return 0;
 	}
 
-	int fun2(lua_State* L)
+	// void SetPosition(userdata RenderableObject, number X, number Y)
+	int SetPosition(lua_State *L)
 	{
-		// LuaStackGuard здесь не нужен!
-		// мы ИЗМЕНЯЕМ Lua-state!
-		int retVal = globalLuaState->innerFunction2();
+		::CRenderable *obj = static_cast< ::CRenderable *>(lua_touserdata(L, -3));
+		if (!obj)
+			::Log("LUAERROR", "Incorrect usage of light user data in SetPosition API call");
+		else
+			obj->Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
 
-		lua_pushnumber(L, retVal);
-
-		return 1;
+		return 0;
 	}
 
-	int fun3(lua_State* L)
-	{
-		// LuaStackGuard здесь не нужен!
-		// мы ИЗМЕНЯЕМ Lua-state!
-		string retVal = globalLuaState->innerFunction3();
+};
 
-		lua_pushstring(L, retVal.c_str());
+//////////////////////////////////////////////////////////////////////////
+// CLuaVirtualMachine
 
-		return 1;
-	}
-}
-
-GlobalLuaState::GlobalLuaState(const string& Filename)
+CLuaVirtualMachine::CLuaVirtualMachine()
 {
-	L_ = luaL_newstate();
-	luaL_openlibs(L_);
-
-	// поскольку внутренние функции могут быть вызваны в процессе загрузки скрипта, 
-	// то сначала регистрируем их
-	lua_register(L_, "innerFunction1", fun1);
-	lua_register(L_, "innerFunction2", fun2);
-	lua_register(L_, "innerFunction3", fun3);
-
-	// загружаем скрипт
-	if(luaL_dofile(L_, Filename.c_str()))
+	State = luaL_newstate();
+	if (!State)
 	{
-		string err(lua_tostring(L_, -1));
-
-		lua_close(L_);
-
-		throw Exception(err);
-	}
-}
-
-GlobalLuaState::~GlobalLuaState()
-{
-	lua_close(L_);
-}
-
-void GlobalLuaState::outerFunction1()
-{
-	// stack:
-	LuaStackGuard stackGuard(L_);
-
-	lua_getglobal(L_, "outerFunction1"); // stack: outerFunction1
-
-	if(lua_pcall(L_, 0, 0, 0)) // stack:
-	{
-		string err(lua_tostring(L_, -1));
-
-		lua_close(L_);
-
-		throw Exception(err);
+		Log("ERROR", "Lua state initialization failed");
+		return;
 	}
 
-	printf("GlobalLuaState::outerFunction1() called!\n");
+	RegisterStandardAPI();
 }
 
-int GlobalLuaState::outerFunction2()
+CLuaVirtualMachine::~CLuaVirtualMachine()
 {
-	// stack:
-	LuaStackGuard stackGuard(L_);
+	lua_close(State);
+}
 
-	lua_getglobal(L_, "outerFunction2"); // stack: outerFunction1
+bool CLuaVirtualMachine::RunFile(const string &AFilename)
+{
+	if (!State)
+		return false;
 
-	if(lua_pcall(L_, 0, 1, 0)) // stack: число
+	return (luaL_dofile(State, AFilename.c_str()) == 0);
+}
+
+void CLuaVirtualMachine::RegisterAPIFunction(const string &AName, lua_CFunction AFunc)
+{
+	if (!State)
+		return;
+
+	lua_register(State, AName.c_str(), AFunc);
+}
+
+void CLuaVirtualMachine::RegisterStandardAPI()
+{
+	lua_register(State, "Log", &LuaAPI::WriteToLog);
+	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
+	lua_register(State, "IsSpacePressed", &LuaAPI::IsSpacePressed);
+	lua_register(State, "CreateNewText", &LuaAPI::CreateNewText);
+	lua_register(State, "SetText", &LuaAPI::SetText);
+	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
+}
+
+
+// маленький помощник, чтобы самим не считать количество lua_push...() и lua_pop()
+// 	пока не юзается, но может понадобится, так что оставлю..
+/*class LuaStackGuard
+{
+public:
+	LuaStackGuard(lua_State* L) : luaState_(L)
 	{
-		string err(lua_tostring(L_, -1));
-
-		lua_close(L_);
-
-		throw Exception(err);
+		top_ = lua_gettop(L);
 	}
 
-	const int result = (int)lua_tonumber(L_, 1);
-
-	printf("GlobalLuaState::outerFunction2() called! Result %d\n", result);
-
-	return result;
-
-	// после выхода из функции стек Lua должен быть в том же состоянии, 
-	// что и до входа в функцию.
-	// stackGuard сам все подчистит за нами
-}
-
-std::string GlobalLuaState::outerFunction3()
-{
-	// stack:
-	LuaStackGuard stackGuard(L_);
-
-	lua_getglobal(L_, "outerFunction3"); // stack: outerFunction1
-
-	if(lua_pcall(L_, 0, 1, 0)) // stack: строка
+	~LuaStackGuard()
 	{
-		string err(lua_tostring(L_, -1));
-
-		lua_close(L_);
-
-		throw Exception(err);
+		lua_settop(luaState_, top_);
 	}
 
-	string result;
+private:
+	lua_State* luaState_;
+	int top_;
+};*/
 
-	// функция может вернуть nil
-	if(const char* s = lua_tostring(L_, 1))
-	{
-		result = s;
-	}
-
-	printf("GlobalLuaState::outerFunction3() called! Result %s\n", result.c_str());
-
-	return result;
-
-	// после выхода из функции стек Lua должен быть в том же состоянии, 
-	// что и до входа в функцию.
-	// stackGuard сам все подчистит за нами
-}
-
-Vector2 pnts2[2];
-
-void GlobalLuaState::innerFunction1()
-{
-	CFactory *Factory = CFactory::Instance();
-
-	CParticleSystem *ps;
-	
-
-
-	ps = Factory->New<CParticleSystem>("psysaaaa");
-	ps->Init();
-	ps->ColorStart = RGBAf(0.0f, 1.0f, 0.0f, 1.0f);
-	ps->ColorOver = RGBAf(0.0f, 0.0f, 1.0f, 0.5f);
-	ps->SetVisibility(true);	
-	pnts2[0] = Vector2(0, 480);
-	pnts2[1] = Vector2(640, 480);
-	ps->ParticleLife = 3;
-	ps->Emission = 500;///*debug 1 */ 3000;
-	ps->SizeStart = 32;
-	// debug //
-	ps->SizeVariability = 8;
-	
-//	ps->TexID = (dynamic_cast<CTexture*>(Ninja->TextureManager->GetObjectByName("Particle")))->GetTexID();
-	ps->SetGeometry(pnts2, 2);
-
-
-
-
-
-
-
-}
-
-int GlobalLuaState::innerFunction2()
-{
-	printf("GlobalLuaState::innerFunction2() called!\n");
-
-	return 12345;
-}
-
-string GlobalLuaState::innerFunction3()
-{
-	printf("GlobalLuaState::innerFunction3() called!\n");
-
-	return "Hello from GlobalLuaState!";
-}
