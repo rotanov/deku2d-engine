@@ -65,6 +65,8 @@ public:
 	int keys[SDLK_LAST];	//FFUUU~ for sure. Wait till the Event system.
 	Vector2 MousePos;
 
+	CXML Config; // until CConfig..
+
 protected:
 	CEngine();
 	~CEngine();

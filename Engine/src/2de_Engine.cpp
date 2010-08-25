@@ -76,7 +76,6 @@ bool CEngine::Initialize()
 	SDL_putenv("SDL_VIDEO_CENTERED=1");
 
 	// TODO: CConfig
-	CXML Config;
 	Config.LoadFromFile(CEnvironment::Paths::GetConfigPath() + ProgramName + ".xml");
 
 	CXMLNode *ConfigRoot = Config.Root.First("Configuration");
@@ -108,19 +107,6 @@ bool CEngine::Initialize()
 	// 	doLimitFps = Config->Section("Video")["DoLimitFps"];
 	// 	etc.
 	// at least, I will try to achieve such functionality
-
-	
-	//	looks like shit.. but this is correct order of initializing singletons.. 
-	//	we need some way to do it in more beautiful sense..
-	//		this seems to be not needed anymore..
-	CUpdateManager::Instance();
-	CTextureManager::Instance();
-	CFontManager::Instance();	
-	CTileSetManager::Instance();
-	CSoundManager::Instance();
-	CMusicManager::Instance();
-	// CGUIManager::Instance(); // gui manager crashes it, because it's trying to 
-	//	get default font when no fonts are in font manager
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
 	ResourceManager->DataPath = ConfigRoot->Children.First("Data")->Children.First("DataPath")->GetAttribute("value");

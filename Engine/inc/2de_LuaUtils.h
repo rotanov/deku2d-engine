@@ -15,6 +15,9 @@ public:
 	bool RunFile(const string &AFilename);
 	void RegisterAPIFunction(const string &AName, lua_CFunction AFunc);
 
+	int GetMemoryUsage() const;
+	void RunGC();
+
 protected:
 	CLuaVirtualMachine();
 	~CLuaVirtualMachine();

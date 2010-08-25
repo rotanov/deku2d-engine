@@ -105,6 +105,22 @@ void CLuaVirtualMachine::RegisterAPIFunction(const string &AName, lua_CFunction 
 	lua_register(State, AName.c_str(), AFunc);
 }
 
+int CLuaVirtualMachine::GetMemoryUsage() const
+{
+	if (!State)
+		return 0;
+
+	return lua_gc(State, LUA_GCCOUNT, 0);
+}
+
+void CLuaVirtualMachine::RunGC()
+{
+	if (!State)
+		return;
+
+	lua_gc(State, LUA_GCCOLLECT, 0);
+}
+
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
