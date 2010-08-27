@@ -182,42 +182,17 @@ class CPrmitiveVertexDataHolder	// for any other non textured stuff
 {
 	friend class CRenderManager;
 public:
-	CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
-	{
-		Colors = new RGBAf [StartSize];
-		Vertices = new Vector3 [StartSize];
+	CPrmitiveVertexDataHolder();
+	virtual ~CPrmitiveVertexDataHolder();
+	virtual void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	virtual void PushVertex(const CRenderable *Sender, const Vector2 &Vertex);
+	virtual void RenderPrimitive(GLenum Type);
 
-	}
-	virtual ~CPrmitiveVertexDataHolder()
-	{
-		delete [] Colors;
-		delete [] Vertices;
-	}
-	virtual void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color)
-	{
-		assert(Sender != NULL);
-		// if VertexCount == ReservedCount then grow
-		Vector2 TempVector = Vertex + Sender->Position;
-		Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth()); // also apply rotation here
-		Colors[VertexCount] = Color;
-		VertexCount++;
-	}
-	virtual void RenderPrimitive(GLenum Type)
-	{
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0, Vertices);
-		glColorPointer(4, GL_FLOAT, 0, Colors);
-		glDrawArrays(Type, 0, VertexCount);
-	}
 protected:
 	unsigned int VertexCount;
 	unsigned int ReservedCount;
 	RGBAf *Colors;
 	Vector3 *Vertices;
-
-private:
-
 };
 
 template <unsigned int StartSize = 65536>
@@ -225,39 +200,13 @@ class CVertexDataHolder : public CPrmitiveVertexDataHolder<StartSize>
 {
 	friend class CRenderManager;
 public:
-	CVertexDataHolder()
-	{
-		TexCoords = new Vector2 [StartSize];
-	}
-	~CVertexDataHolder()
-	{
-		delete [] TexCoords;
-	}
-	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color)
-	{
-		assert(false);
-	}
+	CVertexDataHolder();
+	~CVertexDataHolder();
+	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color);
 	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex,
-		const RGBAf &Color, const Vector2 &TexCoord)
-	{
-		CPrmitiveVertexDataHolder<StartSize>::PushVertex(Sender, Vertex, Color);
-		// if VertexCount == ReservedCount then grow here also
-		TexCoords[CPrmitiveVertexDataHolder<StartSize>::VertexCount - 1] = TexCoord;
-	}
-	void RenderPrimitive(GLenum Type)
-	{
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Vertices);
-		glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Colors);
-		glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
-		glDrawArrays(Type, 0, CPrmitiveVertexDataHolder<StartSize>::VertexCount);
-		CPrmitiveVertexDataHolder<StartSize>::VertexCount = 0;
-	}
+		const RGBAf &Color, const Vector2 &TexCoord);
+	void RenderPrimitive(GLenum Type);
 
-protected:
-	
 private:
 	Vector2 *TexCoords;
 };
@@ -289,19 +238,11 @@ public:
 	CBox GetSymbolsBBOX();
 	float GetDistance() const;
 	float SymbolWidth(unsigned int Index) const;
-	Vector2Array<4> GetTexCoords(unsigned int Charachter)	//const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable ‘result’ returned
-	{
-		Vector2Array<4> result;
-		result[0] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
-							bbox[Charachter - 32].Min.y / Texture->Height);
-		result[1] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
-							bbox[Charachter - 32].Min.y / Texture->Height);
-		result[2] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
-							bbox[Charachter - 32].Max.y / Texture->Height);
-		result[3] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
-							bbox[Charachter - 32].Max.y / Texture->Height);
-		return result;
-	}
+	Vector2Array<4> GetTexCoords(unsigned int Charachter);
+	//const Vector2Array<4>& GetTexCoords(unsigned int Charachter) 
+	// <-- warning: reference to local variable ‘result’ returned;
+	// This function is not for user, so there should be some kind of guard
+	// To let using of this function only for what needs it
 
 private:
 	float Distance;
@@ -320,15 +261,8 @@ private:
 	CRenderable *RenderSource;
 
 public:
-	CRenderProxy(CRenderable *ARenderSource) : RenderSource(ARenderSource)
-	{
-		SetName("CRenderProxy");
-	}
-
-	void Render()
-	{
-		RenderSource->Render();
-	}
+	CRenderProxy(CRenderable *ARenderSource);
+	void Render();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -380,6 +314,7 @@ public:
 };
 
 class CText;
+class CGrRect;
 
 class CRenderManager : public CCommonManager <list <CRenderable*> >, public CTSingleton <CRenderManager>
 {
@@ -387,12 +322,15 @@ protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 private:
-	CVertexDataHolder<> FontVertices;
+	CVertexDataHolder<> FontVertices;	// We want them for each font, don't we? @todo: implement this
+										// possibiliy
+	CPrmitiveVertexDataHolder<>	QuadVertices;
 public:
 	CCamera	Camera;
 	~CRenderManager();
 	bool DrawObjects();
 	void Print(const CText *Text);
+	void DrawBox(const CGrRect *Rectangle);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -444,6 +382,28 @@ private:
 	unsigned int Height;
 	string Caption;
 	bool isCreated;
+};
+//////////////////////////////////////////////////////////////////////////
+//CGrRect - not nice enough, i think.
+class CGrRect : public CRenderable // or better CBasePrimitive
+{
+public:
+	CRectangle Rectangle;
+
+	CGrRect();
+	CGrRect(const Vector2 p0, const Vector2 p1) : Rectangle(p0, p1)
+	{		
+		SetName("Some rectangle");
+	}
+	~CGrRect()
+	{
+
+	}
+	void Render()
+	{
+		CRenderManager::Instance()->DrawBox(this);
+	}
+private:	
 };
 //////////////////////////////////////////////////////////////////////////
 //CText
@@ -556,5 +516,93 @@ protected:
 	~CSceneManager();
 	CSceneManager();
 };
+
+// templ impl section
+
+//////////////////////////////////////////////////////////////////////////
+//CPrimitiveVertexDataHolder
+
+template <unsigned int StartSize>
+CPrmitiveVertexDataHolder<StartSize>::CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
+{
+	Colors = new RGBAf [StartSize];
+	Vertices = new Vector3 [StartSize];
+}
+
+template <unsigned int StartSize>
+CPrmitiveVertexDataHolder<StartSize>::~CPrmitiveVertexDataHolder()
+{
+	delete [] Colors;
+	delete [] Vertices;
+}
+
+template <unsigned int StartSize>
+void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color )
+{
+	assert(Sender != NULL);
+	// if VertexCount == ReservedCount then grow
+	Vector2 TempVector = Vertex + Sender->Position;
+	Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth()); // also apply rotation here
+	Colors[VertexCount] = Color;
+	VertexCount++;
+}
+
+template <unsigned int StartSize>
+void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex )
+{
+	PushVertex(Sender, Vertex, Sender->Color);
+}
+
+template <unsigned int StartSize>
+void CPrmitiveVertexDataHolder<StartSize>::RenderPrimitive( GLenum Type )
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glColorPointer(4, GL_FLOAT, 0, Colors);
+	glDrawArrays(Type, 0, VertexCount);
+	CPrmitiveVertexDataHolder<StartSize>::VertexCount = 0; // Clear here or not?
+}
+
+//////////////////////////////////////////////////////////////////////////
+//CVertexDataHolder
+template <unsigned int StartSize>
+CVertexDataHolder<StartSize>::CVertexDataHolder()
+{
+	TexCoords = new Vector2 [StartSize];
+}
+
+template <unsigned int StartSize>
+CVertexDataHolder<StartSize>::~CVertexDataHolder()
+{
+	delete [] TexCoords;
+}
+
+template <unsigned int StartSize>
+void CVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color )
+{
+	assert(false);
+}
+
+template <unsigned int StartSize>
+void CVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord )
+{
+	CPrmitiveVertexDataHolder<StartSize>::PushVertex(Sender, Vertex, Color);
+	// if VertexCount == ReservedCount then grow here also
+	TexCoords[CPrmitiveVertexDataHolder<StartSize>::VertexCount - 1] = TexCoord;
+}
+
+template <unsigned int StartSize>
+void CVertexDataHolder<StartSize>::RenderPrimitive( GLenum Type )
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Vertices);
+	glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Colors);
+	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+	glDrawArrays(Type, 0, CPrmitiveVertexDataHolder<StartSize>::VertexCount);
+	CPrmitiveVertexDataHolder<StartSize>::VertexCount = 0;
+}
 
 #endif // _2DE_GRAPHICS_LOW_H_

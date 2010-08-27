@@ -43,7 +43,7 @@ public:
 	bool AddEventFunction(EventFunc func);		// Until event system created.
 	bool AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
 
-	void ToggleExitOnEscape(bool AdoExitOnEscape); // it seems to me, that it's too much overkill for such small option... 
+	void ToggleExitOnEscape(bool AdoExitOnEscape); // it seems to me, that it's too much overkill for such small option...  И как ты предлагаешь её выставлять, блеа? Ящитаю всё ок.
 	void ToggleLimitFPS(bool AdoLimitFPS);
 	void ToggleCalcFPS(bool AdoCalcFPS);
 

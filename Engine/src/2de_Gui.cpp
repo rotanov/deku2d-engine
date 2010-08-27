@@ -138,6 +138,7 @@ void CGUIRootObject::Update(float dt)
 // CGUIObject
 CGUIObject::CGUIObject()
 {
+	Text.SetLayer(5);
 	CGUIManager::Instance()->Add(this);
 	SetParent(CGUIManager::Instance()->GetRoot());
 }
@@ -302,19 +303,28 @@ void CButton::Render()
 {	
 	// Font = Style->Fonts.ButtonFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
 
+	CGrRect temprect = CGrRect(GetBox().Min, GetBox().Max);
+
+	temprect.Color = Style->Colors.ButtonFace;
 	PRender->sClr = Style->Colors.ButtonFace;
 	PRender->lClr = Style->Colors.ButtonBorder;
 	if (WidgetState.Hovered)
 	{
+		temprect.Color = Style->Colors.ButtonFaceHovered;
 		PRender->sClr = Style->Colors.ButtonFaceHovered;
 		PRender->lClr = Style->Colors.ButtonBorderHovered;
 	}
 	if (WidgetState.Pressed)
 	{
+		temprect.Color = Style->Colors.ButtonFaceHovered;
 		PRender->sClr = Style->Colors.ButtonFacePressed;
 		PRender->lClr = Style->Colors.ButtonFacePressed;
 	}
 	PRender->grRectS(GetBox().Min, GetBox().Max);
+	temprect.SetLayer(1);
+	//temprect.Render();
+
+
 	PRender->grRectL(GetBox().Min, GetBox().Max);	
 }
 

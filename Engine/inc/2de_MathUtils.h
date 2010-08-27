@@ -960,8 +960,8 @@ typedef Vector4 RGBAf;
 // </чятик, чятик (радость)>
 
 //////////////////////////////////////////////////////////////////////////
-// CAABB - Axis Aligned Bounding Box. Maybe i should choose different name. This on isn't nice enough.
-
+//CAABB - Axis Aligned Bounding Box. Maybe i should choose different name. This on isn't nice enough.
+//Yep. This is CBox now. KISS
 class CBox
 {
 public:
@@ -1053,8 +1053,7 @@ bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, con
 bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);	// Feel the difference.
 
 //////////////////////////////////////////////////////////////////////////
-//	Geometry
-
+//CGeometry
 class CGeometry
 {
 public:
@@ -1064,8 +1063,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-// CCircle
-
+//CCircle
 class CCircle : public CGeometry
 {
 	Vector2 Position;
@@ -1081,7 +1079,6 @@ class CCircle : public CGeometry
 //////////////////////////////////////////////////////////////////////////
 //CPolygon @todo: decide: should we update BBOX each time, we add or remove vertices
 // or just leave it with possibility to update BBOX each time we need it correct
-
 class CPolygon : public CGeometry
 {
 public:
@@ -1113,7 +1110,34 @@ private:
 
 class CRectangle : public CGeometry
 {
+public:
+	// влепить сюда union, когда будешь дома, а не в больничке
+	Vector2 v0;	// Lower left 
+	Vector2 v1;	// Lower right
+	Vector2 v2;	// Upper right
+	Vector2 v3;	// Upper left
 
+	CRectangle(const Vector2 &Min, const Vector2 &Max)
+	{
+		assert(Min.x <= Max.x);
+		assert(Min.y <= Max.y);
+		v0 = Min;
+		v1 = Vector2(Max.x, Min.y);
+		v2 = Max;
+		v3 = Vector2(Min.x, Max.y);
+	}
+	CRectangle(const Vector2 &Av0, const Vector2 &Av1, const Vector2 &Av2, const Vector2 &Av3) :
+		v0(Av0), v1(Av1), v2(Av2), v3(Av3)
+	{}
+	CRectangle(const Vector2 &Center, float Width, float Height)
+	{
+		Vector2 wh_2 = Vector2(Width, Height) * 0.5f;
+		v0 = Center - wh_2;
+		v1 = Vector2(Center.x + Width * 0.5f, Center.y - Height * 0.5f);
+		v2 = Center + wh_2;		
+		v3 = Vector2(Center.x - Width * 0.5f, Center.y + Height * 0.5f);
+	}
+	//bool CheckOrienation();
 };
 
 class CSegment : public CGeometry  // Are we really need it?

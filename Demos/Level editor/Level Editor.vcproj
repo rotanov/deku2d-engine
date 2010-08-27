@@ -187,10 +187,18 @@
 		<Filter
 			Name="Headers"
 			>
+			<File
+				RelativePath=".\inc\LevelEditor.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Source"
 			>
+			<File
+				RelativePath=".\src\LevelEditor.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\src\main.cpp"
 				>
@@ -214,14 +222,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\src\LevelEditor.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\inc\LevelEditor.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

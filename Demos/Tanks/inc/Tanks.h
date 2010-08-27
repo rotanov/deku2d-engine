@@ -191,6 +191,7 @@ public:
 class CTankManager : CCommonManager <list<CObject*> >/*public CList*/, public CUpdatable, public CRenderable
 {
 public:	
+	CText PlOneHealth, PlTwoHealth;
 	CTankMap *Map;
 	int PlayerCount;
 	CTankManager() : PlayerCount(0)
@@ -199,6 +200,15 @@ public:
 		AddPlayer();
 		AddPlayer();
 		//AddAI();
+		PlOneHealth.SetText("Player1 health: %d" + itos(GetPlayer(0)->Health));
+		PlTwoHealth.SetText("Player2 health: %d" + itos(GetPlayer(1)->Health));
+		PlOneHealth.Color = COLOR_P1;
+		PlTwoHealth.Color = COLOR_P2;
+		PlOneHealth.Position = Vector2(10, 460);
+		PlTwoHealth.Position = Vector2(490, 460);
+		PlOneHealth.SetLayer(2);
+		PlTwoHealth.SetLayer(2);
+
 	}
 
 	CTank* GetPlayer(int PlayerIndex);

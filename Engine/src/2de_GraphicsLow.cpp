@@ -584,6 +584,19 @@ float CFont::SymbolWidth( unsigned int Index ) const
 	return Width[Index];
 }
 
+Vector2Array<4> CFont::GetTexCoords( unsigned int Charachter ) /*const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable result returned */
+{
+	Vector2Array<4> result;
+	result[0] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
+		bbox[Charachter - 32].Min.y / Texture->Height);
+	result[1] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
+		bbox[Charachter - 32].Min.y / Texture->Height);
+	result[2] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
+		bbox[Charachter - 32].Max.y / Texture->Height);
+	result[3] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
+		bbox[Charachter - 32].Max.y / Texture->Height);
+	return result;
+}
 //////////////////////////////////////////////////////////////////////////
 // CCamera
 
@@ -726,9 +739,14 @@ bool CRenderManager::DrawObjects()
 	}
 	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	FontVertices.RenderPrimitive(GL_QUADS);
+	glDisable(GL_TEXTURE_2D);
+	QuadVertices.RenderPrimitive(GL_QUADS);
 	//////////////////////////////////////////////////////////////////////////
 	/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
@@ -759,6 +777,14 @@ void CRenderManager::Print(const CText *Text)
 		FontVertices.PushVertex(Text, Vector2(dx,			liheight), Text->Color, TempTexCoords[3]);
 		dx += Text->GetFont()->bbox[Text->GetText()[i] - 32].Width() + 1;
 	}
+}
+
+void CRenderManager::DrawBox( const CGrRect *Rectangle )
+{
+	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
+	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
+	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
+	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
 }
 //-------------------------------------------//
 //				Common OpenGL stuff			 //
@@ -1241,4 +1267,16 @@ CSceneManager::~CSceneManager()
 	for(vector<CAbstractScene*>::iterator i = Scenes.begin(); i != Scenes.end(); ++i)
 		delete (*i);
 	Scenes.clear();
+}
+
+//////////////////////////////////////////////////////////////////////////
+//CRenderProxy
+CRenderProxy::CRenderProxy( CRenderable *ARenderSource ) : RenderSource(ARenderSource)
+{
+	SetName("CRenderProxy");
+}
+
+void CRenderProxy::Render()
+{
+	RenderSource->Render();
 }

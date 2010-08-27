@@ -12,7 +12,6 @@
 
 //////////////////////////////////////////////////////////////////////////
 //Primitive Render
-
 #define G_POLY_TEX_CELL_SIZE 20				//	Размер клетки текстуры шахматной доски для многоугольников.
 #define G_POLY_OUTLINE_ENABLE			
 #define G_POLY_TEXTURE_ENABLE
@@ -21,7 +20,7 @@
 #define PRM_RNDR_OPT_BLEND_OTHER	0x02
 #define PRM_RNDR_OPT_BLEND_NO_ONE	0x03
 
-class CPrimitiveRender // Унсаследовать? Но зачем?
+class CPrimitiveRender
 {
 public:
 	int BlendingOption, CheckerCellSize;

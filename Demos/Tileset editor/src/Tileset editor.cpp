@@ -154,7 +154,6 @@ void CTilesetEditor::Render()
 
 	PRender.grCircleL(MousePosition, 5);
 	int fps = CEngine::Instance()->GetFPS();
-	//CFontManager::Instance()->PrintEx(5, WindowHeight - 20, 0.0f, "FPS: %d", fps);
 	glLoadIdentity();
 
 	gToggleScissor(true);

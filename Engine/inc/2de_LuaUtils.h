@@ -6,7 +6,8 @@
 #include "2de_Core.h"
 
 /** 
-* Класс CLuaVirtualMachine - синглтон, предоставляющий доступ к единой виртуальной машине Lua. Регистрирует Lua API функции движка, а также позволяет выполнять Lua-скрипты по имени файла.
+*	Класс CLuaVirtualMachine - синглтон, предоставляющий доступ к единой виртуальной машине Lua.
+*	Регистрирует Lua API функции движка, а также позволяет выполнять Lua-скрипты по имени файла.
 */
 
 class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
