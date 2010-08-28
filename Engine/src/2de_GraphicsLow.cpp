@@ -31,10 +31,55 @@ void Vector4::glSet() const
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CRenderableUnitInfo
+
+CRenderableUnitInfo::CRenderableUnitInfo() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
+{
+
+}
+
+void CRenderableUnitInfo::SetAngle(float AAngle /*= 0.0f*/)
+{
+	Angle = Clamp(AAngle, 0.0f, 360.0f);
+}
+
+float CRenderableUnitInfo::GetAngle() const
+{
+	return Angle;
+}
+
+void CRenderableUnitInfo::SetLayer(unsigned int Layer)
+{
+	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
+}
+
+float CRenderableUnitInfo::GetDepth() const
+{
+	return Depth;
+}
+
+float CRenderableUnitInfo::GetScaling() const
+{
+	return Scaling;
+}
+
+void CRenderableUnitInfo::SetScaling(float AScaling)
+{
+	Scaling = AScaling;
+// 	Box.Min *= Scaling;
+// 	Box.Max *= Scaling;
+}
+
+unsigned int CRenderableUnitInfo::GetLayer() const
+{
+	return Depth * 100.0f;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 // CRenderable
 
-CRenderable::CRenderable() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f),
-	Box(0, 0, 0, 0), Depth(0.0f), Scaling(1.0f), Scene(NULL), Visible(true)
+CRenderable::CRenderable() : Box(0, 0, 0, 0), Scene(NULL), Visible(true)
 {
 	SetName("CRenderable");
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
@@ -47,51 +92,18 @@ CRenderable::~CRenderable()
 	Scene->RemoveRenderable(this);
 }
 
-void CRenderable::SetAngle(float AAngle /*= 0.0f*/)
+const CBox CRenderable::GetBox() const
 {
-	Angle = Clamp(AAngle, 0.0f, 360.0f);
+ 	CBox TempBox = Box;
+ 	TempBox.Min *= GetScaling();
+ 	TempBox.Max *= GetScaling();
+	//Box.RotateByAngle(Angle);
+	return TempBox;
 }
 
-float CRenderable::GetAngle() const
+void CRenderable::SetBox(const CBox &ABox)
 {
-	return Angle;
-}
-
-void CRenderable::SetLayer(unsigned int Layer)
-{
-	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
-}
-
-float CRenderable::GetDepth() const
-{
-	return Depth;
-}
-
-const CBox& CRenderable::GetBox() const
-{
-	return Box;
-}
-
-void CRenderable::SetBox(const CBox &box)
-{
-	Box = box;
-}
-
-float CRenderable::GetScaling() const
-{
-	return Scaling;
-}
-
-void CRenderable::SetScaling(float AScaling)
-{
-	Scaling = AScaling;
-	Box.Min *= Scaling;
-	Box.Max *= Scaling;
-}
-
-unsigned int CRenderable::GetLayer() const
-{
-	return Depth * 100.0f;
+	Box = ABox;
 }
 
 void CRenderable::PutIntoScene(CAbstractScene *AScene)
@@ -747,6 +759,9 @@ bool CRenderManager::DrawObjects()
 	FontVertices.RenderPrimitive(GL_QUADS);
 	glDisable(GL_TEXTURE_2D);
 	QuadVertices.RenderPrimitive(GL_QUADS);
+	LineVertices.RenderPrimitive(GL_LINES);
+	//PointVertices.RenderPrimitive(GL_POINTS);
+	PointVertices.Clear();
 	//////////////////////////////////////////////////////////////////////////
 	/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
@@ -781,10 +796,33 @@ void CRenderManager::Print(const CText *Text)
 
 void CRenderManager::DrawBox( const CGrRect *Rectangle )
 {
+	if (Rectangle->isLineDrawn)
+	{
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
+		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
+		return;
+	}
 	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
 	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
 	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
 	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
+}
+
+void CRenderManager::DrawPoint(const CGrPoint *Point)
+{
+	PointVertices.PushVertex(Point, Point->Position);
+}
+
+void CRenderManager::DrawLine(const CGrLine *Line)
+{
+	LineVertices.PushVertex(Line, Line->Segment.v0);
+	LineVertices.PushVertex(Line, Line->Segment.v1);
 }
 //-------------------------------------------//
 //				Common OpenGL stuff			 //

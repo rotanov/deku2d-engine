@@ -191,7 +191,7 @@ bool CEngine::Initialize()
 	Tscn->Texture = TitleScreenShroomTexture;
 	
 	
-	StateHandler->OnInitialize();	// maybe make it bool too and interrupt on errors like it was before..
+	StateHandler->OnInitialize();	// maybe make it bool too and interrupt on errors like it was before.. // YES
 
 	//if (procUserInit != NULL)
 		//if (!procUserInit())

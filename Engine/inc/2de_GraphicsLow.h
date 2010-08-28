@@ -46,51 +46,49 @@ extern char BINARY_DATA_DEFAULT_FONT[];
 //RenderObject
 
 /**
-*	Виртуально унаследовать от этой гадости - это первый вариант.
+*	Виртуально унаследовать от этой гадости - это первый вариант. // Интересно, почему я думал унаследовать виртуально?
 *	Второй вариант - аггрегировать указатель на неё в классы.
 */
 
-/*
-class CPlacing 
+class CRenderableUnitInfo
 {
-	float Angle;
+public:
 	Vector2 Position;
-	float Scaling;
-	CAABB aabb;
+	RGBAf Color;	
+	bool doIgnoreCamera;	// if true, then object will be drawn in global cords,
+
+	CRenderableUnitInfo();
+	void SetAngle(float AAngle = 0.0f);
+	float GetAngle() const;
+	float GetScaling() const;
+	void SetScaling(float AScaling);
+	void SetLayer(unsigned int Layer);	// Layers should be from 0 to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
+	unsigned int GetLayer() const;
+	float GetDepth() const;
+
+private:
+	float				Angle;		//	(Degrees)
+	float				Depth;		//	[-1; 1]?
+	float				Scaling;	
 };
-*/
 
 class CAbstractScene;
 
-class CRenderable : public virtual CObject
+class CRenderable : public virtual CObject, public CRenderableUnitInfo
 {
 public:
 	CRenderable();
 	virtual ~CRenderable();
 	virtual void Render() = 0;
-	void SetAngle(float AAngle = 0.0f);
-	float GetAngle() const;
-	const CBox& GetBox() const;
-	virtual void SetBox(const CBox &box);
-	float GetScaling() const;
-	void SetScaling(float AScaling);
-	void SetLayer(unsigned int Layer);
-	unsigned int GetLayer() const;
-	float GetDepth() const;
-	void PutIntoScene(CAbstractScene *AScene);
-	CAbstractScene* GetScene() const;
+	const CBox GetBox() const;
+	virtual void SetBox(const CBox &ABox);
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
-
-	Vector2				Position;
-	RGBAf				Color;	
-	bool				doIgnoreCamera;		// if true, then object will be drawn in global cords,
+	void PutIntoScene(CAbstractScene *AScene);
+	CAbstractScene* GetScene() const;
 
 private:
-	float				Angle;		//	(Degrees)
-	CBox				Box;		//	Axis Aligned Bounding Box; ORLY? Isn't it obvious;
-	float				Depth;		//	[-1; 1]?
-	float				Scaling;	
+	CBox				Box;		//	Axis Aligned Bounding Box for culling
 	CAbstractScene		*Scene;
 	bool				Visible;
 };
@@ -100,16 +98,18 @@ private:
 
 class CGLImageData : public CImageData
 {
-private:
-	bool			MakeTexture();
 public:
-					CGLImageData();
-					virtual ~CGLImageData();
+	CGLImageData();
+	virtual ~CGLImageData();
 	bool			LoadTexture(const string &Filename);
 	bool			LoadTexture(size_t AWidth, size_t AHeight, const byte* Address);	// From memory
 	virtual GLuint	GetTexID();
+
 protected:
 	GLuint			TexID;
+
+private:
+	bool			MakeTexture();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -123,8 +123,10 @@ public:
 	//CTexture(const string &AFilename);
 	void Bind();
 	bool LoadFromFile();
+
 protected:
 	void Unload();
+
 private:
 	GLuint GetTexID();
 };
@@ -184,9 +186,13 @@ class CPrmitiveVertexDataHolder	// for any other non textured stuff
 public:
 	CPrmitiveVertexDataHolder();
 	virtual ~CPrmitiveVertexDataHolder();
-	virtual void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	virtual void PushVertex(const CRenderable *Sender, const Vector2 &Vertex);
+	virtual void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	virtual void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex);
 	virtual void RenderPrimitive(GLenum Type);
+	void Clear()
+	{
+		VertexCount = 0;
+	}
 
 protected:
 	unsigned int VertexCount;
@@ -202,8 +208,8 @@ class CVertexDataHolder : public CPrmitiveVertexDataHolder<StartSize>
 public:
 	CVertexDataHolder();
 	~CVertexDataHolder();
-	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	void PushVertex(const CRenderable *Sender, const Vector2 &Vertex,
+	void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex,
 		const RGBAf &Color, const Vector2 &TexCoord);
 	void RenderPrimitive(GLenum Type);
 
@@ -315,6 +321,8 @@ public:
 
 class CText;
 class CGrRect;
+class CGrPoint;
+class CGrLine;
 
 class CRenderManager : public CCommonManager <list <CRenderable*> >, public CTSingleton <CRenderManager>
 {
@@ -322,8 +330,9 @@ protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 private:
-	CVertexDataHolder<> FontVertices;	// We want them for each font, don't we? @todo: implement this
-										// possibiliy
+	CVertexDataHolder<> FontVertices;	// We want them for each font, don't we? @todo: implement this possibiliy
+	CPrmitiveVertexDataHolder<512>	PointVertices;
+	CPrmitiveVertexDataHolder<>	LineVertices;
 	CPrmitiveVertexDataHolder<>	QuadVertices;
 public:
 	CCamera	Camera;
@@ -331,6 +340,8 @@ public:
 	bool DrawObjects();
 	void Print(const CText *Text);
 	void DrawBox(const CGrRect *Rectangle);
+	void DrawPoint(const CGrPoint *Point);
+	void DrawLine(const CGrLine *Line);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -351,7 +362,7 @@ typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
 void setVSync(int interval=1);
 
 //////////////////////////////////////////////////////////////////////////
-//CGLWindow // too old // not really
+//CGLWindow
 
 class CGLWindow : public CTSingleton<CGLWindow>
 {
@@ -385,15 +396,63 @@ private:
 };
 //////////////////////////////////////////////////////////////////////////
 //CGrRect - not nice enough, i think.
-class CGrRect : public CRenderable // or better CBasePrimitive
+
+class CBasePrimitive : public CRenderableUnitInfo
+{
+public:
+};
+
+class CGrPoint : public CBasePrimitive
+{
+public:
+	void Render()
+	{
+		CRenderManager::Instance()->DrawPoint(this);
+	}
+};
+
+
+class CGrLine : public CBasePrimitive
+{
+public:
+	CSegment Segment;
+	CGrLine(const Vector2 &v0, const Vector2 &v1) : Segment(v0, v1)
+	{
+
+	}
+	void Render()
+	{
+		CRenderManager::Instance()->DrawLine(this);
+	}
+};
+
+class CGrSegMent : public CGrLine
+{
+public:
+	CGrSegMent(const Vector2 &v0, const Vector2 &v1) : CGrLine(v0, v1)
+	{
+
+	}
+	void Render()
+	{
+		CGrPoint p0, p1;
+		p0.Position = Segment.v0;
+		p1.Position = Segment.v1;
+		p0.Render();
+		p1.Render();
+		CGrLine::Render();
+	}
+};
+
+class CGrRect : public CBasePrimitive
 {
 public:
 	CRectangle Rectangle;
+	bool isLineDrawn;
 
 	CGrRect();
-	CGrRect(const Vector2 p0, const Vector2 p1) : Rectangle(p0, p1)
+	CGrRect(const Vector2 p0, const Vector2 p1) : Rectangle(p0, p1), isLineDrawn(false)
 	{		
-		SetName("Some rectangle");
 	}
 	~CGrRect()
 	{
@@ -401,6 +460,18 @@ public:
 	}
 	void Render()
 	{
+// 		if (isLineDrawn)
+// 		{
+// 			CGrSegMent s0(Rectangle.v0, Rectangle.v1);
+// 			CGrSegMent s1(Rectangle.v1, Rectangle.v2);
+// 			CGrSegMent s2(Rectangle.v2, Rectangle.v3);
+// 			CGrSegMent s3(Rectangle.v3, Rectangle.v0);
+// 			s0.Render();
+// 			s1.Render();
+// 			s2.Render();
+// 			s3.Render();
+// 			return;
+// 		}
 		CRenderManager::Instance()->DrawBox(this);
 	}
 private:	
@@ -517,8 +588,8 @@ protected:
 	CSceneManager();
 };
 
-// templ impl section
-
+//////////////////////////////////////////////////////////////////////////
+// Implementation section
 //////////////////////////////////////////////////////////////////////////
 //CPrimitiveVertexDataHolder
 
@@ -537,7 +608,7 @@ CPrmitiveVertexDataHolder<StartSize>::~CPrmitiveVertexDataHolder()
 }
 
 template <unsigned int StartSize>
-void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color )
+void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color )
 {
 	assert(Sender != NULL);
 	// if VertexCount == ReservedCount then grow
@@ -548,7 +619,7 @@ void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender
 }
 
 template <unsigned int StartSize>
-void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex )
+void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex )
 {
 	PushVertex(Sender, Vertex, Sender->Color);
 }
@@ -579,13 +650,13 @@ CVertexDataHolder<StartSize>::~CVertexDataHolder()
 }
 
 template <unsigned int StartSize>
-void CVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color )
+void CVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color )
 {
 	assert(false);
 }
 
 template <unsigned int StartSize>
-void CVertexDataHolder<StartSize>::PushVertex( const CRenderable *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord )
+void CVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord )
 {
 	CPrmitiveVertexDataHolder<StartSize>::PushVertex(Sender, Vertex, Color);
 	// if VertexCount == ReservedCount then grow here also

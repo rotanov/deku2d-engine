@@ -303,29 +303,36 @@ void CButton::Render()
 {	
 	// Font = Style->Fonts.ButtonFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
 
-	CGrRect temprect = CGrRect(GetBox().Min, GetBox().Max);
+	CGrRect temprect(GetBox().Min, GetBox().Max);
+	CGrRect temprect_lines(GetBox().Min, GetBox().Max);
 
 	temprect.Color = Style->Colors.ButtonFace;
+	temprect_lines.Color = Style->Colors.ButtonBorder;
 	PRender->sClr = Style->Colors.ButtonFace;
 	PRender->lClr = Style->Colors.ButtonBorder;
 	if (WidgetState.Hovered)
 	{
 		temprect.Color = Style->Colors.ButtonFaceHovered;
+		temprect_lines.Color = Style->Colors.ButtonBorderHovered;
 		PRender->sClr = Style->Colors.ButtonFaceHovered;
 		PRender->lClr = Style->Colors.ButtonBorderHovered;
 	}
 	if (WidgetState.Pressed)
 	{
 		temprect.Color = Style->Colors.ButtonFaceHovered;
+		temprect_lines.Color = Style->Colors.ButtonBorderPressed;
 		PRender->sClr = Style->Colors.ButtonFacePressed;
-		PRender->lClr = Style->Colors.ButtonFacePressed;
+		PRender->lClr = Style->Colors.ButtonBorderPressed;
 	}
-	PRender->grRectS(GetBox().Min, GetBox().Max);
+	//PRender->grRectS(GetBox().Min, GetBox().Max);
 	temprect.SetLayer(1);
-	//temprect.Render();
+	temprect_lines.SetLayer(2);
+	temprect_lines.isLineDrawn = true;
+	temprect_lines.Render();
+	temprect.Render();
 
 
-	PRender->grRectL(GetBox().Min, GetBox().Max);	
+	//PRender->grRectL(GetBox().Min, GetBox().Max);	
 }
 
 

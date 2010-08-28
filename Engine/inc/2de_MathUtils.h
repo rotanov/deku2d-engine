@@ -98,21 +98,36 @@ __INLINE int Sign<float>(const float &x)
 
 // interpolate between interval [a,b] with t in [0,1].
 
-__INLINE float Lerp(float a, float b, float t)
+__INLINE float LinearInterpolate(float a, float b, float t)
 {
 	return a + (b - a) * t;
 }
 
-__INLINE float CosineInterpolation(float a, float b, float t)
+__INLINE float CosineInterpolate(float a, float b, float t)
 {
-	return a + (b - a) * cos(t * PI_D2);
+	return a + (b - a) * (1.0f - cos(t * PI)) * 0.5f;
 }
 
-// snap floating point number to grid.
+// Here v1 is the "a" point and v2 is the "b" point. v0 is "the point before a" and v3 is "the point after b".
+__INLINE float CubicInterpolate(float v0, float v1, float v2, float v3, float t)
+{
+	float P = (v3 - v2) - (v0 - v1);
+	float Q = (v0 - v1) - P;
+	float R = v2 - v0;
+	float S = v1;
+	float x2 = t * t;
+	float x3 = x2 * t;
+	return P * x3 + Q * x2 + R * t + S;
+}
 
+// Also i heard about some Hermite interpolation here http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/interpolation/
+// but i think we won't ever need it. And also some keywords: Bezier, Spline, and piecewise Bezier
+// also also look here for perlin noise http://freespace.virgin.net/hugo.elias/models/m_perlin.htm and other stuff
+
+// snap floating point number to grid.
 __INLINE float snap(float p, float grid)
 {
-	return grid ? float( floor((p + grid*0.5f)/grid) * grid) : p;
+	return grid ? float(floor((p + grid * 0.5f) / grid) * grid) : p;
 }
 
 class Vector2
@@ -1142,7 +1157,13 @@ public:
 
 class CSegment : public CGeometry  // Are we really need it?
 {
+public:
+	Vector2 v0, v1;
 
+	CSegment(const Vector2 &Av0, const Vector2 &Av1) : v0(Av0), v1(Av1)
+	{
+		assert(v0 != v1);	// Я предполгаю, что такие отрезки нам не нужны и мы хотели бы узнать, если они случайно появятся.
+	}
 };
 
 
