@@ -35,7 +35,7 @@ OBJECTS		=	obj/2de_Core.o \
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 
-CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -iquoteinc
+CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -Iinc
 
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
@@ -87,11 +87,16 @@ install: $(TARGET_STATIC) $(TARGET_SHARED)
 	install -m644 $(TARGET) $(PREFIXDIR)$(TARGET_STATIC)
 	install -m644 $(TARGET_SHARED) $(PREFIXDIR)$(TARGET_SHARED)
 	install -m644 inc/2de_*.h $(INCLUDEDIR)
+
+# TODO: write uninstall target..
 	
 
 docs: doc/Doxyfile
-	if [ -e /usr/bin/doxygen ]; then \
+	@if [ -e /usr/bin/doxygen ]; \
+	then \
 		doxygen doc/Doxyfile; \
+	else \
+		echo "You must have Doxygen installed to make documentation."; \
 	fi
 
 clean:

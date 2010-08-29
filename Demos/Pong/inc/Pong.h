@@ -170,7 +170,7 @@ public:
 	{
 		PlayerOneScoreText.Position = Vector2(10.0f, 450.0f);
 		PlayerOneScoreText.SetText("Score: " + itos(PlayerOneScore));
-		PlayerTwoScoreText.Position = Vector2(1170.0f, 450.0f);
+		PlayerTwoScoreText.Position = Vector2(CGLWindow::Instance()->GetWidth() - 100.0f, 450.0f);
 		PlayerTwoScoreText.SetText("Score: " + itos(PlayerTwoScore));
 
 		CBox BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;

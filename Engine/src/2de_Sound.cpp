@@ -254,7 +254,7 @@ size_t CSoundMixer::GetSoundVolume(CSound *ASound) const
 	return Mix_VolumeChunk(ASound->GetData(), -1);
 }
 
-CSoundMixer::CSoundMixer()// : DefaultBGMVolume(MIX_MAX_VOLUME), DefaultSFXVolume(MIX_MAX_VOLUME)
+CSoundMixer::CSoundMixer() : SOUND_MIXING_CHANNELS_COUNT(32) // : DefaultBGMVolume(MIX_MAX_VOLUME), DefaultSFXVolume(MIX_MAX_VOLUME)
 {
 	SetName("Sound mixer");
 	Initialized = false;

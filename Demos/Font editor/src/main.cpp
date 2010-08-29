@@ -3,13 +3,15 @@
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 	CFontEditor *FontEditor = CFactory::Instance()->New<CFontEditor>("FontEditor");
+	CEngine::Instance()->ToggleKeyRepeat(true); // temporarily for GUI-only programs..
+	return true;
 }
 
 int main(int argc, char *argv[])

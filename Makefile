@@ -16,10 +16,13 @@ strict: all
 docs:
 	$(MAKE) -C Engine/ docs
 
+tags:
+	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
+
 clean:
 	$(MAKE) -C Engine/ clean
 
 distclean: MAKETARGET = distclean
 distclean: all
 
-.PHONY: clean distclean docs
+.PHONY: clean distclean docs tags

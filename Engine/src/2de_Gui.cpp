@@ -2,7 +2,41 @@
 #include "2de_Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
+// CGUIStyle
+
+CGUIStyle::CGUIStyle()
+{
+	// default style values - very ugly style :) I'm programmer, not fucking "эстет" :) you're welcome to fix colors to more beautiful ones
+
+	Colors.FocusRect = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
+	Colors.ButtonFace = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+	Colors.ButtonFaceHovered = RGBAf(0.6f, 0.6f, 0.6f, 1.0f);
+	Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
+	Colors.ButtonBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+	Colors.ButtonBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+	Colors.ButtonBorderPressed = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+	Colors.ButtonText = COLOR_BLACK;
+	Colors.ButtonInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
+	Colors.EditBackground = COLOR_WHITE;
+	Colors.EditBackgroundHovered = COLOR_WHITE;
+	Colors.EditBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+	Colors.EditBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
+	Colors.EditText = COLOR_BLACK;
+	Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
+	Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
+	Colors.LabelText = COLOR_WHITE;
+
+	Metrics.FocusRectSpacing = 5.0f;
+	Metrics.FocusRectLineWidth = 0.5f;
+	Metrics.EditMargins = Vector2(4.0f, 6.0f);
+	Metrics.EditBorderWidth = 2.0f;
+
+	Font = CFontManager::Instance()->GetDefaultFont();
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CGUIObjectBase
+
 CGUIObjectBase::CGUIObjectBase()
 {
 	Font = NULL;
@@ -68,19 +102,21 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 	return Result;
 }
 
-void CGUIObjectBase::SetCallback( CObjectCallback ACallProc, CObject *ACaller )
+void CGUIObjectBase::SetCallback(CObjectCallback ACallProc, CObject *ACaller)
 {
 	Caller = ACaller;
 	CallProc = ACallProc;
 }
 
-void CGUIObject::SetVisibility( bool AVisible )
+void CGUIObject::SetVisibility(bool AVisible)
 {
 	CRenderable::SetVisibility(AVisible);
 	Text.SetVisibility(AVisible);
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CGUIRootObject
+
 CGUIRootObject::CGUIRootObject() : TabHolded(false), KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0)
 {
 	SetName("GUI Root Object");
@@ -106,6 +142,7 @@ void CGUIRootObject::Render()
 void CGUIRootObject::Update(float dt)
 {
 #ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
+	//  этот код по-моему вообще не работает...
 	if (TabHolded)
 	{
 		TimerAccum += dt*1000;
@@ -136,6 +173,7 @@ void CGUIRootObject::Update(float dt)
 
 //////////////////////////////////////////////////////////////////////////
 // CGUIObject
+
 CGUIObject::CGUIObject()
 {
 	Text.SetLayer(5);
@@ -205,19 +243,23 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		{
 		case SDLK_TAB:
 			Root->TabHolded = true;
-			if (Focus != Objects.end()) // if iterator correct
+			if (mod & KMOD_SHIFT)
 			{
-				if (mod & KMOD_SHIFT)
+				if (Focus != Objects.begin())
 					Focus--;
-				else
-					Focus++;									
-			}
 
-			if (Focus == Objects.end()) // if iterator incorrect totally i.e. pointing to illegal object
-			{
-				if (mod & KMOD_SHIFT)
+				if (Focus == Objects.begin())
+				{
 					Focus = Objects.end();
-				else
+					Focus--;
+				}
+			}
+			else
+			{
+				if (Focus != Objects.end())
+					Focus++;
+
+				if (Focus == Objects.end())
 					Focus = Objects.begin();
 			}
 			break;
@@ -233,7 +275,8 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		break;
 	}
 
-	(*Focus)->InputHandling(state, key, mod, letter);
+	if (Focus != Objects.end())
+		(*Focus)->InputHandling(state, key, mod, letter);
 		
 	return true;
 }
@@ -258,7 +301,6 @@ void CGUIManager::Add(CGUIObject *AObject)
 	CCommonManager <list <CGUIObject*> >::Add(AObject);
 	Focus = Objects.begin();
 }
-
 
 CGUIManager::~CGUIManager()
 {
@@ -299,6 +341,13 @@ CButton::CButton(CBox ARect, const char* AText, RGBAf AColor)
 	Text.Color = Style->Colors.ButtonText;
 }
 
+void CButton::SetBox(const CBox &box)
+{
+	CGUIObject::SetBox(box);
+	Text.Position.x = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).x;
+	Text.Position.y = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).y;
+}
+
 void CButton::Render()
 {	
 	// Font = Style->Fonts.ButtonFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
@@ -319,7 +368,7 @@ void CButton::Render()
 	}
 	if (WidgetState.Pressed)
 	{
-		temprect.Color = Style->Colors.ButtonFaceHovered;
+		temprect.Color = Style->Colors.ButtonFacePressed;
 		temprect_lines.Color = Style->Colors.ButtonBorderPressed;
 		PRender->sClr = Style->Colors.ButtonFacePressed;
 		PRender->lClr = Style->Colors.ButtonBorderPressed;
@@ -679,17 +728,16 @@ bool CEdit::isTextFits(const char *AText) const
 	return ((Font->GetStringWidth(AText) + 2.0f * Style->Metrics.EditMargins.x) < GetBox().Width());
 }
 
-void CEdit::SetBox( const CBox &box )
+void CEdit::SetBox(const CBox &box)
 {
 	float StringHeight = Text.Height();
 	CGUIObject::SetBox(box);
 	Text.Position.x = (int)box.Min.x + (int)Style->Metrics.EditMargins.x;
 	/*Text.Position.y = (int)((box.Min.y + box.Max.y) / 2.0f - StringHeight / 2.0f);*/
 	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
-
 }
 
-void CEdit::SetText( const string &AText )
+void CEdit::SetText(const string &AText)
 {
 	ActualText = AText;			
 	/*Text.Position.y = (int)((GetBox().Min.y + GetBox().Max.y) / 2.0f - Text.Height() / 2.0f);*/
@@ -697,6 +745,7 @@ void CEdit::SetText( const string &AText )
 	Text.Position.x = (int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x;
 	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CEdit::CTextSelection
 
@@ -772,7 +821,6 @@ CMenuItem::CMenuItem(CMenuItem *AParent, const string &AMenuText)
 
 CMenuItem::~CMenuItem()
 {
-
 }
 
 void CMenuItem::Render()
@@ -786,10 +834,15 @@ void CMenuItem::Render()
 		//Font->Print(ChildMenuItem->Text.c_str());
 	}	
 	Color = COLOR_WHITE;
-	PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
+
+	if (Focus != Objects.end())
+		PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
 }
 
-void CMenuItem::Update(float dt){}
+void CMenuItem::Update(float dt)
+{
+}
+
 
 bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
@@ -801,23 +854,24 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		{
 		case SDLK_UP:
 			// Вероятно эту логику можно записать и покороче @todo
-			if (Focus == Objects.begin() && isCycledMenuSwitch)
+			// 	записал чуть короче, да и баг, кажется, пофиксил..
+			if (Focus != Objects.begin())
+				Focus--;
+			else if (isCycledMenuSwitch)
 			{
 				Focus = Objects.end();
-				break;
+				Focus--;
 			}
-			Focus--;
 			break;
 		case SDLK_DOWN:
-			if (Focus == Objects.end() && isCycledMenuSwitch)
-			{
+			if (Focus != --Objects.end())
+				Focus++;
+			else if (isCycledMenuSwitch)
 				Focus = Objects.begin();
-				break;
-			}
-			Focus++;
+
 			break;
 		case SDLK_RETURN:
-			if ((*Focus)->CallProc)
+			if ((Focus != Objects.end()) && (*Focus)->CallProc)
 				(*Focus)->CallProc(Caller);
 // 			else
 // 				if ((*Focus)->)

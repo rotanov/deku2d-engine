@@ -4,7 +4,6 @@
 #include "2de_Core.h"
 #include "2de_Xml.h"
 
-#define DEFAULT_RESOURCE_LIST_FILE_NAME "Resources.xml"
 
 /**
  * CResourceSectionLoaderBase - базовый класс загрузчика секций ресурсов для полиморфизма.
@@ -87,6 +86,7 @@ bool CResourceSectionLoader<T>::Load(CXML *ResourceList)
 class CDataLister
 {
 public:
+	CDataLister();
 	CXML* List(string ADataRoot, bool ForceReindex = false);
 private:
 	CXML XML;
@@ -95,6 +95,8 @@ private:
 	void ExploreDirectory(string Path);
 	string GetLastPathComponent(string Path);
 	string GetFileNameWithoutExtension(string Filename);
+
+	const char *DEFAULT_RESOURCE_LIST_FILE_NAME;
 };
 
 /**

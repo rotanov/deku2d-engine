@@ -107,9 +107,7 @@ bool CEngine::Initialize()
 
 	SDL_EnableUNICODE(1);
 
-#ifdef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-#endif
+	//ToggleKeyRepeat(true); // now can be dynamically switched on/off..
 
 	gToggleScissor(false);
 
@@ -130,6 +128,7 @@ bool CEngine::Initialize()
 	CFontManager::Instance()->Init();	// Initialize default font;
 
 	CFactory::Instance(); // Factory should be initialized after all other managers
+
 	//////////////////////////////////////////////////////////////////////////
 	//Here goes high level initializations, like default scene as title screen
 	//and FPSText
@@ -163,14 +162,11 @@ bool CEngine::Initialize()
 	Tscn->SetTexture(TitleScreenShroomTexture);
 	
 	
-	StateHandler->OnInitialize();	// maybe make it bool too and interrupt on errors like it was before.. // YES
-
-	//if (procUserInit != NULL)
-		//if (!procUserInit())
-		//{
-			//Log("ERROR", "User init failed.");
-			//return false;
-		//}
+	if (!StateHandler->OnInitialize())
+	{
+		Log("ERROR", "State handler OnInitialize has failed");
+		return false;
+	}
 
 	Initialized = true;
 	Log("INFO","Initialization success");
@@ -494,6 +490,12 @@ void CEngine::ToggleLimitFPS(bool AdoLimitFPS)
 void CEngine::ToggleCalcFPS(bool AdoCalcFPS)
 {
 	doCalcFPS = AdoCalcFPS;
+}
+
+void CEngine::ToggleKeyRepeat(bool AdoKeyRepeat)
+{
+	int RepeatDelay = AdoKeyRepeat ? SDL_DEFAULT_REPEAT_DELAY : 0;
+	SDL_EnableKeyRepeat(RepeatDelay, SDL_DEFAULT_REPEAT_INTERVAL);
 }
 
 float CEngine::GetDeltaTime() const

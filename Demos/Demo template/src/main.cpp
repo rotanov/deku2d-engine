@@ -5,13 +5,15 @@ CEngine *Engine = CEngine::Instance();
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 	// do something..
 	// i put it here just to show how it works and as placeholder for user's code..
+
+	return true;
 }
 
 int main(int argc, char *argv[])
@@ -22,3 +24,6 @@ int main(int argc, char *argv[])
 	Engine->Run();
 	return 0;
 }
+
+
+

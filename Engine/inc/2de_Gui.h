@@ -57,36 +57,8 @@ public:
 		CFont* EditFont;
 	};*/
 
-	CGUIStyle()
-	{
-		// default style values - very ugly style :) I'm programmer, not fucking "эстет" :) you're welcome to fix colors to more beautiful ones
+	CGUIStyle();
 
-		Colors.FocusRect = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
-		Colors.ButtonFace = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-		Colors.ButtonFaceHovered = RGBAf(0.6f, 0.6f, 0.6f, 1.0f);
-		Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
-		Colors.ButtonFacePressed = RGBAf(0.45f, 0.45f, 0.45f, 1.0f);
-		Colors.ButtonBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-		Colors.ButtonBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-		Colors.ButtonBorderPressed = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-		Colors.ButtonText = COLOR_BLACK;
-		Colors.ButtonInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
-		Colors.EditBackground = COLOR_WHITE;
-		Colors.EditBackgroundHovered = COLOR_WHITE;
-		Colors.EditBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-		Colors.EditBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-		Colors.EditText = COLOR_BLACK;
-		Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
-		Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
-		Colors.LabelText = COLOR_WHITE;
-
-		Metrics.FocusRectSpacing = 5.0f;
-		Metrics.FocusRectLineWidth = 0.5f;
-		Metrics.EditMargins = Vector2(4.0f, 6.0f);
-		Metrics.EditBorderWidth = 2.0f;
-
-		Font = CFontManager::Instance()->GetDefaultFont();
-	}
 	CGUIStyleColors Colors;
 	CGUIStyleMetrics Metrics;
 	CFont *Font;
@@ -189,10 +161,6 @@ protected:
 					// 	ну она как бы есть, но не совсем иерархия.. и да, родителем объекта может быть и Base, поэтому тут будет он
 };
 
-// вот этот класс (CGUIManager) наследован одновременно и от синглтона,
-// и от CGUIObjectBase (который CUpdateObject и CRenderObject)..
-// получаем всякие гадости в логах при удалении, потому что его сначала
-// удаляет синглтон-киллер, а потом пытается удалить апдейт-менеджер и т. д.
 class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingleton<CGUIManager>
 {
 public:
@@ -202,7 +170,7 @@ public:
 	void SetFocus(CGUIObject *AObject);
 	CGUIRootObject* GetRoot() const;
 	void Add(CGUIObject *AObject);
-		
+
 private:
 	ManagerIterator Focus;
 	CGUIRootObject *Root;
@@ -230,12 +198,7 @@ class CButton : public CGUIObject
 public:
 	CButton();
 	CButton(CBox ARect, const char* AText, RGBAf AColor);
-	void SetBox(const CBox &box)
-	{
-		CGUIObject::SetBox(box);
-		Text.Position.x = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).x;
-		Text.Position.y = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).y;
-	}
+	void SetBox(const CBox &box);
 	void Render();
 	void Update(float dt);
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);

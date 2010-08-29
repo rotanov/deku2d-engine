@@ -6,11 +6,11 @@
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 // 	CMenuItem *MenuRoot = new CMenuItem(NULL, "Root menu item");
 // 	MenuRoot->SetLayer(10);
@@ -22,9 +22,15 @@ void CCustomStateHandler::OnInitialize()
 // 	dynamic_cast<CRenderObject*>(CGUIManager::Instance()->GetObject("Root menu item"))->Visible = true;
 // 	CGUIManager::Instance()->SetFocus(MenuRoot);
 
+	// to get rid of title screen text..
+	CAbstractScene *MainScene = CSceneManager::Instance()->CreateScene();
+	CSceneManager::Instance()->SetCurrentScene(MainScene);
+
 	CFactory::Instance()->Add(new CPacmanGame(CFactory::Instance()->New<CPacmanPlayer>("CPacmanPlayer")), "CPacmanGame");
 	CFactory::Instance()->Get<CFont>("Font")->LoadFromFile();	// ???
 	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("PacMan"), 5000);
+
+	return true;
 }
 
 int main(int argc, char *argv[])

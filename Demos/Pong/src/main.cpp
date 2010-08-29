@@ -17,11 +17,11 @@ public:
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 	CAbstractScene *PongScene = CSceneManager::Instance()->CreateScene();
 	CAbstractScene *SomeScene = CSceneManager::Instance()->GetCurrentScene();
@@ -33,6 +33,8 @@ void CCustomStateHandler::OnInitialize()
 	CTimeredAction<CChangeSceneToPackMan> *Action = new CTimeredAction<CChangeSceneToPackMan>();
 	Action->Action.PongScn = PongScene;
 	Action->SetLife(5.0f);
+
+	return true;
 }
 
 int main(int argc, char* argv[])

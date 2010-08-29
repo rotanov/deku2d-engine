@@ -6,17 +6,19 @@ CEngine *Ninja = CEngine::Instance();
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 	//CNinjaStoryGame *NinjaStoryGame = new CNinjaStoryGame();
 	CAbstractScene *SomeNewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(SomeNewScene);
 
 	CTemporaryBouncingTextTest *BouncingTextTest = CFactory::Instance()->New<CTemporaryBouncingTextTest>("BouncingTextTest");
+
+	return true;
 }
 
 int main(int argc, char *argv[])

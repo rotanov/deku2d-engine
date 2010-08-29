@@ -5,7 +5,6 @@
 
 #include "2de_Core.h"
 
-#define SOUND_MIXING_CHANNELS_COUNT 32
 
 /**
  * CSound - класс звукового семлпа как ресурса.
@@ -100,6 +99,7 @@ private:
 	//size_t DefaultBGMVolume;	// Could be named DefaultMusicVolume // И вообще нужно ли это хранить здесь? Вот это - точно не нужно.
 	//size_t DefaultSFXVolume;	// Could be named DefaultSoundVolume // А это - нужно, я считаю, так как громкость устанавливается для каждого отдельного звука.
 
+	const int SOUND_MIXING_CHANNELS_COUNT;
 };
 
 #endif // _2DE_SOUND_H_

@@ -6,13 +6,15 @@ CEngine	*Ninja = CEngine::Instance();
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 	CTilesetEditor *TilesetEditor = CFactory::Instance()->New<CTilesetEditor>("Tileset editor");
+	CEngine::Instance()->ToggleKeyRepeat(true); // temporarily for GUI-only programs..
+	return true;
 }
 
 int main(int argc, char *argv[])

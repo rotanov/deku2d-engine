@@ -80,11 +80,11 @@ CTitleScreen *TitleScreen;
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 		CFont* Font = CFontManager::Instance()->GetDefaultFont();
 	//////////////////////////////////////////////////////////////////////////
@@ -207,6 +207,7 @@ void CCustomStateHandler::OnInitialize()
 	//delete clientGame;
 	//delete serverGame;
 
+	return true;
 }
 
 int main(int argc, char *argv[])

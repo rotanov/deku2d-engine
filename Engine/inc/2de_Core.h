@@ -2,6 +2,9 @@
 #define _2DE_CORE_H_
 
 #ifdef _MSC_VER
+	// чёрт возьми, перепроверьте это уже кто-нибудь и удалите лишнее...
+	// если уж у строгого GCC остался 1 варнинг (ну может 3, если считать и демки), то у похуистического мсвс ну никак не может быть 25..
+
 	//#pragma warning (disable	:	4312)   //
 	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
 	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
@@ -75,7 +78,7 @@ using namespace std;
 
 #if defined(_MSC_VER)
 	#define __INLINE __forceinline
-#elif defined(__GNUC__)
+#elif __GNUC__ >= 4
 	#define __INLINE __inline __attribute__ ((always_inline))
 #else
 	#define __INLINE inline

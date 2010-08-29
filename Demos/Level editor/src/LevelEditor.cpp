@@ -315,10 +315,10 @@ void CGlobalRenderObject::Render()
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {	
 	// Загружаем из конфига всякие разные параметры для редактора
 
@@ -327,6 +327,7 @@ void CCustomStateHandler::OnInitialize()
 	if (LevelEditorConfig->IsErroneous())
 	{
 		Log("ERROR", "Can't load level editor configuration '%s'", string(CEnvironment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml").c_str());
+		return false;
 	}
 
 	SetZoom(stoi(LevelEditorConfig->Children.First("DefaultCellSize")->GetAttribute("value")));
@@ -365,6 +366,10 @@ void CCustomStateHandler::OnInitialize()
 // 	Level.Depth = -0.6f;
 
 	CGlobalRenderObject *GlobalRenderObject = CFactory::Instance()->New<CGlobalRenderObject>("Global Render Object");
+
+	CEngine::Instance()->ToggleKeyRepeat(true); // temporarily for GUI-only programs..
+
+	return true;
 }
 
 

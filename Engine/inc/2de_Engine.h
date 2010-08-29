@@ -23,7 +23,7 @@ class CAbstractStateHandler
 {
 public:
 	virtual void OnBeforeInitialize() { }
-	virtual void OnInitialize() { }
+	virtual bool OnInitialize() { return true; }
 	virtual void OnBeforeFinalize() { }
 	virtual void OnFinalize() { }
 
@@ -43,9 +43,12 @@ public:
 	bool AddEventFunction(EventFunc func);		// Until event system created.
 	bool AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
 
+	// Toggle - это переключить, а тут по смыслу - Set.. и геттеров нема - неудобно...
 	void ToggleExitOnEscape(bool AdoExitOnEscape); // it seems to me, that it's too much overkill for such small option...  И как ты предлагаешь её выставлять, блеа? Ящитаю всё ок.
 	void ToggleLimitFPS(bool AdoLimitFPS);
 	void ToggleCalcFPS(bool AdoCalcFPS);
+	void ToggleKeyRepeat(bool AdoKeyRepeat); // temporarily here.. basically, we need key repeat in GUI only, so in future it'll be handled by focusable GUI widget-groups (forms, panels, whatever..)
+		
 
 	template<typename T>
 	void SetStateHandler();

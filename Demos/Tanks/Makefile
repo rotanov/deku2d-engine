@@ -1,26 +1,34 @@
 SOURCES		=	src/MainTanks.cpp \
 			src/Tanks.cpp
 
-SDL_LDFLAGS	:=	$(shell sdl-config --libs)
-LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
+HEADERS		=	inc/Tanks.h
+
+TARGET		=	bin/Tanks
+ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
 
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 
-CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -iquoteinc -iquote../../Engine/inc
-LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lSDL_mixer -lIL ../../Engine/lib/libDeku2d.a
+SDL_LDFLAGS	:=	$(shell sdl-config --libs)
+LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
 
-TARGET		=	bin/Tanks
+CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -Iinc -I../../Engine/inc
+LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lSDL_mixer -lIL ${ENGINE_LIB}
 
-all:
-	g++ -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+all: ${TARGET}
 
-debug:
-	g++ -g3 -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+debug: CFLAGS := -g3 ${CFLAGS}
+debug: all
 
-strict:
-	g++ -Wall -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+strict: CFLAGS := -Wall ${CFLAGS}
+strict: all
 
 distclean:
 	rm -f ${TARGET}
 	rm -f bin/Logs/*
-	rm -f bin/Config/Resources.xml 
+	rm -f bin/Config/Resources.xml
+
+${TARGET}: ${ENGINE_LIB} ${SOURCES} ${HEADERS}
+	g++ -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
+
+${ENGINE_LIB}:
+	$(MAKE) -C ../../Engine/

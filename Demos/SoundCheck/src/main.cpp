@@ -8,13 +8,14 @@ CSoundCheck *SoundCheck = NULL;
 class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
-	void OnInitialize();
+	bool OnInitialize();
 
 };
 
-void CCustomStateHandler::OnInitialize()
+bool CCustomStateHandler::OnInitialize()
 {
 	SoundCheck = CFactory::Instance()->New<CSoundCheck>("SoundCheck");
+	return true;
 }
 
 int main(int argc, char* argv[])

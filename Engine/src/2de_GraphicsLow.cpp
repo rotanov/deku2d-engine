@@ -348,7 +348,7 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	setVSync(1);
+	setVSync(0);
 }
 
 unsigned int CGLWindow::GetWidth() const
