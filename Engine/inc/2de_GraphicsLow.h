@@ -81,6 +81,8 @@ public:
 	virtual ~CRenderable();
 	virtual void Render() = 0;
 	const CBox GetBox() const;
+	float Width();
+	float Height();
 	virtual void SetBox(const CBox &ABox);
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
@@ -123,12 +125,12 @@ public:
 	//CTexture(const string &AFilename);
 	void Bind();
 	bool LoadFromFile();
-
+	GLuint GetTexID();
 protected:
 	void Unload();
 
 private:
-	GLuint GetTexID();
+	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -179,7 +181,6 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 //CArrayHolder
-template <unsigned int StartSize = 65536>
 class CPrmitiveVertexDataHolder	// for any other non textured stuff
 {
 	friend class CRenderManager;
@@ -189,20 +190,19 @@ public:
 	virtual void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
 	virtual void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex);
 	virtual void RenderPrimitive(GLenum Type);
-	void Clear()
-	{
-		VertexCount = 0;
-	}
+	void Clear();
 
 protected:
+	static const unsigned int StartSize = 256;
 	unsigned int VertexCount;
 	unsigned int ReservedCount;
 	RGBAf *Colors;
 	Vector3 *Vertices;
+
+	virtual void Grow();
 };
 
-template <unsigned int StartSize = 65536>
-class CVertexDataHolder : public CPrmitiveVertexDataHolder<StartSize>
+class CVertexDataHolder : public CPrmitiveVertexDataHolder
 {
 	friend class CRenderManager;
 public:
@@ -215,6 +215,8 @@ public:
 
 private:
 	Vector2 *TexCoords;
+
+	void Grow();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -330,15 +332,17 @@ protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 private:
-	CVertexDataHolder<> FontVertices;	// We want them for each font, don't we? @todo: implement this possibiliy
-	CPrmitiveVertexDataHolder<512>	PointVertices;
-	CPrmitiveVertexDataHolder<>	LineVertices;
-	CPrmitiveVertexDataHolder<>	QuadVertices;
+	//CVertexDataHolder FontVertices;	// We want them for each font, don't we? @todo: implement this possibiliy
+	#define MAX_TEXTURES 32
+	CVertexDataHolder TexturedQuadVertices[MAX_TEXTURES];	// May be that way just for now
+	CPrmitiveVertexDataHolder PointVertices;
+	CPrmitiveVertexDataHolder LineVertices;
+	CPrmitiveVertexDataHolder QuadVertices;
 public:
 	CCamera	Camera;
 	~CRenderManager();
 	bool DrawObjects();
-	void Print(const CText *Text);
+	void Print(const CText *Text, const string &Characters);
 	void DrawBox(const CGrRect *Rectangle);
 	void DrawPoint(const CGrPoint *Point);
 	void DrawLine(const CGrLine *Line);
@@ -490,19 +494,13 @@ public:
 	const string& GetText() const;
 	void SetFont(CFont *AFont);
 	void SetText(const string &AText);
-	int Height();	// @todo: вынести Height и Width в переменные и обновлять при изменении текста.
-	int Width();
 	CText& operator =(const string &AText);
-	string operator +(const CText &Text) const;
-	string operator +(const char *Text) const;
-	unsigned char operator [] (unsigned int index) const
-	{
-		return Text[index];
-	}
-	float StringCoordToCursorPos(int x, int y) const;
+	unsigned char operator [] (unsigned int index) const;
+	float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
+	unsigned int Length() const;
 
 private:
-	string Text;
+	string Characters;
 	CFont *Font;
 };
 
@@ -588,92 +586,5 @@ protected:
 	CSceneManager();
 };
 
-//////////////////////////////////////////////////////////////////////////
-// Implementation section
-//////////////////////////////////////////////////////////////////////////
-//CPrimitiveVertexDataHolder
-
-template <unsigned int StartSize>
-CPrmitiveVertexDataHolder<StartSize>::CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
-{
-	Colors = new RGBAf [StartSize];
-	Vertices = new Vector3 [StartSize];
-}
-
-template <unsigned int StartSize>
-CPrmitiveVertexDataHolder<StartSize>::~CPrmitiveVertexDataHolder()
-{
-	delete [] Colors;
-	delete [] Vertices;
-}
-
-template <unsigned int StartSize>
-void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color )
-{
-	assert(Sender != NULL);
-	// if VertexCount == ReservedCount then grow
-	Vector2 TempVector = Vertex + Sender->Position;
-	Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth()); // also apply rotation here
-	Colors[VertexCount] = Color;
-	VertexCount++;
-}
-
-template <unsigned int StartSize>
-void CPrmitiveVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex )
-{
-	PushVertex(Sender, Vertex, Sender->Color);
-}
-
-template <unsigned int StartSize>
-void CPrmitiveVertexDataHolder<StartSize>::RenderPrimitive( GLenum Type )
-{
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-	glColorPointer(4, GL_FLOAT, 0, Colors);
-	glDrawArrays(Type, 0, VertexCount);
-	CPrmitiveVertexDataHolder<StartSize>::VertexCount = 0; // Clear here or not?
-}
-
-//////////////////////////////////////////////////////////////////////////
-//CVertexDataHolder
-template <unsigned int StartSize>
-CVertexDataHolder<StartSize>::CVertexDataHolder()
-{
-	TexCoords = new Vector2 [StartSize];
-}
-
-template <unsigned int StartSize>
-CVertexDataHolder<StartSize>::~CVertexDataHolder()
-{
-	delete [] TexCoords;
-}
-
-template <unsigned int StartSize>
-void CVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color )
-{
-	assert(false);
-}
-
-template <unsigned int StartSize>
-void CVertexDataHolder<StartSize>::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord )
-{
-	CPrmitiveVertexDataHolder<StartSize>::PushVertex(Sender, Vertex, Color);
-	// if VertexCount == ReservedCount then grow here also
-	TexCoords[CPrmitiveVertexDataHolder<StartSize>::VertexCount - 1] = TexCoord;
-}
-
-template <unsigned int StartSize>
-void CVertexDataHolder<StartSize>::RenderPrimitive( GLenum Type )
-{
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Vertices);
-	glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder<StartSize>::Colors);
-	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
-	glDrawArrays(Type, 0, CPrmitiveVertexDataHolder<StartSize>::VertexCount);
-	CPrmitiveVertexDataHolder<StartSize>::VertexCount = 0;
-}
 
 #endif // _2DE_GRAPHICS_LOW_H_

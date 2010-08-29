@@ -3,12 +3,9 @@
 //////////////////////////////////////////////////////////////////////////
 // CEngine
 
-CEngine CEngine::MainEngineInstance;
+CEngine CEngine::EngineInstance;
 
-CEngine::CEngine() //: FPSText(NULL), doShowFPS(true), doExitOnEscape(true) // либо всё, либо ничего..
-// Переместить все инициализации в вид CEngine::CEngine() : A(AA), B(AB) ... 
-// а зачем собственно? щас нормальный многострочный вид, читаемо, 
-// а будет длинная строчка не понять чего..
+CEngine::CEngine()
 {
 	memset(keys, 0, sizeof(keys));
 
@@ -40,31 +37,8 @@ CEngine::~CEngine()
 
 CEngine* CEngine::Instance()
 {
-	return &MainEngineInstance;
+	return &EngineInstance;
 }
-
-class CTempTitleScreen : public CRenderable	// Existing of this class itself in a such manner is
-	// completely wrong
-	// 	i suggest you to move it to GraphicsHigh or GameUtils and make it "standard, default title screen".. and add some interface, like setting splash image and text or something like that..
-{
-public:
-	CTexture *Texture;
-	void Render()
-	{
-		int ScrWidth = CGLWindow::Instance()->GetWidth();
-		int ScrHeight = CGLWindow::Instance()->GetHeight();
-
-		glEnable(GL_TEXTURE_2D);
-		Texture->Bind();
-
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.0f, 0.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f - 50.0f);
-			glTexCoord2f(1.0f, 0.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f - 50.0f);
-			glTexCoord2f(1.0f, 1.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f + 50.0f);
-			glTexCoord2f(0.0f, 1.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f + 50.0f);
-		glEnd();
-	}
-};
 
 bool CEngine::Initialize()
 {
@@ -163,21 +137,20 @@ bool CEngine::Initialize()
 	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->SetText("FPS: 0");
 
-	//	
+	//	Создание текстуры из памяти
 	CTexture *TitleScreenShroomTexture;
 	TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
 	TitleScreenShroomTexture->LoadTexture(IMAGE_SHROOM_TITLE_WIDTH, IMAGE_SHROOM_TITLE_HEIGHT,
 		reinterpret_cast<byte *>(IMAGE_SHROOM_TITLE_DATA));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+	// Создание и установка текущей сцены
 	CAbstractScene *TitleScreen = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(TitleScreen);
 
-	// I don't know where to put Title Screen initialization, so it will be here for now
-
+	// Инициализация текста	
 	unsigned int ScrWidth = CGLWindow::Instance()->GetWidth();
 	unsigned int ScrHeight = CGLWindow::Instance()->GetHeight();
-
 	CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
 	TitleText->SetText("Deku");
 	TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f);
@@ -185,10 +158,9 @@ bool CEngine::Initialize()
 	TitleText->SetText("team");
 	TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f);
 
-//	void Render()
-
-	CTempTitleScreen *Tscn = CFactory::Instance()->New<CTempTitleScreen>("TitleScreenClassForInst");
-	Tscn->Texture = TitleScreenShroomTexture;
+	// Создание класса CDefaultTutleScreen (в текущей сцене)
+	CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
+	Tscn->SetTexture(TitleScreenShroomTexture);
 	
 	
 	StateHandler->OnInitialize();	// maybe make it bool too and interrupt on errors like it was before.. // YES

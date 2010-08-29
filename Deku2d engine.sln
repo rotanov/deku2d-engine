@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Demos\Sandbox\Sandbox.vcproj", "{EB5680F1-C65B-4244-BDA0-49F2A818F605}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}

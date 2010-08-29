@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9,00"
 	Name="Level editor"
 	ProjectGUID="{B18211B0-4D50-4F93-A351-4530E915E979}"
 	RootNamespace="Level editor"

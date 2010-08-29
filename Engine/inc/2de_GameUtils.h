@@ -107,4 +107,37 @@ public:
 	void Render();	
 };
 
+class CDefaultTitleScreen : public CRenderable
+{
+public:
+	CDefaultTitleScreen() : Texture(NULL), TextDeku("Deku"), TextTeam("Team")
+	{
+
+	}
+	void SetTexture(CTexture* ATexture)
+	{
+		assert(ATexture != NULL);
+		Texture = ATexture;
+	}
+	void Render()
+	{
+		int ScrWidth = CGLWindow::Instance()->GetWidth();
+		int ScrHeight = CGLWindow::Instance()->GetHeight();
+
+		glEnable(GL_TEXTURE_2D);
+		Texture->Bind();
+
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f - 50.0f);
+		glTexCoord2f(1.0f, 0.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f - 50.0f);
+		glTexCoord2f(1.0f, 1.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f + 50.0f);
+		glTexCoord2f(0.0f, 1.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f + 50.0f);
+		glEnd();
+	}
+private:
+	CTexture *Texture;
+	CText TextDeku;
+	CText TextTeam;
+};
+
 #endif // _2DE_GAME_UTILS_H

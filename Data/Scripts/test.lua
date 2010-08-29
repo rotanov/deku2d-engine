@@ -3,3 +3,8 @@
 mytext = CreateNewText("mytext")
 SetText(mytext, "This text is created by Lua script")
 SetPosition(mytext, 150, 250)
+
+
+mytext = CreateNewText("mytext")
+SetText(mytext, "Other text")
+SetPosition(mytext, 150, 230)

@@ -131,6 +131,15 @@ void CRenderable::SetVisibility( bool AVisible )
 	Visible = AVisible;
 }
 
+float CRenderable::Width()
+{
+	return Box.Width();
+}
+
+float CRenderable::Height()
+{
+	return Box.Height();
+}
 //////////////////////////////////////////////////////////////////////////
 // CGLImagedata
 
@@ -756,12 +765,21 @@ bool CRenderManager::DrawObjects()
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	FontVertices.RenderPrimitive(GL_QUADS);
+	glEnable(GL_TEXTURE_2D);
+	for(unsigned int i = 0; i < MAX_TEXTURES; i++)
+	{
+		glBindTexture(GL_TEXTURE_2D, i);
+		TexturedQuadVertices[i].RenderPrimitive(GL_QUADS);
+		TexturedQuadVertices[i].Clear();
+	}
+	//FontVertices.RenderPrimitive(GL_QUADS);
 	glDisable(GL_TEXTURE_2D);
 	QuadVertices.RenderPrimitive(GL_QUADS);
 	LineVertices.RenderPrimitive(GL_LINES);
-	//PointVertices.RenderPrimitive(GL_POINTS);
+	PointVertices.RenderPrimitive(GL_POINTS);
 	PointVertices.Clear();
+	LineVertices.Clear();
+	QuadVertices.Clear();
 	//////////////////////////////////////////////////////////////////////////
 	/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
 	{
@@ -774,23 +792,23 @@ bool CRenderManager::DrawObjects()
 	return true;
 }
 
-void CRenderManager::Print(const CText *Text)
+void CRenderManager::Print(const CText *Text, const string &Characters)
 {
- 	glEnable(GL_TEXTURE_2D);
- 	Text->GetFont()->Texture->Bind();
-// 	glListBase(Text->GetFont()->base-32);		
-// 	glCallLists(static_cast<GLsizei>(Text->GetText().length()), GL_UNSIGNED_BYTE, Text->GetText().c_str());
-	float dx = 0.0f;
-	for(int i = 0; i < Text->GetText().length(); i++)
+	CFont *Font = Text->GetFont();
+	assert(Font != NULL);
+	const CText & RText = *Text;
+	RGBAf TColor = Text->Color;
+	float dx(0.0f);
+	for(unsigned int i = 0; i < Text->Length(); i++)
 	{
-		float liwidth = Text->GetFont()->bbox[Text->GetText()[i] - 32].Width();
-		float liheight = Text->GetFont()->bbox[Text->GetText()[i] - 32].Height();
-		Vector2Array<4> TempTexCoords = Text->GetFont()->GetTexCoords(Text->GetText()[i]);
-		FontVertices.PushVertex(Text, Vector2(dx,			0.0f), Text->Color, TempTexCoords[0]);
-		FontVertices.PushVertex(Text, Vector2(liwidth + dx, 0.0f), Text->Color, TempTexCoords[1]);
-		FontVertices.PushVertex(Text, Vector2(liwidth + dx, liheight), Text->Color, TempTexCoords[2]);
-		FontVertices.PushVertex(Text, Vector2(dx,			liheight), Text->Color, TempTexCoords[3]);
-		dx += Text->GetFont()->bbox[Text->GetText()[i] - 32].Width() + 1;
+		float liwidth = Font->bbox[RText[i] - 32].Width();	// 32!!!
+		float liheight = Font->bbox[RText[i] - 32].Height();
+		Vector2Array<4> TempTexCoords = Font->GetTexCoords(RText[i]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx,			0.0f), TColor, TempTexCoords[0]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, 0.0f), TColor, TempTexCoords[1]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, liheight), TColor, TempTexCoords[2]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx,			liheight), TColor, TempTexCoords[3]);
+		dx += Font->bbox[RText[i] - 32].Width() + 1;
 	}
 }
 
@@ -1080,21 +1098,22 @@ void setVSync(int interval)
 //////////////////////////////////////////////////////////////////////////
 // CText
 
-CText::CText() : Text(""), Font(CFontManager::Instance()->GetDefaultFont())
+CText::CText() : Font(CFontManager::Instance()->GetDefaultFont())
 {	
 	assert(Font != NULL);
+	SetText("");
 	doIgnoreCamera = true;
 }
 
-CText::CText(const string &AText) : Text(AText), Font(CFontManager::Instance()->GetDefaultFont())
+CText::CText(const string &AText) : Font(CFontManager::Instance()->GetDefaultFont())
 {
 	assert(Font != NULL);
+	SetText(Characters);
 	doIgnoreCamera = true;
 }
 void CText::Render()
 {
-	//assert(Text != "");
-	CRenderManager::Instance()->Print(this);
+	CRenderManager::Instance()->Print(this, Characters);
 }
 
 CFont* CText::GetFont() const
@@ -1105,78 +1124,65 @@ CFont* CText::GetFont() const
 
 string& CText::GetText()
 {
-	return Text;
+	return Characters;
 }
 
 const string& CText::GetText() const
 {
-	return Text;
+	return Characters;
 }
 
 void CText::SetFont(CFont *AFont)
 {
 	assert(AFont != NULL);
 	Font = AFont;
+	SetText(Characters);	// Пересчитать BOX, шрифт же меняется.
 }
 
 void CText::SetText(const string &AText)
 {
-	Text = AText;
+	Characters = AText;
+	SetBox(CBox(Position, Position + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
 }
 
-int CText::Height()
+CText& CText::operator =(const string &AText)
 {
-	assert(Font != NULL);
-	return Font->GetStringHeight(Text);
-}
-
-int CText::Width()
-{
-	assert(Font != NULL);
-	return Font->GetStringWidth(Text);
-}
-
-CText& CText::operator=(const string &AText)
-{
-	Text = AText;
+	SetText(AText);
 	return *this;
-}
-
-std::string CText::operator+(const CText &Text) const
-{
-	return this->GetText() + Text.GetText();
-}
-
-std::string CText::operator+(const char *Text) const
-{
-	return this->GetText() + Text;
 }
 
 float CText::StringCoordToCursorPos(int x, int y) const
 {
-	// @todo: move this function to CText
-	if (Text.length() == 0)
+	if (Characters.length() == 0)
 		return -1;
 	Vector2 Local = Vector2(x, y) - Position;
 	if (Local.x < 0)
 		return -1;
 
-	for (int i = 0; i < Text.length(); i++)
+	for (int i = 0; i < Characters.length(); i++)
 	{
-		float SubstrWidth = Font->GetStringWidthEx(0, i, Text);
-		float SymbolCenterCoord = SubstrWidth - Font->GetDistance() - (Font->SymbolWidth((byte)Text[i] - 32) / 2.0f);
+		float SubstrWidth = Font->GetStringWidthEx(0, i, Characters);
+		float SymbolCenterCoord = SubstrWidth - Font->GetDistance() - (Font->SymbolWidth((byte)Characters[i] - 32) / 2.0f);
 		if (Local.x < SymbolCenterCoord)
 			return (i - 1);
 	}
-	return (Text.length() - 1.0f);
+	return (Characters.length() - 1.0f);
 }
 
 CText::~CText()
 {
-	// this is destructor. i can set breakpoint here
+	
 }
 
+unsigned char CText::operator[](unsigned int index) const
+{
+	return Characters[index];
+}
 
+unsigned int CText::Length() const
+{
+	return Characters.length();
+}
 //////////////////////////////////////////////////////////////////////////
 // CAbstractScene
 
@@ -1317,4 +1323,112 @@ CRenderProxy::CRenderProxy( CRenderable *ARenderSource ) : RenderSource(ARenderS
 void CRenderProxy::Render()
 {
 	RenderSource->Render();
+}
+
+//////////////////////////////////////////////////////////////////////////
+//CPrimitiveVertexDataHolder
+
+CPrmitiveVertexDataHolder::CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
+{
+	Colors = new RGBAf [StartSize];
+	Vertices = new Vector3 [StartSize];
+}
+
+CPrmitiveVertexDataHolder::~CPrmitiveVertexDataHolder()
+{
+	delete [] Colors;
+	delete [] Vertices;
+}
+
+void CPrmitiveVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
+{
+	assert(Sender != NULL);
+	if (VertexCount == ReservedCount)
+		Grow();
+	Vector2 TempVector = Vertex + Sender->Position;
+	Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth()); // also apply rotation here
+	Colors[VertexCount] = Color;
+	VertexCount++;
+}
+
+void CPrmitiveVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex)
+{
+	PushVertex(Sender, Vertex, Sender->Color);
+}
+
+void CPrmitiveVertexDataHolder::RenderPrimitive(GLenum Type)
+{
+	if (VertexCount == 0)
+		return;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glColorPointer(4, GL_FLOAT, 0, Colors);
+	glDrawArrays(Type, 0, VertexCount);
+}
+
+void CPrmitiveVertexDataHolder::Grow()
+{
+	ReservedCount = VertexCount * 2;
+	RGBAf *NewColors = new RGBAf[ReservedCount];
+	for(unsigned int i = 0; i < VertexCount; i++)
+		NewColors[i] = Colors[i];
+	Colors = NewColors;
+
+	Vector3 *NewVertices = new Vector3[ReservedCount];
+	for(unsigned int i = 0; i < VertexCount; i++)
+		NewVertices[i] = Vertices[i];
+	Vertices = NewVertices;
+}
+
+void CPrmitiveVertexDataHolder::Clear()
+{
+	VertexCount = 0;
+}
+//////////////////////////////////////////////////////////////////////////
+//CVertexDataHolder
+
+CVertexDataHolder::CVertexDataHolder()
+{
+	TexCoords = new Vector2 [StartSize];
+}
+
+CVertexDataHolder::~CVertexDataHolder()
+{
+	delete [] TexCoords;
+}
+
+void CVertexDataHolder::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color )
+{
+	assert(false);
+}
+
+void CVertexDataHolder::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord )
+{
+	CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
+	if (VertexCount == ReservedCount)
+		Grow();
+	TexCoords[CPrmitiveVertexDataHolder::VertexCount - 1] = TexCoord;
+}
+
+void CVertexDataHolder::RenderPrimitive( GLenum Type )
+{
+	if (VertexCount == 0)
+		return;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, CPrmitiveVertexDataHolder::Vertices);
+	glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder::Colors);
+	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+	glDrawArrays(Type, 0, CPrmitiveVertexDataHolder::VertexCount);
+}
+
+void CVertexDataHolder::Grow()
+{
+	CPrmitiveVertexDataHolder::Grow();
+	Vector2 *NewTexCoords = new Vector2[ReservedCount];
+	for(unsigned int i = 0; i < VertexCount; i++)
+		NewTexCoords[i] = TexCoords[i];
+	TexCoords = NewTexCoords;
 }

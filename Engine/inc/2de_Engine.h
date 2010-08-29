@@ -107,7 +107,7 @@ private:
 
 	CAbstractStateHandler *StateHandler;
 
-	static CEngine MainEngineInstance;
+	static CEngine EngineInstance;
 };
 
 template<typename T>
