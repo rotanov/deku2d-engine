@@ -5,12 +5,14 @@
 
 class CAbstractScene;
 
-//////////////////////////////////////////////////////////////////////////
-//CUpdatable
+/**
+* Класс CUpdatable - базовый абстрактный класс для объектов, которые следует обновлять.
+*/
+
 class CUpdatable : public virtual CObject
 {
 public:
-	bool Active;
+	bool Active; // на даннй момент Active и Dead используются для одного и того же.. надо либо оставить что-то одно, либо чётко разделить их назначение..
 	CUpdatable();
 	~CUpdatable();
 	bool isDead() const;
@@ -24,8 +26,10 @@ private:
 	CAbstractScene *Scene;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
+/**
+* Класс CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
+*/
+
 class CUpdateManager : public CCommonManager <list<CUpdatable*> >, public CTSingleton <CUpdateManager>
 {
 public:	

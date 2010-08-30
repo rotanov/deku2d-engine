@@ -4,7 +4,8 @@
 #include "2de_Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
-//Vector2, Vector4 - some graphics integrated into math
+// Vector2, Vector4 - some graphics integrated into math
+
 void Vector2::glTranslate() const
 {
 	glTranslatef(x, y, 0.0f);
@@ -126,7 +127,7 @@ bool CRenderable::GetVisibility() const
 	return Visible;
 }
 
-void CRenderable::SetVisibility( bool AVisible )
+void CRenderable::SetVisibility(bool AVisible)
 {
 	Visible = AVisible;
 }
@@ -140,6 +141,7 @@ float CRenderable::Height()
 {
 	return Box.Height();
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CGLImagedata
 
@@ -618,6 +620,7 @@ Vector2Array<4> CFont::GetTexCoords( unsigned int Charachter ) /*const Vector2Ar
 		bbox[Charachter - 32].Max.y / Texture->Height);
 	return result;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CCamera
 
@@ -714,9 +717,10 @@ void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
 	h = AHeight;
 	Point = p = v = Vector2(w / 2.0f, h / 2.0f);
 }
-//-------------------------------------------//
-//				CRenderManager				 //
-//-------------------------------------------//
+
+//////////////////////////////////////////////////////////////////////////
+// CRenderManager
+
 CRenderManager::CRenderManager()
 {
 	SetName("Render Manager");
@@ -738,11 +742,11 @@ bool CRenderManager::DrawObjects()
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
 		data = *i;
-		/*if (data->isDestroyed())
+		if (data->isDestroyed())
 		{
-			toDelete.push_back(data);
+			//toDelete.push_back(data);
 			continue;
-		}*/
+		}
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (data->GetVisibility())
@@ -766,7 +770,7 @@ bool CRenderManager::DrawObjects()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_2D);
-	for(unsigned int i = 0; i < MAX_TEXTURES; i++)
+	for (unsigned int i = 0; i < MAX_TEXTURES; i++)
 	{
 		glBindTexture(GL_TEXTURE_2D, i);
 		TexturedQuadVertices[i].RenderPrimitive(GL_QUADS);
@@ -903,9 +907,9 @@ void gDrawBBox( CBox box )
 	glPopAttrib();
 	glPopMatrix();
 }
+
 //////////////////////////////////////////////////////////////////////////
-//			Font Manager
-//////////////////////////////////////////////////////////////////////////
+// CFontManager
 
 CFontManager::CFontManager() : DefaultFont(NULL), CurrentFont(NULL)
 {
@@ -966,9 +970,9 @@ CFontManager::~CFontManager()
 		//SAFE_DELETE(DefaultFont);
 	// DefaultFont is managed now..
 }
+
 //////////////////////////////////////////////////////////////////////////
-//						CTexture Manager
-//////////////////////////////////////////////////////////////////////////
+// CTexture Manager
 
 CTextureManager::CTextureManager()
 {
@@ -984,10 +988,9 @@ CTextureManager::CTextureManager()
 // 	return TempTexture;
 // }
 
+//////////////////////////////////////////////////////////////////////////
+// CTexture
 
-//////////////////////////////////////////////////////////////////////////
-//					CTexture
-//////////////////////////////////////////////////////////////////////////
 GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
@@ -1183,6 +1186,7 @@ unsigned int CText::Length() const
 {
 	return Characters.length();
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CAbstractScene
 
@@ -1192,7 +1196,7 @@ CAbstractScene::CAbstractScene()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CScene
+// CScene
 
 void CScene::Render()
 {
@@ -1247,13 +1251,11 @@ CScene::~CScene()
 {
 	for(vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
 	{
-		if ((*i)->Managed) 
-			CFactory::Instance()->Destroy(*i);
+		(*i)->SetDestroyed(); 
 	}
 	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
 	{
-		if ((*i)->Managed) 
-			CFactory::Instance()->Destroy(*i); 
+		(*i)->SetDestroyed(); 
 	}
 }
 
@@ -1271,7 +1273,7 @@ void CGlobalScene::AddUpdatable(CUpdatable *AObject)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CSceneManager
+// CSceneManager
 
 CSceneManager::CSceneManager() : CurrentScene(&GlobalScene)
 {
@@ -1314,8 +1316,9 @@ CSceneManager::~CSceneManager()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CRenderProxy
-CRenderProxy::CRenderProxy( CRenderable *ARenderSource ) : RenderSource(ARenderSource)
+// CRenderProxy
+
+CRenderProxy::CRenderProxy(CRenderable *ARenderSource) : RenderSource(ARenderSource)
 {
 	SetName("CRenderProxy");
 }
@@ -1326,7 +1329,7 @@ void CRenderProxy::Render()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CPrimitiveVertexDataHolder
+// CPrimitiveVertexDataHolder
 
 CPrmitiveVertexDataHolder::CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
 {
@@ -1373,11 +1376,17 @@ void CPrmitiveVertexDataHolder::Grow()
 	RGBAf *NewColors = new RGBAf[ReservedCount];
 	for(unsigned int i = 0; i < VertexCount; i++)
 		NewColors[i] = Colors[i];
+
+	delete[] Colors;
+
 	Colors = NewColors;
 
 	Vector3 *NewVertices = new Vector3[ReservedCount];
 	for(unsigned int i = 0; i < VertexCount; i++)
 		NewVertices[i] = Vertices[i];
+
+	delete[] Vertices;
+
 	Vertices = NewVertices;
 }
 
@@ -1385,8 +1394,9 @@ void CPrmitiveVertexDataHolder::Clear()
 {
 	VertexCount = 0;
 }
+
 //////////////////////////////////////////////////////////////////////////
-//CVertexDataHolder
+// CVertexDataHolder
 
 CVertexDataHolder::CVertexDataHolder()
 {
@@ -1398,12 +1408,12 @@ CVertexDataHolder::~CVertexDataHolder()
 	delete [] TexCoords;
 }
 
-void CVertexDataHolder::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color )
+void CVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
 {
 	assert(false);
 }
 
-void CVertexDataHolder::PushVertex( const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord )
+void CVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord)
 {
 	CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
 	if (VertexCount == ReservedCount)
@@ -1411,7 +1421,7 @@ void CVertexDataHolder::PushVertex( const CRenderableUnitInfo *Sender, const Vec
 	TexCoords[CPrmitiveVertexDataHolder::VertexCount - 1] = TexCoord;
 }
 
-void CVertexDataHolder::RenderPrimitive( GLenum Type )
+void CVertexDataHolder::RenderPrimitive(GLenum Type)
 {
 	if (VertexCount == 0)
 		return;
@@ -1430,5 +1440,8 @@ void CVertexDataHolder::Grow()
 	Vector2 *NewTexCoords = new Vector2[ReservedCount];
 	for(unsigned int i = 0; i < VertexCount; i++)
 		NewTexCoords[i] = TexCoords[i];
+
+	delete[] TexCoords;
+
 	TexCoords = NewTexCoords;
 }

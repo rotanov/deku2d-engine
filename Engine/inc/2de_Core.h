@@ -129,36 +129,38 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 
 class CObject
 {
+public:
+	CObject();
+	virtual ~CObject();
+
+	void IncRefCount();
+	static void DecRefCount(CObject* AObject);	
+
+	const string& GetName() const;
+	virtual void SetName(const string &AObjectName);
+
+	size_t GetID() const;
+
+	bool isDestroyed() const;
+	void SetDestroyed();
+
+	bool isManaged() const;
+
+	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
+
 private:
+	CObject(const CObject &AObject);
+	CObject& operator=(const CObject &AObject);
+
+	bool Managed;
 	bool Destroyed;
 	int ID;
 	string Name;
 	size_t RefCount;
-	static unsigned int CObjectCount;
-	CObject(const CObject &AObject);
-	CObject& operator =(const CObject &AObject)
-	{
-		if (this == &AObject)
-			return *this;
-		Destroyed = AObject.Destroyed;
-		ID = reinterpret_cast<int>(this);
-		Name = AObject.GetName() + " copy";
-		RefCount = 0;
-	}
 
-public:
-	CObject();
-	virtual ~CObject();
-	void IncRefCount();
-	static void DecRefCount(CObject* AObject);	
-	const string& GetName() const;
-	virtual void SetName(const string &AObjectName);
-	size_t GetID() const;
-	bool isDestroyed() const;
-	void SetDestroyed();
-	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
-	bool Managed;	// temporary in public, todo: setter/getter.. or maybe make it		
-					// completely private and make CFactory to be friend of CObject
+	static unsigned int CObjectCount;
+
+	friend class CFactory;
 };
 
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
@@ -186,28 +188,22 @@ public:
 
 	T Get(const string &AName)	// I think, we're better to avoid search by object's name. Search by ID or address instead.
 	{					// 	hashmap, anyone?...
-		T temp = NULL;
-		//ManagerContainer toDelete;
+		T result = NULL;
+
 		for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
 		{
-			temp = *i;
-			/*if ((*i)->isDestroyed())
+			if ((*i)->isDestroyed())
 			{
-				toDelete.push_back(temp);
 				continue;
-			}*/
+			}
 			if ((*i)->GetName() == AName)
 			{
-				temp = *i;
+				result = *i;
 				break;
 			}
 		}
-		/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
-		{
-			Objects.remove(*i);
-			CObject::DecRefCount(*i);
-		}*/
-		return temp;
+
+		return result;
 	}
 
 	virtual void Add(const T &AObject)
@@ -284,7 +280,7 @@ private:
 };
 
 // SingletonHolder по Александреску
-// начал, но пока не осилил..
+// начал, но пока не осилил.. // а вообще нахер он нам нужен?... он же громоздкий, блядь..
 /*template<class T>
 class CreateUsingNew
 {

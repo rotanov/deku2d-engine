@@ -306,7 +306,7 @@ CGUIManager::~CGUIManager()
 {
 	delete Root->GetPrimitiveRender();
 	delete Root->GetStyle();
-	//delete Root;
+	delete Root;
 }
 
 

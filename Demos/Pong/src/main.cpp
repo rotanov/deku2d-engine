@@ -30,7 +30,7 @@ bool CCustomStateHandler::OnInitialize()
 	CSceneManager::Instance()->SetCurrentScene(SomeScene);
 
 
-	CTimeredAction<CChangeSceneToPackMan> *Action = new CTimeredAction<CChangeSceneToPackMan>();
+	CTimeredAction<CChangeSceneToPackMan> *Action = CFactory::Instance()->New<CTimeredAction<CChangeSceneToPackMan> >("Change Scene Timered Action");
 	Action->Action.PongScn = PongScene;
 	Action->SetLife(5.0f);
 

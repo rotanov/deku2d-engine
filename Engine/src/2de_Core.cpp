@@ -11,23 +11,29 @@
 // CObject
 
 unsigned int CObject::CObjectCount = 0;
-CObject::CObject() : Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0), Managed(false)
+CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0)
 {
 
 }
 
-CObject::CObject(const CObject &AObject) : Destroyed(false), Name(" CObject " + itos(ID)), RefCount(0), Managed(false)
+CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), Name(" CObject " + itos(ID)), RefCount(0)
 {
 	ID = reinterpret_cast<int>(this);
 }
 
-CObject::~CObject()
+CObject& CObject::operator=(const CObject &AObject)
 {
+	if (this == &AObject)
+		return *this;
+
+	Destroyed = AObject.Destroyed;
+	ID = reinterpret_cast<int>(this);
+	Name = AObject.GetName() + " copy";
+	RefCount = 0;
 }
 
-bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+CObject::~CObject()
 {
-	return true;
 }
 
 void CObject::IncRefCount()
@@ -61,14 +67,34 @@ void CObject::SetName(const string &AObjectName)
 	Name = AObjectName;
 }
 
+/**
+* CObject::SetDestroyed - для не-managed объектов помечает объект как уничтоженный, для managed - вызывает CFactory::Destroy. Не выполняет никаких действий для объектов, уже помеченных как уничтоженные.
+*/
+
 void CObject::SetDestroyed()
 {
-	Destroyed = true;
+	if (Destroyed)
+		return;
+
+	if (Managed)
+		CFactory::Instance()->Destroy(this);
+	else
+		Destroyed = true;
 }
 
 bool CObject::isDestroyed() const
 {
 	return Destroyed;
+}
+
+bool CObject::isManaged() const
+{
+	return Managed;
+}
+
+bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+{
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -880,7 +906,7 @@ void CFactory::Destroy(CObject *AObject)
 		return;
 	}
 	
-	AObject->SetDestroyed();
+	AObject->Destroyed = true;
 
 	Objects.erase(i);
 	Deletion.push(AObject);

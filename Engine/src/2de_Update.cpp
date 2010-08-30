@@ -61,11 +61,11 @@ bool CUpdateManager::UpdateObjects()
 	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
 		data = *it;
-		/*if (data->isDestroyed())
+		if (data->isDestroyed())
 		{
-			toDelete.push_back(data);
+			//toDelete.push_back(data);
 			continue;
-		}*/
+		}
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (!data->Active)
