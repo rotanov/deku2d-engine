@@ -323,7 +323,6 @@ void CLabel::Render()
 {
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 // CButton
 
@@ -350,38 +349,27 @@ void CButton::SetBox(const CBox &box)
 
 void CButton::Render()
 {	
-	// Font = Style->Fonts.ButtonFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
+	// Вынести. Сильно вынести отсюда.
+	//(GetBox().Min, GetBox().Max);
 
-	CGrRect temprect(GetBox().Min, GetBox().Max);
-	CGrRect temprect_lines(GetBox().Min, GetBox().Max);
-
-	temprect.Color = Style->Colors.ButtonFace;
-	temprect_lines.Color = Style->Colors.ButtonBorder;
-	PRender->sClr = Style->Colors.ButtonFace;
-	PRender->lClr = Style->Colors.ButtonBorder;
+	Color = Style->Colors.ButtonFace;
+	//temprect_lines.Color = Style->Colors.ButtonBorder;
 	if (WidgetState.Hovered)
 	{
-		temprect.Color = Style->Colors.ButtonFaceHovered;
-		temprect_lines.Color = Style->Colors.ButtonBorderHovered;
-		PRender->sClr = Style->Colors.ButtonFaceHovered;
-		PRender->lClr = Style->Colors.ButtonBorderHovered;
+		Color = Style->Colors.ButtonFaceHovered;
+		//temprect_lines.Color = Style->Colors.ButtonBorderHovered;
 	}
 	if (WidgetState.Pressed)
 	{
-		temprect.Color = Style->Colors.ButtonFacePressed;
-		temprect_lines.Color = Style->Colors.ButtonBorderPressed;
-		PRender->sClr = Style->Colors.ButtonFacePressed;
-		PRender->lClr = Style->Colors.ButtonBorderPressed;
+		Color = Style->Colors.ButtonFacePressed;
+		//temprect_lines.Color = Style->Colors.ButtonBorderPressed;
 	}
-	//PRender->grRectS(GetBox().Min, GetBox().Max);
-	temprect.SetLayer(1);
-	temprect_lines.SetLayer(2);
-	temprect_lines.isLineDrawn = true;
-	temprect_lines.Render();
-	temprect.Render();
 
-
-	//PRender->grRectL(GetBox().Min, GetBox().Max);	
+	SetLayer(1);
+	//CRenderManager::Instance()->DrawSolidBox(this, GetBox().Inflated(4.0f, 4.0f));
+	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
+	
+	
 }
 
 
@@ -469,6 +457,7 @@ CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
 
 void CEdit::Render()
 {
+	SetLayer(1);
 	float StringWidth = Text.Width();
 	float StringHeight = Text.Height();
 	float CursorDistance = Font->GetStringWidthEx(0, (CursorPos - VisibleTextOffset), GetVisibleText().c_str());
@@ -479,16 +468,17 @@ void CEdit::Render()
 	if (MouseState.Hovered)
 	{
 		PRender->lClr = Style->Colors.EditBorderHovered;
-		PRender->sClr = Style->Colors.EditBackgroundHovered;
+		Color = Style->Colors.EditBackgroundHovered;
 	}
 	else
 	{
 		PRender->lClr = Style->Colors.EditBorder;
-		PRender->sClr = Style->Colors.EditBackground;
+		Color = Style->Colors.EditBackground;
 	}
 	PRender->lwidth = Style->Metrics.EditBorderWidth;
-	PRender->grRectS(GetBox().Min, GetBox().Max);
-	PRender->grRectL(GetBox().Min, GetBox().Max);
+	
+	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
+	//PRender->grRectL(GetBox().Min, GetBox().Max);
 	if (isFocused())
 	{
 		if (Selection.Exists())
@@ -500,13 +490,11 @@ void CEdit::Render()
 				std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1), GetVisibleText().c_str()),
 				GetBox().Max.y - Style->Metrics.EditMargins.y);
 
-			PRender->sClr = Style->Colors.EditSelection;
-			PRender->grRectS(SelBox.Min, SelBox.Max);
+			Color = Style->Colors.EditSelection;
+			CRenderManager::Instance()->DrawSolidBox(this, SelBox);
 		}
-		PRender->psize = 2.0f;
-		PRender->lClr = Style->Colors.EditText;
-		PRender->lwidth = 1.0f;
-		PRender->grSegment(Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
+		Color = Style->Colors.EditText;
+		CRenderManager::Instance()->DrawLine(this, Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
 			Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Min.y));
 	}
 }

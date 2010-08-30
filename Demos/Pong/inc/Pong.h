@@ -26,6 +26,7 @@ public:
 
 	CPongPlayer(EPlayerKind APlayerKind) : PlayerKind(APlayerKind)
 	{
+		this->doIgnoreCamera = true;
 		Acceleration = Velocity = V2_ZERO;
 		int ScreenWidth;
 		ScreenWidth = CGLWindow::Instance()->GetWidth();
@@ -42,10 +43,7 @@ public:
 
 	void Render()
 	{
-		CPrimitiveRender pr;
-		pr.doUseGlobalCoordSystem = false;
-		pr.sClr = Color;
-		pr.grRectS(Vector2(0, 0), Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+		CRenderManager::Instance()->DrawSolidBox(this, CBox(Vector2(0, 0), Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT)));
 		return;
 	}
 	void Update(float dt)

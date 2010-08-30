@@ -112,7 +112,9 @@ class CDefaultTitleScreen : public CRenderable
 public:
 	CDefaultTitleScreen() : Texture(NULL), TextDeku("Deku"), TextTeam("Team")
 	{
-
+		int ScrWidth = CGLWindow::Instance()->GetWidth();
+		int ScrHeight = CGLWindow::Instance()->GetHeight();
+		Position = Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f);
 	}
 	void SetTexture(CTexture* ATexture)
 	{
@@ -121,18 +123,7 @@ public:
 	}
 	void Render()
 	{
-		int ScrWidth = CGLWindow::Instance()->GetWidth();
-		int ScrHeight = CGLWindow::Instance()->GetHeight();
-
-		glEnable(GL_TEXTURE_2D);
-		Texture->Bind();
-
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f - 50.0f);
-		glTexCoord2f(1.0f, 0.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f - 50.0f);
-		glTexCoord2f(1.0f, 1.0f); glVertex2f(ScrWidth * 0.5f + 50.0f, ScrHeight * 0.5f + 50.0f);
-		glTexCoord2f(0.0f, 1.0f); glVertex2f(ScrWidth * 0.5f - 50.0f, ScrHeight * 0.5f + 50.0f);
-		glEnd();
+		CRenderManager::Instance()->DrawTexturedBox(this, CBox(Vector2(-50.0f, -50.0f), Vector2(50.0f, 50.0f)), Texture, CBox(V2_ZERO, V2_DIR_UP + V2_DIR_RIGHT).GetVertices());
 	}
 private:
 	CTexture *Texture;

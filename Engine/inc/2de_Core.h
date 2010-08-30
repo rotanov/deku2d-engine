@@ -415,12 +415,15 @@ protected:
 private:
 	static T * _instance;
 
+#ifdef _DEBUG
 	static set<const type_info *> UnderConstruction;
+#endif // _DEBUG
 };
 
 template <typename T>
 T* CTSingleton<T>::Instance()
 {
+#ifdef _DEBUG
 	if (UnderConstruction.count(&typeid(T)) == 1)
 	{
 		// well, we can't log it....
@@ -428,15 +431,20 @@ T* CTSingleton<T>::Instance()
 
 		throw std::logic_error(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name());
 	}
+#endif // _DEBUG
 
 	if (!_instance)
 	{
+#ifdef _DEBUG
 		UnderConstruction.insert(&typeid(T));
+#endif // _DEBUG
 
 		_instance = new T;
 		CSingletonManager::Instance()->Add(_instance);
 
+#ifdef _DEBUG
 		UnderConstruction.erase(&typeid(T));
+#endif // _DEBUG
 	}
 	return _instance;
 }
@@ -444,9 +452,10 @@ T* CTSingleton<T>::Instance()
 template <typename T>
 T* CTSingleton<T>::_instance = 0;
 
+#ifdef _DEBUG
 template <typename T>
 set<const type_info *> CTSingleton<T>::UnderConstruction;
-
+#endif // _DEBUG
 
 class CBaseResource
 {

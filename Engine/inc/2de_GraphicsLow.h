@@ -22,6 +22,8 @@ const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertice
 	V2_DIR_UP,
 };
 
+const Vector2Array<4> V2_QUAD_BIN =  Vector2Array<4>(V2_QuadBin);
+
 const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with vertices (-1 -1) (1 -1) (1 1) (-1 1)
 {
 	V2_DIR_LEFT + V2_DIR_DOWN,
@@ -50,31 +52,31 @@ extern char BINARY_DATA_DEFAULT_FONT[];
 *	Второй вариант - аггрегировать указатель на неё в классы.
 */
 
-class CRenderableUnitInfo
+class CRenderObjectInfo
 {
 public:
 	Vector2 Position;
 	RGBAf Color;	
-	bool doIgnoreCamera;	// if true, then object will be drawn in global cords,
+	bool doIgnoreCamera; // if true, then object will be drawn in global cords,
 
-	CRenderableUnitInfo();
+	CRenderObjectInfo();
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle() const;
 	float GetScaling() const;
 	void SetScaling(float AScaling);
-	void SetLayer(unsigned int Layer);	// Layers should be from 0 to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
-	unsigned int GetLayer() const;
+	void SetLayer(int Layer); // Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
+	int GetLayer() const;
 	float GetDepth() const;
 
 private:
-	float				Angle;		//	(Degrees)
-	float				Depth;		//	[-1; 1]?
-	float				Scaling;	
+	float Angle; //	(Degrees)
+	float Depth; //	[-1; 1]?
+	float Scaling;	
 };
 
 class CAbstractScene;
 
-class CRenderable : public virtual CObject, public CRenderableUnitInfo
+class CRenderable : public virtual CObject, public CRenderObjectInfo
 {
 public:
 	CRenderable();
@@ -90,9 +92,9 @@ public:
 	CAbstractScene* GetScene() const;
 
 private:
-	CBox				Box;		//	Axis Aligned Bounding Box for culling
-	CAbstractScene		*Scene;
-	bool				Visible;
+	CBox Box; //	Axis Aligned Bounding Box for culling
+	CAbstractScene *Scene;
+	bool Visible;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -122,7 +124,6 @@ class CTexture : public CGLImageData, public CResource
 public:
 	CTexture();
 	virtual ~CTexture();
-	//CTexture(const string &AFilename);
 	void Bind();
 	bool LoadFromFile();
 	GLuint GetTexID();
@@ -181,16 +182,17 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 //CArrayHolder
-class CPrmitiveVertexDataHolder	// for any other non textured stuff
+class CPrmitiveVertexDataHolder	// for any non textured stuff
 {
 	friend class CRenderManager;
 public:
 	CPrmitiveVertexDataHolder();
 	virtual ~CPrmitiveVertexDataHolder();
-	virtual void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	virtual void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex);
+	virtual void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	virtual void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex);
 	virtual void RenderPrimitive(GLenum Type);
 	void Clear();
+	unsigned int GetVertexCount();
 
 protected:
 	static const unsigned int StartSize = 256;
@@ -208,9 +210,11 @@ class CVertexDataHolder : public CPrmitiveVertexDataHolder
 public:
 	CVertexDataHolder();
 	~CVertexDataHolder();
-	void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	void PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex,
+	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex);
+	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex,
 		const RGBAf &Color, const Vector2 &TexCoord);
+	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const Vector2 &TexCoord);
 	void RenderPrimitive(GLenum Type);
 
 private:
@@ -223,7 +227,6 @@ private:
 //CFont
 
 #define CFONT_DEFAULT_DISTANCE	1				// FFFUUU~
-#define CFONT_MAX_STRING_LENGTH		256
 #define CFONT_MAX_SYMBOLS			256
 
 class CFont : public CResource
@@ -257,7 +260,6 @@ private:
 	float Width[CFONT_MAX_SYMBOLS];
 	float Height[CFONT_MAX_SYMBOLS];
 	CTexture* Texture;
-	GLuint base;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -294,6 +296,10 @@ public:
 	void gTranslate();
 	void DrawDebug();
 	void Update();
+	Vector2 GetTranslation() const
+	{
+		return Vector2(static_cast<int>(w * 0.5f - Point.x), static_cast<int>(h * 0.5f - Point.y));
+	}
 };
 
 
@@ -332,9 +338,8 @@ protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 private:
-	//CVertexDataHolder FontVertices;	// We want them for each font, don't we? @todo: implement this possibiliy
-	#define MAX_TEXTURES 32
-	CVertexDataHolder TexturedQuadVertices[MAX_TEXTURES];	// May be that way just for now
+	#define DEKU2D_MAX_TEXTURES 32
+	CVertexDataHolder TexturedQuadVertices[DEKU2D_MAX_TEXTURES];	// Временно. В вектор запихать, что ли.
 	CPrmitiveVertexDataHolder PointVertices;
 	CPrmitiveVertexDataHolder LineVertices;
 	CPrmitiveVertexDataHolder QuadVertices;
@@ -343,13 +348,15 @@ public:
 	~CRenderManager();
 	bool DrawObjects();
 	void Print(const CText *Text, const string &Characters);
-	void DrawBox(const CGrRect *Rectangle);
-	void DrawPoint(const CGrPoint *Point);
-	void DrawLine(const CGrLine *Line);
+	void DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
+	// Box is always box, but TC may be used to mirros sprite or smthng, so it is not CBox
+	void DrawTexturedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords);
+	void DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point);
+	void DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1);
 };
 
 //////////////////////////////////////////////////////////////////////////
-// OpenGl interface// Херня какая-то передумать и переделать нахуй...
+// OpenGl interface
 
 void gSetBlendingMode();
 void gBeginFrame();
@@ -401,20 +408,10 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CGrRect - not nice enough, i think.
 
-class CBasePrimitive : public CRenderableUnitInfo
+class CBasePrimitive : public CRenderObjectInfo
 {
 public:
 };
-
-class CGrPoint : public CBasePrimitive
-{
-public:
-	void Render()
-	{
-		CRenderManager::Instance()->DrawPoint(this);
-	}
-};
-
 
 class CGrLine : public CBasePrimitive
 {
@@ -426,7 +423,7 @@ public:
 	}
 	void Render()
 	{
-		CRenderManager::Instance()->DrawLine(this);
+		CRenderManager::Instance()->DrawLine(this, Segment.v0, Segment.v1);
 	}
 };
 
@@ -439,12 +436,9 @@ public:
 	}
 	void Render()
 	{
-		CGrPoint p0, p1;
-		p0.Position = Segment.v0;
-		p1.Position = Segment.v1;
-		p0.Render();
-		p1.Render();
 		CGrLine::Render();
+		CRenderManager::Instance()->DrawPoint(this, Segment.v0);
+		CRenderManager::Instance()->DrawPoint(this, Segment.v1);
 	}
 };
 
@@ -452,10 +446,9 @@ class CGrRect : public CBasePrimitive
 {
 public:
 	CRectangle Rectangle;
-	bool isLineDrawn;
 
 	CGrRect();
-	CGrRect(const Vector2 p0, const Vector2 p1) : Rectangle(p0, p1), isLineDrawn(false)
+	CGrRect(const Vector2 p0, const Vector2 p1) : Rectangle(p0, p1)
 	{		
 	}
 	~CGrRect()
@@ -464,19 +457,7 @@ public:
 	}
 	void Render()
 	{
-// 		if (isLineDrawn)
-// 		{
-// 			CGrSegMent s0(Rectangle.v0, Rectangle.v1);
-// 			CGrSegMent s1(Rectangle.v1, Rectangle.v2);
-// 			CGrSegMent s2(Rectangle.v2, Rectangle.v3);
-// 			CGrSegMent s3(Rectangle.v3, Rectangle.v0);
-// 			s0.Render();
-// 			s1.Render();
-// 			s2.Render();
-// 			s3.Render();
-// 			return;
-// 		}
-		CRenderManager::Instance()->DrawBox(this);
+		CRenderManager::Instance()->DrawSolidBox(this, CBox(Rectangle.v0, Rectangle.v2));
 	}
 private:	
 };

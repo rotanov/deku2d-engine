@@ -549,6 +549,15 @@ float CBox::Height() const
 	return Max.y - Min.y;
 }
 
+Vector2Array<4> CBox::GetVertices() const
+{
+	Vector2Array<4> Result;
+	Result[0] = Min;
+	Result[1] = Vector2(Max.x, Min.y);
+	Result[2] = Max;
+	Result[3] = Vector2(Min.x, Max.y);;
+	return Result;
+}
 //////////////////////////////////////////////////////////////////////////
 //	Geometry
 

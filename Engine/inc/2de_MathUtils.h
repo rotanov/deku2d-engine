@@ -267,7 +267,23 @@ class Vector2Array
 private:
 	Vector2 Elements[N];
 public:
+	Vector2Array(const Vector2 *Vertices)
+	{
+		for(unsigned int i = 0; i < N; i++)
+			Elements[i] = Vertices[i];
+	}
+	Vector2Array()
+	{
+		for(unsigned int i = 0; i < N; i++)
+			Elements[i] = V2_ZERO;
+	}
 	Vector2& operator [](size_t Index)
+	{
+		if (Index >= N)
+			throw std::runtime_error("CCoitus or CReproductor or CBreeding or CPropagation index out of bounds");
+		return Elements[Index];
+	}
+	const Vector2& operator [](size_t Index) const
 	{
 		if (Index >= N)
 			throw std::runtime_error("CCoitus or CReproductor or CBreeding or CPropagation index out of bounds");
@@ -1001,6 +1017,7 @@ public:
 	void Union(const CBox &other);
 	float Width() const;
 	float Height() const;
+	Vector2Array<4> GetVertices() const;
 };
 
 

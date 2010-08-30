@@ -572,42 +572,27 @@ void CSprite::Render()
 	fRelativeY = (anim->m_fheight);// * 0.5);
 
 
-	//glPushAttrib(GL_TEXTURE_BIT || GL_DEPTH_TEST || GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
-	//glDisable(GL_DEPTH_TEST);
-	//glDisable(GL_LIGHTING);
-	Texture->Bind();
+	//Texture//
 	
 	
-	glBegin( GL_QUADS );
-	Color.glSet();
+	Vector2 LowerLeft = Vector2((int)fRelativeX * -0.5f, (int)fRelativeY * -0.5f);
+	Vector2 UpperRight = Vector2((int)fRelativeX * 0.5f, (int)fRelativeY * 0.5f);
+	
 	if (!mirror_h)
+		CRenderManager::Instance()->DrawTexturedBox(this,
+			CBox(LowerLeft, UpperRight), Texture,
+			CBox(Vector2(fLowerLeft_s, fLowerLeft_t), Vector2(fUpperRight_s, fUpperRight_t)).GetVertices());
+ 	else
 	{
-		glTexCoord2f(fLowerLeft_s, fLowerLeft_t);
-			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * -0.5f);
-		glTexCoord2f(fLowerRight_s, fLowerRight_t);
-			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * -0.5f);
-		glTexCoord2f(fUpperRight_s, fUpperRight_t);
-			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * 0.5f);
-		glTexCoord2f(fUpperLeft_s, fUpperLeft_t);
-			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * 0.5f);
+		Vector2Array<4> TexCoords;
+		TexCoords[0] = Vector2(fLowerRight_s, fLowerRight_t);
+		TexCoords[1] = Vector2(fLowerLeft_s, fLowerLeft_t);
+		TexCoords[2] = Vector2(fUpperLeft_s, fUpperLeft_t);
+		TexCoords[3] = Vector2(fUpperRight_s, fUpperRight_t);
+			CRenderManager::Instance()->DrawTexturedBox(this,
+				CBox(LowerLeft, UpperRight), Texture,
+				TexCoords);
 	}
-	else
-	{
-		glTexCoord2f(fLowerRight_s, fLowerRight_t);
-			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * -0.5f);
-		glTexCoord2f(fLowerLeft_s, fLowerLeft_t);
-			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * -0.5f);
-		glTexCoord2f(fUpperLeft_s, fUpperLeft_t);
-			glVertex2i((int)fRelativeX * 0.5f, (int)fRelativeY * 0.5f);
-		glTexCoord2f(fUpperRight_s, fUpperRight_t);
-			glVertex2i((int)fRelativeX * -0.5f, (int)fRelativeY * 0.5f);
-	}
-	glColor4ub(255, 255, 255, 255);
-	glEnd();
-
-	glPopAttrib();
-
 
 	if(EllapsedTime >= anim->m_fFrameDelay)
 	{

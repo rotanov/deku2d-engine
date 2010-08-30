@@ -196,29 +196,18 @@ CFontEditor::CFontEditor()
 	lblCharachterSelectedASCIIIndex->Color = COLOR_WHITE;
 	lblCharachterSelectedASCIIIndex->SetVisibility(true);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, SelectionBoxes);
 }
 
 void CFontEditor::Render()
 {
+	Position = V2_ZERO;
+	Color = COLOR_THIRD;
+	SetLayer(0);
+	SetScaling(1.0f);
+	CRenderManager::Instance()->DrawSolidBox(this, CBox(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, WindowHeight)));
 
-	glLoadIdentity();
-	PRender.grRectC(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, WindowHeight));
-	glLoadIdentity();
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);		
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-
-	PRender.grCircleL(MousePosition, 5);
-	glLoadIdentity();
-
-	gToggleScissor(true);
-	gScissor(INTERFACE_OFFSET_X, 0, WindowWidth - INTERFACE_OFFSET_X, WindowHeight);
-	glLoadIdentity();
 	Offset.x = (int)Offset.x;
-	Offset.y = (int)Offset.y;
-	Offset.glTranslate();
+	Offset.y = (int)Offset.y;	
 
 // 	if (Font != NULL)
 // 		for(int i=0;i<256;i++)
@@ -235,86 +224,41 @@ void CFontEditor::Render()
 
 	glScalef(Zoom, Zoom, 1.0f);
 
-	glEnable(GL_TEXTURE_2D);
-
 	if(FontTexture)
 	{
-		FontTexture->Bind();
-		RGBAf(1.0f, 1.0f, 1.0f, 1.0f).glSet();
-		glBegin(GL_QUADS);
-		glTexCoord2f(.0f, .0f);
-		glVertex2f(.0f, .0f);
-
-		glTexCoord2f(1.0f, .0f);
-		glVertex2f(FontTexture->Width, .0f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(FontTexture->Width, FontTexture->Height);
-
-		glTexCoord2f(.0f, 1.0f);
-		glVertex2f(.0f, FontTexture->Height);
-		glEnd();
+		this->SetScaling(Zoom);
+		this->Position = Offset;
+		Color = COLOR_WHITE;
+		CRenderManager::Instance()->DrawTexturedBox(this, CBox(V2_ZERO, Vector2(FontTexture->Width, FontTexture->Height)), FontTexture, CBox(V2_ZERO, V2_DIR_RIGHT + V2_DIR_UP).GetVertices());
 	}
 
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_LINE_WIDTH);
-	glLineWidth(1.0f);
-	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glColor4fv(&COLOR_THIRD.r);
+	SetLayer(-1);
 	if (Font)
 	{
-
-		glBegin(GL_QUADS);
-		for(int i=0;i<5;i++)
+		for(int i = 0; i < 5; i++)
 		{
-
-// 			PRender.grRectS(SelectionBoxes[i * 16 + 0], SelectionBoxes[i * 16 + 3]);
-// 			PRender.grRectS(SelectionBoxes[i * 16 + 4], SelectionBoxes[i * 16 + 6]);
-// 			PRender.grRectS(SelectionBoxes[i * 16 + 8], SelectionBoxes[i * 16 + 10]);
-// 			PRender.grRectS(SelectionBoxes[i * 16 + 12], SelectionBoxes[i * 16 + 15]);
-			glColor4fv(&COLOR_THIRD.r);
+			Color = COLOR_THIRD;
 			if (CornerKind == i)
-				glColor4f(0.9f, 0.4f, 0.3f, 0.9f);
-			glArrayElement(i*4+0);
-			glArrayElement(i*4+1);
-			glArrayElement(i*4+2);
-			glArrayElement(i*4+3);
-// 					glBegin(GL_QUADS);
-// 					  SelectionBoxes[i*4+0].glVertex();
-// 					  SelectionBoxes[i*4+1].glVertex();
-// 					  SelectionBoxes[i*4+2].glVertex();
-// 					  SelectionBoxes[i*4+3].glVertex();
-// 					glEnd();
-			
+				Color = RGBAf(0.9f, 0.4f, 0.3f, 0.9f);
+			CRenderManager::Instance()->DrawSolidBox(this, CBox(SelectionBoxes[i * 4 + 0], SelectionBoxes[i * 4 + 2]));			
 		}
-		glEnd();
 		
-		glBegin(GL_LINES);
-		for(int i=0;i<256;i++)
+		CRenderManager *RenerManager = CRenderManager::Instance();
+		for(int i = 0; i < 256; i++)
 		{
-			float x0 = Font->bbox[i].Min.x, x1 = Font->bbox[i].Max.x;
-			float y0 = Font->bbox[i].Min.y, y1 = Font->bbox[i].Max.y;
-
+			Vector2 v0 = Font->bbox[i].Min;
+			Vector2 v1(Font->bbox[i].Max.x, Font->bbox[i].Min.y);
+			Vector2 v2 = Font->bbox[i].Max;
+			Vector2 v3(Font->bbox[i].Min.x, Font->bbox[i].Max.y);
+			Color = COLOR_WHITE;
 			if (i == CurrentSymbol)
-				RGBAf(0.9f, 0.4f, 0.3f, 0.9f).glSet();
-			glVertex2f(x0, y0);
-			glVertex2f(x1, y0);
-
-			glVertex2f(x1, y0);
-			glVertex2f(x1, y1);
-
-			glVertex2f(x1, y1);
-			glVertex2f(x0, y1);
-
-			glVertex2f(x0, y1);
-			glVertex2f(x0, y0);
-			if (i == CurrentSymbol)
-				COLOR_WHITE.glSet();
+				Color = RGBAf(0.9f, 0.4f, 0.3f, 0.9f);
+			RenerManager->DrawLine(this, v0, v1);
+			RenerManager->DrawLine(this, v1, v2);
+			RenerManager->DrawLine(this, v2, v3);
+			RenerManager->DrawLine(this, v3, v0);
 		}
-		glEnd();
 	}
-	gToggleScissor(false);
-	glEnable(GL_DEPTH_TEST);
 }
 
 void CFontEditor::Update(float dt)

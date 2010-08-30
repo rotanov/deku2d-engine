@@ -38,29 +38,20 @@ bool CTileset::LoadFromFile()
 
 void CTileset::RenderTileSet()
 {
-	// encapsulate Opengl calls
-	glEnable(GL_TEXTURE_2D);
-	Texture->Bind();
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0); glVertex2f(0, 0);
-		glTexCoord2f(1, 0); glVertex2f(TileWidth*HorNumTiles, 0);
-		glTexCoord2f(1, 1); glVertex2f(TileWidth*HorNumTiles, TileHeight*VerNumTiles);
-		glTexCoord2f(0, 1); glVertex2f(0, TileHeight*VerNumTiles);
-	glEnd();
-
-	CPrimitiveRender p;
-	p.doUseGlobalCoordSystem = false;
-	p.BlendingOption = PRM_RNDR_OPT_BLEND_NO_ONE;
-	p.lClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
-	p.pClr = RGBAf(0.0f, 0.0f, 0.0f, 1.0f);
-	p.lwidth = 0.1f;
+	CRenderObjectInfo TempInfo;
+	TempInfo.SetLayer(-1);
+	TempInfo.doIgnoreCamera = true;
+	TempInfo.Color = COLOR_WHITE;
+	CRenderManager *RenderManager = CRenderManager::Instance();
+	RenderManager->DrawTexturedBox(&TempInfo, CBox(V2_ZERO, Vector2(TileWidth*HorNumTiles, TileHeight*VerNumTiles)), Texture, V2_QuadBin);
+	TempInfo.SetLayer(0);
 	
 	for (int i = 0; i <= HorNumTiles; i++)
-		p.grSegment(Vector2(i*TileWidth, 0),
-			Vector2(i*TileWidth, Texture->Height));
+		RenderManager->DrawLine(&TempInfo,	Vector2(i*TileWidth, 0),
+											Vector2(i*TileWidth, Texture->Height));
 	for (int i = 0; i <= VerNumTiles; i++)
-		p.grSegment(Vector2(0, i*TileHeight),
-			Vector2(Texture->Width, i*TileHeight));
+		RenderManager->DrawLine(&TempInfo,	Vector2(0, i*TileHeight),
+											Vector2(Texture->Width, i*TileHeight));
 }
 
 bool CTileset::SaveToFile()
@@ -136,24 +127,19 @@ CTileset::~CTileset()
 
 void CLevelMap::Render()
 {
+	CRenderManager *RenerManager = CRenderManager::Instance();
 	CMapCellInfo *t;
-	COLOR_WHITE.glSet();
-	glEnable(GL_TEXTURE_2D);
-	TileSet->GetTexture()->Bind();
-	glBegin(GL_QUADS);
 	for(int j = 0; j < HorizontalCellsCount; j++)
 		for(int i = 0; i < VerticalCellsCount; i++)		
 		{
 			t = Cells + GetCellIndex(j, i);
-
-			for(int k = 0; k < 4; k++)
-			{
-				t->tc[k].glTexCoord();
-				glVertex3f(t->pos[k].x,	t->pos[k].y, t->z);
-			}
+// 			for(int k = 0; k < 4; k++)
+// 			{
+// 				//t->tc[k].glTexCoord();
+// 				glVertex3f(t->pos[k].x,	t->pos[k].y, t->z);
+// 			}
+			RenerManager->DrawTexturedBox(this, CBox(t->pos[0], t->pos[2]), TileSet->GetTexture(), t->tc);
 		}
-	glEnd();
-	glPopAttrib();
 }
 
 /*

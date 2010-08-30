@@ -6,7 +6,7 @@
 		<WindowBPP value="32" />
 		<WindowCaption value="Deku pac-man" />
 		<DoCalcFps value="true" />
-		<DoLimitFps value="true" />
+		<DoLimitFps value="false" />
 		<FpsLimit value="60" />
 	</Video>
 	<Sound>

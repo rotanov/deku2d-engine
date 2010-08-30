@@ -34,44 +34,44 @@ void Vector4::glSet() const
 //////////////////////////////////////////////////////////////////////////
 // CRenderableUnitInfo
 
-CRenderableUnitInfo::CRenderableUnitInfo() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
+CRenderObjectInfo::CRenderObjectInfo() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
 {
 
 }
 
-void CRenderableUnitInfo::SetAngle(float AAngle /*= 0.0f*/)
+void CRenderObjectInfo::SetAngle(float AAngle /*= 0.0f*/)
 {
 	Angle = Clamp(AAngle, 0.0f, 360.0f);
 }
 
-float CRenderableUnitInfo::GetAngle() const
+float CRenderObjectInfo::GetAngle() const
 {
 	return Angle;
 }
 
-void CRenderableUnitInfo::SetLayer(unsigned int Layer)
+void CRenderObjectInfo::SetLayer(int Layer)
 {
 	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
 }
 
-float CRenderableUnitInfo::GetDepth() const
+float CRenderObjectInfo::GetDepth() const
 {
 	return Depth;
 }
 
-float CRenderableUnitInfo::GetScaling() const
+float CRenderObjectInfo::GetScaling() const
 {
 	return Scaling;
 }
 
-void CRenderableUnitInfo::SetScaling(float AScaling)
+void CRenderObjectInfo::SetScaling(float AScaling)
 {
 	Scaling = AScaling;
 // 	Box.Min *= Scaling;
 // 	Box.Max *= Scaling;
 }
 
-unsigned int CRenderableUnitInfo::GetLayer() const
+int CRenderObjectInfo::GetLayer() const
 {
 	return Depth * 100.0f;
 }
@@ -316,7 +316,8 @@ void CGLWindow::glResize(GLsizei Width, GLsizei Height)
 	glViewport(0, 0, Width-1, Height-1);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();			
-	gluOrtho2D(0.0f, Width-1, 0.0f, Height-1);
+	//gluOrtho2D(0.0f, Width-1, 0.0f, Height-1);
+	glOrtho(0.0f, Width - 1.0f, 0.0f, Height - 1.0f, -100.0f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);	
 }
 
@@ -397,27 +398,21 @@ void CGLWindow::SetBackgroundColor(const RGBAf &AColor)
 //////////////////////////////////////////////////////////////////////////
 // CFont
 
-CFont::CFont()
+CFont::CFont() : Distance(1.0f)// Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение.// Пользователь потом сам попроавит, если надо.
 {
-	base = 0;
-	Distance = CFONT_DEFAULT_DISTANCE;	// Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение.
-										// Пользователь потом сам попроавит, если надо.
 	CFontManager::Instance()->Add(this);
 }
 
 CFont::~CFont()
 {
-	if (!base)
-		glDeleteLists(base, 256);
 	CFontManager::Instance()->Remove(this);
 }
-
 
 bool CFont::LoadFromFile()
 {
 	if (Filename == "")
 		return false;
-	CFile			file;
+	CFile file;
 	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
 		Log("ERROR", "Can't Load Font %s: file  couldn't be opened.", GetName().c_str());
@@ -435,35 +430,14 @@ bool CFont::LoadFromFile()
 
 
 	file.Close();
-	base = glGenLists(256);
-	Texture->Bind();
-	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
 	for(int i=0;i<256;i++)
 	{
 		if (bbox[i].Min.x > bbox[i].Max.x)
 			swap(bbox[i].Min.x, bbox[i].Max.x);
 		if (bbox[i].Min.y > bbox[i].Max.y)
 			swap(bbox[i].Min.y, bbox[i].Max.y);
-		glNewList(base + i, GL_COMPILE);
-			float x0 = bbox[i].Min.x, x1 = bbox[i].Max.x;
-			float y0 = bbox[i].Min.y, y1 = bbox[i].Max.y;
-			glBegin(GL_QUADS);		
-				glTexCoord2f(x0 * TmpOOWdth, y0 * TmpOOHght);
-				glVertex2i(0, 0);
-
-				glTexCoord2f(x1 * TmpOOWdth, y0 * TmpOOHght);
-				glVertex2i(x1 - x0, 0);
-
-				glTexCoord2f(x1 * TmpOOWdth, y1 * TmpOOHght);
-				glVertex2i(x1 - x0, y1 - y0);
-
-				glTexCoord2f(x0 * TmpOOWdth, y1 * TmpOOHght);
-				glVertex2i(0, y1 - y0);
-			glEnd();
-			glTranslated(x1 - x0 + Distance, 0, 0);
-		glEndList();
-		Width[i] = (x1 - x0);
-		Height[i] = (y1 - y0);
+		Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
+		Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
 	}
 	return true;
 }
@@ -477,35 +451,14 @@ bool CFont::LoadFromMemory(const byte* Address)
 	Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
 	
 	memcpy(bbox, Address, sizeof(bbox));
-	base = glGenLists(256);
-	Texture->Bind();
-	float TmpOOWdth = 1.0f/Texture->Width, TmpOOHght = 1.0f/Texture->Height;
 	for(int i=0;i<256;i++)
 	{
 		if (bbox[i].Min.x > bbox[i].Max.x)
 			swap(bbox[i].Min.x, bbox[i].Max.x);
 		if (bbox[i].Min.y > bbox[i].Max.y)
 			swap(bbox[i].Min.y, bbox[i].Max.y);
-		glNewList(base + i, GL_COMPILE);
-		float x0 = bbox[i].Min.x, x1 = bbox[i].Max.x;
-		float y0 = bbox[i].Min.y, y1 = bbox[i].Max.y;
-		glBegin(GL_QUADS);		
-		glTexCoord2f(x0 * TmpOOWdth, y0 * TmpOOHght);
-		glVertex2i(0, 0);
-
-		glTexCoord2f(x1 * TmpOOWdth, y0 * TmpOOHght);
-		glVertex2i(x1 - x0, 0);
-
-		glTexCoord2f(x1 * TmpOOWdth, y1 * TmpOOHght);
-		glVertex2i(x1 - x0, y1 - y0);
-
-		glTexCoord2f(x0 * TmpOOWdth, y1 * TmpOOHght);
-		glVertex2i(0, y1 - y0);
-		glEnd();
-		glTranslated(x1 - x0 + Distance, 0, 0);
-		glEndList();
-		Width[i] = (x1 - x0);
-		Height[i] = (y1 - y0);
+		Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
+		Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
 	}
 	return true;
 }
@@ -733,9 +686,10 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
+	glLoadIdentity();	
+	glTranslatef(0.375, 0.375, ROTATIONAL_AXIS_Z); //accuracy tip from MSDN help
 	//ManagerContainer toDelete;
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // !!! there. it shouln't be there
-	Camera.Update();
+	Camera.Update(); // @todo: review camera
 
 	CRenderable *data;
 
@@ -750,17 +704,7 @@ bool CRenderManager::DrawObjects()
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (data->GetVisibility())
-		{
-			glLoadIdentity();	
-			glTranslatef(0.375, 0.375, 0.0); //accuracy tip from MSDN help
-			if (!data->doIgnoreCamera)
-				Camera.gTranslate();
-			data->Color.glSet();
-			glScalef(data->GetScaling(), data->GetScaling(), ROTATIONAL_AXIS_Z);
-			glTranslatef(data->Position.x, data->Position.y, data->GetDepth());
-			glRotatef(data->GetAngle(), 0.0f, 0.0f, 1.0f);
 			data->Render();
-		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
@@ -770,12 +714,13 @@ bool CRenderManager::DrawObjects()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_2D);
-	for (unsigned int i = 0; i < MAX_TEXTURES; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, i);
-		TexturedQuadVertices[i].RenderPrimitive(GL_QUADS);
-		TexturedQuadVertices[i].Clear();
-	}
+	for(unsigned int i = 0; i < DEKU2D_MAX_TEXTURES; i++)
+		if (TexturedQuadVertices[i].GetVertexCount() != 0)
+		{
+			glBindTexture(GL_TEXTURE_2D, i);
+			TexturedQuadVertices[i].RenderPrimitive(GL_QUADS);
+			TexturedQuadVertices[i].Clear();
+		}
 	//FontVertices.RenderPrimitive(GL_QUADS);
 	glDisable(GL_TEXTURE_2D);
 	QuadVertices.RenderPrimitive(GL_QUADS);
@@ -816,36 +761,44 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 	}
 }
 
-void CRenderManager::DrawBox( const CGrRect *Rectangle )
+void CRenderManager::DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box)
 {
-	if (Rectangle->isLineDrawn)
-	{
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
-		LineVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
-		return;
-	}
-	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v0);
-	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v1);
-	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v2);
-	QuadVertices.PushVertex(Rectangle, Rectangle->Rectangle.v3);
+	Vector2 v0 = Box.Min;
+	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
+	Vector2 v2 = Box.Max;
+	Vector2 v3 = Vector2(Box.Min.x, Box.Max.y);
+	QuadVertices.PushVertex(RenderInfo, v0);
+	QuadVertices.PushVertex(RenderInfo, v1);
+	QuadVertices.PushVertex(RenderInfo, v2);
+	QuadVertices.PushVertex(RenderInfo, v3);
 }
 
-void CRenderManager::DrawPoint(const CGrPoint *Point)
+void CRenderManager::DrawTexturedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords)
 {
-	PointVertices.PushVertex(Point, Point->Position);
+	Vector2 v0 = Box.Min;	
+	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
+	Vector2 v2 = Box.Max;
+	Vector2 v3 = Vector2(Box.Min.x, Box.Max.y);
+
+	unsigned int i = Texture->GetTexID();
+	TexturedQuadVertices[i].PushVertex(RenderInfo, v0, TexCoords[0]);
+	TexturedQuadVertices[i].PushVertex(RenderInfo, v1, TexCoords[1]);
+	TexturedQuadVertices[i].PushVertex(RenderInfo, v2, TexCoords[2]);
+	TexturedQuadVertices[i].PushVertex(RenderInfo, v3, TexCoords[3]);
 }
 
-void CRenderManager::DrawLine(const CGrLine *Line)
+void CRenderManager::DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point)
 {
-	LineVertices.PushVertex(Line, Line->Segment.v0);
-	LineVertices.PushVertex(Line, Line->Segment.v1);
+	PointVertices.PushVertex(RenderInfo, Point);
 }
+
+void CRenderManager::DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1)
+{
+	LineVertices.PushVertex(RenderInfo, v0);
+	LineVertices.PushVertex(RenderInfo, v1);
+}
+
+
 //-------------------------------------------//
 //				Common OpenGL stuff			 //
 //-------------------------------------------//
@@ -889,24 +842,7 @@ void gScissor( int x, int y, int width, int height )
 	glScissor(x, y, width, height);
 }
 
-void gDrawBBox( CBox box )
-{
-	glPushMatrix();
-	glPushAttrib(GL_TEXTURE_2D);
-	glDisable(GL_TEXTURE_2D);
-	glLoadIdentity();
-	glEnable(GL_LINE_WIDTH);
-	glLineWidth(4);
-	glTranslatef(0.0f, 0.0f, 0.99f);
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(box.Min.x, box.Min.y);	
-	glVertex2f(box.Max.x, box.Min.y);
-	glVertex2f(box.Max.x, box.Max.y);
-	glVertex2f(box.Min.x, box.Max.y);
-	glEnd();
-	glPopAttrib();
-	glPopMatrix();
-}
+
 
 //////////////////////////////////////////////////////////////////////////
 // CFontManager
@@ -1343,18 +1279,23 @@ CPrmitiveVertexDataHolder::~CPrmitiveVertexDataHolder()
 	delete [] Vertices;
 }
 
-void CPrmitiveVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
+void CPrmitiveVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
 {
 	assert(Sender != NULL);
 	if (VertexCount == ReservedCount)
 		Grow();
-	Vector2 TempVector = Vertex + Sender->Position;
-	Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth()); // also apply rotation here
+	Vector2 TempVector = (Vertex * Sender->GetScaling());
+	if (!Equal(Sender->GetAngle(), 0.0f))
+		TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
+	TempVector += Sender->Position;
+	if (!Sender->doIgnoreCamera)
+		TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+	Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth());
 	Colors[VertexCount] = Color;
 	VertexCount++;
 }
 
-void CPrmitiveVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex)
+void CPrmitiveVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex)
 {
 	PushVertex(Sender, Vertex, Sender->Color);
 }
@@ -1395,6 +1336,10 @@ void CPrmitiveVertexDataHolder::Clear()
 	VertexCount = 0;
 }
 
+unsigned int CPrmitiveVertexDataHolder::GetVertexCount()
+{
+	return VertexCount;
+}
 //////////////////////////////////////////////////////////////////////////
 // CVertexDataHolder
 
@@ -1408,12 +1353,12 @@ CVertexDataHolder::~CVertexDataHolder()
 	delete [] TexCoords;
 }
 
-void CVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
+void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
 {
 	assert(false);
 }
 
-void CVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord)
+void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord)
 {
 	CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
 	if (VertexCount == ReservedCount)
@@ -1421,7 +1366,17 @@ void CVertexDataHolder::PushVertex(const CRenderableUnitInfo *Sender, const Vect
 	TexCoords[CPrmitiveVertexDataHolder::VertexCount - 1] = TexCoord;
 }
 
-void CVertexDataHolder::RenderPrimitive(GLenum Type)
+void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex)
+{
+	assert(false);
+}
+
+void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const Vector2 &TexCoord)
+{
+	PushVertex(Sender, Vertex, Sender->Color, TexCoord);
+}
+
+void CVertexDataHolder::RenderPrimitive( GLenum Type )
 {
 	if (VertexCount == 0)
 		return;
@@ -1436,7 +1391,7 @@ void CVertexDataHolder::RenderPrimitive(GLenum Type)
 
 void CVertexDataHolder::Grow()
 {
-	CPrmitiveVertexDataHolder::Grow();
+    CPrmitiveVertexDataHolder::Grow();
 	Vector2 *NewTexCoords = new Vector2[ReservedCount];
 	for(unsigned int i = 0; i < VertexCount; i++)
 		NewTexCoords[i] = TexCoords[i];

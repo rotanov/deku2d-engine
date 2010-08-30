@@ -206,6 +206,7 @@ void CTilesetEditor::Render()
 	glColor4fv(&COLOR_THIRD.r);
 	if (Tileset)
 	{
+		//Tileset->RenderTileSet();
 
 /*
 		glBegin(GL_QUADS);
