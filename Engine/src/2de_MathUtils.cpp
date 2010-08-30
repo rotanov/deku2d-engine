@@ -48,39 +48,40 @@ Vector2& Vector2::operator ^=(const Matrix2& M)
 	return *this;
 }
 
-bool SqareEq( float a, float b, float c, float &t0, float &t1)
+bool SqareEq(float a, float b, float c, float &t0, float &t1)
 {
 	float d = b * b - 4.0f * a * c;
-	if ( d < 0)	return false;
-	d = (float)sqrt( d);
-	float oo2a = 1 / ( 2.0f * a);
+	if (d < 0)	return false;
+	d = static_cast<float>(sqrt(d));
+	float oo2a = 1 / (2.0f * a);
 	t0 = (- b + d) * oo2a;
 	t1 = (- b - d) * oo2a;
-	if ( t1 > t0)
+	if (t1 > t0)
 	{
 		float t = t0;
 		t0 = t1;
 		t1 = t;
 	}
-	return true;	
+	return true;
 }
 
 void GenSinTable()
 {
-	float a = 0, add = (float)PI*2 / (float)SINE_COSINE_TABLE_DIM;
-	for (int i=0; i<SINE_COSINE_TABLE_DIM; ++i){
-		SineTable[i] = (float)sin(a);
-		CosineTable[i] = (float)cos(a);
+	float a = 0, add = static_cast<float>(PI) * 2 / static_cast<float>(SINE_COSINE_TABLE_DIM);
+	for (int i = 0; i < SINE_COSINE_TABLE_DIM; ++i)
+	{
+		SineTable[i] = static_cast<float>(sin(a));
+		CosineTable[i] = static_cast<float>(cos(a));
 		a += add;
 	}
 }
 
-float fSinr(float angle){return SineTable[(int)(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
-float fSind(float angle){return SineTable[(int)(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
-float fSini(int index){return SineTable[index%SINE_COSINE_TABLE_DIM];}
-float fCosr(float angle){return CosineTable[(int)(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
-float fCosd(float angle){return CosineTable[(int)(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
-float fCosi(int index){return CosineTable[index%SINE_COSINE_TABLE_DIM];}
+float fSinr(float angle){return SineTable[static_cast<int>(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
+float fSind(float angle){return SineTable[static_cast<int>(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
+float fSini(int index){return SineTable[index % SINE_COSINE_TABLE_DIM];}
+float fCosr(float angle){return CosineTable[static_cast<int>(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
+float fCosd(float angle){return CosineTable[static_cast<int>(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
+float fCosi(int index){return CosineTable[index % SINE_COSINE_TABLE_DIM];}
 
 
 // Polygons collision stuff will be here
@@ -133,7 +134,7 @@ bool CPolygon::Collide(const CPolygon &A,
 		iNumAxes++;
 	}
 
-	for(int j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
+	for (int j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
 	{
 		Vector2 E0 = A[j];
 		Vector2 E1 = A[i];
@@ -149,7 +150,7 @@ bool CPolygon::Collide(const CPolygon &A,
 		iNumAxes++;
 	}
 
-	for(int j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
+	for (int j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
 	{
 		Vector2 E0 = B[j];
 		Vector2 E1 = B[i];
@@ -209,7 +210,7 @@ void GetInterval(const CPolygon &Polygon, const Vector2& xAxis, float& min, floa
 {
 	min = max = (Polygon[0] * xAxis);
 
-	for(int i = 1; i < Polygon.GetVertexCount(); i ++)
+	for (int i = 1; i < Polygon.GetVertexCount(); i ++)
 	{
 		float d = (Polygon[i] * xAxis);
 		if (d < min) min = d; else if (d > max) max = d;
@@ -237,7 +238,7 @@ bool IntervalIntersect(const CPolygon &A,
 	float d0 = min0 - max1;
 	float d1 = min1 - max0;
 
-	if (d0 > 0.0f || d1 > 0.0f) 
+	if (d0 > 0.0f || d1 > 0.0f)
 	{
 		float v = xVel * xAxis;
 
@@ -265,7 +266,7 @@ bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
 {
 	int mini = -1;
 	t = 0.0f;
-	for(int i = 0; i < iNumAxes; i ++)
+	for (int i = 0; i < iNumAxes; i ++)
 	{	
 		if (taxis[i] > 0)
 		{
@@ -280,10 +281,10 @@ bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
 	}
 
 	if (mini != -1)
-		return true; 
+		return true;
 
 	mini = -1;
-	for(int i = 0; i < iNumAxes; i ++)
+	for (int i = 0; i < iNumAxes; i ++)
 	{
 		float n = xAxis[i].Normalize();
 		taxis[i] /= n;
@@ -310,7 +311,7 @@ float HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Ð
 bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
 {
 	float a1 = u1.y - u0.y;
-	float b1 = u0.x - u1.x; 
+	float b1 = u0.x - u1.x;
 	float a2 = v1.y - v0.y;
 	float b2 = v0.x - v1.x;
 	Matrix2 deltaMatrix(a1, b1, a2, b2);
@@ -474,7 +475,7 @@ bool CBox::Inside(const Vector2 &point, float &MTD, Vector2 &n) const /* MTD - i
 		return false;
 
 	//DistanceToLine
-	float d1, d2, d3, d4;		
+	float d1, d2, d3, d4;
 	d1 =  Max.x - point.x;
 	d2 =  Max.y - point.y;
 	d3 = -Min.x + point.x;
@@ -500,7 +501,7 @@ bool CBox::Outside(const Vector2 &point, float &MTD, Vector2 &n) const /* MTD - 
 		return false;
 
 	//DistanceToLine
-	float d1, d2, d3, d4;		
+	float d1, d2, d3, d4;
 	d1 = -Max.x + point.x;
 	d2 = -Max.y + point.y;
 	d3 =  Min.x - point.x;
@@ -528,7 +529,7 @@ bool CBox::Intersect(const CBox &box) const
 	if (box.Max.x <= Min.x)
 		return false;
 	if (box.Max.y <= Min.y)
-		return false;		
+		return false;
 
 	return true;
 }
@@ -558,8 +559,9 @@ Vector2Array<4> CBox::GetVertices() const
 	Result[3] = Vector2(Min.x, Max.y);;
 	return Result;
 }
+
 //////////////////////////////////////////////////////////////////////////
-//	Geometry
+// CGeometry
 
 CGeometry::CGeometry()
 {
@@ -567,8 +569,9 @@ CGeometry::CGeometry()
 }
 
 //////////////////////////////////////////////////////////////////////////
-//CCircle
-CCircle::CCircle( Vector2 APosition, float ARadius ) : Position(APosition), Radius(ARadius)
+// CCircle
+
+CCircle::CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius(ARadius)
 {
 	CalcBBOX();
 }
@@ -589,13 +592,13 @@ void CPolygon::CalcBBOX()
 	Box.Min.y = 0xffffff;
 	Box.Max.x = -0xffffff;
 	Box.Max.x = -0xffffff;
-	for(int i = 0; i< VerticesCount; i++)
+	for (int i = 0; i < VerticesCount; i++)
 	{
 		Box.Add(Vertices[i]);
 	}
 }
 
-CPolygon::CPolygon(unsigned int AVerticesCount) :VerticesCount(AVerticesCount)
+CPolygon::CPolygon(unsigned int AVerticesCount) : VerticesCount(AVerticesCount)
 {
 	Vertices = new Vector2 [VerticesCount];
 	memset(Vertices, 0, sizeof(Vertices));
@@ -614,7 +617,7 @@ CPolygon::~CPolygon()
 void CPolygon::AddVertex(const Vector2 &Vertex)
 {
 	Vector2 *TempVertices = new Vector2 [VerticesCount + 1];
-	for(unsigned int i = 0; i < VerticesCount; i++)
+	for (unsigned int i = 0; i < VerticesCount; i++)
 		TempVertices[i] = Vertices[i];
 	TempVertices[VerticesCount++] = Vertex;
 	SAFE_DELETE_ARRAY(Vertices);
@@ -637,7 +640,7 @@ void CPolygon::RemoveVertex(unsigned int Index)
 {
 	assert(Index >= 0 && Index < VerticesCount);
 	Vector2 *TempVertices = new Vector2 [VerticesCount - 1];
-	for(unsigned int i = 0; i < VerticesCount; i++)
+	for (unsigned int i = 0; i < VerticesCount; i++)
 	{
 		if (i > Index)
 			TempVertices[i - 1] = Vertices[i];

@@ -21,7 +21,7 @@ void CPacmanBonus::Update(float dt)
 	RenderProxy->Position = Vector2(ceil(Position.x), ceil(Position.y + Period));
 	CBox AABB = CBox(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 	CBox AABBself = CBox(Position - Vector2(16, 16), Position + Vector2(16, 16));
-	if ( (AABB.Intersect(AABBself)))
+	if ((AABB.Intersect(AABBself)))
 	{
 		Player->Score += 100;
 		Player->ScoreText->SetText("Score: " + itos(Player->Score));
@@ -86,7 +86,7 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 {
 	if (state == KEY_PRESSED)
 	{
-		switch(key)
+		switch (key)
 		{
 		case SDLK_LEFT:
 			Velocity.x += -DEFAULT_VELOCITY;
@@ -134,8 +134,8 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 	Map->SetLayer(0);
 	Map->SetScaling(2.0f);
 	//	Map.TileSet = Tiles;
-	for(int i = 0; i < LEVEL_WIDTH; i++)
-		for(int j = 0; j < LEVEL_HEIGHT; j++)
+	for (int i = 0; i < LEVEL_WIDTH; i++)
+		for (int j = 0; j < LEVEL_HEIGHT; j++)
 			if ((i*j == 0 || i == LEVEL_WIDTH - 1 || j == LEVEL_HEIGHT - 1))
 				Map->GetMapCell(i, j)->index = 1;
 			else
@@ -194,7 +194,7 @@ void CPacmanGame::Update(float dt)
 			Direction = 3;
 	}
 
-	switch(Direction)
+	switch (Direction)
 	{
 	case 0: // left
 		Pot1 = Map->GetCellAABB(TopLeft);
@@ -293,7 +293,7 @@ void CPacmanEnemy::Update(float dt)
 		Ps->SizeVariability = 2;
 		Ps->Emission = 10;
 		Ps->Life = 0.5;
-		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");		
+		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");
 		Ps->PtrPosition = &Player->Position;
 	}
 	Sprite->Position = Position;

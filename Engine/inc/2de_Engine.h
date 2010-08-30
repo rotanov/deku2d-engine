@@ -14,10 +14,10 @@
 #include "2de_Update.h"
 #include "2de_Xml.h"
 
-const float FIXED_DELTA_TIME		=	0.02f;
-const int ENGINE_VERSION			=	0x001; // it's a pity that it's not used.. i DO WANT some build counter, that increments automatically every build :)
-const int MAX_EVENT_FUNCTIONS		=	8;
-const int MAX_KEY_INPUT_FUNCTIONS	=	8;
+const int ENGINE_VERSION = 0x001;	// it's a pity that it's not used.. i DO WANT some build counter, that increments automatically every build :)
+const float FIXED_DELTA_TIME = 0.02f;
+const int MAX_EVENT_FUNCTIONS = 8;
+const int MAX_KEY_INPUT_FUNCTIONS = 8;
 
 class CAbstractStateHandler
 {

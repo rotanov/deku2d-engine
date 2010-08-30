@@ -34,6 +34,7 @@ class CUpdateManager : public CCommonManager <list<CUpdatable*> >, public CTSing
 {
 public:	
 	bool UpdateObjects();
+
 protected:
 	CUpdateManager();
 	friend class CTSingleton<CUpdateManager>;
@@ -72,6 +73,7 @@ public:
 	}
 
 	ActionT Action;
+
 private:
 	float Life;
 	float Age;

@@ -5,7 +5,7 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	if (state == KEY_PRESSED)
 	{
-		for(int i = 0; i < CONTROLS_COUNT; i++)
+		for (int i = 0; i < CONTROLS_COUNT; i++)
 			if (key == Controls[i])
 			{
 				States[i] = true;
@@ -21,7 +21,7 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	else
 	{
 		isWalking = false;
-		for(int i=0;i<5;i++)
+		for (int i = 0; i < 5; i++)
 			if (key == Controls[i])
 				States[i] = false;
 			else 
@@ -35,7 +35,7 @@ void CTank::SetPlayerControls(int PlayerIndex)
 {
 	if (AI != NULL)
 		return;
-	for(int i =0;i<CONTROLS_COUNT;i++)
+	for (int i = 0; i < CONTROLS_COUNT; i++)
 		Controls[i] = AR_K_CONTRLS[i][PlayerIndex];
 }
 
@@ -53,7 +53,7 @@ void CTank::Update(float dt)
 	Vector2 BottomLeft = AABB.Min, TopRight = AABB.Max, BottomRight = Vector2(AABB.Max.x, AABB.Min.y), TopLeft = Vector2(AABB.Min.x, AABB.Max.y);
 	CBox Pot1, Pot2;
 
-	switch(Dir2AK(Direction))
+	switch (Dir2AK(Direction))
 	{
 	case akLeft:
 		Pot1 = Map->GetCellAABB(TopLeft);
@@ -100,7 +100,7 @@ void CTank::Update(float dt)
 			Bullets[BulletsCount-1].p = GetCenter();
 		}
 	}
-	for (int i = 0;i<BulletsCount;i++)
+	for (int i = 0; i < BulletsCount; i++)
 	{
 		Bullets[i].p += Bullets[i].v;
 		if (Map->GetCell(Bullets[i].p)->TileIndex == csDestr)
@@ -162,7 +162,7 @@ void CTank::Render()
 	Tileset->GetTexture()->Bind();
 	glColor4f(0.8f, 0.1f, 0.1f, 0.9f);
 	glBegin(GL_QUADS);
-	for(int i=0;i<BulletsCount;i++)
+	for (int i = 0; i < BulletsCount; i++)
 	{
 		Tileset->GetCellTC(csBullet)[0].glTexCoord();
 		Bullets[i].p.glVertex();
@@ -205,7 +205,7 @@ void CTankManager::AddPlayer()
 	CTank *Tank = new CTank(Map, this, NULL);
 	//char * tmp = new char[16];
 	//SDL_itoa(, tmp, 10);
-	Tank->SetName((string)"TankPlayer" + itos(PlayerCount+1));	
+	Tank->SetName((string)"TankPlayer" + itos(PlayerCount+1));
 	//delete [] tmp;
 	Tank->Init(PlayerCount == 0?&COLOR_P1:&COLOR_P2, Map->GetNewTankLocation());
 	Tank->SetPlayerControls(PlayerCount);
@@ -227,7 +227,7 @@ void CTankManager::AddAI()
 	CTank *Tank = NULL;
 	CTankAI *AI = new CTankAI(this, Map, Tank);
 	Tank = new CTank(Map, this, AI);
-	Tank->SetName("Tank");	
+	Tank->SetName("Tank");
 	Tank->Init(&COLOR_AI, Map->GetNewTankLocation());
 	Add(Tank);
 	PlayerCount++;
@@ -237,7 +237,7 @@ void CTankManager::AddAI()
 void CTankManager::Render()
 {
 	glLoadIdentity();
-	gSetBlendingMode();	
+	gSetBlendingMode();
 	CFont *Font = CFontManager::Instance()->GetFont("Font");
 	return;
 }
@@ -251,8 +251,8 @@ void CTankManager::Update(float dt)
 
 Vector2 CTankMap::GetNewTankLocation()
 {
-	for (int i=0;i<MAP_SIZE_X;i++)
-		for (int j=0;j<MAP_SIZE_Y;j++)
+	for (int i = 0; i < MAP_SIZE_X; i++)
+		for (int j = 0; j < MAP_SIZE_Y; j++)
 		{
 			if (Cells[j][i].TileIndex == csFree1)
 				return Vector2(i*CellSize, j*CellSize);
@@ -270,8 +270,8 @@ void CTankMap::Render()
 	glEnable(GL_TEXTURE_2D);
 	CellSize = DEFAULT_CELL_SIZE;
 	glBegin(GL_QUADS);
-	for (int i=0;i<MAP_SIZE_X;i++)
-		for (int j=0;j<MAP_SIZE_Y;j++)
+	for (int i = 0; i < MAP_SIZE_X; i++)
+		for (int j = 0; j < MAP_SIZE_Y; j++)
 		{
 			//if (Cells[j][i].TileIndex == csBlock || Cells[j][i].TileIndex  == csDestr || Cells[j][i].TileIndex  == csFree1)
 			{
@@ -302,7 +302,7 @@ CBox CTankMap::GetCellAABB(Vector2 V)
 {
 	
 	if (!Cells[(int)V.y/(int)CellSize][(int)V.x/(int)CellSize].isFree())
-		return CBox(      (((int)V.x/(int)CellSize)) * CellSize, (((int)V.y/(int)CellSize)) * CellSize, 
+		return CBox((((int)V.x/(int)CellSize)) * CellSize, (((int)V.y/(int)CellSize)) * CellSize,
 			CellSize, CellSize);
 	else 
 		return CBox(-1, -1, -1, -1);

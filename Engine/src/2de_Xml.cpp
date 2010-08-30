@@ -264,7 +264,7 @@ CXML::~CXML()
 CXML& CXML::operator=(const CXML &ASource)
 {
 	for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
-		Root.AddLast((*it)->Copy()); 
+		Root.AddLast((*it)->Copy());
 	
 	return *this;
 }
@@ -277,7 +277,7 @@ void CXML::LoadFromFile(const string &AFilename)
 
 	Root.DeleteAll();
 
-	CXMLParser parser(AllContent); 
+	CXMLParser parser(AllContent);
 	Root = parser.Parse();
 }
 
@@ -720,7 +720,7 @@ CXMLTextNode* CXMLTextNode::Copy()
 
 string CXMLTextNode::GetText() const
 {
-	return CXMLHelper::Instance()->EntitiesEncode(GetValue()) + "\n"; 
+	return CXMLHelper::Instance()->EntitiesEncode(GetValue()) + "\n";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -822,7 +822,7 @@ CXMLNode* CXMLParser::ParseNode()
 			Current++;
 			string EndName = ParseTagName();
 
-			if (CurrentLevel && EndName != CurrentLevel->GetName()) 
+			if (CurrentLevel && EndName != CurrentLevel->GetName())
 				ReportError("ERROR", "Incorrect nesting: end tag doesn't match start tag at", start);
 			else if (!CurrentLevel)
 			 	ReportError("ERROR", "Unexpected end tag without corresponding start tag at root level at", start);

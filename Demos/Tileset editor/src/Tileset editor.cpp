@@ -30,7 +30,7 @@ bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char let
 	switch (state)
 	{
 	case KEY_PRESSED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_g:
 			PreviousState = State;
@@ -51,7 +51,7 @@ bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char let
 		}
 		break;
 	case KEY_RELEASED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_g:
 			State = PreviousState;
@@ -85,11 +85,11 @@ CTilesetEditor::CTilesetEditor()
 	const char* ButtonNames[BUTTONS_COUNT] = {"Exit", "Load tileset", "Load texture", "Save tileset", };
 	const CObjectCallback ButtonCallers[BUTTONS_COUNT] = {&ExitEditor, &LoadTileset, &LoadTexture, &SaveTileset, };
 
-	for(int i = 0; i < BUTTONS_COUNT; i++)
+	for (int i = 0; i < BUTTONS_COUNT; i++)
 	{
 		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
 		temp->SetText(static_cast<string>(ButtonNames[i]));
-		temp->SetBox(CBox(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));		
+		temp->SetBox(CBox(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));
 		temp->SetCallback(ButtonCallers[i], this);
 	}
 
@@ -149,7 +149,7 @@ void CTilesetEditor::Render()
 	PRender.grRectC(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, WindowHeight));
 	glLoadIdentity();
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);		
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
 	PRender.grCircleL(MousePosition, 5);
@@ -164,7 +164,7 @@ void CTilesetEditor::Render()
 	Offset.glTranslate();
 
 	// 	if (Font != NULL)
-	// 		for(int i=0;i<256;i++)
+	// 		for (int i = 0; i < 256; i++)
 	// 		{
 	// 			char a[2];
 	// 			a[0] = (char)i+32;
@@ -180,7 +180,7 @@ void CTilesetEditor::Render()
 
 	glEnable(GL_TEXTURE_2D);
 
-	if(TilesetTexture)
+	if (TilesetTexture)
 	{
 		TilesetTexture->Bind();
 		RGBAf(1.0f, 1.0f, 1.0f, 1.0f).glSet();
@@ -210,7 +210,7 @@ void CTilesetEditor::Render()
 
 /*
 		glBegin(GL_QUADS);
-		for(int i=0;i<5;i++)
+		for (int i = 0; i < 5; i++)
 		{
 
 			// 			PRender.grRectS(SelectionBoxes[i * 16 + 0], SelectionBoxes[i * 16 + 3]);
@@ -235,7 +235,7 @@ void CTilesetEditor::Render()
 		glEnd();
 
 		glBegin(GL_LINES);
-		for(int i=0;i<256;i++)
+		for (int i = 0; i < 256; i++)
 		{
 			if (i == CurrentSymbol)
 				RGBAf(0.9f, 0.4f, 0.3f, 0.9f).glSet();
@@ -327,7 +327,7 @@ bool SaveTileset(CObject *Caller)
 	TilesetEditor->Tileset->SetName(TilesetEditor->edTilesetName->GetText());
 	TilesetEditor->Tileset->SetTexture(TilesetEditor->TilesetTexture->GetName());
 	TilesetEditor->Tileset->SetSettings(stoi(TilesetEditor->edTileWidth->GetText()), stoi(TilesetEditor->edTileHeight->GetText()),
-	stoi(TilesetEditor->edHorNumTiles->GetText()), stoi(TilesetEditor->edVerNumTiles->GetText()) );
+	stoi(TilesetEditor->edHorNumTiles->GetText()), stoi(TilesetEditor->edVerNumTiles->GetText()));
 
 
 	TilesetEditor->Tileset->SaveToFile();

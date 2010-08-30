@@ -56,7 +56,7 @@ static const SDLKey *AR_K_CONTRLS[CONTROLS_COUNT] = {K_LEFT, K_RIGHT, K_UP, K_DO
 
 __INLINE int Dir2AK(Vector2& V) // Direction to action kind
 {
-	for (int i=0;i<4;i++)
+	for (int i = 0; i < 4; i++)
 		if (V == Directions[i])
 			return EActionKind(i);
 	
@@ -98,8 +98,8 @@ public:
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 		isAlive = true;
-		isFiring = false;			
-		for (int i=0;i<5;i++)
+		isFiring = false;
+		for (int i = 0; i < 5; i++)
 		{
 			Controls[i] = SDLKey(0);
 			States[i] = false;
@@ -150,8 +150,8 @@ public:
 		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 
 		CellSize = DEFAULT_CELL_SIZE;
-		for (int i=0;i<MAP_SIZE_X;i++)
-			for (int j=0;j<MAP_SIZE_Y;j++)
+		for (int i = 0; i < MAP_SIZE_X; i++)
+			for (int j = 0; j < MAP_SIZE_Y; j++)
 			{
 				if (i==0 || i == MAP_SIZE_X-1 || j==0 || j== MAP_SIZE_Y-1)
 					Cells[j][i].TileIndex = csBlock;
@@ -173,7 +173,7 @@ public:
 								if (freeind == 2)
 									Cells[j][i].TileIndex = csFree3; else
 									
-										Cells[j][i].TileIndex = csFree2; 
+										Cells[j][i].TileIndex = csFree2;
 
 					}
 				}

@@ -132,7 +132,7 @@ void CGUIRootObject::Render()
 		PRender->lwidth = Style->Metrics.FocusRectLineWidth;
 		PRender->lClr = Style->Colors.FocusRect;
 		PRender->grRectL(Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Min,
-			Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Max);	
+			Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Max);
 		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
 		PRender->lwidth = 1.0f;
 	}
@@ -236,10 +236,10 @@ CGUIManager::CGUIManager()
 bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	// TODO: move this function to CGUIRootObject..	
-	switch(state)
+	switch (state)
 	{
 	case KEY_PRESSED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_TAB:
 			Root->TabHolded = true;
@@ -266,7 +266,7 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		}
 		break;
 	case KEY_RELEASED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_TAB:
 			Root->TabHolded =  false;
@@ -368,8 +368,6 @@ void CButton::Render()
 	SetLayer(1);
 	//CRenderManager::Instance()->DrawSolidBox(this, GetBox().Inflated(4.0f, 4.0f));
 	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
-	
-	
 }
 
 
@@ -416,10 +414,10 @@ void CButton::Update(float dt)
 
 bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	switch(state)
+	switch (state)
 	{
 	case KEY_PRESSED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_SPACE:
 			WidgetState.Pressed = true;
@@ -431,7 +429,7 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		}
 		break;
 	case KEY_RELEASED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_SPACE:
 			WidgetState.Pressed = false;
@@ -552,10 +550,10 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	// this function has many copy-pasted blocks.. they're all marked with fN, where N is 1, 2, 3, ...
 	// @todo: move 'em all to separate functions
 	// or maybe selection will be handled by some CText or whatever... i just don't know yet..
-	switch(state)
+	switch (state)
 	{
 	case KEY_PRESSED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_BACKSPACE:
 			if (Selection.Exists())
@@ -682,7 +680,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		}
 		break;
 	case KEY_RELEASED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_AMPERSAND:
 			break;
@@ -727,7 +725,7 @@ void CEdit::SetBox(const CBox &box)
 
 void CEdit::SetText(const string &AText)
 {
-	ActualText = AText;			
+	ActualText = AText;
 	/*Text.Position.y = (int)((GetBox().Min.y + GetBox().Max.y) / 2.0f - Text.Height() / 2.0f);*/
 	Text = GetVisibleText();
 	Text.Position.x = (int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x;
@@ -813,7 +811,7 @@ CMenuItem::~CMenuItem()
 
 void CMenuItem::Render()
 {
-	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
+	for (ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{		
 		CMenuItem *ChildMenuItem = *it;
 		//Text.Color = RGBAf(1.0,1.0,1.0,1.0);
@@ -838,7 +836,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		return false;
 	if (state == KEY_PRESSED)
 	{
-		switch(key)
+		switch (key)
 		{
 		case SDLK_UP:
 			// Вероятно эту логику можно записать и покороче @todo

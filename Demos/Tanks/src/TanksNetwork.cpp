@@ -12,7 +12,7 @@
 	TestGame *serverGame = NULL;
 
 	//---------------------------------------------------------------------------------
-	TNL_IMPLEMENT_NETOBJECT(Player); 
+	TNL_IMPLEMENT_NETOBJECT(Player);
 
 	// Player constructor
 	Player::Player(Player::PlayerType pt)
@@ -37,13 +37,13 @@
 
 	Player::~Player()
 	{
-		if(!game)
+		if (!game)
 			return;
 
 		// remove the player from the list of players in the game.
-		for( TNL::S32 i = 0; i < game->players.size(); i++)
+		for (TNL::S32 i = 0; i < game->players.size(); i++)
 		{
-			if(game->players[i] == this)
+			if (game->players[i] == this)
 			{
 				game->players.erase_fast(i);
 				return;
@@ -57,7 +57,7 @@
 		theGame->players.push_back(this);
 		game = theGame;
 
-		if(myPlayerType == PlayerTypeMyClient)
+		if (myPlayerType == PlayerTypeMyClient)
 		{
 			// set the client player for the game for drawing the
 			// scoping radius circle.
@@ -78,16 +78,16 @@
 		// scope always, as well as all "players" in a circle of radius
 		// 0.25 around the scope object, or a radius squared of 0.0625
 
-		for(TNL::S32 i = 0; i < game->buildings.size(); i++)
+		for (TNL::S32 i = 0; i < game->buildings.size(); i++)
 			connection->objectInScope(game->buildings[i]);
 
-		for(TNL::S32 i = 0; i < game->players.size(); i++)
+		for (TNL::S32 i = 0; i < game->players.size(); i++)
 		{
 			PositionStr playerP = game->players[i]->renderPos;
 			TNL::F32 dx = playerP.x - renderPos.x;
 			TNL::F32 dy = playerP.y - renderPos.y;
 			TNL::F32 distSquared = dx * dx + dy * dy;
-			if(distSquared < 0.0625)
+			if (distSquared < 0.0625)
 				connection->objectInScope(game->players[i]);
 		}
 	}
@@ -98,10 +98,10 @@
 		// information about this player.  Since we never call
 		// setMaskBits(InitialMask), we're guaranteed that this state
 		// will only be updated on the first update for this object.
-		if(stream->writeFlag(updateMask & InitialMask))
+		if (stream->writeFlag(updateMask & InitialMask))
 		{
 			// write one bit if it's not an AI
-			if(stream->writeFlag(myPlayerType != PlayerTypeAI))
+			if (stream->writeFlag(myPlayerType != PlayerTypeAI))
 			{
 				// write a flag to the client if this is the player that
 				// that client controls.
@@ -113,15 +113,15 @@
 		// we must write a bit to let the unpackUpdate know whether to
 		// read the position data out of the stream.
 
-		if(stream->writeFlag(updateMask & PositionMask))
+		if (stream->writeFlag(updateMask & PositionMask))
 		{
 			// since the position data is all 0 to 1, we can use
 			// the bit stream's writeFloat method to write it out.
 			// 12 bits should be sufficient precision
-			stream->writeFloat(startPos.x, 12); 
-			stream->writeFloat(startPos.y, 12); 
-			stream->writeFloat(endPos.x, 12); 
-			stream->writeFloat(endPos.y, 12); 
+			stream->writeFloat(startPos.x, 12);
+			stream->writeFloat(startPos.y, 12);
+			stream->writeFloat(endPos.x, 12);
+			stream->writeFloat(endPos.y, 12);
 			stream->write(t); // fully precise t and tDelta
 			stream->write(tDelta);
 		}
@@ -142,12 +142,12 @@
 	void Player::unpackUpdate(TNL::GhostConnection *connection, TNL::BitStream *stream)
 	{
 		// see if the initial packet data was written:
-		if(stream->readFlag())
+		if (stream->readFlag())
 		{
 			// check to see if it's not an AI player.
-			if(stream->readFlag())
+			if (stream->readFlag())
 			{
-				if(stream->readFlag())
+				if (stream->readFlag())
 					myPlayerType = PlayerTypeMyClient;
 				else
 					myPlayerType = PlayerTypeClient;
@@ -156,7 +156,7 @@
 				myPlayerType = PlayerTypeAIDummy;
 		}
 		// see if the player's position has been updated:
-		if(stream->readFlag())
+		if (stream->readFlag())
 		{
 			startPos.x = stream->readFloat(12);
 			startPos.y = stream->readFloat(12);
@@ -187,13 +187,13 @@
 	void Player::update(TNL::F32 timeDelta)
 	{
 		t += tDelta * timeDelta;
-		if(t >= 1.0)
+		if (t >= 1.0)
 		{
 			t = 1.0;
 			tDelta = 0;
 			renderPos = endPos;
 			// if this is an AI player on the server, 
-			if(myPlayerType == PlayerTypeAI)
+			if (myPlayerType == PlayerTypeAI)
 			{
 				startPos = renderPos;
 				t = 0;
@@ -232,24 +232,24 @@
 	class RPCEV_Player_rpcPlayerIsInScope : 
 	public TNL::NetObjectRPCEvent 
 	{ 
-	public: TNL::FunctorDecl<void (Player::*)(TNL::Float<6> x, TNL::Float<6> y)> mFunctorDecl; 
+	public: TNL::FunctorDecl<void (Player::*)(TNL::Float<6> x, TNL::Float<6> y)> mFunctorDecl;
 	RPCEV_Player_rpcPlayerIsInScope() : 
 	mFunctorDecl(Player::rpcPlayerIsInScope_remote), 
-	RPCEvent(TNL::RPCGuaranteedOrdered, TNL::RPCToGhost) 
+	RPCEvent(TNL::RPCGuaranteedOrdered, TNL::RPCToGhost)
 	{ mFunctor = &mFunctorDecl; } 
-	static TNL::NetClassRepInstance<RPCEV_Player_rpcPlayerIsInScope> dynClassRep; 
-	virtual TNL::NetClassRep* getClassRep() const; 
-	bool checkClassType(TNL::Object *theObject) 
+	static TNL::NetClassRepInstance<RPCEV_Player_rpcPlayerIsInScope> dynClassRep;
+	virtual TNL::NetClassRep* getClassRep() const;
+	bool checkClassType(TNL::Object *theObject)
 	{ return dynamic_cast<Player *>(theObject) != __null; } 
-	}; 
-	TNL::NetClassRep* RPCEV_Player_rpcPlayerIsInScope::getClassRep() 
+	};
+	TNL::NetClassRep* RPCEV_Player_rpcPlayerIsInScope::getClassRep()
 	const { return &RPCEV_Player_rpcPlayerIsInScope::dynClassRep; } 
-	TNL::NetClassRepInstance<RPCEV_Player_rpcPlayerIsInScope> RPCEV_Player_rpcPlayerIsInScope::dynClassRep("RPCEV_Player_rpcPlayerIsInScope",TNL::NetClassGroupGameMask, TNL::NetClassTypeEvent, 0); 
-	void Player::rpcPlayerIsInScope (TNL::Float<6> x, TNL::Float<6> y) 
+	TNL::NetClassRepInstance<RPCEV_Player_rpcPlayerIsInScope> RPCEV_Player_rpcPlayerIsInScope::dynClassRep("RPCEV_Player_rpcPlayerIsInScope",TNL::NetClassGroupGameMask, TNL::NetClassTypeEvent, 0);
+	void Player::rpcPlayerIsInScope (TNL::Float<6> x, TNL::Float<6> y)
 	{ 
-	RPCEV_Player_rpcPlayerIsInScope *theEvent = new RPCEV_Player_rpcPlayerIsInScope; 
-	theEvent->mFunctorDecl.set (x, y) ; 
-	postNetEvent(theEvent); 
+	RPCEV_Player_rpcPlayerIsInScope *theEvent = new RPCEV_Player_rpcPlayerIsInScope;
+	theEvent->mFunctorDecl.set(x, y);
+	postNetEvent(theEvent);
 	} 
 
 	TNL::NetEvent * Player::rpcPlayerIsInScope_construct (TNL::Float<6> x, TNL::Float<6> y) { RPCEV_Player_rpcPlayerIsInScope *theEvent = new RPCEV_Player_rpcPlayerIsInScope; theEvent->mFunctorDecl.set (x, y) ; return theEvent; } void Player::rpcPlayerIsInScope_test (TNL::Float<6> x, TNL::Float<6> y) { RPCEV_Player_rpcPlayerIsInScope *theEvent = new RPCEV_Player_rpcPlayerIsInScope; theEvent->mFunctorDecl.set (x, y) ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); } void Player::rpcPlayerIsInScope_remote (TNL::Float<6> x, TNL::Float<6> y)
@@ -304,13 +304,13 @@
 
 	Building::~Building()
 	{
-		if(!game)
+		if (!game)
 			return;
 
 		// remove the building from the list of buildings in the game.
-		for( TNL::S32 i = 0; i < game->buildings.size(); i++)
+		for (TNL::S32 i = 0; i < game->buildings.size(); i++)
 		{
-			if(game->buildings[i] == this)
+			if (game->buildings[i] == this)
 			{
 				game->buildings.erase_fast(i);
 				return;
@@ -333,7 +333,7 @@
 
 	TNL::U32 Building::packUpdate(TNL::GhostConnection *connection, TNL::U32 updateMask, TNL::BitStream *stream)
 	{
-		if(stream->writeFlag(updateMask & InitialMask))
+		if (stream->writeFlag(updateMask & InitialMask))
 		{
 			// we know all the positions are 0 to 1.
 			// since this object is scope always, we don't care quite as much
@@ -353,7 +353,7 @@
 
 	void Building::unpackUpdate(TNL::GhostConnection *connection, TNL::BitStream *stream)
 	{
-		if(stream->readFlag())
+		if (stream->readFlag())
 		{
 			stream->read(&upperLeft.x);
 			stream->read(&upperLeft.y);
@@ -416,7 +416,7 @@
 	{
 		logprintf("%s - %s connection terminated - reason %d.", getNetAddressString(), isConnectionToServer() ? "server" : "client", reason);
 
-		if(isConnectionToServer())
+		if (isConnectionToServer())
 			((TestNetInterface *) getInterface())->pingingServers = true;
 		else
 			delete (Player*)myPlayer;
@@ -433,7 +433,7 @@
 		// Try uncommenting the next line :)
 		//setSimulatedNetParams(0.5, 0);
 
-		if(isInitiator())
+		if (isInitiator())
 		{
 			setGhostFrom(false);
 			setGhostTo(true);
@@ -482,7 +482,7 @@
 	{
 		TNL::U32 currentTime = TNL::Platform::getRealMilliseconds();
 
-		if(pingingServers && (lastPingTime + PingDelayTime < currentTime))
+		if (pingingServers && (lastPingTime + PingDelayTime < currentTime))
 		{
 			lastPingTime = currentTime;
 			sendPing();
@@ -500,7 +500,7 @@
 	void TestNetInterface::handleInfoPacket(const TNL::Address &address, TNL::U8 packetType, TNL::BitStream *stream)
 	{
 		TNL::PacketStream writeStream;
-		if(packetType == GamePingRequest && isServer)
+		if (packetType == GamePingRequest && isServer)
 		{
 			TNL::logprintf("%s - received ping.", address.toString());
 			// we're a server, and we got a ping packet from a client,
@@ -511,7 +511,7 @@
 
 			TNL::logprintf("%s - sending ping response.", address.toString());
 		}
-		else if(packetType == GamePingResponse && pingingServers)
+		else if (packetType == GamePingResponse && pingingServers)
 		{
 			// we were pinging servers and we got a response.  Stop the server
 			// pinging, and try to connect to the server.
@@ -540,15 +540,15 @@
 
 		lastTime = TNL::Platform::getRealMilliseconds();
 
-		if(isServer)
+		if (isServer)
 		{
 			// generate some buildings and AIs:
-			for(TNL::S32 i = 0; i < 50; i ++)
+			for (TNL::S32 i = 0; i < 50; i ++)
 			{
 				Building *building = new Building;
 				building->addToGame(this);
 			}
-			for(TNL::S32 i = 0; i < 15; i ++)
+			for (TNL::S32 i = 0; i < 15; i ++)
 			{
 				Player *aiPlayer = new Player(Player::PlayerTypeAI);
 				aiPlayer->addToGame(this);
@@ -566,9 +566,9 @@
 	TestGame::~TestGame()
 	{
 		delete myNetInterface;
-		for(TNL::S32 i = 0; i < buildings.size(); i++)
+		for (TNL::S32 i = 0; i < buildings.size(); i++)
 			delete buildings[i];
-		for(TNL::S32 i = 0; i < players.size(); i++)
+		for (TNL::S32 i = 0; i < players.size(); i++)
 			delete players[i];
 
 		TNL::logprintf("Destroyed a %s...", (this->isServer ? "server" : "client"));
@@ -584,11 +584,11 @@
 	bool TestGame::Update(float dt)
 	{
 		TNL::U32 currentTime = TNL::Platform::getRealMilliseconds();
-		if(currentTime == lastTime)
+		if (currentTime == lastTime)
 			return true;
 
 		TNL::F32 timeDelta = (currentTime - lastTime) / 1000.0f;
-		for(TNL::S32 i = 0; i < players.size(); i++)  
+		for (TNL::S32 i = 0; i < players.size(); i++)  
 			players[i]->update(timeDelta);
 		myNetInterface->tick();
 		lastTime = currentTime;
@@ -597,14 +597,14 @@
 
 	void TestGame::moveMyPlayerTo(PositionStr newPosition)
 	{
-		if(isServer)
+		if (isServer)
 		{
 			serverPlayer->serverSetPosition(serverPlayer->renderPos, newPosition, 0, 0.2f);
 		}
-		else if(!myNetInterface->connectionToServer.isNull())
+		else if (!myNetInterface->connectionToServer.isNull())
 		{
 			TNL::logprintf("posting new position (%g, %g) to server", newPosition.x, newPosition.y);
-			if(!clientPlayer.isNull())
+			if (!clientPlayer.isNull())
 				clientPlayer->rpcPlayerWillMove("Whee! Foo!");
 			myNetInterface->connectionToServer->rpcSetPlayerPos(newPosition.x, newPosition.y);
 		}
@@ -633,14 +633,14 @@
 		// first, render the alpha blended circle around the player,
 		// to show the scoping range.
 		glLoadIdentity();
-		if(clientPlayer)
+		if (clientPlayer)
 		{
 			PositionStr p = clientPlayer->renderPos;
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glBegin(GL_POLYGON);
 			glColor4f(0.5f, 0.5f, 0.5f, 0.65f);
-			for(TNL::F32 r = 0; r < 3.1415 * 2; r += 0.1f)
+			for (TNL::F32 r = 0; r < 3.1415 * 2; r += 0.1f)
 			{
 				glVertex2f(p.x + 50.25f * cos(r), p.y + 50.25f * sin(r));
 			}
@@ -650,7 +650,7 @@
 		}
 
 		// then draw all the buildings.
-		for(TNL::S32 i = 0; i < buildings.size(); i++)
+		for (TNL::S32 i = 0; i < buildings.size(); i++)
 		{
 			Building *b = buildings[i];
 			glBegin(GL_POLYGON);
@@ -663,7 +663,7 @@
 		}
 
 		// last, draw all the players in the game.
-		for(TNL::S32 i = 0; i < players.size(); i++)
+		for (TNL::S32 i = 0; i < players.size(); i++)
 		{
 			Player *p = players[i];
 			glBegin(GL_POLYGON);
@@ -676,7 +676,7 @@
 			glEnd();
 
 			glBegin(GL_POLYGON);
-			switch(p->myPlayerType)
+			switch (p->myPlayerType)
 			{
 			case Player::PlayerTypeAI:
 			case Player::PlayerTypeAIDummy:

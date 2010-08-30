@@ -31,7 +31,7 @@ typedef void (*CKeyEvent)(CHandle, int);
 //	}
 //}
 __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
-	if (X != NULL && Sender != NULL) 
+	if (X != NULL && Sender != NULL)
 	{
 		(X)((CHandle)Sender, Key);
 	}
@@ -48,7 +48,7 @@ __forceinline  void  SAFEKEYCALL(CKeyEvent X, CObject *Sender, int Key){
 // {
 // 	CEventManager(){}
 // 	~CEventManager(){}
-// 	void RegisterEvent(const CObject &Subscriber, const long int );
+// 	void RegisterEvent(const CObject &Subscriber, const long int);
 // };
 
 #endif // _2DE_EVENT_H_

@@ -6,8 +6,8 @@
 
 
 /**
- * CResourceSectionLoaderBase - базовый класс загрузчика секций ресурсов для полиморфизма.
- */
+* CResourceSectionLoaderBase - базовый класс загрузчика секций ресурсов для полиморфизма.
+*/
 
 class CResourceSectionLoaderBase
 {
@@ -23,8 +23,8 @@ protected:
 };
 
 /**
- * CResourceSectionLoaderBase - шаблонизированный класс загрузчика секций ресурсов.
- */
+* CResourceSectionLoaderBase - шаблонизированный класс загрузчика секций ресурсов.
+*/
 
 template<typename T>
 class CResourceSectionLoader : public CResourceSectionLoaderBase
@@ -80,8 +80,8 @@ bool CResourceSectionLoader<T>::Load(CXML *ResourceList)
 }
 
 /**
- * CDataLister - перечислитель файлов ресурсов.
- */
+* CDataLister - перечислитель файлов ресурсов.
+*/
 
 class CDataLister
 {
@@ -100,8 +100,8 @@ private:
 };
 
 /**
- * CResourceManager - менеджер ресурсов.
- */
+* CResourceManager - менеджер ресурсов.
+*/
 
 class CResourceManager : public CTSingleton<CResourceManager>
 {

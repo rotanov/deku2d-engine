@@ -211,7 +211,7 @@
 		/// onConnectionEstablished is called on both ends of a connection when the connection is established.  
 		/// On the server this will create a player for this client, and set it as the client's
 		/// scope object.  On both sides this will set the proper ghosting behavior for the connection (ie server to client).
-		void onConnectionEstablished(); 
+		void onConnectionEstablished();
 
 		/// isDataToTransmit is called each time the connection is ready to send a packet.  If
 		/// the NetConnection subclass has data to send it should return true.  In the case of a simulation,

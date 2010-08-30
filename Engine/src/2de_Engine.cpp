@@ -14,7 +14,7 @@ CEngine::CEngine()
 	userReInit = false;
 
 	doExitOnEscape = true;
-	doLimitFPS = false; 
+	doLimitFPS = false;
 	doCalcFPS = true;
 	doShowFPS = true;
 
@@ -28,7 +28,7 @@ CEngine::CEngine()
 	StateHandler = NULL;
 	SetStateHandler<CAbstractStateHandler>();
 
-	CSingletonManager::Init(); 
+	CSingletonManager::Init();
 }
 
 CEngine::~CEngine()
@@ -196,7 +196,7 @@ void CEngine::CalcFPS()
 	
 	unsigned long ct = SDL_GetTicks();
 	DTime = ct - _llt;
-	dt = (float)DTime * 0.001f;
+	dt = static_cast<float>(DTime) * 0.001f;
 	_llt = ct;
 	if (ct - lt >= 1000)
 	{
@@ -263,7 +263,7 @@ bool CEngine::ProcessEvents()
 			{
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;
-				for(int i = 0; i < KeyInputFuncCount; i++)
+				for (int i = 0; i < KeyInputFuncCount; i++)
 					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);
 				keys[keysym.sym] = 1;
 				break;
@@ -302,15 +302,21 @@ bool CEngine::ProcessEvents()
 			{
 				if (event.active.state != SDL_APPMOUSEFOCUS)
 				{
-					// бля, от двойного отрицания в глазах рябит... я бы написал (event.active.gain == 1), но по-моему так ещё хуже будет...
-					if (isHaveFocus != !!event.active.gain)
+					if (isHaveFocus != static_cast<bool>(event.active.gain))
 					{
-						if (!!event.active.gain)
+						if (isHaveFocus)
+						{
+							CSoundMixer::Instance()->PauseMusic(); // TODO: add option to play music in background..
+							// CSoundMixer::Instance()->StopAllSound(); // i'm not sure about this..
 							StateHandler->OnFocusGain();
+						}
 						else
+						{
+							CSoundMixer::Instance()->ResumeMusic();
 							StateHandler->OnFocusLost();
+						}
 					}
-					isHaveFocus = !!event.active.gain;
+					isHaveFocus = static_cast<bool>(event.active.gain);
 				}
 				break;
 			}
@@ -334,7 +340,7 @@ bool CEngine::Run()
 {
 	StateHandler->OnBeforeInitialize();
 
-	if(!(Initialized = Initialize()))
+	if (!(Initialized = Initialize()))
 	{
 		Log("ERROR", "Initialization failed");
 		SDL_Quit();	// maybe Finalize() to clean-up already initialized systems?
@@ -371,6 +377,8 @@ bool CEngine::Run()
 				const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
 				const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
 				const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
+
+				// TODO: сделать курсор отдельным классом, рисовать на максимальном слое, возможность загрузки текстурных курсоров, etc.
 				CPrimitiveRender PRender;
 				PRender.lClr = COLOR_FIRST;
 				PRender.sClr = COLOR_THIRD;
@@ -389,7 +397,7 @@ bool CEngine::Run()
 				PRender.grCircleL(MousePos, 5);
 				glEnable(GL_DEPTH_TEST);
 				gSetBlendingMode();
-				gEndFrame();	
+				gEndFrame();
 
 				/**/
 				// ZOMG There wasn't other choice, the next step is to put it all into separate thread.
@@ -403,12 +411,12 @@ bool CEngine::Run()
 	// 				SDL_SetEventFilter(GlobalFilterEvents);
 	// 
 	// 
-	// 			int GlobalFilterEvents(const SDL_Event *event) 
+	// 			int GlobalFilterEvents(const SDL_Event *event)
 	// 			{ 
-	// 				if(SDL_MOUSEMOTION == event->type) 
+	// 				if (SDL_MOUSEMOTION == event->type)
 	// 					RedrawCursor(event->motion.x, event->motion.y);
 	// 
-	// 				return 1; 
+	// 				return 1;
 	// 			}
 	// 
 	// 			это не дословный код но общая идея именно такая.
@@ -427,7 +435,7 @@ bool CEngine::Run()
 	#ifdef _WIN32			
 				WaitMessage(); // SDL_WaitEvent(NULL);
 	#else
-				sleep(1);
+				SDL_WaitEvent(NULL); // sleep(1);
 	#endif //_WIN32
 			}
 		}
@@ -511,7 +519,7 @@ string CEngine::GetProgramName() const
 
 void CEngine::SetProgramName(const string &AProgramName)
 {
-	ProgramName = AProgramName; 
+	ProgramName = AProgramName;
 }
 
 // well, getter and setter do different things.. something wrong here..

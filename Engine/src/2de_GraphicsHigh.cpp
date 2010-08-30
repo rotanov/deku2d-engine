@@ -38,7 +38,7 @@ void CPrimitiveRender::grSegment(const Vector2 &v0, const Vector2 &v1)
 	AfterRndr();
 }
 
-void CPrimitiveRender::grSegmentC( const Vector2 &v0, const Vector2 &v1 )
+void CPrimitiveRender::grSegmentC(const Vector2 &v0, const Vector2 &v1)
 {
 	BeforeRndr();
 	plClr->glSet();
@@ -202,7 +202,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, const CPolygon &po
 #endif 
 
 	glBegin(GL_TRIANGLE_FAN);
-	for(unsigned int i = 0; i < poly.GetVertexCount(); i++)
+	for (unsigned int i = 0; i < poly.GetVertexCount(); i++)
 	{
 #ifdef G_POLY_TEXTURE_ENABLE
 		glTexCoord2f(poly[i].x/G_POLY_TEX_CELL_SIZE, poly[i].y/G_POLY_TEX_CELL_SIZE);
@@ -217,7 +217,7 @@ void CPrimitiveRender::grPolyC(const Vector2 &p, float angle, const CPolygon &po
 	glLineWidth(1.0f);
 	plClr->glSet();
 	glBegin(GL_LINE_LOOP);
-	for(unsigned int i = 0; i < poly.GetVertexCount(); i++)
+	for (unsigned int i = 0; i < poly.GetVertexCount(); i++)
 	{
 		glVertex2fv(&(poly[i].x));
 	}
@@ -237,7 +237,7 @@ void CPrimitiveRender::grRingS(const Vector2 &p, float Radius)
 	AfterRndr();
 }
 
-void CPrimitiveRender::grRingC( const Vector2 &p, float Radius )
+void CPrimitiveRender::grRingC(const Vector2 &p, float Radius)
 {
 	BeforeRndr();
 	glTranslatef(p.x, p.y, 0.0f);
@@ -280,16 +280,16 @@ void CPrimitiveRender::AfterRndr()
 
 void CPrimitiveRender::CheckBlend()
 {
-	switch(BlendingOption)
+	switch (BlendingOption)
 	{
 	case PRM_RNDR_OPT_BLEND_ONE:
 		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);		
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 		break;
 	case PRM_RNDR_OPT_BLEND_OTHER:
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);		
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	case PRM_RNDR_OPT_BLEND_NO_ONE:
@@ -313,7 +313,7 @@ void CPrimitiveRender::Init()  // @todo: вынести качество ген�
 		glListCircleL = glGenLists(1);
 		glNewList(glListCircleL, GL_COMPILE);
 		glBegin(GL_LINE_LOOP);
-		for(int i = 0; i < 64 + 1; i ++)
+		for (int i = 0; i < 64 + 1; i ++)
 		{
 			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
 			glVertex2f(P.x, P.y);
@@ -327,7 +327,7 @@ void CPrimitiveRender::Init()  // @todo: вынести качество ген�
 		glListQuarterCircle = glGenLists(1);
 		glNewList(glListQuarterCircle, GL_COMPILE);
 		glBegin(GL_LINES);
-		for(int i = 0; i < 16; i ++)
+		for (int i = 0; i < 16; i ++)
 		{
 			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
 			glVertex2f(P.x, P.y);
@@ -343,7 +343,7 @@ void CPrimitiveRender::Init()  // @todo: вынести качество ген�
 		glListCircleS = glGenLists(1);
 		glNewList(glListCircleS, GL_COMPILE);
 		glBegin(GL_TRIANGLE_FAN);
-		for(int i = 0; i < 64 + 1; i ++)
+		for (int i = 0; i < 64 + 1; i ++)
 		{
 			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
 			glVertex2f(P.x, P.y);
@@ -357,7 +357,7 @@ void CPrimitiveRender::Init()  // @todo: вынести качество ген�
 		glListRingS = glGenLists(1);
 		glNewList(glListRingS, GL_COMPILE);
 		glBegin(GL_TRIANGLE_STRIP);
-		for(int i = 0; i < 64 + 1; i ++)
+		for (int i = 0; i < 64 + 1; i ++)
 		{
 			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
 			glVertex2f(P.x, P.y);
@@ -373,7 +373,7 @@ void CPrimitiveRender::Init()  // @todo: вынести качество ген�
 		glListHalfCircle = glGenLists(1);
 		glNewList(glListHalfCircle, GL_COMPILE);
 		glBegin(GL_TRIANGLE_FAN);
-		for(int i = 0; i < 32 + 1; i ++)
+		for (int i = 0; i < 32 + 1; i ++)
 		{
 			Vector2 P(cos(PI * (i / 32.0f)), sin(PI * (i / 32.0f)));
 			glVertex2f(P.x, P.y);
@@ -418,10 +418,10 @@ void CPrimitiveRender::grInYan(const Vector2 &p, float Radius)
 	grCircleL(p, Radius/*+lwidth/2.0f*/);
 }
 
-void CPrimitiveRender::gDrawBBox( CBox box )
+void CPrimitiveRender::gDrawBBox(CBox box)
 {
 	BeforeRndr();
-	float x0 = box.Min.x, x1 = box.Max.x, y0 = box.Min.y, y1 = box.Max.y; 
+	float x0 = box.Min.x, x1 = box.Max.x, y0 = box.Min.y, y1 = box.Max.y;
 	grSegmentC(Vector2(x0, y0), Vector2(x1, y0));
 	grSegmentC(Vector2(x1, y0), Vector2(x1, y1));
 	grSegmentC(Vector2(x1, y1), Vector2(x0, y1));
@@ -483,10 +483,10 @@ bool CSprite::AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwid
 						   int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop)
 {
 	AnimationsCount++;
-	SAnimationInfo *temp;	
+	SAnimationInfo *temp;
 	temp = new SAnimationInfo[AnimationsCount];
 
-	for(int i=0;i<AnimationsCount-1;i++)
+	for (int i = 0; i < AnimationsCount - 1; i++)
 		temp[i] = animations[i];
 	{
 		temp[AnimationsCount-1].isAnimated			= _isAnimated;
@@ -526,7 +526,7 @@ void CSprite::Render()
 		fOffset_s, fOffset_t,
 		fRelativeX, fRelativeY;
 
-	//if(!isLoop && m_nFrameNumber < anim->m_nTotalFrames)
+	//if (!isLoop && m_nFrameNumber < anim->m_nTotalFrames)
 	{
 		if (isFirstTimeRendering == true)
 		{
@@ -554,9 +554,9 @@ void CSprite::Render()
 	fUpperLeft_s	= CurrentColumn*fFrame_s;
 	fUpperLeft_t	= 1.0f - (CurrentRow*fFrame_t);
 
-	if(anim->m_nOffsetX>0 || anim->m_nOffsetY > 0)
+	if (anim->m_nOffsetX>0 || anim->m_nOffsetY > 0)
 	{
-		fOffset_s		= (1.0f / Texture->Width ) * anim->m_nOffsetX;
+		fOffset_s		= (1.0f / Texture->Width) * anim->m_nOffsetX;
 		fOffset_t		= (1.0f / Texture->Height) * anim->m_nOffsetY;
 		fLowerLeft_s	= fLowerLeft_s + fOffset_s;
 		fLowerLeft_t	= fLowerLeft_t - fOffset_t;
@@ -594,7 +594,7 @@ void CSprite::Render()
 				TexCoords);
 	}
 
-	if(EllapsedTime >= anim->m_fFrameDelay)
+	if (EllapsedTime >= anim->m_fFrameDelay)
 	{
 		EllapsedTime = 0;
 		CurrentColumn++;
@@ -609,19 +609,19 @@ void CSprite::Render()
 				return;
 			}
 
-			if(CurrentColumn >= anim->m_nNumFrameColumns)
+			if (CurrentColumn >= anim->m_nNumFrameColumns)
 			{
 				CurrentColumn = 0;
 				CurrentRow++;
 			}
 
-			if(CurrentRow >= anim->m_nNumFrameRows)
+			if (CurrentRow >= anim->m_nNumFrameRows)
 			{
 				CurrentRow		= 0;
 				CurrentColumn	= 0;
 			}
 
-			if(CurrentFrame >= anim->m_nTotalFrames)
+			if (CurrentFrame >= anim->m_nTotalFrames)
 			{
 				CurrentRow		= 0;
 				CurrentColumn	= 0;
@@ -632,7 +632,7 @@ void CSprite::Render()
 
 void CSprite::SetAnimation(int index)
 {
-	for(int i=0;i<AnimationsCount;i++)
+	for (int i = 0; i < AnimationsCount; i++)
 		if (index == animations[i].AnimationIndex)
 		{	
 			if (anim != &(animations[i]))
@@ -648,7 +648,7 @@ void CSprite::SetAnimation(int index)
 
 SAnimationInfo* CSprite::FindAnimation(int index)
 {
-	for(int i=0;i<AnimationsCount;i++)
+	for (int i = 0; i < AnimationsCount; i++)
 		if (index == animations[i].AnimationIndex)		
 			return &(animations[i]);
 	return NULL;
@@ -705,7 +705,7 @@ void CParticleSystem::Update(float dt)
 	return false;
 #endif
 	// Here integrating and updating values of active particles
-	for(int i=0; i < ParticlesActive; i++)
+	for (int i=0; i < ParticlesActive; i++)
 	{
 		if (!user_update)
 		{
@@ -755,25 +755,25 @@ void CParticleSystem::Update(float dt)
 		// 		info.ParticlesActive++;
 		// 
 		// 		particles[i].life  = Random_Float(info.plife ,info.plife + info.plifevar); // - rand()%(int)info.plifevar
-		// 		if (particles[i].life < 0 ) particles[i].life = info.plife;
+		// 		if (particles[i].life < 0) particles[i].life = info.plife;
 		// 		particles[i].age = 0;
 		// 		
 		// 		if (info.GeomNumPoints == 1)
 		// 		{
 		// 			particles[i].p = info.geom[0];
-		// 			particles[i].v = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
+		// 			particles[i].v = Vector2((rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f);
 		// 		}
 		// 		else
 		// 			if (info.geom != NULL)
 		// 			{
 		// 				int sr = Random_Int(0, info.GeomNumPoints-2);
 		// 				particles[i].p = info.geom[sr] + (info.geom[sr+1]-info.geom[sr])*Random_Float(0.0f, 1.0f);
-		// 				particles[i].v = ((info.geom[sr]-info.geom[sr+1]).GetPerp().Normalized())/0.01f; 
+		// 				particles[i].v = ((info.geom[sr]-info.geom[sr+1]).GetPerp().Normalized())/0.01f;
 		// 			}
 		// 			else
 		// 			{
 		// 				particles[i].p = info.p;
-		// 				particles[i].v = Vector2( (rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f); 
+		// 				particles[i].v = Vector2((rand()%1000 - rand()%1000) / 1.0f, (rand()%1000 - rand()%1000) / 1.0f);
 		// 			}
 		// 		particles[i].Period = Random_Float(0.0f, 2*PI);
 		// 
@@ -802,10 +802,10 @@ void CParticleSystem::Render()
 		glDisable(GL_TEXTURE_2D);
 		glPointSize(Particles[0].Size);
 		glBegin(GL_POINTS);
-		for(int i = 0; i < ParticlesActive; i++)
+		for (int i = 0; i < ParticlesActive; i++)
 		{
 			Particles[i].Color.glSet();
-			glVertex2f(Particles[i].Position.x, Particles[i].Position.y);			
+			glVertex2f(Particles[i].Position.x, Particles[i].Position.y);
 		}
 		glEnd();
 		glPopAttrib();
@@ -824,17 +824,17 @@ void CParticleSystem::Render()
 		Texture->Bind();
 
 		glBegin(GL_QUADS);
-		for(int i = 0; i < ParticlesActive; i++)
+		for (int i = 0; i < ParticlesActive; i++)
 		{
 			Particles[i].Color.glSet();
 			glTexCoord2f(0.0f, 0.0f);
-				glVertex2f(Particles[i].Position.x - Particles[i].Size,	Particles[i].Position.y - Particles[i].Size);			
+				glVertex2f(Particles[i].Position.x - Particles[i].Size,	Particles[i].Position.y - Particles[i].Size);
 			glTexCoord2f(1.0f, 0.0f);
-				glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y - Particles[i].Size);			
+				glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y - Particles[i].Size);
 			glTexCoord2f(1.0f, 1.0f);
-				glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);			
+				glVertex2f(Particles[i].Position.x + Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);
 			glTexCoord2f(0.0f, 1.0f);
-				glVertex2f(Particles[i].Position.x - Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);			
+				glVertex2f(Particles[i].Position.x - Particles[i].Size,	Particles[i].Position.y + Particles[i].Size);
 		}
 		glEnd();
 		glPopAttrib();
@@ -861,7 +861,7 @@ bool CParticleSystem::LoadFromFile()
 	return true;
 }
 
-void CParticleSystem::SetGeometry( Vector2 * points, int numPoints )
+void CParticleSystem::SetGeometry(Vector2 * points, int numPoints)
 {
 	GeometryVertices = points;
 	GeometryPointsCount = numPoints;
@@ -881,26 +881,26 @@ CParticle* CParticleSystem::CreateParticle()
 		if (!user_create)
 		{
 			Particles[i].Life  = Random_Float(ParticleLife, ParticleLife + ParticleLifeVariability);
-			if (Particles[i].Life < 0 )
+			if (Particles[i].Life < 0)
 				Particles[i].Life = ParticleLife;
 			Particles[i].Age = 0;
 
 			if (GeometryPointsCount == 1)
 			{
 				Particles[i].Position = GeometryVertices[0];
-				Particles[i].Velocity = Vector2( (rand() % 1000 - rand() % 1000) / 1.0f, (rand() % 1000 - rand() % 1000) / 1.0f); // MAGIC NUMBERS ARE BAD BAD BAD BAD BAD
+				Particles[i].Velocity = Vector2((rand() % 1000 - rand() % 1000) / 1.0f, (rand() % 1000 - rand() % 1000) / 1.0f); // MAGIC NUMBERS ARE BAD BAD BAD BAD BAD
 			}
 			else
 				if (GeometryVertices != NULL)
 				{
 					int sr = Random_Int(0, GeometryPointsCount - 2);
 					Particles[i].Position = GeometryVertices[sr] + (GeometryVertices[sr + 1] - GeometryVertices[sr])*Random_Float(0.0f, 1.0f);
-					Particles[i].Velocity = ((GeometryVertices[sr]-GeometryVertices[sr + 1]).GetPerpendicular().Normalized())/0.01f; 
+					Particles[i].Velocity = ((GeometryVertices[sr]-GeometryVertices[sr + 1]).GetPerpendicular().Normalized())/0.01f;
 				}
 				else
 				{
 					Particles[i].Position = Position;
-					Particles[i].Velocity = Vector2( (rand()%1000 - rand()%1000) / 10.0f, (rand()%1000 - rand()%1000) / 10.0f); 
+					Particles[i].Velocity = Vector2((rand()%1000 - rand()%1000) / 10.0f, (rand()%1000 - rand()%1000) / 10.0f);
 				}
 
 				Particles[i].Size = Random_Int(SizeStart, SizeStart + SizeVariability);
@@ -921,7 +921,7 @@ CParticle* CParticleSystem::CreateParticle()
 	return &Particles[i];
 }
 
-void CParticleSystem::SetUserUpdate( FUpdateFunc func)
+void CParticleSystem::SetUserUpdate(FUpdateFunc func)
 {
 	if (func == NULL)
 		return;
@@ -929,7 +929,7 @@ void CParticleSystem::SetUserUpdate( FUpdateFunc func)
 	procUserUpdate = func;
 }
 
-void CParticleSystem::SetUserCreate( FCreateFunc func )
+void CParticleSystem::SetUserCreate(FCreateFunc func)
 {
 	if (func == NULL)
 		return;

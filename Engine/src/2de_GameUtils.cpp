@@ -2,9 +2,8 @@
 
 #include "2de_GraphicsHigh.h"
 
-//-------------------------------------------//
-//			CTileSet functions				 //
-//-------------------------------------------//
+//////////////////////////////////////////////////////////////////////////
+// CTileset
 
 bool CTileset::LoadFromFile()
 {
@@ -83,16 +82,16 @@ CTileset::CTileset()
 	CTileSetManager::Instance()->Add(this);
 }
 
-void CTileset::SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles)
+void CTileset::SetSettings(byte ATileWidth, byte ATileHeight, int AHorNumTiles, int AVerNumTiles)
 {
-	HorNumTiles = _HorNumTiles;
-	VerNumTiles = _VerNumTiles;
-	TileWidth = _TileWidth;
-	TileHeight = _TileHeight;
+	HorNumTiles = AHorNumTiles;
+	VerNumTiles = AVerNumTiles;
+	TileWidth = ATileWidth;
+	TileHeight = ATileHeight;
 	if (BBox != NULL)
 		delete [] BBox;
-	BBox = new CBox [HorNumTiles*VerNumTiles];
-	for(int i=0; i<HorNumTiles*VerNumTiles; i++)
+	BBox = new CBox [HorNumTiles * VerNumTiles];
+	for (int i = 0; i < HorNumTiles * VerNumTiles; i++)
 		BBox[i] = CBox(0, 0, TileHeight, TileWidth);
 }
 
@@ -120,20 +119,19 @@ CTileset::~CTileset()
 
 	CTileSetManager::Instance()->Remove(this);
 }
-//-------------------------------------------//
-//				CMap functions				 //
-//-------------------------------------------//
-	
+
+//////////////////////////////////////////////////////////////////////////
+// CLevelMap
 
 void CLevelMap::Render()
 {
 	CRenderManager *RenerManager = CRenderManager::Instance();
 	CMapCellInfo *t;
-	for(int j = 0; j < HorizontalCellsCount; j++)
-		for(int i = 0; i < VerticalCellsCount; i++)		
+	for (int j = 0; j < HorizontalCellsCount; j++)
+		for (int i = 0; i < VerticalCellsCount; i++)		
 		{
 			t = Cells + GetCellIndex(j, i);
-// 			for(int k = 0; k < 4; k++)
+// 			for (int k = 0; k < 4; k++)
 // 			{
 // 				//t->tc[k].glTexCoord();
 // 				glVertex3f(t->pos[k].x,	t->pos[k].y, t->z);
@@ -200,14 +198,14 @@ bool CLevelMap::SaveToFile()
 
 bool CLevelMap::GenCells()
 {
-	for(int i=0;i<VerticalCellsCount;i++)
-		for(int j=0;j<HorizontalCellsCount;j++)
+	for (int i=0; i < VerticalCellsCount; i++)
+		for (int j=0; j < HorizontalCellsCount; j++)
 		{
 			CMapCellInfo *t = &(Cells[GetCellIndex(j, i)]);
 			Vector2 ji = Vector2(j, i);
 			float w = TileSet->TileWidth;
 			float h = TileSet->TileHeight;
-			for(int k = 0; k < 4; k++)
+			for (int k = 0; k < 4; k++)
 			{
 				t->pos[k] = (ji + V2_QuadBin[k]);
 				t->pos[k].x *= w;
@@ -250,8 +248,8 @@ CBox CLevelMap::GetCellAABB(const Vector2 &V)
 {
 	size_t CellWidth = TileSet->TileWidth * GetScaling();
 	size_t CellHeight = TileSet->TileWidth * GetScaling();
-	if (GetMapCell((int)V.x / CellWidth, (int)V.y / CellHeight )->index != 0)
-		return CBox( (((int)V.x / CellWidth)) * CellWidth,
+	if (GetMapCell((int)V.x / CellWidth, (int)V.y / CellHeight)->index != 0)
+		return CBox((((int)V.x / CellWidth)) * CellWidth,
 		(((int)V.y/CellHeight)) * CellHeight, 
 		CellWidth, CellHeight);
 	else 
@@ -265,6 +263,10 @@ CMapCellInfo* CLevelMap::GetMapCell(size_t HorizontalIndex, size_t VerticalIndex
 	VerticalIndex = Clamp<size_t>(VerticalIndex, 0, VerticalCellsCount-1);
 	return &Cells[GetCellIndex(HorizontalIndex, VerticalIndex)];
 }
+
+//////////////////////////////////////////////////////////////////////////
+// CCompas
+
 void CCompas::Render()
 {
 		Vector2 v1, n;
@@ -284,7 +286,7 @@ void CCompas::Render()
 		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth));
 
 //  		pr.grCircleL(Vector2(100,100), depth, RGBAf(depth/ (90.0f * 2), 0.0f, 0.0f, 0.9f));
-//  		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth), 1.0f, RGBAf(depth/( 90.0f * 2), 0.0f, 0.0f, 0.9f));
+//  		pr.grSegment(Vector2(100, 100), (Vector2(100, 100) + n*depth), 1.0f, RGBAf(depth/(90.0f * 2), 0.0f, 0.0f, 0.9f));
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

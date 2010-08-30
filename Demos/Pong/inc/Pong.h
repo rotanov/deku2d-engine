@@ -83,7 +83,7 @@ public:
 			Velocity.y = -Velocity.y * 0.5f;
 		}
 
-		return;	
+		return;
 	}
 };
 
@@ -197,7 +197,7 @@ public:
 			PlayerTwo->Velocity.y += (- PlayerTwo->Position.y - PONG_PLAYER_HEIGHT*0.5f + Ball->Position.y + PONG_BALL_SIZE * 0.5f)*0.34f;
 
 		if (CEngine::Instance()->keys[SDLK_SPACE])
-			Ball->Iinitialize();		
+			Ball->Iinitialize();
 
 		if (Ball->Position.x < 0.0f)
 		{

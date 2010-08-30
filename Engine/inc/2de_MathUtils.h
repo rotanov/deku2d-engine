@@ -45,12 +45,12 @@ __INLINE T Clamp(const T &x , const T &min, const T &max)
 
 __INLINE float DegToRad(float degree)
 { 
-	return (float)(degree * PI_d180);
+	return static_cast<float>(degree * PI_d180);
 }
 
 __INLINE float RadToDeg(float radian)
 {
-	return (float)(radian * d180_PI);
+	return static_cast<float>(radian * d180_PI);
 }
 
 template<typename T>
@@ -93,7 +93,7 @@ template<>
 __INLINE int Sign<float>(const float &x)
 {	
    if (((int&)x & 0x7FFFFFFF)==0) return 0; // test exponent & mantissa bits: is input zero?
-    return (signed((int&)x & 0x80000000) >> 31 ) | 1;
+    return (signed((int&)x & 0x80000000) >> 31) | 1;
 }
 
 // interpolate between interval [a,b] with t in [0,1].
@@ -151,17 +151,17 @@ public:
 	}
 	__INLINE Vector2 operator /(float a) const
 	{
-		if(a == 0)
+		if (a == 0)
 			throw std::runtime_error("Division by zero encountered in Vector2 operator / ");
 		float t = 1.0f / a;
 		return Vector2(x * t, y * t);
-		return Vector2(); // What we should return if we tried to divide by zero?
+		return Vector2(); // What we should return if we tried to divide by zero? // exception, obviously..
 	}
 	friend __INLINE  Vector2 operator *(float k, const Vector2 &V)
 	{
 		return Vector2(V.x * k, V.y * k);
 	}
-	__INLINE Vector2& operator +=(const Vector2 &V) 
+	__INLINE Vector2& operator +=(const Vector2 &V)
 	{
 		x += V.x;
 		y += V.y;
@@ -216,7 +216,7 @@ public:
 			else    
 				return 0.961f * dx + 0.398f * dy;
 		#else
-			return (float)sqrt((double)(x * x + y * y));
+			return static_cast<float>(sqrt(static_cast<double>(x * x + y * y)));
 		#endif
 	}
 	__INLINE Vector2 GetPerpendicular() const
@@ -246,6 +246,14 @@ public:
 		void glTexCoord() const;
 #endif
 };
+
+const Vector2 V2_ZERO		= Vector2(0.0f, 0.0f);
+const Vector2 V2_DIR_LEFT	= Vector2(-1.0f, 0.0f);
+const Vector2 V2_DIR_RIGHT	= (-V2_DIR_LEFT);
+const Vector2 V2_DIR_UP		= Vector2(0.0f, 1.0f);
+const Vector2 V2_DIR_DOWN	= (-V2_DIR_UP);
+
+const Vector2 V2_DIRECTIONS[4] = {V2_DIR_LEFT, V2_DIR_DOWN, V2_DIR_RIGHT, V2_DIR_UP,};
 
 template<typename T, size_t N>
 class CCoitus
@@ -290,14 +298,6 @@ public:
 		return Elements[Index];
 	}
 };
-
-const Vector2 V2_ZERO		= Vector2(0.0f, 0.0f);
-const Vector2 V2_DIR_LEFT	= Vector2(-1.0f, 0.0f);
-const Vector2 V2_DIR_RIGHT	= (-V2_DIR_LEFT);
-const Vector2 V2_DIR_UP		= Vector2(0.0f, 1.0f);
-const Vector2 V2_DIR_DOWN	= (-V2_DIR_UP);
-
-const Vector2 V2_DIRECTIONS[4] = {V2_DIR_LEFT, V2_DIR_DOWN, V2_DIR_RIGHT, V2_DIR_UP,};
 
 union Vector3{
 public:
@@ -346,18 +346,18 @@ public:
 
 	__INLINE Vector3 operator /(float s) const
 	{
-		if(s == 0)
+		if (s == 0)
 			throw std::runtime_error("Division by zero encountered in Vector3 operator / ");
 		float t = 1.0f / s;
 		return Vector3(x * t, y * t, z * t);
 	}
 
-	friend Vector3 operator *(float s, const Vector3 &v) 
+	friend Vector3 operator *(float s, const Vector3 &v)
 	{
-		return Vector3(v.x * s, v.y * s, v.z * s); 
+		return Vector3(v.x * s, v.y * s, v.z * s);
 	}
 
-	__INLINE Vector3& operator +=(const Vector3 &v) 
+	__INLINE Vector3& operator +=(const Vector3 &v)
 	{ 
 		x += v.x;
 		y += v.y;
@@ -403,7 +403,7 @@ public:
 
 	__INLINE float Length() const
 	{
-		return (float)sqrt((double)(x * x + y * y + z * z));
+		return static_cast<float>(sqrt(static_cast<double>(x * x + y * y + z * z)));
 	}
 
 	Vector3 RotateAroundAxis(const Vector3& P, const Vector3& D, float angle)
@@ -448,21 +448,21 @@ public:
 		return *this;
 	}
 
-	float Normalise() 
+	float Normalise()
 	{
 		float l = Length();
-		if ( l == 0.0f )
+		if (l == 0.0f)
 			return 0.0f;
-		(*this) *= ( 1.0f / l );	
-		return l; 
+		(*this) *= (1.0f / l);
+		return l;
 	}
 
-	Vector3 Normalized() 
+	Vector3 Normalized()
 	{
 		float l = Length();
-		if ( l == 0.0f )
+		if (l == 0.0f)
 			return Vector3();
-		Vector3 t = (*this) * ( 1.0f / l );	 
+		Vector3 t = (*this) * (1.0f / l);
 		return t;
 	}
 
@@ -470,7 +470,7 @@ public:
 	{
 		Vector3 E = V1 - V0;// E -= V0;
 		Vector3 F = V2 - V1;// F -= V1;
-		(*this)  = E ^ F;		
+		(*this)  = E ^ F;
 		return (*this).Normalise();
 	}
 
@@ -562,31 +562,31 @@ public:
 		m[2] = c2;
 	}
 
-	__INLINE Vector3 & operator [](int i) 
+	__INLINE Vector3 & operator [](int i)
 	{ return m[i];	} 
 
-	__INLINE Matrix3 &operator += ( Matrix3 other)
+	__INLINE Matrix3 &operator += (Matrix3 other)
 	{
 		m[0] += other.m[0];
 		m[1] += other.m[1];
 		m[2] += other.m[2];
 		return (*this);
 	}
-	__INLINE Matrix3 &operator -= ( Matrix3 other)
+	__INLINE Matrix3 &operator -= (Matrix3 other)
 	{
 		m[0] -= other.m[0];
 		m[1] -= other.m[1];
 		m[2] -= other.m[2];
 		return (*this);
 	}
-	__INLINE Matrix3 &operator *= ( float other)
+	__INLINE Matrix3 &operator *= (float other)
 	{
 		m[0] *= other;
 		m[1] *= other;
 		m[2] *= other;
 		return (*this);
 	}
-	__INLINE Matrix3 &operator /= ( float other)
+	__INLINE Matrix3 &operator /= (float other)
 	{
 		if (Equal(other, 0.0f))
 			m[0] = m[1] = m[2] = Vector3();			
@@ -642,12 +642,12 @@ public:
 						 m[0].z, m[1].z, m[2].z);
 	}
 
-	float cofac(int r1, int c1, int r2, int c2) 
+	float cofac(int r1, int c1, int r2, int c2)
 		{			
 			return (m[r1][c1] * m[r2][c2] - m[r1][c2] * m[r2][c1]);
 		}
 
-	__INLINE Matrix3 inverse() 
+	__INLINE Matrix3 inverse()
 	{
 		Vector3 co = Vector3(cofac(1, 1, 2, 2), cofac(1, 2, 2, 0), cofac(1, 0, 2, 1));
 		float det = m[0]*co;
@@ -708,7 +708,7 @@ public:
 // 
 // 	float& operator()(int i, int j)       
 // 	{
-// 		return e[i][j]; 
+// 		return e[i][j];
 // 	}
 
 // 	const Vector2& operator[](int i) const
@@ -738,7 +738,7 @@ public:
 
 	Matrix2 Tranpose()
 	{
-		std::swap(e12, e21);		
+		std::swap(e12, e21);
 		return *this;
 	}
 
@@ -852,8 +852,8 @@ union Vector4
 	Vector4(const Vector3 &v) : x(v.x), y(v.y), z(v.z), w(1.0f)
 		{};
 	//void operator=(const Vector4 &q){x=q.x;y=q.y;z=q.z;w=q.w;}
-	__INLINE Vector4 operator+(Vector4 q){return Vector4( x + q.x , y + q.y, z + q.z, w + q.w );}
-	__INLINE Vector4 operator-(Vector4 q){return Vector4( x - q.x , y - q.y, z - q.z, w - q.w );}
+	__INLINE Vector4 operator+(Vector4 q){return Vector4(x + q.x , y + q.y, z + q.z, w + q.w);}
+	__INLINE Vector4 operator-(Vector4 q){return Vector4(x - q.x , y - q.y, z - q.z, w - q.w);}
 	__INLINE Vector4 operator*(float s){return Vector4(x * s, y * s, z * s, w * s);}
 	__INLINE Vector4 operator=(const Vector4& V)
 	{
@@ -868,13 +868,13 @@ union Vector4
 	{
 		if (s == 0.0f)
 			return Vector4();
-		float is = 1.0f/s; 
+		float is = 1.0f/s;
 		return (*this)*is;
 	}
 	__INLINE Vector4 operator+=(Vector4 q){(*this) = (*this)+q; return *this;}
 	__INLINE Vector4 operator-=(Vector4 q){(*this) = (*this)-q; return *this;}
 	float Norm()const{return x * x + y * y + z * z + w * w;}
-	float Length(  ){return sqrt(x * x + y * y + z * z + w * w );}	
+	float Length(){return sqrt(x * x + y * y + z * z + w * w);}	
 	Vector4 Conjugate(){ return Vector4(-x,-y,-z,w);}
 	Vector4 Identity()
 	{
@@ -894,17 +894,17 @@ union Vector4
 		return result;
 	}
 		
-	__INLINE void AxisAngle(Vector3& axis, float& angle)const
+	__INLINE void AxisAngle(Vector3& axis, float& angle) const
 	{
-		float vl = (float)sqrt( x*x + y*y + z*z );
-		if( vl > 0.0001f )
+		float vl = static_cast<float>(sqrt(x*x + y*y + z*z));
+		if (vl > 0.0001f)
 		{
 			float ivl = 1.0f/vl;
-			axis = Vector3( x*ivl, y*ivl, z*ivl );
-			if( w < 0 )
-				angle = 2.0f*(float)atan2(-vl, -w); //-PI,0 
+			axis = Vector3(x*ivl, y*ivl, z*ivl);
+			if (w < 0)
+				angle = 2.0f * static_cast<float>(atan2(-vl, -w)); //-PI,0 
 			else
-				angle = 2.0f*(float)atan2( vl,  w); //0,PI 
+				angle = 2.0f * static_cast<float>(atan2(vl,  w)); //0,PI 
 		}
 		else
 		{
@@ -916,29 +916,29 @@ union Vector4
 
 	void Rotate(float amount, float xAxis, float yAxis, float zAxis)
 	{
-		if((xAxis != 0 && xAxis != 1) ||
+		if ((xAxis != 0 && xAxis != 1) ||
 			(yAxis != 0 && yAxis != 1) ||
 			(zAxis != 0 && zAxis != 1))
 		{
-			float length = (float)sqrt(xAxis * xAxis + yAxis * yAxis + zAxis * zAxis);
+			float length = static_cast<float>(sqrt(xAxis * xAxis + yAxis * yAxis + zAxis * zAxis));
 			if (length == 0.0f)
 				return;
 			xAxis /= length; yAxis /= length; zAxis /= length;
 		}
 		float angle = DegToRad(amount);
-		float sine = (float)sin(angle / 2.0f);
+		float sine = static_cast<float>(sin(angle / 2.0f));
 		x = xAxis * sine;
 		y = yAxis * sine;
 		z = zAxis * sine;
-		w = (float)cos(angle / 2.0f);
+		w = static_cast<float>(cos(angle / 2.0f));
 		//@todo: division by zero check
-		float length = 1 / (float)sqrt(x * x + y * y + z * z + w * w);
+		float length = 1 / static_cast<float>(sqrt(x * x + y * y + z * z + w * w));
 		x *= length;
 		y *= length;
 		z *= length;
 	}
 
-	__INLINE void toMatrix3( Matrix3& m  )const
+	__INLINE void toMatrix3(Matrix3 &m)const
 	{
 		float wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
 		float s  = 2.0f/(*this).Norm();  
@@ -1006,7 +1006,7 @@ public:
 	void Add(const Vector2 &point);
 	void Add(float x, float y);
 	void Offset(float dx, float dy);
-	CBox Offsetted(float dx, float dy) const;	
+	CBox Offsetted(float dx, float dy) const;
 	void Inflate(float x, float y);
 	CBox Inflated(float x, float y) const;
 	bool Inside(const Vector2 &point) const;
@@ -1027,7 +1027,7 @@ public:
 *	a b c - соответствующие коэффициенты квадратного уравнения.
 */
 
-bool SqareEq( float a, float b, float c, float &t0, float &t1);
+bool SqareEq(float a, float b, float c, float &t0, float &t1);
 
 /**
 *	CalcFrustumVertices(...) - функция вычисляет координаты вершин
@@ -1053,7 +1053,7 @@ bool CullBox(Vector3 _min, Vector3 _max, Vector3 pos, Vector3 scaling, Matrix3 R
 				Vector3 cpos, Vector3 cat, Vector3 cup);
 
 // непонятная функция. походу я её откуда-то рипанул, надо разобраться
-int inclusion (Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
+int inclusion(Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
 
 /**
 /	HalfPlaneSign - определяет знак полуплоскости точки x относительно прямой, лежащей на отрезке [u0, u1].
@@ -1137,7 +1137,7 @@ public:
 							float& depth);
 private:
 	unsigned int VerticesCount;
-	Vector2 *Vertices;							
+	Vector2 *Vertices;
 };
 
 class CRectangle : public CGeometry
@@ -1166,7 +1166,7 @@ public:
 		Vector2 wh_2 = Vector2(Width, Height) * 0.5f;
 		v0 = Center - wh_2;
 		v1 = Vector2(Center.x + Width * 0.5f, Center.y - Height * 0.5f);
-		v2 = Center + wh_2;		
+		v2 = Center + wh_2;
 		v3 = Vector2(Center.x - Width * 0.5f, Center.y + Height * 0.5f);
 	}
 	//bool CheckOrienation();

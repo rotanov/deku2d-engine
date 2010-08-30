@@ -40,6 +40,7 @@
 
 #include <IL/il.h>
 #include <SDL/SDL.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -47,6 +48,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <list>
 #include <map>
@@ -60,12 +62,19 @@
 #include <typeinfo>
 #include <vector>
 
+#include <sys/stat.h>
+
 #ifdef _WIN32
 	#define	WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 	#define Get  Get
 	#include <tchar.h>
-#endif  //_WIN32
+	#include "dirent/dirent.h"
+#else
+	#include <unistd.h>
+	#include <dirent.h>
+#endif //_WIN32
+
 
 using namespace std;
 
@@ -109,13 +118,13 @@ typedef bool (*EventFunc)(SDL_Event&);
 #define Forever for(;;)
 
 template<typename T>
-__INLINE void SAFE_DELETE(T*& a) 
+__INLINE void SAFE_DELETE(T*& a)
 {
 	delete a, a = NULL;
 }
 
 template<typename T>
-__INLINE void SAFE_DELETE_ARRAY(T*& a) 
+__INLINE void SAFE_DELETE_ARRAY(T*& a)
 {
 	delete [] a, a = NULL;
 }
@@ -134,7 +143,7 @@ public:
 	virtual ~CObject();
 
 	void IncRefCount();
-	static void DecRefCount(CObject* AObject);	
+	static void DecRefCount(CObject* AObject);
 
 	const string& GetName() const;
 	virtual void SetName(const string &AObjectName);
@@ -235,7 +244,7 @@ public:
 			}
 		if (temp == NULL)
 			return;
-		Objects.remove(temp);		
+		Objects.remove(temp);
 		//CObject::DecRefCount(temp);
 	}
 
@@ -465,8 +474,9 @@ public:
 	virtual bool LoadFromFile();
 	virtual bool SaveToFile();
 	bool CheckLoad();
-	void SetFilename(const string &AFilename);	
+	void SetFilename(const string &AFilename);
 	const string& GetFilename() const;
+
 protected:	
 	bool Loaded;		// Loaded должна быть истина если экземпляр объекта						
 	// был РЕАЛЬНО загружен, а не просто проиндексирован.	
@@ -610,56 +620,27 @@ public:
 
 	void WriteToLog(const char *Event, const char *Format, ...);
 
-	__INLINE void Toggle(bool AEnabled)
-	{
-		Enabled = AEnabled;
-	}
-	__INLINE bool isEnabled() const
-	{
-		return Enabled;
-	}
+	bool isEnabled() const;
+	void Toggle(bool AEnabled);
 
+	ELogMode GetLogMode() const;
 	void SetLogMode(ELogMode ALogMode);
-	__INLINE ELogMode GetLogMode() const 
-	{
-		return LogMode;
-	}
 
-	__INLINE void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode)
-	{
-		LogFileWriteMode = ALogFileWriteMode;
-	}
-	__INLINE ELogFileWriteMode GetLogFileWriteMode() const
-	{
-		return LogFileWriteMode;
-	}
+	ELogFileWriteMode GetLogFileWriteMode() const;
+	void SetLogFileWriteMode(ELogFileWriteMode ALogFileWriteMode);
 
-	__INLINE void SetDatedLogFileNames(bool ADatedLogFileNames)
-	{
-		DatedLogFileNames = ADatedLogFileNames;
-	}
-	__INLINE bool GetDatedLogFileNames() const
-	{
-		return DatedLogFileNames;
-	}
+	bool GetDatedLogFileNames() const;
+	void SetDatedLogFileNames(bool ADatedLogFileNames);
 
-	__INLINE void SetLogFilePath(string ALogFilePath)
-	{
-		LogFilePath = ALogFilePath;
-	}
-	__INLINE string GetLogFilePath() const
-	{
-		return LogFilePath;
-	}
+	void SetLogFilePath(const string &ALogFilePath);
+	string GetLogFilePath() const;
 
-	__INLINE void SetLogName(string ALogName)
-	{
-		LogName = ALogName;
-	}
-	__INLINE string GetLogName() const
-	{
-		return LogName;
-	}
+	void SetLogName(const string &ALogName);
+	string GetLogName() const;
+
+protected:
+	CLog();
+	friend class CTSingleton<CLog>;
 
 private:
 	bool Enabled;
@@ -669,9 +650,6 @@ private:
 	ostream *Stream;
 	string LogFilePath;
 	string LogName;
-protected:
-	friend class CTSingleton<CLog>;
-	CLog();
 };
 
 // define SIMPLIFIED_LOG to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
@@ -710,6 +688,7 @@ public:
 	};
 
 	static void LogToStdOut(const char *Event, const char *Format, ...);
+	static string GetLineTerminator();
 
 };
 
@@ -729,16 +708,7 @@ public:
 	T* Remove(const string &AName);
 	void Destroy(CObject *AObject);
 	void CleanUp();
-
-	// well.. there should be a better solution, so it's gonna be temporary function...
-	void DestroyAll()
-	{
-		for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-			Deletion.push(*i);
-
-		Objects.clear();
-		CleanUp(); 
-	}
+	void DestroyAll();
 
 protected:
 	CFactory();
@@ -781,7 +751,7 @@ template<typename T>
 T* CFactory::Get(const string &AName)
 {
 	T* result = NULL;
-	for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+	for (list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
 		if ((*i)->GetName() == AName)
 		{
 			result = dynamic_cast<T *>(*i);
@@ -805,7 +775,7 @@ T* CFactory::Remove(const string &AName)
 {
 	T* result = NULL;
 	list<CObject*>::iterator i;
-	for(i = Objects.begin(); i != Objects.end(); ++i)
+	for (i = Objects.begin(); i != Objects.end(); ++i)
 		if ((*i)->GetName() == AName)
 		{
 			result = dynamic_cast<T *>(*i);

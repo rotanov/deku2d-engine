@@ -51,7 +51,7 @@ public:
 				//CUpdateManager::Instance()->DelObject("Title screen tanks");
 				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->SetVisibility(false);
 				dynamic_cast<CGUIObject*>(CGUIManager::Instance()->Get("Root menu item"))->SetVisibility(false);
-				Tanks = new CTankManager;	
+				Tanks = new CTankManager;
 			}
 		}
 	}
@@ -99,7 +99,7 @@ bool CCustomStateHandler::OnInitialize()
 		FontEffect->Init();
 		FontEffect->ColorStart = RGBAf(0.5f, 0.5f, 0.5f, 1.0f);
 		FontEffect->ColorOver = RGBAf(0.0f, 0.0f, 0.0f, 0.5f);
-		FontEffect->SetVisibility(false);	
+		FontEffect->SetVisibility(false);
 		Vector2 *pnts2 = new Vector2 [2];
 		pnts2[1] = fPosition + Vector2(0.0f, 20.0f);
 		pnts2[0] = fPosition + Vector2(Font->GetStringWidth(TITLE_TEXT)*SCALE_TITLE, 20.0f);
@@ -127,7 +127,7 @@ bool CCustomStateHandler::OnInitialize()
 	next = new CMenuItem(MenuRoot, "Options");
 	next->Position = Vector2(ScreenWidth*0.5f - 20,160);
 
-		CMenuItem *options = new CMenuItem(next, "Game");	
+		CMenuItem *options = new CMenuItem(next, "Game");
 		options->Position = Vector2(ScreenWidth*0.5f - 20, 180);
 		options->SetCallback(&Options, NULL);
 
@@ -291,15 +291,15 @@ void mouse(int button, int state, int x, int y)
 {
 static int mouseState=0;
 
-if(!state) // mouse up
+if (!state) // mouse up
 {
 Position p;
 p.x = x / TNL::F32(gWindowWidth);
 p.y = y / TNL::F32(gWindowHeight);
 
-if(clientGame)
+if (clientGame)
 clientGame->moveMyPlayerTo(p);
-else if(serverGame)
+else if (serverGame)
 serverGame->moveMyPlayerTo(p);
 }
 }
@@ -307,18 +307,18 @@ serverGame->moveMyPlayerTo(p);
 
 void idle()
 {
-if(clientGame)
+if (clientGame)
 clientGame->tick();
-if(serverGame)
+if (serverGame)
 serverGame->tick();
 glutPostRedisplay();
 }
 
 void display()
 {
-if(clientGame)
+if (clientGame)
 clientGame->renderFrame(gWindowWidth, gWindowHeight);
-else if(serverGame)
+else if (serverGame)
 serverGame->renderFrame(gWindowWidth, gWindowHeight);
 glFlush();
 glutSwapBuffers();
@@ -326,7 +326,7 @@ glutSwapBuffers();
 
 void menu(int value)
 {
-switch(value)
+switch (value)
 {
 case 1:
 createGameClient(false);
@@ -373,7 +373,7 @@ glutAddMenuEntry("Restart as client", 1);
 glutAddMenuEntry("Restart as server", 2);
 glutAddMenuEntry("Restart as client/server", 3);
 glutAddMenuEntry("Restart as client pinging localhost", 4);
-glutAttachMenu( GLUT_RIGHT_BUTTON );
+glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 glutMainLoop();
 }

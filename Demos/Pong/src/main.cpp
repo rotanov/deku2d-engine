@@ -2,7 +2,7 @@
 #include "Pong.h"
 
 
-CPongGame *PongGame = NULL; 
+CPongGame *PongGame = NULL;
 
 class CChangeSceneToPackMan : public CAbstractAction
 {

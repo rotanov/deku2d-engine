@@ -3,12 +3,6 @@
 #include "2de_Core.h"
 #include "2de_Engine.h"
 
-#ifdef _WIN32
-#include "dirent/dirent.h"
-#else
-#include <dirent.h>
-#endif // _WIN32
-
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
@@ -45,7 +39,7 @@ CXML* CDataLister::List(string DataRoot, bool ForceReindex /*= false*/)
 			return &XML;
 		}
 		else
-			Log("WARNING", "Cached resources list file '%s' is invalid. Trying to regenerate it...", ResourcesListFile.c_str()); 
+			Log("WARNING", "Cached resources list file '%s' is invalid. Trying to regenerate it...", ResourcesListFile.c_str());
 	}
 
 	XML.Root.DeleteAll();
@@ -171,7 +165,7 @@ bool CResourceManager::LoadResources()
 	{
 		if ((*it)->Load(ResourceList))
 		{
-			Log("INFO", "Resources section '%s' loaded", (*it)->GetName().c_str()); 
+			Log("INFO", "Resources section '%s' loaded", (*it)->GetName().c_str());
 		}
 	}
 	return true;

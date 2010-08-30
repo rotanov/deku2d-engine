@@ -55,17 +55,13 @@ CUpdateManager::CUpdateManager()
 
 bool CUpdateManager::UpdateObjects()
 {
-	//ManagerContainer toDelete;	
 	CUpdatable *data;
 
-	for(ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
+	for (ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
 	{
 		data = *it;
 		if (data->isDestroyed())
-		{
-			//toDelete.push_back(data);
 			continue;
-		}
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (!data->Active)
@@ -75,11 +71,6 @@ bool CUpdateManager::UpdateObjects()
 		CEngine::Instance()->GetState(CEngine::STATE_DELTA_TIME, &dt);*/
 		data->Update(CEngine::Instance()->GetDeltaTime()); // @todo: подумать что использоваьт: фиксированную дельту или реальную engine->Getdt()
 	}
-	/*for(ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
-	{
-		Objects.remove(*i);
-		CObject::DecRefCount(*i);
-	}*/
 	return true;
 }
 

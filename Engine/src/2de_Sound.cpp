@@ -47,6 +47,11 @@ bool CSound::LoadFromFile()
 	return true;
 }
 
+Mix_Chunk* CSound::GetData()
+{
+	return Data;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CMusic
 
@@ -91,6 +96,11 @@ bool CMusic::LoadFromFile()
 	}
 
 	return true;
+}
+
+Mix_Music* CMusic::GetData()
+{
+	return Data;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -217,8 +227,10 @@ void CSoundMixer::StopMusic(int FadeOutTime /*= 0*/)
 
 void CSoundMixer::SetMusicVolume(size_t AVolume)
 {
-	if (AVolume > MIX_MAX_VOLUME) {
+	if (AVolume > MIX_MAX_VOLUME)
+	{
 		Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
+		return;
 	}
 
 	Mix_VolumeMusic(AVolume);
@@ -236,8 +248,10 @@ void CSoundMixer::SetSoundVolume(CSound *ASound, size_t AVolume)
 		Log("ERROR", "SetSoundVolume Mixer should be initialized, or ASound is NULL");
 		return;
 	}
-	if (AVolume > MIX_MAX_VOLUME) {
+	if (AVolume > MIX_MAX_VOLUME)
+	{
 		Log("WARNING", "Volume should be between 0 and MIX_MAX_VOLUME (%d)", MIX_MAX_VOLUME);
+		return;
 	}
 
 	Mix_VolumeChunk(ASound->GetData(), AVolume);

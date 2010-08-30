@@ -119,7 +119,7 @@ public:
 	void Update(float dt);
 	bool TabHolded; // temporary, ofcourse..
 private:
-	int KeyHoldRepeatDelay;	
+	int KeyHoldRepeatDelay;
 	int KeyHoldRepeatInterval;
 	int TimerAccum;
 	bool RepeatStarted;
@@ -153,7 +153,7 @@ public:
 		// maybe smthng else
 	}
 
-	virtual void SetVisibility( bool AVisible );
+	virtual void SetVisibility(bool AVisible);
 
 protected:
 	CText Text;
@@ -251,7 +251,7 @@ private:
 public:
 	void SetBox(const CBox &box)
 	{
-		CEdit::SetBox(box);		
+		CEdit::SetBox(box);
 		CBox tempBox = box;
 		tempBox.Offset(0.0f, box.Height() + 2.0f);
 		int TextHeight = Label.GetFont()->GetStringHeight(Label.GetText());

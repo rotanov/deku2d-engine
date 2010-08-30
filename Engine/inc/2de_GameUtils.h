@@ -12,23 +12,14 @@ class CUnitBase : public CRenderable, public CUpdatable
 
 class CTileset : public CResource
 {
-private:
-	CTexture	*Texture;
-
 public:
-	unsigned int TileWidth;
-	unsigned int TileHeight;
-	unsigned int HorNumTiles;
-	unsigned int VerNumTiles;
-	CBox* BBox;
-
-	CTileset ();
+	CTileset();
 	~CTileset();
 	Vector2Array<4> GetCellTC(int CellIndex);
-	void SetSettings(byte _TileWidth, byte _TileHeight, int _HorNumTiles, int _VerNumTiles);
+	void SetSettings(byte ATileWidth, byte ATileHeight, int AHorNumTiles, int AVerNumTiles);
 	bool LoadFromFile();
 	bool SaveToFile();
-	CTexture * GetTexture() const
+	CTexture* GetTexture() const
 	{
 		assert(Texture != NULL);
 		return Texture;
@@ -39,6 +30,15 @@ public:
 	}
 
 	void RenderTileSet(); //FOR DEBUGGING
+
+	unsigned int TileWidth;
+	unsigned int TileHeight;
+	unsigned int HorNumTiles;
+	unsigned int VerNumTiles;
+	CBox* BBox;
+
+private:
+	CTexture *Texture;
 
 };
 
@@ -53,6 +53,7 @@ public:
 			Tileset->CheckLoad();
 		return Tileset;
 	}
+
 protected:
 	CTileSetManager();
 	friend class CTSingleton<CTileSetManager>;
@@ -73,13 +74,6 @@ struct CMapCellInfo
 
 class CLevelMap : /*public CResource,*/ public CRenderable
 {
-private:
-	size_t HorizontalCellsCount;
-	size_t VerticalCellsCount;
-	CMapCellInfo *Cells;
-	CTileset *TileSet;
-
-	int GetCellIndex(int h, int v);
 public:
 	CLevelMap();
 	CLevelMap(size_t AHorizontalCellsCount, size_t AVerticalCellsCount,
@@ -97,6 +91,13 @@ public:
 	}
 	CBox GetCellAABB(const Vector2 &V);
 
+private:
+	size_t HorizontalCellsCount;
+	size_t VerticalCellsCount;
+	CMapCellInfo *Cells;
+	CTileset *TileSet;
+
+	int GetCellIndex(int h, int v);
 };
 
 class CCompas : public CRenderable
@@ -104,7 +105,7 @@ class CCompas : public CRenderable
 public:
 	CCompas();
 	~CCompas();
-	void Render();	
+	void Render();
 };
 
 class CDefaultTitleScreen : public CRenderable
@@ -125,6 +126,7 @@ public:
 	{
 		CRenderManager::Instance()->DrawTexturedBox(this, CBox(Vector2(-50.0f, -50.0f), Vector2(50.0f, 50.0f)), Texture, CBox(V2_ZERO, V2_DIR_UP + V2_DIR_RIGHT).GetVertices());
 	}
+
 private:
 	CTexture *Texture;
 	CText TextDeku;

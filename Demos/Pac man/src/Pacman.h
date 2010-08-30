@@ -28,7 +28,7 @@ public:
 class CPacmanBonus : public CUpdatable
 {
 public:
-	CPacmanPlayer *Player;	
+	CPacmanPlayer *Player;
 	Vector2 Position;
 	float Period;
 	float Angle;

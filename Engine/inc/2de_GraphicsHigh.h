@@ -33,7 +33,7 @@ public:
 	float Angle, lwidth, depth, psize;
 	int dash;
 	RGBAf *plClr, *psClr, *ppClr;
-	RGBAf lClr, sClr, pClr; 
+	RGBAf lClr, sClr, pClr;
 	CPrimitiveRender()
 	{
 		lClr = sClr = pClr = RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
@@ -44,7 +44,7 @@ public:
 		lwidth = 1.0f;
 		psize = 8.0f;
 		BlendingOption = PRM_RNDR_OPT_BLEND_OTHER;
-		LineStippleEnabled = doUseGlobalCoordSystem = false;			
+		LineStippleEnabled = doUseGlobalCoordSystem = false;
 	}
 
 	void Init();
@@ -138,7 +138,7 @@ public:
 	bool AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwidth,
 		float _m_fheight, int _m_nNumFrameColumns, int _m_nNumFrameRows,
 		int _m_nTotalFrames, int _m_nFrameWidth, int _m_nFrameHeight,
-		int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop);	
+		int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop);
 	void Render();
 	void SetAnimation(int index);
 	SAnimationInfo* FindAnimation(int index);
@@ -219,7 +219,7 @@ public:
 
 	CParticleSystem();
 	~CParticleSystem();
-	void					Init();	
+	void					Init();
 	void					Update(float dt);
 	void					Render();
 

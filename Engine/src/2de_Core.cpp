@@ -1,12 +1,5 @@
 #include "2de_Core.h"
 
-#include <fstream>
-#include <sys/stat.h>
-
-#ifndef _WIN32
-	#include <unistd.h>
-#endif //_WIN32
-
 //////////////////////////////////////////////////////////////////////////
 // CObject
 
@@ -126,17 +119,6 @@ void CSingletonManager::Clear()
 		delete Singletones.top();
 		Singletones.pop();
 	}
-	/*for(list<CObject*>::iterator i = Singletones.begin(); i != Singletones.end(); ++i)
-	{
-		//Log("INFO", "Singletone killer deleting object named: %s id: %u", (*i)->GetName().c_str(), (*i)->GetID());
-		
-		delete *i;
-		[>CObject *Object = *i;
-		*i = NULL;
-		CObject::DecRefCount(Object);<]
-	}
-
-	Singletones.clear();*/
 }
 
 void CSingletonManager::Finalize()
@@ -172,7 +154,7 @@ const string& CBaseResource::GetFilename() const
 	return Filename;
 }
 
-void CBaseResource::SetFilename( const string &AFilename )
+void CBaseResource::SetFilename(const string &AFilename)
 {
 	Filename = AFilename; // may be some check here
 }
@@ -187,9 +169,10 @@ CResource::CResource()
 
 void CResource::SetName(const string &AObjectName)
 {
+	// эээ, неее.. имя ресурса и имя его файла - две большие разницы..
 	CObject::SetName(AObjectName);
 	int t0 = Filename.length() - 1;
-	while(t0 > 0 && Filename[t0] != '/' && Filename[t0] != '\\')
+	while (t0 > 0 && Filename[t0] != '/' && Filename[t0] != '\\')
 		t0--;
 	t0++;
 	Filename.insert(t0, AObjectName);
@@ -608,19 +591,9 @@ bool CFile::WriteLine(const char *Data, size_t Size)
 		return false;
 
 	Write(Data, Size);
-
-	byte b;
-
-#ifdef _WIN32
-	b = 13;
-	WriteByte(&b);
-#endif //_WIN32
-
-	b = 10;
-	WriteByte(&b);
+	WriteText(CEnvironment::GetLineTerminator());
 
 	return true;
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -702,6 +675,21 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 	delete[] buffer;
 }
 
+bool CLog::isEnabled() const
+{
+	return Enabled;
+}
+
+void CLog::Toggle(bool AEnabled)
+{
+	Enabled = AEnabled;
+}
+
+CLog::ELogMode CLog::GetLogMode() const 
+{
+	return LogMode;
+}
+
 void CLog::SetLogMode(CLog::ELogMode ALogMode)
 {
 	if (Stream != NULL)
@@ -740,7 +728,8 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 
 		string NewLogFileName = LogFilePath + LogName;
 
-		if (DatedLogFileNames) {
+		if (DatedLogFileNames)
+		{
 			tm* TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
 			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
 		}
@@ -758,6 +747,45 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 	LogMode = ALogMode;
 }
 
+CLog::ELogFileWriteMode CLog::GetLogFileWriteMode() const
+{
+	return LogFileWriteMode;
+}
+
+void CLog::SetLogFileWriteMode(CLog::ELogFileWriteMode ALogFileWriteMode)
+{
+	LogFileWriteMode = ALogFileWriteMode;
+}
+
+bool CLog::GetDatedLogFileNames() const
+{
+	return DatedLogFileNames;
+}
+
+void CLog::SetDatedLogFileNames(bool ADatedLogFileNames)
+{
+	DatedLogFileNames = ADatedLogFileNames;
+}
+
+void CLog::SetLogFilePath(const string &ALogFilePath)
+{
+	LogFilePath = ALogFilePath;
+}
+
+string CLog::GetLogFilePath() const
+{
+	return LogFilePath;
+}
+
+void CLog::SetLogName(const string &ALogName)
+{
+	LogName = ALogName;
+}
+
+string CLog::GetLogName() const
+{
+	return LogName;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // CEnvironment
@@ -858,6 +886,17 @@ void CEnvironment::LogToStdOut(const char *Event, const char *Format, ...)
 		<< Event << "] " << buffer << endl;
 }
 
+string CEnvironment::GetLineTerminator()
+{
+#ifdef _WIN32
+	static string LineTerminator = "\r\n";
+#else
+	static string LineTerminator = "\n";
+#endif // _WIN32
+
+	return LineTerminator;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CFactory
 
@@ -868,11 +907,6 @@ CFactory::CFactory()
 
 CFactory::~CFactory()
 {	
-	/*for(list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-		Deletion.push(*i);
-
-	Objects.clear();
-	CleanUp(); */
 }
 
 /**
@@ -935,6 +969,16 @@ void CFactory::CleanUp()
 	}
 }
 
+// well, maybe there is better way to do final all-destroy clean-up..
+void CFactory::DestroyAll()
+{
+	for (list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+		Deletion.push(*i);
+
+	Objects.clear();
+	CleanUp();
+}
+
 
 ostream& operator<<(ostream &AStream, const CVariant &AData)
 {
@@ -946,7 +990,7 @@ ostream& operator<<(ostream &AStream, const CVariant &AData)
 void DelFNameFromFPath(char *src)
 {
 	int i = strlen(src)-1;
-	while(src[i] != '/' && src[i] != '\\' && src[i] != ':')
+	while (src[i] != '/' && src[i] != '\\' && src[i] != ':')
 		i--;
 	src[i+1] = 0;
 }
@@ -954,7 +998,7 @@ void DelFNameFromFPath(char *src)
 void DelExtFromFName(char *src)
 {
 	int i = strlen(src)-1;
-	while(src[i] != '.')
+	while (src[i] != '.')
 		i--;
 	src[i] = 0;
 }
@@ -962,9 +1006,9 @@ void DelExtFromFName(char *src)
 void DelLastDirFromPath(char *src)
 {
 	int i = strlen(src)-1;
-	while(src[i] == '\\' || src[i] == '/')
+	while (src[i] == '\\' || src[i] == '/')
 		i--;
-	while(src[i] != '\\' && src[i] != '/')
+	while (src[i] != '\\' && src[i] != '/')
 		i--;
 	src[i+1] = 0;
 }
@@ -1007,8 +1051,8 @@ void MemCheck()
 
 	_RPT0(_CRT_WARN, "file message\n");
 
-	if ( _CrtMemDifference( MemState3, MemState1, MemState2 ) )
-		_CrtMemDumpStatistics( MemState3 );
+	if (_CrtMemDifference(MemState3, MemState1, MemState2))
+		_CrtMemDumpStatistics(MemState3);
 	CloseHandle(hLogFile);
 }
 #endif //_WIN32
@@ -1023,9 +1067,9 @@ void RemoveTrack(unsigned long addr)
 
 	if (allocList == NULL)
 		return;
-	for(i = allocList->begin(); i != allocList->end(); i++)
+	for (i = allocList->begin(); i != allocList->end(); i++)
 	{
-		if((*i)->address == addr)
+		if ((*i)->address == addr)
 		{
 			allocList->remove((*i));
 			break;
@@ -1043,7 +1087,8 @@ void DumpUnfreed()
 	if (allocList == NULL)
 		return;
 
-	for(i = allocList->begin(); i != allocList->end(); i++) {
+	for (i = allocList->begin(); i != allocList->end(); i++)
+	{
 		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
 			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
 		fprintf(fo, "%s", buf);

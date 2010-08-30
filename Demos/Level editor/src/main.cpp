@@ -9,7 +9,7 @@
 // #define MAX_ZOOM 128
 // 
 // 
-// int     GameVTiles = 20; 
+// int     GameVTiles = 20;
 // int     GameHTiles = 15;
 // int Zoom = 16;
 // int ZoomDt = 2;
@@ -46,7 +46,7 @@
 // #define ST_ENTITY_SET           0x03
 // 
 // 
-// int State = ST_DRAW_TILES; 
+// int State = ST_DRAW_TILES;
 // 
 // 
 // struct CCellNode
@@ -75,7 +75,7 @@
 // 	Vector2 ji = Vector2(x, y);
 // 	float w = TileSet->TileWidth;
 // 	float h = TileSet->TileHeight;
-// 	for(int k = 0; k < 4; k++)
+// 	for (int k = 0; k < 4; k++)
 // 	{
 // 		next->info.pos[k] = (ji + V2_QuadBin[k]);
 // 		next->info.pos[k].x *= w;
@@ -106,15 +106,15 @@
 // 		glVertex3f(t->pos[0].x, t->pos[0].y, t->z);
 // 
 // 
-// 		glTexCoord2f(t->tc[1].x, t->tc[1].y); 
+// 		glTexCoord2f(t->tc[1].x, t->tc[1].y);
 // 		glVertex3f(t->pos[1].x, t->pos[1].y, t->z);
 // 
 // 
-// 		glTexCoord2f(t->tc[2].x, t->tc[2].y); 
+// 		glTexCoord2f(t->tc[2].x, t->tc[2].y);
 // 		glVertex3f(t->pos[2].x, t->pos[2].y, t->z);
 // 
 // 
-// 		glTexCoord2f(t->tc[3].x, t->tc[3].y); 
+// 		glTexCoord2f(t->tc[3].x, t->tc[3].y);
 // 		glVertex3f(t->pos[3].x, t->pos[3].y, t->z);
 // 		next = next->next;
 // 	}
@@ -143,7 +143,7 @@
 // 
 // bool ProcessInput(SDL_Event& event)
 // {
-// 	switch(event.type)
+// 	switch (event.type)
 // 	{
 // 	case SDL_KEYDOWN:
 // 		{
@@ -207,7 +207,7 @@
 // 			}
 // 			if (event.button.button == SDL_BUTTON_LEFT && State == ST_SELECT_TILE)
 // 			{
-// 				CurrTileIndex = ((int)(MousePos.y - TileSelPos.y)/(int)TileSet->TileHeight)*TileSet->HorNumTiles + (int)(MousePos.x - TileSelPos.x)/(int)TileSet->TileWidth; 
+// 				CurrTileIndex = ((int)(MousePos.y - TileSelPos.y)/(int)TileSet->TileHeight)*TileSet->HorNumTiles + (int)(MousePos.x - TileSelPos.x)/(int)TileSet->TileWidth;
 // 			}
 // 		}
 // 		break;
@@ -416,7 +416,7 @@
 // 	//Level.Cells = new CMapCellInfo [20*10];
 // 	//memset(Level.Cells, 0, 20*10*(sizeof(CMapCellInfo)));
 // 	//Level.TileSet = TileSet;
-// 	//      for (int i=0;i<20*10;i++)
+// 	//      for (int i = 0; i < 20*10; i++)
 // 	//      {
 // 	//              Level.Cells[i].index = Random_Int(2, 2);
 // 	//              Level.Cells[i].z = -0.0f;

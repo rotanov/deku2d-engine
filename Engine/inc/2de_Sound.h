@@ -7,8 +7,8 @@
 
 
 /**
- * CSound - класс звукового семлпа как ресурса.
- */
+* CSound - класс звукового семлпа как ресурса.
+*/
 
 class CSound : public CResource
 {
@@ -17,15 +17,15 @@ public:
 	CSound(const char *AFileName);
 	~CSound();
 	bool LoadFromFile();
-	__INLINE Mix_Chunk* GetData() { return Data; }
+	Mix_Chunk* GetData();
 
 private:
 	Mix_Chunk *Data;
 };
 
 /**
- * CMusic - класс музыки как ресурса.
- */
+* CMusic - класс музыки как ресурса.
+*/
 
 class CMusic : public CResource
 {
@@ -35,15 +35,15 @@ public:
 	~CMusic();
 
 	bool LoadFromFile();
-	__INLINE Mix_Music* GetData() { return Data; }
+	Mix_Music* GetData();
 
 private:
 	Mix_Music *Data;
 };
 
 /**
- * CSoundManager - ресурсовый менеджер звуковых семплов.
- */
+* CSoundManager - ресурсовый менеджер звуковых семплов.
+*/
 
 class CSoundManager : public CCommonManager <list <CSound*> >, public CTSingleton <CSoundManager>
 {
@@ -56,8 +56,8 @@ protected:
 };
 
 /**
- * CMusicManager - ресурсовый менеджер музыки.
- */
+* CMusicManager - ресурсовый менеджер музыки.
+*/
 
 class CMusicManager : public CCommonManager <list <CMusic*> >, public CTSingleton <CMusicManager>
 {
@@ -70,8 +70,8 @@ protected:
 };
 
 /**
- * CSoundMixer - звуковой микшер, отвечающий за инициализацию и деинициализацию звуковой системы, а также воспроизведение звука и музыки.
- */
+* CSoundMixer - звуковой микшер, отвечающий за инициализацию и деинициализацию звуковой системы, а также воспроизведение звука и музыки.
+*/
 
 class CSoundMixer : public CTSingleton<CSoundMixer>
 {

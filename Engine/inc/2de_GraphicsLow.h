@@ -56,7 +56,7 @@ class CRenderObjectInfo
 {
 public:
 	Vector2 Position;
-	RGBAf Color;	
+	RGBAf Color;
 	bool doIgnoreCamera; // if true, then object will be drawn in global cords,
 
 	CRenderObjectInfo();
@@ -71,7 +71,7 @@ public:
 private:
 	float Angle; //	(Degrees)
 	float Depth; //	[-1; 1]?
-	float Scaling;	
+	float Scaling;
 };
 
 class CAbstractScene;
@@ -250,7 +250,7 @@ public:
 	float GetDistance() const;
 	float SymbolWidth(unsigned int Index) const;
 	Vector2Array<4> GetTexCoords(unsigned int Charachter);
-	//const Vector2Array<4>& GetTexCoords(unsigned int Charachter) 
+	//const Vector2Array<4>& GetTexCoords(unsigned int Charachter)
 	// <-- warning: reference to local variable ‘result’ returned;
 	// This function is not for user, so there should be some kind of guard
 	// To let using of this function only for what needs it
@@ -323,7 +323,7 @@ public:
 		return DefaultFont;
 	}
 	bool SetCurrentFont(const char* fontname);
-	CFont* GetFont(const string &fontname);	
+	CFont* GetFont(const string &fontname);
 	bool AddFont(CFont *AObject); // WTF>?
 };
 

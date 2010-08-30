@@ -63,7 +63,7 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 	switch (state)
 	{
 	case KEY_PRESSED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_g:
 			PreviousState = State;
@@ -79,7 +79,7 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 			if (MousePosition.x < INTERFACE_OFFSET_X)
 				break;
 			if (Font != NULL && CornerKind == SCK_NONE)
-				for(int i = 0; i < 256; i++)
+				for (int i = 0; i < 256; i++)
 					if (Font->bbox[i].Min.x < (MousePosition.x / Zoom - Offset.x / Zoom) && Font->bbox[i].Max.x > (MousePosition.x / Zoom - Offset.x / Zoom) &&
 						Font->bbox[i].Min.y < (MousePosition.y / Zoom - Offset.y / Zoom) && Font->bbox[i].Max.y > (MousePosition.y / Zoom - Offset.y / Zoom))
 					{
@@ -123,7 +123,7 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		}
 		break;
 	case KEY_RELEASED:
-		switch(key)
+		switch (key)
 		{
 		case SDLK_g:
 			State = PreviousState;
@@ -161,11 +161,11 @@ CFontEditor::CFontEditor()
 	const char* ButtonNames[BUTTONS_COUNT] = {"Exit", "Load font", "Load texture", "Test phrase", "Save font", "Expose box", "<-", "->"};
 	const CObjectCallback ButtonCallers[BUTTONS_COUNT] = {&ExitFontEditor, &LoadFont, &LoadTexture, &ShowTestPhrase, &SaveFont, &ExposeRect, &GoToPrevChar, &GoToNextChar};
 
-	for(int i = 0; i < BUTTONS_COUNT; i++)
+	for (int i = 0; i < BUTTONS_COUNT; i++)
 	{
 		CButton *temp = CFactory::Instance()->New<CButton>(ButtonNames[i]);
 		temp->SetText(static_cast<string>(ButtonNames[i]));
-		temp->SetBox(CBox(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));		
+		temp->SetBox(CBox(LEFT_MARGIN, 20 + (BUTTON_HEIGHT + 10) * i, BUTTON_WIDTH, BUTTON_HEIGHT));
 		temp->SetCallback(ButtonCallers[i], this);
 	}
 
@@ -176,12 +176,12 @@ CFontEditor::CFontEditor()
 
 	edFontTextureName = CFactory::Instance()->New<CEdit>("edFontTextureName");
 	edFontTextureName->SetText(static_cast<string>("Font_font"));
-	edFontTextureName->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT));	
+	edFontTextureName->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * BUTTONS_COUNT, EDIT_WIDTH, BUTTON_HEIGHT));
 //	edFontTextureName->Color = RGBAf(0.5f, 0.5f, 0.6f, 0.9f);
 
 	edFontname = CFactory::Instance()->New<CEdit>("edFontname");
 	edFontname->SetText(static_cast<string>("iich"));
-	edFontname->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT));	
+	edFontname->SetBox(CBox(LEFT_MARGIN,  20 + (BUTTON_HEIGHT + 10) * (BUTTONS_COUNT + 1), EDIT_WIDTH, BUTTON_HEIGHT));
 	edFontname->Color = RGBAf(0.8f, 0.3f, 0.5f, 0.9f);
 
 	lblSampleText = CFactory::Instance()->New<CLabel>("lblSampleText");
@@ -210,7 +210,7 @@ void CFontEditor::Render()
 	Offset.y = (int)Offset.y;	
 
 // 	if (Font != NULL)
-// 		for(int i=0;i<256;i++)
+// 		for (int i = 0; i < 256; i++)
 // 		{
 // 			char a[2];
 // 			a[0] = (char)i+32;
@@ -224,7 +224,7 @@ void CFontEditor::Render()
 
 	glScalef(Zoom, Zoom, 1.0f);
 
-	if(FontTexture)
+	if (FontTexture)
 	{
 		this->SetScaling(Zoom);
 		this->Position = Offset;
@@ -235,7 +235,7 @@ void CFontEditor::Render()
 	SetLayer(-1);
 	if (Font)
 	{
-		for(int i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			Color = COLOR_THIRD;
 			if (CornerKind == i)
@@ -244,7 +244,7 @@ void CFontEditor::Render()
 		}
 		
 		CRenderManager *RenerManager = CRenderManager::Instance();
-		for(int i = 0; i < 256; i++)
+		for (int i = 0; i < 256; i++)
 		{
 			Vector2 v0 = Font->bbox[i].Min;
 			Vector2 v1(Font->bbox[i].Max.x, Font->bbox[i].Min.y);
@@ -350,7 +350,7 @@ void CFontEditor::SetSelectedBoxTo(int Index)
 		Vector2(rect.Min.x, rect.Max.y),
 		Vector2((rect.Min.x + rect.Max.x) * 0.5f, (rect.Min.y + rect.Max.y) * 0.5f),
 	};
-	for(int i = 0; i < 5; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		SelectionBoxes[i*4 + 0] = Vertices[i] + V2_QuadBinCenter[0] * 2.0f;
 		SelectionBoxes[i*4 + 1] = Vertices[i] + V2_QuadBinCenter[1] * 2.0f;

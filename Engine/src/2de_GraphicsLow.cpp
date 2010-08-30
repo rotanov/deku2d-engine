@@ -154,13 +154,13 @@ CGLImageData::CGLImageData()
 
 CGLImageData::~CGLImageData()
 {
-	if(glIsTexture(TexID))
+	if (glIsTexture(TexID))
 		glDeleteTextures(1, &TexID);
 }
 
 bool CGLImageData::MakeTexture()
 {
-	if (Data == NULL) 
+	if (Data == NULL)
 		return false;
 	if ((Width&(Width-1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
 		return false;				//	Ultimate - это использовать NOT_POWER_OF_TWO екстеншон, если он доступен;
@@ -268,7 +268,7 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 	// 	glEnable(0x809D);
 
 	int flags = SDL_OPENGL;
-	if(Fullscreen == true)
+	if (Fullscreen == true)
 	{
 		flags |= SDL_FULLSCREEN;
 	}
@@ -315,13 +315,13 @@ void CGLWindow::glResize(GLsizei Width, GLsizei Height)
 		Height = 1;
 	glViewport(0, 0, Width-1, Height-1);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();			
+	glLoadIdentity();
 	//gluOrtho2D(0.0f, Width-1, 0.0f, Height-1);
 	glOrtho(0.0f, Width - 1.0f, 0.0f, Height - 1.0f, -100.0f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);	
+	glMatrixMode(GL_MODELVIEW);
 }
 
-void CGLWindow::glInit(GLsizei Width, GLsizei Height)	
+void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 {
 	glShadeModel(GL_SMOOTH);	//GL_SMOOTH GL_FLAT
 
@@ -337,13 +337,13 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 		Width = 1;
 	glViewport(0, 0, Width, Height);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();			
+	glLoadIdentity();
 	gluOrtho2D(0.0f, Width - 1, 0.0f, Height - 1);
-	glMatrixMode(GL_MODELVIEW);	
+	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glClearDepth(1.0);	
+	glClearDepth(1.0);
 
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
@@ -419,7 +419,7 @@ bool CFont::LoadFromFile()
 		return false;
 	}
 	string FontImageName;
-	file.ReadString(FontImageName);	
+	file.ReadString(FontImageName);
 
 	CTextureManager *TexMan = CTextureManager::Instance();
 	Texture = TexMan->Get(FontImageName);
@@ -430,7 +430,7 @@ bool CFont::LoadFromFile()
 
 
 	file.Close();
-	for(int i=0;i<256;i++)
+	for (int i=0; i<256; i++)
 	{
 		if (bbox[i].Min.x > bbox[i].Max.x)
 			swap(bbox[i].Min.x, bbox[i].Max.x);
@@ -451,7 +451,7 @@ bool CFont::LoadFromMemory(const byte* Address)
 	Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
 	
 	memcpy(bbox, Address, sizeof(bbox));
-	for(int i=0;i<256;i++)
+	for (int i=0; i<256; i++)
 	{
 		if (bbox[i].Min.x > bbox[i].Max.x)
 			swap(bbox[i].Min.x, bbox[i].Max.x);
@@ -534,7 +534,7 @@ CBox CFont::GetSymbolsBBOX()
 	CBox Result;
 	Result.Min = Vector2(9999.0f, 9999.0f);
 	Result.Max = Vector2(0.0f, 0.0f);
-	for(int i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		Result.Add(bbox[i].Min);
 		Result.Add(bbox[i].Max);
@@ -545,7 +545,7 @@ CBox CFont::GetSymbolsBBOX()
 // 		if (bbox[i].x1 > Result.Max.x)
 // 			Result.Max.x = bbox[i].x1;
 // 		if (bbox[i].y1 > Result.Max.y)
-// 			Result.Max.y = bbox[i].y1;		
+// 			Result.Max.y = bbox[i].y1;
 	}
 	return Result;
 }
@@ -555,12 +555,12 @@ float CFont::GetDistance() const
 	return Distance;
 }
 
-float CFont::SymbolWidth( unsigned int Index ) const
+float CFont::SymbolWidth(unsigned int Index) const
 {
 	return Width[Index];
 }
 
-Vector2Array<4> CFont::GetTexCoords( unsigned int Charachter ) /*const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable result returned */
+Vector2Array<4> CFont::GetTexCoords(unsigned int Charachter) /*const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable result returned */
 {
 	Vector2Array<4> result;
 	result[0] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
@@ -599,7 +599,7 @@ void CCamera::Update()
 	if (!Assigned)
 		return;
 	//dx -= *Atx;
-	//dy -= *Aty;	
+	//dy -= *Aty;
 	/*
 	world = view.Offsetted(Point.x, Point.y);
 
@@ -688,7 +688,6 @@ bool CRenderManager::DrawObjects()
 {
 	glLoadIdentity();	
 	glTranslatef(0.375, 0.375, ROTATIONAL_AXIS_Z); //accuracy tip from MSDN help
-	//ManagerContainer toDelete;
 	Camera.Update(); // @todo: review camera
 
 	CRenderable *data;
@@ -697,10 +696,7 @@ bool CRenderManager::DrawObjects()
 	{
 		data = *i;
 		if (data->isDestroyed())
-		{
-			//toDelete.push_back(data);
 			continue;
-		}
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (data->GetVisibility())
@@ -714,7 +710,7 @@ bool CRenderManager::DrawObjects()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_2D);
-	for(unsigned int i = 0; i < DEKU2D_MAX_TEXTURES; i++)
+	for (unsigned int i = 0; i < DEKU2D_MAX_TEXTURES; i++)
 		if (TexturedQuadVertices[i].GetVertexCount() != 0)
 		{
 			glBindTexture(GL_TEXTURE_2D, i);
@@ -730,11 +726,6 @@ bool CRenderManager::DrawObjects()
 	LineVertices.Clear();
 	QuadVertices.Clear();
 	//////////////////////////////////////////////////////////////////////////
-	/*for (ManagerIterator i = toDelete.begin(); i != toDelete.end(); ++i)
-	{
-		Objects.remove(*i);
-		CObject::DecRefCount(*i);
-	}*/
 #ifdef _DEBUG
 	//	Camera.DrawDebug();
 #endif 
@@ -748,7 +739,7 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 	const CText & RText = *Text;
 	RGBAf TColor = Text->Color;
 	float dx(0.0f);
-	for(unsigned int i = 0; i < Text->Length(); i++)
+	for (unsigned int i = 0; i < Text->Length(); i++)
 	{
 		float liwidth = Font->bbox[RText[i] - 32].Width();	// 32!!!
 		float liheight = Font->bbox[RText[i] - 32].Height();
@@ -823,7 +814,7 @@ void gSetBlendingMode(void)
 	glAlphaFunc			(GL_GREATER, 0);
 }
 
-void gToggleScissor( bool State )
+void gToggleScissor(bool State)
 {
 	if (State)
 	{
@@ -837,11 +828,10 @@ void gToggleScissor( bool State )
 	}
 }
 
-void gScissor( int x, int y, int width, int height )
+void gScissor(int x, int y, int width, int height)
 {
 	glScissor(x, y, width, height);
 }
-
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -871,7 +861,7 @@ void CFontManager::Init()
 }
 
 
-CFont* CFontManager::GetFont(const string &fontname)	
+CFont* CFontManager::GetFont(const string &fontname)
 {
 	CFont *TempFont = NULL;
 	TempFont = Get(fontname);
@@ -883,7 +873,7 @@ CFont* CFontManager::GetFont(const string &fontname)
 bool CFontManager::SetCurrentFont(const char* fontname)
 {
 	CurrentFont = GetFont(fontname);
-	return !!CurrentFont;
+	return (CurrentFont != NULL);
 }
 
 bool CFontManager::AddFont(CFont *AObject)
@@ -1142,7 +1132,7 @@ void CScene::Render()
 
 void CScene::Update(float dt)
 {
-// 	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
+// 	for (vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
 // 	{
 // 		(*i)->Color.a -= dt / 4.0f;
 // 
@@ -1185,13 +1175,13 @@ void CScene::RemoveRenderable(CRenderable *AObject)
 
 CScene::~CScene()
 {
-	for(vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
+	for (vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
 	{
-		(*i)->SetDestroyed(); 
+		(*i)->SetDestroyed();
 	}
-	for(vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
+	for (vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
 	{
-		(*i)->SetDestroyed(); 
+		(*i)->SetDestroyed();
 	}
 }
 
@@ -1246,7 +1236,7 @@ CAbstractScene* CSceneManager::CreateScene()
 
 CSceneManager::~CSceneManager()
 {
-	for(vector<CAbstractScene*>::iterator i = Scenes.begin(); i != Scenes.end(); ++i)
+	for (vector<CAbstractScene*>::iterator i = Scenes.begin(); i != Scenes.end(); ++i)
 		delete (*i);
 	Scenes.clear();
 }
@@ -1315,7 +1305,7 @@ void CPrmitiveVertexDataHolder::Grow()
 {
 	ReservedCount = VertexCount * 2;
 	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for(unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned int i = 0; i < VertexCount; i++)
 		NewColors[i] = Colors[i];
 
 	delete[] Colors;
@@ -1323,7 +1313,7 @@ void CPrmitiveVertexDataHolder::Grow()
 	Colors = NewColors;
 
 	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for(unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned int i = 0; i < VertexCount; i++)
 		NewVertices[i] = Vertices[i];
 
 	delete[] Vertices;
@@ -1393,7 +1383,7 @@ void CVertexDataHolder::Grow()
 {
     CPrmitiveVertexDataHolder::Grow();
 	Vector2 *NewTexCoords = new Vector2[ReservedCount];
-	for(unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned int i = 0; i < VertexCount; i++)
 		NewTexCoords[i] = TexCoords[i];
 
 	delete[] TexCoords;
