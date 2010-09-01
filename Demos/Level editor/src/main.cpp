@@ -443,7 +443,6 @@
 // 
 // int main(int argc, char *argv[])
 // {
-// 	CEnvironment::Paths::SetConfigPath("Config/");
 // 	Ninja->SetProgramName("Level Editor");
 // 	Ninja->SetStateHandler<CCustomStateHandler>();
 // 	Ninja->Run();

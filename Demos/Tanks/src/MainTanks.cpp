@@ -212,7 +212,6 @@ bool CCustomStateHandler::OnInitialize()
 
 int main(int argc, char *argv[])
 {
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetProgramName("Tanks");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();

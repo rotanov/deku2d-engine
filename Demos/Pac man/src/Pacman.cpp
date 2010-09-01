@@ -84,7 +84,7 @@ void CPacmanPlayer::Update(float dt)
 
 bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	if (state == KEY_PRESSED)
+	if (state == KEY_DOWN)
 	{
 		switch (key)
 		{

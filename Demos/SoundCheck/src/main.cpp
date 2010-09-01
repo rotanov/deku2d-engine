@@ -21,7 +21,6 @@ bool CCustomStateHandler::OnInitialize()
 int main(int argc, char* argv[])
 {
 	Engine->SetStateHandler<CCustomStateHandler>();
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Engine->SetProgramName("SoundCheck");
 	Engine->Run();
 

@@ -1,5 +1,7 @@
 #include "2de_Core.h"
 
+#include "2de_Engine.h"
+
 //////////////////////////////////////////////////////////////////////////
 // CObject
 
@@ -9,9 +11,8 @@ CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name(
 
 }
 
-CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), Name(" CObject " + itos(ID)), RefCount(0)
+CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0)
 {
-	ID = reinterpret_cast<int>(this);
 }
 
 CObject& CObject::operator=(const CObject &AObject)
@@ -20,7 +21,7 @@ CObject& CObject::operator=(const CObject &AObject)
 		return *this;
 
 	Destroyed = AObject.Destroyed;
-	ID = reinterpret_cast<int>(this);
+	ID = ++CObjectCount;
 	Name = AObject.GetName() + " copy";
 	RefCount = 0;
 }
@@ -200,13 +201,13 @@ bool CFile::Open(const string &AFilename, EOpenMode Mode)
 {
 	if (File != NULL)
 	{
-		Log("ERROR", "Can't open file '%s': another file is already opened.", AFilename.c_str());
+		Log("ERROR", "Can't open file '%s': another file is already opened", AFilename.c_str());
 		return false;
 	}
 
 	if (AFilename.empty())
 	{
-		Log("ERROR", "Can't open file with empty filename.");
+		Log("ERROR", "Can't open file with empty filename");
 		return false;
 	}
 
@@ -224,7 +225,7 @@ bool CFile::Open(const string &AFilename, EOpenMode Mode)
 
 	if (File == NULL)
 	{
-		Log("ERROR", "Can't open file '%s'.", Filename.c_str());
+		Log("ERROR", "Can't open file '%s'", Filename.c_str());
 		return false;
 	}
 
@@ -255,7 +256,7 @@ bool CFile::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
 
 	if (fread(Buffer, BytesCount, ElementsCount, File) != ElementsCount && !Eof())
 	{
-		Log("ERROR", "File IO error occured in attempt to read data from '%s'.", Filename.c_str());
+		Log("ERROR", "File IO error occured in attempt to read data from '%s'", Filename.c_str());
 		return false;
 	}
 
@@ -273,7 +274,7 @@ bool CFile::Write(const void *Data, size_t BytesCount, size_t ElementsCount /*= 
 
 	if (fwrite(Data, BytesCount, ElementsCount, File) != ElementsCount)
 	{
-		Log("ERROR", "File IO error occured in attempt to write data to '%s'.", Filename.c_str());
+		Log("ERROR", "File IO error occured in attempt to write data to '%s'", Filename.c_str());
 		return false;
 	}
 
@@ -574,7 +575,7 @@ long CFile::Size() const
 
 	if (stat(Filename.c_str(), &FileStat))
 	{
-		Log("ERROR", "Can't get size of %s.", Filename.c_str());
+		Log("ERROR", "Can't get size of '%s'", Filename.c_str());
 		return 0;
 	}
 
@@ -738,10 +739,10 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 		Stream = new ofstream(NewLogFileName.c_str(), ios_base::out | om);
 		if (Stream == NULL || !dynamic_cast<ofstream*>(Stream)->is_open())
 		{
-			cerr << "Can't open log file \"" << NewLogFileName << "\"." << endl;
+			cerr << "Can't open log file '" << NewLogFileName << "'." << endl;
 			return;
 		}
-		Log("INFO", "Log to file \"%s\" started", NewLogFileName.c_str());
+		Log("INFO", "Log to file '%s' started", NewLogFileName.c_str());
 		break;
 	}
 	LogMode = ALogMode;
@@ -820,6 +821,25 @@ string CEnvironment::DateTime::GetFormattedTime(tm *TimeStruct, const char *Form
 	return result;
 }
 
+string CEnvironment::Paths::GetExecutablePath()
+{
+	string result;
+
+#ifdef _WIN32
+	char *MainDir = new char[MAX_PATH];
+	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+	DelFNameFromFPath(MainDir);
+
+	result = MainDir;
+
+	delete [] MainDir;
+#else
+	// executable path is useless on *nix-like systems, so return empty string
+#endif // _WIN32
+
+	return result;
+}
+
 string CEnvironment::Paths::GetWorkingDirectory()
 {
 	string result;
@@ -835,17 +855,13 @@ string CEnvironment::Paths::GetWorkingDirectory()
 	return result;
 }
 
-void CEnvironment::Paths::SetWorkingDirectory()
+void CEnvironment::Paths::SetWorkingDirectory(const string &AWorkingDirectory)
 {
 #ifdef _WIN32
-	char *MainDir = new char[MAX_PATH];
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-	SetCurrentDirectory(MainDir);
-	delete [] MainDir;
+	SetCurrentDirectory(AWorkingDirectory.c_str());
+#else
+	chdir(AWorkingDirectory.c_str());
 #endif // _WIN32
-	// *nix-like systems don't need current directory to be 
-	// set to executable path - they use different directory structure
 }
 
 string CEnvironment::Paths::GetConfigPath()
@@ -859,7 +875,64 @@ void CEnvironment::Paths::SetConfigPath(const string &AConfigPath)
 	ConfigPath = AConfigPath;
 }
 
+string CEnvironment::Paths::GetLogPath()
+{
+	return LogPath;
+
+}
+
+void CEnvironment::Paths::SetLogPath(const string &ALogPath)
+{
+	LogPath = ALogPath;
+}
+
+/**
+* CEnvironment::Paths::GetUniversalDirectory - возвращает стандартную для системы директорию для помещения всех изменяемых файлов программы, таких как конфиг, лог, возможно сэйвы и т. п.
+*
+* Название Universal здесь не очень удачное, но ничего лучше я придумать не смог...
+*/
+
+string CEnvironment::Paths::GetUniversalDirectory()
+{
+	string result;
+#ifdef _WIN32
+	result = CEnvironment::Variables::Get("APPDATA");
+	if (!result.empty())
+		result += "\\" + CEngine::Instance()->GetProgramName() + "\\";
+#else
+	string HomeDir = CEnvironment::Variables::Get("HOME");
+	if (HomeDir.empty())
+	{
+		string UserName = CEnvironment::Variables::Get("USER");
+		if (UserName.empty())
+			UserName = CEnvironment::Variables::Get("USERNAME");
+
+		if (!UserName.empty())
+			HomeDir = "/home/" + UserName;
+	}
+
+	if (!HomeDir.empty())
+		result = HomeDir + "/" + CEngine::Instance()->GetProgramName() + "/";
+#endif // _WIN32
+
+	return result;
+}
+
 string CEnvironment::Paths::ConfigPath = "Config/";
+string CEnvironment::Paths::LogPath = "Logs/";
+
+string CEnvironment::Variables::Get(const string &AName)
+{
+	char *var = getenv(AName.c_str());
+	return ((var == NULL) ? "" : string(var));
+}
+
+void CEnvironment::Variables::Set(const string &AName, const string &AValue)
+{
+	static string PutEnvString;
+	PutEnvString = AName + "=" + AValue;
+	SDL_putenv(const_cast<char *>(PutEnvString.c_str()));
+}
 
 /**
 * CEnvironment::LogToStdOut - упрощённый лог на стандартный вывод, в обход синглтонного ада CLog'а.
@@ -977,13 +1050,6 @@ void CFactory::DestroyAll()
 
 	Objects.clear();
 	CleanUp();
-}
-
-
-ostream& operator<<(ostream &AStream, const CVariant &AData)
-{
-	AStream << AData.Data;
-	return AStream;
 }
 
 

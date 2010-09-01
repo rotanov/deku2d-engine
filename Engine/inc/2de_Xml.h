@@ -66,6 +66,7 @@ public:
 	void AddAfter(const Iterator &AIterator, CXMLNode *ANode);
 	void AddBefore(const Iterator &AIterator, CXMLNode *ANode);
 	CXMLNode* Remove(Iterator &AIterator);
+	CXMLNode* Remove(CXMLNode *ANode);
 	void DeleteAll();
 	void Clear();
 
@@ -128,6 +129,7 @@ public:
 	virtual CXMLNode* GetParent();
 	virtual void SetParent(CXMLNode *AParent);
 
+	virtual bool HasAttribute(const string &AName) const;
 	virtual string GetAttribute(const string &AName) const;
 	virtual void SetAttribute(const string &AName, const string &AValue);
 	virtual void DeleteAttribute(const string &AName);
@@ -193,6 +195,7 @@ static CXMLErroneousNode ErroneousNode;
 class CXMLNodeWithAttributes : public CXMLNode
 {
 public:
+	bool HasAttribute(const string &AName) const;
 	string GetAttribute(const string &AName) const;
 	void SetAttribute(const string &AName, const string &AValue);
 	void DeleteAttribute(const string &AName);

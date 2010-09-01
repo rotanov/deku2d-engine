@@ -17,7 +17,6 @@ bool CCustomStateHandler::OnInitialize()
 int main(int argc, char *argv[])
 {
 	CEngine	*Ninja = CEngine::Instance();
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetProgramName("Font editor");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();

@@ -41,7 +41,6 @@ int main(int argc, char* argv[])
 {
 	CEngine *Ninja = CEngine::Instance();
 	Ninja->SetStateHandler<CCustomStateHandler>();
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetProgramName("Pong");
 	Ninja->Run();
 	return 0;

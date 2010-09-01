@@ -1,4 +1,5 @@
 SOURCES		=	src/2de_Core.cpp \
+			src/2de_Config.cpp \
 			src/2de_DefaultFont.cpp \
 			src/2de_Engine.cpp \
 			src/2de_GameUtils.cpp \
@@ -16,6 +17,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Xml.cpp
 
 OBJECTS		=	obj/2de_Core.o \
+			obj/2de_Config.o \
 			obj/2de_DefaultFont.o \
 			obj/2de_Engine.o \
 			obj/2de_GameUtils.o \
@@ -42,8 +44,11 @@ LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
 
 LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lSDL_mixer
 
-TARGET_STATIC	=	lib/libDeku2d.a
-TARGET_SHARED	=	lib/libDeku2d.so
+TARGET_STATIC_FILE = libDeku2d.a
+TARGET_SHARED_FILE = libDeku2d.so
+
+TARGET_STATIC	=	lib/$(TARGET_STATIC_FILE)
+TARGET_SHARED	=	lib/$(TARGET_SHARED_FILE)
 
 STRICTFLAG	=	-Wno-write-strings
 
@@ -55,8 +60,9 @@ obj/%.o: src/%.cpp
 # maybe replace this implicit rule by explicit one, that uses ar
 $(TARGET_STATIC): $(TARGET_STATIC)($(OBJECTS))
 
+$(TARGET_SHARED): CFLAGS := $(CFLAGS) -fPIC
 $(TARGET_SHARED): $(OBJECTS)
-	g++ $(DEBUGFLAG) $(STRICTFLAG) -shared -fPIC $(LDFLAGS) -o $(TARGET_SHARED) $(OBJECTS)
+	g++ $(DEBUGFLAG) $(STRICTFLAG) -shared $(CFLAGS) $(LDFLAGS) -o $(TARGET_SHARED) $(OBJECTS)
 
 obj:
 	mkdir -p obj/
@@ -78,17 +84,21 @@ debug-shared: shared
 strict-shared: STRICTFLAG = -Wall
 strict-shared: shared
 
-PREFIXDIR = $(DESTDIR)/usr/
-INCLUDEDIR = $(PREFIXDIR)include/deku2d/
+PREFIXDIR = $(DESTDIR)/usr
+LIBDIR = $(PREFIXDIR)/lib
+INCLUDEDIR = $(PREFIXDIR)/include
 
 install: $(TARGET_STATIC) $(TARGET_SHARED)
-	install -d $(PREFIXDIR)lib/
-	install -d $(INCLUDEDIR)
-	install -m644 $(TARGET) $(PREFIXDIR)$(TARGET_STATIC)
-	install -m644 $(TARGET_SHARED) $(PREFIXDIR)$(TARGET_SHARED)
-	install -m644 inc/2de_*.h $(INCLUDEDIR)
+	install -d $(LIBDIR)
+	install -d $(INCLUDEDIR)/deku2d/
+	install -m644 $(TARGET_STATIC) $(LIBDIR)/$(TARGET_STATIC_FILE)
+	install -m644 $(TARGET_SHARED) $(LIBDIR)/$(TARGET_SHARED_FILE)
+	install -m644 inc/2de_*.h $(INCLUDEDIR)/deku2d/
 
-# TODO: write uninstall target..
+uninstall:
+	rm $(LIBDIR)/$(TARGET_STATIC_FILE)
+	rm $(LIBDIR)/$(TARGET_SHARED_FILE)
+	rm -r $(INCLUDEDIR)/deku2d/
 	
 
 docs: doc/Doxyfile

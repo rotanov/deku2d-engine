@@ -185,7 +185,7 @@ bool CGLImageData::LoadTexture(const string &Filename)
 	}
 	if (!MakeTexture())
 	{
-		Log("ERROR", "Can't load texture in video memory.");
+		Log("ERROR", "Can't load texture in video memory");
 		return false;
 	}
 	if (doCleanData)
@@ -205,7 +205,7 @@ bool CGLImageData::LoadTexture(size_t AWidth, size_t AHeight, const byte* Addres
 	BPP = 4;
 	if (!MakeTexture())
 	{
-		Log("ERROR", "Can't load texture in video memory.");
+		Log("ERROR", "Can't load texture in video memory");
 		return false;
 	}
 	return true;
@@ -415,7 +415,7 @@ bool CFont::LoadFromFile()
 	CFile file;
 	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
 	{
-		Log("ERROR", "Can't Load Font %s: file  couldn't be opened.", GetName().c_str());
+		Log("ERROR", "Can't Load Font '%s': file couldn't be opened", GetName().c_str());
 		return false;
 	}
 	string FontImageName;
@@ -1019,7 +1019,7 @@ void setVSync(int interval)
 	}
 	else
 	{
-		Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer.");
+		Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer");
 	}
 #endif                        // </platforms, that support swap interval control>
 }

@@ -141,6 +141,7 @@ void CGUIRootObject::Render()
 
 void CGUIRootObject::Update(float dt)
 {
+#if 0
 #ifndef I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
 	//  этот код по-моему вообще не работает...
 	if (TabHolded)
@@ -159,7 +160,7 @@ void CGUIRootObject::Update(float dt)
 			if (TimerAccum > KeyHoldRepeatInterval)
 			{
 				TimerAccum = 0;
-				CGUIManager::Instance()->InputHandling(KEY_PRESSED, SDLK_TAB, SDLMod(0), 0);
+				CGUIManager::Instance()->InputHandling(KEY_PRESS, SDLK_TAB, SDLMod(0), 0);
 			}
 		}
 	}
@@ -168,6 +169,7 @@ void CGUIRootObject::Update(float dt)
 		TimerAccum = 0;
 		RepeatStarted = false;
 	}
+#endif
 #endif
 }
 
@@ -238,7 +240,7 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 	// TODO: move this function to CGUIRootObject..	
 	switch (state)
 	{
-	case KEY_PRESSED:
+	case KEY_PRESS:
 		switch (key)
 		{
 		case SDLK_TAB:
@@ -265,7 +267,7 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 			break;
 		}
 		break;
-	case KEY_RELEASED:
+	case KEY_UP:
 		switch (key)
 		{
 		case SDLK_TAB:
@@ -416,7 +418,7 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch (state)
 	{
-	case KEY_PRESSED:
+	case KEY_DOWN:
 		switch (key)
 		{
 		case SDLK_SPACE:
@@ -428,7 +430,7 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			break;
 		}
 		break;
-	case KEY_RELEASED:
+	case KEY_UP:
 		switch (key)
 		{
 		case SDLK_SPACE:
@@ -552,7 +554,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	// or maybe selection will be handled by some CText or whatever... i just don't know yet..
 	switch (state)
 	{
-	case KEY_PRESSED:
+	case KEY_PRESS:
 		switch (key)
 		{
 		case SDLK_BACKSPACE:
@@ -679,13 +681,7 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 			}
 		}
 		break;
-	case KEY_RELEASED:
-		switch (key)
-		{
-		case SDLK_AMPERSAND:
-			break;
-		default:;
-		}
+	case KEY_UP:
 		break;
 	}
 	return true;
@@ -834,7 +830,7 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	if (!GetVisibility())
 		return false;
-	if (state == KEY_PRESSED)
+	if (state == KEY_DOWN)
 	{
 		switch (key)
 		{

@@ -28,6 +28,8 @@ CEngine::CEngine()
 	StateHandler = NULL;
 	SetStateHandler<CAbstractStateHandler>();
 
+	CEnvironment::Paths::SetWorkingDirectory(CEnvironment::Paths::GetExecutablePath());
+
 	CSingletonManager::Init();
 }
 
@@ -42,60 +44,36 @@ CEngine* CEngine::Instance()
 
 bool CEngine::Initialize()
 {
-	CEnvironment::Paths::SetWorkingDirectory();
-	CLog::Instance()->SetLogFilePath("Logs/");	// take path from settings or from some system-specific defines.. or maybe something like CEnvironment::Paths::GetLogsPath()..
+	CLog::Instance()->SetLogFilePath(CEnvironment::Paths::GetLogPath());
 	CLog::Instance()->SetLogName("System");
-	Log("INFO", "Working directory is \"%s\"", CEnvironment::Paths::GetWorkingDirectory().c_str());
+	Log("INFO", "Working directory is '%s'", CEnvironment::Paths::GetWorkingDirectory().c_str());
 
-	SDL_putenv("SDL_VIDEO_CENTERED=1");
+	CEnvironment::Variables::Set("SDL_VIDEO_CENTERED", "1");
 
-	// TODO: CConfig
-	Config.LoadFromFile(CEnvironment::Paths::GetConfigPath() + ProgramName + ".xml");
+	// config correctness check is not needed - it will just isuue a warning internally - this is not fatal as there's default values..
 
-	CXMLNode *ConfigRoot = Config.Root.First("Configuration");
+	CConfig *Config = CConfig::Instance();
 
-	if (ConfigRoot->IsErroneous())
-	{
-		Log("ERROR", "Can't load main configuration '%s'", string(CEnvironment::Paths::GetConfigPath() + ProgramName + ".xml").c_str());
-		return false;
-	}
-	
-	// still looks like shit
-	int wwidth = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowWidth")->GetAttribute("value"));
-	int wheight = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowHeight")->GetAttribute("value"));
-	int wbpp = stoi(ConfigRoot->Children.First("Video")->Children.First("WindowBPP")->GetAttribute("value"));
-	string wcaption = ConfigRoot->Children.First("Video")->Children.First("WindowCaption")->GetAttribute("value");
-	doCalcFPS = (ConfigRoot->Children.First("Video")->Children.First("DoCalcFps")->GetAttribute("value") == "true");
-	doLimitFPS = (ConfigRoot->Children.First("Video")->Children.First("DoLimitFps")->GetAttribute("value") == "true");
-	SetFPSLimit(stoi(ConfigRoot->Children.First("Video")->Children.First("FpsLimit")->GetAttribute("value")));
-	bool isFullscreen = (ConfigRoot->Children.First("Video")->Children.First("Fullscreen")->GetAttribute("value") == "true");
+	CConfig::CConfigSection VideoSection = Config->Section("Video");
 
-	// as soon as CConfig will be created, it will look just like this:
-	// 	CConfig *Config = CConfig::Instance();
-	// 	CGLWindow *Window = CGLWindow::Instance();
-	// 	Window->SetWidth(Config->Section("Video")["WindowWidth"]);
-	// 	Window->SetHeight(Config->Section("Video")["WindowHeight"]);
-	// 	Window->BPP = Config->Section("Video")["WindowBPP"];
-	// 	Window->SetCaption(Config->Section("Video")["WindowCaption"]);
-	// 	doCalcFps = Config->Section("Video")["DoCalcFps"];
-	// 	doLimitFps = Config->Section("Video")["DoLimitFps"];
-	// 	etc.
-	// at least, I will try to achieve such functionality
+	CGLWindow *Window = CGLWindow::Instance();
+	Window->SetWidth(VideoSection["WindowWidth"]);
+	Window->SetHeight(VideoSection["WindowHeight"]);
+	//Window->BPP = VideoSection["WindowBPP"]; // 32
+	Window->SetCaption(VideoSection["WindowCaption"]);
+	Window->Fullscreen = VideoSection["Fullscreen"];
+	doCalcFPS = VideoSection["DoCalcFps"];
+	doLimitFPS = VideoSection["DoLimitFps"];
+	SetFPSLimit(VideoSection["FpsLimit"]);
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
-	ResourceManager->DataPath = ConfigRoot->Children.First("Data")->Children.First("DataPath")->GetAttribute("value");
-	doLoadDefaultResourceList = (ConfigRoot->Children.First("Data")->Children.First("doLoadDefaultResourceList")->GetAttribute("value") == "true");
-
-	CGLWindow::Instance()->SetWidth(wwidth);
-	CGLWindow::Instance()->SetHeight(wheight);
-	CGLWindow::Instance()->SetCaption(wcaption);
+	ResourceManager->DataPath = Config->Section("Data")["DataPath"].To<string>();
+	doLoadDefaultResourceList = Config->Section("Data")["doLoadDefaultResourceList"];
 
 	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->GetWidth(),
 		CGLWindow::Instance()->GetHeight()); // Update camera due to update of wh from config
 
 
-	CGLWindow::Instance()->BPP = 32;
-	CGLWindow::Instance()->Fullscreen = isFullscreen;
 	if (!CGLWindow::Instance()->gCreateWindow())
 	{
 		Log("ERROR", "Window creation failed");
@@ -103,7 +81,7 @@ bool CEngine::Initialize()
 	}
 
 	ilInit(); // Инициализация DevIL
-	CSoundMixer::Instance()->SetMusicVolume(stoi(ConfigRoot->Children.First("Sound")->Children.First("MusicVolume")->GetAttribute("value")));
+	CSoundMixer::Instance()->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 	SDL_EnableUNICODE(1);
 
@@ -264,7 +242,12 @@ bool CEngine::ProcessEvents()
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;
 				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, keysym.sym, keysym.mod, TempChar);
+				{
+					if (keys[keysym.sym] == 0)
+						(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, keysym.sym, keysym.mod, TempChar);
+
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESS, keysym.sym, keysym.mod, TempChar);
+				}
 				keys[keysym.sym] = 1;
 				break;
 			}
@@ -275,20 +258,20 @@ bool CEngine::ProcessEvents()
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;				
 				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, keysym.sym, keysym.mod, TempChar);
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, keysym.sym, keysym.mod, TempChar);
 				keys[keysym.sym] = 0;
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
 			{
 				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESSED, event.button.button, SDL_GetModState(), 0);
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, event.button.button, SDL_GetModState(), 0);
 				break;
 			}
 			case SDL_MOUSEBUTTONUP:
 			{
 				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_RELEASED, event.button.button, SDL_GetModState(), 0);
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, event.button.button, SDL_GetModState(), 0);
 				break;
 			}
 			case SDL_MOUSEMOTION:

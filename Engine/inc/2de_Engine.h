@@ -2,6 +2,7 @@
 #define _2DE_ENGINE_H_
 
 #include "2de_Core.h"
+#include "2de_Config.h"
 #include "2de_GameUtils.h"
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
@@ -67,8 +68,6 @@ public:
 	// may leave it in something like CLowLevelInput, even when Event system will be ready...
 	int keys[SDLK_LAST];	//FFUUU~ for sure. Wait till the Event system.
 	Vector2 MousePos;
-
-	CXML Config; // until CConfig..
 
 protected:
 	CEngine();

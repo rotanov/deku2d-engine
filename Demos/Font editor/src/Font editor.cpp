@@ -62,7 +62,7 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 {
 	switch (state)
 	{
-	case KEY_PRESSED:
+	case KEY_DOWN:
 		switch (key)
 		{
 		case SDLK_g:
@@ -122,7 +122,7 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 			break;
 		}
 		break;
-	case KEY_RELEASED:
+	case KEY_UP:
 		switch (key)
 		{
 		case SDLK_g:

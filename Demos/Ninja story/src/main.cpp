@@ -23,7 +23,6 @@ bool CCustomStateHandler::OnInitialize()
 
 int main(int argc, char *argv[])
 {
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetProgramName("Ninja story");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();

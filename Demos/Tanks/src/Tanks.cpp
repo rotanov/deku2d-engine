@@ -3,7 +3,7 @@
 
 bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
-	if (state == KEY_PRESSED)
+	if (state == KEY_DOWN)
 	{
 		for (int i = 0; i < CONTROLS_COUNT; i++)
 			if (key == Controls[i])
@@ -18,7 +18,7 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 		if (key == Controls[akFire])
 			FiringTimeout = 0.21f;
 	}
-	else
+	else if (state == KEY_UP)
 	{
 		isWalking = false;
 		for (int i = 0; i < 5; i++)

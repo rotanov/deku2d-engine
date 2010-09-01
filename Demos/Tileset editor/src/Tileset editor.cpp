@@ -29,7 +29,7 @@ bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char let
 {
 	switch (state)
 	{
-	case KEY_PRESSED:
+	case KEY_DOWN:
 		switch (key)
 		{
 		case SDLK_g:
@@ -50,7 +50,7 @@ bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char let
 			break;
 		}
 		break;
-	case KEY_RELEASED:
+	case KEY_UP:
 		switch (key)
 		{
 		case SDLK_g:

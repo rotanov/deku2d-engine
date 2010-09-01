@@ -189,6 +189,13 @@ CXMLNode* CXMLChildrenList::Remove(Iterator &AIterator)
 	return result;
 }
 
+CXMLNode* CXMLChildrenList::Remove(CXMLNode *ANode)
+{
+	Backend.remove(ANode);
+	ANode->SetParent(NULL);
+	return ANode;
+}
+
 void CXMLChildrenList::DeleteAll()
 {
 	for (Iterator it = Begin(); it != End(); ++it)
@@ -341,6 +348,11 @@ CXMLNode* CXMLNode::GetParent()
 void CXMLNode::SetParent(CXMLNode *AParent)
 {
 	Parent = AParent;
+}
+
+bool CXMLNode::HasAttribute(const string &AName) const
+{
+	return false;
 }
 
 string CXMLNode::GetAttribute(const string &AName) const
@@ -519,6 +531,12 @@ bool CXMLErroneousNode::IsErroneous() const
 
 //////////////////////////////////////////////////////////////////////////
 // CXMLNodeWithAttributes
+
+bool CXMLNodeWithAttributes::HasAttribute(const string &AName) const
+{
+	map<string, string, CCaseInsensetiveComparison>::const_iterator iter = Attributes.find(AName);
+	return (iter != Attributes.end());
+}
 
 string CXMLNodeWithAttributes::GetAttribute(const string &AName) const
 {

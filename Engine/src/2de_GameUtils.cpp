@@ -246,8 +246,8 @@ int CLevelMap::GetCellIndex(int h, int v)
 
 CBox CLevelMap::GetCellAABB(const Vector2 &V)
 {
-	size_t CellWidth = TileSet->TileWidth * GetScaling();
-	size_t CellHeight = TileSet->TileWidth * GetScaling();
+	unsigned int CellWidth = TileSet->TileWidth * GetScaling();
+	unsigned int CellHeight = TileSet->TileWidth * GetScaling();
 	if (GetMapCell((int)V.x / CellWidth, (int)V.y / CellHeight)->index != 0)
 		return CBox((((int)V.x / CellWidth)) * CellWidth,
 		(((int)V.y/CellHeight)) * CellHeight, 

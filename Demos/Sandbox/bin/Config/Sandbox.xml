@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <Configuration>
-	<Video>
-		<Fullscreen value="false" />
-		<WindowWidth value="640" />
-		<WindowHeight value="480" />
-		<WindowBPP value="32" />
-		<WindowCaption value="Sandbox" />
-		<DoCalcFps value="true" />
-		<DoLimitFps value="false" />
-		<FpsLimit value="60" />
-	</Video>
-	<Sound>
-		<MusicVolume value="10" />
-	</Sound>
-	<Data>
-		<DataPath value="../../../Data" />
-		<doLoadDefaultResourceList value="true" />
-	</Data>
+<Video>
+<Fullscreen value="false" />
+<WindowWidth value="640" />
+<WindowHeight value="480" />
+<WindowBPP value="32" />
+<WindowCaption value="Sandbox" />
+<DoCalcFps value="true" />
+<DoLimitFps value="false" />
+<FpsLimit value="60" />
+</Video>
+<Sound>
+<MusicVolume value="10" />
+</Sound>
+<Data>
+<DataPath value="../../../Data" />
+<doLoadDefaultResourceList value="true" />
+</Data>
 </Configuration>

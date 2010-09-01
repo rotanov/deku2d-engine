@@ -322,19 +322,22 @@ bool CCustomStateHandler::OnInitialize()
 {	
 	// Загружаем из конфига всякие разные параметры для редактора
 
-	CXMLNode *LevelEditorConfig = CEngine::Instance()->Config.Root.First("Configuration")->Children.First("LevelEditor");
+	CConfig *Config = CConfig::Instance();
 
-	if (LevelEditorConfig->IsErroneous())
-	{
-		Log("ERROR", "Can't load level editor configuration '%s'", string(CEnvironment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml").c_str());
-		return false;
-	}
+	// defaults for Level Editor
+	Config->AddDefault("LevelEditor", "DefaultCellSize", "4");
+	Config->AddDefault("LevelEditor", "GameVTiles", "15");
+	Config->AddDefault("LevelEditor", "GameHTiles", "20");
+	Config->AddDefault("LevelEditor", "LeftPanel", "196");
+	Config->AddDefault("LevelEditor", "BottomPanel", "196");
 
-	SetZoom(stoi(LevelEditorConfig->Children.First("DefaultCellSize")->GetAttribute("value")));
-	GameVTiles = stoi(LevelEditorConfig->Children.First("GameVTiles")->GetAttribute("value"));
-	GameHTiles = stoi(LevelEditorConfig->Children.First("GameHTiles")->GetAttribute("value"));
-	LeftPanel = stoi(LevelEditorConfig->Children.First("LeftPanel")->GetAttribute("value"));
-	BottomPanel = stoi(LevelEditorConfig->Children.First("BottomPanel")->GetAttribute("value"));
+	CConfig::CConfigSection LevelEditorSection = Config->Section("LevelEditor");
+
+	SetZoom(LevelEditorSection["DefaultCellSize"]);
+	GameVTiles = LevelEditorSection["GameVTiles"];
+	GameHTiles = LevelEditorSection["GameHTiles"];
+	LeftPanel = LevelEditorSection["LeftPanel"];
+	BottomPanel = LevelEditorSection["BottomPanel"];
 
 	ScrnWidth = CGLWindow::Instance()->GetWidth();
 	ScrnHeight = CGLWindow::Instance()->GetHeight();
@@ -380,7 +383,6 @@ void CheckMouse()
 
 int main(int argc, char *argv[])
 {
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetProgramName("Level Editor");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();

@@ -81,10 +81,6 @@ using namespace std;
 #define USE_SDL_OPENGL
 #define USING_OPENGL
 
-// так как у меня SDL_EnableKeyRepeat и связанные с этим вещи работают и проблем не вызывают, то я не нашёл ничего лучше, кроме как сделать вот так...
-// раскомментировать, если устраивает то, как работает SDL_EnableKeyRepeat и связанные с этим вещи
-//#define I_LIKE_HOW_SDL_KEY_REPEAT_WORKS
-
 #if defined(_MSC_VER)
 	#define __INLINE __forceinline
 #elif __GNUC__ >= 4
@@ -111,8 +107,9 @@ typedef unsigned char		byte;
 
 typedef bool (*EventFunc)(SDL_Event&);
 
-#define KEY_PRESSED		0x00
-#define KEY_RELEASED	0x01
+#define KEY_DOWN 0
+#define KEY_PRESS 1
+#define KEY_UP 2
 
 //	"Forever" instead of "for(;;)", anyway, just kidding.
 #define Forever for(;;)
@@ -175,7 +172,7 @@ private:
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 /**
 *	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
-*	Первый параметр - произошло ли событие KEY_PRESSED или KEY_RELEASED
+*	Первый параметр - произошло ли событие KEY_UP, KEY_PRESS или KEY_DOWN
 *	Второй - какая клавиша была нажата; одновременно принимает значения мыши и клавиатуры: sdl_keysym.h, sdl_mouse.h - списки констант
 *	Третий параметр - модификатор, т.е. зажат ли Shift, Ctrl, Alt итд
 *	И четвёртый параметр - ASCII код.
@@ -660,7 +657,8 @@ private:
 #endif // SIMPLIFIED_LOG
 
 /**
-* Класс CEnvironment содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
+* CEnvironment - содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
+*
 * В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
 */
 
@@ -677,14 +675,29 @@ public:
 	class Paths
 	{
 	public:
+		static string GetExecutablePath();
+
 		static string GetWorkingDirectory();
-		static void SetWorkingDirectory();
+		static void SetWorkingDirectory(const string &AWorkingDirectory);
 
 		static string GetConfigPath();
 		static void SetConfigPath(const string &AConfigPath);
 
+		static string GetLogPath();
+		static void SetLogPath(const string &ALogPath);
+
+		static string GetUniversalDirectory();
+
 	private:
 		static string ConfigPath;
+		static string LogPath;
+	};
+
+	class Variables
+	{
+	public:
+		static string Get(const string &AName);
+		static void Set(const string &AName, const string &AValue);
 	};
 
 	static void LogToStdOut(const char *Event, const char *Format, ...);
@@ -693,7 +706,7 @@ public:
 };
 
 /**
-*	Класс CFactory. Назначение классы - контроль создания любых объектов.
+* CFactory - контроль создания любых объектов. Реальное предназначение на текущий момент - управление памятью при создании и уничтожении объектов, а также получение указателя по имени.
 */
 
 class CFactory : public CTSingleton<CFactory>
@@ -796,142 +809,6 @@ T* CFactory::Remove(const string &AName)
 	return result;
 }
 
-/**
-* Класс CVariant служит для хранения любых данных простых типов с автоматической конвертации в нужный.
-*/
-
-class CVariant
-{
-#define CVARIANT_CONVERSION_TO(TYPE) \
-	operator TYPE() \
-	{ \
-		TYPE result; \
-		Converter.clear(); \
-		Converter.str(Data); \
-		Converter >> result; \
-		if (Converter.fail()) \
-		{ \
-			return (TYPE)(0); \
-		} \
-		return result; \
-	}
-
-#define CVARIANT_CONVERSION_FROM(TYPE) \
-	CVariant(const TYPE &ASource) \
-	{ \
-		Converter << fixed << ASource; \
-		Data = Converter.str(); \
-	}; \
-	CVariant& operator=(const TYPE &ASource) \
-	{ \
-		Converter.clear(); \
-		Converter.str(""); \
-		Converter << fixed << ASource; \
-		Data = Converter.str(); \
-		return *this; \
-	}
-		
-public:
-	CVariant()
-	{
-	}
-	CVariant(const CVariant &ASource)
-	{
-		Data = ASource.Data;
-	}
-	CVariant& operator=(const CVariant &ASource)
-	{
-		Data = ASource.Data;
-		return *this;
-	}
-
-	CVARIANT_CONVERSION_TO(char);
-	CVARIANT_CONVERSION_TO(short);
-	CVARIANT_CONVERSION_TO(int);
-	CVARIANT_CONVERSION_TO(long);
-	CVARIANT_CONVERSION_TO(unsigned char);
-	CVARIANT_CONVERSION_TO(unsigned short);
-	CVARIANT_CONVERSION_TO(unsigned int);
-	CVARIANT_CONVERSION_TO(unsigned long);
-	CVARIANT_CONVERSION_TO(float);
-	CVARIANT_CONVERSION_TO(double);
-	CVARIANT_CONVERSION_TO(long double);
-
-	CVARIANT_CONVERSION_FROM(char);
-	CVARIANT_CONVERSION_FROM(short);
-	CVARIANT_CONVERSION_FROM(int);
-	CVARIANT_CONVERSION_FROM(long);
-	CVARIANT_CONVERSION_FROM(unsigned char);
-	CVARIANT_CONVERSION_FROM(unsigned short);
-	CVARIANT_CONVERSION_FROM(unsigned int);
-	CVARIANT_CONVERSION_FROM(unsigned long);
-	CVARIANT_CONVERSION_FROM(float);
-	CVARIANT_CONVERSION_FROM(double);
-	CVARIANT_CONVERSION_FROM(long double);
-
-	operator string()
-	{
-		return Data;
-	}
-	CVariant(const string &ASource)
-	{
-		Data = ASource;
-	}
-	CVariant& operator=(const string &ASource)
-	{
-		Data = ASource;
-		return *this;
-	}
-
-	operator const char*()
-	{
-		return Data.c_str();
-	}
-	CVariant(const char *ASource)
-	{
-		Data = ASource;
-	}
-	CVariant& operator=(const char *ASource)
-	{
-		Data = ASource;
-		return *this;
-	}
-
-	operator bool()
-	{
-		if (Data == "false")
-			return false;
-
-		long double result;
-		Converter.clear();
-		Converter.str(Data);
-		Converter >> result;
-
-		if (Converter.fail())
-			return true;
-
-		return ((int) result != 0);
-	}
-	CVariant(bool ASource)
-	{
-		Converter << noboolalpha << ASource;
-		Data = Converter.str();
-	}
-	CVariant& operator=(bool ASource)
-	{
-		Converter.clear();
-		Converter.str("");
-		Converter << noboolalpha << ASource;
-		Data = Converter.str();
-		return *this;
-	}
-
-	friend ostream& operator<<(ostream &AStream, const CVariant &AData);
-
-private:
-	string Data;
-	stringstream Converter;
-};
 
 // @todo: taking into account, that global functions is evil, may be we should move such kind of functions
 //	in some class, named, for example, CEnvironment// Agreed with you.
@@ -965,6 +842,52 @@ __INLINE string to_string(const T& t)
 	ostringstream s;
 	s << t;
 	return s.str();
+}
+
+/**
+* CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
+*/
+
+class CVariantConvert
+{
+public:
+	template<typename T>
+	struct identity
+	{
+		typedef T type;
+	};
+
+	template<typename T>
+	static T from_string_impl(const string &s, identity<T>)
+	{
+		T result;
+		stringstream ss;
+		ss << s;
+		ss >> result;
+		return result;
+	}
+
+	static bool from_string_impl(const string &s, identity<bool>)
+	{
+		if (s == "false")
+			return false;
+
+		long double result;
+		stringstream ss;
+		ss << s;
+		ss >> result;
+
+		if (ss.fail())
+			return true;
+
+		return ((int) result != 0);
+	}
+};
+
+template<typename T>
+T from_string(const string &s)
+{
+	return CVariantConvert::from_string_impl(s, CVariantConvert::identity<T>());
 }
 
 /**

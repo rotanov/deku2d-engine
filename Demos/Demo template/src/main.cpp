@@ -18,7 +18,6 @@ bool CCustomStateHandler::OnInitialize()
 
 int main(int argc, char *argv[])
 {
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Engine->SetProgramName("Demo template");
 	Engine->SetStateHandler<CCustomStateHandler>();
 	Engine->Run();

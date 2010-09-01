@@ -36,7 +36,6 @@ bool CCustomStateHandler::OnInitialize()
 int main(int argc, char *argv[])
 {
 	CEngine	*Ninja = CEngine::Instance();
-	CEnvironment::Paths::SetConfigPath("Config/");
 	Ninja->SetProgramName("Pac man");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run();
