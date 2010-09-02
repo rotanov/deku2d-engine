@@ -301,7 +301,7 @@ void CXML::SaveToFile(const string &AFilename)
 //////////////////////////////////////////////////////////////////////////
 // CXMLNode
 
-CXMLNode::CXMLNode() : Children(this), Parent(NULL)
+CXMLNode::CXMLNode() : Children(this), Parent(NULL), Depth(0)
 {
 
 }
@@ -332,7 +332,7 @@ void CXMLNode::SetName(const string &AName)
 
 string CXMLNode::GetText() const
 {
-	return GetStartingSequence() + GetName() + GetContent() + GetEndingSequence() + "\n";
+	return GetTabulation() + GetStartingSequence() + GetName() + GetContent() + GetEndingSequence() + "\n";
 }
 
 void CXMLNode::SetInnerText(const string &AText)
@@ -348,6 +348,7 @@ CXMLNode* CXMLNode::GetParent()
 void CXMLNode::SetParent(CXMLNode *AParent)
 {
 	Parent = AParent;
+	UpdateDepth();
 }
 
 bool CXMLNode::HasAttribute(const string &AName) const
@@ -440,6 +441,14 @@ CXMLNode* CXMLNode::NextSimilarSibling() const
 	return NextSibling(GetValue());
 }
 
+void CXMLNode::UpdateDepth()
+{
+	if (Parent != NULL)
+		Depth = Parent->Depth + 1;
+	else
+		Depth = 0;
+}
+
 string CXMLNode::GetStartingSequence() const
 {
 	return "";
@@ -453,6 +462,11 @@ string CXMLNode::GetEndingSequence() const
 string CXMLNode::GetContent() const
 {
 	return GetValue();
+}
+
+string CXMLNode::GetTabulation() const
+{
+	return string(Depth, '\t');
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -607,6 +621,12 @@ void CXMLPrologNode::SetVersion(const string &AVersion)
 	SetAttribute("version", AVersion);
 }
 
+/*string CXMLPrologNode::GetText() const
+{
+	string result = GetTabulation();
+	
+}*/
+
 string CXMLPrologNode::GetStartingSequence() const
 {
 	return "<?";
@@ -654,6 +674,14 @@ void CXMLNormalNode::SetInnerText(const string &AText)
 	Children = parser.Parse();
 }
 
+void CXMLNormalNode::UpdateDepth()
+{
+	CXMLNode::UpdateDepth();
+
+	for (CXMLChildrenList::Iterator it = Children.Begin(); it != Children.End(); ++it)
+		(*it)->UpdateDepth(); 
+}
+
 string CXMLNormalNode::GetStartingSequence() const
 {
 	return "<";
@@ -675,7 +703,8 @@ string CXMLNormalNode::GetContent() const
 		result += ">\n";
 		for (CXMLChildrenList::ConstIterator it = Children.Begin(); it != Children.End(); ++it)
 			result += (*it)->GetText();
-		result += "</" + GetName();
+
+		result += GetTabulation() + "</" + GetName();
 	}
 
 	return result;
@@ -738,7 +767,7 @@ CXMLTextNode* CXMLTextNode::Copy()
 
 string CXMLTextNode::GetText() const
 {
-	return CXMLHelper::Instance()->EntitiesEncode(GetValue()) + "\n";
+	return GetTabulation() + CXMLHelper::Instance()->EntitiesEncode(GetValue()) + "\n";
 }
 
 //////////////////////////////////////////////////////////////////////////

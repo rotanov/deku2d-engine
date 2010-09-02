@@ -862,7 +862,7 @@ public:
 	{
 		T result;
 		stringstream ss;
-		ss << s;
+		ss.str(s);
 		ss >> result;
 		return result;
 	}
@@ -874,13 +874,18 @@ public:
 
 		long double result;
 		stringstream ss;
-		ss << s;
+		ss.str(s);
 		ss >> result;
 
 		if (ss.fail())
 			return true;
 
 		return ((int) result != 0);
+	}
+
+	static string from_string_impl(const string &s, identity<string>)
+	{
+		return s;
 	}
 };
 

@@ -141,15 +141,19 @@ public:
 	CXMLNode* PreviousSimilarSibling() const;
 	CXMLNode* NextSimilarSibling() const;
 
+	virtual void UpdateDepth();
+
 	CXMLChildrenList Children;
 
 protected:
 	virtual string GetStartingSequence() const;
 	virtual string GetEndingSequence() const;
 	virtual string GetContent() const;
+	string GetTabulation() const;
 
 	CXMLNode *Parent;
 	string Name;
+	unsigned int Depth;
 
 	map<string, string, CCaseInsensetiveComparison> Attributes;
 };
@@ -220,6 +224,8 @@ public:
 	string GetVersion() const;
 	void SetVersion(const string &AVersion);
 
+	//string GetText() const;
+
 protected:
 	string GetStartingSequence() const;
 	string GetEndingSequence() const;
@@ -243,6 +249,8 @@ public:
 	// TODO: add support for special "ID" attribute (see specs).. its values are unique for entire document.. add GetElementByID, that should return node by its ID
 
 	void SetInnerText(const string &AText);
+
+	void UpdateDepth();
 
 protected:
 	string GetStartingSequence() const;
