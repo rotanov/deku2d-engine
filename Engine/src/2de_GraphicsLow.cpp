@@ -41,7 +41,11 @@ CRenderObjectInfo::CRenderObjectInfo() : Position(V2_ZERO), Color(COLOR_WHITE), 
 
 void CRenderObjectInfo::SetAngle(float AAngle /*= 0.0f*/)
 {
-	Angle = Clamp(AAngle, 0.0f, 360.0f);
+	if (AAngle > 360.0f)
+		Angle = AAngle - (static_cast<int>(AAngle) / 360) * 360.0f; 
+	else
+		Angle = AAngle;
+	//Angle = Clamp(AAngle, 0.0f, 360.0f);
 }
 
 float CRenderObjectInfo::GetAngle() const
@@ -93,6 +97,7 @@ CRenderable::~CRenderable()
 	Scene->RemoveRenderable(this);
 }
 
+// Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--
 const CBox CRenderable::GetBox() const
 {
  	CBox TempBox = Box;
@@ -352,6 +357,12 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	setVSync(0);
+
+	glEnable			(GL_BLEND);
+	glBlendFunc			(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
+	//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	glEnable			(GL_ALPHA_TEST);
+	glAlphaFunc			(GL_GREATER, 0);
 }
 
 unsigned int CGLWindow::GetWidth() const
@@ -426,8 +437,16 @@ bool CFont::LoadFromFile()
 
 	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
 
+// 	int Vertices[4*256];
+// 	file.Read(Vertices, sizeof(Vertices));
+// 	for(int i = 0; i < 256; i++)
+// 	{
+// 		bbox[i].Min.x = Vertices[i * 4 + 0];
+// 		bbox[i].Min.y = Vertices[i * 4 + 2];
+// 		bbox[i].Max.x = Vertices[i * 4 + 1];
+// 		bbox[i].Max.y = Vertices[i * 4 + 3];
+// 	}	// Для конвертирования из старого формата.
 	file.Read(bbox, sizeof(bbox));
-
 
 	file.Close();
 	for (int i=0; i<256; i++)
@@ -789,50 +808,16 @@ void CRenderManager::DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2
 	LineVertices.PushVertex(RenderInfo, v1);
 }
 
-
-//-------------------------------------------//
-//				Common OpenGL stuff			 //
-//-------------------------------------------//
-
-void gBeginFrame()
+void CRenderManager::BeginFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void gEndFrame()
+void CRenderManager::EndFrame()
 {
 	glFinish();
 	SDL_GL_SwapBuffers();
 }
-
-void gSetBlendingMode(void)
-{
-	glEnable			(GL_BLEND);
-	glBlendFunc			(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
-	//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	glEnable			(GL_ALPHA_TEST);
-	glAlphaFunc			(GL_GREATER, 0);
-}
-
-void gToggleScissor(bool State)
-{
-	if (State)
-	{
-		glEnable(GL_SCISSOR_TEST);
-		//		Log("GLINFO", "Enabled Scissor test");
-	}
-	else
-	{
-		glDisable(GL_SCISSOR_TEST);
-		//		Log("GLINFO", "Disabled Scissor test");
-	}
-}
-
-void gScissor(int x, int y, int width, int height)
-{
-	glScissor(x, y, width, height);
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 // CFontManager
@@ -921,7 +906,7 @@ GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 	{
-		Log("ERROR", "CTextuere named %s. Trying to access TexID but it is 0", GetName().c_str());
+		Log("ERROR", "CTexture named %s. Trying to access TexID but it is 0", GetName().c_str());
 		if (!Loaded)
 		{
 			LoadFromFile();

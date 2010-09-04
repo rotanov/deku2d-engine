@@ -3,6 +3,11 @@
 #include "2de_Core.h"
 #include "2de_Engine.h"
 
+#ifdef _WIN32
+	
+#endif
+
+
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 

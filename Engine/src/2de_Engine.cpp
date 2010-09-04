@@ -87,8 +87,6 @@ bool CEngine::Initialize()
 
 	//ToggleKeyRepeat(true); // now can be dynamically switched on/off..
 
-	gToggleScissor(false);
-
 	// Default sections:
 	ResourceManager->AddSection<CFont>("Fonts");
 	ResourceManager->AddSection<CTexture>("Textures");
@@ -378,7 +376,7 @@ bool CEngine::Run(int argc, char *argv[])
 					CSceneManager::Instance()->Update(dt);
 					if (doCalcFPS)
 						CalcFPS();
-					gBeginFrame();
+					CRenderManager::Instance()->BeginFrame();
 					CRenderManager::Instance()->DrawObjects();
 					CSceneManager::Instance()->Render();
 					
@@ -413,8 +411,7 @@ bool CEngine::Run(int argc, char *argv[])
 
 				PRender.grCircleL(MousePos, 5);
 				glEnable(GL_DEPTH_TEST);
-				gSetBlendingMode();
-				gEndFrame();
+				CRenderManager::Instance()->EndFrame();	
 
 				/**/
 				// ZOMG There wasn't other choice, the next step is to put it all into separate thread.

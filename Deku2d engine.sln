@@ -53,6 +53,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ninja story", "Demos\Ninja 
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Benchmark", "Demos\Benchmark\Benchmark.vcproj", "{2333C986-733D-47A6-8825-8DF0A32E0D38}"
+	ProjectSection(ProjectDependencies) = postProject
+		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -103,6 +108,10 @@ Global
 		{F964DF4C-3A74-41B4-B281-EDB04636E5F8}.Debug|Win32.Build.0 = Debug|Win32
 		{F964DF4C-3A74-41B4-B281-EDB04636E5F8}.Release|Win32.ActiveCfg = Release|Win32
 		{F964DF4C-3A74-41B4-B281-EDB04636E5F8}.Release|Win32.Build.0 = Release|Win32
+		{2333C986-733D-47A6-8825-8DF0A32E0D38}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2333C986-733D-47A6-8825-8DF0A32E0D38}.Debug|Win32.Build.0 = Debug|Win32
+		{2333C986-733D-47A6-8825-8DF0A32E0D38}.Release|Win32.ActiveCfg = Release|Win32
+		{2333C986-733D-47A6-8825-8DF0A32E0D38}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

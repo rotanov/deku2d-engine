@@ -123,7 +123,7 @@ static int closedir (DIR *dirp);
 * Returns type of item according to enum
 */
 
-unsigned char
+static unsigned char
 getdirtype
 (
 	WIN32_FIND_DATAA fd)
@@ -139,10 +139,7 @@ getdirtype
 	default:
 		return DT_UNKNOWN;
 	}
-	
-
 }
-
 
 /*
  * Open directory stream DIRNAME for read and return a pointer to the

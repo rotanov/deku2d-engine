@@ -9,55 +9,6 @@ int CPrimitiveRender::glListCircleS = 0;
 int CPrimitiveRender::glListRingS = 0;
 int CPrimitiveRender::glListHalfCircle = 0;
 
-
-void CPrimitiveRender::grLine(const Vector2 &v0, const Vector2 &v1)
-{
-	BeforeRndr();
-	plClr->glSet();
-	glBegin(GL_LINES);
-	glVertex2fv(&(v0.x));
-	glVertex2fv(&(v1.x));
-	glEnd();
-	AfterRndr();
-}
-
-void CPrimitiveRender::grSegment(const Vector2 &v0, const Vector2 &v1)
-{
-	BeforeRndr();
-	plClr->glSet();
-	glBegin(GL_LINES);
-	glVertex2fv(&(v0.x));
-	glVertex2fv(&(v1.x));
-	glEnd();
-	if (ppClr)
-		ppClr->glSet();
-	glBegin(GL_POINTS);
-	glVertex2fv(&(v0.x));
-	glVertex2fv(&(v1.x));
-	glEnd();
-	AfterRndr();
-}
-
-void CPrimitiveRender::grSegmentC(const Vector2 &v0, const Vector2 &v1)
-{
-	BeforeRndr();
-	plClr->glSet();
-	glTranslatef(v0.x, v0.y, 0.0f);
-	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
-	glTranslatef(-v0.x, -v0.y, 0.0f);
-	glBegin(GL_LINES);
-	glVertex2fv(&(v0.x));
-	glVertex2fv(&(v1.x));
-	glEnd();
-	if (ppClr)
-		ppClr->glSet();
-	glBegin(GL_POINTS);
-	glVertex2fv(&(v0.x));
-	glVertex2fv(&(v1.x));
-	glEnd();
-	AfterRndr();
-}
-
 void CPrimitiveRender::grCircleL(const Vector2 &p, float Radius)
 {
 	if (!glIsList(glListCircleL))
@@ -86,7 +37,7 @@ void CPrimitiveRender::grCircleC(const Vector2 &p, float Radius)
 {
 	grCircleS(p, Radius);
 	grCircleL(p, Radius);
-	grSegmentC(p, p + Vector2(Radius, 0.0f));
+	//grSegmentC(p, p + Vector2(Radius, 0.0f));
 }
 
 void CPrimitiveRender::grRectL(const Vector2 &v0, const Vector2 &v1)
@@ -422,10 +373,10 @@ void CPrimitiveRender::gDrawBBox(CBox box)
 {
 	BeforeRndr();
 	float x0 = box.Min.x, x1 = box.Max.x, y0 = box.Min.y, y1 = box.Max.y;
-	grSegmentC(Vector2(x0, y0), Vector2(x1, y0));
-	grSegmentC(Vector2(x1, y0), Vector2(x1, y1));
-	grSegmentC(Vector2(x1, y1), Vector2(x0, y1));
-	grSegmentC(Vector2(x0, y1), Vector2(x0, y0));
+// 	grSegmentC(Vector2(x0, y0), Vector2(x1, y0));
+// 	grSegmentC(Vector2(x1, y0), Vector2(x1, y1));
+// 	grSegmentC(Vector2(x1, y1), Vector2(x0, y1));
+// 	grSegmentC(Vector2(x0, y1), Vector2(x0, y0));
 	AfterRndr();
 }
 

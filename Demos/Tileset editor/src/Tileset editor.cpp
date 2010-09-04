@@ -156,8 +156,6 @@ void CTilesetEditor::Render()
 	int fps = CEngine::Instance()->GetFPS();
 	glLoadIdentity();
 
-	gToggleScissor(true);
-	gScissor(INTERFACE_OFFSET_X, 0, WindowWidth - INTERFACE_OFFSET_X, WindowHeight);
 	glLoadIdentity();
 	Offset.x = (int)Offset.x;
 	Offset.y = (int)Offset.y;
@@ -256,7 +254,7 @@ void CTilesetEditor::Render()
 		glEnd();
 */
 	}
-	gToggleScissor(false);
+	//gToggleScissor(false);
 	glEnable(GL_DEPTH_TEST);
 }
 

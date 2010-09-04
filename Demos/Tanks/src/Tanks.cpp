@@ -237,7 +237,7 @@ void CTankManager::AddAI()
 void CTankManager::Render()
 {
 	glLoadIdentity();
-	gSetBlendingMode();
+//	gSetBlendingMode();	
 	CFont *Font = CFontManager::Instance()->GetFont("Font");
 	return;
 }
@@ -265,7 +265,7 @@ void CTankMap::Render()
 {
 	glLoadIdentity();
 	glScissor(0, 0, 640, 460);
-	gToggleScissor(true);
+//	gToggleScissor(true);
 	Tileset->GetTexture()->Bind();
 	glEnable(GL_TEXTURE_2D);
 	CellSize = DEFAULT_CELL_SIZE;
@@ -289,7 +289,7 @@ void CTankMap::Render()
 		}
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
-	gToggleScissor(false);
+//	gToggleScissor(false);
 	return;
 }
 

@@ -337,12 +337,17 @@ class CRenderManager : public CCommonManager <list <CRenderable*> >, public CTSi
 protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
+	friend class CEngine;
 private:
 	#define DEKU2D_MAX_TEXTURES 32
 	CVertexDataHolder TexturedQuadVertices[DEKU2D_MAX_TEXTURES];	// Временно. В вектор запихать, что ли.
 	CPrmitiveVertexDataHolder PointVertices;
 	CPrmitiveVertexDataHolder LineVertices;
 	CPrmitiveVertexDataHolder QuadVertices;
+
+	void SetBlendingMode();
+	void BeginFrame();
+	void EndFrame();
 public:
 	CCamera	Camera;
 	~CRenderManager();
@@ -354,15 +359,6 @@ public:
 	void DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point);
 	void DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1);
 };
-
-//////////////////////////////////////////////////////////////////////////
-// OpenGl interface
-
-void gSetBlendingMode();
-void gBeginFrame();
-void gEndFrame();
-void gToggleScissor(bool State);
-void gScissor(int x, int y, int width, int height);
 
 #if defined(_WIN32)
 	#define SWAP_INTERVAL_PROC PFNWGLSWAPINTERVALFARPROC 

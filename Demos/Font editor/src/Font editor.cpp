@@ -66,7 +66,8 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		switch (key)
 		{
 		case SDLK_g:
-			PreviousState = State;
+			if (State != ES_GRIP_TOOL)
+				PreviousState = State;
 			State = ES_GRIP_TOOL;
 			break;
 		case SDL_BUTTON_WHEELUP: case SDLK_EQUALS:
@@ -126,7 +127,9 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		switch (key)
 		{
 		case SDLK_g:
+			EEditorState TempState = State;
 			State = PreviousState;
+			PreviousState = State;
 			break;
 		}
 		break;

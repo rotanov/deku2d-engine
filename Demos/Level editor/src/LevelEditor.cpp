@@ -202,22 +202,22 @@ void DrawGrid()
 
 	for (int i = -2; i <= n+2; i ++)
 	{
-		p.grSegment(Vector2(i*Zoom, -2*Zoom), Vector2(i*Zoom, (m+2)*Zoom));
+//		p.grSegment(Vector2(i*Zoom, -2*Zoom), Vector2(i*Zoom, (m+2)*Zoom));
 	}
 	for (int i = -2; i <= m+2; i ++)
 	{
-		p.grSegment(Vector2(-2*Zoom, i*Zoom), Vector2((n+2)*Zoom, i*Zoom));
+//		p.grSegment(Vector2(-2*Zoom, i*Zoom), Vector2((n+2)*Zoom, i*Zoom));
 	}
 
 	p.lClr = RGBAf(0.4f, 0.1f, 0.8f, 0.6f);
 	p.lwidth = 3.0f;
 	for (int i = (int)CellOffset.x; i <= n+2; i+=GameHTiles)
 	{
-		p.grSegment(Vector2(i*Zoom, -2*Zoom), Vector2(i*Zoom, (m+2)*Zoom));
+//		p.grSegment(Vector2(i*Zoom, -2*Zoom), Vector2(i*Zoom, (m+2)*Zoom));
 	}
 	for (int i = (int)CellOffset.y; i <= m+2; i+=GameVTiles)
 	{
-		p.grSegment(Vector2(-2*Zoom, i*Zoom), Vector2((n+2)*Zoom, i*Zoom));
+//		p.grSegment(Vector2(-2*Zoom, i*Zoom), Vector2((n+2)*Zoom, i*Zoom));
 	}
 	
 
@@ -256,13 +256,13 @@ void CGlobalRenderObject::Render()
 	CellOffset.x = (int)Offset.x / (int)Zoom;
 	CellOffset.y = (int)Offset.y / (int)Zoom;
 
- 	gToggleScissor(true);
- 	gScissor(LeftPanel, 0.0f, ScrnWidth-LeftPanel, ScrnHeight);
+//  	gToggleScissor(true);
+//  	gScissor(LeftPanel, 0.0f, ScrnWidth-LeftPanel, ScrnHeight);
 	DrawGrid();
 	RenderTileList();
 
 
-	gToggleScissor(false);
+//	gToggleScissor(false);
 
 
 	
@@ -346,7 +346,7 @@ bool CCustomStateHandler::OnInitialize()
 	//Ninja->RenderManager.SortByAlpha();
 	//Ninja->RenderManager.SortByZ();
 	TileSet = CFactory::Instance()->Get<CTileset>("TileSet02-Snow01");
-	gSetBlendingMode();
+//	gSetBlendingMode();
 	CFontManager::Instance()->SetCurrentFont("Font");
 	CFontManager* fm = CFontManager::Instance();
 	f = fm->Font();

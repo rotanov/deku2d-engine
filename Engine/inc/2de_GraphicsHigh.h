@@ -58,9 +58,6 @@ public:
 	*	Обычно - вращение + линии + заливка + ещё что-то
 	*/
 
-	void grLine(const Vector2 &v0, const Vector2 &v1);
-	void grSegment(const Vector2 &v0, const Vector2 &v1);
-	void grSegmentC(const Vector2 &v0, const Vector2 &v1);
 
 	void grRectL(const Vector2 &v0, const Vector2 &v1);
 	void grRectS(const Vector2 &v0, const Vector2 &v1);
