@@ -4,6 +4,10 @@
 #include "2de_Core.h"
 #include "2de_Xml.h"
 
+/**
+* CConfigStorage - класс, представляющий собой некое абстрактное хранилище конфигурации. Используется как базовый класс для всех конкретных видов хранилищ.
+*/
+
 class CConfigStorage
 {
 public:
@@ -27,13 +31,20 @@ protected:
 
 };
 
-// TODO:
-/*class CConfigCommandLineStorage : public CConfigStorage
+/**
+* CConfigCommandLineStorage - класс, представляющий собой хранилище конфигурации, получемой преобразованием из аргументов командой строки.
+*/
+
+class CConfigCommandLineStorage : public CConfigStorage
 {
 public:
-	// constructor will take two args - vector/list/object with arguments and ARootNodeName
+	CConfigCommandLineStorage(const string &ARootNodeName);
 
-};*/
+};
+
+/**
+* CConfigFileStorage - класс, представляющий собой файловое хранилище конфигурации.
+*/
 
 class CConfigFileStorage : public CConfigStorage
 {
@@ -51,12 +62,20 @@ private:
 
 };
 
+/**
+* CConfigDefaultsStorage - класс, представляющий собой хранилище конфигурации по-умолчанию. Необходимо наследоваться от него для создания умолчальных значений для конкретной конфигурации.
+*/
+
 class CConfigDefaultsStorage : public CConfigStorage
 {
 public:
 	CConfigDefaultsStorage(const string &ARootNodeName);
 
 };
+
+/**
+* CMainConfigDefaultsStorage - класс, представляющий собой хранилище конфигурации по-умолчанию для главной конфигурации движка.
+*/
 
 class CMainConfigDefaults : public CConfigDefaultsStorage
 {
@@ -67,6 +86,10 @@ public:
 
 // ON_DEMAND_TODO:
 // class CAbstractConfig to make configs apart of main config.. should just describe interface..
+
+/**
+* CConfig - класс, представляющий собой главную конфигурацию движка.
+*/
 
 class CConfig : public CTSingleton<CConfig>
 {
@@ -133,84 +156,111 @@ private:
 
 	bool Initialized;
 	CConfigFileStorage *FileConfig;
-	//CConfigCommandLineStorage *CommandLineConfig;
+	CConfigCommandLineStorage *CommandLineConfig;
 	CMainConfigDefaults Defaults;
 
 
 	friend class CTSingleton<CConfig>;
 };
 
+enum ECommandLineArgumentType
+{
+	COMMAND_LINE_ARGUMENT_TYPE_SHORT_OPTION,
+	COMMAND_LINE_ARGUMENT_TYPE_LONG_OPTION,
+	COMMAND_LINE_ARGUMENT_TYPE_OPTION_VALUE,
+	COMMAND_LINE_ARGUMENT_TYPE_PLAIN,
+};
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
-* Command line parser classes - not done yet - commented out.
+* CCommandLineArgument - структура, представляющая собой отдельный аргумент как лексему.
 */
 
-/*class CCommandLineArgument
+struct CCommandLineArgument
 {
-public:
-	enum ECommandLineArgumentType
-	{
-		COMMAND_LINE_ARGUMENT_TYPE_INVALID,
-		COMMAND_LINE_ARGUMENT_TYPE_FLAG,
-		COMMAND_LINE_ARGUMENT_TYPE_PARAMETER,
-	};
-
-	CCommandLineArgument(ECommandLineArgumentType AType, const string &ALongName, char AShortName);
-
-	bool IsValid();
+	CCommandLineArgument(ECommandLineArgumentType AType, const string &AContent);
 
 	ECommandLineArgumentType Type;
-
-	string LongName;
-	char ShortName;
+	string Content;
 };
 
-class CCommandLineArgumentValue
-{
-public:
-	CCommandLineArgumentValue();
-	CCommandLineArgumentValue(bool AFlag);
-	CCommandLineArgumentValue(const string &AValue);
-
-	union
-	{
-		bool Flag;
-		string Value;
-
-	};
-};
+/**
+* CCommandLineArgumentsManager - менеджер аргументов коммандной строки. Разбивает аргументы на лексемы и предоставляет к ним доступ.
+*/
 
 class CCommandLineArgumentsManager : public CTSingleton<CCommandLineArgumentsManager>
 {
 public:
-	void Add(const CCommandLineArgument &AArgument);
+	typedef list<CCommandLineArgument> ArgumentsStorage;
 
-	CCommandLineArgument GetByName(char AShortName);
-	CCommandLineArgument GetByName(const string &ALongName);
+	bool Initialize(int argc, char *argv[]);
 
-protected:
-	friend class CTSingleton<CCommandLineArgumentsManager>;
-	CCommandLineArgumentsManager() { }
+	string GetPlain(int Index);
+
+	string GetOption(const string &LongName);
+	string GetOption(char ShortName);
+	string GetOption(const string &LongName, char ShortName);
+
+	bool GetFlag(const string &LongName);
+	bool GetFlag(char ShortName);
+	bool GetFlag(const string &LongName, char ShortName);
+
+	bool IsOptionExists(const string &LongName);
+	bool IsOptionExists(char ShortName);
+	bool IsOptionExists(const string &LongName, char ShortName);
+
+	bool RegisterOption(const string &LongName);
+	bool RegisterOption(char ShortName);
+	bool RegisterOption(const string &LongName, char ShortName);
+
+	string GetError() const;
+	bool GetErrorState() const;
 
 private:
-	list<CCommandLineArgument> ArgumentsPrototypes;
+	CCommandLineArgumentsManager();
 
+	bool Lex(int argc, char *argv[]);
+
+	void SetErrorState(const string &AError);
+
+	ArgumentsStorage Arguments;
+	string Error;
+	bool ErrorState;
+
+	friend class CTSingleton<CCommandLineArgumentsManager>;
 };
 
-class CCommandLineArguments
+struct CArgumentsConfigMapping
+{
+	CArgumentsConfigMapping(const string &AArgumentLongName, char AArgumentShortName, const string &ASection, const string &AParameter);
+
+	string ArgumentLongName;
+	char ArgumentShortName;
+
+	string Section;
+	string Parameter;
+};
+
+/**
+* CArgumentsConfigMappingsManager - менеджер отображений из аргументов командной строки в конфигурационные парамеры.
+*/
+
+class CArgumentsConfigMappingsManager : public CTSingleton<CArgumentsConfigMappingsManager>
 {
 public:
-	CCommandLineArguments(int argc, char *argv[]);
+	typedef list<CArgumentsConfigMapping> MappingsStorage;
+	typedef MappingsStorage::iterator MappingsIterator;
 
-	void Parse();
+	void Add(CArgumentsConfigMapping AMapping);
 
-	CVariant Get(char AShortName);
-	CVariant Get(const string &ALongName);
+	MappingsIterator Begin();
+	MappingsIterator End();
 
 private:
-	vector<string> Argv;
-	map<CCommandLineArgument, CCommandLineArgumentValue> Arguments;
-};*/
+	CArgumentsConfigMappingsManager();
+
+	MappingsStorage Mappings;
+
+	friend class CTSingleton<CArgumentsConfigMappingsManager>;
+};
 
 #endif // _2DE_CONFIG_H_

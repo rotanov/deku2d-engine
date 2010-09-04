@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 {
 	Engine->SetProgramName("Demo template");
 	Engine->SetStateHandler<CCustomStateHandler>();
-	Engine->Run();
+	Engine->Run(argc, argv);
 	return 0;
 }
 

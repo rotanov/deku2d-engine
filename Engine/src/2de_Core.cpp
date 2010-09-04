@@ -51,14 +51,20 @@ const string& CObject::GetName() const
 	return Name;
 }
 
+void CObject::SetName(const string &AObjectName)
+{
+	if (Managed)
+	{
+		Log("ERROR", "Name of managed objects can only be changed by calling CFactory::Rename");
+		return;
+	}
+
+	Name = AObjectName;
+}
+
 size_t CObject::GetID() const
 {
 	return ID;
-}
-
-void CObject::SetName(const string &AObjectName)
-{
-	Name = AObjectName;
 }
 
 /**
@@ -983,20 +989,21 @@ CFactory::~CFactory()
 }
 
 /**
-* CFactory::Add - берёт управление памятью объекта на себя. У объекта обязательно должно быть уникальное имя, но допускается его задание в другом месте.
+* CFactory::Rename - переименовывает управляемый объект.
 */
 
-void CFactory::Add(CObject *AObject, const string &AName /*= ""*/)
+void CFactory::Rename(const string &AName, const string &ANewName)
 {
-	// we generally allow passing empty name, when it set somewhere else
-	if (!AName.empty())
+	if (Objects.count(AName) == 0)
 	{
-		AObject->SetName(AName);
+		Log("WARNING", "Factory isn't managing object named '%s'", AName.c_str());
+		return;
 	}
 
-	Objects.push_back(AObject); // not only this
-	//AObject->IncRefCount();
-	AObject->Managed = true;
+	CObject *Object = Objects[AName];
+	Objects.erase(AName);
+	Object->SetName(ANewName);
+	Objects[ANewName] = Object;
 }
 
 /**
@@ -1005,7 +1012,13 @@ void CFactory::Add(CObject *AObject, const string &AName /*= ""*/)
 
 void CFactory::Destroy(CObject *AObject)
 {
-	list<CObject*>::iterator i = find(Objects.begin(), Objects.end(), AObject);
+	map<string, CObject*>::iterator i;
+	
+	for (i = Objects.begin(); i != Objects.end(); ++i)
+	{
+		if (i->second == AObject)
+			break;
+	}
 
 	if (i == Objects.end())
 	{
@@ -1045,8 +1058,8 @@ void CFactory::CleanUp()
 // well, maybe there is better way to do final all-destroy clean-up..
 void CFactory::DestroyAll()
 {
-	for (list<CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
-		Deletion.push(*i);
+	for (map<string, CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+		Deletion.push(i->second);
 
 	Objects.clear();
 	CleanUp();

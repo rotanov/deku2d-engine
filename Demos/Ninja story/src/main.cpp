@@ -25,6 +25,6 @@ int main(int argc, char *argv[])
 {
 	Ninja->SetProgramName("Ninja story");
 	Ninja->SetStateHandler<CCustomStateHandler>();
-	Ninja->Run();
+	Ninja->Run(argc, argv);
 	return EXIT_SUCCESS;
 }

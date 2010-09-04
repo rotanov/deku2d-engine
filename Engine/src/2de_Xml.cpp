@@ -621,12 +621,6 @@ void CXMLPrologNode::SetVersion(const string &AVersion)
 	SetAttribute("version", AVersion);
 }
 
-/*string CXMLPrologNode::GetText() const
-{
-	string result = GetTabulation();
-	
-}*/
-
 string CXMLPrologNode::GetStartingSequence() const
 {
 	return "<?";

@@ -168,6 +168,32 @@ void CEngine::Finalize()
 	StateHandler->OnFinalize();
 }
 
+bool CEngine::ProcessArguments(int argc, char *argv[])
+{
+	// return false if you want to stop engine
+
+	CCommandLineArgumentsManager *ArgMan = CCommandLineArgumentsManager::Instance();
+
+	if (!ArgMan->Initialize(argc, argv))
+		return false;
+
+	CArgumentsConfigMappingsManager *ArgConfigMap = CArgumentsConfigMappingsManager::Instance();
+
+	for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
+	{
+		if (!ArgMan->RegisterOption(it->ArgumentLongName, it->ArgumentShortName))
+			return false;
+	}
+
+	if (ArgMan->GetFlag("version", 'v'))
+	{
+		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2010  Deku Team" << endl << endl;
+		return false;
+	}
+
+	return true;
+}
+
 void CEngine::CalcFPS()
 {
 	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
@@ -319,9 +345,17 @@ bool CEngine::ProcessEvents()
 	return true;
 }
 
-bool CEngine::Run()
+bool CEngine::Run(int argc, char *argv[])
 {
 	StateHandler->OnBeforeInitialize();
+
+	if (!ProcessArguments(argc, argv))
+	{
+		if (CCommandLineArgumentsManager::Instance()->GetErrorState())
+			cout << CCommandLineArgumentsManager::Instance()->GetError() << endl << endl;	// maybe incapsulate in something like CEnvironment::Console::Print..
+
+		return false;
+	}
 
 	if (!(Initialized = Initialize()))
 	{

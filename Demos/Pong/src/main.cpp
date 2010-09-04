@@ -42,6 +42,6 @@ int main(int argc, char* argv[])
 	CEngine *Ninja = CEngine::Instance();
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->SetProgramName("Pong");
-	Ninja->Run();
+	Ninja->Run(argc, argv);
 	return 0;
 }

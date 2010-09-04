@@ -258,7 +258,7 @@ void CPacmanGame::Update(float dt)
 CPacmanEnemy::CPacmanEnemy(Vector2 APosition) : Position(APosition), Player(NULL),
 Direction(static_cast<EDirection>(rand()%4))
 {
-	Sprite = CFactory::Instance()->New<CSprite>("PacmanEnemy sprite");
+	Sprite = CFactory::Instance()->New<CSprite>("PacmanEnemy sprite " + itos(GetID()));
 	SetName("Pacman enemy");
 	Sprite->SetLayer(1);
 	Sprite->SetTexture("PacmanEnemy");

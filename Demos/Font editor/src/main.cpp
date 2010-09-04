@@ -19,6 +19,6 @@ int main(int argc, char *argv[])
 	CEngine	*Ninja = CEngine::Instance();
 	Ninja->SetProgramName("Font editor");
 	Ninja->SetStateHandler<CCustomStateHandler>();
-	Ninja->Run();
+	Ninja->Run(argc, argv);
 	return 0;
 }

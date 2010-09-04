@@ -224,8 +224,6 @@ public:
 	string GetVersion() const;
 	void SetVersion(const string &AVersion);
 
-	//string GetText() const;
-
 protected:
 	string GetStartingSequence() const;
 	string GetEndingSequence() const;

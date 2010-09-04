@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 {
 	Engine->SetStateHandler<CCustomStateHandler>();
 	Engine->SetProgramName("SoundCheck");
-	Engine->Run();
+	Engine->Run(argc, argv);
 
 	return 0;
 }

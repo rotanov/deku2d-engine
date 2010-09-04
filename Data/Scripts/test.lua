@@ -5,6 +5,6 @@ SetText(mytext, "This text is created by Lua script")
 SetPosition(mytext, 150, 250)
 
 
-mytext = CreateNewText("mytext")
+mytext = CreateNewText("mytext2")
 SetText(mytext, "Other text")
 SetPosition(mytext, 150, 230)

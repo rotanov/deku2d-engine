@@ -37,7 +37,7 @@ class CEngine
 public:
 	static CEngine* Instance();
 
-	bool Run();
+	bool Run(int argc, char *argv[]);
 	void Pause();
 	void ShutDown();
 
@@ -77,6 +77,7 @@ private:
 	bool Initialize();
 	void Finalize();
 	bool ProcessEvents();
+	bool ProcessArguments(int argc, char *argv[]);
 	
 	// possibly incapsulate into something.. too many things in this class are dedicated to fps...
 	void CalcFPS();

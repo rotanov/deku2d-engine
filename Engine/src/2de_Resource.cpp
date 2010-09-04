@@ -159,7 +159,7 @@ CResourceManager::~CResourceManager()
 
 bool CResourceManager::LoadResources()
 {
-	ResourceList = DataLister.List(DataPath);
+	ResourceList = DataLister.List(DataPath, CCommandLineArgumentsManager::Instance()->GetFlag("clear-resources-cache"));
 
 	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 	{

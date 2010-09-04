@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 {
 	Ninja->SetProgramName("Tanks");
 	Ninja->SetStateHandler<CCustomStateHandler>();
-	Ninja->Run();
+	Ninja->Run(argc, argv);
 	return 0;
 }
 

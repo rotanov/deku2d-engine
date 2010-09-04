@@ -38,6 +38,6 @@ int main(int argc, char *argv[])
 	CEngine	*Ninja = CEngine::Instance();
 	Ninja->SetProgramName("Pac man");
 	Ninja->SetStateHandler<CCustomStateHandler>();
-	Ninja->Run();
+	Ninja->Run(argc, argv);
 	return 0;
 }
