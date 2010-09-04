@@ -2,7 +2,7 @@ SOURCES		=	src/main.cpp
 
 HEADERS		=	
 
-TARGET		=	bin/Demo\ template
+TARGET		=	bin/Benchmark
 ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
 
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)

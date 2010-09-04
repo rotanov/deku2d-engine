@@ -483,12 +483,12 @@ void CArgumentsConfigMappingsManager::Add(CArgumentsConfigMapping AMapping)
 	Mappings.push_back(AMapping);
 }
 
-MappingsIterator CArgumentsConfigMappingsManager::Begin()
+CArgumentsConfigMappingsManager::MappingsIterator CArgumentsConfigMappingsManager::Begin()
 {
 	return Mappings.begin();
 }
 
-MappingsIterator CArgumentsConfigMappingsManager::End()
+CArgumentsConfigMappingsManager::MappingsIterator CArgumentsConfigMappingsManager::End()
 {
 	return Mappings.end();
 }

@@ -53,7 +53,7 @@ public:
 	{
 		if (CEngine::Instance()->keys[SDLK_UP])
 		{
-			new CRotatingQuad();
+			CFactory::Instance()->New<CRotatingQuad>("");
 			CounterText.SetText("Rectangles count: " + itos(++RectangleCount));
 		}
 	}
@@ -84,7 +84,7 @@ bool CCustomStateHandler::OnInitialize()
 {
 	// do something..
 	// i put it here just to show how it works and as placeholder for user's code..
-	new CRectangleTest;
+	CFactory::Instance()->New<CRectangleTest>("Rectangle test");
 	return true;
 }
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 {
 	Engine->SetProgramName("Benchmark");
 	Engine->SetStateHandler<CCustomStateHandler>();
-	Engine->Run();
+	Engine->Run(argc, argv);
 	return 0;
 }
 
