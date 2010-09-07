@@ -74,7 +74,7 @@ public:
 };
 
 /**
-* CMainConfigDefaultsStorage - класс, представляющий собой хранилище конфигурации по-умолчанию для главной конфигурации движка.
+* CMainConfigDefaults - класс, представляющий собой хранилище конфигурации по-умолчанию для главной конфигурации движка.
 */
 
 class CMainConfigDefaults : public CConfigDefaultsStorage
@@ -103,6 +103,7 @@ public:
 		CConfigParameter& operator=(const T &ASource)
 		{
 			Config->Set(Section, Name, to_string(ASource));
+			return *this;
 		}
 
 		template<typename T>

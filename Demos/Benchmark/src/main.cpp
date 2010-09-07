@@ -45,7 +45,17 @@ public:
 	CRectangleTest()
 	{
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
-		CounterText.SetText("Rectangles count: " + itos(0));
+		if (CCommandLineArgumentsManager::Instance()->IsOptionExists("rectangles"))
+		{
+			RectangleCount = stoi(CCommandLineArgumentsManager::Instance()->GetOption("rectangles"));
+			for (int i = 0; i < RectangleCount; i++)
+				CFactory::Instance()->New<CRotatingQuad>("");
+		}
+		else
+		{
+			RectangleCount = 0;
+		}
+		CounterText.SetText("Rectangles count: " + itos(RectangleCount));
 		CounterText.SetLayer(1);
 		CounterText.Position = Vector2(0.0f, 15.0f);
 	}
@@ -78,7 +88,16 @@ class CCustomStateHandler : public CAbstractStateHandler
 {
 public:
 	bool OnInitialize();
+	bool OnArgumentsProcessing();
 };
+
+bool CCustomStateHandler::OnArgumentsProcessing()
+{
+	if (!CCommandLineArgumentsManager::Instance()->RegisterOption("rectangles"))
+		return false;
+
+	return true;
+}
 
 bool CCustomStateHandler::OnInitialize()
 {

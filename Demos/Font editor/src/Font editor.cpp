@@ -371,10 +371,15 @@ bool LoadFont(CObject *Caller)
 	FontEditor->Font = CFontManager::Instance()->GetFont(FontEditor->edFontname->GetText());
 	if (FontEditor->Font == NULL)
 	{
-		Log("Error", "Font %s not found within data/fonts", FontEditor->edFontname->GetText().c_str());
+		Log("ERROR", "Font %s not found within data/fonts", FontEditor->edFontname->GetText().c_str());
 		return false;
 	}
 	FontEditor->FontTexture = FontEditor->Font->GetTexture();
+	if (FontEditor->FontTexture == NULL)
+	{
+		Log("ERROR", "Failed to load texture of font '%s'", FontEditor->edFontname->GetText().c_str());
+		return false;
+	}
 	FontEditor->lblSampleText->SetFont(FontEditor->Font);
 // 	for (int i = 0; i < 256; i++)
 // 	{
@@ -414,7 +419,7 @@ bool SaveFont(CObject *Caller)
 		return false;
 	FontEditor->Font->SetName(FontEditor->edFontname->GetText());
 	FontEditor->Font->SetTexture(FontEditor->FontTexture->GetName());
-	FontEditor->Font->SaveToFile();
+	FontEditor->Font->SaveToFile(FontEditor->Font->GetFilename());
 	return true;
 }
 

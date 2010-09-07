@@ -37,9 +37,7 @@ namespace LuaAPI
 	int CreateNewText(lua_State *L)
 	{
 		::CText *text = ::CFactory::Instance()->New< ::CText>(lua_tostring(L, -1));
-
 		lua_pushlightuserdata(L, text);
-
 		return 1;
 	}
 
@@ -53,6 +51,35 @@ namespace LuaAPI
 			text->SetText(lua_tostring(L, -1));
 
 		return 0;
+	}
+
+	// void SetTextFont(userdata TextObject, userdata FontObject)
+	int SetTextFont(lua_State *L)
+	{
+		::CText *text = static_cast< ::CText *>(lua_touserdata(L, -2));
+		if (!text)
+		{
+			::Log("LUAERROR", "Incorrect usage of light user data in SetTextFont API call");
+			return 0;
+		}
+	
+		::CFont *font = static_cast< ::CFont *>(lua_touserdata(L, -1));
+		if (!font)
+		{
+			::Log("LUAERROR", "Incorrect usage of light user data in SetTextFont API call");
+			return 0;
+		}
+
+		text->SetFont(font);
+		return 0;
+	}
+
+	// userdata GetFont(string Name)
+	int GetFont(lua_State *L)
+	{
+		::CFont *font = ::CFactory::Instance()->Get<CFont>(lua_tostring(L, -1));
+		lua_pushlightuserdata(L, font);
+		return 1;
 	}
 
 	// void SetPosition(userdata RenderableObject, number X, number Y)
@@ -128,6 +155,8 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "IsSpacePressed", &LuaAPI::IsSpacePressed);
 	lua_register(State, "CreateNewText", &LuaAPI::CreateNewText);
 	lua_register(State, "SetText", &LuaAPI::SetText);
+	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
+	lua_register(State, "GetFont", &LuaAPI::GetFont);
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
 }
 

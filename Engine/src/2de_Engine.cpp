@@ -152,6 +152,7 @@ bool CEngine::Initialize()
 
 void CEngine::Finalize()
 {
+	CResourceRefCounterState::DisableRC();
 	CFactory::Instance()->DestroyAll();
 	CSingletonManager::Instance()->Clear();
 	CSingletonManager::Finalize();
@@ -175,6 +176,12 @@ bool CEngine::ProcessArguments(int argc, char *argv[])
 	if (!ArgMan->Initialize(argc, argv))
 		return false;
 
+	if (ArgMan->GetFlag("version", 'v'))
+	{
+		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2010  Deku Team" << endl << endl;
+		return false;
+	}
+
 	CArgumentsConfigMappingsManager *ArgConfigMap = CArgumentsConfigMappingsManager::Instance();
 
 	for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
@@ -183,11 +190,8 @@ bool CEngine::ProcessArguments(int argc, char *argv[])
 			return false;
 	}
 
-	if (ArgMan->GetFlag("version", 'v'))
-	{
-		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2010  Deku Team" << endl << endl;
+	if (!StateHandler->OnArgumentsProcessing())
 		return false;
-	}
 
 	return true;
 }
@@ -369,6 +373,7 @@ bool CEngine::Run(int argc, char *argv[])
 			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом 
 								//	заниматься отдельно и вплотную.
 			{
+				CResourceManager::Instance()->PerformUnload();
 				CFactory::Instance()->CleanUp();
 				if (LimitFPS())
 				{		

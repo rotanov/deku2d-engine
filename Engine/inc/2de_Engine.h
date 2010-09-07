@@ -30,6 +30,8 @@ public:
 
 	virtual void OnFocusGain() { }
 	virtual void OnFocusLost() { }
+
+	virtual bool OnArgumentsProcessing() { return true; }
 };
 
 class CEngine

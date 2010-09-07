@@ -610,8 +610,9 @@ bool CSprite::SetTexture(const string &TextureName)
 	Texture = CFactory::Instance()->Get<CTexture>(TextureName);
 	return true;
 }
+
 //////////////////////////////////////////////////////////////////////////
-//CPartcleSystem
+// CPartcleSystem
 
 void CParticleSystem::_swap(int i, int j)
 {

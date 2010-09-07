@@ -347,9 +347,9 @@ bool CCustomStateHandler::OnInitialize()
 	//Ninja->RenderManager.SortByZ();
 	TileSet = CFactory::Instance()->Get<CTileset>("TileSet02-Snow01");
 //	gSetBlendingMode();
-	CFontManager::Instance()->SetCurrentFont("Font");
-	CFontManager* fm = CFontManager::Instance();
-	f = fm->Font();
+	//CFontManager::Instance()->SetCurrentFont("Font");
+	//CFontManager* fm = CFontManager::Instance();
+	//f = fm->Font();
 	Ninja->AddEventFunction(ProcessInput);
 	//Level.numCellsHor = 20;
 	//Level.numCellsVer = 10;

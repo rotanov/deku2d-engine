@@ -6,12 +6,13 @@
 // CObject
 
 unsigned int CObject::CObjectCount = 0;
-CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0)
+
+CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)) /*, RefCount(0) */
 {
 
 }
 
-CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)), RefCount(0)
+CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)) /*, RefCount(0) */
 {
 }
 
@@ -23,7 +24,9 @@ CObject& CObject::operator=(const CObject &AObject)
 	Destroyed = AObject.Destroyed;
 	ID = ++CObjectCount;
 	Name = AObject.GetName() + " copy";
-	RefCount = 0;
+	/* RefCount = 0; */
+
+	return *this;
 }
 
 CObject::~CObject()
@@ -132,58 +135,6 @@ void CSingletonManager::Finalize()
 {
 	delete _instance;
 	_instance = NULL;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CBaseResource
-
-bool CBaseResource::LoadFromFile()
-{
-	return false;
-}
-
-bool CBaseResource::SaveToFile()
-{
-	return false;
-}
-
-bool CBaseResource::CheckLoad()
-{
-	return Loaded = !Loaded ? LoadFromFile() : true;
-}
-
-CBaseResource::CBaseResource() : Loaded(false), Filename("")
-{
-}
-
-const string& CBaseResource::GetFilename() const
-{
-	return Filename;
-}
-
-void CBaseResource::SetFilename(const string &AFilename)
-{
-	Filename = AFilename; // may be some check here
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CResource
-
-CResource::CResource()
-{
-	SetName("CResource");
-}
-
-void CResource::SetName(const string &AObjectName)
-{
-	// эээ, неее.. имя ресурса и имя его файла - две большие разницы..
-	CObject::SetName(AObjectName);
-	int t0 = Filename.length() - 1;
-	while (t0 > 0 && Filename[t0] != '/' && Filename[t0] != '\\')
-		t0--;
-	t0++;
-	Filename.insert(t0, AObjectName);
-	Filename.erase(t0 + AObjectName.length(), Filename.length() - t0 - AObjectName.length() - 4);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -989,7 +940,7 @@ CFactory::~CFactory()
 }
 
 /**
-* CFactory::Rename - переименовывает управляемый объект.
+* CFactory::Rename - renames managed object.
 */
 
 void CFactory::Rename(const string &AName, const string &ANewName)
@@ -1007,7 +958,7 @@ void CFactory::Rename(const string &AName, const string &ANewName)
 }
 
 /**
-* CFactory::Destroy - ставит объект в очередь на уничтожение и удаляет его из списка управляемых объектов (при этом не снимая флаг управляемости).
+* CFactory::Destroy - adds object to deletion queue and deletes it from the list of managed objects (not removing Managed flag).
 */
 
 void CFactory::Destroy(CObject *AObject)
@@ -1035,7 +986,7 @@ void CFactory::Destroy(CObject *AObject)
 }
 
 /**
-* CFactory::CleanUp - очищает очередь уничтожения объектов, освобождая память каждого объекта.
+* CFactory::CleanUp - clears objects destroying queue, freeing each object's memory.
 */
 
 void CFactory::CleanUp()

@@ -70,7 +70,8 @@ class CHelpText
 public:
 	CHelpText()
 	{
-		CFontManager::Instance()->SetCurrentFont("hge");
+		//CFontManager::Instance()->SetCurrentFont("hge");
+		//CGUIManager::Instance()->GetRoot()->GetStyle()->Font = CFactory::Instance()->Get<CFont>("hge");
 
 		int ScreenHeight = CGLWindow::Instance()->GetHeight();
 
@@ -104,8 +105,8 @@ bool PlayFile(CObject *Caller)
 	CMusic *mus = CFactory::Instance()->New<CMusic>("mus"); // WRONG, i think
 								// i mean we should specify just name of music file, that already
 								// lies int the music folder
-	mus->SetFilename(test);
-	mus->LoadFromFile();
+	mus->SetLoadSource(test);
+	mus->Load();
 	CSoundMixer::Instance()->PlayMusic(mus);
 	return true;
 }

@@ -130,7 +130,7 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_FOOD 0xdeadf00d
 
 /**
-* Класс CObject - базовый класс для многих классов.
+* CObject - base class for many classes.
 */
 
 class CObject
@@ -162,7 +162,7 @@ private:
 	bool Destroyed;
 	int ID;
 	string Name;
-	size_t RefCount;
+	//size_t RefCount;
 
 	static unsigned int CObjectCount;
 
@@ -463,32 +463,6 @@ template <typename T>
 set<const type_info *> CTSingleton<T>::UnderConstruction;
 #endif // _DEBUG
 
-class CBaseResource
-{
-public:
-	CBaseResource();	// const string &AFilename?	
-	virtual ~CBaseResource(){};
-	virtual bool LoadFromFile();
-	virtual bool SaveToFile();
-	bool CheckLoad();
-	void SetFilename(const string &AFilename);
-	const string& GetFilename() const;
-
-protected:	
-	bool Loaded;		// Loaded должна быть истина если экземпляр объекта						
-	// был РЕАЛЬНО загружен, а не просто проиндексирован.	
-	string Filename;	// Полный^W хоть-какой-нибудь путь к файлу.
-};
-
-class CResource : public CBaseResource, virtual public CObject
-{
-public:
-	void SetName(const string &AObjectName);	// Мы ведь хотим обновлять имя файла, оставляя
-	// полный путь к нему, при обновлении имени объекта.	
-	CResource();
-	virtual ~CResource(){};
-};
-
 /**
 * CFile - класс, представляющий собой интерфейс к чтению и записи файлов.
 *
@@ -736,13 +710,12 @@ protected:
 };
 
 /**
-* CFactory::New - создаёт объект заданного класса, берёт управление его памятью на себя и возвращает указатель на созданный объект.
+* CFactory::New - creates managed object of specified class and returns pointer to it.
 */
 
 template<typename T>
 T* CFactory::New(const string &AName)
 {
-	// Поддерживаем уникальность имени здесь, наверное, да.
 	if (Objects.count(AName) != 0)
 	{
 		Log("ERROR", "Object with name '%s' already exists", AName.c_str());
@@ -757,7 +730,7 @@ T* CFactory::New(const string &AName)
 }
 
 /**
-* CFactory::Add - берёт управление памятью объекта на себя. У объекта обязательно должно быть уникальное имя, поэтому оно будет сгенерировано автоматически, если не задано.
+* CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified.
 */
 
 template<typename T>
@@ -790,8 +763,8 @@ void CFactory::Add(T *AObject, const string &AName /*= ""*/)
 }
 
 /**
-* CFactory::Get - возвращает указатель на объект по его уникальному имени.
-* Ругается в лог и возвращает NULL в случае неудачи.
+* CFactory::Get - returns pointer to object by its unique name.
+* Swears in log and returns NULL in case of failure.
 */
 
 template<typename T>
@@ -813,8 +786,8 @@ T* CFactory::Get(const string &AName)
 }
 
 /**
-* CFactory::Remove - прекращают управление памятью объекта и возвращает указатель на объект на растерзание программисту.
-* Ругается в лог и возвращает NULL в случае неудачи.
+* CFactory::Remove - removes object from the list of managed objects and returns pointer to it.
+* Swears in log and returns NULL in case of failure.
 */
 
 template<typename T>

@@ -416,84 +416,118 @@ CFont::CFont() : Distance(1.0f)// Нет! Грузить её из файла!!!
 
 CFont::~CFont()
 {
+	Unload();
 	CFontManager::Instance()->Remove(this);
 }
 
-bool CFont::LoadFromFile()
+bool CFont::Load()
 {
-	if (Filename == "")
-		return false;
-	CFile file;
-	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
+	if (Loaded)
+		return true;
+
+	if (Source == LOAD_SOURCE_FILE)
 	{
-		Log("ERROR", "Can't Load Font '%s': file couldn't be opened", GetName().c_str());
-		return false;
+		if (Filename == "")
+			return false;
+
+		CFile file;
+		if (!file.Open(Filename, CFile::OPEN_MODE_READ))
+		{
+			Log("ERROR", "Can't Load Font '%s': file couldn't be opened", GetName().c_str());
+			return false;
+		}
+
+		string FontImageName;
+		file.ReadString(FontImageName);
+
+		CTextureManager *TexMan = CTextureManager::Instance();
+		Texture = TexMan->Get(FontImageName);
+
+		if (Texture == NULL)
+			return false;
+
+		Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
+
+		// 	int Vertices[4*256];
+		// 	file.Read(Vertices, sizeof(Vertices));
+		// 	for(int i = 0; i < 256; i++)
+		// 	{
+		// 		bbox[i].Min.x = Vertices[i * 4 + 0];
+		// 		bbox[i].Min.y = Vertices[i * 4 + 2];
+		// 		bbox[i].Max.x = Vertices[i * 4 + 1];
+		// 		bbox[i].Max.y = Vertices[i * 4 + 3];
+		// 	}	// Для конвертирования из старого формата.
+		file.Read(bbox, sizeof(bbox));
+
+		file.Close();
+		for (int i=0; i<256; i++)
+		{
+			if (bbox[i].Min.x > bbox[i].Max.x)
+				swap(bbox[i].Min.x, bbox[i].Max.x);
+			if (bbox[i].Min.y > bbox[i].Max.y)
+				swap(bbox[i].Min.y, bbox[i].Max.y);
+			Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
+			Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
+		}
 	}
-	string FontImageName;
-	file.ReadString(FontImageName);
-
-	CTextureManager *TexMan = CTextureManager::Instance();
-	Texture = TexMan->Get(FontImageName);
-
-	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
-
-// 	int Vertices[4*256];
-// 	file.Read(Vertices, sizeof(Vertices));
-// 	for(int i = 0; i < 256; i++)
-// 	{
-// 		bbox[i].Min.x = Vertices[i * 4 + 0];
-// 		bbox[i].Min.y = Vertices[i * 4 + 2];
-// 		bbox[i].Max.x = Vertices[i * 4 + 1];
-// 		bbox[i].Max.y = Vertices[i * 4 + 3];
-// 	}	// Для конвертирования из старого формата.
-	file.Read(bbox, sizeof(bbox));
-
-	file.Close();
-	for (int i=0; i<256; i++)
+	else if (Source == LOAD_SOURCE_MEMORY)
 	{
-		if (bbox[i].Min.x > bbox[i].Max.x)
-			swap(bbox[i].Min.x, bbox[i].Max.x);
-		if (bbox[i].Min.y > bbox[i].Max.y)
-			swap(bbox[i].Min.y, bbox[i].Max.y);
-		Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
-		Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
+		// TODO: fix this, take away common code..
+		if (MemoryLoadData == NULL || MemoryLoadLength == 0)
+			return false;
+
+		// assert(MemoryLoadData != NULL);
+
+		while (*MemoryLoadData)
+			MemoryLoadData++;
+
+		MemoryLoadData++;
+
+		Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
+
+		memcpy(bbox, MemoryLoadData, sizeof(bbox));
+		for (int i=0; i<256; i++)
+		{
+			if (bbox[i].Min.x > bbox[i].Max.x)
+				swap(bbox[i].Min.x, bbox[i].Max.x);
+			if (bbox[i].Min.y > bbox[i].Max.y)
+				swap(bbox[i].Min.y, bbox[i].Max.y);
+			Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
+			Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
+		}
 	}
+
+	CResource::Load();
+
 	return true;
 }
 
-bool CFont::LoadFromMemory(const byte* Address)
+void CFont::Unload()
 {
-	assert(Address != NULL);
-	while (*Address)
-		Address++;
-	Address++;
-	Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
-	
-	memcpy(bbox, Address, sizeof(bbox));
-	for (int i=0; i<256; i++)
-	{
-		if (bbox[i].Min.x > bbox[i].Max.x)
-			swap(bbox[i].Min.x, bbox[i].Max.x);
-		if (bbox[i].Min.y > bbox[i].Max.y)
-			swap(bbox[i].Min.y, bbox[i].Max.y);
-		Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
-		Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
-	}
-	return true;
+	if (!Loaded)
+		return;
+
+	Texture = NULL;
+	// well, nothing else in font are allocated dynamically, so nothing to clear..
+
+	CResource::Unload();
 }
 
-bool CFont::SaveToFile()
+bool CFont::SaveToFile(const string &AFilename)
 {
-	if (Filename == "")
+	if (AFilename == "")
 		return false;
+
 	if (!Texture)
 		return false;
+
 	CFile file;
-	file.Open(Filename, CFile::OPEN_MODE_WRITE);
+	file.Open(AFilename, CFile::OPEN_MODE_WRITE);
 	file.Write(Texture->GetName().c_str(), Texture->GetName().length());
 	file.WriteByte((byte)0x00);
 	file.Write(bbox, sizeof(bbox));
 	file.Close();
+
 	return true;
 }
 
@@ -755,6 +789,7 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 {
 	CFont *Font = Text->GetFont();
 	assert(Font != NULL);
+	Font->CheckLoad();
 	const CText & RText = *Text;
 	RGBAf TColor = Text->Color;
 	float dx(0.0f);
@@ -822,7 +857,7 @@ void CRenderManager::EndFrame()
 //////////////////////////////////////////////////////////////////////////
 // CFontManager
 
-CFontManager::CFontManager() : DefaultFont(NULL), CurrentFont(NULL)
+CFontManager::CFontManager() : DefaultFont(NULL)
 {
 	SetName("Font manager");
 }
@@ -835,13 +870,10 @@ void CFontManager::Init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	
 	DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
-	DefaultFont->LoadFromMemory(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT));
+	DefaultFont->SetLoadSource(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_DEFAULT_FONT_SIZE);
+	DefaultFont->SetPersistent(true);
+	DefaultFont->Load(); // maybe no need to explicitly call Load here..
 
-	//DefaultFont = new CFont;
-	//DefaultFont->SetName("DefaultFont");
-	//DefaultFont->LoadFromMemory(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT));
-
-	CurrentFont = DefaultFont;
 	assert(DefaultFont != NULL);
 }
 
@@ -853,26 +885,6 @@ CFont* CFontManager::GetFont(const string &fontname)
 	if (TempFont)
 		TempFont->CheckLoad();
 	return TempFont;
-}
-
-bool CFontManager::SetCurrentFont(const char* fontname)
-{
-	CurrentFont = GetFont(fontname);
-	return (CurrentFont != NULL);
-}
-
-bool CFontManager::AddFont(CFont *AObject)
-{	
-	CCommonManager <list <CFont*> >::Add(AObject);
-	if (CurrentFont == NULL)
-		CurrentFont = AObject;
-	return true;
-}
-
-CFont* CFontManager::Font()
-{
-	assert(CurrentFont);
-	return CurrentFont;
 }
 
 CFontManager::~CFontManager()
@@ -907,20 +919,10 @@ GLuint CTexture::GetTexID()
 	if (TexID == 0)
 	{
 		Log("ERROR", "CTexture named %s. Trying to access TexID but it is 0", GetName().c_str());
-		if (!Loaded)
-		{
-			LoadFromFile();
-		}		
+		Load();
 	}
 	return TexID;
 }
-
-// CTexture::CTexture(const string &AFilename) : CBaseResource::Filename(AFilename)
-// {	
-// 	SetName("CTexture");
-// 	CTextureManager *TexMan = CTextureManager::Instance();
-// 	TexMan->AddObject(this);
-// }
 
 CTexture::CTexture()
 {
@@ -930,6 +932,7 @@ CTexture::CTexture()
 
 CTexture::~CTexture()
 {
+	Unload();
 	CTextureManager::Instance()->Remove(this);
 }
 
@@ -938,22 +941,48 @@ void CTexture::Bind()
 	glBindTexture(GL_TEXTURE_2D, GetTexID());
 }
 
-void CTexture::Unload()
+bool CTexture::Load()
 {
-	glDeleteTextures(1, &TexID);
+	if (Loaded)
+		return true;
+
+	if (Source == LOAD_SOURCE_FILE)
+	{
+		if (Filename == "")
+		{
+			// TODO: fix and simplify error message..
+			Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName().c_str());
+			return false;
+		}
+
+		if (!LoadTexture(Filename))
+			return false;
+	}
+	else if (Source = LOAD_SOURCE_MEMORY)
+	{
+		// TODO: implement loading from memory..
+		throw std::logic_error("Unimplemented!!");
+	}
+
+	CResource::Load();
+
+	return true;
 }
 
-bool CTexture::LoadFromFile()
+void CTexture::Unload()
 {
-	if (Filename == "")
-	{
-		Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName().c_str());
-		return false;
-	}
 	if (!Loaded)
-		if (LoadTexture(Filename))
-			Loaded = true;
-	return Loaded;
+		return;
+
+	glDeleteTextures(1, &TexID);
+
+	CResource::Unload();
+}
+
+bool CTexture::SaveToFile(const string &AFilename)
+{
+	// TODO: implement this..
+	throw std::logic_error("Unimplemented!!");
 }
 
 

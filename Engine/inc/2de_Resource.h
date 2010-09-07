@@ -2,11 +2,11 @@
 #define _2DE_RESOURCE_H_
 
 #include "2de_Core.h"
+#include "2de_Update.h"
 #include "2de_Xml.h"
 
-
 /**
-* CResourceSectionLoaderBase - базовый класс загрузчика секций ресурсов для полиморфизма.
+* CResourceSectionLoaderBase - base class of resources sections loader for polymorphism.
 */
 
 class CResourceSectionLoaderBase
@@ -23,7 +23,7 @@ protected:
 };
 
 /**
-* CResourceSectionLoaderBase - шаблонизированный класс загрузчика секций ресурсов.
+* CResourceSectionLoader - class template of resources section loader.
 */
 
 template<typename T>
@@ -34,6 +34,165 @@ public:
 	bool Load(CXML *ResourceList);
 
 };
+
+/**
+* CResourceRefCounterState - class that stores state of reference counting in its static members.
+*/
+
+class CResourceRefCounterState
+{
+public:
+	static void DisableRC();
+	static bool IsRCDisabled();
+
+private:
+	static bool RCDisabled;
+
+};
+
+/**
+* CResourceRefCounter - resource reference counter class template, used to automate process of loading and unloading of resources.
+*/
+
+template<typename T>
+class CResourceRefCounter
+{
+public:
+	CResourceRefCounter(T *Source = NULL);
+	CResourceRefCounter(const CResourceRefCounter &Source);
+	~CResourceRefCounter();
+
+	void Assign(T *Source);
+
+	CResourceRefCounter& operator=(const CResourceRefCounter &Source);
+	CResourceRefCounter& operator=(T *Source);
+
+	T* operator->() const;
+	T& operator*() const;
+	operator T*() const;
+	bool operator==(T *Operand) const;
+	bool operator!=(T *Operand) const;
+
+private:
+	T *Pointer;
+
+};
+
+/**
+* CResource - base class for resources.
+*/
+
+class CResource : public virtual CObject
+{
+public:
+	enum ELoadSource
+	{
+		LOAD_SOURCE_FILE,
+		LOAD_SOURCE_MEMORY,
+	};
+
+	CResource();
+	virtual ~CResource();
+
+	string GetFilename() const;
+
+	void SetLoadSource(const string &AFilename);
+	void SetLoadSource(byte *AData, size_t ALength);
+
+	virtual bool Load();
+	virtual void Unload();
+
+	// make CSaveableResource
+	virtual bool SaveToFile(const string &AFilename)
+	{
+		throw std::logic_error("Unimplemented for this type of resource");
+		return false;
+	}
+
+	bool CheckLoad();
+
+	bool isPersistent() const;
+	void SetPersistent(bool APersistent);
+
+	int RefCount;
+
+protected:
+	ELoadSource Source;
+	string Filename;
+	byte *MemoryLoadData;
+	size_t MemoryLoadLength;
+
+	bool Loaded;
+	bool FirstTimeLoaded;
+	bool Persistent;
+
+};
+
+/**
+* CDataLister - resources files lister.
+*/
+
+class CDataLister
+{
+public:
+	CDataLister();
+	CXML* List(string ADataRoot, bool ForceReindex = false);
+private:
+	CXML XML;
+	CXMLNode *CurNode;
+
+	void ExploreDirectory(string Path);
+	string GetLastPathComponent(string Path);
+	string GetFileNameWithoutExtension(string Filename);
+
+	const char *DEFAULT_RESOURCE_LIST_FILE_NAME;
+};
+
+/**
+* CResourceManager - resources manager.
+*/
+
+class CResourceManager : public CTSingleton<CResourceManager>, public CUpdatable
+{
+public:
+	bool LoadResources();
+
+	template<typename T>
+	void AddSection(const string &SectionName);
+
+	void AddToUnloadQueue(CResource *AResource);
+	void RemoveFromUnloadQueue(CResource *AResource);
+
+	void PerformUnload();
+
+	void Update(float dt);
+
+	float GetAutoUnloadInterval() const;
+	void SetAutoUnloadInterval(float AAutoUnloadInterval);
+
+	string DataPath; // make setter, getter
+
+protected:
+	CResourceManager();
+	~CResourceManager();
+	friend class CTSingleton<CResourceManager>;
+
+private:
+	list<CResourceSectionLoaderBase *> SectionsLoaders;
+	set<CResource *> UnloadQueue;
+	CDataLister DataLister;
+	CXML *ResourceList;
+
+	float SinceLastUnload;
+	float AutoUnloadInterval;
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+// Templates implementations
+
+//////////////////////////////////////////////////////////////////////////
+// CResourceSectionLoader
 
 template<typename T>
 CResourceSectionLoader<T>::CResourceSectionLoader(const string &AName) : CResourceSectionLoaderBase(AName)
@@ -73,54 +232,14 @@ bool CResourceSectionLoader<T>::Load(CXML *ResourceList)
 			continue;
 		}
 
-		Resource->SetFilename(ResNode->Children.First()->GetValue());
+		Resource->SetLoadSource(ResNode->Children.First()->GetValue());
 	}
 
 	return true;
 }
 
-/**
-* CDataLister - перечислитель файлов ресурсов.
-*/
-
-class CDataLister
-{
-public:
-	CDataLister();
-	CXML* List(string ADataRoot, bool ForceReindex = false);
-private:
-	CXML XML;
-	CXMLNode *CurNode;
-
-	void ExploreDirectory(string Path);
-	string GetLastPathComponent(string Path);
-	string GetFileNameWithoutExtension(string Filename);
-
-	const char *DEFAULT_RESOURCE_LIST_FILE_NAME;
-};
-
-/**
-* CResourceManager - менеджер ресурсов.
-*/
-
-class CResourceManager : public CTSingleton<CResourceManager>
-{
-public:
-	~CResourceManager();
-	bool LoadResources();
-
-	template<typename T>
-	void AddSection(const string &SectionName);
-
-	string DataPath;
-protected:
-	CResourceManager();
-	friend class CTSingleton<CResourceManager>;
-	list<CResourceSectionLoaderBase *> SectionsLoaders;
-	CDataLister DataLister;
-	CXML *ResourceList;
-
-};
+//////////////////////////////////////////////////////////////////////////
+// CResourceManager
 
 template<typename T>
 void CResourceManager::AddSection(const string &SectionName)
@@ -128,8 +247,106 @@ void CResourceManager::AddSection(const string &SectionName)
 	SectionsLoaders.push_back(new CResourceSectionLoader<T>(SectionName));
 }
 
+//////////////////////////////////////////////////////////////////////////
+// CResourceRefCounter
+
+template<typename T>
+CResourceRefCounter<T>::CResourceRefCounter(T *Source /*= NULL*/) : Pointer(NULL)
+{
+	Assign(Source);
+}
+
+template<typename T>
+CResourceRefCounter<T>::CResourceRefCounter(const CResourceRefCounter<T> &Source) : Pointer(NULL)
+{
+	Assign(Source.Pointer);
+}
+
+template<typename T>
+CResourceRefCounter<T>::~CResourceRefCounter()
+{
+	Assign(NULL);
+}
+
+template<typename T>
+void CResourceRefCounter<T>::Assign(T *Source)
+{
+	if (CResourceRefCounterState::IsRCDisabled())
+		return;
+
+	if (Pointer != NULL)
+	{
+		Pointer->RefCount--;
+		if (!Pointer->isPersistent() && Pointer->RefCount == 0)
+		{
+			CResourceManager::Instance()->AddToUnloadQueue(Pointer);
+		}
+	}
+
+	Pointer = Source;
+
+	if (Pointer != NULL)
+	{
+		if (Pointer->RefCount == 0)
+		{
+			CResourceManager::Instance()->RemoveFromUnloadQueue(Pointer);
+		}
+		Pointer->RefCount++;
+	}
+}
+
+template<typename T>
+CResourceRefCounter<T>& CResourceRefCounter<T>::operator=(const CResourceRefCounter &Source)
+{
+	if (this == &Source)
+		return *this;
+
+	Assign(Source.Pointer);
+
+	return *this;
+}
+
+template<typename T>
+CResourceRefCounter<T>& CResourceRefCounter<T>::operator=(T *Source)
+{
+	Assign(Source);
+	return *this;
+}
+
+template<typename T>
+T* CResourceRefCounter<T>::operator->() const
+{
+	return Pointer;
+}
+
+template<typename T>
+T& CResourceRefCounter<T>::operator*() const
+{
+	return *Pointer;
+}
+
+template<typename T>
+CResourceRefCounter<T>::operator T*() const
+{
+	return Pointer;
+}
+
+template<typename T>
+bool CResourceRefCounter<T>::operator==(T *Operand) const
+{
+	return (Pointer == Operand);
+}
+
+template<typename T>
+bool CResourceRefCounter<T>::operator!=(T *Operand) const
+{
+	return (Pointer != Operand);
+}
+
 #endif // _2DE_RESOURCE_H_
 
+// TODO: move to some internal documentation...
+//
 // конфетка. Читать александреску.
 // namespace
 // {

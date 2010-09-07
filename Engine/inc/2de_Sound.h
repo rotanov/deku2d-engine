@@ -4,19 +4,21 @@
 #include <SDL/SDL_mixer.h>
 
 #include "2de_Core.h"
-
+#include "2de_Resource.h"
 
 /**
-* CSound - класс звукового семлпа как ресурса.
+* CSound - sound as resource class.
 */
 
 class CSound : public CResource
 {
 public:
 	CSound();
-	CSound(const char *AFileName);
 	~CSound();
-	bool LoadFromFile();
+
+	bool Load();
+	void Unload();
+
 	Mix_Chunk* GetData();
 
 private:
@@ -24,17 +26,18 @@ private:
 };
 
 /**
-* CMusic - класс музыки как ресурса.
+* CMusic - music as resource class.
 */
 
 class CMusic : public CResource
 {
 public:
 	CMusic();
-	CMusic(const char *AFileName);
 	~CMusic();
 
-	bool LoadFromFile();
+	bool Load();
+	void Unload();
+
 	Mix_Music* GetData();
 
 private:
@@ -42,7 +45,7 @@ private:
 };
 
 /**
-* CSoundManager - ресурсовый менеджер звуковых семплов.
+* CSoundManager - sound samples resource manager.
 */
 
 class CSoundManager : public CCommonManager <list <CSound*> >, public CTSingleton <CSoundManager>
@@ -56,7 +59,7 @@ protected:
 };
 
 /**
-* CMusicManager - ресурсовый менеджер музыки.
+* CMusicManager - music resource manager.
 */
 
 class CMusicManager : public CCommonManager <list <CMusic*> >, public CTSingleton <CMusicManager>
@@ -72,6 +75,15 @@ protected:
 /**
 * CSoundMixer - звуковой микшер, отвечающий за инициализацию и деинициализацию звуковой системы, а также воспроизведение звука и музыки.
 */
+
+namespace SoundMixerHooks
+{
+
+void OnMusicFinished();
+void OnSoundFinished(int AChannel);
+
+};
+
 
 class CSoundMixer : public CTSingleton<CSoundMixer>
 {
@@ -99,7 +111,13 @@ private:
 	//size_t DefaultBGMVolume;	// Could be named DefaultMusicVolume // И вообще нужно ли это хранить здесь? Вот это - точно не нужно.
 	//size_t DefaultSFXVolume;	// Could be named DefaultSoundVolume // А это - нужно, я считаю, так как громкость устанавливается для каждого отдельного звука.
 
+	CResourceRefCounter<CMusic> CurrentMusic;
+	map<int, CResourceRefCounter<CSound> > CurrentSounds;
+
 	const int SOUND_MIXING_CHANNELS_COUNT;
+
+	friend void SoundMixerHooks::OnMusicFinished();
+	friend void SoundMixerHooks::OnSoundFinished(int AChannel);
 };
 
 #endif // _2DE_SOUND_H_

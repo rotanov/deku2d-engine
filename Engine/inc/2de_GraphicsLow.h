@@ -3,6 +3,7 @@
 
 #include "2de_Core.h"
 #include "2de_Update.h"
+#include "2de_Resource.h"
 
 #ifdef USE_SDL_OPENGL
 	#include <SDL/SDL_opengl.h>
@@ -125,10 +126,15 @@ public:
 	CTexture();
 	virtual ~CTexture();
 	void Bind();
-	bool LoadFromFile();
-	GLuint GetTexID();
-protected:
+
+	bool Load();
 	void Unload();
+
+	bool SaveToFile(const string &AFilename);
+
+	GLuint GetTexID();
+
+protected:
 
 private:
 	
@@ -231,15 +237,17 @@ private:
 
 class CFont : public CResource
 {
-	friend class CRenderManager;
 public:
-	CBox bbox[256];	// why 256?
+	CBox bbox[256];	// why 256? // TODO: make this private and getter that checks for FirstTimeLoaded..
 
 	CFont();
 	~CFont();
-	bool LoadFromFile();
-	bool SaveToFile();
-	bool LoadFromMemory(const byte* Address);
+
+	bool Load();
+	void Unload();
+
+	bool SaveToFile(const string &AFilename);
+
 	float GetStringWidth(const string &text);
 	float GetStringWidthEx(int t1, int t2, const string &text);
 	float GetStringHeight(const string &text);
@@ -260,6 +268,8 @@ private:
 	float Width[CFONT_MAX_SYMBOLS];
 	float Height[CFONT_MAX_SYMBOLS];
 	CTexture* Texture;
+
+	friend class CRenderManager;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -305,26 +315,24 @@ public:
 
 class CFontManager : public CCommonManager <list <CFont*> >, public CTSingleton <CFontManager>
 {
-private:
-	CFont *DefaultFont;
-	CFont *CurrentFont;
+public:
+	void Init();
+
+	CFont* GetDefaultFont()
+	{
+		assert(DefaultFont != NULL);
+		return DefaultFont;
+	}
+
+	CFont* GetFont(const string &fontname);
 
 protected:	
 	CFontManager();
 	~CFontManager();
 	friend class CTSingleton<CFontManager>;
 
-public:
-	void Init();
-	CFont* Font(); // @todo: rename
-	CFont* GetDefaultFont()
-	{
-		assert(DefaultFont != NULL);
-		return DefaultFont;
-	}
-	bool SetCurrentFont(const char* fontname);
-	CFont* GetFont(const string &fontname);
-	bool AddFont(CFont *AObject); // WTF>?
+private:
+	CFont *DefaultFont;
 };
 
 class CText;
@@ -478,7 +486,7 @@ public:
 
 private:
 	string Characters;
-	CFont *Font;
+	CResourceRefCounter<CFont> Font;
 };
 
 //////////////////////////////////////////////////////////////////////////

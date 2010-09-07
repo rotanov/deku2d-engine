@@ -15,10 +15,15 @@ class CTileset : public CResource
 public:
 	CTileset();
 	~CTileset();
-	Vector2Array<4> GetCellTC(int CellIndex);
+
+	bool Load();
+	void Unload();
+
+	bool SaveToFile(const string &AFilename);
+
 	void SetSettings(byte ATileWidth, byte ATileHeight, int AHorNumTiles, int AVerNumTiles);
-	bool LoadFromFile();
-	bool SaveToFile();
+	Vector2Array<4> GetCellTC(int CellIndex);
+
 	CTexture* GetTexture() const
 	{
 		assert(Texture != NULL);
@@ -38,7 +43,7 @@ public:
 	CBox* BBox;
 
 private:
-	CTexture *Texture;
+	CResourceRefCounter<CTexture> Texture;
 
 };
 
@@ -95,7 +100,7 @@ private:
 	size_t HorizontalCellsCount;
 	size_t VerticalCellsCount;
 	CMapCellInfo *Cells;
-	CTileset *TileSet;
+	CResourceRefCounter<CTileset> TileSet;
 
 	int GetCellIndex(int h, int v);
 };
@@ -128,7 +133,7 @@ public:
 	}
 
 private:
-	CTexture *Texture;
+	CResourceRefCounter<CTexture> Texture;
 	CText TextDeku;
 	CText TextTeam;
 };

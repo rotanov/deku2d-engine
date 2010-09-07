@@ -61,7 +61,7 @@ public:
 
 	CGUIStyleColors Colors;
 	CGUIStyleMetrics Metrics;
-	CFont *Font;
+	CResourceRefCounter<CFont> Font;
 	//CGUIStyleFonts Fonts;
 
 	// @todo: loading style from XML file (and even maybe saving)

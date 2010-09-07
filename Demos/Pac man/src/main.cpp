@@ -27,7 +27,6 @@ bool CCustomStateHandler::OnInitialize()
 	CSceneManager::Instance()->SetCurrentScene(MainScene);
 
 	CFactory::Instance()->Add(new CPacmanGame(CFactory::Instance()->New<CPacmanPlayer>("CPacmanPlayer")), "CPacmanGame");
-	CFactory::Instance()->Get<CFont>("Font")->LoadFromFile();	// ???
 	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("PacMan"), 5000);
 
 	return true;

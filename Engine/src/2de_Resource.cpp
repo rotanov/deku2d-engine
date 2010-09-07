@@ -3,11 +3,6 @@
 #include "2de_Core.h"
 #include "2de_Engine.h"
 
-#ifdef _WIN32
-	
-#endif
-
-
 //////////////////////////////////////////////////////////////////////////
 // CResourceSectionLoaderBase
 
@@ -22,6 +17,80 @@ CResourceSectionLoaderBase::~CResourceSectionLoaderBase()
 string CResourceSectionLoaderBase::GetName() const
 {
 	return Name;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CResourceRefCounterState
+
+void CResourceRefCounterState::DisableRC()
+{
+	RCDisabled = true;
+}
+
+bool CResourceRefCounterState::IsRCDisabled()
+{
+	return RCDisabled;
+}
+
+bool CResourceRefCounterState::RCDisabled = false;
+
+//////////////////////////////////////////////////////////////////////////
+// CResource
+
+CResource::CResource() : MemoryLoadData(NULL), MemoryLoadLength(0), Loaded(false), FirstTimeLoaded(false), Persistent(false), RefCount(0)
+{
+	SetName("CResource");
+}
+
+CResource::~CResource()
+{
+}
+
+string CResource::GetFilename() const
+{
+	return Filename;
+}
+
+void CResource::SetLoadSource(const string &AFilename)
+{
+	Source = LOAD_SOURCE_FILE;
+	Filename = AFilename;
+	FirstTimeLoaded = false;
+}
+
+void CResource::SetLoadSource(byte *AData, size_t ALength)
+{
+	Source = LOAD_SOURCE_MEMORY;
+	MemoryLoadData = AData;
+	MemoryLoadLength = ALength;
+	FirstTimeLoaded = false;
+}
+
+bool CResource::Load()
+{
+	Log("INFO", "Resources: LOAD - %s", GetName().c_str());
+	return (Loaded = FirstTimeLoaded = true);
+}
+
+void CResource::Unload()
+{
+	Log("INFO", "Resources: UNLOAD - %s", GetName().c_str());
+	Loaded = false;
+}
+
+bool CResource::CheckLoad()
+{
+	return Loaded = !Loaded ? Load() : true;
+}
+
+bool CResource::isPersistent() const
+{
+	return Persistent;
+}
+
+void CResource::SetPersistent(bool APersistent)
+{
+	Persistent = APersistent;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -82,7 +151,6 @@ void CDataLister::ExploreDirectory(string Path)
 		CurrentPath = Path + "/" + string(entry->d_name);
 		testdir = opendir(CurrentPath.c_str());
 
-		//if (entry->d_type == DT_DIR)
 		if (testdir)
 		{
 			closedir(testdir);
@@ -98,7 +166,6 @@ void CDataLister::ExploreDirectory(string Path)
 			PreviousNode->Children.AddLast(CurNode);
 			CurNode = PreviousNode;
 		}
-		//else if (entry->d_type == DT_REG)
 		else
 		{
 			CXMLNode *ResNode = new CXMLNormalNode("Resource");
@@ -154,14 +221,6 @@ string CDataLister::GetFileNameWithoutExtension(string Filename)
 //////////////////////////////////////////////////////////////////////////
 // CResourceManager
 
-CResourceManager::~CResourceManager()
-{
-	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
-	{
-		delete *it;
-	}
-}
-
 bool CResourceManager::LoadResources()
 {
 	ResourceList = DataLister.List(DataPath, CCommandLineArgumentsManager::Instance()->GetFlag("clear-resources-cache"));
@@ -176,8 +235,60 @@ bool CResourceManager::LoadResources()
 	return true;
 }
 
-CResourceManager::CResourceManager()
+void CResourceManager::AddToUnloadQueue(CResource *AResource)
+{
+	UnloadQueue.insert(AResource);
+}
+
+void CResourceManager::RemoveFromUnloadQueue(CResource *AResource)
+{
+	UnloadQueue.erase(AResource);
+}
+
+void CResourceManager::PerformUnload()
+{
+	if (UnloadQueue.empty())
+		return;
+
+	if (SinceLastUnload < AutoUnloadInterval)
+		return;
+
+	for (set<CResource *>::iterator it = UnloadQueue.begin(); it != UnloadQueue.end(); ++it)
+	{
+		(*it)->Unload(); 
+	}
+
+	UnloadQueue.clear();
+
+	SinceLastUnload = 0.0f;
+	Log("INFO", "Resource manager cleared auto-unload queue");
+}
+
+void CResourceManager::Update(float dt)
+{
+	SinceLastUnload += dt;
+}
+
+float CResourceManager::GetAutoUnloadInterval() const
+{
+	return AutoUnloadInterval;
+}
+
+void CResourceManager::SetAutoUnloadInterval(float AAutoUnloadInterval)
+{
+	AutoUnloadInterval = AAutoUnloadInterval;
+}
+
+CResourceManager::CResourceManager() : SinceLastUnload(0.0f), AutoUnloadInterval(15.0f)
 {
 	SetName("ResourceManager");
+}
+
+CResourceManager::~CResourceManager()
+{
+	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
+	{
+		delete *it;
+	}
 }
 

@@ -328,7 +328,7 @@ bool SaveTileset(CObject *Caller)
 	stoi(TilesetEditor->edHorNumTiles->GetText()), stoi(TilesetEditor->edVerNumTiles->GetText()));
 
 
-	TilesetEditor->Tileset->SaveToFile();
+	TilesetEditor->Tileset->SaveToFile(TilesetEditor->Tileset->GetFilename());
 	return true;
 }
 

@@ -5,62 +5,86 @@
 //////////////////////////////////////////////////////////////////////////
 // CTileset
 
-bool CTileset::LoadFromFile()
+CTileset::CTileset() : TileWidth(0), TileHeight(0), HorNumTiles(0), VerNumTiles(0), BBox(NULL), Texture(NULL)
 {
-	CFile file;
-	if (!file.Open(Filename, CFile::OPEN_MODE_READ))
+	CTileSetManager::Instance()->Add(this);
+}
+
+CTileset::~CTileset()
+{
+	Unload();
+	CTileSetManager::Instance()->Remove(this);
+}
+
+bool CTileset::Load()
+{
+	if (Loaded)
+		return true;
+
+	// TODO: maybe make some single interface for file and memory reading..
+
+	if (Source == LOAD_SOURCE_FILE)
 	{
-		Log("ERROR", "Can't open TileSet file %s", Filename.c_str());
-		return false;
+		CFile file;
+		if (!file.Open(Filename, CFile::OPEN_MODE_READ))
+		{
+			Log("ERROR", "Can't open TileSet file '%s'", Filename.c_str());
+			return false;
+		}
+
+		string TextureName;
+		file.ReadString(TextureName);
+
+		Texture = CTextureManager::Instance()->Get(TextureName);
+		Texture->CheckLoad();
+
+		file.Read(&TileWidth, sizeof(TileWidth));
+		file.Read(&TileHeight, sizeof(TileHeight));
+		file.Read(&HorNumTiles, sizeof(HorNumTiles));
+		file.Read(&VerNumTiles, sizeof(VerNumTiles));
+
+		if (BBox != NULL)
+			delete [] BBox;
+
+		BBox = new CBox[HorNumTiles * VerNumTiles];
+		file.Read(BBox, sizeof(CBox) * HorNumTiles * VerNumTiles);
+
+		file.Close();
+	}
+	else if (Source == LOAD_SOURCE_MEMORY)
+	{
+		// TODO: implement this
+		throw std::logic_error("Unimplemented!!");
 	}
 
-	string TextureName;
-	file.ReadString(TextureName);
-
-	Texture = CTextureManager::Instance()->Get(TextureName);
-	Texture->CheckLoad();
-
-	file.Read(&TileWidth, sizeof(TileWidth));
-	file.Read(&TileHeight, sizeof(TileHeight));
-	file.Read(&HorNumTiles, sizeof(HorNumTiles));
-	file.Read(&VerNumTiles, sizeof(VerNumTiles));
-
-	if (BBox != NULL)
-		delete [] BBox;
-	BBox = new CBox[HorNumTiles*VerNumTiles];
-	file.Read(BBox, sizeof(CBox)*HorNumTiles*VerNumTiles);
-
-	file.Close();
+	CResource::Load();
 
 	return true;
 }
 
-void CTileset::RenderTileSet()
+void CTileset::Unload()
 {
-	CRenderObjectInfo TempInfo;
-	TempInfo.SetLayer(-1);
-	TempInfo.doIgnoreCamera = true;
-	TempInfo.Color = COLOR_WHITE;
-	CRenderManager *RenderManager = CRenderManager::Instance();
-	RenderManager->DrawTexturedBox(&TempInfo, CBox(V2_ZERO, Vector2(TileWidth*HorNumTiles, TileHeight*VerNumTiles)), Texture, V2_QuadBin);
-	TempInfo.SetLayer(0);
-	
-	for (int i = 0; i <= HorNumTiles; i++)
-		RenderManager->DrawLine(&TempInfo,	Vector2(i*TileWidth, 0),
-											Vector2(i*TileWidth, Texture->Height));
-	for (int i = 0; i <= VerNumTiles; i++)
-		RenderManager->DrawLine(&TempInfo,	Vector2(0, i*TileHeight),
-											Vector2(Texture->Width, i*TileHeight));
+	if (!Loaded)
+		return;
+
+	if (BBox != NULL)
+	{
+		delete[] BBox;
+		BBox = NULL;
+	}
+
+	CResource::Unload();
 }
 
-bool CTileset::SaveToFile()
+bool CTileset::SaveToFile(const string &AFilename)
 {
 	CFile file;
-	if (!file.Open(Filename, CFile::OPEN_MODE_WRITE))
+	if (!file.Open(AFilename, CFile::OPEN_MODE_WRITE))
 	{
 		Log("ERROR", "Can't open TileSet file %s", Filename.c_str());
 		return false;
 	}
+
 	file.Write(Texture->GetName().c_str(), Texture->GetName().length() + 1);
 	file.Write(&TileWidth, sizeof(TileWidth));
 	file.Write(&TileHeight, sizeof(TileHeight));
@@ -68,18 +92,8 @@ bool CTileset::SaveToFile()
 	file.Write(&VerNumTiles, sizeof(VerNumTiles));
 	file.Write(BBox, sizeof(CBox) * HorNumTiles * VerNumTiles);
 	file.Close();
-	return true;
-}
 
-CTileset::CTileset()
-{
-	BBox		=	NULL;
-	Texture		=	NULL;
-	TileWidth	=	0;
-	TileHeight	=	0;
-	HorNumTiles	=	0;
-	VerNumTiles	=	0;
-	CTileSetManager::Instance()->Add(this);
+	return true;
 }
 
 void CTileset::SetSettings(byte ATileWidth, byte ATileHeight, int AHorNumTiles, int AVerNumTiles)
@@ -112,12 +126,22 @@ Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 	return tc;
 }
 
-CTileset::~CTileset()
+void CTileset::RenderTileSet()
 {
-	if (BBox != NULL)
-		delete [] BBox;
-
-	CTileSetManager::Instance()->Remove(this);
+	CRenderObjectInfo TempInfo;
+	TempInfo.SetLayer(-1);
+	TempInfo.doIgnoreCamera = true;
+	TempInfo.Color = COLOR_WHITE;
+	CRenderManager *RenderManager = CRenderManager::Instance();
+	RenderManager->DrawTexturedBox(&TempInfo, CBox(V2_ZERO, Vector2(TileWidth*HorNumTiles, TileHeight*VerNumTiles)), Texture, V2_QuadBin);
+	TempInfo.SetLayer(0);
+	
+	for (int i = 0; i <= HorNumTiles; i++)
+		RenderManager->DrawLine(&TempInfo,	Vector2(i*TileWidth, 0),
+											Vector2(i*TileWidth, Texture->Height));
+	for (int i = 0; i <= VerNumTiles; i++)
+		RenderManager->DrawLine(&TempInfo,	Vector2(0, i*TileHeight),
+											Vector2(Texture->Width, i*TileHeight));
 }
 
 //////////////////////////////////////////////////////////////////////////

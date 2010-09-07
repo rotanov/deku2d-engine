@@ -108,21 +108,6 @@ struct SAnimationInfo				// структура определяющая пара
 
 class CSprite : public CRenderable	// говно
 {
-private:
-	CTexture	*Texture;
-
-	unsigned long	EllapsedTime;
-	unsigned long	LastTime;
-	unsigned int	CurrentFrame;
-	unsigned int	CurrentRow;
-	unsigned int	CurrentColumn;
-
-	bool		isFirstTimeRendering;
-
-	size_t		AnimationsCount;
-	SAnimationInfo *animations;
-	SAnimationInfo *anim;
-
 public:
 	CSprite() : EllapsedTime(0), LastTime(0), CurrentFrame(0), CurrentRow(0), CurrentColumn(0),
 		isFirstTimeRendering(true), AnimationsCount(0), animations(NULL), anim(NULL),
@@ -144,6 +129,22 @@ public:
 
 	RGBAf		Color;
 	bool mirror_h;
+
+private:
+	CResourceRefCounter<CTexture> Texture;
+
+	unsigned long	EllapsedTime;
+	unsigned long	LastTime;
+	unsigned int	CurrentFrame;
+	unsigned int	CurrentRow;
+	unsigned int	CurrentColumn;
+
+	bool		isFirstTimeRendering;
+
+	size_t		AnimationsCount;
+	SAnimationInfo *animations;
+	SAnimationInfo *anim;
+
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -204,7 +205,7 @@ public:
 	Vector2				*GeometryVertices;			//	массив точек, для генерации частиц
 	int					GeometryPointsCount;		//	число этих точек
 
-	CTexture			*Texture;
+	CResourceRefCounter<CTexture> Texture;
 
 	CRenderable			*UserRenderSample;
 	bool					user_create;

@@ -6,5 +6,6 @@ SetPosition(mytext, 150, 250)
 
 
 mytext = CreateNewText("mytext2")
-SetText(mytext, "Other text")
-SetPosition(mytext, 150, 230)
+SetText(mytext, "Other text - now in other font")
+SetPosition(mytext, 150, 220)
+SetTextFont(mytext, GetFont("hge"))

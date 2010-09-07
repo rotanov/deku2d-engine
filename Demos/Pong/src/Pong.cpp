@@ -125,7 +125,7 @@ CPongGame::CPongGame()
 
 	Ball = CFactory::Instance()->New<CPongBall>("PongBall");
 
-	CFontManager::Instance()->SetCurrentFont("Font");
+	//CFontManager::Instance()->SetCurrentFont("Font");
 }
 
 CPongGame::~CPongGame()

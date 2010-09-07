@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Deku2d engine"
+PROJECT_NAME           = "Deku2D engine"
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = doc/
 CREATE_SUBDIRS         = NO
@@ -21,7 +21,9 @@ ABBREVIATE_BRIEF       = "The $name class" \
                          represents \
                          a \
                          an \
-                         the
+                         the \
+			 "Класс $name - " \
+			 "$name - "
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = NO
