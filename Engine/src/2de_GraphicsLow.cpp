@@ -790,23 +790,42 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 	CFont *Font = Text->GetFont();
 	assert(Font != NULL);
 	Font->CheckLoad();
-	const CText & RText = *Text;
+	const CText &RText = *Text;
 	RGBAf TColor = Text->Color;
-	float dx(0.0f);
+
+	float dx = 0.0f;
+	float dy = 0.0f;
+
+	float liwidth;
+	float liheight;
+	float maxliheight = 0.0f;
+
 	for (unsigned int i = 0; i < Text->Length(); i++)
 	{
-		float liwidth = Font->bbox[RText[i] - 32].Width();	// 32!!!
-		float liheight = Font->bbox[RText[i] - 32].Height();
+		if (RText[i] == '\n')
+		{
+			dx = 0.0f;
+			dy -= maxliheight + 1; // FIXME: magic number (1) - vertical spacing
+			maxliheight = 0.0f; // comment this if you want all lines to have the same (maximum) height..
+			continue;
+		}
+
+		liwidth = Font->bbox[RText[i] - 32].Width();	// 32!!!
+		liheight = Font->bbox[RText[i] - 32].Height();
+		maxliheight = max(maxliheight, liheight);
+
 		Vector2Array<4> TempTexCoords = Font->GetTexCoords(RText[i]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx,			0.0f), TColor, TempTexCoords[0]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, 0.0f), TColor, TempTexCoords[1]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, liheight), TColor, TempTexCoords[2]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx,			liheight), TColor, TempTexCoords[3]);
-		dx += Font->bbox[RText[i] - 32].Width() + 1;
+
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx, dy), TColor, TempTexCoords[0]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, dy), TColor, TempTexCoords[1]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, liheight + dy), TColor, TempTexCoords[2]);
+		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx, liheight + dy), TColor, TempTexCoords[3]);
+
+		dx += Font->bbox[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
 	}
 }
 
-void CRenderManager::DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box)
+void CRenderManager::DrawSolidBox(const CRenderObjectInfo *RenderInfo, const CBox &Box)
 {
 	Vector2 v0 = Box.Min;
 	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
@@ -818,7 +837,7 @@ void CRenderManager::DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBo
 	QuadVertices.PushVertex(RenderInfo, v3);
 }
 
-void CRenderManager::DrawTexturedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords)
+void CRenderManager::DrawTexturedBox(const CRenderObjectInfo *RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords)
 {
 	Vector2 v0 = Box.Min;	
 	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);

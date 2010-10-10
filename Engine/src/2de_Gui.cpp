@@ -726,6 +726,7 @@ void CEdit::SetText(const string &AText)
 	Text = GetVisibleText();
 	Text.Position.x = (int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x;
 	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
+	Selection.Clear((CursorPos = -1));
 }
 
 //////////////////////////////////////////////////////////////////////////

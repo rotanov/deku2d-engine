@@ -41,6 +41,47 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// string GetText(userdata TextObject)
+	int GetText(lua_State *L)
+	{
+		::CText *text = static_cast< ::CText *>(lua_touserdata(L, -1));
+		if (!text)
+		{
+			::Log("LUAERROR", "Incorrect usage of light user data in GetText API call");
+			lua_pushstring(L, "");
+			return 1;
+		}
+
+		lua_pushstring(L, text->GetText().c_str());
+		return 1;
+	}
+
+	// userdata GetTextObject(string Name)
+	int GetTextObject(lua_State *L)
+	{
+		string name = lua_tostring(L, -1);
+		::CText *result = ::CFactory::Instance()->Get<CText>(name);
+
+		if (!result)
+			return 0;
+
+		lua_pushlightuserdata(L, result);
+		return 1;
+	}
+
+	// userdata GetFontObject(string Name)
+	int GetFontObject(lua_State *L)
+	{
+		string name = lua_tostring(L, -1);
+		::CFont *result = ::CFactory::Instance()->Get<CFont>(name);
+
+		if (!result)
+			return 0;
+
+		lua_pushlightuserdata(L, result);
+		return 1;
+	}
+
 	// void SetText(userdata TextObject, string NewText)
 	int SetText(lua_State *L)
 	{
@@ -121,7 +162,27 @@ bool CLuaVirtualMachine::RunFile(const string &AFilename)
 	if (!State)
 		return false;
 
-	return (luaL_dofile(State, AFilename.c_str()) == 0);
+	if (luaL_dofile(State, AFilename.c_str()) !=0 )
+	{
+		LastError = lua_tostring(State, -1);
+		return false;
+	}
+
+	return true;
+}
+
+bool CLuaVirtualMachine::RunString(const string &AString)
+{
+	if (!State)
+		return false;
+	
+	if (luaL_dostring(State, AString.c_str()) != 0)
+	{
+		LastError = lua_tostring(State, -1);
+		return false;
+	}
+
+	return true;
 }
 
 void CLuaVirtualMachine::RegisterAPIFunction(const string &AName, lua_CFunction AFunc)
@@ -148,6 +209,11 @@ void CLuaVirtualMachine::RunGC()
 	lua_gc(State, LUA_GCCOLLECT, 0);
 }
 
+string CLuaVirtualMachine::GetLastError() const
+{
+	return LastError;
+}
+
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
@@ -155,6 +221,9 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "IsSpacePressed", &LuaAPI::IsSpacePressed);
 	lua_register(State, "CreateNewText", &LuaAPI::CreateNewText);
 	lua_register(State, "SetText", &LuaAPI::SetText);
+	lua_register(State, "GetText", &LuaAPI::GetText);
+	lua_register(State, "GetTextObject", &LuaAPI::GetTextObject);
+	lua_register(State, "GetFontObject", &LuaAPI::GetFontObject);
 	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
 	lua_register(State, "GetFont", &LuaAPI::GetFont);
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);

@@ -69,7 +69,7 @@ public:
 	}
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
-		switch(state)
+		switch (state)
 		{
 			case KEY_DOWN:
 				switch (key)

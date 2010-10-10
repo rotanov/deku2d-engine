@@ -15,10 +15,13 @@ class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
 {
 public:
 	bool RunFile(const string &AFilename);
+	bool RunString(const string &AString);
 	void RegisterAPIFunction(const string &AName, lua_CFunction AFunc);
 
 	int GetMemoryUsage() const;
 	void RunGC();
+
+	string GetLastError() const;
 
 protected:
 	CLuaVirtualMachine();
@@ -28,6 +31,8 @@ private:
 	void RegisterStandardAPI();
 
 	lua_State *State;
+
+	string LastError;
 
 	friend class CTSingleton<CLuaVirtualMachine>;
 };
