@@ -71,7 +71,7 @@ size_t CObject::GetID() const
 }
 
 /**
-* CObject::SetDestroyed - для не-managed объектов помечает объект как уничтоженный, для managed - вызывает CFactory::Destroy. Не выполняет никаких действий для объектов, уже помеченных как уничтоженные.
+* CObject::SetDestroyed - marks non-managed objects as destroyed, calls CFactory::Destroy for managed ones. Does nothing for objects already marked as destroyed.
 */
 
 void CObject::SetDestroyed()
@@ -203,7 +203,7 @@ bool CFile::Close()
 }
 
 /**
-* CFile::Read - читает из файла BytesCount байт ElementsCount раз и записывает в память по адресу Buffer.
+* CFile::Read - reads BytesCount bytes ElementsCount times from a file and stores them in memory at address Buffer.
 */
 
 bool CFile::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
@@ -221,7 +221,7 @@ bool CFile::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
 }
 
 /**
-* CFile::Write - записывает в файл данные из массива из ElementsCount элементов размером BytesCount байт каждый, находящегося по адресу Data.
+* CFile::Write - writes ElementsCount elements size of BytesCount bytes each from array at address Data to a file.
 */
 
 bool CFile::Write(const void *Data, size_t BytesCount, size_t ElementsCount /*= 1*/)
@@ -254,9 +254,9 @@ bool CFile::WriteByte(byte Data)
 }
 
 /**
-* CFile::ReadString - читает из файла строку, завершённую нулевым байтом, максимальной длиной ASize и записывает её в память по адресу Buffer.
+* CFile::ReadString - reads a null-terminated string from a file with maximum length of ASize bytes and stores it in memory at address Buffer.
 *
-* \todo Хорошо бы либо вынести куда-нибудь эту логику, либо вообще перестать юзать подобные способы хранения строк.
+* \todo It woulde be better to take out this logic somewhere, or stop using such ways of storing strings at all.
 */
 
 bool CFile::ReadString(char *Buffer, int ASize)
@@ -280,10 +280,10 @@ bool CFile::ReadString(char *Buffer, int ASize)
 }
 
 /**
-* CFile::ReadString - читает из файла строку, завершённую нулевым байтом и записывает её в строку Buffer.
-* В отличие от версии с char* не требует явного указания максимальной длины строки.
+* CFile::ReadString - reads a null-terminated string from a file and stores it in Buffer.
+* Unlike the version with char* doesn't require to specify size explicitly.
 *
-* \todo Хорошо бы либо вынести куда-нибудь эту логику, либо вообще перестать юзать подобные способы хранения строк.
+* \todo It woulde be better to take out this logic somewhere, or stop using such ways of storing strings at all.
 */
 
 bool CFile::ReadString(string &Buffer)
@@ -313,9 +313,9 @@ bool CFile::ReadString(string &Buffer)
 }
 
 /**
-* CFile::WriteString - записывает строку Data в файл и заканчивает запись нулевым байтом.
+* CFile::WriteString - writes Data string to a file, terminating it with null byte.
 *
-* \todo Хорошо бы либо вынести куда-нибудь эту логику, либо вообще перестать юзать подобные способы хранения строк.
+* \todo It woulde be better to take out this logic somewhere, or stop using such ways of storing strings at all.
 */
 
 bool CFile::WriteString(const char *Data)
@@ -334,9 +334,9 @@ bool CFile::WriteString(const string &Data)
 }
 
 /**
-* CFile::WriteText - записывает текст из Data в файл, не завершая его ничем.
+* CFile::WriteText - writes text from Data to a file without terminating it with anything.
 *
-* В отличие от WriteString, эта функция добрая и полезная.
+* Unlike WriteString this function is good and useful.
 */
 
 bool CFile::WriteText(const char *Data)
@@ -355,11 +355,11 @@ bool CFile::WriteText(const string &Data)
 }
 
 /**
-* CFile::ReadLine - читает строку, завершённую символом конца строки, из файла и записывает её в память по адресу Buffer.
-* Чтение заканчивается при достижении ASize символа, символа конца строки или конца файла, что встретится первее.
+* CFile::ReadLine - reads a string terminated by newline symbol and stores it in memory at address Buffer.
+* Reading finishes at reaching ASize symbol, newline or EOF symbol, whichvever comes first.
 * 
-* \param[out] Buffer указатель на участок памяти, в который будет записана строка, 
-* \param ASize максимальное число символов для чтения
+* \param[out] Buffer pointer to memory, where a string will be stored
+* \param ASize maximum number of symbols to read
 */
 
 bool CFile::ReadLine(char *Buffer, int ASize)
@@ -377,7 +377,7 @@ bool CFile::ReadLine(char *Buffer, int ASize)
 }
 
 /**
-* CFile::ReadLine - читает строку из файла до символа конца строки или конца файла, что встретися первее, и записывает её в Buffer.
+* CFile::ReadLine - reads a string from a file until newline or EOF symbol, whichever comes first, and stores it in Buffer.
 */
 
 bool CFile::ReadLine(string &Buffer)
@@ -410,7 +410,7 @@ bool CFile::ReadLine(string &Buffer)
 }
 
 /**
-* CFile::WriteLine - записывает строку Data в файл и завршает запись символами конца строки, соответствующими текущей системе.
+* CFile::WriteLine - writes Data string in a file, terminated by newline symbols, according to current platform.
 */
 
 bool CFile::WriteLine(const char *Data)
@@ -429,9 +429,9 @@ bool CFile::WriteLine(const string &Data)
 }
 
 /**
-* CFile::GetContent - возвращает всё содержимое файла в виде строки.
+* CFile::GetContent - returns all file content in string.
 *
-* Не влияет на позицию курсора для других операций чтения.
+* Doesn't affect cursor position for other reading operations.
 */
 
 string CFile::GetContent()
@@ -464,9 +464,9 @@ string CFile::GetContent()
 }
 
 /**
-* CFile::SetContent - записывает в файл строку Data с его начала.
+* CFile::SetContent - writes Data string in a file from its beginning.
 *
-* Позиция курсора остаётся в месте окончания записи, поэтому, очевидно, влияет на другие операции записи.
+* Cursor position is set to the end of write, so, obviously, affects other writing operations.
 */
 
 bool CFile::SetContent(const string &Data)
@@ -476,10 +476,10 @@ bool CFile::SetContent(const string &Data)
 }
 
 /**
-* CFile::Seek - перемещает внутренний указатель текущей позиции на указанное место.
+* CFile::Seek - moves the internal current position pointer to specified place.
 *
-* \param Offset смещение в байтах.
-* \param Origin показывает, откуда считать Offset.
+* \param Offset offset in bytes
+* \param Origin shows from what place offset is calculated
 */
 
 bool CFile::Seek(long Offset, ESeekOrigin Origin)
@@ -540,7 +540,7 @@ long CFile::Size() const
 }
 
 /**
-* CFile::WriteLine - внутренняя версия WriteLine, для выноса общего кода из версий с std::string и 0-terminated строкой.
+* CFile::WriteLine - internal version of WriteLine to take out common code from versions with std::string and null-terrminated string.
 */
 
 bool CFile::WriteLine(const char *Data, size_t Size)

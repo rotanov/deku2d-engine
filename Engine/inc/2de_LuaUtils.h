@@ -22,6 +22,7 @@ public:
 	void RunGC();
 
 	string GetLastError() const;
+	void TriggerError(const string &AMessage, ...);
 
 protected:
 	CLuaVirtualMachine();

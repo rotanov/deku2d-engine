@@ -13,6 +13,9 @@ namespace LuaAPI
 	// void Log(string Event, string Text)
 	int WriteToLog(lua_State *L)
 	{
+		if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Log API call");
+
 		::Log(lua_tostring(L, -2), lua_tostring(L, -1));
 		return 0;
 	}
@@ -20,14 +23,14 @@ namespace LuaAPI
 	// bool IsSpacePressed()
 	int IsSpacePressed(lua_State *L)
 	{
-		lua_pushboolean(L, (::CEngine::Instance()->keys[SDLK_SPACE]) ? true : false);
+		lua_pushboolean(L, (CEngine::Instance()->keys[SDLK_SPACE]) ? true : false);
 		return 1;
 	}
 
 	// number GetDeltaTime()
 	int GetDeltaTime(lua_State *L)
 	{
-		lua_pushnumber(L, ::CEngine::Instance()->GetDeltaTime());
+		lua_pushnumber(L, CEngine::Instance()->GetDeltaTime());
 		return 1;
 	}
 
@@ -36,7 +39,10 @@ namespace LuaAPI
 	// userdata CreateNewText(string Name)
 	int CreateNewText(lua_State *L)
 	{
-		::CText *text = ::CFactory::Instance()->New< ::CText>(lua_tostring(L, -1));
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to CreateNewText API call");
+
+		CText *text = CFactory::Instance()->New<CText>(lua_tostring(L, -1));
 		lua_pushlightuserdata(L, text);
 		return 1;
 	}
@@ -44,13 +50,9 @@ namespace LuaAPI
 	// string GetText(userdata TextObject)
 	int GetText(lua_State *L)
 	{
-		::CText *text = static_cast< ::CText *>(lua_touserdata(L, -1));
+		CText *text = static_cast< ::CText *>(lua_touserdata(L, -1));
 		if (!text)
-		{
-			::Log("LUAERROR", "Incorrect usage of light user data in GetText API call");
-			lua_pushstring(L, "");
-			return 1;
-		}
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetText API call");
 
 		lua_pushstring(L, text->GetText().c_str());
 		return 1;
@@ -59,8 +61,10 @@ namespace LuaAPI
 	// userdata GetTextObject(string Name)
 	int GetTextObject(lua_State *L)
 	{
-		string name = lua_tostring(L, -1);
-		::CText *result = ::CFactory::Instance()->Get<CText>(name);
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetTextObject API call");
+
+		CText *result = CFactory::Instance()->Get<CText>(lua_tostring(L, -1));
 
 		if (!result)
 			return 0;
@@ -72,8 +76,10 @@ namespace LuaAPI
 	// userdata GetFontObject(string Name)
 	int GetFontObject(lua_State *L)
 	{
-		string name = lua_tostring(L, -1);
-		::CFont *result = ::CFactory::Instance()->Get<CFont>(name);
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetFontObject API call");
+
+		CFont *result = CFactory::Instance()->Get<CFont>(lua_tostring(L, -1));
 
 		if (!result)
 			return 0;
@@ -85,11 +91,14 @@ namespace LuaAPI
 	// void SetText(userdata TextObject, string NewText)
 	int SetText(lua_State *L)
 	{
-		::CText *text = static_cast< ::CText *>(lua_touserdata(L, -2));
+		CText *text = static_cast<CText *>(lua_touserdata(L, -2));
 		if (!text)
-			::Log("LUAERROR", "Incorrect usage of light user data in SetText API call");
-		else
-			text->SetText(lua_tostring(L, -1));
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetText API call");
+
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetText API call");
+
+		text->SetText(lua_tostring(L, -1));
 
 		return 0;
 	}
@@ -97,19 +106,13 @@ namespace LuaAPI
 	// void SetTextFont(userdata TextObject, userdata FontObject)
 	int SetTextFont(lua_State *L)
 	{
-		::CText *text = static_cast< ::CText *>(lua_touserdata(L, -2));
+		CText *text = static_cast<CText *>(lua_touserdata(L, -2));
 		if (!text)
-		{
-			::Log("LUAERROR", "Incorrect usage of light user data in SetTextFont API call");
-			return 0;
-		}
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
 	
-		::CFont *font = static_cast< ::CFont *>(lua_touserdata(L, -1));
+		CFont *font = static_cast<CFont *>(lua_touserdata(L, -1));
 		if (!font)
-		{
-			::Log("LUAERROR", "Incorrect usage of light user data in SetTextFont API call");
-			return 0;
-		}
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
 
 		text->SetFont(font);
 		return 0;
@@ -118,7 +121,10 @@ namespace LuaAPI
 	// userdata GetFont(string Name)
 	int GetFont(lua_State *L)
 	{
-		::CFont *font = ::CFactory::Instance()->Get<CFont>(lua_tostring(L, -1));
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetFont API call");
+
+		CFont *font = CFactory::Instance()->Get<CFont>(lua_tostring(L, -1));
 		lua_pushlightuserdata(L, font);
 		return 1;
 	}
@@ -126,11 +132,14 @@ namespace LuaAPI
 	// void SetPosition(userdata RenderableObject, number X, number Y)
 	int SetPosition(lua_State *L)
 	{
-		::CRenderable *obj = static_cast< ::CRenderable *>(lua_touserdata(L, -3));
+		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
+
+		CRenderable *obj = static_cast<CRenderable *>(lua_touserdata(L, -3));
 		if (!obj)
-			::Log("LUAERROR", "Incorrect usage of light user data in SetPosition API call");
-		else
-			obj->Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
+
+		obj->Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
 
 		return 0;
 	}
@@ -162,9 +171,10 @@ bool CLuaVirtualMachine::RunFile(const string &AFilename)
 	if (!State)
 		return false;
 
-	if (luaL_dofile(State, AFilename.c_str()) !=0 )
+	if (luaL_dofile(State, AFilename.c_str()) !=0)
 	{
 		LastError = lua_tostring(State, -1);
+		Log("ERROR", "Lua: %s", LastError.c_str());
 		return false;
 	}
 
@@ -179,6 +189,7 @@ bool CLuaVirtualMachine::RunString(const string &AString)
 	if (luaL_dostring(State, AString.c_str()) != 0)
 	{
 		LastError = lua_tostring(State, -1);
+		Log("ERROR", "Lua: %s", LastError.c_str());
 		return false;
 	}
 
@@ -212,6 +223,17 @@ void CLuaVirtualMachine::RunGC()
 string CLuaVirtualMachine::GetLastError() const
 {
 	return LastError;
+}
+
+void CLuaVirtualMachine::TriggerError(const string &AMessage, ...)
+{
+	if (!State)
+		return;
+	
+	va_list args;
+	va_start(args, AMessage);
+	luaL_error(State, AMessage.c_str(), args);
+	va_end(args);
 }
 
 void CLuaVirtualMachine::RegisterStandardAPI()

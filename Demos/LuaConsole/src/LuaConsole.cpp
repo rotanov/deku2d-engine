@@ -6,6 +6,9 @@ namespace LuaAPI
 	// void ConsoleWrite(string Text)
 	int ConsoleWrite(lua_State *L)
 	{
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect argument given to ConsoleWrite API call");
+
 		CFactory::Instance()->Get<CLuaConsole>("Lua Console")->WriteLine(lua_tostring(L, -1));
 		return 0;
 	}
@@ -28,7 +31,6 @@ CLuaConsole::CLuaConsole()
 	CommandLineEdit->SetBox(CBox(10, 30, CGLWindow::Instance()->GetWidth() - 20, 30));
 
 	CommandOutput = CFactory::Instance()->New<CText>("CommandOutput");
-	//CommandOutput->SetBox(CBox(10, CGLWindow::Instance()->GetHeight() - 50, CGLWindow::Instance()->GetWidth() - 20, CGLWindow::Instance()->GetHeight() - 100));
 	
 	CommandOutput->Position = Vector2(10, CGLWindow::Instance()->GetHeight() - 20);
 
