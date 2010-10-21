@@ -752,11 +752,12 @@ void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
 CRenderManager::CRenderManager()
 {
 	SetName("Render Manager");
+	Renderer = new CFixedPipelineRenderer();
 }
 
 CRenderManager::~CRenderManager()
 {
-
+	delete Renderer;
 }
 
 bool CRenderManager::DrawObjects()
@@ -782,13 +783,17 @@ bool CRenderManager::DrawObjects()
 			continue;
 		if (data->GetVisibility())
 		{
-			data->Render();
+			if (data->GetModel() != NULL)
+				Renderer->PushModel(data, data->GetModel());
+			//data->Render();
 #if defined(_2DE_DEBUG_DRAW_BOXES)
 			DrawLinedBox(&TempRenderInfo, data->GetBox());
 #endif
 		}
 	}
 
+
+	
 	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
@@ -810,6 +815,9 @@ bool CRenderManager::DrawObjects()
 		}
 	//FontVertices.RenderPrimitive(GL_QUADS);
 	glDisable(GL_TEXTURE_2D);
+
+	Renderer->Render();
+
 	QuadVertices.RenderPrimitive(GL_QUADS);
 	LineVertices.RenderPrimitive(GL_LINES);
 	PointVertices.RenderPrimitive(GL_POINTS);
@@ -1478,4 +1486,144 @@ void CVertexDataHolder::Grow()
 	delete[] TexCoords;
 
 	TexCoords = NewTexCoords;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CRenderer
+
+
+
+bool CFixedPipelineRenderer::Initilize()
+{
+	// do something
+	return true;
+}
+
+bool CFixedPipelineRenderer::Finalize()
+{
+	// do something either
+	return false;
+}
+
+void CFixedPipelineRenderer::PushModel(CRenderObjectInfo *Sender, CModel * AModel)
+{
+	assert(Sender != NULL && AModel != NULL);
+	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType()];
+
+	switch (AModel->GetModelType())
+	{
+	case MODEL_TYPE_NOT_A_MODEL:
+		assert(false);
+		break;
+	case MODEL_TYPE_POINTS:
+
+		break;
+	case MODEL_TYPE_LINES:
+
+		break;
+	case MODEL_TYPE_TRIANGLES:
+
+	case MODEL_TYPE_QUADS:
+		assert(false);
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
+	
+	for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
+	{
+		Vertex = AModel->GetVertices()[i];
+		TempVector = (Vertex * Sender->GetScaling());
+		if (!Equal(Sender->GetAngle(), 0.0f))
+			TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
+		TempVector += Sender->Position;
+		if (!Sender->doIgnoreCamera)
+			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+		VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Sender->GetDepth()), Sender->Color);
+	}
+
+}
+
+void CFixedPipelineRenderer::Render()
+{
+	PrimitiveHolders[0].RenderPrimitive(GL_POINTS);
+	PrimitiveHolders[1].RenderPrimitive(GL_LINES);
+	PrimitiveHolders[2].RenderPrimitive(GL_TRIANGLES);
+
+	PrimitiveHolders[0].Clear();
+	PrimitiveHolders[1].Clear();
+	PrimitiveHolders[2].Clear();
+}
+
+CFixedPipelineRenderer::~CFixedPipelineRenderer()
+{
+
+}
+//////////////////////////////////////////////////////////////////////////
+// Better vertex holder
+
+
+CBetterVertexHolder::CBetterVertexHolder() : VertexCount(0), ReservedCount(StartSize)
+{
+	Colors = new RGBAf [StartSize];
+	Vertices = new Vector3 [StartSize];
+}
+
+CBetterVertexHolder::~CBetterVertexHolder()
+{
+	delete [] Colors;
+	delete [] Vertices;
+}
+
+void CBetterVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor)
+{
+	if (VertexCount == ReservedCount)
+		_Grow();
+	Vertices[VertexCount] = AVertex;
+	Colors[VertexCount] = AColor;
+	VertexCount++;
+}
+
+void CBetterVertexHolder::RenderPrimitive(GLuint Type)
+{
+	if (VertexCount == 0)
+		return;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glColorPointer(4, GL_FLOAT, 0, Colors);
+	glDrawArrays(Type, 0, VertexCount);
+}
+
+void CBetterVertexHolder::Clear()
+{
+	VertexCount = 0;
+}
+
+unsigned int CBetterVertexHolder::GetVertexCount()
+{
+	return VertexCount;
+}
+
+void CBetterVertexHolder::_Grow()
+{
+	ReservedCount = VertexCount * 2;
+	RGBAf *NewColors = new RGBAf[ReservedCount];
+	for (unsigned int i = 0; i < VertexCount; i++)
+		NewColors[i] = Colors[i];
+
+	delete[] Colors;
+
+	Colors = NewColors;
+
+	Vector3 *NewVertices = new Vector3[ReservedCount];
+	for (unsigned int i = 0; i < VertexCount; i++)
+		NewVertices[i] = Vertices[i];
+
+	delete[] Vertices;
+
+	Vertices = NewVertices;
 }

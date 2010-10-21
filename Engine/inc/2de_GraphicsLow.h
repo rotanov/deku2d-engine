@@ -53,9 +53,11 @@ extern char BINARY_DATA_DEFAULT_FONT[];
 
 enum EModelType
 {
-	MODEL_TYPE_LINES,
-	MODEL_TYPE_POINTS,
-	MODEL_TYPE_TRIANGLES,
+	MODEL_TYPE_NOT_A_MODEL = -1,
+	MODEL_TYPE_LINES = 0,
+	MODEL_TYPE_POINTS = 1,
+	MODEL_TYPE_TRIANGLES = 2,
+	MODEL_TYPE_QUADS = 3,
 };
 
 enum EBlendingMode
@@ -133,6 +135,8 @@ public:
 
 };
 
+class CModel;
+
 class CRenderObjectInfo
 {
 public:
@@ -151,6 +155,11 @@ public:
 	void SetLayer(int Layer); // Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
 	int GetLayer() const;
 	float GetDepth() const;
+
+	virtual CModel* GetModel()
+	{
+		return NULL;
+	}
 
 private:
 	float Angle; //	(Degrees)
@@ -180,16 +189,6 @@ private:
 	CBox Box; //	Axis Aligned Bounding Box for culling
 	CAbstractScene *Scene;
 	bool Visible;
-};
-
-class CModel // : public 
-{
-/*
-	CTexture*
-	Vector2*
-	Vector2*
-	RGBAf*
-*/
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -241,6 +240,74 @@ class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSing
 protected:
 	CTextureManager();
 	friend class CTSingleton <CTextureManager>;
+};
+
+//////////////////////////////////////////////////////////////////////////
+// CModel
+
+class CModel // : public // is Abstract as fuck
+{
+public:
+	virtual void SetTexture(const CTexture *ATexture) = 0;
+	virtual void SetModelType(EModelType AModelType) = 0;
+	virtual const CTexture* GetTexture() const = 0;
+	virtual const Vector2* GetVertices() const = 0;
+	virtual const Vector2* GetTexCoords() const = 0;
+	//const RGBAf* GetColors() const = 0;
+	virtual EModelType GetModelType() const = 0;
+	virtual int GetVertexNumber() const = 0;
+};
+
+class CModelLine : public CModel
+{
+public:
+	CModelLine()
+	{
+		Vertices[0] = V2_ZERO;
+		Vertices[1] = V2_DIR_RIGHT + V2_DIR_UP;
+	}
+
+	void SetTexture(const CTexture *ATexture)
+	{
+		assert(false);
+	}
+
+	void SetModelType(EModelType AModelType)
+	{
+		assert(false);
+	}
+
+	const CTexture* GetTexture() const
+	{
+		assert(false);
+		return NULL;
+	}
+
+	const Vector2* GetVertices() const
+	{
+		return Vertices;
+	}
+
+	const Vector2* GetTexCoords() const
+	{
+		assert(false);
+		return NULL;
+	}
+
+	EModelType GetModelType() const
+	{
+		return MODEL_TYPE_LINES;
+	}
+
+	int GetVertexNumber() const
+	{
+		return 2;
+	}
+
+private:
+	CTexture *Texture;
+	Vector2 Vertices[2];
+
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -322,10 +389,31 @@ private:
 	void Grow();
 };
 
+class CBetterVertexHolder // For primitives for now
+{
+public:
+	CBetterVertexHolder();	// Desired model type;
+	virtual ~CBetterVertexHolder();
+	virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
+	virtual void RenderPrimitive(GLuint);
+	void Clear();
+	unsigned int GetVertexCount();
+
+protected:
+	static const unsigned int StartSize = 256;
+	unsigned int VertexCount;
+	unsigned int ReservedCount;
+	RGBAf *Colors;
+	Vector3 *Vertices;
+
+	virtual void _Grow();
+};
+
+
 //////////////////////////////////////////////////////////////////////////
 // CAbstractRender
 
-class CTransformator	// lol
+class CTransformator	// is "CTransformer" better?
 {
 public:
 	virtual void PushTransformation(const CRenderObjectInfo * ATransformation)
@@ -335,6 +423,7 @@ public:
 		CurrentTransformation += TempTransformation;
 		TransformationStack.push_back(TempTransformation);
 	}
+
 	virtual void PopTransformation()
 	{
 		CurrentTransformation -= TransformationStack.back();
@@ -355,58 +444,33 @@ protected:
 class CAbstractRenderer
 {
 public:
-	virtual bool Initialize() = 0;
-	virtual bool Finalize() = 0;
-	virtual void PushModel(EModelType, CRenderObjectInfo *, Vector2 *) = 0;
-	virtual void PushModel(EModelType, CRenderObjectInfo *, GLuint, Vector2 *) = 0;
+	virtual ~CAbstractRenderer()
+	{
+		// = 0;
+	}
+	virtual bool Initialize(){return false;};// = 0;
+	virtual bool Finalize(){return false;};// = 0;
+	virtual void PushModel(CRenderObjectInfo *, CModel *){};// = 0;
+	virtual void Render(){};// = 0;
 
-	virtual void Render() = 0;
-
-protected:
-
-private:
 
 };
 
 class CFixedPipelineRenderer : public CAbstractRenderer
 {
 public:
-	bool Initilize()
+	CFixedPipelineRenderer()
 	{
 
 	}
-
-	bool Finalize()
-	{
-
-	}
-
-	void PushModel(EModelType ModelKind, CRenderObjectInfo *RenderInfo, Vector2 *Vertices)
-	{
-		CPrmitiveVertexDataHolder *VertexHolder = &PrimitiveHolders[ModelKind];
-// 		switch (EModelKind)
-// 		{
-// 		case MODEL_KIND_POINTS:
-// 			break;
-// 		case MODEL_KIND_LINES:
-// 			break;
-// 		case MODEL_KIND_TRIANGLES:
-// 			break;
-// 		}
-	}
-
-	void PushModel(EModelType, CRenderObjectInfo *, GLuint, Vector2 *)
-	{
-
-	}
-
-	void Render()
-	{
-
-	}
+	~CFixedPipelineRenderer();
+	bool Initilize();
+	bool Finalize();
+	void PushModel(CRenderObjectInfo *ARenderInfo, CModel * AModel);
+	void Render();
 
 private:
-	CPrmitiveVertexDataHolder PrimitiveHolders[MODEL_TYPE_TRIANGLES + 1];
+	CBetterVertexHolder PrimitiveHolders[MODEL_TYPE_TRIANGLES + 1];
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -526,6 +590,7 @@ protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 	friend class CEngine;
+
 private:
 	CAbstractRenderer *Renderer;
 	#define DEKU2D_MAX_TEXTURES 32
@@ -538,6 +603,7 @@ private:
 	void SetBlendingMode();
 	void BeginFrame();
 	void EndFrame();
+
 public:
 	CCamera	Camera;
 	~CRenderManager();
@@ -545,7 +611,6 @@ public:
 	void Print(const CText *Text, const string &Characters);
 	void DrawLinedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
 	void DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
-	// Box is always box, but TC may be used to mirros sprite or smthng, so it is not CBox
 	void DrawTexturedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords);
 	void DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point);
 	void DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1);

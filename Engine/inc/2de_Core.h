@@ -130,6 +130,95 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
+namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html 
+						// if it won't come in handy, I'll remove it.
+	namespace typetag_private {
+
+	/**
+	*  address of this structure is used as typetag
+	*/
+	template <typename _Ty> struct typetag_holder {};
+
+	template <typename _Ty>
+	inline const void* GenTypeTag()
+	{
+		static typetag_holder<_Ty> typetagInst;
+		return reinterpret_cast<void*>(&typetagInst);
+	}
+
+	} // namespace typetag_private
+
+	template <typename C>
+	inline const void * typetag()
+	{
+		return _details::typetag_private::GenTypeTag<C>();
+	}
+
+	/** 
+	*  remove modifier removes const, volatile and others modifiers
+	*/
+	template <typename _Ty>
+	struct remove_modifier
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<const _Ty>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<volatile _Ty>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<_Ty&>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<const _Ty&>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<_Ty*>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<const _Ty*>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<const _Ty* const>
+	{
+		typedef _Ty type;
+	};
+
+	template <typename _Ty>
+	struct remove_modifier<volatile _Ty*>
+	{
+		typedef _Ty type;
+	};
+} // namespace _details
+
+template <typename C>
+inline const void * typetag()
+{
+	return _details::typetag_private::
+	GenTypeTag<typename _details::remove_modifier<C>::type>();
+}
+
 /**
 * CObject - base class for many classes.
 */

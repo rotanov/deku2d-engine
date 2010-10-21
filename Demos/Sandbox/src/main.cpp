@@ -9,7 +9,7 @@ class CGrBox : public CRenderable, public CUpdatable
 {
 private:
 	CBox Box;
-
+	CModelLine Model;
 public:
 	CGrBox()
 	{
@@ -31,6 +31,11 @@ public:
 	void Update(float dt)
 	{
 		Position += Vector2::Random(-0.1f, 0.1f);
+	}
+
+	CModel* GetModel()
+	{
+		return &Model;
 	}
 };
 
