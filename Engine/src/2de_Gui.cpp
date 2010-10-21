@@ -124,17 +124,12 @@ CGUIRootObject::CGUIRootObject() : TabHolded(false), KeyHoldRepeatDelay(300), Ke
 
 void CGUIRootObject::Render()
 {
-	glLoadIdentity();
 	CGUIObject *Focused = CGUIManager::Instance()->GetFocusedObject();
 	if (Focused)
 	{
-		PRender->LineStippleEnabled = true;
-		PRender->lwidth = Style->Metrics.FocusRectLineWidth;
-		PRender->lClr = Style->Colors.FocusRect;
-		PRender->grRectL(Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Min,
-			Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing).Max);
-		PRender->LineStippleEnabled = false;	// bad.. object shouldn't "disable" any settings.. every object should just initialize it..
-		PRender->lwidth = 1.0f;
+		//PRender->lwidth = Style->Metrics.FocusRectLineWidth;
+		Color = Style->Colors.FocusRect;
+		CRenderManager::Instance()->DrawLinedBox(this,	Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing));
 	}
 	return;
 }
@@ -819,7 +814,11 @@ void CMenuItem::Render()
 	Color = COLOR_WHITE;
 
 	if (Focus != Objects.end())
-		PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
+	{
+		//PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
+		Position = (*Focus)->Position;
+		CRenderManager::Instance()->DrawSolidBox(this, CBox(V2_QuadBinCenter).Inflated(4.0f, 4.0f));
+	}
 }
 
 void CMenuItem::Update(float dt)

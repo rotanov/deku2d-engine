@@ -129,7 +129,7 @@ void CTank::Update(float dt)
 
 void CTank::Render()
 {
-	glLoadIdentity();
+//	glLoadIdentity();
 	float Angle = 0;
 	if (Direction == V2_DIR_RIGHT)
 		Angle = 90;
@@ -138,54 +138,30 @@ void CTank::Render()
 	if (Direction == V2_DIR_LEFT)
 		Angle = 270;
 
-	glTranslatef(Position.x + 16, Position.y + 16, 0.0f);
-	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
-	glTranslatef(-Position.x - 16, -Position.y - 16, 0.0f);
-	Color->glSet();
-	glEnable(GL_TEXTURE_2D);
-	Tileset->GetTexture()->Bind();
-	glBegin(GL_QUADS);
-		Tileset->GetCellTC(csTank)[0].glTexCoord();
-		glVertex2f(Position.x, Position.y);
+// 	glTranslatef(Position.x + 16, Position.y + 16, 0.0f);
+// 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
+// 	glTranslatef(-Position.x - 16, -Position.y - 16, 0.0f);
+	SetLayer(2);
+	CRenderManager::Instance()->DrawTexturedBox(this, CBox(V2_ZERO, Vector2(32.0f, 32.0f)), Tileset->GetTexture(), Tileset->GetCellTC(csTank));
 
-		Tileset->GetCellTC(csTank)[1].glTexCoord();
-		glVertex2f(Position.x + 32, Position.y);
+//Draw bullets
+//Tileset->GetTexture()	
+// 	for (int i = 0; i < BulletsCount; i++)
+// 	{
+// 		Tileset->GetCellTC(csBullet)[0].glTexCoord();
+// 		Bullets[i].p.glVertex();
+// 
+// 		Tileset->GetCellTC(csBullet)[1].glTexCoord();
+// 		(Bullets[i].p + Vector2(32,0)).glVertex();
+// 
+// 		Tileset->GetCellTC(csBullet)[2].glTexCoord();
+// 		(Bullets[i].p + Vector2(32,32)).glVertex();
+// 
+// 		Tileset->GetCellTC(csBullet)[3].glTexCoord();
+// 		(Bullets[i].p + Vector2(0,32)).glVertex();
+// 	}
 
-		Tileset->GetCellTC(csTank)[2].glTexCoord();
-		glVertex2f(Position.x + 32, Position.y + 32);
-
-		Tileset->GetCellTC(csTank)[3].glTexCoord();
-		glVertex2f(Position.x, Position.y + 32);
-	glEnd();
-	glLoadIdentity();
-
-	Tileset->GetTexture()->Bind();
-	glColor4f(0.8f, 0.1f, 0.1f, 0.9f);
-	glBegin(GL_QUADS);
-	for (int i = 0; i < BulletsCount; i++)
-	{
-		Tileset->GetCellTC(csBullet)[0].glTexCoord();
-		Bullets[i].p.glVertex();
-
-		Tileset->GetCellTC(csBullet)[1].glTexCoord();
-		(Bullets[i].p + Vector2(32,0)).glVertex();
-
-		Tileset->GetCellTC(csBullet)[2].glTexCoord();
-		(Bullets[i].p + Vector2(32,32)).glVertex();
-
-		Tileset->GetCellTC(csBullet)[3].glTexCoord();
-		(Bullets[i].p + Vector2(0,32)).glVertex();
-	}
-	glEnd();
 	
-	glLoadIdentity();
-	glDisable(GL_TEXTURE_2D);
-
-
-	glDisable(GL_TEXTURE_2D);
-	CPrimitiveRender PRender;
-	PRender.plClr = Color;
-	PRender.gDrawBBox(Map->GetCellAABB(GetCenter()));
 	return;
 }
 
@@ -236,7 +212,7 @@ void CTankManager::AddAI()
 
 void CTankManager::Render()
 {
-	glLoadIdentity();
+//	glLoadIdentity();
 //	gSetBlendingMode();	
 	CFont *Font = CFontManager::Instance()->GetFont("Font");
 	return;
@@ -263,33 +239,20 @@ Vector2 CTankMap::GetNewTankLocation()
 
 void CTankMap::Render()
 {
-	glLoadIdentity();
-	glScissor(0, 0, 640, 460);
-//	gToggleScissor(true);
-	Tileset->GetTexture()->Bind();
-	glEnable(GL_TEXTURE_2D);
+//	glLoadIdentity();
 	CellSize = DEFAULT_CELL_SIZE;
-	glBegin(GL_QUADS);
+
 	for (int i = 0; i < MAP_SIZE_X; i++)
 		for (int j = 0; j < MAP_SIZE_Y; j++)
 		{
 			//if (Cells[j][i].TileIndex == csBlock || Cells[j][i].TileIndex  == csDestr || Cells[j][i].TileIndex  == csFree1)
 			{
-				
-					Tileset->GetCellTC(Cells[j][i].TileIndex)[0].glTexCoord();
-					(Vector2(i, j)*CellSize).glVertex();
-					Tileset->GetCellTC(Cells[j][i].TileIndex)[1].glTexCoord();
-					(Vector2(i+1, j)*CellSize).glVertex();
-					Tileset->GetCellTC(Cells[j][i].TileIndex)[2].glTexCoord();
-					(Vector2(i+1, j+1)*CellSize).glVertex();
-					Tileset->GetCellTC(Cells[j][i].TileIndex)[3].glTexCoord();
-					(Vector2(i, j+1)*CellSize).glVertex();
-				
+				CRenderManager::Instance()->DrawTexturedBox(this, CBox(Vector2(i, j) * CellSize, Vector2(i+1, j+1) * CellSize),
+					Tileset->GetTexture(), Tileset->GetCellTC(Cells[j][i].TileIndex));
 			}
 		}
-	glEnd();
-	glDisable(GL_TEXTURE_2D);
-//	gToggleScissor(false);
+
+//	glDisable(GL_TEXTURE_2D);
 	return;
 }
 

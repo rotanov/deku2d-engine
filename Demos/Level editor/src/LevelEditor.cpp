@@ -72,35 +72,35 @@ void AddTile(int TileIndex, int x, int y)
 void RenderTileList()
 {
 	CCellNode *next = root.next;
-	glLoadIdentity();
-	glTranslatef(Offset.x, Offset.y, 0.0f);
-	glScalef((float)Zoom / (float)TileSet->TileWidth , (float)Zoom / (float)TileSet->TileHeight , 0.0f);
-	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
-	//glDisable(GL_BLEND);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	TileSet->GetTexture()->Bind();
-	glBegin(GL_QUADS);
+// 	glLoadIdentity();
+// 	glTranslatef(Offset.x, Offset.y, 0.0f);
+// 	glScalef((float)Zoom / (float)TileSet->TileWidth , (float)Zoom / (float)TileSet->TileHeight , 0.0f);
+// 	glPushAttrib(GL_TEXTURE_BIT | GL_BLEND);
+// 	glEnable(GL_TEXTURE_2D);
+// 	//glDisable(GL_BLEND);
+// 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+// 	TileSet->GetTexture()->Bind();
+// 	glBegin(GL_QUADS);
 	CMapCellInfo *t;
-	while (next)
-	{
-		t = &next->info;
-
-		glTexCoord2f(t->tc[0].x, t->tc[0].y);
-		glVertex3f(t->pos[0].x,	t->pos[0].y, t->z);
-
-		glTexCoord2f(t->tc[1].x, t->tc[1].y);
-		glVertex3f(t->pos[1].x,	t->pos[1].y, t->z);
-
-		glTexCoord2f(t->tc[2].x, t->tc[2].y);
-		glVertex3f(t->pos[2].x,	t->pos[2].y, t->z);
-
-		glTexCoord2f(t->tc[3].x, t->tc[3].y);
-		glVertex3f(t->pos[3].x,	t->pos[3].y, t->z);
-		next = next->next;
-	}
-	glEnd();
-	glPopAttrib();
+// 	while (next)
+// 	{
+// 		t = &next->info;
+// 
+// 		glTexCoord2f(t->tc[0].x, t->tc[0].y);
+// 		glVertex3f(t->pos[0].x,	t->pos[0].y, t->z);
+// 
+// 		glTexCoord2f(t->tc[1].x, t->tc[1].y);
+// 		glVertex3f(t->pos[1].x,	t->pos[1].y, t->z);
+// 
+// 		glTexCoord2f(t->tc[2].x, t->tc[2].y);
+// 		glVertex3f(t->pos[2].x,	t->pos[2].y, t->z);
+// 
+// 		glTexCoord2f(t->tc[3].x, t->tc[3].y);
+// 		glVertex3f(t->pos[3].x,	t->pos[3].y, t->z);
+// 		next = next->next;
+// 	}
+// 	glEnd();
+// 	glPopAttrib();
 
 }
 
@@ -191,9 +191,9 @@ void DrawGrid()
 	int m = ScrnHeight;
 	(n /= Zoom)++;
 	(m /= Zoom)++;
-	glLoadIdentity();
+//	glLoadIdentity();
 	CPrimitiveRender p;
-	glTranslatef((int)Offset.x % Zoom,(int)Offset.y % Zoom, 0.0f);
+//	glTranslatef((int)Offset.x % Zoom,(int)Offset.y % Zoom, 0.0f);
 	p.doUseGlobalCoordSystem = false;
 	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
 	p.lClr = RGBAf(1.0f, 1.0f, 1.0f, 0.6f);
@@ -230,11 +230,11 @@ void DrawCursor()
 
 void DrawPanels()
 {
-	CPrimitiveRender p;
-	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
-	p.sClr = RGBAf(0.3f, 0.4f, 0.5, 0.7f);
-	p.grRectL(V2_ZERO+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
-	p.grRectS(V2_ZERO+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
+//	CPrimitiveRender p;
+//	p.BlendingOption = PRM_RNDR_OPT_BLEND_ONE;
+//	p.sClr = RGBAf(0.3f, 0.4f, 0.5, 0.7f);
+// 	p.grRectL(V2_ZERO+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
+// 	p.grRectS(V2_ZERO+Vector2(1,1), Vector2(LeftPanel, ScrnHeight-2));
 }
 
 
@@ -277,15 +277,15 @@ void CGlobalRenderObject::Render()
 
 	if (State == ST_SELECT_TILE)
 	{
-		glLoadIdentity();
-		glTranslatef(TileSelPos.x, TileSelPos.y, 0.0f);
+// 		glLoadIdentity();
+// 		glTranslatef(TileSelPos.x, TileSelPos.y, 0.0f);
 		
 		//Level.Render();
 		TileSet->RenderTileSet();
 		Vector2 vt0 = Vector2(((int)(MousePos.x - TileSelPos.x)/(int) TileSet->TileWidth) * TileSet->TileWidth,
 						((int)(MousePos.y - TileSelPos.y)/(int) TileSet->TileHeight) * TileSet->TileHeight) + TileSelPos;
 		Vector2 vt1 = vt0 + Vector2(TileSet->TileWidth, TileSet->TileHeight);
-		p.grRectC(vt0, vt1);
+		//p.grRectC(vt0, vt1);
 	}
 
 
@@ -295,13 +295,13 @@ void CGlobalRenderObject::Render()
 
 	if (State != ST_SELECT_TILE)
 	{
-		p.grRectC(Vector2(vx*Zoom, vy*Zoom)+mOffset,
-			Vector2((vx+1)*Zoom, (vy+1)*Zoom)+mOffset);
+// 		p.grRectC(Vector2(vx*Zoom, vy*Zoom)+mOffset,
+// 			Vector2((vx+1)*Zoom, (vy+1)*Zoom)+mOffset);
 	}
 
-	p.grCircleL(MousePos, 5.0f);
+//	p.grCircleL(MousePos, 5.0f);
 
-	glLoadIdentity();
+	//glLoadIdentity();
 	//f->Pos = Vector2((vx+1)*Zoom, vy*Zoom);
 	//f->Print(" x:%d y:%d", (int)(vx - CellOffset.x), (int)(vy - CellOffset.y));
 

@@ -7,6 +7,7 @@ class CRotatingQuad : public CRenderable, CUpdatable
 public:
 	CRotatingQuad()
 	{
+		SetLayer(-1);
 		float ScrWidth = CGLWindow::Instance()->GetWidth();
 		float ScrHeight = CGLWindow::Instance()->GetHeight();
 		int Width_d2 = Random_Int(5, 10);
@@ -16,7 +17,7 @@ public:
 		Position = Vector2(x, y);
 		SetBox(CBox(Vector2(-Width_d2, -Height_d2), Vector2(Width_d2, Height_d2)));
 		Color = RGBAf(Random_Float(0.0f, 1.0f), Random_Float(0.0f, 1.0f), Random_Float(0.0f, 1.0f), 1.0f);
-		SetAngle(Random_Float(0.0f, 360.0f));
+		//SetAngle(Random_Float(0.0f, 360.0f));
 	}
 	void Render()
 	{
@@ -44,6 +45,7 @@ public:
 	int RectangleCount;
 	CRectangleTest()
 	{
+		RectangleCount = 0;
 		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		if (CCommandLineArgumentsManager::Instance()->IsOptionExists("rectangles"))
 		{
@@ -63,8 +65,9 @@ public:
 	{
 		if (CEngine::Instance()->keys[SDLK_UP])
 		{
-			CFactory::Instance()->New<CRotatingQuad>("");
-			CounterText.SetText("Rectangles count: " + itos(++RectangleCount));
+			for(int i = 0; i < 43000; i++)
+				CFactory::Instance()->New<CRotatingQuad>("");
+			CounterText.SetText("Rectangles count: " + itos(RectangleCount += 43000));
 		}
 	}
 	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)

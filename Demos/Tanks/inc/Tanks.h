@@ -114,6 +114,7 @@ public:
 
 		FiringInterval = DEFAULT_FIRING_INTERVAL;
 		FiringTimeout = 0.0f;
+		SetLayer(5);
 	}
 	void Init(RGBAf* AColor, Vector2 APosition)
 	{

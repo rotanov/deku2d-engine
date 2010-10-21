@@ -1,42 +1,25 @@
 #include "2de_GraphicsLow.h"
 
-#include "2de_MathUtils.h"
+#include "2de_Math.h"
 #include "2de_Engine.h"
 
-//////////////////////////////////////////////////////////////////////////
-// Vector2, Vector4 - some graphics integrated into math
+#if defined(USE_SDL_OPENGL)
+	#include <SDL/SDL_opengl.h>
+#elif defined(USE_GLEW)
+	#define GLEW_STATIC //GLEW_BUILD
+	#include <GL/glew.h>
+#else
+	#include <GL/gl.h>
+	#include <GL/glu.h>
+#endif
 
-void Vector2::glTranslate() const
-{
-	glTranslatef(x, y, 0.0f);
-}
-
-void Vector2::glScale() const
-{
-	glScalef(x, y, 1.0f);
-}
-
-void Vector2::glVertex() const
-{
-	glVertex2f(x, y);
-}
-
-void Vector2::glTexCoord() const
-{
-	glTexCoord2f(x, y);
-}
-
-void Vector4::glSet() const
-{
-	glColor4fv(&x);
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CRenderableUnitInfo
 
 CRenderObjectInfo::CRenderObjectInfo() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
 {
-
+	
 }
 
 void CRenderObjectInfo::SetAngle(float AAngle /*= 0.0f*/)
@@ -103,6 +86,7 @@ const CBox CRenderable::GetBox() const
  	CBox TempBox = Box;
  	TempBox.Min *= GetScaling();
  	TempBox.Max *= GetScaling();
+	TempBox.Offset(Position);
 	//Box.RotateByAngle(Angle);
 	return TempBox;
 }
@@ -230,14 +214,14 @@ CGLWindow::CGLWindow() : isCreated(false)
 	SetName("GLWindow");
 	Width = 640;	//@todo!!! Default magic numbers - delete them!
 	Height = 480;
-	Fullscreen = false;
+	isFullscreen = false;
 	BPP = 32;
 	Caption = "Warning: CGLWindow class instance have not been initialized properly";
 }
 
 bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte ABPP, const string &ACaption)
 {
-	Fullscreen = AFullscreen;
+	isFullscreen = AFullscreen;
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
@@ -272,8 +256,8 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 	// 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1);
 	// 	glEnable(0x809D);
 
-	int flags = SDL_OPENGL;
-	if (Fullscreen == true)
+	int flags = SDL_OPENGL | SDL_RESIZABLE;// | SDL_NOFRAME;
+	if (isFullscreen == true)
 	{
 		flags |= SDL_FULLSCREEN;
 	}
@@ -286,11 +270,50 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 		SDL_Quit();
 	}
 
+	GLenum glewError = glewInit();
+	if (GLEW_OK != glewError)
+	{
+		/* Problem: glewInit failed, something is seriously wrong. */
+		Log("ERROR", "%s", glewGetErrorString(glewError));
+		return false;
+	}
+
 	SDL_Event resizeEvent;
 	resizeEvent.type = SDL_VIDEORESIZE;
 	resizeEvent.resize.w = Width;
 	resizeEvent.resize.h = Height;
 	SDL_PushEvent(&resizeEvent);
+
+	//glCreateShader()
+
+	/* Some code snippets for OpenGL-features aviability check:
+
+		if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
+		printf("Ready for GLSL\n");
+		else {
+		printf("Not totally ready :( \n");
+		exit(1);
+
+		if (glewIsSupported("GL_VERSION_2_0"))
+		printf("Ready for OpenGL 2.0\n");
+		else {
+		printf("OpenGL 2.0 not supported\n");
+		exit(1);
+		}
+
+		to use shaders we will go through the following scheme
+		glCreateProgram();
+			for each shader do ( glAttachShader(); )
+		glLinkProgram();
+		glUseProgram();
+
+		and for each Shader do(
+			glCreateShader();
+			glShaderSource();
+			glCompileShader();
+		)	- now we can attach it.
+	}
+	*/
 
 	glInit(Width, Height);
 
@@ -302,7 +325,7 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 
 bool CGLWindow::gCreateWindow()
 {
-	return gCreateWindow(Fullscreen, Width, Height, BPP, Caption);
+	return gCreateWindow(isFullscreen, Width, Height, BPP, Caption);
 }
 
 bool CGLWindow::glInitSystem()
@@ -318,11 +341,10 @@ void CGLWindow::glResize(GLsizei Width, GLsizei Height)
 {
 	if (Height == 0)		
 		Height = 1;
-	glViewport(0, 0, Width-1, Height-1);
+	glViewport(0, 0, Width, Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluOrtho2D(0.0f, Width-1, 0.0f, Height-1);
-	glOrtho(0.0f, Width - 1.0f, 0.0f, Height - 1.0f, -100.0f, 100.0f);
+	glOrtho(0.0f, Width, 0.0f, Height, -100.0f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -334,35 +356,29 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 	//glClearColor(0.0, 0.0, 0.0, 0.5);
 	SetBackgroundColor(RGBAf(0.0, 0.0, 0.0, 0.5));
 
-	glEnable(GL_BLEND);
-
-	if (Height == 0)		
-		Height = 1;
-	if (Width == 0)		
-		Width = 1;
 	glViewport(0, 0, Width, Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(0.0f, Width - 1, 0.0f, Height - 1);
+	glOrtho(0.0f, Width, 0.0f, Height, -100.0f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);
 
-	glEnable(GL_POINT_SMOOTH);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+// 	glEnable(GL_POINT_SMOOTH);
+// 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+// 	glEnable(GL_LINE_SMOOTH);
+// 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+// 	glEnable(GL_POLYGON_SMOOTH);
+// 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	setVSync(0);
 
-	glEnable			(GL_BLEND);
-	glBlendFunc			(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
-	//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	glEnable			(GL_ALPHA_TEST);
-	glAlphaFunc			(GL_GREATER, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
+//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0);
 }
 
 unsigned int CGLWindow::GetWidth() const
@@ -405,7 +421,15 @@ void CGLWindow::SetBackgroundColor(const RGBAf &AColor)
 	glClearColor(AColor.x, AColor.y, AColor.z, AColor.w);
 }
 
+void CGLWindow::SetBPP(byte ABPP)
+{
+	BPP = ABPP;
+}
 
+void CGLWindow::SetFullscreen(bool AFullscreen)
+{
+	isFullscreen = AFullscreen;
+}
 //////////////////////////////////////////////////////////////////////////
 // CFont
 
@@ -457,17 +481,17 @@ bool CFont::Load()
 		// 		bbox[i].Max.x = Vertices[i * 4 + 1];
 		// 		bbox[i].Max.y = Vertices[i * 4 + 3];
 		// 	}	// Для конвертирования из старого формата.
-		file.Read(bbox, sizeof(bbox));
+		file.Read(Boxes, sizeof(Boxes));
 
 		file.Close();
 		for (int i=0; i<256; i++)
 		{
-			if (bbox[i].Min.x > bbox[i].Max.x)
-				swap(bbox[i].Min.x, bbox[i].Max.x);
-			if (bbox[i].Min.y > bbox[i].Max.y)
-				swap(bbox[i].Min.y, bbox[i].Max.y);
-			Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
-			Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
+			if (Boxes[i].Min.x > Boxes[i].Max.x)
+				swap(Boxes[i].Min.x, Boxes[i].Max.x);
+			if (Boxes[i].Min.y > Boxes[i].Max.y)
+				swap(Boxes[i].Min.y, Boxes[i].Max.y);
+			Width[i] = (Boxes[i].Max.x - Boxes[i].Min.x);
+			Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
 		}
 	}
 	else if (Source == LOAD_SOURCE_MEMORY)
@@ -485,15 +509,15 @@ bool CFont::Load()
 
 		Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
 
-		memcpy(bbox, MemoryLoadData, sizeof(bbox));
+		memcpy(Boxes, MemoryLoadData, sizeof(Boxes));
 		for (int i=0; i<256; i++)
 		{
-			if (bbox[i].Min.x > bbox[i].Max.x)
-				swap(bbox[i].Min.x, bbox[i].Max.x);
-			if (bbox[i].Min.y > bbox[i].Max.y)
-				swap(bbox[i].Min.y, bbox[i].Max.y);
-			Width[i] = (bbox[i].Max.x - bbox[i].Min.x);
-			Height[i] = (bbox[i].Max.y - bbox[i].Min.y);
+			if (Boxes[i].Min.x > Boxes[i].Max.x)
+				swap(Boxes[i].Min.x, Boxes[i].Max.x);
+			if (Boxes[i].Min.y > Boxes[i].Max.y)
+				swap(Boxes[i].Min.y, Boxes[i].Max.y);
+			Width[i] = (Boxes[i].Max.x - Boxes[i].Min.x);
+			Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
 		}
 	}
 
@@ -525,7 +549,7 @@ bool CFont::SaveToFile(const string &AFilename)
 	file.Open(AFilename, CFile::OPEN_MODE_WRITE);
 	file.Write(Texture->GetName().c_str(), Texture->GetName().length());
 	file.WriteByte((byte)0x00);
-	file.Write(bbox, sizeof(bbox));
+	file.Write(Boxes, sizeof(Boxes));
 	file.Close();
 
 	return true;
@@ -589,8 +613,8 @@ CBox CFont::GetSymbolsBBOX()
 	Result.Max = Vector2(0.0f, 0.0f);
 	for (int i = 0; i < 256; i++)
 	{
-		Result.Add(bbox[i].Min);
-		Result.Add(bbox[i].Max);
+		Result.Add(Boxes[i].Min);
+		Result.Add(Boxes[i].Max);
 // 		if (bbox[i].x0 < Result.Min.x)
 // 			Result.Min.x = bbox[i].x0;
 // 		if (bbox[i].y0 < Result.Min.y)
@@ -616,14 +640,14 @@ float CFont::SymbolWidth(unsigned int Index) const
 Vector2Array<4> CFont::GetTexCoords(unsigned int Charachter) /*const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable result returned */
 {
 	Vector2Array<4> result;
-	result[0] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
-		bbox[Charachter - 32].Min.y / Texture->Height);
-	result[1] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
-		bbox[Charachter - 32].Min.y / Texture->Height);
-	result[2] = Vector2(bbox[Charachter - 32].Max.x / Texture->Width,
-		bbox[Charachter - 32].Max.y / Texture->Height);
-	result[3] = Vector2(bbox[Charachter - 32].Min.x / Texture->Width,
-		bbox[Charachter - 32].Max.y / Texture->Height);
+	result[0] = Vector2(Boxes[Charachter - 32].Min.x / Texture->Width,
+		Boxes[Charachter - 32].Min.y / Texture->Height);
+	result[1] = Vector2(Boxes[Charachter - 32].Max.x / Texture->Width,
+		Boxes[Charachter - 32].Min.y / Texture->Height);
+	result[2] = Vector2(Boxes[Charachter - 32].Max.x / Texture->Width,
+		Boxes[Charachter - 32].Max.y / Texture->Height);
+	result[3] = Vector2(Boxes[Charachter - 32].Min.x / Texture->Width,
+		Boxes[Charachter - 32].Max.y / Texture->Height);
 	return result;
 }
 
@@ -692,13 +716,11 @@ void CCamera::Free()
 
 void CCamera::DrawDebug()
 {
-	glEnable(GL_BLEND);
-	glColor4f(0.8f, 0.4f, 0.3f, 0.5f);
-///	gDrawBBox(world);
-	glColor4f(0.4f, 0.8f, 0.3f, 0.5f);
-///	gDrawBBox(view);
-	glColor4f(0.3f, 0.4f, 0.8f, 0.5f);
-//	gDrawBBox(outer);
+	CRenderObjectInfo temp;
+	temp.doIgnoreCamera = true;
+	CRenderManager::Instance()->DrawLinedBox(&temp, world);
+	CRenderManager::Instance()->DrawLinedBox(&temp, view);
+	CRenderManager::Instance()->DrawLinedBox(&temp, outer);
 }
 
 void CCamera::gTranslate()
@@ -709,8 +731,8 @@ void CCamera::gTranslate()
 CCamera::CCamera()
 {
 	SetName("CCamera");
-	view = world = CBox(100, 100, 540, 380);
-	outer = CBox(-1024, 0, 2048, 512);
+	//view = world = CBox(100, 100, 540, 380);
+	//outer = CBox(-1024, 0, 2048, 512);
 	Point = p = v = V2_ZERO;
 	Atx = Aty = NULL;
 	Assigned = false;
@@ -739,8 +761,14 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
+	CRenderObjectInfo TempRenderInfo;
+	TempRenderInfo.SetLayer(512);
+	TempRenderInfo.Color = COLOR_RED;
+	TempRenderInfo.doIgnoreCamera = true;
+
 	glLoadIdentity();	
-	glTranslatef(0.375, 0.375, ROTATIONAL_AXIS_Z); //accuracy tip from MSDN help
+	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
+
 	Camera.Update(); // @todo: review camera
 
 	CRenderable *data;
@@ -753,11 +781,21 @@ bool CRenderManager::DrawObjects()
 		if (!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
 		if (data->GetVisibility())
+		{
 			data->Render();
+#if defined(_2DE_DEBUG_DRAW_BOXES)
+			DrawLinedBox(&TempRenderInfo, data->GetBox());
+#endif
+		}
 	}
+
 	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
-	//glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
+	 glTranslatef(0.375, 0.375, 0);
+
+	
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
@@ -780,7 +818,7 @@ bool CRenderManager::DrawObjects()
 	QuadVertices.Clear();
 	//////////////////////////////////////////////////////////////////////////
 #ifdef _DEBUG
-	//	Camera.DrawDebug();
+		Camera.DrawDebug();
 #endif 
 	return true;
 }
@@ -810,8 +848,8 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 			continue;
 		}
 
-		liwidth = Font->bbox[RText[i] - 32].Width();	// 32!!!
-		liheight = Font->bbox[RText[i] - 32].Height();
+		liwidth = Font->Boxes[RText[i] - 32].Width();	// 32!!!
+		liheight = Font->Boxes[RText[i] - 32].Height();
 		maxliheight = max(maxliheight, liheight);
 
 		Vector2Array<4> TempTexCoords = Font->GetTexCoords(RText[i]);
@@ -821,11 +859,27 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, liheight + dy), TColor, TempTexCoords[2]);
 		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx, liheight + dy), TColor, TempTexCoords[3]);
 
-		dx += Font->bbox[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
+		dx += Font->Boxes[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
 	}
 }
 
-void CRenderManager::DrawSolidBox(const CRenderObjectInfo *RenderInfo, const CBox &Box)
+void CRenderManager::DrawLinedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box)
+{
+	Vector2 v0 = Box.Min;
+	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
+	Vector2 v2 = Box.Max;
+	Vector2 v3 = Vector2(Box.Min.x, Box.Max.y);
+	LineVertices.PushVertex(RenderInfo, v0);
+	LineVertices.PushVertex(RenderInfo, v1);
+	LineVertices.PushVertex(RenderInfo, v1);
+	LineVertices.PushVertex(RenderInfo, v2);
+	LineVertices.PushVertex(RenderInfo, v2);
+	LineVertices.PushVertex(RenderInfo, v3);
+	LineVertices.PushVertex(RenderInfo, v3);
+	LineVertices.PushVertex(RenderInfo, v0);
+}
+
+void CRenderManager::DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box)
 {
 	Vector2 v0 = Box.Min;
 	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
@@ -860,6 +914,11 @@ void CRenderManager::DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2
 {
 	LineVertices.PushVertex(RenderInfo, v0);
 	LineVertices.PushVertex(RenderInfo, v1);
+}
+
+void CRenderManager::DrawTriangles(const CRenderObjectInfo *RenderInfo, const Vector2 *Vertices, unsigned int Count)
+{
+	// ... 
 }
 
 void CRenderManager::BeginFrame()
@@ -955,10 +1014,6 @@ CTexture::~CTexture()
 	CTextureManager::Instance()->Remove(this);
 }
 
-void CTexture::Bind()
-{
-	glBindTexture(GL_TEXTURE_2D, GetTexID());
-}
 
 bool CTexture::Load()
 {
@@ -1146,6 +1201,7 @@ unsigned int CText::Length() const
 	return Characters.length();
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 // CAbstractScene
 
@@ -1313,7 +1369,7 @@ void CPrmitiveVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, cons
 	TempVector += Sender->Position;
 	if (!Sender->doIgnoreCamera)
 		TempVector += CRenderManager::Instance()->Camera.GetTranslation();
-	Vertices[VertexCount] = Vector3(TempVector.x, TempVector.y, Sender->GetDepth());
+	Vertices[VertexCount] = Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Sender->GetDepth());
 	Colors[VertexCount] = Color;
 	VertexCount++;
 }

@@ -9,9 +9,10 @@
 #include "2de_Gui.h"
 #include "2de_ImageUtils.h"
 #include "2de_LuaUtils.h"
-#include "2de_MathUtils.h"
+#include "2de_Math.h"
 #include "2de_Resource.h"
 #include "2de_Sound.h"
+#include "2de_SpatialManager.h"
 #include "2de_Update.h"
 #include "2de_Xml.h"
 
@@ -37,6 +38,9 @@ public:
 class CEngine
 {
 public:
+// IMMA BREAKING THE INCAPSULATION FOR DEBUGGING AND TESTING
+	CAbstractSpatialManager *SpatialManager;
+// SORRY
 	static CEngine* Instance();
 
 	bool Run(int argc, char *argv[]);
@@ -51,7 +55,7 @@ public:
 	void ToggleLimitFPS(bool AdoLimitFPS);
 	void ToggleCalcFPS(bool AdoCalcFPS);
 	void ToggleKeyRepeat(bool AdoKeyRepeat); // temporarily here.. basically, we need key repeat in GUI only, so in future it'll be handled by focusable GUI widget-groups (forms, panels, whatever..)
-		
+	void ToggleShowFPS(bool AdoShowFPS);
 
 	template<typename T>
 	void SetStateHandler();
@@ -76,6 +80,8 @@ protected:
 	~CEngine();
 
 private:
+	CMouseCursor *Cursor;
+
 	bool Initialize();
 	void Finalize();
 	bool ProcessEvents();
@@ -94,7 +100,6 @@ private:
 	bool doLoadDefaultResourceList;
 	bool doLimitFPS;
 	bool doCalcFPS;
-	bool doShowFPS;
 	unsigned long FPSCount;
 	unsigned long FPSLimit;
 

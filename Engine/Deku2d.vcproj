@@ -21,6 +21,7 @@
 			OutputDirectory="$(ProjectDir)\lib"
 			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets=".\Common settings debug.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -85,6 +86,7 @@
 			OutputDirectory="$(ProjectDir)\lib"
 			IntermediateDirectory="$(SolutionDir)\obj\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets=".\Common settings release.vsprops"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -197,7 +199,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\2de_MathUtils.cpp"
+				RelativePath=".\src\2de_Math.cpp"
 				>
 			</File>
 			<File
@@ -214,6 +216,10 @@
 			</File>
 			<File
 				RelativePath=".\src\2de_Sound.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\2de_SpatialManager.cpp"
 				>
 			</File>
 			<File
@@ -271,7 +277,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\2de_MathUtils.h"
+				RelativePath=".\inc\2de_Math.h"
 				>
 			</File>
 			<File
@@ -284,6 +290,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\2de_Sound.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_SpatialManager.h"
 				>
 			</File>
 			<File

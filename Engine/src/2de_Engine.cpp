@@ -16,7 +16,6 @@ CEngine::CEngine()
 	doExitOnEscape = true;
 	doLimitFPS = false;
 	doCalcFPS = true;
-	doShowFPS = true;
 
 	ProgramName = "Some Deku2D-using program";
 
@@ -31,10 +30,13 @@ CEngine::CEngine()
 	CEnvironment::Paths::SetWorkingDirectory(CEnvironment::Paths::GetExecutablePath());
 
 	CSingletonManager::Init();
+
+	SpatialManager = new CBruteForceSpatialManager();
 }
 
 CEngine::~CEngine()
 {
+	delete SpatialManager;
 }
 
 CEngine* CEngine::Instance()
@@ -48,8 +50,8 @@ bool CEngine::Initialize()
 	CLog::Instance()->SetLogName("System");
 	Log("INFO", "Working directory is '%s'", CEnvironment::Paths::GetWorkingDirectory().c_str());
 
-	CEnvironment::Variables::Set("SDL_VIDEO_CENTERED", "1");
-
+	CEnvironment::Variables::Set("SDL_VIDEO_CENTERED", "center");
+	
 	// config correctness check is not needed - it will just isuue a warning internally - this is not fatal as there's default values..
 
 	CConfig *Config = CConfig::Instance();
@@ -61,7 +63,7 @@ bool CEngine::Initialize()
 	Window->SetHeight(VideoSection["WindowHeight"]);
 	//Window->BPP = VideoSection["WindowBPP"]; // 32
 	Window->SetCaption(VideoSection["WindowCaption"]);
-	Window->Fullscreen = VideoSection["Fullscreen"];
+	Window->SetFullscreen(VideoSection["Fullscreen"]);
 	doCalcFPS = VideoSection["DoCalcFps"];
 	doLimitFPS = VideoSection["DoLimitFps"];
 	SetFPSLimit(VideoSection["FpsLimit"]);
@@ -84,6 +86,7 @@ bool CEngine::Initialize()
 	CSoundMixer::Instance()->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 	SDL_EnableUNICODE(1);
+	SDL_ShowCursor(0);
 
 	//ToggleKeyRepeat(true); // now can be dynamically switched on/off..
 
@@ -105,6 +108,8 @@ bool CEngine::Initialize()
 
 	CFactory::Instance(); // Factory should be initialized after all other managers
 
+	Cursor = CFactory::Instance()->New<CMouseCursor>("Mouse cursor");
+
 	//////////////////////////////////////////////////////////////////////////
 	//Here goes high level initializations, like default scene as title screen
 	//and FPSText
@@ -118,7 +123,6 @@ bool CEngine::Initialize()
 	TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
 	TitleScreenShroomTexture->LoadTexture(IMAGE_SHROOM_TITLE_WIDTH, IMAGE_SHROOM_TITLE_HEIGHT,
 		reinterpret_cast<byte *>(IMAGE_SHROOM_TITLE_DATA));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	// Создание и установка текущей сцены
 	CAbstractScene *TitleScreen = CSceneManager::Instance()->CreateScene();
@@ -306,6 +310,7 @@ bool CEngine::ProcessEvents()
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
 				MousePos = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
+				Cursor->Position = MousePos;
 				//SDL_Delay(2);
 				break;
 			}
@@ -370,8 +375,7 @@ bool CEngine::Run(int argc, char *argv[])
 	{
 		try
 		{
-			if (isHaveFocus)	// Ядрён батон, network, threading итд короче надо этим вопросом 
-								//	заниматься отдельно и вплотную.
+			if (isHaveFocus) // not actually. See mainloop issue.
 			{
 				CResourceManager::Instance()->PerformUnload();
 				CFactory::Instance()->CleanUp();
@@ -385,69 +389,9 @@ bool CEngine::Run(int argc, char *argv[])
 					CRenderManager::Instance()->DrawObjects();
 					CSceneManager::Instance()->Render();
 					
-					// @todo: And look here:(!!!) http://gafferongames.com/game-physics/fix-your-timestep/
+					// @todo: And look here:(yet it's about mainloopissue) http://gafferongames.com/game-physics/fix-your-timestep/
 				}
-				SDL_ShowCursor(0);
-				/*тестовый код*/	// надо сделать абстрактный класс CTestCode с единственной виртуальной функцией Execute
-							// и засовывать весь такой тестовый код в его наследников.. это такая - полу-шутка, полу-серьёзность..
-				int x, y;
-				SDL_GetMouseState(&x, &y);
-				MousePos = Vector2(x, CGLWindow::Instance()->GetHeight() - y);
-				const RGBAf				COLOR_FIRST(.4f, .4f, .4f, 1.0f);
-				const RGBAf				COLOR_SECOND(.5f, .5f, .6f, 1.0f);
-				const RGBAf				COLOR_THIRD(0.6f, 0.7f, 0.8f, 0.5f);
-				const RGBAf				COLOR_FOURTH(0.9f, 0.8f, 0.2f, 1.0f);
-
-				// TODO: сделать курсор отдельным классом, рисовать на максимальном слое, возможность загрузки текстурных курсоров, etc.
-				CPrimitiveRender PRender;
-				PRender.lClr = COLOR_FIRST;
-				PRender.sClr = COLOR_THIRD;
-				PRender.pClr = COLOR_FIRST;
-				glLoadIdentity();
-				glDisable(GL_DEPTH_TEST);
-				glEnable(GL_BLEND);		
-				glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-
-				/*PRender.lClr = PRender.pClr = RGBAf(0.8f, 0.8f, 0.8f, 1.0f);
-				PRender.lwidth = 4.0f;
-				PRender.psize = 4.0f;
-				PRender.grArrowL(MousePos + Vector2(10, - 15), MousePos);	// стрелочка, хуле..
-				но по дефолту оставим круглешок.. */
-
-				PRender.grCircleL(MousePos, 5);
-				glEnable(GL_DEPTH_TEST);
-				CRenderManager::Instance()->EndFrame();	
-
-				/**/
-				// ZOMG There wasn't other choice, the next step is to put it all into separate thread.
-				// Or pseudo-thread.
-
-	// 			как уже подсказали, нужно 
-	// 				> Можно вынести опрос координат курсора в отдельный поток. 
-	// 
-	// 				но применительно для SDL, можно установить глобальный фильтр обработчика где будет, вызываться твоя функция отрисовки курсора (я делал именно так, и не тормозит)
-	// 
-	// 				SDL_SetEventFilter(GlobalFilterEvents);
-	// 
-	// 
-	// 			int GlobalFilterEvents(const SDL_Event *event)
-	// 			{ 
-	// 				if (SDL_MOUSEMOTION == event->type)
-	// 					RedrawCursor(event->motion.x, event->motion.y);
-	// 
-	// 				return 1;
-	// 			}
-	// 
-	// 			это не дословный код но общая идея именно такая.
-	//------------------
-	// + идея от меня - можно пытаться предсказывать движение курсора, т.е. где он окажется,
-	//	пока мы рисуем кадры под 60FPS
-	// Экстраполяция же.
-
-	//  перетяните уже кто-нибудь что-нибудь куда-нибудь... такие главные функции как Run()
-	//	и Init() должны быть короткими, лаконичными и состоять в основном из вызовов других функций..
-	//	а тут блин даже "документация" валяется..
-
+				CRenderManager::Instance()->EndFrame();
 			}
 			else
 			{
@@ -555,4 +499,10 @@ void CEngine::SetFPSLimit(unsigned long AFPSLimit)
 unsigned long CEngine::GetFPS() const
 {
 	return FPSCount;
+}
+
+void CEngine::ToggleShowFPS(bool AdoShowFPS)
+{
+	if (FPSText != NULL)
+		FPSText->SetVisibility(AdoShowFPS);
 }

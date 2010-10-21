@@ -3,17 +3,18 @@
 
 #include "2de_Core.h"
 #include "2de_Update.h"
-#include "2de_Resource.h"
-
-#ifdef USE_SDL_OPENGL
-	#include <SDL/SDL_opengl.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-#endif
 
 #include "2de_ImageUtils.h"
-#include "2de_MathUtils.h"
+#include "2de_Math.h"
+#include "2de_Resource.h"
+
+#define _2DE_DEBUG_DRAW_BOXES
+
+
+// OpenGL is not included in the interface now, so I'll redefine it myself
+typedef unsigned int GLuint;
+typedef unsigned int GLenum;
+typedef int GLsizei;
 
 const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertices (0 0) (1 0) (1 1) (0 1)
 {
@@ -33,6 +34,8 @@ const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with v
 	V2_DIR_LEFT + V2_DIR_UP,
 };
 
+const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
+
 
 const float ROTATIONAL_AXIS_Z = 1.0f;
 
@@ -48,17 +51,97 @@ extern char BINARY_DATA_DEFAULT_FONT[];
 //////////////////////////////////////////////////////////////////////////
 //RenderObject
 
-/**
-*	Виртуально унаследовать от этой гадости - это первый вариант. // Интересно, почему я думал унаследовать виртуально?
-*	Второй вариант - аггрегировать указатель на неё в классы.
-*/
+enum EModelType
+{
+	MODEL_TYPE_LINES,
+	MODEL_TYPE_POINTS,
+	MODEL_TYPE_TRIANGLES,
+};
+
+enum EBlendingMode
+{
+	BLEND_MODE_ADDITIVE,
+	BLEND_MODE_OPAQUE,
+	BLEND_MODE_TRANSPARENT,
+};
+
+class CTransformation
+{
+private:
+	float DepthOffset;
+	Vector2 Translation;
+	float Rotation;
+	//Matrix2 RotationalMatrix;
+	float Scaling;
+
+public:
+	CTransformation(float ADepthOffset, const Vector2 &ATranslation,
+		float ARotation, float AScaling) : DepthOffset(ADepthOffset),
+		Translation(ATranslation), Rotation(ARotation), Scaling(AScaling)
+	{
+
+	}
+
+	CTransformation& operator +=(const CTransformation &rhs)
+	{
+		DepthOffset += rhs.DepthOffset;
+		Translation += rhs.Translation;
+		Rotation += rhs.Rotation;
+		Scaling += rhs.Scaling;
+		return *this;
+	}
+
+	CTransformation& operator -=(const CTransformation &rhs)
+	{
+		DepthOffset -= rhs.DepthOffset;
+		Translation -= rhs.Translation;
+		Rotation -= rhs.Rotation;
+		Scaling -= rhs.Scaling;
+		return *this;
+	}
+
+	float GetDepth() const 
+	{
+		return DepthOffset;
+	}
+
+	const Vector2& GetPosition() const 
+	{
+		return Translation;
+	}
+
+	float GetAngle() const
+	{
+		return Rotation;
+	}
+
+	float GetScaling() const
+	{
+		return Scaling;
+	}
+
+	void Clear()
+	{
+		DepthOffset = 0.0f;
+		Translation = V2_ZERO;
+		Scaling = 1.0f;
+		Rotation = 0.0f;
+	}
+
+// 	Matrix2 GetRotationalMatrix();
+// 	Matrix3 GetTransformationMatrix();
+
+};
 
 class CRenderObjectInfo
 {
 public:
+
 	Vector2 Position;
 	RGBAf Color;
 	bool doIgnoreCamera; // if true, then object will be drawn in global cords,
+	bool doMirrorHorizontal;
+	bool doMirrorVertical;
 
 	CRenderObjectInfo();
 	void SetAngle(float AAngle = 0.0f);
@@ -73,6 +156,7 @@ private:
 	float Angle; //	(Degrees)
 	float Depth; //	[-1; 1]?
 	float Scaling;
+	
 };
 
 class CAbstractScene;
@@ -96,6 +180,16 @@ private:
 	CBox Box; //	Axis Aligned Bounding Box for culling
 	CAbstractScene *Scene;
 	bool Visible;
+};
+
+class CModel // : public 
+{
+/*
+	CTexture*
+	Vector2*
+	Vector2*
+	RGBAf*
+*/
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -125,7 +219,6 @@ class CTexture : public CGLImageData, public CResource
 public:
 	CTexture();
 	virtual ~CTexture();
-	void Bind();
 
 	bool Load();
 	void Unload();
@@ -230,6 +323,93 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////
+// CAbstractRender
+
+class CTransformator	// lol
+{
+public:
+	virtual void PushTransformation(const CRenderObjectInfo * ATransformation)
+	{
+		CTransformation TempTransformation(ATransformation->GetDepth(), ATransformation->Position,
+			ATransformation->GetAngle(), ATransformation->GetScaling());
+		CurrentTransformation += TempTransformation;
+		TransformationStack.push_back(TempTransformation);
+	}
+	virtual void PopTransformation()
+	{
+		CurrentTransformation -= TransformationStack.back();
+		TransformationStack.pop_back();
+	}
+
+	virtual void ClearTransformation()
+	{
+		TransformationStack.clear();
+		CurrentTransformation.Clear();
+	}
+
+protected:
+	CTransformation CurrentTransformation;
+	vector<CTransformation> TransformationStack;
+};
+
+class CAbstractRenderer
+{
+public:
+	virtual bool Initialize() = 0;
+	virtual bool Finalize() = 0;
+	virtual void PushModel(EModelType, CRenderObjectInfo *, Vector2 *) = 0;
+	virtual void PushModel(EModelType, CRenderObjectInfo *, GLuint, Vector2 *) = 0;
+
+	virtual void Render() = 0;
+
+protected:
+
+private:
+
+};
+
+class CFixedPipelineRenderer : public CAbstractRenderer
+{
+public:
+	bool Initilize()
+	{
+
+	}
+
+	bool Finalize()
+	{
+
+	}
+
+	void PushModel(EModelType ModelKind, CRenderObjectInfo *RenderInfo, Vector2 *Vertices)
+	{
+		CPrmitiveVertexDataHolder *VertexHolder = &PrimitiveHolders[ModelKind];
+// 		switch (EModelKind)
+// 		{
+// 		case MODEL_KIND_POINTS:
+// 			break;
+// 		case MODEL_KIND_LINES:
+// 			break;
+// 		case MODEL_KIND_TRIANGLES:
+// 			break;
+// 		}
+	}
+
+	void PushModel(EModelType, CRenderObjectInfo *, GLuint, Vector2 *)
+	{
+
+	}
+
+	void Render()
+	{
+
+	}
+
+private:
+	CPrmitiveVertexDataHolder PrimitiveHolders[MODEL_TYPE_TRIANGLES + 1];
+};
+
+//////////////////////////////////////////////////////////////////////////
 //CFont
 
 #define CFONT_DEFAULT_DISTANCE	1				// FFFUUU~
@@ -238,7 +418,7 @@ private:
 class CFont : public CResource
 {
 public:
-	CBox bbox[256];	// why 256? // TODO: make this private and getter that checks for FirstTimeLoaded..
+	CBox Boxes[256];	// why 256? // TODO: make this private and getter that checks for FirstTimeLoaded..
 
 	CFont();
 	~CFont();
@@ -291,8 +471,8 @@ public:
 class CCamera : public CObject
 {
 public:
-	Vector2 Point;					//
-	CBox	view, outer, world;		//
+	Vector2 Point;
+	CBox	view, outer, world;
 	bool	Assigned;
 	float	*Atx, *Aty;
 	float	dx, dy;
@@ -347,11 +527,13 @@ protected:
 	friend class CTSingleton <CRenderManager>;
 	friend class CEngine;
 private:
+	CAbstractRenderer *Renderer;
 	#define DEKU2D_MAX_TEXTURES 32
 	CVertexDataHolder TexturedQuadVertices[DEKU2D_MAX_TEXTURES];	// Временно. В вектор запихать, что ли.
 	CPrmitiveVertexDataHolder PointVertices;
 	CPrmitiveVertexDataHolder LineVertices;
 	CPrmitiveVertexDataHolder QuadVertices;
+	CPrmitiveVertexDataHolder TriVertices;
 
 	void SetBlendingMode();
 	void BeginFrame();
@@ -361,11 +543,13 @@ public:
 	~CRenderManager();
 	bool DrawObjects();
 	void Print(const CText *Text, const string &Characters);
+	void DrawLinedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
 	void DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
 	// Box is always box, but TC may be used to mirros sprite or smthng, so it is not CBox
 	void DrawTexturedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords);
 	void DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point);
 	void DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1);
+	void DrawTriangles(const CRenderObjectInfo *RenderInfo, const Vector2 *Vertices, unsigned int Count);
 };
 
 #if defined(_WIN32)
@@ -374,7 +558,7 @@ public:
 	#define SWAP_INTERVAL_PROC PFNGLXSWAPINTERVALSGIPROC
 #endif
 typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
-void setVSync(int interval=1);
+void setVSync(int interval = 1);
 
 //////////////////////////////////////////////////////////////////////////
 //CGLWindow
@@ -382,9 +566,6 @@ void setVSync(int interval=1);
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
-	byte BPP;
-	bool Fullscreen;
-
 	bool gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte ABPP, const string &ACaption);
 	bool gCreateWindow();
 	void SetSize();
@@ -394,6 +575,8 @@ public:
 	void glInit(GLsizei Width, GLsizei Height);
 	unsigned int GetWidth() const;
 	unsigned int GetHeight() const;
+	void SetFullscreen(bool AFullscreen);
+	void SetBPP(byte ABPP);
 	void SetWidth(unsigned int AWidth);
 	void SetHeight(unsigned int AHeight);
 	string GetCaption() const;
@@ -403,11 +586,14 @@ public:
 protected:
 	CGLWindow();
 	friend class CTSingleton<CGLWindow>;
+
 private:
-	unsigned int Width;
-	unsigned int Height;
+	byte BPP;
 	string Caption;
+	unsigned int Height;
 	bool isCreated;
+	bool isFullscreen;
+	unsigned int Width;	
 };
 //////////////////////////////////////////////////////////////////////////
 //CGrRect - not nice enough, i think.
@@ -474,6 +660,7 @@ public:
 	~CText();
 	CText(const string &AText);
 	void Render();
+	//const CBox GetBox() const;
 	CFont* GetFont() const;
 	string& GetText();
 	const string& GetText() const;
@@ -571,5 +758,24 @@ protected:
 	CSceneManager();
 };
 
+//////////////////////////////////////////////////////////////////////////
+// CMouseCursor
+// TODO: <strike>сделать курсор отдельным классом</strike>, рисовать на максимальном слое, возможность загрузки текстурных курсоров, etc.
+class CMouseCursor : public CRenderable
+{
+public:
+	CBox Box;
+	CMouseCursor()
+	{		
+		Box = CBox(Vector2(-2.0f, -2.0f), Vector2(1.0f, 1.0f));
+		SetLayer(512);
+		Color = COLOR_GREEN;
+	}
+	void Render()
+	{
+		CRenderManager::Instance()->DrawLinedBox(this, Box);
+	}
+};
 
 #endif // _2DE_GRAPHICS_LOW_H_
+

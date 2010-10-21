@@ -78,8 +78,9 @@
 
 using namespace std;
 
-#define USE_SDL_OPENGL
-#define USING_OPENGL
+//#define USE_SDL_OPENGL
+//#define USING_OPENGL
+#define USE_GLEW
 
 #if defined(_MSC_VER)
 	#define __INLINE __forceinline
@@ -517,6 +518,7 @@ public:
 	// i think, that CFile should not provide posibility to read 0-terminated strings from files..
 	// formats should be developed in such way, that does NOT include reading variable-length strings from binary files.. it's bad design of data structures to do so..
 	// BUT even if someone ever need to store string in binary file, they should develop structure for storing string size too, together with string.. and then deal with it in higher level of abstraction..
+	// YES OFCOURSE YOU"RE FUCKIING RIGHT> LET"S DO IT
 
 	bool ReadString(char *Buffer, int ASize);
 	bool ReadString(string &Buffer);
@@ -853,7 +855,7 @@ __INLINE string to_string(const T& t)
 * CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
 */
 
-class CVariantConvert
+class CVariantConvert	// Looks more like a namespace
 {
 public:
 	template<typename T>
@@ -874,6 +876,7 @@ public:
 
 	static bool from_string_impl(const string &s, identity<bool>)
 	{
+		// ios::boolalpha - have you looked for it, while trying to reinvent the wheel?
 		if (s == "false")
 			return false;
 

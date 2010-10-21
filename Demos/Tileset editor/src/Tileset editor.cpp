@@ -144,22 +144,19 @@ CTilesetEditor::CTilesetEditor()
 
 void CTilesetEditor::Render()
 {
+	Position = V2_ZERO;
+	Color = COLOR_THIRD;
+	SetLayer(0);
+	SetScaling(1.0f);
+	CRenderManager::Instance()->DrawSolidBox(this, CBox(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, WindowHeight)));
 
-	glLoadIdentity();
-	PRender.grRectC(Vector2(.0f, .0f), Vector2(INTERFACE_OFFSET_X, WindowHeight));
-	glLoadIdentity();
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
-	PRender.grCircleL(MousePosition, 5);
-	int fps = CEngine::Instance()->GetFPS();
-	glLoadIdentity();
 
-	glLoadIdentity();
+
+
 	Offset.x = (int)Offset.x;
 	Offset.y = (int)Offset.y;
-	Offset.glTranslate();
+//	Offset.glTranslate();
 
 	// 	if (Font != NULL)
 	// 		for (int i = 0; i < 256; i++)
@@ -174,34 +171,32 @@ void CTilesetEditor::Render()
 	// 				CFontManager::Instance()->CurrentFont->tClr = COLOR_WHITE;
 	// 		}
 
-	glScalef(Zoom, Zoom, 1.0f);
+	SetScaling(Zoom);
 
-	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_TEXTURE_2D);
 
 	if (TilesetTexture)
 	{
-		TilesetTexture->Bind();
-		RGBAf(1.0f, 1.0f, 1.0f, 1.0f).glSet();
-		glBegin(GL_QUADS);
-		glTexCoord2f(.0f, .0f);
-		glVertex2f(.0f, .0f);
-
-		glTexCoord2f(1.0f, .0f);
-		glVertex2f(TilesetTexture->Width, .0f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(TilesetTexture->Width, TilesetTexture->Height);
-
-		glTexCoord2f(.0f, 1.0f);
-		glVertex2f(.0f, TilesetTexture->Height);
-		glEnd();
+//		TilesetTexture->Bind();
+//		RGBAf(1.0f, 1.0f, 1.0f, 1.0f).glSet();
+// 		glBegin(GL_QUADS);
+// 		glTexCoord2f(.0f, .0f);
+// 		glVertex2f(.0f, .0f);
+// 
+// 		glTexCoord2f(1.0f, .0f);
+// 		glVertex2f(TilesetTexture->Width, .0f);
+// 
+// 		glTexCoord2f(1.0f, 1.0f);
+// 		glVertex2f(TilesetTexture->Width, TilesetTexture->Height);
+// 
+// 		glTexCoord2f(.0f, 1.0f);
+// 		glVertex2f(.0f, TilesetTexture->Height);
+// 		glEnd();
 	}
 
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_LINE_WIDTH);
-	glLineWidth(1.0f);
+	//glDisable(GL_TEXTURE_2D);
 	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glColor4fv(&COLOR_THIRD.r);
+
 	if (Tileset)
 	{
 		//Tileset->RenderTileSet();
@@ -255,7 +250,7 @@ void CTilesetEditor::Render()
 */
 	}
 	//gToggleScissor(false);
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 }
 
 void CTilesetEditor::Update(float dt)

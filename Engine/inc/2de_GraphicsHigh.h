@@ -3,7 +3,7 @@
 
 #include "2de_Core.h"
 #include "2de_GraphicsLow.h"
-#include "2de_MathUtils.h"
+#include "2de_Math.h"
 #include "2de_Update.h"
 
 //	Глобальные отладочные флаги
@@ -49,36 +49,6 @@ public:
 
 	void Init();
 
-	/**
-	*	Внизу функции для отображения примитивов.
-	*	Суффикс L - примитив рисуется линиями
-	*	S - solid
-	*	C - complete
-	*	Последнее - по разному для каждого примитива.
-	*	Обычно - вращение + линии + заливка + ещё что-то
-	*/
-
-
-	void grRectL(const Vector2 &v0, const Vector2 &v1);
-	void grRectS(const Vector2 &v0, const Vector2 &v1);
-	void grRectC(const Vector2 &v0, const Vector2 &v1);
-
-	void grQuarterCircle(const Vector2 &v0, float Radius);
-
-	void grCircleL(const Vector2 &p, float Radius);
-	void grCircleS(const Vector2 &p, float Radius);
-	void grCircleC(const Vector2 &p, float Radius);
-
-	void grPolyC(const Vector2 &p, float angle, const CPolygon &poly);
-
-	void grRingS(const Vector2 &p, float Radius);
-	void grRingC(const Vector2 &p, float Radius);
-
-	void grArrowL(const Vector2& v0, const Vector2& v1);
-	void grArrowC(const Vector2 &v0,const Vector2 &v1);
-
-	void gDrawBBox(CBox box);
-	void grInYan(const Vector2 &p, float Radius);
 private:
 	void BeforeRndr();
 	void AfterRndr();

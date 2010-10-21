@@ -81,8 +81,8 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 				break;
 			if (Font != NULL && CornerKind == SCK_NONE)
 				for (int i = 0; i < 256; i++)
-					if (Font->bbox[i].Min.x < (MousePosition.x / Zoom - Offset.x / Zoom) && Font->bbox[i].Max.x > (MousePosition.x / Zoom - Offset.x / Zoom) &&
-						Font->bbox[i].Min.y < (MousePosition.y / Zoom - Offset.y / Zoom) && Font->bbox[i].Max.y > (MousePosition.y / Zoom - Offset.y / Zoom))
+					if (Font->Boxes[i].Min.x < (MousePosition.x / Zoom - Offset.x / Zoom) && Font->Boxes[i].Max.x > (MousePosition.x / Zoom - Offset.x / Zoom) &&
+						Font->Boxes[i].Min.y < (MousePosition.y / Zoom - Offset.y / Zoom) && Font->Boxes[i].Max.y > (MousePosition.y / Zoom - Offset.y / Zoom))
 					{
 						bool tempbool = (i != CurrentSymbol);
 						SetSelectedBoxTo(i);
@@ -225,7 +225,7 @@ void CFontEditor::Render()
 // 				CFontManager::Instance()->CurrentFont->tClr = COLOR_WHITE;
 // 		}
 
-	glScalef(Zoom, Zoom, 1.0f);
+//	glScalef(Zoom, Zoom, 1.0f);
 
 	if (FontTexture)
 	{
@@ -249,17 +249,18 @@ void CFontEditor::Render()
 		CRenderManager *RenerManager = CRenderManager::Instance();
 		for (int i = 0; i < 256; i++)
 		{
-			Vector2 v0 = Font->bbox[i].Min;
-			Vector2 v1(Font->bbox[i].Max.x, Font->bbox[i].Min.y);
-			Vector2 v2 = Font->bbox[i].Max;
-			Vector2 v3(Font->bbox[i].Min.x, Font->bbox[i].Max.y);
+			Vector2 v0 = Font->Boxes[i].Min;
+			Vector2 v1(Font->Boxes[i].Max.x, Font->Boxes[i].Min.y);
+			Vector2 v2 = Font->Boxes[i].Max;
+			Vector2 v3(Font->Boxes[i].Min.x, Font->Boxes[i].Max.y);
 			Color = COLOR_WHITE;
 			if (i == CurrentSymbol)
 				Color = RGBAf(0.9f, 0.4f, 0.3f, 0.9f);
-			RenerManager->DrawLine(this, v0, v1);
-			RenerManager->DrawLine(this, v1, v2);
-			RenerManager->DrawLine(this, v2, v3);
-			RenerManager->DrawLine(this, v3, v0);
+// 			RenerManager->DrawLine(this, v0, v1);
+// 			RenerManager->DrawLine(this, v1, v2);
+// 			RenerManager->DrawLine(this, v2, v3);
+// 			RenerManager->DrawLine(this, v3, v0);
+			RenerManager->DrawLinedBox(this, Font->Boxes[i]);
 		}
 	}
 }
@@ -287,41 +288,41 @@ void CFontEditor::Update(float dt)
 
 		int Mx = MousePosition.x / Zoom - Offset.x / Zoom;
 		int My = MousePosition.y / Zoom - Offset.y / Zoom;
-		int Dx0 = (Font->bbox[CurrentSymbol].Max.x - Font->bbox[CurrentSymbol].Min.x) /2;
-		int Dx1 = (Font->bbox[CurrentSymbol].Max.x - Font->bbox[CurrentSymbol].Min.x) - (Font->bbox[CurrentSymbol].Max.x - Font->bbox[CurrentSymbol].Min.x) /2;
-		int Dy0 = (Font->bbox[CurrentSymbol].Max.y - Font->bbox[CurrentSymbol].Min.y) /2;
-		int Dy1 = (Font->bbox[CurrentSymbol].Max.y - Font->bbox[CurrentSymbol].Min.y) - (Font->bbox[CurrentSymbol].Max.y - Font->bbox[CurrentSymbol].Min.y) /2;
+		int Dx0 = (Font->Boxes[CurrentSymbol].Max.x - Font->Boxes[CurrentSymbol].Min.x) /2;
+		int Dx1 = (Font->Boxes[CurrentSymbol].Max.x - Font->Boxes[CurrentSymbol].Min.x) - (Font->Boxes[CurrentSymbol].Max.x - Font->Boxes[CurrentSymbol].Min.x) /2;
+		int Dy0 = (Font->Boxes[CurrentSymbol].Max.y - Font->Boxes[CurrentSymbol].Min.y) /2;
+		int Dy1 = (Font->Boxes[CurrentSymbol].Max.y - Font->Boxes[CurrentSymbol].Min.y) - (Font->Boxes[CurrentSymbol].Max.y - Font->Boxes[CurrentSymbol].Min.y) /2;
 
 		if (CornerKind == SCK_CENTER)
 		{
-			Font->bbox[CurrentSymbol].Min.x = Mx - Dx0;
-			Font->bbox[CurrentSymbol].Max.x = Mx + Dx1;
-			Font->bbox[CurrentSymbol].Min.y = My - Dy0;
-			Font->bbox[CurrentSymbol].Max.y = My + Dy1;
+			Font->Boxes[CurrentSymbol].Min.x = Mx - Dx0;
+			Font->Boxes[CurrentSymbol].Max.x = Mx + Dx1;
+			Font->Boxes[CurrentSymbol].Min.y = My - Dy0;
+			Font->Boxes[CurrentSymbol].Max.y = My + Dy1;
 		}
 
 		if (CornerKind == SCK_LEFT_BOTTOM)
 		{
-			Font->bbox[CurrentSymbol].Min.x = Mx;
-			Font->bbox[CurrentSymbol].Min.y = My;
+			Font->Boxes[CurrentSymbol].Min.x = Mx;
+			Font->Boxes[CurrentSymbol].Min.y = My;
 		}
 
 		if (CornerKind == SCK_RIGHT_BOTTOM)
 		{
-			Font->bbox[CurrentSymbol].Max.x = Mx;
-			Font->bbox[CurrentSymbol].Min.y = My;
+			Font->Boxes[CurrentSymbol].Max.x = Mx;
+			Font->Boxes[CurrentSymbol].Min.y = My;
 		}
 
 		if (CornerKind == SCK_RIGHT_TOP)
 		{
-			Font->bbox[CurrentSymbol].Max.x = Mx;
-			Font->bbox[CurrentSymbol].Max.y = My;
+			Font->Boxes[CurrentSymbol].Max.x = Mx;
+			Font->Boxes[CurrentSymbol].Max.y = My;
 		}
 
 		if (CornerKind == SCK_LEFT_TOP)
 		{
-			Font->bbox[CurrentSymbol].Min.x = Mx;
-			Font->bbox[CurrentSymbol].Max.y = My;
+			Font->Boxes[CurrentSymbol].Min.x = Mx;
+			Font->Boxes[CurrentSymbol].Max.y = My;
 		}
 
 		if (CornerKind != SCK_NONE)
@@ -344,7 +345,7 @@ void CFontEditor::SetSelectedBoxTo(int Index)
 	CurrentSymbol = Index; // @todo: Add range check
 	lblCharachterSelectedASCIIIndex->SetText("ASCII Index: " + itos(CurrentSymbol + 32));
 
-	CBox rect = Font->bbox[CurrentSymbol];
+	CBox rect = Font->Boxes[CurrentSymbol];
 	Vector2 Vertices[5] = 
 	{
 		Vector2(rect.Min.x, rect.Min.y),
@@ -475,13 +476,13 @@ bool ExposeRect(CObject *Caller)
 	CFontEditor *FontEditor = dynamic_cast<CFontEditor *>(Caller);
 	if (FontEditor == NULL)
 		return false;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Min.x = (FontEditor->Font->GetTexture())->Width / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.x = (FontEditor->Font->GetTexture())->Width / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Min.y = (FontEditor->Font->GetTexture())->Height / 2;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.y = (FontEditor->Font->GetTexture())->Height / 2;
+	FontEditor->Font->Boxes[FontEditor->CurrentSymbol].Min.x = (FontEditor->Font->GetTexture())->Width / 2;
+	FontEditor->Font->Boxes[FontEditor->CurrentSymbol].Max.x = (FontEditor->Font->GetTexture())->Width / 2;
+	FontEditor->Font->Boxes[FontEditor->CurrentSymbol].Min.y = (FontEditor->Font->GetTexture())->Height / 2;
+	FontEditor->Font->Boxes[FontEditor->CurrentSymbol].Max.y = (FontEditor->Font->GetTexture())->Height / 2;
 	
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.x += 20;
-	FontEditor->Font->bbox[FontEditor->CurrentSymbol].Max.y += 20;
+	FontEditor->Font->Boxes[FontEditor->CurrentSymbol].Max.x += 20;
+	FontEditor->Font->Boxes[FontEditor->CurrentSymbol].Max.y += 20;
 
 	FontEditor->SetSelectedBoxTo(FontEditor->CurrentSymbol);
 	return true;

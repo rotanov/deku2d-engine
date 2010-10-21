@@ -2,15 +2,8 @@
 #define _2DE_PHYSICS_H_
 
 #include "2de_Core.h"
-#include "2de_MathUtils.h"
+#include "2de_Math.h"
 #include "2de_Update.h"
-
-/*
-		Что будет в этом модуле.
-	Этот модуль должен прдоставить:
-		Добавление блеааааа ГОЛОВА ОП/ТЬ БОЛИТ СУКА БЛЕАААААДЬНЕНАВИЖУ ВСЕ ЁБАНЫЕ ВРАЧИ НАХУЙ СКОЛЬКО МОЖНО
-		ГОЛОВА БОЛИТ СРАНЫХ 6 ДНЕЙ ПОДРЯД, Я ТАК СДОХНУНАХУЙ
-*/
 
 class CPhysicalObject : public CUpdatable
 {
