@@ -1,5 +1,7 @@
 #include "2de_Math.h"
 
+#include <cstring>
+
 template<typename T>
 __INLINE void SAFE_DELETE_ARRAY(T*& a)
 {

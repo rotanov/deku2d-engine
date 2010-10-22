@@ -12,7 +12,7 @@ SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
 
 CFLAGS		:= 	${CFLAGS} $(LUA_CFLAGS) -Iinc -I../../Engine/inc
-LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lSDL_mixer -lIL ${ENGINE_LIB}
+LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lGLEW -lSDL_mixer -lIL ${ENGINE_LIB}
 
 all: ${TARGET}
 

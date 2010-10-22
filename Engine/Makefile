@@ -8,10 +8,11 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Gui.cpp \
 			src/2de_ImageUtils.cpp \
 			src/2de_LuaUtils.cpp \
-			src/2de_MathUtils.cpp \
+			src/2de_Math.cpp \
 			src/2de_Physics.cpp \
 			src/2de_Resource.cpp \
 			src/2de_ShroomTitle.cpp \
+			src/2de_SpatialManager.cpp \
 			src/2de_Sound.cpp \
 			src/2de_Update.cpp \
 			src/2de_Xml.cpp
@@ -26,10 +27,11 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_Gui.o \
 			obj/2de_ImageUtils.o \
 			obj/2de_LuaUtils.o \
-			obj/2de_MathUtils.o \
+			obj/2de_Math.o \
 			obj/2de_Physics.o \
 			obj/2de_Resource.o \
 			obj/2de_ShroomTitle.o \
+			obj/2de_SpatialManager.o \
 			obj/2de_Sound.o \
 			obj/2de_Update.o \
 			obj/2de_Xml.o
@@ -42,7 +44,7 @@ CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -Iinc
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)
 
-LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lSDL_mixer
+LDFLAGS		:=	$(LDFLAGS) $(SDL_LDFLAGS) $(LUA_LDFLAGS) -lGLU -lGLEW -lSDL_mixer
 
 TARGET_STATIC_FILE = libDeku2d.a
 TARGET_SHARED_FILE = libDeku2d.so

@@ -622,6 +622,11 @@ public:
 #elif defined(__linux)
 	#define SWAP_INTERVAL_PROC PFNGLXSWAPINTERVALSGIPROC
 #endif
+
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
 void setVSync(int interval = 1);
 
