@@ -19,8 +19,8 @@ CEngine::CEngine()
 
 	ProgramName = "Some Deku2D-using program";
 
-	EventFuncCount = 0;
-	KeyInputFuncCount = 0;
+	//EventFuncCount = 0;
+	//KeyInputFuncCount = 0;
 
 	FPSText = NULL;
 
@@ -261,25 +261,43 @@ bool CEngine::ProcessEvents()
 	//	http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
 	{
 		
-		switch (event.type)
+		/*switch (event.type)
 		{
 			INPUT_FILTER
 				for (int i = 0; i < EventFuncCount; i++)
 					(*EventFunctions[i])(event);
-		}
+		}*/
 		switch (event.type)
 		{
 			case SDL_KEYDOWN:
 			{
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;
-				for (int i = 0; i < KeyInputFuncCount; i++)
-				{
-					if (keys[keysym.sym] == 0)
-						(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, keysym.sym, keysym.mod, TempChar);
+				//for (int i = 0; i < KeyInputFuncCount; i++)
+				//{
 
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESS, keysym.sym, keysym.mod, TempChar);
+				if (keys[keysym.sym] == 0)
+				{
+					CEvent *e = new CEvent;
+					e->SetName("KeyDown");
+					e->SetData("Char", TempChar);
+					e->SetData("Sym", keysym.sym);
+					e->SetData("Modifiers", keysym.mod);
+					CEventManager::Instance()->TriggerEvent(e);
+
+					//(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, keysym.sym, keysym.mod, TempChar);
 				}
+
+				CEvent *e = new CEvent;
+				e->SetName("KeyPress");
+				e->SetData("Char", TempChar);
+				e->SetData("Sym", keysym.sym);
+				e->SetData("Modifiers", keysym.mod);
+				CEventManager::Instance()->TriggerEvent(e);
+
+					//(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESS, keysym.sym, keysym.mod, TempChar);
+				//}
+
 				keys[keysym.sym] = 1;
 				break;
 			}
@@ -287,23 +305,46 @@ bool CEngine::ProcessEvents()
 			{
 				if (doExitOnEscape && event.key.keysym.sym == SDLK_ESCAPE)
 					return false;			
+
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;				
-				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, keysym.sym, keysym.mod, TempChar);
+				//for (int i = 0; i < KeyInputFuncCount; i++)
+					//(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, keysym.sym, keysym.mod, TempChar);
+
+				CEvent *e = new CEvent;
+				e->SetName("KeyUp");
+				e->SetData("Char", TempChar);
+				e->SetData("Sym", keysym.sym);
+				e->SetData("Modifiers", keysym.mod);
+				CEventManager::Instance()->TriggerEvent(e);
+
 				keys[keysym.sym] = 0;
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
 			{
-				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, event.button.button, SDL_GetModState(), 0);
+				CEvent *e = new CEvent("MouseDown", NULL);
+				e->SetData("X", MousePos.x);
+				e->SetData("Y", MousePos.y);
+				e->SetData("Button", event.button.button);
+				e->SetData("Modifiers", SDL_GetModState());
+				CEventManager::Instance()->TriggerEvent(e);
+
+				/*for (int i = 0; i < KeyInputFuncCount; i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, event.button.button, SDL_GetModState(), 0);*/
 				break;
 			}
 			case SDL_MOUSEBUTTONUP:
 			{
-				for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, event.button.button, SDL_GetModState(), 0);
+				CEvent *e = new CEvent("MouseUp", NULL);
+				e->SetData("X", MousePos.x);
+				e->SetData("Y", MousePos.y);
+				e->SetData("Button", event.button.button);
+				e->SetData("Modifiers", SDL_GetModState());
+				CEventManager::Instance()->TriggerEvent(e);
+
+				/*for (int i = 0; i < KeyInputFuncCount; i++)
+					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, event.button.button, SDL_GetModState(), 0);*/
 				break;
 			}
 			case SDL_MOUSEMOTION:
@@ -349,7 +390,8 @@ bool CEngine::ProcessEvents()
 			}
 		}
 	}
-	return true;
+
+	return CEventManager::Instance()->ProcessEvents(); // move somewhere..
 }
 
 bool CEngine::Run(int argc, char *argv[])
@@ -430,7 +472,7 @@ void CEngine::ShutDown()
 	SDL_PushEvent(&Event);
 }
 
-bool CEngine::AddEventFunction(EventFunc func)
+/*bool CEngine::AddEventFunction(EventFunc func)
 {
 	if (EventFuncCount >= MAX_EVENT_FUNCTIONS)
 		return false;
@@ -447,7 +489,7 @@ bool CEngine::AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyF
 	KeyFuncCallers[KeyInputFuncCount] = AKeyFuncCaller;
 	KeyInputFuncCount++;
 	return true;
-}
+}*/
 
 void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)
 {

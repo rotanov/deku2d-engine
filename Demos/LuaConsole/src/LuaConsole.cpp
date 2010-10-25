@@ -17,7 +17,7 @@ namespace LuaAPI
 
 CLuaConsole::CLuaConsole()
 {
-	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	CEventManager::Instance()->Subscribe("KeyDown", this);
 
 	CLuaVirtualMachine::Instance()->RegisterAPIFunction("ConsoleWrite", &LuaAPI::ConsoleWrite);
 
@@ -38,11 +38,11 @@ CLuaConsole::CLuaConsole()
 	WritePrompt();
 }
 
-bool CLuaConsole::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+void CLuaConsole::ProcessEvent(const CEvent &AEvent)
 {
-	switch (state)
+	if (AEvent.GetName() == "KeyDown")
 	{
-	case KEY_DOWN:
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
 		switch (key)
 		{
 		case SDLK_RETURN:
@@ -63,9 +63,7 @@ bool CLuaConsole::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 			}
 			break;
 		}
-		break;
 	}
-	return true;
 }
 
 void CLuaConsole::Write(const string &AText)

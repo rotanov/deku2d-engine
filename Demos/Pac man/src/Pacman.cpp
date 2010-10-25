@@ -67,7 +67,8 @@ CPacmanPlayer::CPacmanPlayer() : Score(0), Damage(0), Velocity(V2_ZERO)
 	Sprite->SetTexture("PacmanFrames");
 	Sprite->AddAnimation(true, 50, 32, 32, 4, 2, 7, 32, 32, 0, 0, 0, true);
 	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 1, false);
-	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	CEventManager::Instance()->Subscribe("KeyDown", this);
 	CRenderManager::Instance()->Camera.Assign(&Position.x, &Position.y);
 }
 
@@ -82,7 +83,7 @@ void CPacmanPlayer::Update(float dt)
 	Sprite->Position = Vector2(ceil(Position.x), ceil(Position.y));
 }
 
-bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	if (state == KEY_DOWN)
 	{
@@ -115,6 +116,41 @@ bool CPacmanPlayer::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char lett
 		}
 	}
 	return true;
+}*/
+
+void CPacmanPlayer::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyDown")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_LEFT:
+			Velocity.x += -DEFAULT_VELOCITY;
+			Velocity.y = 0.0f;
+			Sprite->SetAngle(0.0f);
+			Sprite->mirror_h = true;
+			break;
+		case SDLK_RIGHT:
+			Velocity.x += DEFAULT_VELOCITY;
+			Velocity.y = 0.0f;
+			Sprite->SetAngle(0.0f);
+			Sprite->mirror_h = false;
+			break;
+		case SDLK_UP:
+			Velocity.y += DEFAULT_VELOCITY;
+			Velocity.x = 0.0f;
+			Sprite->SetAngle(90.0f);
+			Sprite->mirror_h = false;
+			break;
+		case SDLK_DOWN:
+			Velocity.y += -DEFAULT_VELOCITY;
+			Velocity.x = 0.0f;
+			Sprite->SetAngle(90.0f);
+			Sprite->mirror_h = true;
+			break;
+		}
+	}
 }
 
 CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)

@@ -25,7 +25,7 @@ void CTilesetEditor::SetZoom(float AZoom)
 	Offset.y = - Temp.y * (TempWH.y * Zoom) + MousePosition.y;
 }
 
-bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch (state)
 	{
@@ -60,6 +60,43 @@ bool CTilesetEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char let
 		break;
 	}
 	return true;
+}*/
+
+void CTilesetEditor::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyDown")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_g:
+			PreviousState = State;
+			State = ES_GRIP_TOOL;
+			break;
+		case SDL_BUTTON_WHEELUP: case SDLK_EQUALS:
+			SetZoom(Zoom + ZOOM_STEP);
+			break;
+		case SDL_BUTTON_WHEELDOWN: case SDLK_MINUS:
+			SetZoom(Zoom - ZOOM_STEP);
+			break;
+		case SDL_BUTTON_LEFT:
+			if (MousePosition.x < INTERFACE_OFFSET_X)
+				break;
+				break;
+		case  SDL_BUTTON_RIGHT:
+			break;
+		}
+	}
+	else if (AEvent.GetName() == "KeyUp")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_g:
+			State = PreviousState;
+			break;
+		}
+	}
 }
 
 CTilesetEditor::CTilesetEditor()
@@ -79,7 +116,9 @@ CTilesetEditor::CTilesetEditor()
 	State					= ES_NONE;
 	PreviousState			= ES_NONE;
 
-	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	CEventManager::Instance()->Subscribe("KeyDown", this);
+	CEventManager::Instance()->Subscribe("KeyUp", this);
 
 #define BUTTONS_COUNT 4
 	const char* ButtonNames[BUTTONS_COUNT] = {"Exit", "Load tileset", "Load texture", "Save tileset", };

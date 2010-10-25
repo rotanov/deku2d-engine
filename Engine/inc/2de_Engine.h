@@ -3,6 +3,7 @@
 
 #include "2de_Core.h"
 #include "2de_Config.h"
+#include "2de_Event.h"
 #include "2de_GameUtils.h"
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
@@ -47,8 +48,8 @@ public:
 	void Pause();
 	void ShutDown();
 
-	bool AddEventFunction(EventFunc func);		// Until event system created.
-	bool AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
+	//bool AddEventFunction(EventFunc func);		// Until event system created.
+	//bool AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
 
 	// Toggle - это переключить, а тут по смыслу - Set.. и геттеров нема - неудобно...
 	void ToggleExitOnEscape(bool AdoExitOnEscape); // it seems to me, that it's too much overkill for such small option...  И как ты предлагаешь её выставлять, блеа? Ящитаю всё ок.
@@ -105,15 +106,15 @@ private:
 
 	string ProgramName;
 
-	int EventFuncCount;
-	int KeyInputFuncCount;
-	CObject *KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
+	//int EventFuncCount;
+	//int KeyInputFuncCount;
+	//CObject *KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
 	CText *FPSText;
 	
 
 	// Временно здесь, будет заменено на систему KeyBinding'a и подписчиков.
-	EventFunc EventFunctions[MAX_EVENT_FUNCTIONS];
-	KeyInputFunc KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
+	//EventFunc EventFunctions[MAX_EVENT_FUNCTIONS];
+	//KeyInputFunc KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
 
 	CAbstractStateHandler *StateHandler;
 

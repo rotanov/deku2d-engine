@@ -350,7 +350,7 @@ bool CCustomStateHandler::OnInitialize()
 	//CFontManager::Instance()->SetCurrentFont("Font");
 	//CFontManager* fm = CFontManager::Instance();
 	//f = fm->Font();
-	Ninja->AddEventFunction(ProcessInput);
+	/*Ninja->AddEventFunction(ProcessInput);*/ // FIXME: just commented no longer working line without thinking
 	//Level.numCellsHor = 20;
 	//Level.numCellsVer = 10;
 	//Level.TileSet->name = "TileSet02-Snow01";

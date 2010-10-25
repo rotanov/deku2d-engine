@@ -3,6 +3,37 @@
 #include "2de_Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
+// CEvent
+
+CEvent::CEvent() : Sender(NULL)
+{
+}
+
+CEvent::CEvent(const string &AName, CObject *ASender) : Name(AName), Sender(ASender)
+{
+}
+
+string CEvent::GetName() const
+{
+	return Name;
+}
+
+void CEvent::SetName(const string &AName)
+{
+	Name = AName;
+}
+
+CObject* CEvent::GetSender() const
+{
+	return Sender;
+}
+
+void CEvent::SetSender(CObject *ASender)
+{
+	Sender = ASender;
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CObject
 
 unsigned int CObject::CObjectCount = 0;
@@ -49,7 +80,7 @@ void CObject::DecRefCount(CObject* AObject)
 	}*/
 }
 
-const string& CObject::GetName() const
+string CObject::GetName() const
 {
 	return Name;
 }
@@ -65,7 +96,7 @@ void CObject::SetName(const string &AObjectName)
 	Name = AObjectName;
 }
 
-size_t CObject::GetID() const
+unsigned int CObject::GetID() const
 {
 	return ID;
 }
@@ -95,10 +126,15 @@ bool CObject::isManaged() const
 	return Managed;
 }
 
-bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+void CObject::ProcessEvent(const CEvent &AEvent)
+{
+	Log("INFO", "Unhandled event '%s' in object '%s'", AEvent.GetName().c_str(), Name.c_str());
+}
+
+/*bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	return true;
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 // CSingletonManager

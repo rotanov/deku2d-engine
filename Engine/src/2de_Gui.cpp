@@ -227,10 +227,16 @@ CGUIManager::CGUIManager()
 	Root->SetPrimitiveRender(new CPrimitiveRender);
 	Root->SetFont(Root->GetStyle()->Font);
 	Focus = Objects.begin();
-	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	CEventManager::Instance()->Subscribe("KeyDown", this);
+	CEventManager::Instance()->Subscribe("KeyPress", this);
+	CEventManager::Instance()->Subscribe("KeyUp", this);
+	CEventManager::Instance()->Subscribe("MouseDown", this);
+	CEventManager::Instance()->Subscribe("MouseUp", this);
+
+	//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 }
 
-bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	// TODO: move this function to CGUIRootObject..	
 	switch (state)
@@ -266,7 +272,7 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		switch (key)
 		{
 		case SDLK_TAB:
-			Root->TabHolded =  false;
+			Root->TabHolded = false;
 			break;
 		}
 		break;
@@ -276,6 +282,44 @@ bool CGUIManager::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		(*Focus)->InputHandling(state, key, mod, letter);
 		
 	return true;
+}*/
+
+void CGUIManager::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyPress")
+	{
+		if (AEvent.GetData<Uint16>("Sym") == SDLK_TAB)
+		{
+			Root->TabHolded = true;
+			if (AEvent.GetData<Uint16>("Modifiers") & KMOD_SHIFT)
+			{
+				if (Focus != Objects.begin())
+					Focus--;
+
+				if (Focus == Objects.begin())
+				{
+					Focus = Objects.end();
+					Focus--;
+				}
+			}
+			else
+			{
+				if (Focus != Objects.end())
+					Focus++;
+
+				if (Focus == Objects.end())
+					Focus = Objects.begin();
+			}
+		}
+	}
+	else if (AEvent.GetName() == "KeyUp")
+	{
+		if (AEvent.GetData<Uint16>("Sym") == SDLK_TAB)
+			Root->TabHolded = false;
+	}
+
+	if (Focus != Objects.end())
+		(*Focus)->ProcessEvent(AEvent);
 }
 
 CGUIObject* CGUIManager::GetFocusedObject() const
@@ -409,7 +453,7 @@ void CButton::Update(float dt)
 	PreviousMouseState = MouseState;
 }
 
-bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch (state)
 	{
@@ -438,6 +482,36 @@ bool CButton::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	}
 	return true;
 
+}*/
+
+void CButton::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyDown")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_SPACE:
+			WidgetState.Pressed = true;
+			break;
+		case SDLK_RETURN:
+			if (CallProc)
+				CallProc(Caller);
+			break;
+		}
+	}
+	else if (AEvent.GetName() == "KeyUp")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_SPACE:
+			WidgetState.Pressed = false;
+			if (CallProc)
+				CallProc(Caller);
+			break;
+		}
+	}
 }
 
 
@@ -542,7 +616,7 @@ void CEdit::Update(float dt)
 	PreviousMouseState = MouseState;
 }
 
-bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	// this function has many copy-pasted blocks.. they're all marked with fN, where N is 1, 2, 3, ...
 	// @todo: move 'em all to separate functions
@@ -681,6 +755,141 @@ bool CEdit::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	}
 	return true;
 	// ужоснах, индусский код в чистом виде...
+}*/
+
+void CEdit::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyPress")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_BACKSPACE:
+			if (Selection.Exists())
+			{
+				// f1
+				CursorPos = Selection.RangeStart();
+				ActualText.erase(Selection.RangeStart() + 1, Selection.Length());
+				Selection.Clear();
+			}
+			else
+			{
+				if (CursorPos >= 0)
+				{
+					ActualText.erase(CursorPos, 1);
+					CursorPos--;
+
+					// f2
+					if (VisibleTextOffset > 0)
+						VisibleTextOffset--;
+				}
+			}
+			break;
+		case SDLK_DELETE:
+			if (Selection.Exists())
+			{
+				// f1
+				CursorPos = Selection.RangeStart();
+				ActualText.erase(Selection.RangeStart() + 1, Selection.Length());
+				Selection.Clear();
+			}
+			else
+			{
+				ActualText.erase(CursorPos + 1, 1);
+				// f2
+				if (VisibleTextOffset > 0)
+					VisibleTextOffset--;
+			}
+			break;
+		case SDLK_LEFT:				
+			if (--CursorPos < -1)
+				CursorPos++;
+
+			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
+				VisibleTextOffset--;
+
+			// f3
+			if (AEvent.GetData<Uint16>("Modifiers") & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+			break;
+		case SDLK_RIGHT:
+			{
+				if (++CursorPos >= ActualText.length())
+					CursorPos--;
+
+				// f3
+				if (AEvent.GetData<Uint16>("Modifiers") & KMOD_SHIFT)
+					Selection.End = CursorPos;
+				else
+					Selection.Clear(CursorPos);
+
+				string RightIncText = ActualText.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+
+				while (!isTextFits(RightIncText.c_str()))
+				{
+					VisibleTextOffset++;
+					RightIncText = ActualText.substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 1);
+				}
+				break;
+			}
+		case SDLK_HOME:
+			CursorPos = -1;
+
+			// f3
+			if (AEvent.GetData<Uint16>("Modifiers") & KMOD_SHIFT)
+				Selection.End = CursorPos;
+			else
+				Selection.Clear(CursorPos);
+
+			VisibleTextOffset = 0;
+			break;
+		case SDLK_END:
+			{
+				CursorPos = ActualText.length() - 1;
+
+				// f3
+				if (AEvent.GetData<Uint16>("Modifiers") & KMOD_SHIFT)
+					Selection.End = CursorPos;
+				else
+					Selection.Clear(CursorPos);
+
+				string RightEndText = ActualText.substr(VisibleTextOffset);
+
+				while (!isTextFits(RightEndText.c_str()))
+				{
+					VisibleTextOffset++;
+					RightEndText = ActualText.substr(VisibleTextOffset);
+				}
+				break;
+			}
+		default:
+			char letter = AEvent.GetData<char>("Char");
+			if (letter > 31 || letter < 0)
+			{
+				if (Selection.Exists())
+				{
+					// f1
+					CursorPos = Selection.RangeStart();
+					ActualText.erase(Selection.RangeStart() + 1, Selection.Length());
+					Selection.Clear();
+				}
+				ActualText.insert(CursorPos + 1, &letter, 1);
+				CursorPos++;
+				Selection.Clear(CursorPos);
+
+				string NewText = GetVisibleText() + letter;
+				while (!isTextFits(NewText.c_str()))
+				{
+					VisibleTextOffset++;
+					NewText = GetVisibleText() + letter;
+				}
+				Text.SetText(NewText);
+			}
+		}
+
+	}
 }
 
 int CEdit::MouseToCursorPos(const Vector2& MousePosition) const
@@ -826,7 +1035,7 @@ void CMenuItem::Update(float dt)
 }
 
 
-bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	if (!GetVisibility())
 		return false;
@@ -878,6 +1087,53 @@ bool CMenuItem::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	}
 	
 	return true;
+}*/
+
+void CMenuItem::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyDown")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_UP:
+			// Вероятно эту логику можно записать и покороче @todo
+			// 	записал чуть короче, да и баг, кажется, пофиксил..
+			if (Focus != Objects.begin())
+				Focus--;
+			else if (isCycledMenuSwitch)
+			{
+				Focus = Objects.end();
+				Focus--;
+			}
+			break;
+		case SDLK_DOWN:
+			if (Focus != --Objects.end())
+				Focus++;
+			else if (isCycledMenuSwitch)
+				Focus = Objects.begin();
+
+			break;
+		case SDLK_RETURN:
+			if ((Focus != Objects.end()) && (*Focus)->CallProc)
+				(*Focus)->CallProc(Caller);
+// 			else
+// 				if ((*Focus)->)
+// 				{
+// 					Visible = false;
+// 					(*Focus)->Visible = true;
+// 					CGUIManager::Instance()->SetFocus(Focus);
+// 				}
+				break;
+		case SDLK_ESCAPE:
+// 			if (!Parent)
+// 				break;
+// 			Visible = false;
+// 			(dynamic_cast<CMenuItem*>(Parent))->Visible = true;
+// 			CGUIManager::Instance()->SetFocus(dynamic_cast<CMenuItem*>(Parent));
+			break;
+		}
+	}
 }
 
 bool CMenuItem::AddObject(CMenuItem *AObject)

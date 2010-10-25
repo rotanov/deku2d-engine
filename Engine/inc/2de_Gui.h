@@ -165,7 +165,8 @@ class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingle
 {
 public:
 	~CGUIManager();
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	//bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 	CGUIObject* GetFocusedObject() const;
 	void SetFocus(CGUIObject *AObject);
 	CGUIRootObject* GetRoot() const;
@@ -201,7 +202,8 @@ public:
 	void SetBox(const CBox &box);
 	void Render();
 	void Update(float dt);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	//bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 };
 
 class CEdit : public CGUIObject
@@ -232,7 +234,8 @@ public:
 	}
 	void Render();
 	void Update(float dt);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	//bool InputHandling(Uint8 state, Uint16 key, SDLMod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 
 private:
 	string ActualText;
@@ -274,7 +277,8 @@ public:
 	~CMenuItem();
 	void Render();
 	void Update(float dt);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	//bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 	bool AddObject(CMenuItem *AObject);
 
 private:

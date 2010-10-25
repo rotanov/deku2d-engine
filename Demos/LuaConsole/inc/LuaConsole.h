@@ -7,7 +7,7 @@ class CLuaConsole : public CObject
 {
 public:
 	CLuaConsole();
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 	void Write(const string &AText);
 	void WriteLine(const string &AText);
 

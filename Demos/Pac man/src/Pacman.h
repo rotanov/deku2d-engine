@@ -22,7 +22,8 @@ public:
 	CPacmanPlayer();
 
 	void Update(float dt);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	//bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 };
 
 class CPacmanBonus : public CUpdatable

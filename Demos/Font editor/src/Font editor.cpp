@@ -58,7 +58,7 @@ void CFontEditor::SetZoom(float AZoom)
 	Offset.y = - Temp.y * (TempWH.y * Zoom) + MousePosition.y;
 }
 
-bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	switch (state)
 	{
@@ -135,6 +135,83 @@ bool CFontEditor::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter
 		break;
 	}
 	return true;
+}*/
+
+void CFontEditor::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyDown")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		switch (key)
+		{
+		case SDLK_g:
+			if (State != ES_GRIP_TOOL)
+				PreviousState = State;
+			State = ES_GRIP_TOOL;
+			break;
+		case SDL_BUTTON_WHEELUP: case SDLK_EQUALS:
+			SetZoom(Zoom + ZOOM_STEP);
+			break;
+		case SDL_BUTTON_WHEELDOWN: case SDLK_MINUS:
+			SetZoom(Zoom - ZOOM_STEP);
+			break;
+		case SDL_BUTTON_LEFT:
+			if (MousePosition.x < INTERFACE_OFFSET_X)
+				break;
+			if (Font != NULL && CornerKind == SCK_NONE)
+				for (int i = 0; i < 256; i++)
+					if (Font->Boxes[i].Min.x < (MousePosition.x / Zoom - Offset.x / Zoom) && Font->Boxes[i].Max.x > (MousePosition.x / Zoom - Offset.x / Zoom) &&
+						Font->Boxes[i].Min.y < (MousePosition.y / Zoom - Offset.y / Zoom) && Font->Boxes[i].Max.y > (MousePosition.y / Zoom - Offset.y / Zoom))
+					{
+						bool tempbool = (i != CurrentSymbol);
+						SetSelectedBoxTo(i);
+						if (tempbool)
+							return;
+						break;
+					}				
+				{
+					if (State == ES_GRIP_TOOL)
+						break;
+					float Mx = MousePosition.x / Zoom - Offset.x / Zoom;
+					float My = MousePosition.y / Zoom - Offset.y / Zoom;
+					CornerKind = SCK_NONE;
+					if (CBox(SelectionBoxes[0], SelectionBoxes[2]).Inside(Vector2(Mx, My)))
+						CornerKind = SCK_LEFT_BOTTOM;
+					if (CBox(SelectionBoxes[4], SelectionBoxes[6]).Inside(Vector2(Mx, My)))
+						CornerKind = SCK_RIGHT_BOTTOM;
+					if (CBox(SelectionBoxes[8], SelectionBoxes[10]).Inside(Vector2(Mx, My)))
+						CornerKind = SCK_RIGHT_TOP;
+					if (CBox(SelectionBoxes[12], SelectionBoxes[14]).Inside(Vector2(Mx, My)))
+						CornerKind = SCK_LEFT_TOP;
+					if (CBox(SelectionBoxes[16], SelectionBoxes[18]).Inside(Vector2(Mx, My)))
+						CornerKind = SCK_CENTER;
+					if (CornerKind != SCK_NONE)
+					{
+						PreviousState = State;
+						State = ES_MOVE_TOOL;
+					}
+				}
+			break;
+		case  SDL_BUTTON_RIGHT:
+			if (Font == NULL)
+				break;
+			if (CornerKind != SCK_NONE)
+			{
+				CornerKind = SCK_NONE;
+			}
+			break;
+		}
+
+	}
+	else if (AEvent.GetName() == "KeyUp")
+	{
+		if (AEvent.GetData<Uint16>("Sym") == SDLK_g)
+		{
+			EEditorState TempState = State;
+			State = PreviousState;
+			PreviousState = State;
+		}
+	}
 }
 
 CFontEditor::CFontEditor()
@@ -158,7 +235,9 @@ CFontEditor::CFontEditor()
 	State				= ES_NONE;
 	PreviousState		= ES_NONE;
 
-	CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+	CEventManager::Instance()->Subscribe("KeyUp", this);
+	CEventManager::Instance()->Subscribe("KeyDown", this);
 
 	#define BUTTONS_COUNT 8
 	const char* ButtonNames[BUTTONS_COUNT] = {"Exit", "Load font", "Load texture", "Test phrase", "Save font", "Expose box", "<-", "->"};

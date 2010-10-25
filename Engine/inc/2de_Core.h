@@ -220,6 +220,92 @@ inline const void * typetag()
 }
 
 /**
+* CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
+*/
+
+class CVariantConvert	// Looks more like a namespace
+{
+public:
+	template<typename T>
+	struct identity
+	{
+		typedef T type;
+	};
+
+	template<typename T>
+	static T from_string_impl(const string &s, identity<T>)
+	{
+		T result;
+		stringstream ss;
+		ss >> noskipws;
+		ss.str(s);
+		ss >> result;
+		return result;
+	}
+
+	static bool from_string_impl(const string &s, identity<bool>)
+	{
+		// ios::boolalpha - have you looked for it, while trying to reinvent the wheel? // it doesn't suit our needs.. i don't remember why, though..
+		if (s == "false")
+			return false;
+
+		long double result;
+		stringstream ss;
+		ss.str(s);
+		ss >> result;
+
+		if (ss.fail())
+			return true;
+
+		return ((int) result != 0);
+	}
+
+	static string from_string_impl(const string &s, identity<string>)
+	{
+		return s;
+	}
+};
+
+template<typename T>
+T from_string(const string &s)
+{
+	return CVariantConvert::from_string_impl(s, CVariantConvert::identity<T>());
+}
+
+class CObject; // forward declaration
+
+class CEvent
+{
+public:
+	CEvent();
+	CEvent(const string &AName, CObject *ASender);
+
+	template<typename T>
+	T GetData(const string &AName) const
+	{
+		// note: just Data[AName] discards const qualifer
+		return from_string<T>(Data.find(AName)->second);
+	}
+
+	template<typename T>
+	void SetData(const string &AName, const T &AValue)
+	{
+		Data[AName] = to_string(AValue);
+	}
+
+	string GetName() const;
+	void SetName(const string &AName);
+
+	CObject* GetSender() const;
+	void SetSender(CObject *ASender);
+
+private:
+	string Name;
+	CObject *Sender;
+	map<string, string> Data;
+};
+
+/**
 * CObject - base class for many classes.
 */
 
@@ -232,17 +318,18 @@ public:
 	void IncRefCount();
 	static void DecRefCount(CObject* AObject);
 
-	const string& GetName() const;
+	string GetName() const;
 	virtual void SetName(const string &AObjectName);
 
-	size_t GetID() const;
+	unsigned int GetID() const;
 
 	bool isDestroyed() const;
 	void SetDestroyed();
 
 	bool isManaged() const;
 
-	virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
+	virtual void ProcessEvent(const CEvent &AEvent);
+	//virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
 
 private:
 	CObject(const CObject &AObject);
@@ -250,7 +337,7 @@ private:
 
 	bool Managed;
 	bool Destroyed;
-	int ID;
+	unsigned int ID;
 	string Name;
 	//size_t RefCount;
 
@@ -267,7 +354,7 @@ typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 *	Третий параметр - модификатор, т.е. зажат ли Shift, Ctrl, Alt итд
 *	И четвёртый параметр - ASCII код.
 */
-typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);	// FFFU~
+//typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);	// FFFU~
 
 // Template class for some manager
 template <typename C>	// C - container type
@@ -938,58 +1025,6 @@ __INLINE string to_string(const T& t)
 	ostringstream s;
 	s << t;
 	return s.str();
-}
-
-/**
-* CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
-*/
-
-class CVariantConvert	// Looks more like a namespace
-{
-public:
-	template<typename T>
-	struct identity
-	{
-		typedef T type;
-	};
-
-	template<typename T>
-	static T from_string_impl(const string &s, identity<T>)
-	{
-		T result;
-		stringstream ss;
-		ss.str(s);
-		ss >> result;
-		return result;
-	}
-
-	static bool from_string_impl(const string &s, identity<bool>)
-	{
-		// ios::boolalpha - have you looked for it, while trying to reinvent the wheel?
-		if (s == "false")
-			return false;
-
-		long double result;
-		stringstream ss;
-		ss.str(s);
-		ss >> result;
-
-		if (ss.fail())
-			return true;
-
-		return ((int) result != 0);
-	}
-
-	static string from_string_impl(const string &s, identity<string>)
-	{
-		return s;
-	}
-};
-
-template<typename T>
-T from_string(const string &s)
-{
-	return CVariantConvert::from_string_impl(s, CVariantConvert::identity<T>());
 }
 
 /**

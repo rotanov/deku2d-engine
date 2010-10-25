@@ -1,7 +1,6 @@
 #include "Tanks.h"
 
-
-bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+/*bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 {
 	if (state == KEY_DOWN)
 	{
@@ -29,6 +28,37 @@ bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 					isWalking = true;
 	}
 	return true;
+}*/
+
+void CTank::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "KeyDown")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		for (int i = 0; i < CONTROLS_COUNT; i++)
+			if (key == Controls[i])
+			{
+				States[i] = true;
+				if (i>=0 && i<=3)
+				{
+					isWalking = true;
+					Direction = Directions[i];
+				}
+			}
+		if (key == Controls[akFire])
+			FiringTimeout = 0.21f;
+	}
+	else if (AEvent.GetName() == "KeyUp")
+	{
+		Uint16 key = AEvent.GetData<Uint16>("Sym");
+		isWalking = false;
+		for (int i = 0; i < 5; i++)
+			if (key == Controls[i])
+				States[i] = false;
+			else 
+				if (i>=0 && i<=3 && States[i])
+					isWalking = true;
+	}
 }
 
 void CTank::SetPlayerControls(int PlayerIndex)

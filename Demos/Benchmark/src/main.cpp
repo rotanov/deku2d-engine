@@ -46,7 +46,8 @@ public:
 	CRectangleTest()
 	{
 		RectangleCount = 0;
-		CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
+		CEventManager::Instance()->Subscribe("KeyPress", this);
+		//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		if (CCommandLineArgumentsManager::Instance()->IsOptionExists("rectangles"))
 		{
 			RectangleCount = stoi(CCommandLineArgumentsManager::Instance()->GetOption("rectangles"));
@@ -61,7 +62,7 @@ public:
 		CounterText.SetLayer(1);
 		CounterText.Position = Vector2(0.0f, 15.0f);
 	}
-	void Update(float dt)
+	/*void Update(float dt)
 	{
 		if (CEngine::Instance()->keys[SDLK_UP])
 		{
@@ -69,8 +70,18 @@ public:
 				CFactory::Instance()->New<CRotatingQuad>("");
 			CounterText.SetText("Rectangles count: " + itos(RectangleCount += 43000));
 		}
+	}*/
+	void ProcessEvent(const CEvent &AEvent)
+	{
+		if (AEvent.GetName() == "KeyPress" && AEvent.GetData<Uint16>("Sym") == SDLK_UP)
+		{
+			//for(int i = 0; i < 43000; i++)
+			CFactory::Instance()->New<CRotatingQuad>("");
+			//CounterText.SetText("Rectangles count: " + itos(RectangleCount += 43000));
+			CounterText.SetText("Rectangles count: " + itos(RectangleCount += 1));
+		}
 	}
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
+	/*bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
 	{
 		switch (state)
 		{
@@ -84,7 +95,7 @@ public:
 			break;
 		}
 		return true;
-	}
+	}*/
 };
 
 class CCustomStateHandler : public CAbstractStateHandler
@@ -104,8 +115,7 @@ bool CCustomStateHandler::OnArgumentsProcessing()
 
 bool CCustomStateHandler::OnInitialize()
 {
-	// do something..
-	// i put it here just to show how it works and as placeholder for user's code..
+	CEngine::Instance()->ToggleKeyRepeat(true);
 	CFactory::Instance()->New<CRectangleTest>("Rectangle test");
 	return true;
 }

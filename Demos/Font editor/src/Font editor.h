@@ -77,7 +77,8 @@ public:
 	~CFontEditor();
 	void SetZoom(float AZoom);
 	void SetSelectedBoxTo(int Index);
-	bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	//bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
+	void ProcessEvent(const CEvent &AEvent);
 	void Render();
 	void Update(float dt);
 	
