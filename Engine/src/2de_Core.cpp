@@ -131,11 +131,6 @@ void CObject::ProcessEvent(const CEvent &AEvent)
 	Log("INFO", "Unhandled event '%s' in object '%s'", AEvent.GetName().c_str(), Name.c_str());
 }
 
-/*bool CObject::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
-{
-	return true;
-}*/
-
 //////////////////////////////////////////////////////////////////////////
 // CSingletonManager
 

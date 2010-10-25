@@ -103,14 +103,7 @@ using namespace std;
 //#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
 
-
 typedef unsigned char		byte;
-
-typedef bool (*EventFunc)(SDL_Event&);
-
-#define KEY_DOWN 0
-#define KEY_PRESS 1
-#define KEY_UP 2
 
 //	"Forever" instead of "for(;;)", anyway, just kidding.
 #define Forever for(;;)
@@ -281,17 +274,10 @@ public:
 	CEvent(const string &AName, CObject *ASender);
 
 	template<typename T>
-	T GetData(const string &AName) const
-	{
-		// note: just Data[AName] discards const qualifer
-		return from_string<T>(Data.find(AName)->second);
-	}
+	T GetData(const string &AName) const;
 
 	template<typename T>
-	void SetData(const string &AName, const T &AValue)
-	{
-		Data[AName] = to_string(AValue);
-	}
+	void SetData(const string &AName, const T &AValue);
 
 	string GetName() const;
 	void SetName(const string &AName);
@@ -329,7 +315,6 @@ public:
 	bool isManaged() const;
 
 	virtual void ProcessEvent(const CEvent &AEvent);
-	//virtual bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);	// FFUU~
 
 private:
 	CObject(const CObject &AObject);
@@ -347,14 +332,6 @@ private:
 };
 
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
-/**
-*	Ф-я для принятия информации о нажатии кнопки, будь то мышь или клавиатура. Ввод с других устройств не поддерживается пока что.
-*	Первый параметр - произошло ли событие KEY_UP, KEY_PRESS или KEY_DOWN
-*	Второй - какая клавиша была нажата; одновременно принимает значения мыши и клавиатуры: sdl_keysym.h, sdl_mouse.h - списки констант
-*	Третий параметр - модификатор, т.е. зажат ли Shift, Ctrl, Alt итд
-*	И четвёртый параметр - ASCII код.
-*/
-//typedef bool (CObject::*KeyInputFunc)(Uint8, Uint16, SDLMod, char);	// FFFU~
 
 // Template class for some manager
 template <typename C>	// C - container type
@@ -1039,6 +1016,26 @@ public:
 		return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
 	}
 };
+
+template<typename T>
+T CEvent::GetData(const string &AName) const
+{
+	map<string, string>::const_iterator it = Data.find(AName);
+	if (it == Data.end())
+	{
+		Log("ERROR", "Event '%s' doesn't have data field named '%s'", Name.c_str(), AName.c_str());
+		return from_string<T>("");
+	}
+
+	return from_string<T>(it->second);
+}
+
+template<typename T>
+void CEvent::SetData(const string &AName, const T &AValue)
+{
+	Data[AName] = to_string(AValue);
+}
+
 
 /**
 *	Отлов утечек памяти.

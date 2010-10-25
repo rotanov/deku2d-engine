@@ -1,35 +1,5 @@
 #include "Tanks.h"
 
-/*bool CTank::InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
-{
-	if (state == KEY_DOWN)
-	{
-		for (int i = 0; i < CONTROLS_COUNT; i++)
-			if (key == Controls[i])
-			{
-				States[i] = true;
-				if (i>=0 && i<=3)
-				{
-					isWalking = true;
-					Direction = Directions[i];
-				}
-			}
-		if (key == Controls[akFire])
-			FiringTimeout = 0.21f;
-	}
-	else if (state == KEY_UP)
-	{
-		isWalking = false;
-		for (int i = 0; i < 5; i++)
-			if (key == Controls[i])
-				States[i] = false;
-			else 
-				if (i>=0 && i<=3 && States[i])
-					isWalking = true;
-	}
-	return true;
-}*/
-
 void CTank::ProcessEvent(const CEvent &AEvent)
 {
 	if (AEvent.GetName() == "KeyDown")

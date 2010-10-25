@@ -63,7 +63,6 @@ public:
 	CTilesetEditor();
 	~CTilesetEditor();
 	void SetZoom(float AZoom);
-	//bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void ProcessEvent(const CEvent &AEvent);
 	void Render();
 	void Update(float dt);

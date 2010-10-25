@@ -47,7 +47,6 @@ public:
 	{
 		RectangleCount = 0;
 		CEventManager::Instance()->Subscribe("KeyPress", this);
-		//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		if (CCommandLineArgumentsManager::Instance()->IsOptionExists("rectangles"))
 		{
 			RectangleCount = stoi(CCommandLineArgumentsManager::Instance()->GetOption("rectangles"));
@@ -81,21 +80,6 @@ public:
 			CounterText.SetText("Rectangles count: " + itos(RectangleCount += 1));
 		}
 	}
-	/*bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
-	{
-		switch (state)
-		{
-			case KEY_DOWN:
-				switch (key)
-				{
-				case SDLK_UP:
-					
-					break;
-				}
-			break;
-		}
-		return true;
-	}*/
 };
 
 class CCustomStateHandler : public CAbstractStateHandler

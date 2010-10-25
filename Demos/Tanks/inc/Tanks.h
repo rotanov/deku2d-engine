@@ -97,7 +97,6 @@ public:
 		isWalking = false;
 		CEventManager::Instance()->Subscribe("KeyDown", this);
 		CEventManager::Instance()->Subscribe("KeyUp", this);
-		//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
 		isAlive = true;
 		isFiring = false;
@@ -128,7 +127,6 @@ public:
 	void SetPlayerControls(int PlayerIndex);
 	void Update(float dt);
 	void Render();
-	//bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter);
 	void ProcessEvent(const CEvent &AEvent);
 };
 

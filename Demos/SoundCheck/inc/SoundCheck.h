@@ -10,7 +10,6 @@ public:
 	CSoundObject() : Volume(MIX_MAX_VOLUME)
 	{
 		CEventManager::Instance()->Subscribe("KeyDown", this);
-		//CEngine::Instance()->AddKeyInputFunction(&CObject::InputHandling, this);
 		VolumeLabel = CFactory::Instance()->New<CLabel>("VolumeLabel");
 		VolumeLabel->SetBox(CBox(530, 270, 100, 32));
 		UpdateVolumeLabel();
@@ -58,47 +57,6 @@ public:
 		}
 	}
 
-	/*bool InputHandling(Uint8 state, Uint16 key, SDLMod mod, char letter)
-	{
-		if (state == KEY_DOWN)
-		{
-			switch (key)
-			{
-			case SDLK_q:
-				CSoundMixer::Instance()->PlaySound(CSoundManager::Instance()->GetSoundByName("chord"));
-				break;
-			case SDLK_w:
-				CSoundMixer::Instance()->StopAllSound();
-				break;
-
-			case SDLK_a:
-				CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("bender1"));
-				break;
-			case SDLK_s:
-				CSoundMixer::Instance()->StopMusic();
-				break;
-
-			case SDLK_z:
-				if (Volume > 0)
-				{
-					Volume--;
-					UpdateVolumeLabel();
-				}
-				CSoundMixer::Instance()->SetMusicVolume(Volume);
-				break;
-			case SDLK_x:
-				if (Volume < MIX_MAX_VOLUME)
-				{
-					Volume++;
-					UpdateVolumeLabel();
-				}
-				CSoundMixer::Instance()->SetMusicVolume(Volume);
-				break;
-			}
-
-		}
-		return true;
-	}*/
 private:
 	void UpdateVolumeLabel()
 	{
