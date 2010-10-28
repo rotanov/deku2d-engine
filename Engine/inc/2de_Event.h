@@ -14,13 +14,13 @@ public:
 	void TriggerEvent(const string &AEventName, CObject *ASender);
 	void TriggerEvent(CEvent *AEvent);
 	
-	bool ProcessEvents();
+	//bool ProcessEvents();
 
 private:
-	typedef queue<CEvent *> LoopContainer;
+	//typedef queue<CEvent *> LoopContainer;
 	typedef multimap<string, CObject *> SubscribersContainer;
 
-	LoopContainer Loop;
+	//LoopContainer Loop;
 	SubscribersContainer Subscribers;
 
 	friend class CTSingleton<CEventManager>;

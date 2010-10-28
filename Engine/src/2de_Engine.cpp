@@ -19,9 +19,6 @@ CEngine::CEngine()
 
 	ProgramName = "Some Deku2D-using program";
 
-	//EventFuncCount = 0;
-	//KeyInputFuncCount = 0;
-
 	FPSText = NULL;
 
 	StateHandler = NULL;
@@ -391,7 +388,7 @@ bool CEngine::ProcessEvents()
 		}
 	}
 
-	return CEventManager::Instance()->ProcessEvents(); // move somewhere..
+	return true; //CEventManager::Instance()->ProcessEvents(); // move somewhere..
 }
 
 bool CEngine::Run(int argc, char *argv[])
@@ -471,25 +468,6 @@ void CEngine::ShutDown()
 	Event.type = SDL_QUIT;
 	SDL_PushEvent(&Event);
 }
-
-/*bool CEngine::AddEventFunction(EventFunc func)
-{
-	if (EventFuncCount >= MAX_EVENT_FUNCTIONS)
-		return false;
-	EventFunctions[EventFuncCount] = func;
-	EventFuncCount++;
-	return true;
-}
-
-bool CEngine::AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller)
-{
-	if (KeyInputFuncCount >= MAX_KEY_INPUT_FUNCTIONS)
-		return false;
-	KeyInputFunctions[KeyInputFuncCount] = AKeyInputFunction;
-	KeyFuncCallers[KeyInputFuncCount] = AKeyFuncCaller;
-	KeyInputFuncCount++;
-	return true;
-}*/
 
 void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)
 {

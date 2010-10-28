@@ -7,11 +7,15 @@
 class CSoundObject : public CObject
 {
 public:
-	CSoundObject() : Volume(MIX_MAX_VOLUME)
+	CSoundObject()
 	{
 		CEventManager::Instance()->Subscribe("KeyDown", this);
+		CEventManager::Instance()->Subscribe("ButtonClick", this);
+
 		VolumeLabel = CFactory::Instance()->New<CLabel>("VolumeLabel");
 		VolumeLabel->SetBox(CBox(530, 270, 100, 32));
+
+		Volume = CSoundMixer::Instance()->GetMusicVolume();
 		UpdateVolumeLabel();
 	}
 
@@ -55,6 +59,22 @@ public:
 				break;
 			}
 		}
+		else if (AEvent.GetName() == "ButtonClick")
+		{
+			if (AEvent.GetSender()->GetName() == "LoadFileButton")
+			{
+				string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->GetText();
+				CMusic *mus = CFactory::Instance()->New<CMusic>(""); // WRONG, i think
+											// i mean we should specify just name of music file, that already
+											// lies int the music folder
+											// 	i just wanted to play some music from filesystem, why not?..
+											// 	ofcourse, you can do Get<CMusic>("name_of_music_resource_already_loaded_by_engine"),
+											// 	but there are too few files in our Data/Music directory to properly test sound system..
+				mus->SetLoadSource(test);
+				mus->Load();
+				CSoundMixer::Instance()->PlayMusic(mus);
+			}
+		}
 	}
 
 private:
@@ -71,62 +91,24 @@ class CHelpText
 public:
 	CHelpText()
 	{
-		//CFontManager::Instance()->SetCurrentFont("hge");
-		//CGUIManager::Instance()->GetRoot()->GetStyle()->Font = CFactory::Instance()->Get<CFont>("hge");
-
-		int ScreenHeight = CGLWindow::Instance()->GetHeight();
-
-		CText *HelpText = CFactory::Instance()->New<CText>("SoundControlsText");
-		//HelpText->Position = Vector2(5.0f, ScreenHeight - 30.0f);
-		HelpText->Position = Vector2(5.0f, ScreenHeight - 260.0f);
-		HelpText->SetText("Sound: q - play, w - stop");
-
-		HelpText = CFactory::Instance()->New<CText>("MusicControlsText");
-		HelpText->Position = Vector2(5.0f, ScreenHeight - 270.0f);
-		HelpText->SetText("Music: a - play, s - stop");
-
-		HelpText = CFactory::Instance()->New<CText>("MusicVolumeText");
-		HelpText->Position = Vector2(5.0f, ScreenHeight - 280.0f);
-		HelpText->SetText("Music volume: z - down, x - up");
-
-		HelpText = CFactory::Instance()->New<CText>("FileText1");
-		HelpText->Position = Vector2(5.0f, ScreenHeight - 290.0f);
-		HelpText->SetText("You can try to enter file name and click Play");
-
-		HelpText = CFactory::Instance()->New<CText>("FileText2");
-		HelpText->Position = Vector2(5.0f, ScreenHeight - 300.0f);
-		HelpText->SetText("to play it as music");
+		CText *HelpText = CFactory::Instance()->New<CText>("HelpText");
+		HelpText->Position = Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f);
+		HelpText->SetText("Sound: q - play, w - stop\nMusic: a - play, s - stop\nMusic volume: z - down, x - up\n"
+			"You can try to enter file name and click Play\nto play it as music");
 	}
 };
 
-bool PlayFile(CObject *Caller)
-{
-	string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->GetText();
-	Log("SOUNDCHECK", "File name string from GUI: %s", test.c_str());
-	CMusic *mus = CFactory::Instance()->New<CMusic>("mus"); // WRONG, i think
-								// i mean we should specify just name of music file, that already
-								// lies int the music folder
-	mus->SetLoadSource(test);
-	mus->Load();
-	CSoundMixer::Instance()->PlayMusic(mus);
-	return true;
-}
-
-class CLoadFileGUI
+class CLoadFileGUI : public CObject
 {
 public:
 	CLoadFileGUI()
 	{
 		LoadFileButton = CFactory::Instance()->New<CButton>("LoadFileButton");
 		LoadFileButton->SetBox(CBox(400, 270, 100, 32));
-		LoadFileButton->SetText(static_cast<string>("Play"));
-		LoadFileButton->SetCallback(&PlayFile, NULL);
+		LoadFileButton->SetText("Play");
 
 		FileNameEdit = CFactory::Instance()->New<CEdit>("FileNameEdit");
 		FileNameEdit->SetBox(CBox(80, 270, 300, 32));
-		//FileNameEdit->SetText("");
-
-
 	}
 private:
 	CEdit *FileNameEdit;

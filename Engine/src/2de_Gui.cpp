@@ -397,8 +397,13 @@ void CButton::Update(float dt)
 	if (!MouseState.PressedInside && PreviousMouseState.PressedInside && !MouseState.PressedOutside)
 	{
 		WidgetState.Pressed = false;
-		if (CallProc && MouseState.Hovered && isFocused())
-			CallProc(Caller);
+		if (MouseState.Hovered && isFocused())
+		{
+			if (CallProc)
+				CallProc(Caller);
+
+			CEventManager::Instance()->TriggerEvent("ButtonClick", this);
+		}
 	}
 
 	PreviousMouseState = MouseState;

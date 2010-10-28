@@ -14,6 +14,9 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
+	CAbstractScene *MainScene = CSceneManager::Instance()->CreateScene();
+	CSceneManager::Instance()->SetCurrentScene(MainScene);
+
 	SoundCheck = CFactory::Instance()->New<CSoundCheck>("SoundCheck");
 	return true;
 }

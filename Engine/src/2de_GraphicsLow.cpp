@@ -785,7 +785,9 @@ bool CRenderManager::DrawObjects()
 		{
 			if (data->GetModel() != NULL)
 				Renderer->PushModel(data, data->GetModel());
-			//data->Render();
+#ifdef USE_OLD_RENDER // it's better, than just commenting out - it's musch easier to set predefined macro, than find and uncomments line in code
+			data->Render();
+#endif
 #if defined(_2DE_DEBUG_DRAW_BOXES)
 			DrawLinedBox(&TempRenderInfo, data->GetBox());
 #endif
