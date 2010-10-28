@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\2de_Event.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\2de_GameUtils.cpp"
 				>
 			</File>

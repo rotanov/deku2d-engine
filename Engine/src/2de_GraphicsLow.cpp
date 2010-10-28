@@ -17,12 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 // CRenderableUnitInfo
 
-CRenderObjectInfo::CRenderObjectInfo() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
+CRenderConfig::CRenderConfig() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
 {
 	
 }
 
-void CRenderObjectInfo::SetAngle(float AAngle /*= 0.0f*/)
+void CRenderConfig::SetAngle(float AAngle /*= 0.0f*/)
 {
 	if (AAngle > 360.0f)
 		Angle = AAngle - (static_cast<int>(AAngle) / 360) * 360.0f; 
@@ -31,34 +31,34 @@ void CRenderObjectInfo::SetAngle(float AAngle /*= 0.0f*/)
 	//Angle = Clamp(AAngle, 0.0f, 360.0f);
 }
 
-float CRenderObjectInfo::GetAngle() const
+float CRenderConfig::GetAngle() const
 {
 	return Angle;
 }
 
-void CRenderObjectInfo::SetLayer(int Layer)
+void CRenderConfig::SetLayer(int Layer)
 {
 	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
 }
 
-float CRenderObjectInfo::GetDepth() const
+float CRenderConfig::GetDepth() const
 {
 	return Depth;
 }
 
-float CRenderObjectInfo::GetScaling() const
+float CRenderConfig::GetScaling() const
 {
 	return Scaling;
 }
 
-void CRenderObjectInfo::SetScaling(float AScaling)
+void CRenderConfig::SetScaling(float AScaling)
 {
 	Scaling = AScaling;
 // 	Box.Min *= Scaling;
 // 	Box.Max *= Scaling;
 }
 
-int CRenderObjectInfo::GetLayer() const
+int CRenderConfig::GetLayer() const
 {
 	return Depth * 100.0f;
 }
@@ -716,7 +716,7 @@ void CCamera::Free()
 
 void CCamera::DrawDebug()
 {
-	CRenderObjectInfo temp;
+	CRenderConfig temp;
 	temp.doIgnoreCamera = true;
 	CRenderManager::Instance()->DrawLinedBox(&temp, world);
 	CRenderManager::Instance()->DrawLinedBox(&temp, view);
@@ -752,7 +752,7 @@ void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
 CRenderManager::CRenderManager()
 {
 	SetName("Render Manager");
-	Renderer = new CFixedPipelineRenderer();
+	Renderer = new CFFPRenderer();
 }
 
 CRenderManager::~CRenderManager()
@@ -762,7 +762,7 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
-	CRenderObjectInfo TempRenderInfo;
+	CRenderConfig TempRenderInfo;
 	TempRenderInfo.SetLayer(512);
 	TempRenderInfo.Color = COLOR_RED;
 	TempRenderInfo.doIgnoreCamera = true;
@@ -773,35 +773,33 @@ bool CRenderManager::DrawObjects()
 	Camera.Update(); // @todo: review camera
 
 	CRenderable *data;
+	CGameObject *GameObject = &(CUpdateManager::Instance()->RootGameObject);
+	for(CGameObject::traverse_iterator_bfs i(*GameObject); i.Ok(); ++i)
+	{
+		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(&(*i));
+		if (RenderComponent != NULL)
+		{
+			Renderer->PushModel(&RenderComponent->Configuration, RenderComponent->Model);
+		}
+	}
 
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
 		data = *i;
-		if (data->isDestroyed())
+		if (data->isDestroyed() || !data->GetVisibility() ||
+			!CSceneManager::Instance()->InScope(data->GetScene()))
 			continue;
-		if (!CSceneManager::Instance()->InScope(data->GetScene()))
-			continue;
-		if (data->GetVisibility())
-		{
-			if (data->GetModel() != NULL)
-				Renderer->PushModel(data, data->GetModel());
-#ifdef USE_OLD_RENDER // it's better, than just commenting out - it's musch easier to set predefined macro, than find and uncomments line in code
-			data->Render();
-#endif
+		data->Render();
 #if defined(_2DE_DEBUG_DRAW_BOXES)
-			DrawLinedBox(&TempRenderInfo, data->GetBox());
+		DrawLinedBox(&TempRenderInfo, data->GetBox());
 #endif
-		}
 	}
 
-
-	
 	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
-	 glTranslatef(0.375, 0.375, 0);
+	glTranslatef(0.375, 0.375, 0);
 
-	
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -819,6 +817,7 @@ bool CRenderManager::DrawObjects()
 	glDisable(GL_TEXTURE_2D);
 
 	Renderer->Render();
+	Renderer->Clear();
 
 	QuadVertices.RenderPrimitive(GL_QUADS);
 	LineVertices.RenderPrimitive(GL_LINES);
@@ -873,7 +872,7 @@ void CRenderManager::Print(const CText *Text, const string &Characters)
 	}
 }
 
-void CRenderManager::DrawLinedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box)
+void CRenderManager::DrawLinedBox(const CRenderConfig* RenderInfo, const CBox &Box)
 {
 	Vector2 v0 = Box.Min;
 	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
@@ -889,7 +888,7 @@ void CRenderManager::DrawLinedBox(const CRenderObjectInfo* RenderInfo, const CBo
 	LineVertices.PushVertex(RenderInfo, v0);
 }
 
-void CRenderManager::DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box)
+void CRenderManager::DrawSolidBox(const CRenderConfig* RenderInfo, const CBox &Box)
 {
 	Vector2 v0 = Box.Min;
 	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
@@ -901,7 +900,7 @@ void CRenderManager::DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBo
 	QuadVertices.PushVertex(RenderInfo, v3);
 }
 
-void CRenderManager::DrawTexturedBox(const CRenderObjectInfo *RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords)
+void CRenderManager::DrawTexturedBox(const CRenderConfig *RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords)
 {
 	Vector2 v0 = Box.Min;	
 	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
@@ -915,18 +914,18 @@ void CRenderManager::DrawTexturedBox(const CRenderObjectInfo *RenderInfo, const 
 	TexturedQuadVertices[i].PushVertex(RenderInfo, v3, TexCoords[3]);
 }
 
-void CRenderManager::DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point)
+void CRenderManager::DrawPoint(const CRenderConfig *RenderInfo, const Vector2 &Point)
 {
 	PointVertices.PushVertex(RenderInfo, Point);
 }
 
-void CRenderManager::DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1)
+void CRenderManager::DrawLine(const CRenderConfig *RenderInfo, const Vector2 &v0, const Vector2 &v1)
 {
 	LineVertices.PushVertex(RenderInfo, v0);
 	LineVertices.PushVertex(RenderInfo, v1);
 }
 
-void CRenderManager::DrawTriangles(const CRenderObjectInfo *RenderInfo, const Vector2 *Vertices, unsigned int Count)
+void CRenderManager::DrawTriangles(const CRenderConfig *RenderInfo, const Vector2 *Vertices, unsigned int Count)
 {
 	// ... 
 }
@@ -1368,7 +1367,7 @@ CPrmitiveVertexDataHolder::~CPrmitiveVertexDataHolder()
 	delete [] Vertices;
 }
 
-void CPrmitiveVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
+void CPrmitiveVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color)
 {
 	assert(Sender != NULL);
 	if (VertexCount == ReservedCount)
@@ -1384,7 +1383,7 @@ void CPrmitiveVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, cons
 	VertexCount++;
 }
 
-void CPrmitiveVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex)
+void CPrmitiveVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex)
 {
 	PushVertex(Sender, Vertex, Sender->Color);
 }
@@ -1442,12 +1441,12 @@ CVertexDataHolder::~CVertexDataHolder()
 	delete [] TexCoords;
 }
 
-void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color)
+void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color)
 {
 	assert(false);
 }
 
-void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord)
+void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord)
 {
 	CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
 	if (VertexCount == ReservedCount)
@@ -1455,12 +1454,12 @@ void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector
 	TexCoords[CPrmitiveVertexDataHolder::VertexCount - 1] = TexCoord;
 }
 
-void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex)
+void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex)
 {
 	assert(false);
 }
 
-void CVertexDataHolder::PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const Vector2 &TexCoord)
+void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const Vector2 &TexCoord)
 {
 	PushVertex(Sender, Vertex, Sender->Color, TexCoord);
 }
@@ -1495,19 +1494,19 @@ void CVertexDataHolder::Grow()
 
 
 
-bool CFixedPipelineRenderer::Initilize()
+bool CFFPRenderer::Initilize()
 {
 	// do something
 	return true;
 }
 
-bool CFixedPipelineRenderer::Finalize()
+bool CFFPRenderer::Finalize()
 {
 	// do something either
 	return false;
 }
 
-void CFixedPipelineRenderer::PushModel(CRenderObjectInfo *Sender, CModel * AModel)
+void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 {
 	assert(Sender != NULL && AModel != NULL);
 	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType()];
@@ -1549,10 +1548,14 @@ void CFixedPipelineRenderer::PushModel(CRenderObjectInfo *Sender, CModel * AMode
 
 }
 
-void CFixedPipelineRenderer::Render()
+void CFFPRenderer::Render()
 {
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_POINTS);
 	PrimitiveHolders[0].RenderPrimitive(GL_POINTS);
+	glEnable(GL_LINES);
 	PrimitiveHolders[1].RenderPrimitive(GL_LINES);
+
 	PrimitiveHolders[2].RenderPrimitive(GL_TRIANGLES);
 
 	PrimitiveHolders[0].Clear();
@@ -1560,7 +1563,7 @@ void CFixedPipelineRenderer::Render()
 	PrimitiveHolders[2].Clear();
 }
 
-CFixedPipelineRenderer::~CFixedPipelineRenderer()
+CFFPRenderer::~CFFPRenderer()
 {
 
 }
@@ -1629,3 +1632,85 @@ void CBetterVertexHolder::_Grow()
 
 	Vertices = NewVertices;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Transformation
+
+CTransformation::CTransformation(float ADepthOffset, const Vector2 &ATranslation, float ARotation, float AScaling) : DepthOffset(ADepthOffset),
+Translation(ATranslation), Rotation(ARotation), Scaling(AScaling)
+{
+
+}
+
+CTransformation& CTransformation::operator+=(const CTransformation &rhs)
+{
+	DepthOffset += rhs.DepthOffset;
+	Translation += rhs.Translation;
+	Rotation += rhs.Rotation;
+	Scaling += rhs.Scaling;
+	return *this;
+}
+
+CTransformation& CTransformation::operator-=(const CTransformation &rhs)
+{
+	DepthOffset -= rhs.DepthOffset;
+	Translation -= rhs.Translation;
+	Rotation -= rhs.Rotation;
+	Scaling -= rhs.Scaling;
+	return *this;
+}
+
+float CTransformation::GetDepth() const
+{
+	return DepthOffset;
+}
+
+const Vector2& CTransformation::GetPosition() const
+{
+	return Translation;
+}
+
+float CTransformation::GetAngle() const
+{
+	return Rotation;
+}
+
+float CTransformation::GetScaling() const
+{
+	return Scaling;
+}
+
+void CTransformation::Clear()
+{
+	DepthOffset = 0.0f;
+	Translation = V2_ZERO;
+	Scaling = 1.0f;
+	Rotation = 0.0f;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Transformator
+
+void CTransformator::PushTransformation(const CRenderConfig * ATransformation)
+{
+	CTransformation TempTransformation(ATransformation->GetDepth(), ATransformation->Position,
+		ATransformation->GetAngle(), ATransformation->GetScaling());
+	CurrentTransformation += TempTransformation;
+	TransformationStack.push_back(TempTransformation);
+}
+
+void CTransformator::PopTransformation()
+{
+	CurrentTransformation -= TransformationStack.back();
+	TransformationStack.pop_back();
+}
+
+void CTransformator::ClearTransformation()
+{
+	TransformationStack.clear();
+	CurrentTransformation.Clear();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CModel
+CModel::~CModel(){}

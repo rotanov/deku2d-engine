@@ -10,11 +10,13 @@
 
 #define _2DE_DEBUG_DRAW_BOXES
 
-
 // OpenGL is not included in the interface now, so I'll redefine it myself
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef int GLsizei;
+
+//////////////////////////////////////////////////////////////////////////
+// Various constants
 
 const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertices (0 0) (1 0) (1 1) (0 1)
 {
@@ -49,6 +51,55 @@ extern const unsigned int BINARY_DATA_DEFAULT_FONT_SIZE;
 extern char BINARY_DATA_DEFAULT_FONT[];
 
 //////////////////////////////////////////////////////////////////////////
+//CGLImageData
+
+class CGLImageData : public CImageData
+{
+public:
+	CGLImageData();
+	virtual ~CGLImageData();
+	bool LoadTexture(const string &Filename);
+	bool LoadTexture(size_t AWidth, size_t AHeight, const byte* Address);	// From memory
+	virtual GLuint GetTexID();
+
+protected:
+	GLuint TexID;
+
+private:
+	bool MakeTexture();
+};
+
+//////////////////////////////////////////////////////////////////////////
+//CTexture
+
+class CTexture : public CGLImageData, public CResource
+{
+public:
+	CTexture();
+	virtual ~CTexture();
+	bool Load();
+	void Unload();
+	bool SaveToFile(const string &AFilename);
+	GLuint GetTexID();
+
+protected:
+
+private:
+
+};
+
+//////////////////////////////////////////////////////////////////////////
+//CTextureManager
+
+class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSingleton <CTextureManager> 
+{
+protected:
+	CTextureManager();
+	friend class CTSingleton <CTextureManager>;
+};
+
+
+//////////////////////////////////////////////////////////////////////////
 //RenderObject
 
 enum EModelType
@@ -67,7 +118,7 @@ enum EBlendingMode
 	BLEND_MODE_TRANSPARENT,
 };
 
-class CTransformation
+class CTransformation	// "CPlacement"?
 {
 private:
 	float DepthOffset;
@@ -78,76 +129,45 @@ private:
 
 public:
 	CTransformation(float ADepthOffset, const Vector2 &ATranslation,
-		float ARotation, float AScaling) : DepthOffset(ADepthOffset),
-		Translation(ATranslation), Rotation(ARotation), Scaling(AScaling)
-	{
-
-	}
-
-	CTransformation& operator +=(const CTransformation &rhs)
-	{
-		DepthOffset += rhs.DepthOffset;
-		Translation += rhs.Translation;
-		Rotation += rhs.Rotation;
-		Scaling += rhs.Scaling;
-		return *this;
-	}
-
-	CTransformation& operator -=(const CTransformation &rhs)
-	{
-		DepthOffset -= rhs.DepthOffset;
-		Translation -= rhs.Translation;
-		Rotation -= rhs.Rotation;
-		Scaling -= rhs.Scaling;
-		return *this;
-	}
-
-	float GetDepth() const 
-	{
-		return DepthOffset;
-	}
-
-	const Vector2& GetPosition() const 
-	{
-		return Translation;
-	}
-
-	float GetAngle() const
-	{
-		return Rotation;
-	}
-
-	float GetScaling() const
-	{
-		return Scaling;
-	}
-
-	void Clear()
-	{
-		DepthOffset = 0.0f;
-		Translation = V2_ZERO;
-		Scaling = 1.0f;
-		Rotation = 0.0f;
-	}
-
+		float ARotation, float AScaling);
+	CTransformation& operator +=(const CTransformation &rhs);
+	CTransformation& operator -=(const CTransformation &rhs);
+	float GetDepth() const;
+	const Vector2& GetPosition() const;
+	float GetAngle() const;
+	float GetScaling() const;
+	void Clear();
 // 	Matrix2 GetRotationalMatrix();
 // 	Matrix3 GetTransformationMatrix();
-
 };
 
-class CModel;
+//////////////////////////////////////////////////////////////////////////
+// CModel
 
-class CRenderObjectInfo
+class CModel // : public // is Abstract as fuck
 {
 public:
+	virtual ~CModel() = 0;
+	virtual void SetTexture(const CTexture *ATexture) = 0;
+	virtual void SetModelType(EModelType AModelType) = 0;
+	virtual const CTexture* GetTexture() const = 0;
+	virtual const Vector2* GetVertices() const = 0;
+	virtual const Vector2* GetTexCoords() const = 0;
+	//const RGBAf* GetColors() const = 0;
+	virtual EModelType GetModelType() const = 0;
+	virtual int GetVertexNumber() const = 0;
+};
 
+class CRenderConfig
+{
+public:
 	Vector2 Position;
 	RGBAf Color;
-	bool doIgnoreCamera; // if true, then object will be drawn in global cords,
+	bool doIgnoreCamera;		// if true, then all previous transformations are ignored
 	bool doMirrorHorizontal;
 	bool doMirrorVertical;
 
-	CRenderObjectInfo();
+	CRenderConfig();
 	void SetAngle(float AAngle = 0.0f);
 	float GetAngle() const;
 	float GetScaling() const;
@@ -155,11 +175,6 @@ public:
 	void SetLayer(int Layer); // Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
 	int GetLayer() const;
 	float GetDepth() const;
-
-	virtual CModel* GetModel()
-	{
-		return NULL;
-	}
 
 private:
 	float Angle; //	(Degrees)
@@ -170,7 +185,7 @@ private:
 
 class CAbstractScene;
 
-class CRenderable : public virtual CObject, public CRenderObjectInfo
+class CRenderable : public virtual CObject, public CRenderConfig
 {
 public:
 	CRenderable();
@@ -191,80 +206,28 @@ private:
 	bool Visible;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CGLImageData
-
-class CGLImageData : public CImageData
+class CRenderableComponent : public CGameObject
 {
 public:
-	CGLImageData();
-	virtual ~CGLImageData();
-	bool			LoadTexture(const string &Filename);
-	bool			LoadTexture(size_t AWidth, size_t AHeight, const byte* Address);	// From memory
-	virtual GLuint	GetTexID();
+	CRenderConfig Configuration;
+	CModel *Model;
 
-protected:
-	GLuint			TexID;
+	CRenderableComponent(CModel *AModel = NULL) : Model(AModel)
+	{
 
-private:
-	bool			MakeTexture();
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////
-//CTexture
-
-class CTexture : public CGLImageData, public CResource
-{
-public:
-	CTexture();
-	virtual ~CTexture();
-
-	bool Load();
-	void Unload();
-
-	bool SaveToFile(const string &AFilename);
-
-	GLuint GetTexID();
-
-protected:
-
-private:
-	
-};
-
-//////////////////////////////////////////////////////////////////////////
-//CTextureManager
-
-class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSingleton <CTextureManager> 
-{
-protected:
-	CTextureManager();
-	friend class CTSingleton <CTextureManager>;
-};
-
-//////////////////////////////////////////////////////////////////////////
-// CModel
-
-class CModel // : public // is Abstract as fuck
-{
-public:
-	virtual void SetTexture(const CTexture *ATexture) = 0;
-	virtual void SetModelType(EModelType AModelType) = 0;
-	virtual const CTexture* GetTexture() const = 0;
-	virtual const Vector2* GetVertices() const = 0;
-	virtual const Vector2* GetTexCoords() const = 0;
-	//const RGBAf* GetColors() const = 0;
-	virtual EModelType GetModelType() const = 0;
-	virtual int GetVertexNumber() const = 0;
-};
+// CModelLine - only draft
 
 class CModelLine : public CModel
 {
 public:
-	CModelLine()
+	CModelLine(const Vector2 &v0 = V2_ZERO, const Vector2 &v1 = V2_DIR_RIGHT + V2_DIR_UP)
 	{
-		Vertices[0] = V2_ZERO;
-		Vertices[1] = V2_DIR_RIGHT + V2_DIR_UP;
+		Vertices[0] = v0;
+		Vertices[1] = v1;
 	}
 
 	void SetTexture(const CTexture *ATexture)
@@ -308,6 +271,61 @@ private:
 	CTexture *Texture;
 	Vector2 Vertices[2];
 
+};
+
+class CModelQuad : public CModel
+{
+public:
+	CModelQuad(const Vector2Array<4> &AVertices, const Vector2Array<4> &ATexCoords,
+		const CTexture *ATexture) : Texture(Texture)
+	{
+		static const int _2DE_QUAD_INDICES_MAPPING[6] = {0, 1, 2, 0, 2, 3};
+		for(unsigned int i  = 0; i < 6; i++)
+		{
+			Vertices[i] = AVertices[_2DE_QUAD_INDICES_MAPPING[i]];
+			TexCoords[i] = ATexCoords[_2DE_QUAD_INDICES_MAPPING[i]];
+		}
+	}
+
+	void SetTexture(CTexture *ATexture)
+	{
+		Texture = ATexture;
+	}
+
+	void SetModelType(EModelType AModelType)
+	{
+		assert(false);
+	}
+
+	const CTexture* GetTexture() const
+	{
+		return Texture;
+	}
+
+	const Vector2* GetVertices() const
+	{
+		return Vertices;
+	}
+
+	const Vector2* GetTexCoords() const
+	{
+		return TexCoords;
+	}
+
+	EModelType GetModelType() const
+	{
+		return MODEL_TYPE_TRIANGLES;
+	}
+
+	int GetVertexNumber() const
+	{
+		return 6;
+	}
+
+private:
+	Vector2 TexCoords[6];
+	CTexture *Texture;
+	Vector2 Vertices[6];	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -354,8 +372,8 @@ class CPrmitiveVertexDataHolder	// for any non textured stuff
 public:
 	CPrmitiveVertexDataHolder();
 	virtual ~CPrmitiveVertexDataHolder();
-	virtual void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	virtual void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex);
+	virtual void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	virtual void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex);
 	virtual void RenderPrimitive(GLenum Type);
 	void Clear();
 	unsigned int GetVertexCount();
@@ -376,11 +394,11 @@ class CVertexDataHolder : public CPrmitiveVertexDataHolder
 public:
 	CVertexDataHolder();
 	~CVertexDataHolder();
-	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex);
-	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex,
+	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color);
+	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex);
+	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex,
 		const RGBAf &Color, const Vector2 &TexCoord);
-	void PushVertex(const CRenderObjectInfo *Sender, const Vector2 &Vertex, const Vector2 &TexCoord);
+	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const Vector2 &TexCoord);
 	void RenderPrimitive(GLenum Type);
 
 private:
@@ -416,25 +434,9 @@ protected:
 class CTransformator	// is "CTransformer" better?
 {
 public:
-	virtual void PushTransformation(const CRenderObjectInfo * ATransformation)
-	{
-		CTransformation TempTransformation(ATransformation->GetDepth(), ATransformation->Position,
-			ATransformation->GetAngle(), ATransformation->GetScaling());
-		CurrentTransformation += TempTransformation;
-		TransformationStack.push_back(TempTransformation);
-	}
-
-	virtual void PopTransformation()
-	{
-		CurrentTransformation -= TransformationStack.back();
-		TransformationStack.pop_back();
-	}
-
-	virtual void ClearTransformation()
-	{
-		TransformationStack.clear();
-		CurrentTransformation.Clear();
-	}
+	virtual void PushTransformation(const CRenderConfig * ATransformation);
+	virtual void PopTransformation();
+	virtual void ClearTransformation();
 
 protected:
 	CTransformation CurrentTransformation;
@@ -450,24 +452,30 @@ public:
 	}
 	virtual bool Initialize(){return false;};// = 0;
 	virtual bool Finalize(){return false;};// = 0;
-	virtual void PushModel(CRenderObjectInfo *, CModel *){};// = 0;
+	virtual void PushModel(CRenderConfig *, CModel *){};// = 0;
 	virtual void Render(){};// = 0;
+	virtual void Clear() = 0;
 
 
 };
 
-class CFixedPipelineRenderer : public CAbstractRenderer
+class CFFPRenderer : public CAbstractRenderer
 {
 public:
-	CFixedPipelineRenderer()
+	CFFPRenderer()
 	{
 
 	}
-	~CFixedPipelineRenderer();
+	~CFFPRenderer();
 	bool Initilize();
 	bool Finalize();
-	void PushModel(CRenderObjectInfo *ARenderInfo, CModel * AModel);
+	void PushModel(CRenderConfig *ARenderInfo, CModel * AModel);
 	void Render();
+	void Clear()
+	{
+		for(unsigned int i = 0; i < MODEL_TYPE_TRIANGLES + 1; i++)
+			PrimitiveHolders[i].Clear();
+	}
 
 private:
 	CBetterVertexHolder PrimitiveHolders[MODEL_TYPE_TRIANGLES + 1];
@@ -609,12 +617,12 @@ public:
 	~CRenderManager();
 	bool DrawObjects();
 	void Print(const CText *Text, const string &Characters);
-	void DrawLinedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
-	void DrawSolidBox(const CRenderObjectInfo* RenderInfo, const CBox &Box);
-	void DrawTexturedBox(const CRenderObjectInfo* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords);
-	void DrawPoint(const CRenderObjectInfo *RenderInfo, const Vector2 &Point);
-	void DrawLine(const CRenderObjectInfo *RenderInfo, const Vector2 &v0, const Vector2 &v1);
-	void DrawTriangles(const CRenderObjectInfo *RenderInfo, const Vector2 *Vertices, unsigned int Count);
+	void DrawLinedBox(const CRenderConfig* RenderInfo, const CBox &Box);
+	void DrawSolidBox(const CRenderConfig* RenderInfo, const CBox &Box);
+	void DrawTexturedBox(const CRenderConfig* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords);
+	void DrawPoint(const CRenderConfig *RenderInfo, const Vector2 &Point);
+	void DrawLine(const CRenderConfig *RenderInfo, const Vector2 &v0, const Vector2 &v1);
+	void DrawTriangles(const CRenderConfig *RenderInfo, const Vector2 *Vertices, unsigned int Count);
 };
 
 #if defined(_WIN32)
@@ -668,7 +676,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //CGrRect - not nice enough, i think.
 
-class CBasePrimitive : public CRenderObjectInfo
+class CBasePrimitive : public CRenderConfig
 {
 public:
 };

@@ -128,7 +128,7 @@ Vector2Array<4> CTileset::GetCellTC(int CellIndex)
 
 void CTileset::RenderTileSet()
 {
-	CRenderObjectInfo TempInfo;
+	CRenderConfig TempInfo;
 	TempInfo.SetLayer(-1);
 	TempInfo.doIgnoreCamera = true;
 	TempInfo.Color = COLOR_WHITE;

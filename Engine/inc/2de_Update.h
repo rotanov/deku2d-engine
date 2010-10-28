@@ -3,16 +3,12 @@
 
 #include "2de_Core.h"
 
-class CAbstractScene;
-
-/**
-* Класс CUpdatable - базовый абстрактный класс для объектов, которые следует обновлять.
-*/
+class CAbstractScene;	// Separate header, may be?
 
 class CUpdatable : public virtual CObject
 {
 public:
-	bool Active; // на даннй момент Active и Dead используются для одного и того же.. надо либо оставить что-то одно, либо чётко разделить их назначение..
+	bool Active;
 	CUpdatable();
 	~CUpdatable();
 	bool isDead() const;
@@ -26,30 +22,23 @@ private:
 	CAbstractScene *Scene;
 };
 
-/**
-* Класс CUpdateManager - менеджер объектов, которые следует обновлять. Такие дела.
-*/
-
 class CUpdateManager : public CCommonManager <list<CUpdatable*> >, public CTSingleton <CUpdateManager>
 {
 public:	
 	bool UpdateObjects();
+	CGameObject RootGameObject;
 
 protected:
 	CUpdateManager();
 	friend class CTSingleton<CUpdateManager>;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//	class CAbstractAction
 class CAbstractAction
 {
 public:
 	virtual void Execute() = 0;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CTimeredEvent
 template <typename ActionT>
 class CTimeredAction : public CUpdatable
 {

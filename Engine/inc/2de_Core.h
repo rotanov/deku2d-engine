@@ -203,6 +203,33 @@ namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html
 	{
 		typedef _Ty type;
 	};
+
+
+	// А вот это уже из александреску
+	// Счетчик значений
+	template <class C>
+	class CType2ValCounter
+	{
+	protected:
+		static C Counter;
+	};
+
+	template<class C> C CType2ValCounter<C>::Counter;
+
+	// Генератор значений
+	template<class T, class C>
+	class CType2ValGenerator : public CType2ValCounter<C>
+	{
+	public:
+		C ID;
+		CType2ValGenerator()
+		{
+			ID = Counter;
+			++Counter;
+		}
+	};
+
+
 } // namespace _details
 
 template <typename C>
@@ -211,6 +238,16 @@ inline const void * typetag()
 	return _details::typetag_private::
 	GenTypeTag<typename _details::remove_modifier<C>::type>();
 }
+
+// Шаблонная функция получения идентификатора типа
+template <class T, class C>
+C Type2Val()
+{
+	static CType2ValGenerator<T, C> ValueGenerator;
+
+	return ValueGenerator.ID;
+}
+
 
 /**
 * CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
@@ -329,6 +366,176 @@ private:
 	static unsigned int CObjectCount;
 
 	friend class CFactory;
+};
+
+//////////////////////////////////////////////////////////////////////////
+// CGameObject
+
+class CGameObject : public CObject
+{
+private:
+	CGameObject *Parent;
+	std::vector<CGameObject*> Children;
+
+	class traverse_iterator
+	{
+	protected:
+		CGameObject *GameObject;
+
+		bool IsEnd() const
+		{
+			return true;
+		}
+
+		bool IsValid() const
+		{
+			return true;
+		}
+
+	public:
+		traverse_iterator(CGameObject &AGameObject) : GameObject(&AGameObject)
+		{
+
+		}
+
+		CGameObject& operator *()
+		{
+			return *GameObject;
+		}
+
+		const CGameObject& operator *() const 
+		{
+			return *GameObject;
+		}
+	};
+
+
+public:	
+	class traverse_iterator_bfs : public traverse_iterator
+	{
+	private:
+		std::queue<CGameObject*> Queue;
+		unsigned int Index; // Index of current object in it's parent Children
+
+	public:
+		traverse_iterator_bfs(CGameObject &AGameObject) : traverse_iterator(AGameObject), Index(0)
+		{
+			Queue.push(GameObject);
+		}
+
+		bool Ok()
+		{
+			return GameObject != NULL;
+		}
+
+		traverse_iterator_bfs& operator++()
+		{
+			if (GameObject->Parent != NULL && Index + 1 < GameObject->Parent->Children.size())
+			{
+				Index++;
+				GameObject = GameObject->Parent->Children[Index];
+				Queue.push(GameObject);
+			}
+			else if (!Queue.empty())
+			{
+				GameObject = Queue.front();
+				Queue.pop();
+				if (GameObject != NULL && GameObject->Children.size() > 0)
+				{
+					GameObject = GameObject->Children[0];
+					if (GameObject->Children.size() > 0)
+						Queue.push(GameObject);
+				}
+				Index = 0;
+			}
+			else
+			{
+				GameObject = NULL;
+				Index = 0;
+			}
+			return *this;
+		}
+
+		traverse_iterator_bfs& operator--()
+		{
+			return *this;
+		}
+
+		bool operator ==(const traverse_iterator_bfs &rhs) const
+		{
+			return true;			
+		}
+
+		bool operator !=(const traverse_iterator_bfs &rhs) const
+		{
+			return !(*this == rhs);
+		}
+	};
+
+	class traverse_iterator_dfs : public traverse_iterator
+	{
+	private:
+		std::vector<std::pair<CGameObject*, unsigned int>> Path;
+
+	public:
+
+	};
+
+	CGameObject() : Parent(NULL)
+	{
+
+	}
+
+	virtual ~CGameObject()
+	{
+		while (Children.size() > 0)
+			// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
+			Children.back()->SetParent(Parent);
+		SetParent(NULL);
+	}
+
+	void Attach(CGameObject* AGameObject)
+	{
+		assert(AGameObject != this);
+		if (AGameObject == this)
+		{
+			//log("Warning", "Recursive dependency in scene graph");
+			return;
+		}
+		Children.push_back(AGameObject);
+		AGameObject->SetParent(this);
+	}
+
+	void SetParent(CGameObject* AGameObject)
+	{
+		assert(AGameObject != this);
+		if (AGameObject == this)
+		{
+			//log("Warning", "Recursive dependency in scene graph");
+			return;
+		}
+		if (Parent != NULL)
+			Parent->Detach(std::find(Parent->Children.begin(), Parent->Children.end(), this));
+		Parent = AGameObject;
+		if (Parent == NULL)
+			return;
+		if (std::find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
+			Parent->Children.push_back(this);
+	}
+
+	template<typename TypeIterator>
+	void Detach(TypeIterator &Iterator)
+	{
+		(*Iterator)->Parent = NULL;
+		std::swap(Iterator, Children.end() - 1);
+		Children.pop_back();
+	}
+
+	virtual void JustDoIt()
+	{
+
+	}
+
 };
 
 typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
