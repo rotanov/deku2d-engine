@@ -819,10 +819,10 @@ bool CRenderManager::DrawObjects()
 			TexturedQuadVertices[i].Clear();
 		}
 	//FontVertices.RenderPrimitive(GL_QUADS);
-	glDisable(GL_TEXTURE_2D);
-
 	Renderer->Render();
 	Renderer->Clear();
+
+	glDisable(GL_TEXTURE_2D);
 
 	QuadVertices.RenderPrimitive(GL_QUADS);
 	LineVertices.RenderPrimitive(GL_LINES);
@@ -1531,6 +1531,8 @@ bool CFFPRenderer::Finalize()
 
 void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 {
+	if (AModel == NULL)
+		return;
 	assert(Sender != NULL && AModel != NULL);
 	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType()];
 
@@ -1566,7 +1568,13 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 			TempVector += Transformation.GetPosition();//Sender->Position;
 			if (!Sender->doIgnoreCamera)
 				TempVector += CRenderManager::Instance()->Camera.GetTranslation();
-			VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color, AModel->GetTexCoords()[i]);
+			VertexHolder->PushVertex(Vector3
+										(
+											static_cast<int>(TempVector.x),
+											static_cast<int>(TempVector.y),
+											Transformation.GetDepth()
+										),
+									Sender->Color, AModel->GetTexCoords()[i]);
 		}
 		return;
 	}

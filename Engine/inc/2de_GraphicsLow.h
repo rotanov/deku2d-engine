@@ -149,7 +149,7 @@ enum EModelType
 	MODEL_TYPE_LINES = 0,
 	MODEL_TYPE_POINTS = 1,
 	MODEL_TYPE_TRIANGLES = 2,
-//	MODEL_TYPE_QUADS = 3,	Keep commented 'cause may be there will be some possibility for optimisation
+//	MODEL_TYPE_QUADS = 3,	// Keep commented 'cause may be there will be some possibility for optimization
 };
 
 class CModel // : public // is Abstract as fuck
