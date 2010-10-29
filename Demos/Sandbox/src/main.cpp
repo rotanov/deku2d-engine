@@ -43,10 +43,12 @@ bool CCustomStateHandler::OnInitialize()
 		}*/
 
 CTestGameObject *TestObject = new CTestGameObject();
-CRenderableComponent *NewRenderableComponent = new CRenderableComponent(new CModelLine(Vector2(128.0f, 128.0f), Vector2(256.0f, 256.0f)));
+CRenderableComponent *NewRenderableComponent = new CRenderableComponent(new CModelLine(Vector2(0.0f, 0.0f), Vector2(128.0f, 128.0f)));
+CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f)));
 
-
+NewRenderableComponent->Configuration.Position = Vector2(128.0f, 128.0f);
 TestObject->Attach(NewRenderableComponent);
+NewRenderableComponent->Attach(NewNewRenderableComponent);
 CUpdateManager::Instance()->RootGameObject.Attach(TestObject);
 //TestObject->AttachChild(new CUpdatable());
 

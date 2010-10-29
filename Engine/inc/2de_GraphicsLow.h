@@ -128,8 +128,8 @@ private:
 	float Scaling;
 
 public:
-	CTransformation(float ADepthOffset, const Vector2 &ATranslation,
-		float ARotation, float AScaling);
+	CTransformation(float ADepthOffset = 0.0f, const Vector2 &ATranslation = V2_ZERO,
+		float ARotation = 0.0f, float AScaling = 1.0f);
 	CTransformation& operator +=(const CTransformation &rhs);
 	CTransformation& operator -=(const CTransformation &rhs);
 	float GetDepth() const;
@@ -434,9 +434,17 @@ protected:
 class CTransformator	// is "CTransformer" better?
 {
 public:
+	CTransformator() : CurrentTransformation()
+	{
+
+	}
 	virtual void PushTransformation(const CRenderConfig * ATransformation);
 	virtual void PopTransformation();
 	virtual void ClearTransformation();
+	const CTransformation& GetCurrentTransfomation() const
+	{
+		return CurrentTransformation;
+	}
 
 protected:
 	CTransformation CurrentTransformation;
@@ -611,9 +619,11 @@ private:
 	void SetBlendingMode();
 	void BeginFrame();
 	void EndFrame();
+	void TransfomationTraverse(CGameObject *Next);
 
 public:
 	CCamera	Camera;
+	CTransformator Transformator;
 	~CRenderManager();
 	bool DrawObjects();
 	void Print(const CText *Text, const string &Characters);

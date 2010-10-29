@@ -374,9 +374,6 @@ private:
 class CGameObject : public CObject
 {
 private:
-	CGameObject *Parent;
-	std::vector<CGameObject*> Children;
-
 	class traverse_iterator
 	{
 	protected:
@@ -411,6 +408,9 @@ private:
 
 
 public:	
+	CGameObject *Parent;
+	std::vector<CGameObject*> Children;
+
 	class traverse_iterator_bfs : public traverse_iterator
 	{
 	private:

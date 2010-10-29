@@ -774,15 +774,19 @@ bool CRenderManager::DrawObjects()
 	Camera.Update(); // @todo: review camera
 
 	CRenderable *data;
-	CGameObject *GameObject = &(CUpdateManager::Instance()->RootGameObject);
-	for(CGameObject::traverse_iterator_bfs i(*GameObject); i.Ok(); ++i)
-	{
-		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(&(*i));
-		if (RenderComponent != NULL)
-		{
-			Renderer->PushModel(&RenderComponent->Configuration, RenderComponent->Model);
-		}
-	}
+// 	CGameObject *GameObject = &(CUpdateManager::Instance()->RootGameObject);
+// 	for(CGameObject::traverse_iterator_bfs i(*GameObject); i.Ok(); ++i)
+// 	{
+// 		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(&(*i));
+// 		if (RenderComponent != NULL)
+// 		{
+// 			Transformator.PushTransformation(&RenderComponent->Configuration);
+// 			Renderer->PushModel(&RenderComponent->Configuration, RenderComponent->Model);
+// 			Transformator.PopTransformation();
+// 		}
+// 	}
+
+	TransfomationTraverse(&CUpdateManager::Instance()->RootGameObject);
 
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
@@ -940,6 +944,27 @@ void CRenderManager::EndFrame()
 {
 	glFinish();
 	SDL_GL_SwapBuffers();
+}
+
+void CRenderManager::TransfomationTraverse(CGameObject *Next)
+{
+	CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next);
+	if (RenderComponent != NULL)
+		Transformator.PushTransformation(&RenderComponent->Configuration);
+	for(unsigned int i = 0; i < Next->Children.size(); i++)
+	{
+		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
+		if (RenderComponent != NULL)
+		{
+			Transformator.PushTransformation(&RenderComponent->Configuration);
+			Renderer->PushModel(&RenderComponent->Configuration, RenderComponent->Model);
+			Transformator.PopTransformation();
+		}
+	}
+	for(unsigned int i = 0; i < Next->Children.size(); i++)
+		TransfomationTraverse(Next->Children[i]);
+	if (RenderComponent != NULL)
+		Transformator.PopTransformation();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1534,17 +1559,17 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 	}
 
 	Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
-	
+	CTransformation Transformation = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 	for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];
-		TempVector = (Vertex * Sender->GetScaling());
-		if (!Equal(Sender->GetAngle(), 0.0f))
-			TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
-		TempVector += Sender->Position;
+		TempVector = (Vertex * Transformation.GetScaling());
+		if (!Equal(Transformation.GetAngle(), 0.0f))
+			TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
+		TempVector += Transformation.GetPosition();//Sender->Position;
 		if (!Sender->doIgnoreCamera)
 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
-		VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Sender->GetDepth()), Sender->Color);
+		VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color);
 	}
 
 }
@@ -1553,11 +1578,11 @@ void CFFPRenderer::Render()
 {
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_POINTS);
-	PrimitiveHolders[0].RenderPrimitive(GL_POINTS);
+	PrimitiveHolders[MODEL_TYPE_POINTS].RenderPrimitive(GL_POINTS);
 	glEnable(GL_LINES);
-	PrimitiveHolders[1].RenderPrimitive(GL_LINES);
+	PrimitiveHolders[MODEL_TYPE_LINES].RenderPrimitive(GL_LINES);
 
-	PrimitiveHolders[2].RenderPrimitive(GL_TRIANGLES);
+	PrimitiveHolders[MODEL_TYPE_TRIANGLES].RenderPrimitive(GL_TRIANGLES);
 
 	PrimitiveHolders[0].Clear();
 	PrimitiveHolders[1].Clear();
@@ -1637,8 +1662,9 @@ void CBetterVertexHolder::_Grow()
 //////////////////////////////////////////////////////////////////////////
 // Transformation
 
-CTransformation::CTransformation(float ADepthOffset, const Vector2 &ATranslation, float ARotation, float AScaling) : DepthOffset(ADepthOffset),
-Translation(ATranslation), Rotation(ARotation), Scaling(AScaling)
+CTransformation::CTransformation(float ADepthOffset, const Vector2 &ATranslation,
+	float ARotation, float AScaling) : DepthOffset(ADepthOffset),
+	Translation(ATranslation), Rotation(ARotation), Scaling(AScaling)
 {
 
 }
@@ -1648,7 +1674,7 @@ CTransformation& CTransformation::operator+=(const CTransformation &rhs)
 	DepthOffset += rhs.DepthOffset;
 	Translation += rhs.Translation;
 	Rotation += rhs.Rotation;
-	Scaling += rhs.Scaling;
+	Scaling *= rhs.Scaling;
 	return *this;
 }
 
@@ -1657,7 +1683,7 @@ CTransformation& CTransformation::operator-=(const CTransformation &rhs)
 	DepthOffset -= rhs.DepthOffset;
 	Translation -= rhs.Translation;
 	Rotation -= rhs.Rotation;
-	Scaling -= rhs.Scaling;
+	Scaling /= rhs.Scaling;
 	return *this;
 }
 
