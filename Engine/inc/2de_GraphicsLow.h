@@ -147,10 +147,10 @@ public:
 class CModel // : public // is Abstract as fuck
 {
 public:
-	virtual ~CModel() = 0;
-	virtual void SetTexture(const CTexture *ATexture) = 0;
+	virtual ~CModel();
+	virtual void SetTexture(CTexture *ATexture) = 0;
 	virtual void SetModelType(EModelType AModelType) = 0;
-	virtual const CTexture* GetTexture() const = 0;
+	virtual CTexture* GetTexture() = 0;
 	virtual const Vector2* GetVertices() const = 0;
 	virtual const Vector2* GetTexCoords() const = 0;
 	//const RGBAf* GetColors() const = 0;
@@ -224,13 +224,15 @@ public:
 class CModelLine : public CModel
 {
 public:
+
+
 	CModelLine(const Vector2 &v0 = V2_ZERO, const Vector2 &v1 = V2_DIR_RIGHT + V2_DIR_UP)
 	{
 		Vertices[0] = v0;
 		Vertices[1] = v1;
 	}
 
-	void SetTexture(const CTexture *ATexture)
+	void SetTexture(CTexture *ATexture)
 	{
 		assert(false);
 	}
@@ -240,9 +242,8 @@ public:
 		assert(false);
 	}
 
-	const CTexture* GetTexture() const
+	CTexture* GetTexture()
 	{
-		assert(false);
 		return NULL;
 	}
 
@@ -266,7 +267,6 @@ public:
 	{
 		return 2;
 	}
-
 private:
 	CTexture *Texture;
 	Vector2 Vertices[2];
@@ -277,7 +277,7 @@ class CModelQuad : public CModel
 {
 public:
 	CModelQuad(const Vector2Array<4> &AVertices, const Vector2Array<4> &ATexCoords,
-		const CTexture *ATexture) : Texture(Texture)
+		 CTexture *ATexture) : Texture(ATexture)
 	{
 		static const int _2DE_QUAD_INDICES_MAPPING[6] = {0, 1, 2, 0, 2, 3};
 		for(unsigned int i  = 0; i < 6; i++)
@@ -285,6 +285,11 @@ public:
 			Vertices[i] = AVertices[_2DE_QUAD_INDICES_MAPPING[i]];
 			TexCoords[i] = ATexCoords[_2DE_QUAD_INDICES_MAPPING[i]];
 		}
+	}
+
+	~CModelQuad()
+	{
+
 	}
 
 	void SetTexture(CTexture *ATexture)
@@ -297,7 +302,7 @@ public:
 		assert(false);
 	}
 
-	const CTexture* GetTexture() const
+	CTexture* GetTexture()
 	{
 		return Texture;
 	}
@@ -407,27 +412,6 @@ private:
 	void Grow();
 };
 
-class CBetterVertexHolder // For primitives for now
-{
-public:
-	CBetterVertexHolder();	// Desired model type;
-	virtual ~CBetterVertexHolder();
-	virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
-	virtual void RenderPrimitive(GLuint);
-	void Clear();
-	unsigned int GetVertexCount();
-
-protected:
-	static const unsigned int StartSize = 256;
-	unsigned int VertexCount;
-	unsigned int ReservedCount;
-	RGBAf *Colors;
-	Vector3 *Vertices;
-
-	virtual void _Grow();
-};
-
-
 //////////////////////////////////////////////////////////////////////////
 // CAbstractRender
 
@@ -486,7 +470,50 @@ public:
 	}
 
 private:
+	class CBetterVertexHolder // For primitives for now
+	{
+	public:
+		CBetterVertexHolder();	// Desired model type;
+		virtual ~CBetterVertexHolder();
+		virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
+		virtual void RenderPrimitive(GLuint);
+		void Clear();
+		unsigned int GetVertexCount();
+
+	protected:
+		static const unsigned int StartSize = 256;
+		unsigned int VertexCount;
+		unsigned int ReservedCount;
+		RGBAf *Colors;
+		Vector3 *Vertices;
+
+		virtual void _Grow();
+	};
+
+	class CBetterTextureVertexHolder // For primitives for now
+	{
+	public:
+		CBetterTextureVertexHolder();	// Desired model type;
+		virtual ~CBetterTextureVertexHolder();
+		virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord);
+		virtual void RenderPrimitive(GLuint);
+		void Clear();
+		unsigned int GetVertexCount();
+
+	protected:
+		static const unsigned int StartSize = 256;
+		unsigned int VertexCount;
+		unsigned int ReservedCount;
+		RGBAf *Colors;
+		Vector3 *Vertices;
+		Vector2 *TexCoords;
+
+		virtual void _Grow();
+	};
+
 	CBetterVertexHolder PrimitiveHolders[MODEL_TYPE_TRIANGLES + 1];
+	vector<CBetterTextureVertexHolder*> TexturedGeometry; // per texture i.e. one texture => single DIP
+	vector<GLuint> TexIDs;
 };
 
 //////////////////////////////////////////////////////////////////////////

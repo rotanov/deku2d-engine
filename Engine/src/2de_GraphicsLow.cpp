@@ -1537,6 +1537,43 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 	assert(Sender != NULL && AModel != NULL);
 	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType()];
 
+	if (AModel->GetTexture() != NULL)
+	{
+		bool flag = false;
+		int index = -1;
+		for(unsigned int i = 0; i < TexIDs.size(); i++)
+			if (TexIDs[i] == AModel->GetTexture()->GetTexID())
+			{
+				flag = true;
+				index = i;
+				break;
+			}
+
+		if (!flag)
+		{
+			TexturedGeometry.push_back(new CBetterTextureVertexHolder());
+			TexIDs.push_back(AModel->GetTexture()->GetTexID());
+			index = TexIDs.size() - 1;
+		}
+
+		CBetterTextureVertexHolder * VertexHolder = TexturedGeometry[index];
+
+		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
+		CTransformation Transformation = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+		for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
+		{
+			Vertex = AModel->GetVertices()[i];
+			TempVector = (Vertex * Transformation.GetScaling());
+			if (!Equal(Transformation.GetAngle(), 0.0f))
+				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
+			TempVector += Transformation.GetPosition();//Sender->Position;
+			if (!Sender->doIgnoreCamera)
+				TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+			VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color, AModel->GetTexCoords()[i]);
+		}
+		return;
+	}
+
 	switch (AModel->GetModelType())
 	{
 	case MODEL_TYPE_NOT_A_MODEL:
@@ -1549,7 +1586,7 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 
 		break;
 	case MODEL_TYPE_TRIANGLES:
-
+		break;
 	case MODEL_TYPE_QUADS:
 		assert(false);
 		break;
@@ -1581,8 +1618,16 @@ void CFFPRenderer::Render()
 	PrimitiveHolders[MODEL_TYPE_POINTS].RenderPrimitive(GL_POINTS);
 	glEnable(GL_LINES);
 	PrimitiveHolders[MODEL_TYPE_LINES].RenderPrimitive(GL_LINES);
-
+	
 	PrimitiveHolders[MODEL_TYPE_TRIANGLES].RenderPrimitive(GL_TRIANGLES);
+
+	glEnable(GL_TEXTURE_2D);
+	for(unsigned i = 0; i < TexturedGeometry.size(); i++)
+	{
+		glBindTexture(GL_TEXTURE_2D, TexIDs[i]);
+		TexturedGeometry[i]->RenderPrimitive(GL_TRIANGLES);
+		TexturedGeometry[i]->Clear();
+	}
 
 	PrimitiveHolders[0].Clear();
 	PrimitiveHolders[1].Clear();
@@ -1597,19 +1642,19 @@ CFFPRenderer::~CFFPRenderer()
 // Better vertex holder
 
 
-CBetterVertexHolder::CBetterVertexHolder() : VertexCount(0), ReservedCount(StartSize)
+CFFPRenderer::CBetterVertexHolder::CBetterVertexHolder() : VertexCount(0), ReservedCount(StartSize)
 {
 	Colors = new RGBAf [StartSize];
-	Vertices = new Vector3 [StartSize];
+	Vertices = new Vector3 [StartSize];	
 }
 
-CBetterVertexHolder::~CBetterVertexHolder()
+CFFPRenderer::CBetterVertexHolder::~CBetterVertexHolder()
 {
 	delete [] Colors;
 	delete [] Vertices;
 }
 
-void CBetterVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor)
+void CFFPRenderer::CBetterVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor)
 {
 	if (VertexCount == ReservedCount)
 		_Grow();
@@ -1618,7 +1663,7 @@ void CBetterVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor
 	VertexCount++;
 }
 
-void CBetterVertexHolder::RenderPrimitive(GLuint Type)
+void CFFPRenderer::CBetterVertexHolder::RenderPrimitive(GLuint Type)
 {
 	if (VertexCount == 0)
 		return;
@@ -1629,17 +1674,17 @@ void CBetterVertexHolder::RenderPrimitive(GLuint Type)
 	glDrawArrays(Type, 0, VertexCount);
 }
 
-void CBetterVertexHolder::Clear()
+void CFFPRenderer::CBetterVertexHolder::Clear()
 {
 	VertexCount = 0;
 }
 
-unsigned int CBetterVertexHolder::GetVertexCount()
+unsigned int CFFPRenderer::CBetterVertexHolder::GetVertexCount()
 {
 	return VertexCount;
 }
 
-void CBetterVertexHolder::_Grow()
+void CFFPRenderer::CBetterVertexHolder::_Grow()
 {
 	ReservedCount = VertexCount * 2;
 	RGBAf *NewColors = new RGBAf[ReservedCount];
@@ -1741,3 +1786,83 @@ void CTransformator::ClearTransformation()
 //////////////////////////////////////////////////////////////////////////
 // CModel
 CModel::~CModel(){}
+
+
+//////////////////////////////////////////////////////////////////////////
+// чотатам
+CFFPRenderer::CBetterTextureVertexHolder::CBetterTextureVertexHolder() : VertexCount(0), ReservedCount(StartSize) 
+{
+	Colors = new RGBAf [StartSize];
+	Vertices = new Vector3 [StartSize];
+	TexCoords = new Vector2[StartSize];
+}
+
+CFFPRenderer::CBetterTextureVertexHolder::~CBetterTextureVertexHolder()
+{
+	delete [] Colors;
+	delete [] Vertices;
+	delete [] TexCoords;
+}
+
+void CFFPRenderer::CBetterTextureVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord)
+{
+	if (VertexCount == ReservedCount)
+		_Grow();
+	Vertices[VertexCount] = AVertex;
+	Colors[VertexCount] = AColor;
+	TexCoords[VertexCount] = ATexCoord;
+	VertexCount++;
+}
+
+void CFFPRenderer::CBetterTextureVertexHolder::RenderPrimitive(GLuint Type)
+{
+	if (VertexCount == 0)
+		return;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glColorPointer(4, GL_FLOAT, 0, Colors);
+	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+	glDrawArrays(Type, 0, VertexCount);
+
+}
+
+void CFFPRenderer::CBetterTextureVertexHolder::Clear()
+{
+	VertexCount = 0;
+}
+
+unsigned int CFFPRenderer::CBetterTextureVertexHolder::GetVertexCount()
+{
+	return VertexCount;
+}
+
+void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
+{
+	ReservedCount = VertexCount * 2;
+	RGBAf *NewColors = new RGBAf[ReservedCount];
+	for (unsigned int i = 0; i < VertexCount; i++)
+		NewColors[i] = Colors[i];
+
+	delete[] Colors;
+
+	Colors = NewColors;
+
+	Vector3 *NewVertices = new Vector3[ReservedCount];
+	for (unsigned int i = 0; i < VertexCount; i++)
+		NewVertices[i] = Vertices[i];
+
+	delete[] Vertices;
+
+	Vertices = NewVertices;
+
+	Vector2 *NewTexCoords = new Vector2[ReservedCount];
+	for (unsigned int i = 0; i < VertexCount; i++)
+		NewTexCoords[i] = TexCoords[i];
+
+	delete [] TexCoords;
+
+	TexCoords = NewTexCoords;
+}
