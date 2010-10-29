@@ -38,7 +38,6 @@ const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with v
 
 const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
 
-
 const float ROTATIONAL_AXIS_Z = 1.0f;
 
 const RGBAf COLOR_WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
@@ -50,9 +49,13 @@ const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 extern const unsigned int BINARY_DATA_DEFAULT_FONT_SIZE;
 extern char BINARY_DATA_DEFAULT_FONT[];
 
-//////////////////////////////////////////////////////////////////////////
-//CGLImageData
+class CAbstractScene;
 
+/**
+*	CGLImageData - like CImageData, but can load itself as a texture;
+*	It's a little strange, i think, but it's working and has not caused any trouble
+*	so I'll leave that hierarchy the way it is now 'til the problems occure.
+*/
 class CGLImageData : public CImageData
 {
 public:
@@ -69,9 +72,12 @@ private:
 	bool MakeTexture();
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CTexture
-
+/**
+*	CTexture — is as CGLImageData, but also has CResource functionality
+*	can Load() and Unload() and even SaveToFile(). Wait, it still can't
+*	save to file, but function is defined @todo: implement saving of textures to
+*	file. And don't even try to think when we'll need such possibility
+*/
 class CTexture : public CGLImageData, public CResource
 {
 public:
@@ -79,18 +85,21 @@ public:
 	virtual ~CTexture();
 	bool Load();
 	void Unload();
+
+	/**
+	*	As I think for now this one should save Texture to file.
+	*	I mean we can render something to Texture, and then save it
+	*	as image on HDD; The trivial example is screenshoot.
+	*	Less trivial is some intermediate textures for gfx;
+	*/
 	bool SaveToFile(const string &AFilename);
 	GLuint GetTexID();
-
-protected:
-
-private:
-
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CTextureManager
-
+/**
+*	CTextureManager — actually a useless class used as a container for textures;
+*	in order to access texture; So @todo: get rid of CTextureManager
+*/
 class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSingleton <CTextureManager> 
 {
 protected:
@@ -98,26 +107,10 @@ protected:
 	friend class CTSingleton <CTextureManager>;
 };
 
-
-//////////////////////////////////////////////////////////////////////////
-//RenderObject
-
-enum EModelType
-{
-	MODEL_TYPE_NOT_A_MODEL = -1,
-	MODEL_TYPE_LINES = 0,
-	MODEL_TYPE_POINTS = 1,
-	MODEL_TYPE_TRIANGLES = 2,
-	MODEL_TYPE_QUADS = 3,
-};
-
-enum EBlendingMode
-{
-	BLEND_MODE_ADDITIVE,
-	BLEND_MODE_OPAQUE,
-	BLEND_MODE_TRANSPARENT,
-};
-
+/**
+*	CTransformation - class describes placement in space and some other properties
+*	which affects to object position, orientation and size;
+*/
 class CTransformation	// "CPlacement"?
 {
 private:
@@ -130,6 +123,10 @@ private:
 public:
 	CTransformation(float ADepthOffset = 0.0f, const Vector2 &ATranslation = V2_ZERO,
 		float ARotation = 0.0f, float AScaling = 1.0f);
+	/**
+	*	Don't be confused here: Look to implementation - it applies one transformation
+	*	on other to represent common transformation, not just add members
+	*/
 	CTransformation& operator +=(const CTransformation &rhs);
 	CTransformation& operator -=(const CTransformation &rhs);
 	float GetDepth() const;
@@ -141,8 +138,19 @@ public:
 // 	Matrix3 GetTransformationMatrix();
 };
 
-//////////////////////////////////////////////////////////////////////////
-// CModel
+/**
+*	CModel — represents object geometry, object type and if has - 
+*	texture and texture coordinates. 
+*	@todo: should be resource;
+*/
+enum EModelType
+{
+	MODEL_TYPE_NOT_A_MODEL = -1,
+	MODEL_TYPE_LINES = 0,
+	MODEL_TYPE_POINTS = 1,
+	MODEL_TYPE_TRIANGLES = 2,
+//	MODEL_TYPE_QUADS = 3,	Keep commented 'cause may be there will be some possibility for optimisation
+};
 
 class CModel // : public // is Abstract as fuck
 {
@@ -156,6 +164,17 @@ public:
 	//const RGBAf* GetColors() const = 0;
 	virtual EModelType GetModelType() const = 0;
 	virtual int GetVertexNumber() const = 0;
+};
+
+/**
+*	Configuration of object, that represents object transformation
+*	and some render options.
+*/
+enum EBlendingMode
+{
+	BLEND_MODE_ADDITIVE,
+	BLEND_MODE_OPAQUE,
+	BLEND_MODE_TRANSPARENT,
 };
 
 class CRenderConfig
@@ -183,8 +202,12 @@ private:
 	
 };
 
-class CAbstractScene;
-
+/**
+*	CRenderable — is no more. @todo: get rid of it and replace to CRenderableComponent;
+*	Was used in such way, that we inherit from CRenderable and then implement it's 
+*	void Render() so object knows how it renders itself and CRenderManager 
+*	will automatically invoke Render() for all CRenderable objects;
+*/
 class CRenderable : public virtual CObject, public CRenderConfig
 {
 public:
@@ -206,6 +229,9 @@ private:
 	bool Visible;
 };
 
+/**
+*	CRenderableComponent - AOP way replacement for CRenderable.
+*/
 class CRenderableComponent : public CGameObject
 {
 public:
@@ -216,121 +242,6 @@ public:
 	{
 
 	}
-};
-
-//////////////////////////////////////////////////////////////////////////
-// CModelLine - only draft
-
-class CModelLine : public CModel
-{
-public:
-
-
-	CModelLine(const Vector2 &v0 = V2_ZERO, const Vector2 &v1 = V2_DIR_RIGHT + V2_DIR_UP)
-	{
-		Vertices[0] = v0;
-		Vertices[1] = v1;
-	}
-
-	void SetTexture(CTexture *ATexture)
-	{
-		assert(false);
-	}
-
-	void SetModelType(EModelType AModelType)
-	{
-		assert(false);
-	}
-
-	CTexture* GetTexture()
-	{
-		return NULL;
-	}
-
-	const Vector2* GetVertices() const
-	{
-		return Vertices;
-	}
-
-	const Vector2* GetTexCoords() const
-	{
-		assert(false);
-		return NULL;
-	}
-
-	EModelType GetModelType() const
-	{
-		return MODEL_TYPE_LINES;
-	}
-
-	int GetVertexNumber() const
-	{
-		return 2;
-	}
-private:
-	CTexture *Texture;
-	Vector2 Vertices[2];
-
-};
-
-class CModelQuad : public CModel
-{
-public:
-	CModelQuad(const Vector2Array<4> &AVertices, const Vector2Array<4> &ATexCoords,
-		 CTexture *ATexture) : Texture(ATexture)
-	{
-		static const int _2DE_QUAD_INDICES_MAPPING[6] = {0, 1, 2, 0, 2, 3};
-		for(unsigned int i  = 0; i < 6; i++)
-		{
-			Vertices[i] = AVertices[_2DE_QUAD_INDICES_MAPPING[i]];
-			TexCoords[i] = ATexCoords[_2DE_QUAD_INDICES_MAPPING[i]];
-		}
-	}
-
-	~CModelQuad()
-	{
-
-	}
-
-	void SetTexture(CTexture *ATexture)
-	{
-		Texture = ATexture;
-	}
-
-	void SetModelType(EModelType AModelType)
-	{
-		assert(false);
-	}
-
-	CTexture* GetTexture()
-	{
-		return Texture;
-	}
-
-	const Vector2* GetVertices() const
-	{
-		return Vertices;
-	}
-
-	const Vector2* GetTexCoords() const
-	{
-		return TexCoords;
-	}
-
-	EModelType GetModelType() const
-	{
-		return MODEL_TYPE_TRIANGLES;
-	}
-
-	int GetVertexNumber() const
-	{
-		return 6;
-	}
-
-private:
-	Vector2 TexCoords[6];
-	CTexture *Texture;
-	Vector2 Vertices[6];	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -369,8 +280,11 @@ public:
 
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CArrayHolder
+/**
+*	CPrmitiveVertexDataHolder was useful class to incorporate Colors and Vertices
+*	for pushing and drawing them. Now modern version of that class included in
+*	declaration of CFFPRender and that version is for @todo: get rid of it.
+*/
 class CPrmitiveVertexDataHolder	// for any non textured stuff
 {
 	friend class CRenderManager;
@@ -393,6 +307,9 @@ protected:
 	virtual void Grow();
 };
 
+/**
+*	CVertexDataHolder - same as CPrmitiveVertexDataHolde, but for textured primitives
+*/
 class CVertexDataHolder : public CPrmitiveVertexDataHolder
 {
 	friend class CRenderManager;
@@ -412,29 +329,34 @@ private:
 	void Grow();
 };
 
-//////////////////////////////////////////////////////////////////////////
-// CAbstractRender
-
+/**
+*	CTransformator holds current transformation and stack of transformations.
+*	Should be updated before use, lol.
+*	Now updated in recursive traverse of CGameObject tree
+*	whenever we need to apply current transformation to dome vertices
+*	we use GetCurrentTransfomation(), if we know, that we are in CGameObject tree traverse
+*	and it's information is actual and true.
+*/
 class CTransformator	// is "CTransformer" better?
 {
 public:
-	CTransformator() : CurrentTransformation()
-	{
-
-	}
+	CTransformator();
 	virtual void PushTransformation(const CRenderConfig * ATransformation);
 	virtual void PopTransformation();
 	virtual void ClearTransformation();
-	const CTransformation& GetCurrentTransfomation() const
-	{
-		return CurrentTransformation;
-	}
+	const CTransformation& GetCurrentTransfomation() const;
 
 protected:
 	CTransformation CurrentTransformation;
 	vector<CTransformation> TransformationStack;
 };
 
+/**
+*	CAbstractRenderer - some abstract interface to actual renderer.
+*	There are two renderers planned:
+*		Fixed Function Pipeline Renderer
+*		Programmable Function Pipeline Renderer
+*/
 class CAbstractRenderer
 {
 public:
@@ -447,27 +369,22 @@ public:
 	virtual void PushModel(CRenderConfig *, CModel *){};// = 0;
 	virtual void Render(){};// = 0;
 	virtual void Clear() = 0;
-
-
 };
 
+/**
+*	CFFPRenderer - Fixed Function Pipeline Renderer
+*	For compatibility with old machines with no Shaders v3.0
+*/
 class CFFPRenderer : public CAbstractRenderer
 {
 public:
-	CFFPRenderer()
-	{
-
-	}
+	CFFPRenderer();
 	~CFFPRenderer();
 	bool Initilize();
 	bool Finalize();
 	void PushModel(CRenderConfig *ARenderInfo, CModel * AModel);
 	void Render();
-	void Clear()
-	{
-		for(unsigned int i = 0; i < MODEL_TYPE_TRIANGLES + 1; i++)
-			PrimitiveHolders[i].Clear();
-	}
+	void Clear();
 
 private:
 	class CBetterVertexHolder // For primitives for now
@@ -516,12 +433,11 @@ private:
 	vector<GLuint> TexIDs;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CFont
-
-#define CFONT_DEFAULT_DISTANCE	1				// FFFUUU~
-#define CFONT_MAX_SYMBOLS			256
-
+/**
+*	CFont - is a resource for font representation;
+*	@todo: read from XML, not binary format.
+*/
+#define CFONT_MAX_SYMBOLS 256
 class CFont : public CResource
 {
 public:
@@ -559,9 +475,9 @@ private:
 	friend class CRenderManager;
 };
 
-//////////////////////////////////////////////////////////////////////////
-// CRenderProxy
-
+/**
+*	CRenderProxy - is some another spike.
+*/
 class CRenderProxy : public CRenderable
 {
 private:
@@ -572,9 +488,9 @@ public:
 	void Render();
 };
 
-//////////////////////////////////////////////////////////////////////////
-//Camera
-
+/**
+*	Old bad class, somehow working, but should be reviewed.	
+*/
 class CCamera : public CObject
 {
 public:
@@ -599,18 +515,16 @@ public:
 	}
 };
 
-
+/**
+*	CFontManager - manages fonts;
+*	except the functinality to provide a default font is no different from container of fonts;
+*	So if we somehow manage to put this functiality somehere else we'll be able to get rid of that class.
+*/
 class CFontManager : public CCommonManager <list <CFont*> >, public CTSingleton <CFontManager>
 {
 public:
 	void Init();
-
-	CFont* GetDefaultFont()
-	{
-		assert(DefaultFont != NULL);
-		return DefaultFont;
-	}
-
+	CFont* GetDefaultFont();
 	CFont* GetFont(const string &fontname);
 
 protected:	
@@ -622,11 +536,16 @@ private:
 	CFont *DefaultFont;
 };
 
-class CText;
+class CText;	// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 class CGrRect;
 class CGrPoint;
 class CGrLine;
 
+/**
+*	CRenderManager - some monster which definitely can't be eliminated.
+*	Manages all stuff for drawing stuff. Traverse tree, applying transformations,
+*	Calls renderer to render some stuff...etc
+*/
 class CRenderManager : public CCommonManager <list <CRenderable*> >, public CTSingleton <CRenderManager>
 {
 protected:
@@ -675,9 +594,12 @@ public:
 typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
 void setVSync(int interval = 1);
 
-//////////////////////////////////////////////////////////////////////////
-//CGLWindow
-
+/**
+*	CGLWindow Provides functionality for creating window and holding info about window.
+*	Why we have this class if we can't create multiple windows, can't change some meaningful
+*	window properties in runtime? I think only to have access to window Width() and Height()
+*	if so, then this class can easily can be eliminated.
+*/
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
@@ -710,9 +632,10 @@ private:
 	bool isFullscreen;
 	unsigned int Width;	
 };
-//////////////////////////////////////////////////////////////////////////
-//CGrRect - not nice enough, i think.
 
+/**
+*	Stuff beyond this line is now CModel resource and should be eliminated	
+*/
 class CBasePrimitive : public CRenderConfig
 {
 public:
@@ -766,8 +689,13 @@ public:
 	}
 private:	
 };
-//////////////////////////////////////////////////////////////////////////
-//CText
+
+/**
+*	CText - Text. Cleat enough, lol.
+*	Shouldn't render itself, should be inherited from CRenderableComponent, not Renderable
+*	So it will have Model and Configuration and there will become some unclear stuff.
+*	Cause CModel wants to be Resource.
+*/
 class CText : public CRenderable
 {
 public:
@@ -791,9 +719,10 @@ private:
 	CResourceRefCounter<CFont> Font;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//AbstractScene
-
+/**
+*	CAbstractScene - common interface to Scene. There are two of them - Common Scene and
+*	Global Scene // replace scene with sense, lol.
+*/
 class CAbstractScene : public CObject
 {
 	friend class CSceneManager;
@@ -815,9 +744,9 @@ private:
 	CAbstractScene& operator=(const CAbstractScene &AScene);
 };
 
-//////////////////////////////////////////////////////////////////////////
-//Scene
-
+/**
+*	CSene	
+*/
 class CScene : public CAbstractScene
 {
 	friend class CSceneManager;
@@ -836,9 +765,9 @@ protected:
 	~CScene();
 };
 
-//////////////////////////////////////////////////////////////////////////
-//Global Scene
-
+/**
+*	CGlobalScene
+*/
 class CGlobalScene : public CScene
 {
 public:
@@ -846,9 +775,9 @@ public:
 	void AddUpdatable(CUpdatable *AObject);
 };
 
-//////////////////////////////////////////////////////////////////////////
-//Scene Manager
-
+/**
+*	CSceneManager
+*/
 class CSceneManager : CCommonManager <list<CScene*> >, public CTSingleton<CSceneManager>
 {
 	friend class CTSingleton<CSceneManager>;
@@ -856,26 +785,28 @@ public:
 	CAbstractScene* CreateScene();
 	void DestroyScene(CAbstractScene *AScene);
 	CAbstractScene* GetCurrentScene();
-	void SetCurrentScene(CAbstractScene *AScene)
-	{
-		assert(AScene != NULL);
-		CurrentScene = AScene;
-	}
+	void SetCurrentScene(CAbstractScene *AScene);
 	bool InScope(CAbstractScene * AScene) const;
 	void Render();
 	void Update(float dt);
+
 private:
 	CAbstractScene *CurrentScene;
 	CGlobalScene GlobalScene;
 	vector<CAbstractScene*> Scenes;
+
 protected:
 	~CSceneManager();
 	CSceneManager();
 };
 
-//////////////////////////////////////////////////////////////////////////
-// CMouseCursor
-// TODO: <strike>сделать курсор отдельным классом</strike>, рисовать на максимальном слое, возможность загрузки текстурных курсоров, etc.
+/**
+*	CMouseCursor	
+*	@todo: <strike>make CMouseCusor a separate class</strike>, draw at topmost layer,
+*		add possibility to load textured cursors, etc.
+*	other @todo: inherit from CRenderComponent and then add to global root object
+*		make update position throug events. Compllicity for nothing, as i call it.
+*/
 class CMouseCursor : public CRenderable
 {
 public:
@@ -893,4 +824,3 @@ public:
 };
 
 #endif // _2DE_GRAPHICS_LOW_H_
-

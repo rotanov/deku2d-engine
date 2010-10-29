@@ -1002,33 +1002,25 @@ CFont* CFontManager::GetFont(const string &fontname)
 
 CFontManager::~CFontManager()
 {
-	//if (DefaultFont != NULL)
-		//SAFE_DELETE(DefaultFont);
-	// DefaultFont is managed now..
 }
 
+CFont* CFontManager::GetDefaultFont()
+{
+	assert(DefaultFont != NULL);
+	return DefaultFont;
+}
 //////////////////////////////////////////////////////////////////////////
 // CTexture Manager
-
 CTextureManager::CTextureManager()
 {
 	SetName("Texture manager");
 }
 
-// CTexture* CTextureManager::GetObject(const string &TextureName)
-// {
-// 	CTexture *TempTexture = NULL;
-// 	TempTexture = dynamic_cast<CTexture*>(GetObject(&TextureName));
-// 	if (TempTexture)
-// 		TempTexture->CheckLoad();
-// 	return TempTexture;
-// }
-
 //////////////////////////////////////////////////////////////////////////
 // CTexture
-
 GLuint CTexture::GetTexID()
 {
+	assert(TexID != 0);
 	if (TexID == 0)
 	{
 		Log("ERROR", "CTexture named %s. Trying to access TexID but it is 0", GetName().c_str());
@@ -1365,6 +1357,11 @@ CSceneManager::~CSceneManager()
 	Scenes.clear();
 }
 
+void CSceneManager::SetCurrentScene(CAbstractScene *AScene)
+{
+	assert(AScene != NULL);
+	CurrentScene = AScene;
+}
 //////////////////////////////////////////////////////////////////////////
 // CRenderProxy
 
@@ -1587,9 +1584,6 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 		break;
 	case MODEL_TYPE_TRIANGLES:
 		break;
-	case MODEL_TYPE_QUADS:
-		assert(false);
-		break;
 	default:
 		assert(false);
 		break;
@@ -1635,6 +1629,17 @@ void CFFPRenderer::Render()
 }
 
 CFFPRenderer::~CFFPRenderer()
+{
+
+}
+
+void CFFPRenderer::Clear()
+{
+	for(unsigned int i = 0; i < MODEL_TYPE_TRIANGLES + 1; i++)
+		PrimitiveHolders[i].Clear();
+}
+
+CFFPRenderer::CFFPRenderer()
 {
 
 }
@@ -1783,6 +1788,15 @@ void CTransformator::ClearTransformation()
 	CurrentTransformation.Clear();
 }
 
+CTransformator::CTransformator() : CurrentTransformation()
+{
+
+}
+
+const CTransformation& CTransformator::GetCurrentTransfomation() const
+{
+	return CurrentTransformation;
+}
 //////////////////////////////////////////////////////////////////////////
 // CModel
 CModel::~CModel(){}
