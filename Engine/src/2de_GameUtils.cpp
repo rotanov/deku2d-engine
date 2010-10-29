@@ -21,41 +21,46 @@ bool CTileset::Load()
 	if (Loaded)
 		return true;
 
-	// TODO: maybe make some single interface for file and memory reading..
+	CStorage *storage;
 
 	if (Source == LOAD_SOURCE_FILE)
 	{
-		CFile file;
-		if (!file.Open(Filename, CFile::OPEN_MODE_READ))
+		storage = new CFile(Filename, CStorage::OPEN_MODE_READ);
+		if (!storage->Good())
 		{
 			Log("ERROR", "Can't open TileSet file '%s'", Filename.c_str());
 			return false;
 		}
-
-		string TextureName;
-		file.ReadString(TextureName);
-
-		Texture = CTextureManager::Instance()->Get(TextureName);
-		Texture->CheckLoad();
-
-		file.Read(&TileWidth, sizeof(TileWidth));
-		file.Read(&TileHeight, sizeof(TileHeight));
-		file.Read(&HorNumTiles, sizeof(HorNumTiles));
-		file.Read(&VerNumTiles, sizeof(VerNumTiles));
-
-		if (BBox != NULL)
-			delete [] BBox;
-
-		BBox = new CBox[HorNumTiles * VerNumTiles];
-		file.Read(BBox, sizeof(CBox) * HorNumTiles * VerNumTiles);
-
-		file.Close();
 	}
 	else if (Source == LOAD_SOURCE_MEMORY)
 	{
-		// TODO: implement this
-		throw std::logic_error("Unimplemented!!");
+		storage = new CMemory(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
+		if (!storage->Good())
+		{
+			Log("ERROR", "Can't open TileSet from memory storage");
+			return false;
+		}
 	}
+
+	string TextureName;
+	storage->ReadString(TextureName);
+
+	Texture = CTextureManager::Instance()->Get(TextureName);
+	Texture->CheckLoad();
+
+	storage->Read(&TileWidth, sizeof(TileWidth));
+	storage->Read(&TileHeight, sizeof(TileHeight));
+	storage->Read(&HorNumTiles, sizeof(HorNumTiles));
+	storage->Read(&VerNumTiles, sizeof(VerNumTiles));
+
+	if (BBox != NULL)
+		delete [] BBox;
+
+	BBox = new CBox[HorNumTiles * VerNumTiles];
+	storage->Read(BBox, sizeof(CBox) * HorNumTiles * VerNumTiles);
+
+	storage->Close();
+	delete storage;
 
 	CResource::Load();
 

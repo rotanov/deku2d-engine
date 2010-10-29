@@ -224,8 +224,8 @@ namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html
 		C ID;
 		CType2ValGenerator()
 		{
-			ID = Counter;
-			++Counter;
+			ID = CType2ValCounter<C>::Counter;
+			++CType2ValCounter<C>::Counter;
 		}
 	};
 
@@ -243,7 +243,7 @@ inline const void * typetag()
 template <class T, class C>
 C Type2Val()
 {
-	static CType2ValGenerator<T, C> ValueGenerator;
+	static _details::CType2ValGenerator<T, C> ValueGenerator;
 
 	return ValueGenerator.ID;
 }
@@ -475,7 +475,7 @@ public:
 	class traverse_iterator_dfs : public traverse_iterator
 	{
 	private:
-		std::vector<std::pair<CGameObject*, unsigned int>> Path;
+		std::vector<std::pair<CGameObject*, unsigned int> > Path;
 
 	public:
 
@@ -515,7 +515,11 @@ public:
 			return;
 		}
 		if (Parent != NULL)
-			Parent->Detach(std::find(Parent->Children.begin(), Parent->Children.end(), this));
+		{
+			vector<CGameObject *>::iterator it = std::find(Parent->Children.begin(), Parent->Children.end(), this);
+			//Parent->Detach(std::find(Parent->Children.begin(), Parent->Children.end(), this));
+			Parent->Detach(it);
+		}
 		Parent = AGameObject;
 		if (Parent == NULL)
 			return;
@@ -527,7 +531,7 @@ public:
 	void Detach(TypeIterator &Iterator)
 	{
 		(*Iterator)->Parent = NULL;
-		std::swap(Iterator, Children.end() - 1);
+		std::swap(Iterator, --Children.end());
 		Children.pop_back();
 	}
 
@@ -825,14 +829,10 @@ set<const type_info *> CTSingleton<T>::UnderConstruction;
 #endif // _DEBUG
 
 /**
-* CFile - класс, представляющий собой интерфейс к чтению и записи файлов.
-*
-* Каждый экземпляр класса управляет отдельным файлом, реализует принцип RAII.
-* Является надстройкой над stdio. Также дополняет его всякими функциями-ленивчиками, типа получить всё содержимое в строку и т. п.
-* Нельзя копировать и присваивать.
+* CStorage - base class for CFile and CMemory classes, that describes their interface.
 */
 
-class CFile
+class CStorage
 {
 public:
 	enum EOpenMode
@@ -848,15 +848,12 @@ public:
 		SEEK_ORIGIN_END,
 	};
 
-	CFile();
-	CFile(const string &AFilename, EOpenMode Mode);
-	~CFile();
+	CStorage();
 
-	bool Open(const string &AFilename, EOpenMode Mode);
-	bool Close();
+	virtual bool Close() = 0;
 
-	bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
-	bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
+	virtual bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1) = 0;
+	virtual bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1) = 0;
 	
 	// kinda-type-and-size-safe versions of Read and Write.. don't work with arrays, though..
 	template<typename T>
@@ -888,32 +885,99 @@ public:
 	bool WriteText(const char *Data);
 	bool WriteText(const string &Data);
 
-	bool ReadLine(char *Buffer, int ASize);
-	bool ReadLine(string &Buffer);
+	virtual bool ReadLine(char *Buffer, int ASize) = 0;
+	virtual bool ReadLineS(string &Buffer);
 	bool WriteLine(const char *Data);
 	bool WriteLine(const string &Data);
 
-	string GetContent();
+	virtual string GetContent() = 0;
 	bool SetContent(const string &Data);
 
-	bool Seek(long Offset, ESeekOrigin Origin);
+	virtual bool Seek(long Offset, ESeekOrigin Origin) = 0;
 	bool Rewind();
+	virtual bool Flush();
+
+	virtual bool Eof() const = 0;
+	virtual bool Good() const = 0;
+	virtual long Size() const = 0;
+
+protected:
+	bool WriteLine(const char *Data, size_t Size);
+
+	EOpenMode Mode;
+
+	const int READ_BUFFER_DEFAULT_SIZE;
+
+private:
+	// CStorage can't be copied or assigned.
+	CStorage(const CStorage &Source);
+	CStorage& operator=(const CStorage &Source);
+};
+
+/**
+* CFile - класс, представляющий собой интерфейс к чтению и записи файлов.
+*
+* Каждый экземпляр класса управляет отдельным файлом, реализует принцип RAII.
+* Является надстройкой над stdio. Также дополняет его всякими функциями-ленивчиками, типа получить всё содержимое в строку и т. п.
+* Нельзя копировать и присваивать.
+*/
+
+class CFile : public CStorage
+{
+public:
+	CFile();
+	CFile(const string &AFilename, EOpenMode AMode);
+	~CFile();
+
+	bool Open(const string &AFilename, EOpenMode AMode);
+	bool Close();
+
+	bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
+	bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
+	
+	bool ReadLine(char *Buffer, int ASize);
+
+	string GetContent();
+
+	bool Seek(long Offset, ESeekOrigin Origin);
 	bool Flush();
 
 	bool Eof() const;
+	bool Good() const;
 	long Size() const;
 
 private:
-	// CFile can't be copied or assigned.
-	CFile(const CFile &Source);
-	CFile& operator=(const CFile &Source);
-
-	bool WriteLine(const char *Data, size_t Size);
-
 	FILE *File;
 	string Filename;
+};
 
-	const int READ_BUFFER_DEFAULT_SIZE;
+class CMemory : public CStorage
+{
+public:
+	CMemory();
+	CMemory(byte *ABeginningPointer, long ALength, EOpenMode AMode);
+	~CMemory();
+
+	bool Open(byte *ABeginningPointer, long ALength, EOpenMode AMode);
+	bool Close();
+
+	bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
+	bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
+
+	bool ReadLine(char *Buffer, int ASize);
+
+	string GetContent();
+
+	bool Seek(long Offset, ESeekOrigin Origin);
+
+	bool Eof() const;
+	bool Good() const;
+	long Size() const;
+
+private:
+	byte *BeginningPointer;
+	byte *CurrentPointer;
+	long Length;
 };
 
 /**

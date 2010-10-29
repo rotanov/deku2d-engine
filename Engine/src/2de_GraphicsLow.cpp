@@ -151,9 +151,9 @@ bool CGLImageData::MakeTexture()
 {
 	if (Data == NULL)
 		return false;
-	if ((Width&(Width-1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
+	if ((Width & (Width - 1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
 		return false;				//	Ultimate - это использовать NOT_POWER_OF_TWO екстеншон, если он доступен;
-	if ((Height&(Height-1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
+	if ((Height & (Height - 1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
 		return false;				//	Ширина и выстоа стали ближайшими степенями двойки. Но это потом. И это @todo.
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &TexID);
@@ -199,6 +199,7 @@ bool CGLImageData::LoadTexture(size_t AWidth, size_t AHeight, const byte* Addres
 	}
 	return true;
 }
+
 GLuint CGLImageData::GetTexID()
 {
 	if (TexID == 0)
@@ -484,7 +485,7 @@ bool CFont::Load()
 		file.Read(Boxes, sizeof(Boxes));
 
 		file.Close();
-		for (int i=0; i<256; i++)
+		for (int i = 0; i < 256; i++)
 		{
 			if (Boxes[i].Min.x > Boxes[i].Max.x)
 				swap(Boxes[i].Min.x, Boxes[i].Max.x);
@@ -496,7 +497,7 @@ bool CFont::Load()
 	}
 	else if (Source == LOAD_SOURCE_MEMORY)
 	{
-		// TODO: fix this, take away common code..
+		// TODO: see issue 42, take away common code..
 		if (MemoryLoadData == NULL || MemoryLoadLength == 0)
 			return false;
 
@@ -510,7 +511,7 @@ bool CFont::Load()
 		Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
 
 		memcpy(Boxes, MemoryLoadData, sizeof(Boxes));
-		for (int i=0; i<256; i++)
+		for (int i = 0; i < 256; i++)
 		{
 			if (Boxes[i].Min.x > Boxes[i].Max.x)
 				swap(Boxes[i].Min.x, Boxes[i].Max.x);
@@ -954,7 +955,7 @@ void CFontManager::Init()
 {
 	CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
 	DefaultFontTexture->LoadTexture(IMAGE_DEFAULT_FONT_WIDTH, IMAGE_DEFAULT_FONT_HEIGHT, reinterpret_cast<byte *>(IMAGE_DEFAULT_FONT_DATA));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// wtf is it? incapsulate it please or whatever...
 	
 	DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
 	DefaultFont->SetLoadSource(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_DEFAULT_FONT_SIZE);

@@ -169,130 +169,36 @@ void CSingletonManager::Finalize()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CFile
+// CStorage
 
-CFile::CFile() : File(NULL), READ_BUFFER_DEFAULT_SIZE(256)
+CStorage::CStorage() : READ_BUFFER_DEFAULT_SIZE(256)
 {
 }
 
-CFile::CFile(const string &AFilename, EOpenMode Mode) : File(NULL), READ_BUFFER_DEFAULT_SIZE(256)
-{
-	Open(AFilename, Mode);
-}
-
-CFile::~CFile()
-{
-	Close();
-}
-
-bool CFile::Open(const string &AFilename, EOpenMode Mode)
-{
-	if (File != NULL)
-	{
-		Log("ERROR", "Can't open file '%s': another file is already opened", AFilename.c_str());
-		return false;
-	}
-
-	if (AFilename.empty())
-	{
-		Log("ERROR", "Can't open file with empty filename");
-		return false;
-	}
-
-	Filename = AFilename;
-
-	switch (Mode)
-	{
-	case OPEN_MODE_READ:
-		File = fopen(Filename.c_str(), "rb");
-		break;
-	case OPEN_MODE_WRITE:
-		File = fopen(Filename.c_str(), "wb");
-		break;
-	}
-
-	if (File == NULL)
-	{
-		Log("ERROR", "Can't open file '%s'", Filename.c_str());
-		return false;
-	}
-
-	return true;
-}
-
-bool CFile::Close()
-{
-	if (File == NULL)
-		return false;
-
-	fclose(File);
-	File = NULL;
-
-	Filename.clear();
-
-	return true;
-}
-
-/**
-* CFile::Read - reads BytesCount bytes ElementsCount times from a file and stores them in memory at address Buffer.
-*/
-
-bool CFile::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
-{
-	if (Buffer == NULL || File == NULL || BytesCount == 0 || ElementsCount == 0)
-		return false;
-
-	if (fread(Buffer, BytesCount, ElementsCount, File) != ElementsCount && !Eof())
-	{
-		Log("ERROR", "File IO error occured in attempt to read data from '%s'", Filename.c_str());
-		return false;
-	}
-
-	return true;
-}
-
-/**
-* CFile::Write - writes ElementsCount elements size of BytesCount bytes each from array at address Data to a file.
-*/
-
-bool CFile::Write(const void *Data, size_t BytesCount, size_t ElementsCount /*= 1*/)
-{
-	if (Data == NULL || File == NULL || BytesCount == 0 || ElementsCount == 0)
-		return false;
-
-	if (fwrite(Data, BytesCount, ElementsCount, File) != ElementsCount)
-	{
-		Log("ERROR", "File IO error occured in attempt to write data to '%s'", Filename.c_str());
-		return false;
-	}
-
-	return true;
-}
-
-bool CFile::ReadByte(byte *Buffer)
+bool CStorage::ReadByte(byte *Buffer)
 {
 	return Read(Buffer, sizeof(byte));
 }
 
-bool CFile::WriteByte(byte *Data)
+bool CStorage::WriteByte(byte *Data)
 {
 	return Write(Data, sizeof(byte));
 }
 
-bool CFile::WriteByte(byte Data)
+bool CStorage::WriteByte(byte Data)
 {
 	return WriteByte(&Data);
 }
 
 /**
-* CFile::ReadString - reads a null-terminated string from a file with maximum length of ASize bytes and stores it in memory at address Buffer.
+* CStorage::ReadString - reads a null-terminated string from a storage with maximum length of ASize bytes and stores it in memory at address Buffer.
 *
 * \todo It woulde be better to take out this logic somewhere, or stop using such ways of storing strings at all.
 */
 
-bool CFile::ReadString(char *Buffer, int ASize)
+bool CStorage::ReadString(char *Buffer, int ASize)
 {
-	if (File == NULL || Buffer == NULL || ASize == 0)
+	if (!Good() || Buffer == NULL || ASize == 0)
 		return false;
 	
 	byte b;
@@ -311,15 +217,15 @@ bool CFile::ReadString(char *Buffer, int ASize)
 }
 
 /**
-* CFile::ReadString - reads a null-terminated string from a file and stores it in Buffer.
+* CStorage::ReadString - reads a null-terminated string from a storage and stores it in Buffer.
 * Unlike the version with char* doesn't require to specify size explicitly.
 *
 * \todo It woulde be better to take out this logic somewhere, or stop using such ways of storing strings at all.
 */
 
-bool CFile::ReadString(string &Buffer)
+bool CStorage::ReadString(string &Buffer)
 {
-	if (File == NULL)
+	if (!Good())
 		return false;
 	
 	Buffer.clear();
@@ -344,12 +250,12 @@ bool CFile::ReadString(string &Buffer)
 }
 
 /**
-* CFile::WriteString - writes Data string to a file, terminating it with null byte.
+* CStorage::WriteString - writes Data string to a storage, terminating it with null byte.
 *
 * \todo It woulde be better to take out this logic somewhere, or stop using such ways of storing strings at all.
 */
 
-bool CFile::WriteString(const char *Data)
+bool CStorage::WriteString(const char *Data)
 {
 	if (Data == NULL)
 		return false;
@@ -359,18 +265,18 @@ bool CFile::WriteString(const char *Data)
 
 /** \copydoc WriteString(const char *) */
 
-bool CFile::WriteString(const string &Data)
+bool CStorage::WriteString(const string &Data)
 {
 	return Write(Data.c_str(), Data.length() + 1);
 }
 
 /**
-* CFile::WriteText - writes text from Data to a file without terminating it with anything.
+* CStorage::WriteText - writes text from Data to a storage without terminating it with anything.
 *
 * Unlike WriteString this function is good and useful.
 */
 
-bool CFile::WriteText(const char *Data)
+bool CStorage::WriteText(const char *Data)
 {
 	if (Data == NULL)
 		return false;
@@ -380,40 +286,18 @@ bool CFile::WriteText(const char *Data)
 
 /** \copydoc WriteText(const char *) */
 
-bool CFile::WriteText(const string &Data)
+bool CStorage::WriteText(const string &Data)
 {
 	return Write(Data.c_str(), Data.length());
 }
 
 /**
-* CFile::ReadLine - reads a string terminated by newline symbol and stores it in memory at address Buffer.
-* Reading finishes at reaching ASize symbol, newline or EOF symbol, whichvever comes first.
-* 
-* \param[out] Buffer pointer to memory, where a string will be stored
-* \param ASize maximum number of symbols to read
+* CStorage::ReadLineS - reads a string from a storage until newline or EOF symbol, whichever comes first, and stores it in Buffer.
 */
 
-bool CFile::ReadLine(char *Buffer, int ASize)
+bool CStorage::ReadLineS(string &Buffer)
 {
-	if (File == NULL || Buffer == NULL || ASize == 0)
-		return false;
-
-	if (fgets(Buffer, ASize, File) == NULL)
-	{
-		Log("ERROR", "File IO error occurend in attempt to read line from '%s'", Filename.c_str());
-		return false;
-	}
-
-	return true;
-}
-
-/**
-* CFile::ReadLine - reads a string from a file until newline or EOF symbol, whichever comes first, and stores it in Buffer.
-*/
-
-bool CFile::ReadLine(string &Buffer)
-{
-	if (File == NULL)
+	if (!Good())
 		return false;
 	
 	Buffer.clear();
@@ -441,10 +325,10 @@ bool CFile::ReadLine(string &Buffer)
 }
 
 /**
-* CFile::WriteLine - writes Data string in a file, terminated by newline symbols, according to current platform.
+* CStorage::WriteLine - writes Data string in a storage, terminated by newline symbols, according to current platform.
 */
 
-bool CFile::WriteLine(const char *Data)
+bool CStorage::WriteLine(const char *Data)
 {
 	if (Data == NULL)
 		return false;
@@ -454,9 +338,172 @@ bool CFile::WriteLine(const char *Data)
 
 /*! \copydoc WriteLine(const char *) */
 
-bool CFile::WriteLine(const string &Data)
+bool CStorage::WriteLine(const string &Data)
 {
 	return WriteLine(Data.c_str(), Data.length());
+}
+
+/**
+* CStorage::SetContent - writes Data string in a storage from its beginning.
+*
+* Cursor position is set to the end of write, so, obviously, affects other writing operations.
+*/
+
+bool CStorage::SetContent(const string &Data)
+{
+	Rewind();
+	return WriteText(Data);
+}
+
+bool CStorage::Rewind()
+{
+	return Seek(0L, SEEK_ORIGIN_BEGINNING);
+}
+
+bool CStorage::Flush()
+{
+	if (!Good())
+		return false;
+
+	return true;
+}
+
+/**
+* CStorage::WriteLine - internal version of WriteLine to take out common code from versions with std::string and null-terrminated string.
+*/
+
+bool CStorage::WriteLine(const char *Data, size_t Size)
+{
+	if (!Good() || Data == NULL)
+		return false;
+
+	Write(Data, Size);
+	WriteText(CEnvironment::GetLineTerminator());
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CFile
+
+CFile::CFile() : File(NULL)
+{
+}
+
+CFile::CFile(const string &AFilename, EOpenMode AMode) : File(NULL)
+{
+	Open(AFilename, AMode);
+}
+
+CFile::~CFile()
+{
+	Close();
+}
+
+bool CFile::Open(const string &AFilename, EOpenMode AMode)
+{
+	if (Good())
+	{
+		Log("ERROR", "Can't open file '%s': another file is already opened", AFilename.c_str());
+		return false;
+	}
+
+	if (AFilename.empty())
+	{
+		Log("ERROR", "Can't open file with empty filename");
+		return false;
+	}
+
+	Filename = AFilename;
+
+	switch (AMode)
+	{
+	case OPEN_MODE_READ:
+		File = fopen(Filename.c_str(), "rb");
+		break;
+	case OPEN_MODE_WRITE:
+		File = fopen(Filename.c_str(), "wb");
+		break;
+	}
+
+	if (!Good())
+	{
+		Log("ERROR", "Can't open file '%s'", Filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool CFile::Close()
+{
+	if (!Good())
+		return false;
+
+	fclose(File);
+	File = NULL;
+
+	Filename.clear();
+
+	return true;
+}
+
+/**
+* CFile::Read - reads BytesCount bytes ElementsCount times from a file and stores them in memory at address Buffer.
+*/
+
+bool CFile::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
+{
+	if (!Good() || Buffer == NULL || BytesCount == 0 || ElementsCount == 0)
+		return false;
+
+	if (fread(Buffer, BytesCount, ElementsCount, File) != ElementsCount && !Eof())
+	{
+		Log("ERROR", "File IO error occured in attempt to read data from '%s'", Filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+/**
+* CFile::Write - writes ElementsCount elements size of BytesCount bytes each from array at address Data to a file.
+*/
+
+bool CFile::Write(const void *Data, size_t BytesCount, size_t ElementsCount /*= 1*/)
+{
+	if (!Good() || Data == NULL || BytesCount == 0 || ElementsCount == 0)
+		return false;
+
+	if (fwrite(Data, BytesCount, ElementsCount, File) != ElementsCount)
+	{
+		Log("ERROR", "File IO error occured in attempt to write data to '%s'", Filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+/**
+* CFile::ReadLine - reads a string terminated by newline symbol and stores it in memory at address Buffer.
+* Reading finishes at reaching ASize symbol, newline or EOF symbol, whichvever comes first.
+* 
+* \param[out] Buffer pointer to memory, where a string will be stored
+* \param ASize maximum number of symbols to read
+*/
+
+bool CFile::ReadLine(char *Buffer, int ASize)
+{
+	if (!Good() || Buffer == NULL || ASize == 0)
+		return false;
+
+	if (fgets(Buffer, ASize, File) == NULL)
+	{
+		Log("ERROR", "File IO error occurend in attempt to read line from '%s'", Filename.c_str());
+		return false;
+	}
+
+	return true;
 }
 
 /**
@@ -467,7 +514,7 @@ bool CFile::WriteLine(const string &Data)
 
 string CFile::GetContent()
 {
-	if (File == NULL)
+	if (!Good())
 		return "";
 
 	string result;
@@ -485,7 +532,7 @@ string CFile::GetContent()
 
 	while (!Eof())
 	{
-		ReadLine(tmp);
+		ReadLineS(tmp);
 		result += tmp;
 	}
 
@@ -494,17 +541,6 @@ string CFile::GetContent()
 	return result;
 }
 
-/**
-* CFile::SetContent - writes Data string in a file from its beginning.
-*
-* Cursor position is set to the end of write, so, obviously, affects other writing operations.
-*/
-
-bool CFile::SetContent(const string &Data)
-{
-	Rewind();
-	return WriteText(Data);
-}
 
 /**
 * CFile::Seek - moves the internal current position pointer to specified place.
@@ -515,7 +551,7 @@ bool CFile::SetContent(const string &Data)
 
 bool CFile::Seek(long Offset, ESeekOrigin Origin)
 {
-	if (!File)
+	if (!Good())
 		return false;
 
 	int origin_const;
@@ -536,14 +572,9 @@ bool CFile::Seek(long Offset, ESeekOrigin Origin)
 	return (fseek(File, Offset, origin_const) == 0);
 }
 
-bool CFile::Rewind()
-{
-	return Seek(0L, SEEK_ORIGIN_BEGINNING);
-}
-
 bool CFile::Flush()
 {
-	if (!File)
+	if (!Good())
 		return false;
 
 	return (fflush(File) == 0);
@@ -551,10 +582,15 @@ bool CFile::Flush()
 
 bool CFile::Eof() const
 {
-	if (!File)
+	if (!Good())
 		return true;
 
 	return (feof(File) != 0);
+}
+
+bool CFile::Good() const
+{
+	return (File != NULL);
 }
 
 long CFile::Size() const
@@ -570,19 +606,214 @@ long CFile::Size() const
 	return FileStat.st_size;
 }
 
-/**
-* CFile::WriteLine - internal version of WriteLine to take out common code from versions with std::string and null-terrminated string.
-*/
+//////////////////////////////////////////////////////////////////////////
+// CMemory
 
-bool CFile::WriteLine(const char *Data, size_t Size)
+CMemory::CMemory() : BeginningPointer(NULL), CurrentPointer(NULL), Length(0)
 {
-	if (File == NULL || Data == NULL)
-		return false;
+}
 
-	Write(Data, Size);
-	WriteText(CEnvironment::GetLineTerminator());
+CMemory::CMemory(byte *ABeginningPointer, long ALength, EOpenMode AMode) : BeginningPointer(NULL), CurrentPointer(NULL), Length(0)
+{
+	Open(ABeginningPointer, ALength, AMode);
+}
+
+CMemory::~CMemory()
+{
+	Close();
+}
+
+bool CMemory::Open(byte *ABeginningPointer, long ALength, EOpenMode AMode)
+{
+	if (Good())
+	{
+		Log("ERROR", "Can't open memory storage at address '%p': another storage is already opened at address '%p'", ABeginningPointer, BeginningPointer);
+		return false;
+	}
+
+	if (ABeginningPointer == NULL)
+	{
+		Log("ERROR", "Can't open memory storage at null address");
+		return false;
+	}
+
+	if (ALength == 0)
+	{
+		Log("ERROR", "Can't open memory storage with zero length");
+		return false;
+	}
+
+	BeginningPointer = ABeginningPointer;
+	CurrentPointer = BeginningPointer;
+	Mode = AMode;
 
 	return true;
+}
+
+bool CMemory::Close()
+{
+	if (!Good())
+		return false;
+
+	BeginningPointer = NULL;
+	CurrentPointer = NULL;
+	Length = 0;
+
+	return true;
+}
+
+/**
+* CMemory::Read - reads BytesCount bytes ElementsCount times from a memory storage and stores them in memory at address Buffer.
+*/
+
+bool CMemory::Read(void *Buffer, size_t BytesCount, size_t ElementsCount /*= 1*/)
+{
+	if (!Good() || Buffer == NULL || BytesCount == 0 || ElementsCount == 0)
+		return false;
+	
+	int n = min(Length - (CurrentPointer - BeginningPointer), static_cast<long>(BytesCount * ElementsCount));
+	/*if (n == 0)
+		return false;*/
+
+	memcpy(Buffer, CurrentPointer, n);
+
+	CurrentPointer += n;
+
+	return true;
+}
+
+/**
+* CMemory::Write - writes ElementsCount elements size of BytesCount bytes each from array at address Data to a memory storage.
+*/
+
+bool CMemory::Write(const void *Data, size_t BytesCount, size_t ElementsCount /*= 1*/)
+{
+	if (!Good() || Data == NULL || BytesCount == 0 || ElementsCount == 0)
+		return false;
+
+	// maybe add mode check..
+
+	int n = min(Length - (CurrentPointer - BeginningPointer), static_cast<long>(BytesCount * ElementsCount));
+
+	memcpy(CurrentPointer, Data, n);
+
+	CurrentPointer += n;
+
+	return true;
+}
+
+/**
+* CMemory::ReadLine - reads a string terminated by newline symbol and stores it in memory at address Buffer.
+* Reading finishes at reaching ASize symbol, newline or EOF symbol, whichvever comes first.
+* 
+* \param[out] Buffer pointer to memory, where a string will be stored
+* \param ASize maximum number of symbols to read
+*/
+
+bool CMemory::ReadLine(char *Buffer, int ASize)
+{
+	if (!Good() || Buffer == NULL || ASize == 0)
+		return false;
+	
+	int ReadCount = 0;
+
+	while (!Eof() && (ReadCount < ASize))
+	{
+		Buffer[ReadCount] = *CurrentPointer;
+
+		ReadCount++;
+		CurrentPointer++;
+
+		if (*(CurrentPointer - 1) == '\n')
+			break;
+	}
+
+	Buffer[ReadCount] = 0;
+
+	return true;
+}
+
+/**
+* CMemory::GetContent - returns all memory storage content in string.
+*
+* Doesn't affect cursor position for other reading operations.
+*/
+
+string CMemory::GetContent()
+{
+	if (!Good())
+		return "";
+
+	string result;
+	if (result.max_size() < Size())
+	{
+		Log("ERROR", "Memory storage at address '%p' is too large to be stored in single string", BeginningPointer);
+		return "";
+	}
+
+	byte *OldPos = CurrentPointer;
+
+	CurrentPointer = BeginningPointer;
+
+	string tmp;
+
+	while (!Eof())
+	{
+		ReadLineS(tmp);
+		result += tmp;
+	}
+
+	CurrentPointer = OldPos;
+
+	return result;
+}
+
+
+/**
+* CMemory::Seek - moves the internal current position pointer to specified place.
+*
+* \param Offset offset in bytes
+* \param Origin shows from what place offset is calculated
+*/
+
+bool CMemory::Seek(long Offset, ESeekOrigin Origin)
+{
+	if (!Good())
+		return false;
+
+	switch (Origin)
+	{
+	case SEEK_ORIGIN_BEGINNING:
+		CurrentPointer = BeginningPointer + Offset;
+		break;
+	case SEEK_ORIGIN_CURRENT:
+		CurrentPointer += Offset;
+		break;
+	case SEEK_ORIGIN_END:
+		// maybe disallow this...
+		CurrentPointer = BeginningPointer + Length + Offset;
+		break;
+	}
+
+	return true;
+}
+
+bool CMemory::Eof() const
+{
+	if (!Good())
+		return true;
+
+	return (CurrentPointer >= (BeginningPointer + Length));
+}
+
+bool CMemory::Good() const
+{
+	return (BeginningPointer != NULL);
+}
+
+long CMemory::Size() const
+{
+	return Length;
 }
 
 //////////////////////////////////////////////////////////////////////////
