@@ -2,6 +2,7 @@
 #define _2DE_RESOURCE_H_
 
 #include "2de_Core.h"
+#include "2de_Factory.h"
 #include "2de_Update.h"
 #include "2de_Xml.h"
 
@@ -96,6 +97,7 @@ public:
 
 	string GetFilename() const;
 
+	ELoadSource GetLoadSource() const;
 	void SetLoadSource(const string &AFilename);
 	void SetLoadSource(byte *AData, size_t ALength);
 

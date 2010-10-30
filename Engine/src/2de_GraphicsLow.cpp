@@ -774,7 +774,7 @@ bool CRenderManager::DrawObjects()
 	Camera.Update(); // @todo: review camera
 
 	CRenderable *data;
-// 	CGameObject *GameObject = &(CUpdateManager::Instance()->RootGameObject);
+// 	CGameObject *GameObject = CUpdateManager::Instance()->RootGameObject;
 // 	for(CGameObject::traverse_iterator_bfs i(*GameObject); i.Ok(); ++i)
 // 	{
 // 		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(&(*i));
@@ -786,7 +786,7 @@ bool CRenderManager::DrawObjects()
 // 		}
 // 	}
 
-	TransfomationTraverse(&CUpdateManager::Instance()->RootGameObject);
+	TransfomationTraverse(CUpdateManager::Instance()->RootGameObject);
 
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{

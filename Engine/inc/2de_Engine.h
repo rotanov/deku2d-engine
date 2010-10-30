@@ -4,6 +4,7 @@
 #include "2de_Core.h"
 #include "2de_Config.h"
 #include "2de_Event.h"
+#include "2de_Factory.h"
 #include "2de_GameUtils.h"
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"

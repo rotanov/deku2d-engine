@@ -25,12 +25,17 @@ bool CCustomStateHandler::OnInitialize()
 
 	CEngine::Instance()->ToggleShowFPS(true);
 
-	// создать сцену, добавить в неё *нихера*, сделать её текущей
 	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(NewScene);
 
 	// Lua scripting test
-//	CLuaVirtualMachine::Instance()->RunFile(CResourceManager::Instance()->DataPath + "/Scripts/test.lua");
+	//CLuaVirtualMachine::Instance()->RunFile(CResourceManager::Instance()->DataPath + "/Scripts/test.lua");
+	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("test"));
+	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("scriptable-test"));
+
+	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
+	CFactory::Instance()->Add(sc, "ScriptableComponent");
+	CUpdateManager::Instance()->RootGameObject->Attach(sc);
 
 	// Some boxes
 /*
@@ -66,13 +71,13 @@ NewRenderableComponent->Configuration.Position = Vector2(128.0f, 128.0f);
 TestObject->Attach(NewRenderableComponent);
 NewRenderableComponent->Attach(NewNewRenderableComponent);
 NewNewRenderableComponent->Attach(NewNewNewRenderableComponent);
-CUpdateManager::Instance()->RootGameObject.Attach(TestObject);
+CUpdateManager::Instance()->RootGameObject->Attach(TestObject);
 //TestObject->AttachChild(new CUpdatable());
 
 /*
 Position = Vector2(320.0f, 240.0f);
 SetBox(CTestGameObject::Box);
-// Опять же скрипт OnEveryFrame хотя можно и в сущность CUpdatable
+// РћРїСЏС‚СЊ Р¶Рµ СЃРєСЂРёРїС‚ OnEveryFrame С…РѕС‚СЏ РјРѕР¶РЅРѕ Рё РІ СЃСѓС‰РЅРѕСЃС‚СЊ CUpdatable
 Position += Vector2::Random(-0.1f, 0.1f);
 */
 

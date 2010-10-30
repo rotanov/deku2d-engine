@@ -51,6 +51,11 @@ string CResource::GetFilename() const
 	return Filename;
 }
 
+CResource::ELoadSource CResource::GetLoadSource() const
+{
+	return Source;
+}
+
 void CResource::SetLoadSource(const string &AFilename)
 {
 	Source = LOAD_SOURCE_FILE;

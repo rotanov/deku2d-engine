@@ -26,7 +26,7 @@ class CUpdateManager : public CCommonManager <list<CUpdatable*> >, public CTSing
 {
 public:	
 	bool UpdateObjects();
-	CGameObject RootGameObject;
+	CGameObject *RootGameObject;
 
 protected:
 	CUpdateManager();

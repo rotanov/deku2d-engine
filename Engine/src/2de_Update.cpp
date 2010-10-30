@@ -51,6 +51,7 @@ CAbstractScene* CUpdatable::GetScene() const
 CUpdateManager::CUpdateManager()
 {
 	SetName("CUpdateManager");
+	RootGameObject = CFactory::Instance()->New<CGameObject>("RootGameObject");
 }
 
 bool CUpdateManager::UpdateObjects()

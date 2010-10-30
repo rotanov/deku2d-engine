@@ -3,12 +3,12 @@
 #include "2de_Engine.h"
 
 /**
-* LuaAPI - пространство имён для функций, вызываемых из Lua-скриптов. Самим движком эти функции не используются.
+* LuaAPI - namespace for functions that is called from Lua scripts. The engine itself doesn't use them.
 */
 
 namespace LuaAPI
 {
-	// часть из этих функций действительно останется в API, другая - просто временные для теста..
+	// some of these functions are really will be left in the API, others are just temporarily ones for testing..
 
 	// void Log(string Event, string Text)
 	int WriteToLog(lua_State *L)
@@ -129,6 +129,18 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// (number, number) GetPosition(userdata RenderableObject)
+	int GetPosition(lua_State *L)
+	{
+		CRenderable *obj = static_cast<CRenderable *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
+
+		lua_pushnumber(L, obj->Position.x);
+		lua_pushnumber(L, obj->Position.y);
+		return 2;
+	}
+
 	// void SetPosition(userdata RenderableObject, number X, number Y)
 	int SetPosition(lua_State *L)
 	{
@@ -144,7 +156,91 @@ namespace LuaAPI
 		return 0;
 	}
 
+	// number GetWindowWidth()
+	int GetWindowWidth(lua_State *L)
+	{
+		lua_pushnumber(L, CGLWindow::Instance()->GetWidth());
+		return 1;
+	}
+
+	// number GetWindowHeight()
+	int GetWindowHeight(lua_State *L)
+	{
+		lua_pushnumber(L, CGLWindow::Instance()->GetHeight());
+		return 1;
+	}
+
+	// (number, number) GetWindowDimensions()
+	int GetWindowDimensions(lua_State *L)
+	{
+		lua_pushnumber(L, CGLWindow::Instance()->GetWidth());
+		lua_pushnumber(L, CGLWindow::Instance()->GetHeight());
+		return 2;
+	}
+
+	// void SubscribeToEvent(string EventName, userdata Object)
+	int SubscribeToEvent(lua_State *L)
+	{
+		if (!lua_isstring(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SubscribeToEvent API call");
+
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SubscribeToEvent API call");
+
+		CEventManager::Instance()->Subscribe(lua_tostring(L, -2), obj);
+
+		return 0;
+	}
+
+	// void UnsubscribeFromEvent(string EventName, userdata Object)
+	int UnsubscribeFromEvent(lua_State *L)
+	{
+		if (!lua_isstring(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to UnsubscribeFromEvent API call");
+
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in UnsubscribeFromEvent API call");
+
+		CEventManager::Instance()->Unsubscribe(lua_tostring(L, -2), obj);
+
+		return 0;
+	}
+
 };
+
+//////////////////////////////////////////////////////////////////////////
+// CScript
+
+bool CScript::Load()
+{
+	if (Loaded)
+		return true;
+
+	if (Source == LOAD_SOURCE_FILE)
+	{
+		if (!CFileSystem::Exists(Filename))
+		{
+			Log("ERROR", "Can't load script from a file named '%s': file doesn't exist", Filename.c_str());
+			return false;
+		}
+	}
+	else if (Source == LOAD_SOURCE_MEMORY)
+	{
+		CMemory mem(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
+		ScriptText = mem.GetContent();
+	}
+
+	CResource::Load();
+
+	return true;
+}
+
+string CScript::GetScriptText() const
+{
+	return ScriptText;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // CLuaVirtualMachine
@@ -196,12 +292,83 @@ bool CLuaVirtualMachine::RunString(const string &AString)
 	return true;
 }
 
+bool CLuaVirtualMachine::RunScript(CScript *AScript)
+{
+	if (!State)
+		return false;
+	
+	if (AScript->GetLoadSource() == CResource::LOAD_SOURCE_FILE)
+	{
+		return RunFile(AScript->GetFilename());
+	}
+	else if (AScript->GetLoadSource() == CResource::LOAD_SOURCE_MEMORY)
+	{
+		return RunString(AScript->GetScriptText());
+	}
+
+	// can't happen
+	return false;
+}
+
 void CLuaVirtualMachine::RegisterAPIFunction(const string &AName, lua_CFunction AFunc)
 {
 	if (!State)
 		return;
 
 	lua_register(State, AName.c_str(), AFunc);
+}
+
+// TODO: add possibility to call functions with arguments and return values..
+
+bool CLuaVirtualMachine::CallFunction(const string &AFunctionName)
+{
+	if (!State)
+		return false;
+
+	lua_getglobal(State, AFunctionName.c_str());
+
+	if (lua_pcall(State, 0, 0, 0) != 0)
+	{
+		LastError = lua_tostring(State, -1);
+		Log("ERROR", "Lua: %s", LastError.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool CLuaVirtualMachine::CallMethodFunction(const string &AObjectName, const string &AFunctionName)
+{
+	if (!State)
+		return false;
+
+	lua_getglobal(State, AObjectName.c_str());
+	lua_getfield(State, -1, AFunctionName.c_str());
+
+	lua_insert(State, -2);
+
+	if (lua_pcall(State, 1, 0, 0) != 0)
+	{
+		LastError = lua_tostring(State, -1);
+		Log("ERROR", "Lua: %s", LastError.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+/**
+* CLuaVirtualMachine::CreateLuaObject - creates a new Lua object, puts it in the global namespace table under AName name and sets its "object" field to AObject.
+*/
+
+void CLuaVirtualMachine::CreateLuaObject(const string &AName, CObject *AObject)
+{
+	// Note: object must already exist on Lua side. ObjectName = { } in any Lua file will suffice.
+
+	lua_getglobal(State, AName.c_str());
+	lua_pushlightuserdata(State, AObject);
+	lua_setfield(State, -2, "object");
+	lua_pop(State, 1);
 }
 
 int CLuaVirtualMachine::GetMemoryUsage() const
@@ -248,7 +415,40 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "GetFontObject", &LuaAPI::GetFontObject);
 	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
 	lua_register(State, "GetFont", &LuaAPI::GetFont);
+	lua_register(State, "GetPosition", &LuaAPI::GetPosition);
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
+	lua_register(State, "GetWindowWidth", &LuaAPI::GetWindowWidth);
+	lua_register(State, "GetWindowHeight", &LuaAPI::GetWindowHeight);
+	lua_register(State, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
+	lua_register(State, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
+	lua_register(State, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CScriptableComponent
+
+CScriptableComponent::CScriptableComponent(CScript *AScript)
+{
+	CEventManager::Instance()->Subscribe("Create", this);
+	CLuaVirtualMachine::Instance()->RunScript(AScript);
+}
+
+void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
+{
+	// TODO: possibility to get event parameters from script
+
+	if (AEvent.GetName() == "Create")
+	{
+		if (AEvent.GetData<string>("Name") == Name)
+		{
+			CLuaVirtualMachine::Instance()->CreateLuaObject(Name, this);
+			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
+		}
+	}
+	else
+	{
+		CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "On" + AEvent.GetName());
+	}
 }
 
 

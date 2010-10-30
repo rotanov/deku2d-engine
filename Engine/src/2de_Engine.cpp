@@ -93,6 +93,7 @@ bool CEngine::Initialize()
 	ResourceManager->AddSection<CTileset>("Tilesets");
 	ResourceManager->AddSection<CSound>("Sounds");
 	ResourceManager->AddSection<CMusic>("Music");
+	ResourceManager->AddSection<CScript>("Scripts");
 
 	if (doLoadDefaultResourceList)
 	{
@@ -388,7 +389,7 @@ bool CEngine::ProcessEvents()
 		}
 	}
 
-	return true; //CEventManager::Instance()->ProcessEvents(); // move somewhere..
+	return true;
 }
 
 bool CEngine::Run(int argc, char *argv[])
@@ -419,7 +420,8 @@ bool CEngine::Run(int argc, char *argv[])
 				CResourceManager::Instance()->PerformUnload();
 				CFactory::Instance()->CleanUp();
 				if (LimitFPS())
-				{		
+				{
+					CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
 					CUpdateManager::Instance()->UpdateObjects();
 					CSceneManager::Instance()->Update(dt);
 					if (doCalcFPS)
