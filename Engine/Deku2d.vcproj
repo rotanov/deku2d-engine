@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\2de_Factory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\2de_GameUtils.cpp"
 				>
 			</File>
@@ -254,6 +258,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\2de_Event.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Factory.h"
 				>
 			</File>
 			<File

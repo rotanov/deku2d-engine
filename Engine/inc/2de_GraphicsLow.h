@@ -152,18 +152,73 @@ enum EModelType
 //	MODEL_TYPE_QUADS = 3,	// Keep commented 'cause may be there will be some possibility for optimization
 };
 
-class CModel // : public // is Abstract as fuck
+class CModel
 {
 public:
-	virtual ~CModel();
-	virtual void SetTexture(CTexture *ATexture) = 0;
-	virtual void SetModelType(EModelType AModelType) = 0;
-	virtual CTexture* GetTexture() = 0;
-	virtual const Vector2* GetVertices() const = 0;
-	virtual const Vector2* GetTexCoords() const = 0;
-	//const RGBAf* GetColors() const = 0;
-	virtual EModelType GetModelType() const = 0;
-	virtual int GetVertexNumber() const = 0;
+	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, CTexture * ATexture = NULL,
+		unsigned int AVerticesNumber = 0, Vector2* AVertices = NULL, 
+		Vector2* ATexCoords = NULL) : Texture(ATexture), ModelType(AModelType),
+		Vertices(NULL), TexCoords(NULL), VerticesNumber(AVerticesNumber)
+	{
+		if (VerticesNumber == 0)
+			return;
+		Vertices = new Vector2[VerticesNumber];
+		std::copy(AVertices, AVertices + VerticesNumber, Vertices);
+		if (ATexCoords == NULL)
+			return;
+		TexCoords = new Vector2[VerticesNumber];
+		std::copy(ATexCoords, ATexCoords + VerticesNumber, TexCoords);
+	}
+
+	~CModel()
+	{
+		SAFE_DELETE_ARRAY(Vertices);
+		SAFE_DELETE_ARRAY(TexCoords);
+	}
+
+	void SetTexture(CTexture *ATexture)
+	{
+		Texture = ATexture;
+	}
+
+	void SetModelType(EModelType AModelType)
+	{
+		ModelType = AModelType;
+	}
+
+	CTexture* GetTexture()
+	{
+		return Texture;
+	}
+
+	const Vector2* GetVertices() const
+	{
+		return Vertices;
+	}
+
+	const Vector2* GetTexCoords() const
+	{
+		return TexCoords;
+	}
+	
+	EModelType GetModelType() const
+	{
+		return ModelType;
+	}
+
+	virtual int GetVertexNumber() const
+	{
+		return VerticesNumber;
+	}
+
+	//const RGBAf* GetColors() const;
+
+private:
+	CTexture *Texture;
+	EModelType ModelType;
+	Vector2 *Vertices;
+	Vector2 *TexCoords;
+	unsigned int VerticesNumber;
 };
 
 /**
@@ -579,6 +634,29 @@ public:
 	void DrawPoint(const CRenderConfig *RenderInfo, const Vector2 &Point);
 	void DrawLine(const CRenderConfig *RenderInfo, const Vector2 &v0, const Vector2 &v1);
 	void DrawTriangles(const CRenderConfig *RenderInfo, const Vector2 *Vertices, unsigned int Count);
+
+	static CModel* CreateModelCircleLine(float Radius, int Presicion = 16)	// Presicion 
+	{
+		Vector2 *Vertices = new Vector2 [Presicion * 2];
+
+		for (int i = 0; i < Presicion; i ++)
+		{
+			Vector2 P
+					(	
+						cos(PI2 * i / Presicion),
+						sin(PI2 * i / Presicion)
+					);
+			Vertices[i * 2] = P * Radius;
+		}
+
+		for (int i = 0; i < Presicion; i ++)
+			Vertices[i * 2 + 1] = Vertices[(i+1)%Presicion * 2];
+
+		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, Presicion * 2, Vertices);//CFactory::Instance()->New<CModel>("New circle cmodel");
+		
+		return Result;
+		SAFE_DELETE_ARRAY(Vertices);
+	}
 };
 
 #if defined(_WIN32)

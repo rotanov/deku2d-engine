@@ -33,9 +33,9 @@ bool CCustomStateHandler::OnInitialize()
 	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("test"));
 	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("scriptable-test"));
 
-	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
-	CFactory::Instance()->Add(sc, "ScriptableComponent");
-	CUpdateManager::Instance()->RootGameObject->Attach(sc);
+ 	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
+ 	CFactory::Instance()->Add(sc, "ScriptableComponent");
+ 	CUpdateManager::Instance()->RootGameObject->Attach(sc);
 
 	// Some boxes
 /*
@@ -47,31 +47,33 @@ bool CCustomStateHandler::OnInitialize()
 			GrBox->Position = Vector2(170.0f + i * 32.0f, 120.0f + j * 24.0f);
 		}*/
 
-CTestGameObject *TestObject = new CTestGameObject();
-CRenderableComponent *NewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(128.0f, 128.0f))*/);
-CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f))*/);
-
-Vector2Array<4> vert;
-Vector2Array<4> tcor;
-
-vert[0] = Vector2(0.0f, -64.0f);
-vert[1] = Vector2(64.0f, -64.0f);
-vert[2] = Vector2(64.0f, 0.0f);
-vert[3] = Vector2(0.0f, 0.0f);
-
-tcor = V2_QUAD_BIN;
-
-//CModelQuad * NewQuadModel = new CModelQuad(vert, tcor, CTextureManager::Instance()->Get("PacmanTiles"));
-
-CRenderableComponent *NewNewNewRenderableComponent = new CRenderableComponent(/*NewQuadModel*/);
-
-NewNewNewRenderableComponent->Configuration.Color = RGBAf(0.9f, 0.6f, 0.5f, 1.0f);
-
-NewRenderableComponent->Configuration.Position = Vector2(128.0f, 128.0f);
-TestObject->Attach(NewRenderableComponent);
-NewRenderableComponent->Attach(NewNewRenderableComponent);
-NewNewRenderableComponent->Attach(NewNewNewRenderableComponent);
-CUpdateManager::Instance()->RootGameObject->Attach(TestObject);
+ CTestGameObject *TestObject = new CTestGameObject();
+ CRenderableComponent *NewRenderableComponent = new CRenderableComponent(CRenderManager::CreateModelCircleLine(50.0f));
+// CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f))*/);
+// 
+// Vector2Array<4> vert;
+// Vector2Array<4> tcor;
+// 
+// vert[0] = Vector2(0.0f, -64.0f);
+// vert[1] = Vector2(64.0f, -64.0f);
+// vert[2] = Vector2(64.0f, 0.0f);
+// vert[3] = Vector2(0.0f, 0.0f);
+// 
+// tcor = V2_QUAD_BIN;
+// 
+// //CModelQuad * NewQuadModel = new CModelQuad(vert, tcor, CTextureManager::Instance()->Get("PacmanTiles"));
+// 
+// CRenderableComponent *NewNewNewRenderableComponent = new CRenderableComponent(/*NewQuadModel*/);
+// 
+// NewNewNewRenderableComponent->Configuration.Color = RGBAf(0.9f, 0.6f, 0.5f, 1.0f);
+// 
+// NewRenderableComponent->Configuration.Position = Vector2(128.0f, 128.0f);
+ //TestObject->Attach(NewRenderableComponent);
+ NewRenderableComponent->Configuration.Position = Vector2(100.0f, 100.0f);
+// NewRenderableComponent->Attach(NewNewRenderableComponent);
+// NewNewRenderableComponent->Attach(NewNewNewRenderableComponent);
+ //CUpdateManager::Instance()->RootGameObject->Attach(TestObject);
+ sc->Attach(NewRenderableComponent);
 //TestObject->AttachChild(new CUpdatable());
 
 /*
