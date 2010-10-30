@@ -188,8 +188,11 @@ bool CEngine::ProcessArguments(int argc, char *argv[])
 
 	for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
 	{
-		if (!ArgMan->RegisterOption(it->ArgumentLongName, it->ArgumentShortName))
-			return false;
+		if (it->Option) 
+		{
+			if (!ArgMan->RegisterOption(it->ArgumentLongName, it->ArgumentShortName))
+				return false;
+		}
 	}
 
 	if (!StateHandler->OnArgumentsProcessing())

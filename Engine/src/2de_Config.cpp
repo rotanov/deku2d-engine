@@ -412,6 +412,7 @@ bool CCommandLineArgumentsManager::GetErrorState() const
 CCommandLineArgumentsManager::CCommandLineArgumentsManager() : ErrorState(false)
 {
 }
+
 bool CCommandLineArgumentsManager::Lex(int argc, char *argv[])
 {
 	string Current;
@@ -470,8 +471,8 @@ void CCommandLineArgumentsManager::SetErrorState(const string &AError)
 //////////////////////////////////////////////////////////////////////////
 // CArgumentsConfigMapping
 
-CArgumentsConfigMapping::CArgumentsConfigMapping(const string &AArgumentLongName, char AArgumentShortName, const string &ASection, const string &AParameter) :
-	ArgumentLongName(AArgumentLongName), ArgumentShortName(AArgumentShortName), Section(ASection), Parameter(AParameter)
+CArgumentsConfigMapping::CArgumentsConfigMapping(const string &AArgumentLongName, char AArgumentShortName, const string &ASection, const string &AParameter, bool AOption) :
+	ArgumentLongName(AArgumentLongName), ArgumentShortName(AArgumentShortName), Section(ASection), Parameter(AParameter), Option(AOption)
 {
 }
 
@@ -495,9 +496,10 @@ CArgumentsConfigMappingsManager::MappingsIterator CArgumentsConfigMappingsManage
 
 CArgumentsConfigMappingsManager::CArgumentsConfigMappingsManager()
 {
-	Add(CArgumentsConfigMapping("data-path", 0, "Data", "DataPath"));
-	Add(CArgumentsConfigMapping("window-width", 0, "Video", "WindowWidth"));
-	Add(CArgumentsConfigMapping("window-height", 0, "Video", "WindowHeight"));
+	Add(CArgumentsConfigMapping("data-path", 0, "Data", "DataPath", true));
+	Add(CArgumentsConfigMapping("window-width", 0, "Video", "WindowWidth", true));
+	Add(CArgumentsConfigMapping("window-height", 0, "Video", "WindowHeight", true));
+	Add(CArgumentsConfigMapping("clear-resources-cache", 0, "Data", "ForceReindex", false));
 	// TODO: add more mappings
 }
 

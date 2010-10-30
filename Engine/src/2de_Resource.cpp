@@ -228,7 +228,7 @@ string CDataLister::GetFileNameWithoutExtension(string Filename)
 
 bool CResourceManager::LoadResources()
 {
-	ResourceList = DataLister.List(DataPath, CCommandLineArgumentsManager::Instance()->GetFlag("clear-resources-cache"));
+	ResourceList = DataLister.List(DataPath, CConfig::Instance()->Section("Data")["ForceReindex"]);
 
 	for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 	{

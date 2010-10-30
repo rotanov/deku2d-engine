@@ -232,13 +232,15 @@ private:
 
 struct CArgumentsConfigMapping
 {
-	CArgumentsConfigMapping(const string &AArgumentLongName, char AArgumentShortName, const string &ASection, const string &AParameter);
+	CArgumentsConfigMapping(const string &AArgumentLongName, char AArgumentShortName, const string &ASection, const string &AParameter, bool AOption);
 
 	string ArgumentLongName;
 	char ArgumentShortName;
 
 	string Section;
 	string Parameter;
+
+	bool Option;
 };
 
 /**

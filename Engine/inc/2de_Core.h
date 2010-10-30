@@ -276,7 +276,7 @@ public:
 	static bool from_string_impl(const string &s, identity<bool>)
 	{
 		// ios::boolalpha - have you looked for it, while trying to reinvent the wheel? // it doesn't suit our needs.. i don't remember why, though..
-		if (s == "false")
+		if (s == "false" || s.empty())
 			return false;
 
 		long double result;
