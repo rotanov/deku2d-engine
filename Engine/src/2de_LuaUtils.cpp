@@ -129,30 +129,46 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// (number, number) GetPosition(userdata RenderableObject)
+	// (number, number) GetPosition(userdata RenderableComponent)
 	int GetPosition(lua_State *L)
 	{
-		CRenderable *obj = static_cast<CRenderable *>(lua_touserdata(L, -1));
-		if (!obj)
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
+		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -1));
+		if (!rcobj)
+		{
+			// backward compatibility
+			CRenderable *robj = static_cast<CRenderable *>(lua_touserdata(L, -1));
+			if (!robj)
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
 
-		lua_pushnumber(L, obj->Position.x);
-		lua_pushnumber(L, obj->Position.y);
+			lua_pushnumber(L, robj->Position.x);
+			lua_pushnumber(L, robj->Position.y);
+			return 2;
+		}
+
+		lua_pushnumber(L, rcobj->Configuration.Position.x);
+		lua_pushnumber(L, rcobj->Configuration.Position.y);
 		return 2;
 	}
 
-	// void SetPosition(userdata RenderableObject, number X, number Y)
+	// void SetPosition(userdata RenderableComponent, number X, number Y)
 	int SetPosition(lua_State *L)
 	{
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
 
-		CRenderable *obj = static_cast<CRenderable *>(lua_touserdata(L, -3));
-		if (!obj)
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
+		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -3));
+		if (!rcobj)
+		{
+			// backward compatibility
+			CRenderable *robj = static_cast<CRenderable *>(lua_touserdata(L, -3));
+			if (!robj)
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
 
-		obj->Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
+			robj->Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
+			return 0;
+		}
 
+		rcobj->Configuration.Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
 		return 0;
 	}
 
@@ -206,6 +222,82 @@ namespace LuaAPI
 		CEventManager::Instance()->Unsubscribe(lua_tostring(L, -2), obj);
 
 		return 0;
+	}
+
+	// void TriggerEvent(string EventName, userdata Sender) // the first implementation, without parameters support...
+	int TriggerEvent(lua_State *L)
+	{
+		if (!lua_isstring(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to TriggerEvent API call");
+
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in TriggerEvent API call");
+
+		CEventManager::Instance()->TriggerEvent(lua_tostring(L, -2), obj);
+
+		return 0;
+	}
+
+	// number sin(number n)
+	int sin(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to sin API call");
+
+		lua_pushnumber(L, ::sin(lua_tonumber(L, -1)));
+		return 1;
+	}
+
+	// number cos(number n)
+	int cos(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to cos API call");
+
+		lua_pushnumber(L, ::cos(lua_tonumber(L, -1)));
+		return 1;
+	}
+
+	// number Abs(number n)
+	int Abs(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Abs API call");
+
+		lua_pushnumber(L, ::Abs(lua_tonumber(L, -1)));
+		return 1;
+	}
+
+	// number Random_Int(number min, number max)
+	int Random_Int(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Int API call");
+
+		lua_pushnumber(L, ::Random_Int(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		return 1;
+	}
+
+	// number Random_Float(number min, number max)
+	int Random_Float(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Float API call");
+
+		lua_pushnumber(L, ::Random_Float(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		return 1;
+	}
+
+	// userdata GetParent(userdata Object)
+	int GetParent(lua_State *L)
+	{
+		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetParent API call");
+
+		lua_pushlightuserdata(L, obj->Parent);
+		return 1;
 	}
 
 };
@@ -296,6 +388,12 @@ bool CLuaVirtualMachine::RunScript(CScript *AScript)
 {
 	if (!State)
 		return false;
+
+	if (AScript == NULL)
+	{
+		Log("ERROR", "Script is NULL in CLuaVirtualMachine::RunScript");
+		return false;
+	}
 	
 	if (AScript->GetLoadSource() == CResource::LOAD_SOURCE_FILE)
 	{
@@ -343,7 +441,20 @@ bool CLuaVirtualMachine::CallMethodFunction(const string &AObjectName, const str
 		return false;
 
 	lua_getglobal(State, AObjectName.c_str());
+	if (lua_isnil(State, -1))
+	{
+		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such object", AObjectName.c_str(), AFunctionName.c_str());
+		lua_pop(State, 1);
+		return false;
+	}
+
 	lua_getfield(State, -1, AFunctionName.c_str());
+	if (lua_isnil(State, -1))
+	{
+		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such function", AObjectName.c_str(), AFunctionName.c_str());
+		lua_pop(State, 2);
+		return false;
+	}
 
 	lua_insert(State, -2);
 
@@ -366,6 +477,13 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AName, CObject *AObject)
 	// Note: object must already exist on Lua side. ObjectName = { } in any Lua file will suffice.
 
 	lua_getglobal(State, AName.c_str());
+	if (lua_isnil(State, -1))
+	{
+		Log("ERROR", "An error occured while creating '%s': object must be defined in Lua script first", AName.c_str());
+		lua_pop(State, 1);
+		return;
+	}
+
 	lua_pushlightuserdata(State, AObject);
 	lua_setfield(State, -2, "object");
 	lua_pop(State, 1);
@@ -405,6 +523,8 @@ void CLuaVirtualMachine::TriggerError(const string &AMessage, ...)
 
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
+	luaopen_base(State);
+
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
 	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
 	lua_register(State, "IsSpacePressed", &LuaAPI::IsSpacePressed);
@@ -422,6 +542,16 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
 	lua_register(State, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
 	lua_register(State, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
+	lua_register(State, "TriggerEvent", &LuaAPI::TriggerEvent);
+	lua_register(State, "sin", &LuaAPI::sin);
+	lua_register(State, "cos", &LuaAPI::cos);
+	lua_register(State, "Abs", &LuaAPI::Abs);
+	lua_register(State, "Random_Int", &LuaAPI::Random_Int);
+	lua_register(State, "Random_Float", &LuaAPI::Random_Float);
+	lua_register(State, "GetParent", &LuaAPI::GetParent);
+
+	lua_pushnumber(State, PI);
+	lua_setglobal(State, "PI");
 }
 
 //////////////////////////////////////////////////////////////////////////

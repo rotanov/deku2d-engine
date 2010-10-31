@@ -1,7 +1,6 @@
-SOURCES		=	src/main.cpp \
-			src/Pong.cpp
+SOURCES		=	src/main.cpp
 
-HEADERS		=	inc/Pong.h
+HEADERS		=	
 
 TARGET		=	bin/Pong
 ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
