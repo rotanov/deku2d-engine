@@ -635,27 +635,55 @@ public:
 	void DrawLine(const CRenderConfig *RenderInfo, const Vector2 &v0, const Vector2 &v1);
 	void DrawTriangles(const CRenderConfig *RenderInfo, const Vector2 *Vertices, unsigned int Count);
 
-	static CModel* CreateModelCircleLine(float Radius, int Presicion = 16)	// Presicion 
+	static CModel* CreateModelCircle(float Radius, EModelType AModelType = MODEL_TYPE_LINES, int Precision = 16)
 	{
-		Vector2 *Vertices = new Vector2 [Presicion * 2];
+		Vector2 *Vertices = new Vector2 [Precision * 2];
 
-		for (int i = 0; i < Presicion; i ++)
+		for (int i = 0; i < Precision; i ++)
 		{
 			Vector2 P
 					(	
-						cos(PI2 * i / Presicion),
-						sin(PI2 * i / Presicion)
+						cos(PI * (float)i / ((float)Precision/ 2.0f)),
+						sin(PI * (float)i / ((float)Precision/2.0f))
 					);
 			Vertices[i * 2] = P * Radius;
 		}
 
-		for (int i = 0; i < Presicion; i ++)
-			Vertices[i * 2 + 1] = Vertices[(i+1)%Presicion * 2];
+		for (int i = 0; i < Precision; i ++)
+			Vertices[i * 2 + 1] = Vertices[(i+1)%Precision * 2];
 
-		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, Presicion * 2, Vertices);//CFactory::Instance()->New<CModel>("New circle cmodel");
+		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, Precision * 2, Vertices);//CFactory::Instance()->New<CModel>("New circle cmodel");
 		
 		return Result;
 		SAFE_DELETE_ARRAY(Vertices);
+	}
+
+	static CModel* CreateModelBox(float Width, float Height, EModelType AModelType = MODEL_TYPE_LINES)
+	{
+		Vector2 Vertices[8];
+		float wd2 = Width * 0.5f, hd2 = Height * 0.5f;
+		Vertices[0] = Vector2(-wd2, -hd2);
+		Vertices[1] = Vector2( wd2, -hd2);
+
+		Vertices[2] = Vector2( wd2, -hd2);
+		Vertices[3] = Vector2( wd2,  hd2);
+
+		Vertices[4] = Vector2( wd2,  hd2);
+		Vertices[5] = Vector2(-wd2,  hd2);
+
+		Vertices[6] = Vector2(-wd2,  hd2);
+		Vertices[7] = Vector2(-wd2, -hd2);
+		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 8, Vertices);
+		return Result;
+	}
+
+	static CModel* CreateModelLine(const Vector2 &v0, const Vector2 &v1, EModelType AModelType = MODEL_TYPE_LINES)
+	{
+		Vector2 Vertices[2];
+		Vertices[0] = v0;
+		Vertices[1] = v1;
+		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
+		return Result;
 	}
 };
 

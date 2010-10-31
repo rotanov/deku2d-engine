@@ -97,9 +97,9 @@ bool CCustomStateHandler::OnInitialize()
 
 	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("PongPlayers"));
 
-	CRenderableComponent *PlayerOne = new CRenderableComponent(CRenderManager::CreateModelCircleLine(20.0f));
-	CRenderableComponent *PlayerTwo = new CRenderableComponent(CRenderManager::CreateModelCircleLine(20.0f));
-	CRenderableComponent *Ball = new CRenderableComponent(CRenderManager::CreateModelCircleLine(20.0f));
+	CRenderableComponent *PlayerOne = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+	CRenderableComponent *PlayerTwo = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+	CRenderableComponent *Ball = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_BALL_SIZE, PONG_BALL_SIZE));
 
 	CScriptableComponent *PlayerOneScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongPlayers"));
 	CScriptableComponent *PlayerTwoScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongPlayers"));

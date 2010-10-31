@@ -34,12 +34,12 @@ function PongPlayer()
 			self.Velocity = self.Velocity * 0.9995
 			self.Acceleration = Vector2(0, 0)
 
-			if self.Position.y < 0 then
-				self.Position.y= 0
+			if (self.Position.y - 48) < 0 then
+				self.Position.y= 96/2
 				self.Velocity.y = -self.Velocity.y * 0.5
 			end
-			if (self.Position.y + PONG_PLAYER_HEIGHT) > GetWindowHeight() then
-				self.Position.y = GetWindowHeight() - PONG_PLAYER_HEIGHT
+			if (self.Position.y + PONG_PLAYER_HEIGHT/2) > GetWindowHeight() then
+				self.Position.y = GetWindowHeight() - PONG_PLAYER_HEIGHT/2
 				self.Velocity.y = -self.Velocity.y * 0.5
 			end
 
@@ -55,7 +55,7 @@ end
 
 function PongPlayerOne()
 	local t = PongPlayer()	-- inheritance
-	t.Position = Vector2(PONG_MARGIN, PONG_MARGIN)
+	t.Position = Vector2(PONG_MARGIN + 12, GetWindowHeight()/2)
 	t.OnPlayerOneMoveUp = t.MoveUp
 	t.OnPlayerOneMoveDown = t.MoveDown
 	t.OnPlayerOneStop = t.Stop
@@ -70,7 +70,7 @@ end
 
 function PongPlayerTwo()
 	local t = PongPlayer()
-	t.Position = Vector2(GetWindowWidth() - PONG_MARGIN - PONG_PLAYER_WIDTH, PONG_MARGIN)
+	t.Position = Vector2(GetWindowWidth() - PONG_MARGIN - PONG_PLAYER_WIDTH/2, PONG_MARGIN)
 	t.OnPlayerTwoMoveUp = t.MoveUp
 	t.OnPlayerTwoMoveDown = t.MoveDown
 	t.OnPlayerTwoStop = t.Stop

@@ -1617,11 +1617,21 @@ void CFFPRenderer::Render()
 {
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_POINTS);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	PrimitiveHolders[MODEL_TYPE_POINTS].RenderPrimitive(GL_POINTS);
+	glEnable(GL_BLEND);
 	glEnable(GL_LINES);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	PrimitiveHolders[MODEL_TYPE_LINES].RenderPrimitive(GL_LINES);
-	
+	glEnable(GL_POLYGON_SMOOTH);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);	
 	PrimitiveHolders[MODEL_TYPE_TRIANGLES].RenderPrimitive(GL_TRIANGLES);
+
+	glDisable(GL_POINT_SMOOTH);
+	glDisable(GL_LINE_SMOOTH);
+	glDisable(GL_POLYGON_SMOOTH);
 
 	glEnable(GL_TEXTURE_2D);
 	for(unsigned i = 0; i < TexturedGeometry.size(); i++)

@@ -1,6 +1,6 @@
 BallScriptable = { }
 
-PONG_BALL_SIZE = 40
+PONG_BALL_SIZE = 24
 
 function BallScriptable:OnCreate()
 	self.BallSpeed = 250

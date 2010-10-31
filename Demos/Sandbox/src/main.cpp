@@ -48,7 +48,7 @@ bool CCustomStateHandler::OnInitialize()
 		}*/
 
  CTestGameObject *TestObject = new CTestGameObject();
- CRenderableComponent *NewRenderableComponent = new CRenderableComponent(CRenderManager::CreateModelCircleLine(50.0f));
+ CRenderableComponent *NewRenderableComponent = new CRenderableComponent(CRenderManager::CreateModelCircle(50.0f));
 // CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f))*/);
 // 
 // Vector2Array<4> vert;
