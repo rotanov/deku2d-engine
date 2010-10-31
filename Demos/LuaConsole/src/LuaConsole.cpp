@@ -32,7 +32,7 @@ CLuaConsole::CLuaConsole()
 
 	CommandOutput = CFactory::Instance()->New<CText>("CommandOutput");
 	
-	CommandOutput->Position = Vector2(10, CGLWindow::Instance()->GetHeight() - 20);
+	CommandOutput->SetPosition(Vector2(10, CGLWindow::Instance()->GetHeight() - 20));
 
 	WriteLine("Welcome to Deku2D engine Lua console!");
 	WritePrompt();

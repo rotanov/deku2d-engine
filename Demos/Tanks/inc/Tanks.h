@@ -120,7 +120,7 @@ public:
 	void Init(RGBAf* AColor, Vector2 APosition)
 	{
 		Color = AColor;
-		Position = APosition;
+		GetPosition() = APosition;
 	}
 	CBox GetAABB();
 	Vector2 GetCenter();
@@ -206,8 +206,8 @@ public:
 		PlTwoHealth.SetText("Player2 health: %d" + itos(GetPlayer(1)->Health));
 		PlOneHealth.Color = COLOR_P1;
 		PlTwoHealth.Color = COLOR_P2;
-		PlOneHealth.Position = Vector2(10, 460);
-		PlTwoHealth.Position = Vector2(490, 460);
+		PlOneHealth.GetPosition() = Vector2(10, 460);
+		PlTwoHealth.GetPosition() = Vector2(490, 460);
 		PlOneHealth.SetLayer(2);
 		PlTwoHealth.SetLayer(2);
 

@@ -14,7 +14,7 @@ public:
 		int Height_d2 = Random_Int(5, 10);
 		float x = Random_Float(Width_d2, ScrWidth - Width_d2);
 		float y = Random_Float(Height_d2, ScrHeight - Height_d2);
-		Position = Vector2(x, y);
+		SetPosition(Vector2(x, y));
 		SetBox(CBox(Vector2(-Width_d2, -Height_d2), Vector2(Width_d2, Height_d2)));
 		Color = RGBAf(Random_Float(0.0f, 1.0f), Random_Float(0.0f, 1.0f), Random_Float(0.0f, 1.0f), 1.0f);
 		//SetAngle(Random_Float(0.0f, 360.0f));
@@ -59,7 +59,7 @@ public:
 		}
 		CounterText.SetText("Rectangles count: " + itos(RectangleCount));
 		CounterText.SetLayer(1);
-		CounterText.Position = Vector2(0.0f, 15.0f);
+		CounterText.SetPosition(Vector2(0.0f, 15.0f));
 	}
 	/*void Update(float dt)
 	{

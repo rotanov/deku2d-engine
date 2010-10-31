@@ -110,14 +110,14 @@ protected:
 /**
 *	CTransformation - class describes placement in space and some other properties
 *	which affects to object position, orientation and size;
+*	@todo: access to transformation matrices
 */
-class CTransformation	// "CPlacement"?
+class CTransformation
 {
 private:
 	float DepthOffset;
 	Vector2 Translation;
 	float Rotation;
-	//Matrix2 RotationalMatrix;
 	float Scaling;
 
 public:
@@ -129,13 +129,19 @@ public:
 	*/
 	CTransformation& operator +=(const CTransformation &rhs);
 	CTransformation& operator -=(const CTransformation &rhs);
-	float GetDepth() const;
-	const Vector2& GetPosition() const;
+
 	float GetAngle() const;
+	float GetDepth() const;
 	float GetScaling() const;
+	const Vector2& GetTranslation() const;
+	Vector2& GetTranslation();
+	
+	void SetAngle(float Angle);
+	void SetDepth(float ADepth);
+	void SetScaling(float AScaling);
+	void SetTranslation(const Vector2 &Position);
+
 	void Clear();
-// 	Matrix2 GetRotationalMatrix();
-// 	Matrix3 GetTransformationMatrix();
 };
 
 /**
@@ -157,60 +163,15 @@ class CModel
 public:
 	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, CTexture * ATexture = NULL,
 		unsigned int AVerticesNumber = 0, Vector2* AVertices = NULL, 
-		Vector2* ATexCoords = NULL) : Texture(ATexture), ModelType(AModelType),
-		Vertices(NULL), TexCoords(NULL), VerticesNumber(AVerticesNumber)
-	{
-		if (VerticesNumber == 0)
-			return;
-		Vertices = new Vector2[VerticesNumber];
-		std::copy(AVertices, AVertices + VerticesNumber, Vertices);
-		if (ATexCoords == NULL)
-			return;
-		TexCoords = new Vector2[VerticesNumber];
-		std::copy(ATexCoords, ATexCoords + VerticesNumber, TexCoords);
-	}
-
-	~CModel()
-	{
-		SAFE_DELETE_ARRAY(Vertices);
-		SAFE_DELETE_ARRAY(TexCoords);
-	}
-
-	void SetTexture(CTexture *ATexture)
-	{
-		Texture = ATexture;
-	}
-
-	void SetModelType(EModelType AModelType)
-	{
-		ModelType = AModelType;
-	}
-
-	CTexture* GetTexture()
-	{
-		return Texture;
-	}
-
-	const Vector2* GetVertices() const
-	{
-		return Vertices;
-	}
-
-	const Vector2* GetTexCoords() const
-	{
-		return TexCoords;
-	}
-	
-	EModelType GetModelType() const
-	{
-		return ModelType;
-	}
-
-	virtual int GetVertexNumber() const
-	{
-		return VerticesNumber;
-	}
-
+		Vector2* ATexCoords = NULL);
+	~CModel();
+	void SetTexture(CTexture *ATexture);
+	void SetModelType(EModelType AModelType);
+	CTexture* GetTexture();
+	const Vector2* GetVertices() const;
+	const Vector2* GetTexCoords() const;
+	EModelType GetModelType() const;
+	virtual int GetVertexNumber() const;
 	//const RGBAf* GetColors() const;
 
 private:
@@ -235,26 +196,31 @@ enum EBlendingMode
 class CRenderConfig
 {
 public:
-	Vector2 Position;
 	RGBAf Color;
 	bool doIgnoreCamera;		// if true, then all previous transformations are ignored
 	bool doMirrorHorizontal;
 	bool doMirrorVertical;
 
 	CRenderConfig();
-	void SetAngle(float AAngle = 0.0f);
+
 	float GetAngle() const;
-	float GetScaling() const;
-	void SetScaling(float AScaling);
-	void SetLayer(int Layer); // Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
-	int GetLayer() const;
 	float GetDepth() const;
+	int GetLayer() const;	
+	float GetScaling() const;
+	const Vector2& GetPosition() const;
+	Vector2& GetPosition();
+
+	void SetAngle(float AAngle); //	(Degrees)
+	void SetScaling(float AScaling);
+	/**
+	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
+	*	implicitly Depth => [-1; 1]?	
+	*/
+	void SetLayer(int Layer);
+	void SetPosition(const Vector2 &APosition);
 
 private:
-	float Angle; //	(Degrees)
-	float Depth; //	[-1; 1]?
-	float Scaling;
-	
+	CTransformation Transformation;	
 };
 
 /**
@@ -293,10 +259,7 @@ public:
 	CRenderConfig Configuration;
 	CModel *Model;
 
-	CRenderableComponent(CModel *AModel = NULL) : Model(AModel)
-	{
-
-	}
+	CRenderableComponent(CModel *AModel = NULL);
 };
 
 //////////////////////////////////////////////////////////////////////////

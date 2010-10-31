@@ -3,14 +3,10 @@
 
 #include "2de_GraphicsHigh.h"
 
-//////////////////////////////////////////////////////////////////////////
-//Gui 
-
 /**
- * CGUIStyle - класс, представляющий стиль GUI, содержащий цвета и размеры стандартных элементов GUI.
- *
- * Для создания нового стиля можно либо наследовать и перегрузить конструктор, либо инстанцировать и изменить нужные значения.
- */
+*	CGUIStyle - класс, представляющий стиль GUI, содержащий цвета и размеры стандартных элементов GUI.
+*	Для создания нового стиля можно либо наследовать и перегрузить конструктор, либо инстанцировать и изменить нужные значения.
+*/
 
 //	небольшой комментарий: возможно, кому-то не понравится эта идея, возможно,
 //	кто-то любит разукрашивать разные кнопки в разные цвета - и т. п.
@@ -49,8 +45,6 @@ public:
 		Vector2 EditMargins;
 		float EditBorderWidth;
 	};
-	// на данный момент я буду юзать один шрифт для всего ГУИ для простоты
-	// и потому что некоторые моменты использования шрифтов не до коцна ясны и требуют пересмотра
 	/*struct CGUIStyleFonts
 	{
 		CFont* ButtonFont;
@@ -91,16 +85,10 @@ public:
 //	virtual void SetVisibility(bool AVisible);
 
 protected:
-	CObjectCallback CallProc;	//	Указатель на пользовательскую коллбэк ф-ю,
-								//	будет вызываться для каждого наследника по своему
+	CObjectCallback CallProc;
 	CObject *Caller;
-	// вот зачем эти очвевидные комментарии? неужели кому-то не понятно,
-	// что CFont *Font - это указатель на шрифт?
-	// нет, блядь, это наверное число ядерных распадов на Солнце с момента создания объекта....
-	//	Я оставил их тут, потому что у меня есть хитрый план. Непосвящённые не знают.
-	CFont *Font;	//	Указатель на шрифт.
-					// deprecated, я считаю, ибо всегда можно взять из стиля
-	CPrimitiveRender *PRender;	//	Указатель на рендер примитивов.
+	CFont *Font;
+	CPrimitiveRender *PRender;
 	CGUIStyle *Style;
 	CMouseState MouseState;
 	CMouseState PreviousMouseState;
@@ -143,7 +131,7 @@ public:
 	void SetText(const string &AText)
 	{
 		Text = AText;
-		Text.Position = ((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f;
+		Text.SetPosition(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f);
 	}
 
 	void SetBox(const CBox &box)
@@ -157,8 +145,7 @@ public:
 
 protected:
 	CText Text;
-	CGUIObjectBase *Parent;		//	Указатель на родительский объект. На будущее; иерархии виджетов пока нет
-					// 	ну она как бы есть, но не совсем иерархия.. и да, родителем объекта может быть и Base, поэтому тут будет он
+	CGUIObjectBase *Parent;
 };
 
 class CGUIManager : public CCommonManager <list <CGUIObject*> >, public CTSingleton<CGUIManager>
@@ -187,7 +174,7 @@ public:
 	void SetBox(const CBox &box)
 	{
 		CGUIObject::SetBox(box);
-		Text.Position = Vector2(box.Min.x, box.Min.y);
+		Text.SetPosition(Vector2(box.Min.x, box.Min.y));
 	}
 	void Render();
 	void Update(float dt){}
@@ -281,11 +268,9 @@ private:
 	CCommonManager <list <CMenuItem*> >::ManagerIterator Focus;
 };
 
-//////////////////////////////////////////////////////////////////////////
-//CPanel
-
 class CPanel : CGUIObject
 {
 
 };
+
 #endif // _2DE_GUI_H_

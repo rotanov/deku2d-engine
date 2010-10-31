@@ -9,10 +9,10 @@ CPongPlayer::CPongPlayer(EPlayerKind APlayerKind) : PlayerKind(APlayerKind)
 	switch (PlayerKind)
 	{
 	case PLAYER_KIND_ONE:
-		Position = Vector2(PONG_MARGIN, PONG_MARGIN);
+		SetPosition(Vector2(PONG_MARGIN, PONG_MARGIN));
 		break;
 	case PLAYER_KIND_TWO:
-		Position = Vector2(ScreenWidth - PONG_MARGIN - PONG_PLAYER_WIDTH, PONG_MARGIN);
+		SetPosition(Vector2(ScreenWidth - PONG_MARGIN - PONG_PLAYER_WIDTH, PONG_MARGIN));
 		break;
 	}
 }
@@ -51,20 +51,20 @@ void CPongPlayer::Update(float dt)
 
 	if (Equal(Velocity.y , 0.0f))
 		Velocity.y = 0;
-	Position += Velocity*dt;
+	SetPosition(GetPosition() + Velocity*dt);
 	Velocity += Acceleration*dt;
 	Velocity *= 0.9995f;
 	Acceleration = V2_ZERO;
 
-	if (Position.y < 0.0f)
+	if (GetPosition().y < 0.0f)
 	{
-		Position.y = 0.0f;
+		GetPosition().y = 0.0f;
 		Velocity.y = -Velocity.y * 0.5f;
 	}
 
-	if (Position.y + PONG_PLAYER_HEIGHT > CGLWindow::Instance()->GetHeight())
+	if (GetPosition().y + PONG_PLAYER_HEIGHT > CGLWindow::Instance()->GetHeight())
 	{
-		Position.y = CGLWindow::Instance()->GetHeight() - PONG_PLAYER_HEIGHT;
+		GetPosition().y = CGLWindow::Instance()->GetHeight() - PONG_PLAYER_HEIGHT;
 		Velocity.y = -Velocity.y * 0.5f;
 	}
 
@@ -78,7 +78,7 @@ void CPongBall::Iinitialize()
 	int Sign = Random_Int(0, 1);
 	if (Sign) Angle = PI - Angle;
 	Velocity = Vector2(cos(Angle), sin(Angle)) * BallSpeed;
-	Position = Vector2(	CGLWindow::Instance()->GetWidth() * 0.5f,
+	GetPosition() = Vector2(	CGLWindow::Instance()->GetWidth() * 0.5f,
 		CGLWindow::Instance()->GetHeight() * 0.5f);
 }
 
@@ -97,17 +97,17 @@ void CPongBall::Render()
 
 void CPongBall::Update(float dt)
 {
-	Position += Velocity * dt;
+	GetPosition() += Velocity * dt;
 
-	if (Position.y < 0.0f)
+	if (GetPosition().y < 0.0f)
 	{
-		Position.y = 0.0f;
+		GetPosition().y = 0.0f;
 		Velocity.y = -Velocity.y * 0.5f;
 	}
 
-	if (Position.y + PONG_BALL_SIZE > CGLWindow::Instance()->GetHeight())
+	if (GetPosition().y + PONG_BALL_SIZE > CGLWindow::Instance()->GetHeight())
 	{
-		Position.y = CGLWindow::Instance()->GetHeight() - PONG_BALL_SIZE;
+		GetPosition().y = CGLWindow::Instance()->GetHeight() - PONG_BALL_SIZE;
 		Velocity.y = -Velocity.y * 0.5f;
 	}
 
@@ -154,15 +154,15 @@ void CPongGame::Update(float dt)
 	PlayerTwo->dx = dx;
 	PlayerTwo->dy = dy;
 
-	PlayerOneScoreText.Position = Vector2(10.0f, 450.0f);
+	PlayerOneScoreText.GetPosition() = Vector2(10.0f, 450.0f);
 	PlayerOneScoreText.SetText("Score: " + itos(PlayerOneScore));
-	PlayerTwoScoreText.Position = Vector2(CGLWindow::Instance()->GetWidth() - 100.0f, 450.0f);
+	PlayerTwoScoreText.GetPosition() = Vector2(CGLWindow::Instance()->GetWidth() - 100.0f, 450.0f);
 	PlayerTwoScoreText.SetText("Score: " + itos(PlayerTwoScore));
 
 	CBox BallBox, PlayerOneBox, PlayerTwoBox, *BallCollidedWithThatBox = NULL;
-	BallBox = CBox(Ball->Position, Ball->Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
-	PlayerOneBox = CBox(PlayerOne->Position, PlayerOne->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
-	PlayerTwoBox = CBox(PlayerTwo->Position, PlayerTwo->Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+	BallBox = CBox(Ball->GetPosition(), Ball->GetPosition() + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE));
+	PlayerOneBox = CBox(PlayerOne->GetPosition(), PlayerOne->GetPosition() + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
+	PlayerTwoBox = CBox(PlayerTwo->GetPosition(), PlayerTwo->GetPosition() + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 	CPongPlayer *CollidedPlayer = NULL;
 
 	float CollideFlagf = 0.0f;
@@ -187,13 +187,13 @@ void CPongGame::Update(float dt)
 	if (CEngine::Instance()->keys[SDLK_SPACE])
 		Ball->Iinitialize();
 
-	if (Ball->Position.x < 0.0f)
+	if (Ball->GetPosition().x < 0.0f)
 	{
 		Ball->Iinitialize();
 		PlayerTwoScore++;
 	}
 
-	if (Ball->Position.x + PONG_BALL_SIZE > CGLWindow::Instance()->GetWidth())
+	if (Ball->GetPosition().x + PONG_BALL_SIZE > CGLWindow::Instance()->GetWidth())
 	{
 		Ball->Iinitialize();
 		PlayerOneScore++;

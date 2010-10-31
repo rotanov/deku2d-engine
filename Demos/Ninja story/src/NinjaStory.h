@@ -105,7 +105,7 @@ public:
 		Text->SetAngle(Clamp(Text->GetAngle() + dt * 100.0f, 0.0f, 360.0f));
 		Age += dt;
 		t0 += delta * dt * cos((Age * PI) / (2.0f * Life));
-		Text->Position = t0;
+		Text->SetPosition(t0);
 		if (Age >= Life)
 		{
 			CFactory::Instance()->Destroy(this);

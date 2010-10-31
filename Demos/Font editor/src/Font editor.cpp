@@ -216,7 +216,7 @@ CFontEditor::CFontEditor()
 
 void CFontEditor::Render()
 {
-	Position = V2_ZERO;
+	GetPosition() = V2_ZERO;
 	Color = COLOR_THIRD;
 	SetLayer(0);
 	SetScaling(1.0f);
@@ -243,7 +243,7 @@ void CFontEditor::Render()
 	if (FontTexture)
 	{
 		this->SetScaling(Zoom);
-		this->Position = Offset;
+		this->GetPosition() = Offset;
 		Color = COLOR_WHITE;
 		CRenderManager::Instance()->DrawTexturedBox(this, CBox(V2_ZERO, Vector2(FontTexture->Width, FontTexture->Height)), FontTexture, CBox(V2_ZERO, V2_DIR_RIGHT + V2_DIR_UP).GetVertices());
 	}

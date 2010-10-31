@@ -17,53 +17,63 @@
 //////////////////////////////////////////////////////////////////////////
 // CRenderableUnitInfo
 
-CRenderConfig::CRenderConfig() : Position(V2_ZERO), Color(COLOR_WHITE), doIgnoreCamera(false), Angle(0.0f), Depth(0.0f), Scaling(1.0f)
+CRenderConfig::CRenderConfig() : Color(COLOR_WHITE), doIgnoreCamera(false),
+	doMirrorHorizontal(false), doMirrorVertical(false)
 {
-	
 }
 
-void CRenderConfig::SetAngle(float AAngle /*= 0.0f*/)
+void CRenderConfig::SetAngle(float AAngle)
 {
-	if (AAngle > 360.0f)
-		Angle = AAngle - (static_cast<int>(AAngle) / 360) * 360.0f; 
-	else
-		Angle = AAngle;
-	//Angle = Clamp(AAngle, 0.0f, 360.0f);
+	float Angle = AAngle;
+	if (Abs(AAngle) > 360.0f)
+		Angle = AAngle - Sign((static_cast<int>(AAngle) / 360) * 360.0f); 
+	Transformation.SetAngle(Angle);
 }
 
 float CRenderConfig::GetAngle() const
 {
-	return Angle;
+	return Transformation.GetAngle();
 }
 
 void CRenderConfig::SetLayer(int Layer)
 {
-	Depth = Layer == 0 ? 0.0f : Layer / 100.0f;
+	Transformation.SetDepth(Layer == 0 ? 0.0f : Layer / 100.0f);	// @todo: get rid of magic number "100.0f"
 }
 
 float CRenderConfig::GetDepth() const
 {
-	return Depth;
+	return Transformation.GetDepth();
 }
 
 float CRenderConfig::GetScaling() const
 {
-	return Scaling;
+	return Transformation.GetScaling();
 }
 
 void CRenderConfig::SetScaling(float AScaling)
 {
-	Scaling = AScaling;
-// 	Box.Min *= Scaling;
-// 	Box.Max *= Scaling;
+	Transformation.SetScaling(AScaling);
 }
 
 int CRenderConfig::GetLayer() const
 {
-	return Depth * 100.0f;
+	return Transformation.GetDepth() * 100.0f;
 }
 
+const Vector2& CRenderConfig::GetPosition() const
+{
+	return Transformation.GetTranslation();
+}
 
+Vector2& CRenderConfig::GetPosition()
+{
+	return Transformation.GetTranslation();
+}
+
+void CRenderConfig::SetPosition(const Vector2 &APosition)
+{
+	Transformation.SetTranslation(APosition);
+}
 //////////////////////////////////////////////////////////////////////////
 // CRenderable
 
@@ -86,7 +96,7 @@ const CBox CRenderable::GetBox() const
  	CBox TempBox = Box;
  	TempBox.Min *= GetScaling();
  	TempBox.Max *= GetScaling();
-	TempBox.Offset(Position);
+	TempBox.Offset(GetPosition());
 	//Box.RotateByAngle(Angle);
 	return TempBox;
 }
@@ -1186,7 +1196,7 @@ void CText::SetFont(CFont *AFont)
 void CText::SetText(const string &AText)
 {
 	Characters = AText;
-	SetBox(CBox(Position, Position + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
+	SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
 }
 
 CText& CText::operator =(const string &AText)
@@ -1199,7 +1209,7 @@ float CText::StringCoordToCursorPos(int x, int y) const
 {
 	if (Characters.length() == 0)
 		return -1;
-	Vector2 Local = Vector2(x, y) - Position;
+	Vector2 Local = Vector2(x, y) - GetPosition();
 	if (Local.x < 0)
 		return -1;
 
@@ -1398,7 +1408,7 @@ void CPrmitiveVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Ve
 	Vector2 TempVector = (Vertex * Sender->GetScaling());
 	if (!Equal(Sender->GetAngle(), 0.0f))
 		TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
-	TempVector += Sender->Position;
+	TempVector += Sender->GetPosition();
 	if (!Sender->doIgnoreCamera)
 		TempVector += CRenderManager::Instance()->Camera.GetTranslation();
 	Vertices[VertexCount] = Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Sender->GetDepth());
@@ -1565,7 +1575,7 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 			TempVector = (Vertex * Transformation.GetScaling());
 			if (!Equal(Transformation.GetAngle(), 0.0f))
 				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
-			TempVector += Transformation.GetPosition();//Sender->Position;
+			TempVector += Transformation.GetTranslation();//Sender->Position;
 			if (!Sender->doIgnoreCamera)
 				TempVector += CRenderManager::Instance()->Camera.GetTranslation();
 			VertexHolder->PushVertex(Vector3
@@ -1605,7 +1615,7 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 		TempVector = (Vertex * Transformation.GetScaling());
 		if (!Equal(Transformation.GetAngle(), 0.0f))
 			TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
-		TempVector += Transformation.GetPosition();//Sender->Position;
+		TempVector += Transformation.GetTranslation();//Sender->Position;
 		if (!Sender->doIgnoreCamera)
 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
 		VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color);
@@ -1755,24 +1765,49 @@ CTransformation& CTransformation::operator-=(const CTransformation &rhs)
 	return *this;
 }
 
-float CTransformation::GetDepth() const
-{
-	return DepthOffset;
-}
-
-const Vector2& CTransformation::GetPosition() const
-{
-	return Translation;
-}
-
 float CTransformation::GetAngle() const
 {
 	return Rotation;
 }
 
+float CTransformation::GetDepth() const
+{
+	return DepthOffset;
+}
+
 float CTransformation::GetScaling() const
 {
 	return Scaling;
+}
+
+const Vector2& CTransformation::GetTranslation() const
+{
+	return Translation;
+}
+
+Vector2& CTransformation::GetTranslation()
+{
+	return Translation;
+}
+
+void CTransformation::SetAngle(float Angle)
+{
+	Rotation = Angle;
+}
+
+void CTransformation::SetDepth(float ADepth)
+{
+	DepthOffset = ADepth;
+}
+
+void CTransformation::SetScaling(float AScaling)
+{
+	Scaling = AScaling;
+}
+
+void CTransformation::SetTranslation(const Vector2 &Position)
+{
+	Translation = Position;
 }
 
 void CTransformation::Clear()
@@ -1782,13 +1817,12 @@ void CTransformation::Clear()
 	Scaling = 1.0f;
 	Rotation = 0.0f;
 }
-
 //////////////////////////////////////////////////////////////////////////
 // Transformator
 
 void CTransformator::PushTransformation(const CRenderConfig * ATransformation)
 {
-	CTransformation TempTransformation(ATransformation->GetDepth(), ATransformation->Position,
+	CTransformation TempTransformation(ATransformation->GetDepth(), ATransformation->GetPosition(),
 		ATransformation->GetAngle(), ATransformation->GetScaling());
 	CurrentTransformation += TempTransformation;
 	TransformationStack.push_back(TempTransformation);
@@ -1897,4 +1931,70 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 	delete [] TexCoords;
 
 	TexCoords = NewTexCoords;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// CModel
+CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
+			   CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
+			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
+	Texture(ATexture), ModelType(AModelType), Vertices(NULL),
+	TexCoords(NULL), VerticesNumber(AVerticesNumber)
+{
+	if (VerticesNumber == 0)
+		return;
+	Vertices = new Vector2[VerticesNumber];
+	std::copy(AVertices, AVertices + VerticesNumber, Vertices);
+	if (ATexCoords == NULL)
+		return;
+	TexCoords = new Vector2[VerticesNumber];
+	std::copy(ATexCoords, ATexCoords + VerticesNumber, TexCoords);
+}
+
+CModel::~CModel()
+{
+	SAFE_DELETE_ARRAY(Vertices);
+	SAFE_DELETE_ARRAY(TexCoords);
+}
+
+void CModel::SetTexture(CTexture *ATexture)
+{
+	Texture = ATexture;
+}
+
+void CModel::SetModelType(EModelType AModelType)
+{
+	ModelType = AModelType;
+}
+
+CTexture* CModel::GetTexture()
+{
+	return Texture;
+}
+
+const Vector2* CModel::GetVertices() const
+{
+	return Vertices;
+}
+
+const Vector2* CModel::GetTexCoords() const
+{
+	return TexCoords;
+}
+
+EModelType CModel::GetModelType() const
+{
+	return ModelType;
+}
+
+int CModel::GetVertexNumber() const
+{
+	return VerticesNumber;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CRenderableComponent
+CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel)
+{
+
 }

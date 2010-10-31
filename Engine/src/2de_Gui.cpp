@@ -335,8 +335,7 @@ CButton::CButton(CBox ARect, const char* AText, RGBAf AColor)
 void CButton::SetBox(const CBox &box)
 {
 	CGUIObject::SetBox(box);
-	Text.Position.x = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).x;
-	Text.Position.y = (int)((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f).y;
+	Text.SetPosition((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f);
 }
 
 void CButton::Render()
@@ -488,8 +487,8 @@ void CEdit::Render()
 			CRenderManager::Instance()->DrawSolidBox(this, SelBox);
 		}
 		Color = Style->Colors.EditText;
-		CRenderManager::Instance()->DrawLine(this, Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
-			Vector2(Text.Position.x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Min.y));
+		CRenderManager::Instance()->DrawLine(this, Vector2(Text.GetPosition().x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
+			Vector2(Text.GetPosition().x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Min.y));
 	}
 }
 
@@ -702,9 +701,11 @@ void CEdit::SetBox(const CBox &box)
 {
 	float StringHeight = Text.Height();
 	CGUIObject::SetBox(box);
-	Text.Position.x = (int)box.Min.x + (int)Style->Metrics.EditMargins.x;
-	/*Text.Position.y = (int)((box.Min.y + box.Max.y) / 2.0f - StringHeight / 2.0f);*/
-	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
+	Text.SetPosition
+		(Vector2(
+			(int)box.Min.x + (int)Style->Metrics.EditMargins.x,
+			(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y
+		));
 }
 
 void CEdit::SetText(const string &AText)
@@ -712,8 +713,10 @@ void CEdit::SetText(const string &AText)
 	ActualText = AText;
 	/*Text.Position.y = (int)((GetBox().Min.y + GetBox().Max.y) / 2.0f - Text.Height() / 2.0f);*/
 	Text = GetVisibleText();
-	Text.Position.x = (int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x;
-	Text.Position.y = (((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y;
+	Text.SetPosition(Vector2(
+			(int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x,
+			(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y
+		));
 	Selection.Clear((CursorPos = -1));
 }
 
@@ -801,7 +804,7 @@ void CMenuItem::Render()
 		CMenuItem *ChildMenuItem = *it;
 		//Text.Color = RGBAf(1.0,1.0,1.0,1.0);
 		//Text.SetScaling(1.0f);
-		Text.Position  = ChildMenuItem->Position;
+		Text.SetPosition(ChildMenuItem->GetPosition());
 		//Font->Print(ChildMenuItem->Text.c_str());
 	}	
 	Color = COLOR_WHITE;
@@ -809,7 +812,7 @@ void CMenuItem::Render()
 	if (Focus != Objects.end())
 	{
 		//PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
-		Position = (*Focus)->Position;
+		SetPosition((*Focus)->GetPosition());
 		CRenderManager::Instance()->DrawSolidBox(this, CBox(V2_QuadBinCenter).Inflated(4.0f, 4.0f));
 	}
 }

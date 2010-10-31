@@ -145,7 +145,7 @@ CTilesetEditor::CTilesetEditor()
 
 void CTilesetEditor::Render()
 {
-	Position = V2_ZERO;
+	SetPosition(V2_ZERO);
 	Color = COLOR_THIRD;
 	SetLayer(0);
 	SetScaling(1.0f);

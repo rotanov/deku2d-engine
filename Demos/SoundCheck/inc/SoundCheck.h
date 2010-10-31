@@ -92,7 +92,7 @@ public:
 	CHelpText()
 	{
 		CText *HelpText = CFactory::Instance()->New<CText>("HelpText");
-		HelpText->Position = Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f);
+		HelpText->SetPosition(Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f));
 		HelpText->SetText("Sound: q - play, w - stop\nMusic: a - play, s - stop\nMusic volume: z - down, x - up\n"
 			"You can try to enter file name and click Play\nto play it as music");
 	}

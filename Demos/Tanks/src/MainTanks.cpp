@@ -29,7 +29,7 @@ public:
 	{
 		TitleText = new CText;
 		SetName("Title screen tanks");
-		TitleText->Position = fPosition;
+		TitleText->GetPosition() = fPosition;
 		TitleText->SetScaling(SCALE_TITLE);
 		TitleText->SetText(TITLE_TEXT);
 		FontEffect->ColorStart = FadeClr;
@@ -123,37 +123,37 @@ bool CCustomStateHandler::OnInitialize()
  	
 	CMenuItem *next = new CMenuItem(MenuRoot, "Start game");
 	next->SetCallback(&StartGame, NULL);
-	next->Position = Vector2(ScreenWidth*0.5f - 20,180);
+	next->GetPosition() = Vector2(ScreenWidth*0.5f - 20,180);
 
 	next = new CMenuItem(MenuRoot, "Options");
-	next->Position = Vector2(ScreenWidth*0.5f - 20,160);
+	next->GetPosition() = Vector2(ScreenWidth*0.5f - 20,160);
 
 		CMenuItem *options = new CMenuItem(next, "Game");
-		options->Position = Vector2(ScreenWidth*0.5f - 20, 180);
+		options->GetPosition() = Vector2(ScreenWidth*0.5f - 20, 180);
 		options->SetCallback(&Options, NULL);
 
 		options = new CMenuItem(next, "Sound");
-		options->Position = Vector2(ScreenWidth*0.5f - 20, 160);
+		options->GetPosition() = Vector2(ScreenWidth*0.5f - 20, 160);
 
 		options = new CMenuItem(next, "Video");
-		options->Position = Vector2(ScreenWidth*0.5f - 20, 140);
+		options->GetPosition() = Vector2(ScreenWidth*0.5f - 20, 140);
 
 		options = new CMenuItem(next, "Others");
-		options->Position = Vector2(ScreenWidth*0.5f - 20, 120);
+		options->GetPosition() = Vector2(ScreenWidth*0.5f - 20, 120);
 
 	
 
 
 	next = new CMenuItem(MenuRoot, "Exit");
 	next->SetCallback(&EndGame, NULL);
-	next->Position = Vector2(ScreenWidth*0.5f - 20,140);
+	next->GetPosition() = Vector2(ScreenWidth*0.5f - 20,140);
 
 	next = new CMenuItem(MenuRoot, "Create server");
-	next->Position = Vector2(ScreenWidth*0.5f - 20,120);
+	next->GetPosition() = Vector2(ScreenWidth*0.5f - 20,120);
 //	next->SetCallback(&CreateServer, NULL);
 
 	next = new CMenuItem(MenuRoot, "Create client");
-	next->Position = Vector2(ScreenWidth*0.5f - 20,100);
+	next->GetPosition() = Vector2(ScreenWidth*0.5f - 20,100);
 
 //	next->SetCallback(&CreateClient, NULL);
 

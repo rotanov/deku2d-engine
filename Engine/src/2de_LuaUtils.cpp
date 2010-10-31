@@ -140,13 +140,13 @@ namespace LuaAPI
 			if (!robj)
 				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
 
-			lua_pushnumber(L, robj->Position.x);
-			lua_pushnumber(L, robj->Position.y);
+			lua_pushnumber(L, robj->GetPosition().x);
+			lua_pushnumber(L, robj->GetPosition().y);
 			return 2;
 		}
 
-		lua_pushnumber(L, rcobj->Configuration.Position.x);
-		lua_pushnumber(L, rcobj->Configuration.Position.y);
+		lua_pushnumber(L, rcobj->Configuration.GetPosition().x);
+		lua_pushnumber(L, rcobj->Configuration.GetPosition().y);
 		return 2;
 	}
 
@@ -164,11 +164,11 @@ namespace LuaAPI
 			if (!robj)
 				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
 
-			robj->Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
+			robj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 			return 0;
 		}
 
-		rcobj->Configuration.Position = Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1));
+		rcobj->Configuration.SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 		return 0;
 	}
 

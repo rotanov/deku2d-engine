@@ -518,7 +518,6 @@ public:
 		if (Parent != NULL)
 		{
 			vector<CGameObject *>::iterator it = std::find(Parent->Children.begin(), Parent->Children.end(), this);
-			//Parent->Detach(std::find(Parent->Children.begin(), Parent->Children.end(), this));
 			Parent->Detach(it);
 		}
 		Parent = AGameObject;

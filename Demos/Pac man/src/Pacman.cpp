@@ -7,7 +7,7 @@ CPacmanBonus::CPacmanBonus(Vector2 APosition, CSprite *ASprite) : Position(APosi
 {
 	RenderProxy = new CRenderProxy(Sprite);
 	//CFactory::Instance()->Add(RenderProxy);
-	RenderProxy->Position = Position;
+	RenderProxy->SetPosition(Position);
 	RenderProxy->SetLayer(1);
 	SetName("Pacman bonus (mushroom)");
 }
@@ -18,7 +18,7 @@ void CPacmanBonus::Update(float dt)
 	Angle += 10.0f;
 	if (Angle > 360.0f)
 		Angle = 0.0f;
-	RenderProxy->Position = Vector2(ceil(Position.x), ceil(Position.y + Period));
+	RenderProxy->SetPosition(Vector2(ceil(Position.x), ceil(Position.y + Period)));
 	CBox AABB = CBox(Player->Position - Vector2(16, 16), Player->Position + Vector2(16, 16));
 	CBox AABBself = CBox(Position - Vector2(16, 16), Position + Vector2(16, 16));
 	if ((AABB.Intersect(AABBself)))
@@ -56,8 +56,8 @@ CPacmanPlayer::CPacmanPlayer() : Score(0), Damage(0), Velocity(V2_ZERO)
 	DamageText->SetText("Damage: " + itos(Damage));
 	DamageText->Color = COLOR_RED;
 	SetName("Pac-man player");
-	DamageText->Position = Vector2(10.0f, 30.0f);
-	ScoreText->Position = Vector2(10.0f, 10.0f);
+	DamageText->SetPosition(Vector2(10.0f, 30.0f));
+	ScoreText->SetPosition(Vector2(10.0f, 10.0f));
 	ScoreText->SetLayer(10);
 	ScoreText->doIgnoreCamera = true;
 	DamageText->doIgnoreCamera = true;
@@ -79,7 +79,7 @@ void CPacmanPlayer::Update(float dt)
 		Sprite->SetAnimation(1);
 	Position += Velocity * dt;
 	Velocity *= 0.998f;
-	Sprite->Position = Vector2(ceil(Position.x), ceil(Position.y));
+	Sprite->SetPosition(Vector2(ceil(Position.x), ceil(Position.y)));
 }
 
 void CPacmanPlayer::ProcessEvent(const CEvent &AEvent)
@@ -267,7 +267,7 @@ Direction(static_cast<EDirection>(rand()%4))
 	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 32, 32, 2, false);
 	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 32, 3, false);
 	Sprite->SetAnimation(Direction);
-	Sprite->Position = Position;
+	Sprite->SetPosition(Position);
 }
 
 void CPacmanEnemy::Update(float dt)
@@ -296,5 +296,5 @@ void CPacmanEnemy::Update(float dt)
 		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");
 		Ps->PtrPosition = &Player->Position;
 	}
-	Sprite->Position = Position;
+	Sprite->SetPosition(Position);
 }

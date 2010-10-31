@@ -120,7 +120,7 @@ public:
 	{
 		int ScrWidth = CGLWindow::Instance()->GetWidth();
 		int ScrHeight = CGLWindow::Instance()->GetHeight();
-		Position = Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f);
+		SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
 	}
 	void SetTexture(CTexture* ATexture)
 	{

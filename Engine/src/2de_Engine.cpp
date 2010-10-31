@@ -131,10 +131,10 @@ bool CEngine::Initialize()
 	unsigned int ScrHeight = CGLWindow::Instance()->GetHeight();
 	CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
 	TitleText->SetText("Deku");
-	TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f);
+	TitleText->SetPosition(Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f));
 	TitleText = CFactory::Instance()->New<CText>("txtTeam");
 	TitleText->SetText("team");
-	TitleText->Position = Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f);
+	TitleText->SetPosition(Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f));
 
 	// Создание класса CDefaultTutleScreen (в текущей сцене)
 	CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
@@ -352,7 +352,7 @@ bool CEngine::ProcessEvents()
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
 				MousePos = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
-				Cursor->Position = MousePos;
+				Cursor->SetPosition(MousePos);
 				//SDL_Delay(2);
 				break;
 			}

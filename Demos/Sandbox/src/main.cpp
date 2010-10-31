@@ -69,7 +69,7 @@ bool CCustomStateHandler::OnInitialize()
 // 
 // NewRenderableComponent->Configuration.Position = Vector2(128.0f, 128.0f);
  //TestObject->Attach(NewRenderableComponent);
- NewRenderableComponent->Configuration.Position = Vector2(100.0f, 100.0f);
+ NewRenderableComponent->Configuration.SetPosition(Vector2(100.0f, 100.0f));
 // NewRenderableComponent->Attach(NewNewRenderableComponent);
 // NewNewRenderableComponent->Attach(NewNewNewRenderableComponent);
  //CUpdateManager::Instance()->RootGameObject->Attach(TestObject);

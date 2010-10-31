@@ -47,9 +47,9 @@ void CTank::Update(float dt)
 		Velocity += 0.5f;
 		Velocity = Clamp(Velocity, 0.0f, 5.0f);
 	}
-	Position += Direction*Velocity;
+	GetPosition() += Direction*Velocity;
 	Velocity*=0.9f;
-	AABB.Offset(Position.x, Position.y);
+	AABB.Offset(GetPosition());
 	Vector2 BottomLeft = AABB.Min, TopRight = AABB.Max, BottomRight = Vector2(AABB.Max.x, AABB.Min.y), TopLeft = Vector2(AABB.Min.x, AABB.Max.y);
 	CBox Pot1, Pot2;
 
@@ -59,33 +59,33 @@ void CTank::Update(float dt)
 		Pot1 = Map->GetCellAABB(TopLeft);
 		Pot2 = Map->GetCellAABB(BottomLeft);
 		if (Pot1.Intersect(AABB))
-			Position.x = Pot1.Max.x;
+			GetPosition().x = Pot1.Max.x;
 		if (Pot2.Intersect(AABB))
-			Position.x = Pot2.Max.x;
+			GetPosition().x = Pot2.Max.x;
 		break;
 	case akRight:
 		Pot1 = Map->GetCellAABB(TopRight);
 		Pot2 = Map->GetCellAABB(BottomRight);
 		if (Pot1.Intersect(AABB))
-			Position.x = Pot1.Min.x - 32;
+			GetPosition().x = Pot1.Min.x - 32;
 		if (Pot2.Intersect(AABB))
-			Position.x = Pot2.Min.x - 32;
+			GetPosition().x = Pot2.Min.x - 32;
 		break;
 	case akUp:
 		Pot1 = Map->GetCellAABB(TopLeft);
 		Pot2 = Map->GetCellAABB(TopRight);
 		if (Pot1.Intersect(AABB))
-			Position.y = Pot1.Min.y - 32;
+			GetPosition().y = Pot1.Min.y - 32;
 		if (Pot2.Intersect(AABB))
-			Position.y = Pot2.Min.y - 32;
+			GetPosition().y = Pot2.Min.y - 32;
 		break;
 	case akDown:
 		Pot1 = Map->GetCellAABB(BottomLeft);
 		Pot2 = Map->GetCellAABB(BottomRight);
 		if (Pot1.Intersect(AABB))
-			Position.y = Pot1.Max.y;
+			GetPosition().y = Pot1.Max.y;
 		if (Pot2.Intersect(AABB))
-			Position.y = Pot2.Max.y;
+			GetPosition().y = Pot2.Max.y;
 		break;
 	}
 
@@ -114,12 +114,12 @@ void CTank::Update(float dt)
 		}
 
 
-		if ((CBox(0,0,32,32).Offsetted(Host->GetPlayer(0)->Position.x, Host->GetPlayer(0)->Position.y)).Inside(Bullets[i].p) && ((string)GetName() != "TankPlayer1"))
+		if ((CBox(0,0,32,32).Offsetted(Host->GetPlayer(0)->GetPosition().x, Host->GetPlayer(0)->GetPosition().y)).Inside(Bullets[i].p) && ((string)GetName() != "TankPlayer1"))
 		{
 			Host->GetPlayer(0)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
 		}
-		if ((CBox(0,0,32,32).Offsetted(Host->GetPlayer(1)->Position.x, Host->GetPlayer(1)->Position.y)).Inside(Bullets[i].p) && ((string)GetName() != "TankPlayer2"))
+		if ((CBox(0,0,32,32).Offsetted(Host->GetPlayer(1)->GetPosition().x, Host->GetPlayer(1)->GetPosition().y)).Inside(Bullets[i].p) && ((string)GetName() != "TankPlayer2"))
 		{
 			Host->GetPlayer(1)->Health -= 10;
 			std::swap(Bullets[i], Bullets[--BulletsCount]);
@@ -167,12 +167,12 @@ void CTank::Render()
 
 CBox CTank::GetAABB()
 {
-	return CBox(Position.x, Position.y, Position.x + DEFAULT_CELL_SIZE, Position.y + DEFAULT_CELL_SIZE);
+	return CBox(GetPosition().x, GetPosition().y, GetPosition().x + DEFAULT_CELL_SIZE, GetPosition().y + DEFAULT_CELL_SIZE);
 }
 
 Vector2 CTank::GetCenter()
 {
-	return (Position + Vector2(DEFAULT_CELL_SIZE/2, DEFAULT_CELL_SIZE/2));
+	return (GetPosition() + Vector2(DEFAULT_CELL_SIZE/2, DEFAULT_CELL_SIZE/2));
 }
 void CTankManager::AddPlayer()
 {
