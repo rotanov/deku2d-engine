@@ -3,6 +3,7 @@ ScriptableComponent = { }
 function ScriptableComponent:OnCreate()
 	self.dir = {x = 1, y = 1}
 	self.text = CreateNewText("ScriptableComponentTestText")
+	Attach(self.object, self.text);
 	SetPosition(self.text, 150, 250)
 	SetText(self.text, "Deku2D engine rules the fucking world!")
 

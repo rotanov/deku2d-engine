@@ -158,16 +158,16 @@ enum EModelType
 //	MODEL_TYPE_QUADS = 3,	// Keep commented 'cause may be there will be some possibility for optimization
 };
 
-class CModel
+class CModel : public CResource
 {
 public:
-	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, const CTexture * ATexture = NULL,
+	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, CTexture * ATexture = NULL,
 		unsigned int AVerticesNumber = 0, Vector2* AVertices = NULL, 
 		Vector2* ATexCoords = NULL);
 	~CModel();
-	void SetTexture(const CTexture *ATexture);
+	void SetTexture(CTexture *ATexture);
 	void SetModelType(EModelType AModelType);
-	const CTexture* GetTexture() const;
+	CTexture* GetTexture() const;
 	const Vector2* GetVertices() const;
 	const Vector2* GetTexCoords() const;
 	EModelType GetModelType() const;
@@ -175,7 +175,7 @@ public:
 	//const RGBAf* GetColors() const;
 
 private:
-	const CTexture *Texture;
+	CResourceRefCounter<CTexture> Texture;
 	EModelType ModelType;
 	Vector2 *Vertices;
 	Vector2 *TexCoords;
@@ -496,7 +496,7 @@ public:
 	float GetStringWidthEx(int t1, int t2, const string &text);
 	float GetStringHeight(const string &text);
 	float GetStringHeightEx(int t1, int t2, const string &text);
-	const CTexture* GetTexture();
+	CTexture* GetTexture();
 	void SetTexture(const string &TextureName);
 	CBox GetSymbolsBBOX();
 	float GetDistance() const;

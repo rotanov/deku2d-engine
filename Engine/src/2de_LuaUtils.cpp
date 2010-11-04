@@ -10,6 +10,22 @@ namespace LuaAPI
 {
 	// some of these functions are really will be left in the API, others are just temporarily ones for testing..
 
+
+	int Attach(lua_State *L)
+	{
+		CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
+		GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -2));
+		if (!GameObjectSource)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
+
+		GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		if (!GameObjectDestination)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
+
+		GameObjectSource->Attach(GameObjectDestination);
+		return 0;
+	}
+
 	// void Log(string Event, string Text)
 	int WriteToLog(lua_State *L)
 	{
@@ -514,6 +530,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	luaopen_base(State);
 
+	lua_register(State, "Attach", &LuaAPI::Attach);
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
 	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
 	lua_register(State, "IsSpacePressed", &LuaAPI::IsSpacePressed);

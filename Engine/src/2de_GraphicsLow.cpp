@@ -622,7 +622,7 @@ float CFont::GetStringHeightEx(int t1, int t2, const string &text)
 	return r;
 }
 
-const CTexture* CFont::GetTexture()
+CTexture* CFont::GetTexture()
 {
 	return Texture;
 }
@@ -1854,7 +1854,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 /////////////////////////////////////////////////////////////////////////
 // CModel
 CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
-			   const CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
+			   CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
 			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
 	Texture(ATexture), ModelType(AModelType), Vertices(NULL),
 	TexCoords(NULL), VerticesNumber(AVerticesNumber)
@@ -1875,7 +1875,7 @@ CModel::~CModel()
 	SAFE_DELETE_ARRAY(TexCoords);
 }
 
-void CModel::SetTexture(const CTexture *ATexture)
+void CModel::SetTexture(CTexture *ATexture)
 {
 	Texture = ATexture;
 }
@@ -1885,7 +1885,7 @@ void CModel::SetModelType(EModelType AModelType)
 	ModelType = AModelType;
 }
 
-const CTexture* CModel::GetTexture() const
+CTexture* CModel::GetTexture() const
 {
 	return Texture;
 }

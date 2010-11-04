@@ -47,9 +47,9 @@ bool CCustomStateHandler::OnInitialize()
 	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("test"));
 	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("scriptable-test"));
 
-// 	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
- //	CFactory::Instance()->Add(sc, "ScriptableComponent");
- //	CUpdateManager::Instance()->RootGameObject->Attach(sc);
+ 	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
+ 	CFactory::Instance()->Add(sc, "ScriptableComponent");
+ 	CUpdateManager::Instance()->RootGameObject->Attach(sc);
 
 	// Some boxes
 /*

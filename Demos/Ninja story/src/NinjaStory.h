@@ -3,7 +3,7 @@
 
 #include "2de_Engine.h"
 
-class CLifeBarBase : public CRenderable, public CUpdatable
+class CLifeBarBase : /*public CRenderable, */public CUpdatable
 {
 public:
 	void Render()
@@ -38,12 +38,12 @@ class CEnemySpawner // This thing will spawn our base enemies. Maybe this is don
 
 // Some particle effects
 
-class CEnemyBase : public CUnitBase
+class CEnemyBase /*: public CUnitBase*/
 {
 
 };
 
-class CNinjaUnit : public CUnitBase
+class CNinjaUnit /*: public CUnitBase*/
 {
 
 };
@@ -84,13 +84,14 @@ public:
 		Life(4.0f), Age(0.0f)
 	{
 		Text = new CText;
-		Text->Color = RGBAf(0.1f, 0.7f, 0.2f, 0.4f);
+		Text->GetColor() = RGBAf(0.1f, 0.7f, 0.2f, 0.4f);
 		float temp = Random_Float(0.0f, PI);
 		Vector2 mouse = CEngine::Instance()->MousePos;
 		t0 = mouse;
 		t1 = Vector2(cos(temp) * 400.0f, sin(temp) * 400.0f) + t0;
 		delta = (t1 - t0) / Life;
 		Text->SetAngle(Random_Float(0.0f, 360.0f));
+		CUpdateManager::Instance()->RootGameObject->Attach(Text);
 	}
 	~CBouncingText()
 	{
