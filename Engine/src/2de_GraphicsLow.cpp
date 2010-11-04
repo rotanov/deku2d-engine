@@ -26,7 +26,7 @@ void CRenderConfig::SetAngle(float AAngle)
 {
 	float Angle = AAngle;
 	if (Abs(AAngle) > 360.0f)
-		Angle = AAngle - Sign((static_cast<int>(AAngle) / 360) * 360.0f); 
+		Angle = AAngle - Sign(AAngle)*((static_cast<int>(AAngle) / 360) * 360.0f); 
 	Transformation.SetAngle(Angle);
 }
 
@@ -74,16 +74,35 @@ void CRenderConfig::SetPosition(const Vector2 &APosition)
 {
 	Transformation.SetTranslation(APosition);
 }
+
+void CRenderConfig::SetBlendingMode(EBlendingMode ABlendingMode)
+{
+	BlendingMode = ABlendingMode;
+}
+
+EBlendingMode CRenderConfig::GetBlendingMode() const
+{
+	return BlendingMode;
+}
+
+void CRenderConfig::SetTransformation(const CTransformation &ATransformation)
+{
+	Transformation = ATransformation;
+}
+
+CTransformation& CRenderConfig::GetTransformation()
+{
+	return Transformation;
+}
+
+const CTransformation& CRenderConfig::GetTransformation() const
+{
+	return Transformation;
+}
 //////////////////////////////////////////////////////////////////////////
 // CRenderable
 
-CRenderable::CRenderable() : Box(0, 0, 0, 0), Scene(NULL), Visible(true)
-{
-	SetName("CRenderable");
-	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
-};
-
-CRenderable::~CRenderable()
+CRenderableComponent::~CRenderableComponent()
 {
 	CRenderManager::Instance()->Remove(this);
 
@@ -91,7 +110,7 @@ CRenderable::~CRenderable()
 }
 
 // Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--
-const CBox CRenderable::GetBox() const
+const CBox CRenderableComponent::GetBox() const
 {
  	CBox TempBox = Box;
  	TempBox.Min *= GetScaling();
@@ -101,12 +120,12 @@ const CBox CRenderable::GetBox() const
 	return TempBox;
 }
 
-void CRenderable::SetBox(const CBox &ABox)
+void CRenderableComponent::SetBox(const CBox &ABox)
 {
 	Box = ABox;
 }
 
-void CRenderable::PutIntoScene(CAbstractScene *AScene)
+void CRenderableComponent::PutIntoScene(CAbstractScene *AScene)
 {
 	assert(AScene != NULL);
 	if (Scene != NULL)
@@ -115,28 +134,28 @@ void CRenderable::PutIntoScene(CAbstractScene *AScene)
 	Scene->AddRenderable(this);
 }
 
-CAbstractScene* CRenderable::GetScene() const
+CAbstractScene* CRenderableComponent::GetScene() const
 {
 	assert(Scene != NULL);
 	return Scene;
 }
 
-bool CRenderable::GetVisibility() const
+bool CRenderableComponent::GetVisibility() const
 {
 	return Visible;
 }
 
-void CRenderable::SetVisibility(bool AVisible)
+void CRenderableComponent::SetVisibility(bool AVisible)
 {
 	Visible = AVisible;
 }
 
-float CRenderable::Width()
+float CRenderableComponent::Width()
 {
 	return Box.Width();
 }
 
-float CRenderable::Height()
+float CRenderableComponent::Height()
 {
 	return Box.Height();
 }
@@ -327,11 +346,7 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 	*/
 
 	glInit(Width, Height);
-
-	CPrimitiveRender temp;
-	temp.Init();
-	isCreated = true;
-	return true;
+	return isCreated = true;
 }
 
 bool CGLWindow::gCreateWindow()
@@ -607,7 +622,7 @@ float CFont::GetStringHeightEx(int t1, int t2, const string &text)
 	return r;
 }
 
-CTexture* CFont::GetTexture()
+const CTexture* CFont::GetTexture()
 {
 	return Texture;
 }
@@ -729,9 +744,9 @@ void CCamera::DrawDebug()
 {
 	CRenderConfig temp;
 	temp.doIgnoreCamera = true;
-	CRenderManager::Instance()->DrawLinedBox(&temp, world);
-	CRenderManager::Instance()->DrawLinedBox(&temp, view);
-	CRenderManager::Instance()->DrawLinedBox(&temp, outer);
+// 	CRenderManager::Instance()->DrawLinedBox(&temp, world);
+// 	CRenderManager::Instance()->DrawLinedBox(&temp, view);
+// 	CRenderManager::Instance()->DrawLinedBox(&temp, outer);
 }
 
 void CCamera::gTranslate()
@@ -777,13 +792,10 @@ bool CRenderManager::DrawObjects()
 	TempRenderInfo.SetLayer(512);
 	TempRenderInfo.Color = COLOR_RED;
 	TempRenderInfo.doIgnoreCamera = true;
-
 	glLoadIdentity();	
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
-
 	Camera.Update(); // @todo: review camera
 
-	CRenderable *data;
 // 	CGameObject *GameObject = CUpdateManager::Instance()->RootGameObject;
 // 	for(CGameObject::traverse_iterator_bfs i(*GameObject); i.Ok(); ++i)
 // 	{
@@ -797,7 +809,7 @@ bool CRenderManager::DrawObjects()
 // 	}
 
 	TransfomationTraverse(CUpdateManager::Instance()->RootGameObject);
-
+/*
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
 		data = *i;
@@ -809,140 +821,15 @@ bool CRenderManager::DrawObjects()
 		DrawLinedBox(&TempRenderInfo, data->GetBox());
 #endif
 	}
+*/	// stands here to hold some logic
 
 	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
 	glTranslatef(0.375, 0.375, 0);
-
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_TEXTURE_2D);
-	for (unsigned int i = 0; i < DEKU2D_MAX_TEXTURES; i++)
-		if (TexturedQuadVertices[i].GetVertexCount() != 0)
-		{
-			glBindTexture(GL_TEXTURE_2D, i);
-			TexturedQuadVertices[i].RenderPrimitive(GL_QUADS);
-			TexturedQuadVertices[i].Clear();
-		}
-	//FontVertices.RenderPrimitive(GL_QUADS);
 	Renderer->Render();
 	Renderer->Clear();
-
-	glDisable(GL_TEXTURE_2D);
-
-	QuadVertices.RenderPrimitive(GL_QUADS);
-	LineVertices.RenderPrimitive(GL_LINES);
-	PointVertices.RenderPrimitive(GL_POINTS);
-	PointVertices.Clear();
-	LineVertices.Clear();
-	QuadVertices.Clear();
-	//////////////////////////////////////////////////////////////////////////
-#ifdef _DEBUG
-		Camera.DrawDebug();
-#endif 
 	return true;
-}
-
-void CRenderManager::Print(const CText *Text, const string &Characters)
-{
-	CFont *Font = Text->GetFont();
-	assert(Font != NULL);
-	Font->CheckLoad();
-	const CText &RText = *Text;
-	RGBAf TColor = Text->Color;
-
-	float dx = 0.0f;
-	float dy = 0.0f;
-
-	float liwidth;
-	float liheight;
-	float maxliheight = 0.0f;
-
-	for (unsigned int i = 0; i < Text->Length(); i++)
-	{
-		if (RText[i] == '\n')
-		{
-			dx = 0.0f;
-			dy -= maxliheight + 1; // FIXME: magic number (1) - vertical spacing
-			maxliheight = 0.0f; // comment this if you want all lines to have the same (maximum) height..
-			continue;
-		}
-
-		liwidth = Font->Boxes[RText[i] - 32].Width();	// 32!!!
-		liheight = Font->Boxes[RText[i] - 32].Height();
-		maxliheight = max(maxliheight, liheight);
-
-		Vector2Array<4> TempTexCoords = Font->GetTexCoords(RText[i]);
-
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx, dy), TColor, TempTexCoords[0]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, dy), TColor, TempTexCoords[1]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(liwidth + dx, liheight + dy), TColor, TempTexCoords[2]);
-		TexturedQuadVertices[Font->GetTexture()->GetTexID()].PushVertex(Text, Vector2(dx, liheight + dy), TColor, TempTexCoords[3]);
-
-		dx += Font->Boxes[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
-	}
-}
-
-void CRenderManager::DrawLinedBox(const CRenderConfig* RenderInfo, const CBox &Box)
-{
-	Vector2 v0 = Box.Min;
-	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
-	Vector2 v2 = Box.Max;
-	Vector2 v3 = Vector2(Box.Min.x, Box.Max.y);
-	LineVertices.PushVertex(RenderInfo, v0);
-	LineVertices.PushVertex(RenderInfo, v1);
-	LineVertices.PushVertex(RenderInfo, v1);
-	LineVertices.PushVertex(RenderInfo, v2);
-	LineVertices.PushVertex(RenderInfo, v2);
-	LineVertices.PushVertex(RenderInfo, v3);
-	LineVertices.PushVertex(RenderInfo, v3);
-	LineVertices.PushVertex(RenderInfo, v0);
-}
-
-void CRenderManager::DrawSolidBox(const CRenderConfig* RenderInfo, const CBox &Box)
-{
-	Vector2 v0 = Box.Min;
-	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
-	Vector2 v2 = Box.Max;
-	Vector2 v3 = Vector2(Box.Min.x, Box.Max.y);
-	QuadVertices.PushVertex(RenderInfo, v0);
-	QuadVertices.PushVertex(RenderInfo, v1);
-	QuadVertices.PushVertex(RenderInfo, v2);
-	QuadVertices.PushVertex(RenderInfo, v3);
-}
-
-void CRenderManager::DrawTexturedBox(const CRenderConfig *RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords)
-{
-	Vector2 v0 = Box.Min;	
-	Vector2 v1 = Vector2(Box.Max.x, Box.Min.y);
-	Vector2 v2 = Box.Max;
-	Vector2 v3 = Vector2(Box.Min.x, Box.Max.y);
-
-	unsigned int i = Texture->GetTexID();
-	TexturedQuadVertices[i].PushVertex(RenderInfo, v0, TexCoords[0]);
-	TexturedQuadVertices[i].PushVertex(RenderInfo, v1, TexCoords[1]);
-	TexturedQuadVertices[i].PushVertex(RenderInfo, v2, TexCoords[2]);
-	TexturedQuadVertices[i].PushVertex(RenderInfo, v3, TexCoords[3]);
-}
-
-void CRenderManager::DrawPoint(const CRenderConfig *RenderInfo, const Vector2 &Point)
-{
-	PointVertices.PushVertex(RenderInfo, Point);
-}
-
-void CRenderManager::DrawLine(const CRenderConfig *RenderInfo, const Vector2 &v0, const Vector2 &v1)
-{
-	LineVertices.PushVertex(RenderInfo, v0);
-	LineVertices.PushVertex(RenderInfo, v1);
-}
-
-void CRenderManager::DrawTriangles(const CRenderConfig *RenderInfo, const Vector2 *Vertices, unsigned int Count)
-{
-	// ... 
 }
 
 void CRenderManager::BeginFrame()
@@ -960,14 +847,14 @@ void CRenderManager::TransfomationTraverse(CGameObject *Next)
 {
 	CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next);
 	if (RenderComponent != NULL)
-		Transformator.PushTransformation(&RenderComponent->Configuration);
+		Transformator.PushTransformation(RenderComponent->GetTransformation());
 	for(unsigned int i = 0; i < Next->Children.size(); i++)
 	{
 		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
 		if (RenderComponent != NULL)
 		{
-			Transformator.PushTransformation(&RenderComponent->Configuration);
-			Renderer->PushModel(&RenderComponent->Configuration, RenderComponent->Model);
+			Transformator.PushTransformation(RenderComponent->GetTransformation());
+			Renderer->PushModel(&RenderComponent->GetConfiguration(), RenderComponent->GetModel());
 			Transformator.PopTransformation();
 		}
 	}
@@ -977,6 +864,61 @@ void CRenderManager::TransfomationTraverse(CGameObject *Next)
 		Transformator.PopTransformation();
 }
 
+CModel* CRenderManager::CreateModelText(const CText *AText)
+{
+	CFont *Font = AText->GetFont();
+	assert(Font != NULL);
+	Font->CheckLoad();
+	const CText &RText = *AText;
+	Vector2 *Vertices = new Vector2 [6 * AText->Length()];
+	Vector2 *TexCoords = new Vector2 [6 * AText->Length()];
+
+	float dx = 0.0f;
+	float dy = 0.0f;
+
+	float liwidth;
+	float liheight;
+	float maxliheight = 0.0f;
+
+	for (unsigned int i = 0; i < AText->Length(); i++)
+	{
+		if (RText[i] == '\n')
+		{
+			dx = 0.0f;
+			dy -= maxliheight + 1; // FIXME: magic number (1) - vertical spacing
+			maxliheight = 0.0f; // comment this if you want all lines to have the same (maximum) height..
+			continue;
+		}
+
+		liwidth = Font->Boxes[RText[i] - 32].Width();	// 32!!!
+		liheight = Font->Boxes[RText[i] - 32].Height();
+		maxliheight = max(maxliheight, liheight);
+
+		Vector2Array<4> TempTexCoords = Font->GetTexCoords(RText[i]);
+
+		Vertices[i * 6 + 0] = Vector2(dx, dy);
+		Vertices[i * 6 + 1] = Vector2(liwidth + dx, dy);
+		Vertices[i * 6 + 2] = Vector2(liwidth + dx, liheight + dy);
+
+		Vertices[i * 6 + 3] = Vector2(dx, dy);
+		Vertices[i * 6 + 4] = Vector2(liwidth + dx, liheight + dy);
+		Vertices[i * 6 + 5] = Vector2(dx, liheight + dy);
+
+		TexCoords[i * 6 + 0] = TempTexCoords[0];
+		TexCoords[i * 6 + 1] = TempTexCoords[1];
+		TexCoords[i * 6 + 2] = TempTexCoords[2];
+
+		TexCoords[i * 6 + 3] = TempTexCoords[0];
+		TexCoords[i * 6 + 4] = TempTexCoords[2];
+		TexCoords[i * 6 + 5] = TempTexCoords[3];
+
+		dx += Font->Boxes[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
+	}
+	CModel *Model = new CModel(MODEL_TYPE_TRIANGLES, AText->GetFont()->GetTexture(), 6 * AText->Length(), Vertices, TexCoords);
+	delete [] Vertices;
+	delete [] TexCoords;
+	return Model;
+}
 //////////////////////////////////////////////////////////////////////////
 // CFontManager
 
@@ -1028,13 +970,13 @@ CTextureManager::CTextureManager()
 
 //////////////////////////////////////////////////////////////////////////
 // CTexture
-GLuint CTexture::GetTexID()
+GLuint CTexture::GetTexID() const
 {
 	assert(TexID != 0);
 	if (TexID == 0)
 	{
 		Log("ERROR", "CTexture named %s. Trying to access TexID but it is 0", GetName().c_str());
-		Load();
+		const_cast<CTexture*>(this)->Load();
 	}
 	return TexID;
 }
@@ -1156,18 +1098,14 @@ CText::CText() : Font(CFontManager::Instance()->GetDefaultFont())
 {	
 	assert(Font != NULL);
 	SetText("");
-	doIgnoreCamera = true;
+	SetIgnoreParentTransform(true);
 }
 
 CText::CText(const string &AText) : Font(CFontManager::Instance()->GetDefaultFont())
 {
 	assert(Font != NULL);
 	SetText(Characters);
-	doIgnoreCamera = true;
-}
-void CText::Render()
-{
-	CRenderManager::Instance()->Print(this, Characters);
+	SetIgnoreParentTransform(true);
 }
 
 CFont* CText::GetFont() const
@@ -1195,8 +1133,11 @@ void CText::SetFont(CFont *AFont)
 
 void CText::SetText(const string &AText)
 {
+	if (Characters == AText)
+		return;
 	Characters = AText;
 	SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
+	_UpdateSelfModel();
 }
 
 CText& CText::operator =(const string &AText)
@@ -1238,6 +1179,10 @@ unsigned int CText::Length() const
 	return Characters.length();
 }
 
+void CText::_UpdateSelfModel()
+{
+	SetModel(CRenderManager::CreateModelText(this));
+}
 
 //////////////////////////////////////////////////////////////////////////
 // CAbstractScene
@@ -1252,8 +1197,6 @@ CAbstractScene::CAbstractScene()
 
 void CScene::Render()
 {
-	// блеадь, дублирование кода из CRenderManager::draw
-	// АХАХА, его нет.
 }
 
 void CScene::Update(float dt)
@@ -1265,7 +1208,7 @@ void CScene::Update(float dt)
 // 	}
 }
 
-void CScene::AddRenderable(CRenderable *AObject)
+void CScene::AddRenderable(CRenderableComponent *AObject)
 {
 	RenderableObjects.push_back(AObject);
 	CRenderManager::Instance()->Add(AObject);
@@ -1289,9 +1232,9 @@ void CScene::RemoveUpdatable(CUpdatable *AObject)
 	//AObject->PutIntoScene()
 }
 
-void CScene::RemoveRenderable(CRenderable *AObject)
+void CScene::RemoveRenderable(CRenderableComponent *AObject)
 {
-	vector<CRenderable *>::iterator it = find(RenderableObjects.begin(), RenderableObjects.end(), AObject);
+	vector<CRenderableComponent *>::iterator it = find(RenderableObjects.begin(), RenderableObjects.end(), AObject);
 
 	if (it == RenderableObjects.end())
 		return;
@@ -1305,7 +1248,7 @@ CScene::~CScene()
 	{
 		(*i)->SetDestroyed();
 	}
-	for (vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
+	for (vector<CRenderableComponent*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
 	{
 		(*i)->SetDestroyed();
 	}
@@ -1314,7 +1257,7 @@ CScene::~CScene()
 //////////////////////////////////////////////////////////////////////////
 // CGlobalScene
 
-void CGlobalScene::AddRenderable(CRenderable *AObject)
+void CGlobalScene::AddRenderable(CRenderableComponent *AObject)
 {
 	CRenderManager::Instance()->Add(AObject);
 }
@@ -1371,18 +1314,6 @@ void CSceneManager::SetCurrentScene(CAbstractScene *AScene)
 {
 	assert(AScene != NULL);
 	CurrentScene = AScene;
-}
-//////////////////////////////////////////////////////////////////////////
-// CRenderProxy
-
-CRenderProxy::CRenderProxy(CRenderable *ARenderSource) : RenderSource(ARenderSource)
-{
-	SetName("CRenderProxy");
-}
-
-void CRenderProxy::Render()
-{
-	RenderSource->Render();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1539,12 +1470,12 @@ bool CFFPRenderer::Finalize()
 	return false;
 }
 
-void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
+void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 {
 	if (AModel == NULL)
 		return;
 	assert(Sender != NULL && AModel != NULL);
-	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType()];
+	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType() - 1];
 
 	if (AModel->GetTexture() != NULL)
 	{
@@ -1612,12 +1543,12 @@ void CFFPRenderer::PushModel(CRenderConfig *Sender, CModel * AModel)
 	for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];
-		TempVector = (Vertex * Transformation.GetScaling());
-		if (!Equal(Transformation.GetAngle(), 0.0f))
-			TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
-		TempVector += Transformation.GetTranslation();//Sender->Position;
-		if (!Sender->doIgnoreCamera)
-			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+		TempVector = (Vertex * Transformation.GetScaling() * Sender->GetScaling());
+ 		if (!Equal(Sender->GetAngle(), 0.0f))
+ 			TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
+		TempVector += Transformation.GetTranslation();// + Sender->GetPosition();//Sender->Position;
+// 		if (!Sender->doIgnoreCamera)
+// 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
 		VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color);
 	}
 
@@ -1629,15 +1560,15 @@ void CFFPRenderer::Render()
 	glEnable(GL_POINTS);
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	PrimitiveHolders[MODEL_TYPE_POINTS].RenderPrimitive(GL_POINTS);
+	PrimitiveHolders[MODEL_TYPE_POINTS - 1].RenderPrimitive(GL_POINTS);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINES);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	PrimitiveHolders[MODEL_TYPE_LINES].RenderPrimitive(GL_LINES);
+	PrimitiveHolders[MODEL_TYPE_LINES - 1].RenderPrimitive(GL_LINES);
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);	
-	PrimitiveHolders[MODEL_TYPE_TRIANGLES].RenderPrimitive(GL_TRIANGLES);
+	PrimitiveHolders[MODEL_TYPE_TRIANGLES - 1].RenderPrimitive(GL_TRIANGLES);
 
 	glDisable(GL_POINT_SMOOTH);
 	glDisable(GL_LINE_SMOOTH);
@@ -1651,9 +1582,7 @@ void CFFPRenderer::Render()
 		TexturedGeometry[i]->Clear();
 	}
 
-	PrimitiveHolders[0].Clear();
-	PrimitiveHolders[1].Clear();
-	PrimitiveHolders[2].Clear();
+	Clear();
 }
 
 CFFPRenderer::~CFFPRenderer()
@@ -1663,7 +1592,7 @@ CFFPRenderer::~CFFPRenderer()
 
 void CFFPRenderer::Clear()
 {
-	for(unsigned int i = 0; i < MODEL_TYPE_TRIANGLES + 1; i++)
+	for(unsigned int i = 0; i < TOTAL_HOLDERS; i++)
 		PrimitiveHolders[i].Clear();
 }
 
@@ -1750,18 +1679,9 @@ CTransformation::CTransformation(float ADepthOffset, const Vector2 &ATranslation
 CTransformation& CTransformation::operator+=(const CTransformation &rhs)
 {
 	DepthOffset += rhs.DepthOffset;
-	Translation += rhs.Translation;
-	Rotation += rhs.Rotation;
 	Scaling *= rhs.Scaling;
-	return *this;
-}
-
-CTransformation& CTransformation::operator-=(const CTransformation &rhs)
-{
-	DepthOffset -= rhs.DepthOffset;
-	Translation -= rhs.Translation;
-	Rotation -= rhs.Rotation;
-	Scaling /= rhs.Scaling;
+	Translation += rhs.Translation * Matrix2(DegToRad(-Rotation));
+	Rotation = rhs.Rotation;
 	return *this;
 }
 
@@ -1820,17 +1740,15 @@ void CTransformation::Clear()
 //////////////////////////////////////////////////////////////////////////
 // Transformator
 
-void CTransformator::PushTransformation(const CRenderConfig * ATransformation)
+void CTransformator::PushTransformation(const CTransformation &ATransformation)
 {
-	CTransformation TempTransformation(ATransformation->GetDepth(), ATransformation->GetPosition(),
-		ATransformation->GetAngle(), ATransformation->GetScaling());
-	CurrentTransformation += TempTransformation;
-	TransformationStack.push_back(TempTransformation);
+	TransformationStack.push_back(CurrentTransformation);
+	CurrentTransformation += ATransformation;
 }
 
 void CTransformator::PopTransformation()
 {
-	CurrentTransformation -= TransformationStack.back();
+	CurrentTransformation = TransformationStack.back();
 	TransformationStack.pop_back();
 }
 
@@ -1936,7 +1854,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 /////////////////////////////////////////////////////////////////////////
 // CModel
 CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
-			   CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
+			   const CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
 			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
 	Texture(ATexture), ModelType(AModelType), Vertices(NULL),
 	TexCoords(NULL), VerticesNumber(AVerticesNumber)
@@ -1957,7 +1875,7 @@ CModel::~CModel()
 	SAFE_DELETE_ARRAY(TexCoords);
 }
 
-void CModel::SetTexture(CTexture *ATexture)
+void CModel::SetTexture(const CTexture *ATexture)
 {
 	Texture = ATexture;
 }
@@ -1967,7 +1885,7 @@ void CModel::SetModelType(EModelType AModelType)
 	ModelType = AModelType;
 }
 
-CTexture* CModel::GetTexture()
+const CTexture* CModel::GetTexture() const
 {
 	return Texture;
 }
@@ -1994,7 +1912,153 @@ int CModel::GetVertexNumber() const
 
 //////////////////////////////////////////////////////////////////////////
 // CRenderableComponent
-CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel)
+CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel), Box(0, 0, 0, 0), Scene(NULL), Visible(true)
 {
+	SetName("CRenderableComponent");
+	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
+}
 
+bool CRenderableComponent::isMirrorVertical() const
+{
+	return Configuration.doMirrorVertical;
+}
+
+void CRenderableComponent::SetMirrorVertical(bool MirrorOrNot)
+{
+	Configuration.doMirrorHorizontal = MirrorOrNot;
+}
+
+bool CRenderableComponent::isMirrorHorizontal() const
+{
+	return Configuration.doMirrorHorizontal;
+}
+
+void CRenderableComponent::SetMirrorHorizontal(bool MirrorOrNot)
+{
+	Configuration.doMirrorHorizontal = MirrorOrNot;
+}
+
+bool CRenderableComponent::isIgnoringParentTransform() const
+{
+	return Configuration.doIgnoreCamera;
+}
+
+void CRenderableComponent::SetIgnoreParentTransform(bool doIgnore)
+{
+	Configuration.doIgnoreCamera = doIgnore;
+}
+
+const RGBAf& CRenderableComponent::GetColor() const
+{
+	return Configuration.Color;
+}
+
+RGBAf& CRenderableComponent::GetColor()
+{
+	return Configuration.Color;
+}
+
+void CRenderableComponent::SetColor(const RGBAf &AColor)
+{
+	Configuration.Color = AColor;
+}
+
+float CRenderableComponent::GetAngle() const
+{
+	return Configuration.GetAngle();
+}
+
+EBlendingMode CRenderableComponent::GetBlendingMode() const
+{
+	return Configuration.GetBlendingMode();
+}
+
+float CRenderableComponent::GetDepth() const
+{
+	return Configuration.GetDepth();
+}
+
+float CRenderableComponent::GetScaling() const
+{
+	return Configuration.GetScaling();
+}
+
+int CRenderableComponent::GetLayer() const
+{
+	return Configuration.GetLayer();
+}
+
+const Vector2& CRenderableComponent::GetPosition() const
+{
+	return Configuration.GetPosition();
+}
+
+Vector2& CRenderableComponent::GetPosition()
+{
+	return Configuration.GetPosition();
+}
+
+void CRenderableComponent::SetAngle(float AAngle)
+{
+	Configuration.SetAngle(AAngle);
+}
+
+void CRenderableComponent::SetBlendingMode(EBlendingMode ABlendingMode)
+{
+	Configuration.SetBlendingMode(ABlendingMode);
+}
+
+void CRenderableComponent::SetScaling(float AScaling)
+{
+	Configuration.SetScaling(AScaling);
+}
+
+void CRenderableComponent::SetLayer(int Layer)
+{
+	Configuration.SetLayer(Layer);
+}
+
+void CRenderableComponent::SetPosition(const Vector2 &APosition)
+{
+	Configuration.SetPosition(APosition);
+}
+
+const CModel* CRenderableComponent::GetModel() const
+{
+	return Model;
+}
+
+void CRenderableComponent::SetModel(const CModel *AModel)
+{
+	Model = AModel;
+}
+
+void CRenderableComponent::SetConfiguration(const CRenderConfig &AConfiguraton)
+{
+	Configuration = AConfiguraton;
+}
+
+const CRenderConfig& CRenderableComponent::GetConfiguration() const
+{
+	return Configuration;
+}
+
+CRenderConfig& CRenderableComponent::GetConfiguration()
+{
+	return Configuration;
+}
+
+CTransformation& CRenderableComponent::GetTransformation()
+{
+	return Configuration.GetTransformation();
+}
+
+const CTransformation& CRenderableComponent::GetTransformation() const
+{
+	return Configuration.GetTransformation();
+}
+
+void CRenderableComponent::SetTransformation(const CTransformation &ATransformation)
+{
+	Configuration.SetTransformation(ATransformation);
 }

@@ -61,7 +61,7 @@ public:
 	// @todo: loading style from XML file (and even maybe saving)
 };
 
-class CGUIObjectBase : public CRenderable, public CUpdatable
+class CGUIObjectBase : /*public CRenderable*/ public CRenderableComponent
 {
 public:
 	struct CMouseState
@@ -76,19 +76,13 @@ public:
 	~CGUIObjectBase();
 	CFont* GetFont() const;
 	void SetFont(CFont *AFont);
-	CPrimitiveRender* GetPrimitiveRender() const;
-	void SetPrimitiveRender(CPrimitiveRender *APrimitiveRender);
 	CGUIStyle* GetStyle() const;
 	void SetStyle(CGUIStyle *AStyle);
-	void SetCallback(CObjectCallback ACallProc, CObject *ACaller);
 	Vector2 GlobalToLocal(const Vector2& Coords) const;
-//	virtual void SetVisibility(bool AVisible);
 
 protected:
-	CObjectCallback CallProc;
 	CObject *Caller;
 	CFont *Font;
-	CPrimitiveRender *PRender;
 	CGUIStyle *Style;
 	CMouseState MouseState;
 	CMouseState PreviousMouseState;
@@ -96,16 +90,15 @@ protected:
 };
 
 /**
- * CGUIRootObject - корневой объект GUI, всеобщий родитель.
- */
+* CGUIRootObject - everyone's father.
+*/
 
 class CGUIRootObject : public CGUIObjectBase
 {
 public:
 	CGUIRootObject();
-	void Render();
 	void Update(float dt);
-	bool TabHolded; // temporary, ofcourse..
+	bool TabHolded; // temporary, of course..
 private:
 	int KeyHoldRepeatDelay;
 	int KeyHoldRepeatInterval;
@@ -122,25 +115,9 @@ public:
 	bool isFocused() const;
 	void Focus();
 	void SetParent(CGUIObjectBase *AParent);
-
-	const string& GetText() const
-	{
-		return Text.GetText();
-	}
-
-	void SetText(const string &AText)
-	{
-		Text = AText;
-		Text.SetPosition(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f);
-	}
-
-	void SetBox(const CBox &box)
-	{
-		CRenderable::SetBox(box);
-		Text.SetLayer(10);
-		// maybe smthng else
-	}
-
+	const string& GetText() const;
+	void SetText(const string &AText);
+	void SetBox(const CBox &box);
 	virtual void SetVisibility(bool AVisible);
 
 protected:
@@ -171,11 +148,7 @@ class CLabel : public CGUIObject
 {
 public:
 	CLabel(const string &AText = "");
-	void SetBox(const CBox &box)
-	{
-		CGUIObject::SetBox(box);
-		Text.SetPosition(Vector2(box.Min.x, box.Min.y));
-	}
+	void SetBox(const CBox &box);
 	void Render();
 	void Update(float dt){}
 };
@@ -213,10 +186,7 @@ public:
 	CEdit();
 	void SetBox(const CBox &box);
 	void SetText(const string &AText);
-	const string& GetText() const
-	{
-		return ActualText;
-	}
+	const string& GetText() const;
 	void Render();
 	void Update(float dt);
 	void ProcessEvent(const CEvent &AEvent);
@@ -236,22 +206,11 @@ class CLabeledEdit : public CEdit
 private:
 	CLabel Label;
 public:
-	void SetBox(const CBox &box)
-	{
-		CEdit::SetBox(box);
-		CBox tempBox = box;
-		tempBox.Offset(0.0f, box.Height() + 2.0f);
-		int TextHeight = Label.GetFont()->GetStringHeight(Label.GetText());
-		tempBox.Max.y = tempBox.Min.y + TextHeight;
-		Label.SetBox(tempBox);
-	}
-	CLabeledEdit(CBox Aaabb, const string &ALabelText) : Label(ALabelText)
-	{
-		SetBox(Aaabb);
-	}
+	void SetBox(const CBox &box);
+	CLabeledEdit(CBox Aaabb, const string &ALabelText);
 };
 
-class CMenuItem : public CGUIObject, public CCommonManager <list <CMenuItem*> >/*public CList*/
+class CMenuItem : public CGUIObject
 {
 public:
 	bool isCycledMenuSwitch;
@@ -265,7 +224,7 @@ public:
 	bool AddObject(CMenuItem *AObject);
 
 private:
-	CCommonManager <list <CMenuItem*> >::ManagerIterator Focus;
+//	CCommonManager <list <CMenuItem*> >::ManagerIterator Focus;
 };
 
 class CPanel : CGUIObject

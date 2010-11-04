@@ -269,6 +269,16 @@ public:
 			Random_Float(yMin, yMax)
 			);
 	}
+
+	__INLINE static Vector2 Random(const Vector2 &vMin, const Vector2 &vMax)
+	{
+		return Vector2
+			(
+			Random_Float(vMin.x, vMax.x),
+			Random_Float(vMin.y, vMax.y)
+			);
+	}
+
 };
 
 const Vector2 V2_ZERO		= Vector2(0.0f, 0.0f);
@@ -788,6 +798,13 @@ public:
 		return T;
 	}
 
+	__INLINE Matrix2 Inverted() const
+	{
+		Matrix2 temp = *this;
+		temp = Matrix2(e22, -e12, -e21, e11) * (1.0f / Determinant());
+		return temp;
+	}
+
 	Matrix2 operator * (const Matrix2& M) const 
 	{
 		Matrix2 T;
@@ -844,7 +861,7 @@ public:
 		return T;
 	}
 
-	__INLINE float Determinant()
+	__INLINE float Determinant() const
 	{
 		return e11 * e22 - e12 * e21;
 	}
@@ -983,6 +1000,17 @@ union Vector4
 		m.m[1].z = yz + wx;
 		m.m[2].z = 1.0f - (xx + yy);
     }
+
+	__INLINE static Vector4 Random(const Vector4 &vMin, const Vector4 &vMax)
+	{
+		return Vector4
+			(
+				Random_Float(vMin.x, vMax.x),
+				Random_Float(vMin.y, vMax.y),
+				Random_Float(vMin.z, vMax.z),
+				Random_Float(vMin.w, vMax.w)
+			);
+	}
 };
 
 typedef Vector4 Quaternion;

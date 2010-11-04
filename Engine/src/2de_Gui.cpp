@@ -40,9 +40,7 @@ CGUIStyle::CGUIStyle()
 CGUIObjectBase::CGUIObjectBase()
 {
 	Font = NULL;
-	PRender = NULL;
 	Style = NULL;
-	CallProc = NULL;
 	Caller = NULL;
 
 	MouseState.Hovered = false;
@@ -73,17 +71,6 @@ void CGUIObjectBase::SetFont(CFont *AFont)
 	Font = AFont;
 }
 
-CPrimitiveRender* CGUIObjectBase::GetPrimitiveRender() const
-{
-	return PRender;
-}
-
-void CGUIObjectBase::SetPrimitiveRender(CPrimitiveRender *APrimitiveRender)
-{
-	PRender = APrimitiveRender;
-}
-
-
 CGUIStyle* CGUIObjectBase::GetStyle() const
 {
 	return Style;
@@ -102,15 +89,9 @@ Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 	return Result;
 }
 
-void CGUIObjectBase::SetCallback(CObjectCallback ACallProc, CObject *ACaller)
-{
-	Caller = ACaller;
-	CallProc = ACallProc;
-}
-
 void CGUIObject::SetVisibility(bool AVisible)
 {
-	CRenderable::SetVisibility(AVisible);
+	CRenderableComponent::SetVisibility(AVisible);
 	Text.SetVisibility(AVisible);
 }
 
@@ -119,20 +100,20 @@ void CGUIObject::SetVisibility(bool AVisible)
 
 CGUIRootObject::CGUIRootObject() : TabHolded(false), KeyHoldRepeatDelay(300), KeyHoldRepeatInterval(50), TimerAccum(0)
 {
-	SetName("GUI Root Object");
+	CRenderableComponent::SetName("GUI Root Object");
 }
 
-void CGUIRootObject::Render()
-{
-	CGUIObject *Focused = CGUIManager::Instance()->GetFocusedObject();
-	if (Focused)
-	{
-		//PRender->lwidth = Style->Metrics.FocusRectLineWidth;
-		Color = Style->Colors.FocusRect;
-		CRenderManager::Instance()->DrawLinedBox(this,	Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing));
-	}
-	return;
-}
+// void CGUIRootObject::Render()
+// {
+// 	CGUIObject *Focused = CGUIManager::Instance()->GetFocusedObject();
+// 	if (Focused)
+// 	{
+// 		//PRender->lwidth = Style->Metrics.FocusRectLineWidth;
+// 		Color = Style->Colors.FocusRect;
+// 		CRenderManager::Instance()->DrawLinedBox(this,	Focused->GetBox().Inflated(Style->Metrics.FocusRectSpacing, Style->Metrics.FocusRectSpacing));
+// 	}
+// 	return;
+// }
 
 void CGUIRootObject::Update(float dt)
 {
@@ -210,12 +191,29 @@ void CGUIObject::SetParent(CGUIObjectBase *AParent)
 	}
 	Style = Parent->GetStyle();
 	Font = Parent->GetFont();
-	PRender = Parent->GetPrimitiveRender();
-	Color = Parent->Color;	// Color is deprecated for GUI objects 
+//	PRender = Parent->GetPrimitiveRender();
+	//Color = Parent->Color;	// Color is deprecated for GUI objects 
 							// (really not used in CButton, CEdit, but there is something
 							// related to Color in CMenuItem), use CGUIStyle instead
 }
 
+const string& CGUIObject::GetText() const
+{
+	return Text.GetText();
+}
+
+void CGUIObject::SetText(const string &AText)
+{
+	Text = AText;
+	Text.SetPosition(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f);
+}
+
+void CGUIObject::SetBox(const CBox &box)
+{
+	//CRenderable::SetBox(box);
+	Text.SetLayer(10);
+	// maybe smthng else
+}
 //////////////////////////////////////////////////////////////////////////
 // CGUIManager
 
@@ -224,7 +222,7 @@ CGUIManager::CGUIManager()
 	SetName("GUI Manager");
 	Root = new CGUIRootObject;
 	Root->SetStyle(new CGUIStyle);
-	Root->SetPrimitiveRender(new CPrimitiveRender);
+//Root->SetPrimitiveRender(new CPrimitiveRender);
 	Root->SetFont(Root->GetStyle()->Font);
 	Focus = Objects.begin();
 
@@ -269,8 +267,8 @@ void CGUIManager::ProcessEvent(const CEvent &AEvent)
 			Root->TabHolded = false;
 	}
 
-	if (Focus != Objects.end())
-		(*Focus)->ProcessEvent(AEvent);
+//	if (Focus != Objects.end())
+//		(*Focus)->ProcessEvent(AEvent);
 }
 
 CGUIObject* CGUIManager::GetFocusedObject() const
@@ -296,7 +294,7 @@ void CGUIManager::Add(CGUIObject *AObject)
 
 CGUIManager::~CGUIManager()
 {
-	delete Root->GetPrimitiveRender();
+//	delete Root->GetPrimitiveRender();
 	delete Root->GetStyle();
 	delete Root;
 }
@@ -308,28 +306,32 @@ CGUIManager::~CGUIManager()
 CLabel::CLabel(const string &AText /*= ""*/)
 {
 	Text = AText;
-	Text.Color = Style->Colors.LabelText;
+//	Text.Color = Style->Colors.LabelText;
 }
 
 void CLabel::Render()
 {
 }
 
+void CLabel::SetBox(const CBox &box)
+{
+	CGUIObject::SetBox(box);
+	Text.SetPosition(Vector2(box.Min.x, box.Min.y));
+}
 //////////////////////////////////////////////////////////////////////////
 // CButton
 
 CButton::CButton()
 {
-	Text = "Button " + itos(GetID()); // @todo: think, then remove
-	Text.Color = Style->Colors.ButtonText;
+	Text = "Button " + itos(CRenderableComponent::GetID()); // @todo: think, then remove
+	Text.SetColor(Style->Colors.ButtonText);
 }
 
 CButton::CButton(CBox ARect, const char* AText, RGBAf AColor)
 {
 	SetBox(ARect);
-	Color = AColor;	// deprecated, use style
 	Text = AText;
-	Text.Color = Style->Colors.ButtonText;
+	Text.SetColor(Style->Colors.ButtonText);
 }
 
 void CButton::SetBox(const CBox &box)
@@ -343,22 +345,22 @@ void CButton::Render()
 	// Вынести. Сильно вынести отсюда.
 	//(GetBox().Min, GetBox().Max);
 
-	Color = Style->Colors.ButtonFace;
+	SetColor(Style->Colors.ButtonFace);
 	//temprect_lines.Color = Style->Colors.ButtonBorder;
 	if (WidgetState.Hovered)
 	{
-		Color = Style->Colors.ButtonFaceHovered;
+		SetColor(Style->Colors.ButtonFaceHovered);
 		//temprect_lines.Color = Style->Colors.ButtonBorderHovered;
 	}
 	if (WidgetState.Pressed)
 	{
-		Color = Style->Colors.ButtonFacePressed;
+		SetColor(Style->Colors.ButtonFacePressed);
 		//temprect_lines.Color = Style->Colors.ButtonBorderPressed;
 	}
 
 	SetLayer(1);
 	//CRenderManager::Instance()->DrawSolidBox(this, GetBox().Inflated(4.0f, 4.0f));
-	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
+//	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
 }
 
 
@@ -398,8 +400,8 @@ void CButton::Update(float dt)
 		WidgetState.Pressed = false;
 		if (MouseState.Hovered && isFocused())
 		{
-			if (CallProc)
-				CallProc(Caller);
+// 			if (CallProc)
+// 				CallProc(Caller);
 
 			CEventManager::Instance()->TriggerEvent("ButtonClick", this);
 		}
@@ -419,8 +421,8 @@ void CButton::ProcessEvent(const CEvent &AEvent)
 			WidgetState.Pressed = true;
 			break;
 		case SDLK_RETURN:
-			if (CallProc)
-				CallProc(Caller);
+// 			if (CallProc)
+// 				CallProc(Caller);
 			break;
 		}
 	}
@@ -431,8 +433,8 @@ void CButton::ProcessEvent(const CEvent &AEvent)
 		{
 		case SDLK_SPACE:
 			WidgetState.Pressed = false;
-			if (CallProc)
-				CallProc(Caller);
+// 			if (CallProc)
+// 				CallProc(Caller);
 			break;
 		}
 	}
@@ -445,7 +447,7 @@ void CButton::ProcessEvent(const CEvent &AEvent)
 CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
 {
 	Selection.Clear(CursorPos);
-	Text.Color = Style->Colors.EditText;
+	Text.SetColor(Style->Colors.EditText);
 }
 
 void CEdit::Render()
@@ -460,17 +462,17 @@ void CEdit::Render()
 
 	if (MouseState.Hovered)
 	{
-		PRender->lClr = Style->Colors.EditBorderHovered;
-		Color = Style->Colors.EditBackgroundHovered;
+//		PRender->lClr = Style->Colors.EditBorderHovered;
+		GetColor() = Style->Colors.EditBackgroundHovered;
 	}
 	else
 	{
-		PRender->lClr = Style->Colors.EditBorder;
-		Color = Style->Colors.EditBackground;
+		//PRender->lClr = Style->Colors.EditBorder;
+		GetColor() = Style->Colors.EditBackground;
 	}
-	PRender->lwidth = Style->Metrics.EditBorderWidth;
+	//PRender->lwidth = Style->Metrics.EditBorderWidth;
 	
-	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
+	//CRenderManager::Instance()->DrawSolidBox(this, GetBox());
 	//PRender->grRectL(GetBox().Min, GetBox().Max);
 	if (isFocused())
 	{
@@ -483,12 +485,12 @@ void CEdit::Render()
 				std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1), GetVisibleText().c_str()),
 				GetBox().Max.y - Style->Metrics.EditMargins.y);
 
-			Color = Style->Colors.EditSelection;
-			CRenderManager::Instance()->DrawSolidBox(this, SelBox);
+			GetColor() = Style->Colors.EditSelection;
+			//CRenderManager::Instance()->DrawSolidBox(this, SelBox);
 		}
-		Color = Style->Colors.EditText;
-		CRenderManager::Instance()->DrawLine(this, Vector2(Text.GetPosition().x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
-			Vector2(Text.GetPosition().x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Min.y));
+		GetColor() = Style->Colors.EditText;
+// 		CRenderManager::Instance()->DrawLine(this, Vector2(Text.GetPosition().x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Max.y),
+// 			Vector2(Text.GetPosition().x + CursorDistance, GetBox().Inflated(0.0f, -Style->Metrics.EditMargins.y).Min.y));
 	}
 }
 
@@ -720,6 +722,10 @@ void CEdit::SetText(const string &AText)
 	Selection.Clear((CursorPos = -1));
 }
 
+const string& CEdit::GetText() const
+{
+	return ActualText;
+}
 //////////////////////////////////////////////////////////////////////////
 // CEdit::CTextSelection
 
@@ -776,15 +782,15 @@ CEdit::CTextSelection::CTextSelection()
 
 #define DEFAULT_DISTANCE_BEETWEEN_ITEMS 20
 
-CMenuItem::CMenuItem() : isCycledMenuSwitch(true), Focus(Objects.begin())
+CMenuItem::CMenuItem() : isCycledMenuSwitch(true)//, Focus(Objects.begin())
 {
 	SetVisibility(false);
 }
 
 CMenuItem::CMenuItem(CMenuItem *AParent, const string &AMenuText)
 {
-	doIgnoreCamera = true;
-	Focus = Objects.begin();
+	SetIgnoreParentTransform(true);
+//Focus = Objects.begin();
 	SetVisibility(false);
 	isCycledMenuSwitch = true;
 	SetName((Text = AMenuText).GetText());
@@ -799,22 +805,22 @@ CMenuItem::~CMenuItem()
 
 void CMenuItem::Render()
 {
-	for (ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
-	{		
-		CMenuItem *ChildMenuItem = *it;
-		//Text.Color = RGBAf(1.0,1.0,1.0,1.0);
-		//Text.SetScaling(1.0f);
-		Text.SetPosition(ChildMenuItem->GetPosition());
-		//Font->Print(ChildMenuItem->Text.c_str());
-	}	
-	Color = COLOR_WHITE;
-
-	if (Focus != Objects.end())
-	{
-		//PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
-		SetPosition((*Focus)->GetPosition());
-		CRenderManager::Instance()->DrawSolidBox(this, CBox(V2_QuadBinCenter).Inflated(4.0f, 4.0f));
-	}
+// 	for (ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
+// 	{		
+// 		CMenuItem *ChildMenuItem = *it;
+// 		//Text.Color = RGBAf(1.0,1.0,1.0,1.0);
+// 		//Text.SetScaling(1.0f);
+// 		Text.SetPosition(ChildMenuItem->GetPosition());
+// 		//Font->Print(ChildMenuItem->Text.c_str());
+// 	}	
+// 	GetColor() = COLOR_WHITE;
+// 
+// 	if (Focus != Objects.end())
+// 	{
+// 		//PRender->grCircleS((*Focus)->Position - Vector2(20.0f, -10.0f), 5);
+// 		SetPosition((*Focus)->GetPosition());
+// //		CRenderManager::Instance()->DrawSolidBox(this, CBox(V2_QuadBinCenter).Inflated(4.0f, 4.0f));
+// 	}
 }
 
 void CMenuItem::Update(float dt)
@@ -831,24 +837,24 @@ void CMenuItem::ProcessEvent(const CEvent &AEvent)
 		case SDLK_UP:
 			// Вероятно эту логику можно записать и покороче @todo
 			// 	записал чуть короче, да и баг, кажется, пофиксил..
-			if (Focus != Objects.begin())
-				Focus--;
-			else if (isCycledMenuSwitch)
-			{
-				Focus = Objects.end();
-				Focus--;
-			}
+// 			if (Focus != Objects.begin())
+// 				Focus--;
+// 			else if (isCycledMenuSwitch)
+// 			{
+// 				Focus = Objects.end();
+// 				Focus--;
+// 			}
 			break;
 		case SDLK_DOWN:
-			if (Focus != --Objects.end())
-				Focus++;
-			else if (isCycledMenuSwitch)
-				Focus = Objects.begin();
+// 			if (Focus != --Objects.end())
+// 				Focus++;
+// 			else if (isCycledMenuSwitch)
+// 				Focus = Objects.begin();
 
 			break;
 		case SDLK_RETURN:
-			if ((Focus != Objects.end()) && (*Focus)->CallProc)
-				(*Focus)->CallProc(Caller);
+// 			if ((Focus != Objects.end()) && (*Focus)->CallProc)
+// 				(*Focus)->CallProc(Caller);
 // 			else
 // 				if ((*Focus)->)
 // 				{
@@ -870,8 +876,23 @@ void CMenuItem::ProcessEvent(const CEvent &AEvent)
 
 bool CMenuItem::AddObject(CMenuItem *AObject)
 {
-	CCommonManager <list <CMenuItem*> >::Add(AObject);
- 	Focus = Objects.begin();
+// 	CCommonManager <list <CMenuItem*> >::Add(AObject);
+//  	Focus = Objects.begin();
  	return true;
 }
 
+
+void CLabeledEdit::SetBox(const CBox &box)
+{
+	CEdit::SetBox(box);
+	CBox tempBox = box;
+	tempBox.Offset(0.0f, box.Height() + 2.0f);
+	int TextHeight = Label.GetFont()->GetStringHeight(Label.GetText());
+	tempBox.Max.y = tempBox.Min.y + TextHeight;
+	Label.SetBox(tempBox);
+}
+
+CLabeledEdit::CLabeledEdit(CBox Aaabb, const string &ALabelText) : Label(ALabelText)
+{
+	SetBox(Aaabb);
+}

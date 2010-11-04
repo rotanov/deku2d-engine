@@ -115,6 +115,7 @@ bool CEngine::Initialize()
 	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->SetText("FPS: 0");
 	FPSText->SetLayer(512);
+	CUpdateManager::Instance()->RootGameObject->Attach(FPSText);
 
 	//	Создание текстуры из памяти
 	CTexture *TitleScreenShroomTexture;

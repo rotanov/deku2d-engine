@@ -41,7 +41,7 @@ const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
 const float ROTATIONAL_AXIS_Z = 1.0f;
 
 const RGBAf COLOR_WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
-const RGBAf COLOR_BLACK = RGBAf(0.00f, 0.00f, 0.00f, 1.00f);
+const RGBAf COLOR_BLACK = RGBAf(0.00f, 0.00f, 0.00f, 0.00f);
 const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
 const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
 const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
@@ -93,7 +93,8 @@ public:
 	*	Less trivial is some intermediate textures for gfx;
 	*/
 	bool SaveToFile(const string &AFilename);
-	GLuint GetTexID();
+	GLuint GetTexID() const;
+	//GLuint GetTexID();
 };
 
 /**
@@ -128,7 +129,6 @@ public:
 	*	on other to represent common transformation, not just add members
 	*/
 	CTransformation& operator +=(const CTransformation &rhs);
-	CTransformation& operator -=(const CTransformation &rhs);
 
 	float GetAngle() const;
 	float GetDepth() const;
@@ -152,22 +152,22 @@ public:
 enum EModelType
 {
 	MODEL_TYPE_NOT_A_MODEL = -1,
-	MODEL_TYPE_LINES = 0,
 	MODEL_TYPE_POINTS = 1,
-	MODEL_TYPE_TRIANGLES = 2,
+	MODEL_TYPE_LINES = 2,
+	MODEL_TYPE_TRIANGLES = 3,
 //	MODEL_TYPE_QUADS = 3,	// Keep commented 'cause may be there will be some possibility for optimization
 };
 
 class CModel
 {
 public:
-	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, CTexture * ATexture = NULL,
+	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, const CTexture * ATexture = NULL,
 		unsigned int AVerticesNumber = 0, Vector2* AVertices = NULL, 
 		Vector2* ATexCoords = NULL);
 	~CModel();
-	void SetTexture(CTexture *ATexture);
+	void SetTexture(const CTexture *ATexture);
 	void SetModelType(EModelType AModelType);
-	CTexture* GetTexture();
+	const CTexture* GetTexture() const;
 	const Vector2* GetVertices() const;
 	const Vector2* GetTexCoords() const;
 	EModelType GetModelType() const;
@@ -175,7 +175,7 @@ public:
 	//const RGBAf* GetColors() const;
 
 private:
-	CTexture *Texture;
+	const CTexture *Texture;
 	EModelType ModelType;
 	Vector2 *Vertices;
 	Vector2 *TexCoords;
@@ -188,9 +188,9 @@ private:
 */
 enum EBlendingMode
 {
-	BLEND_MODE_ADDITIVE,
-	BLEND_MODE_OPAQUE,
-	BLEND_MODE_TRANSPARENT,
+	BLEND_MODE_OPAQUE = 0,
+	BLEND_MODE_TRANSPARENT = 1,
+	BLEND_MODE_ADDITIVE = 2,
 };
 
 class CRenderConfig
@@ -200,10 +200,11 @@ public:
 	bool doIgnoreCamera;		// if true, then all previous transformations are ignored
 	bool doMirrorHorizontal;
 	bool doMirrorVertical;
+	EBlendingMode BlendingMode;
 
 	CRenderConfig();
-
 	float GetAngle() const;
+	EBlendingMode GetBlendingMode() const;
 	float GetDepth() const;
 	int GetLayer() const;	
 	float GetScaling() const;
@@ -211,6 +212,7 @@ public:
 	Vector2& GetPosition();
 
 	void SetAngle(float AAngle); //	(Degrees)
+	void SetBlendingMode(EBlendingMode ABlendingMode);
 	void SetScaling(float AScaling);
 	/**
 	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
@@ -219,35 +221,12 @@ public:
 	void SetLayer(int Layer);
 	void SetPosition(const Vector2 &APosition);
 
+	void SetTransformation(const CTransformation &ATransformation);
+	CTransformation& GetTransformation();
+	const CTransformation& GetTransformation() const;
+
 private:
 	CTransformation Transformation;	
-};
-
-/**
-*	CRenderable — is no more. @todo: get rid of it and replace to CRenderableComponent;
-*	Was used in such way, that we inherit from CRenderable and then implement it's 
-*	void Render() so object knows how it renders itself and CRenderManager 
-*	will automatically invoke Render() for all CRenderable objects;
-*/
-class CRenderable : public virtual CObject, public CRenderConfig
-{
-public:
-	CRenderable();
-	virtual ~CRenderable();
-	virtual void Render() = 0;
-	const CBox GetBox() const;
-	float Width();
-	float Height();
-	virtual void SetBox(const CBox &ABox);
-	bool GetVisibility() const;
-	virtual void SetVisibility(bool AVisible);
-	void PutIntoScene(CAbstractScene *AScene);
-	CAbstractScene* GetScene() const;
-
-private:
-	CBox Box; //	Axis Aligned Bounding Box for culling
-	CAbstractScene *Scene;
-	bool Visible;
 };
 
 /**
@@ -256,10 +235,52 @@ private:
 class CRenderableComponent : public CGameObject
 {
 public:
-	CRenderConfig Configuration;
-	CModel *Model;
-
 	CRenderableComponent(CModel *AModel = NULL);
+	virtual ~CRenderableComponent();
+	const CBox GetBox() const;
+	float Width();
+	float Height();
+	virtual void SetBox(const CBox &ABox);
+	bool GetVisibility() const;
+	virtual void SetVisibility(bool AVisible);
+	void PutIntoScene(CAbstractScene *AScene);
+	CAbstractScene* GetScene() const;
+	bool isMirrorVertical() const;
+	void SetMirrorVertical(bool MirrorOrNot);
+	bool isMirrorHorizontal() const;
+	void SetMirrorHorizontal(bool MirrorOrNot);
+	bool isIgnoringParentTransform() const;
+	void SetIgnoreParentTransform(bool doIgnore);
+	const RGBAf& GetColor() const;
+	RGBAf& GetColor();
+	void SetColor(const RGBAf &AColor);
+	float GetAngle() const;
+	EBlendingMode GetBlendingMode() const;
+	float GetDepth() const;
+	int GetLayer() const;
+	float GetScaling() const;
+	const Vector2& GetPosition() const;
+	Vector2& GetPosition();
+	void SetAngle(float AAngle);
+	void SetBlendingMode(EBlendingMode ABlendingMode);
+	void SetScaling(float AScaling);
+	void SetLayer(int Layer);
+	void SetPosition(const Vector2 &APosition);
+	const CModel* GetModel() const;
+	void SetModel(const CModel *AModel);
+	void SetTransformation(const CTransformation &ATransformation);
+	const CTransformation& GetTransformation() const;
+	CTransformation& GetTransformation();
+	CRenderConfig& GetConfiguration();
+	const CRenderConfig& GetConfiguration() const;
+	void SetConfiguration(const CRenderConfig &AConfiguraton);
+
+private:
+	CRenderConfig Configuration;
+	const CModel *Model;
+	CBox Box; //	Axis Aligned Bounding Box for culling
+	CAbstractScene *Scene;
+	bool Visible;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -359,14 +380,15 @@ class CTransformator	// is "CTransformer" better?
 {
 public:
 	CTransformator();
-	virtual void PushTransformation(const CRenderConfig * ATransformation);
+	virtual void PushTransformation(const CTransformation &ATransformation);
 	virtual void PopTransformation();
 	virtual void ClearTransformation();
 	const CTransformation& GetCurrentTransfomation() const;
 
+	vector<CTransformation> TransformationStack;
 protected:
 	CTransformation CurrentTransformation;
-	vector<CTransformation> TransformationStack;
+	
 };
 
 /**
@@ -384,7 +406,7 @@ public:
 	}
 	virtual bool Initialize(){return false;};// = 0;
 	virtual bool Finalize(){return false;};// = 0;
-	virtual void PushModel(CRenderConfig *, CModel *){};// = 0;
+	virtual void PushModel(const CRenderConfig *, const CModel *){};// = 0;
 	virtual void Render(){};// = 0;
 	virtual void Clear() = 0;
 };
@@ -400,7 +422,7 @@ public:
 	~CFFPRenderer();
 	bool Initilize();
 	bool Finalize();
-	void PushModel(CRenderConfig *ARenderInfo, CModel * AModel);
+	void PushModel(const CRenderConfig *ARenderInfo, const CModel * AModel);
 	void Render();
 	void Clear();
 
@@ -446,7 +468,8 @@ private:
 		virtual void _Grow();
 	};
 
-	CBetterVertexHolder PrimitiveHolders[MODEL_TYPE_TRIANGLES + 1];
+#define TOTAL_HOLDERS (MODEL_TYPE_TRIANGLES * (BLEND_MODE_ADDITIVE + 1))
+	CBetterVertexHolder PrimitiveHolders[TOTAL_HOLDERS];	// 9 total
 	vector<CBetterTextureVertexHolder*> TexturedGeometry; // per texture i.e. one texture => single DIP
 	vector<GLuint> TexIDs;
 };
@@ -473,7 +496,7 @@ public:
 	float GetStringWidthEx(int t1, int t2, const string &text);
 	float GetStringHeight(const string &text);
 	float GetStringHeightEx(int t1, int t2, const string &text);
-	CTexture* GetTexture();
+	const CTexture* GetTexture();
 	void SetTexture(const string &TextureName);
 	CBox GetSymbolsBBOX();
 	float GetDistance() const;
@@ -491,19 +514,6 @@ private:
 	CTexture* Texture;
 
 	friend class CRenderManager;
-};
-
-/**
-*	CRenderProxy - is some another spike.
-*/
-class CRenderProxy : public CRenderable
-{
-private:
-	CRenderable *RenderSource;
-
-public:
-	CRenderProxy(CRenderable *ARenderSource);
-	void Render();
 };
 
 /**
@@ -564,7 +574,7 @@ class CGrLine;
 *	Manages all stuff for drawing stuff. Traverse tree, applying transformations,
 *	Calls renderer to render some stuff...etc
 */
-class CRenderManager : public CCommonManager <list <CRenderable*> >, public CTSingleton <CRenderManager>
+class CRenderManager : public CCommonManager <list <CRenderableComponent*> >, public CTSingleton <CRenderManager>
 {
 protected:
 	CRenderManager();
@@ -573,12 +583,6 @@ protected:
 
 private:
 	CAbstractRenderer *Renderer;
-	#define DEKU2D_MAX_TEXTURES 32
-	CVertexDataHolder TexturedQuadVertices[DEKU2D_MAX_TEXTURES];	// Временно. В вектор запихать, что ли.
-	CPrmitiveVertexDataHolder PointVertices;
-	CPrmitiveVertexDataHolder LineVertices;
-	CPrmitiveVertexDataHolder QuadVertices;
-	CPrmitiveVertexDataHolder TriVertices;
 
 	void SetBlendingMode();
 	void BeginFrame();
@@ -590,13 +594,7 @@ public:
 	CTransformator Transformator;
 	~CRenderManager();
 	bool DrawObjects();
-	void Print(const CText *Text, const string &Characters);
-	void DrawLinedBox(const CRenderConfig* RenderInfo, const CBox &Box);
-	void DrawSolidBox(const CRenderConfig* RenderInfo, const CBox &Box);
-	void DrawTexturedBox(const CRenderConfig* RenderInfo, const CBox &Box, CTexture *Texture, const Vector2Array<4> &TexCoords);
-	void DrawPoint(const CRenderConfig *RenderInfo, const Vector2 &Point);
-	void DrawLine(const CRenderConfig *RenderInfo, const Vector2 &v0, const Vector2 &v1);
-	void DrawTriangles(const CRenderConfig *RenderInfo, const Vector2 *Vertices, unsigned int Count);
+//	void Print(const CText *Text, const string &Characters);
 
 	static CModel* CreateModelCircle(float Radius, EModelType AModelType = MODEL_TYPE_LINES, int Precision = 16)
 	{
@@ -648,6 +646,8 @@ public:
 		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
 		return Result;
 	}
+
+	static CModel* CreateModelText(const CText *AText);
 };
 
 #if defined(_WIN32)
@@ -703,75 +703,17 @@ private:
 };
 
 /**
-*	Stuff beyond this line is now CModel resource and should be eliminated	
-*/
-class CBasePrimitive : public CRenderConfig
-{
-public:
-};
-
-class CGrLine : public CBasePrimitive
-{
-public:
-	CSegment Segment;
-	CGrLine(const Vector2 &v0, const Vector2 &v1) : Segment(v0, v1)
-	{
-
-	}
-	void Render()
-	{
-		CRenderManager::Instance()->DrawLine(this, Segment.v0, Segment.v1);
-	}
-};
-
-class CGrSegMent : public CGrLine
-{
-public:
-	CGrSegMent(const Vector2 &v0, const Vector2 &v1) : CGrLine(v0, v1)
-	{
-
-	}
-	void Render()
-	{
-		CGrLine::Render();
-		CRenderManager::Instance()->DrawPoint(this, Segment.v0);
-		CRenderManager::Instance()->DrawPoint(this, Segment.v1);
-	}
-};
-
-class CGrRect : public CBasePrimitive
-{
-public:
-	CRectangle Rectangle;
-
-	CGrRect();
-	CGrRect(const Vector2 p0, const Vector2 p1) : Rectangle(p0, p1)
-	{		
-	}
-	~CGrRect()
-	{
-
-	}
-	void Render()
-	{
-		CRenderManager::Instance()->DrawSolidBox(this, CBox(Rectangle.v0, Rectangle.v2));
-	}
-private:	
-};
-
-/**
 *	CText - Text. Cleat enough, lol.
 *	Shouldn't render itself, should be inherited from CRenderableComponent, not Renderable
 *	So it will have Model and Configuration and there will become some unclear stuff.
 *	Cause CModel wants to be Resource.
 */
-class CText : public CRenderable
+class CText : public CRenderableComponent
 {
 public:
 	CText();
 	~CText();
 	CText(const string &AText);
-	void Render();
 	//const CBox GetBox() const;
 	CFont* GetFont() const;
 	string& GetText();
@@ -786,6 +728,8 @@ public:
 private:
 	string Characters;
 	CResourceRefCounter<CFont> Font;
+
+	void _UpdateSelfModel();
 };
 
 /**
@@ -796,9 +740,9 @@ class CAbstractScene : public CObject
 {
 	friend class CSceneManager;
 public:
-	virtual void AddRenderable(CRenderable *AObject) = 0;
+	virtual void AddRenderable(CRenderableComponent *AObject) = 0;
 	virtual void AddUpdatable(CUpdatable *AObject) = 0;
-	virtual void RemoveRenderable(CRenderable *AObject) = 0;
+	virtual void RemoveRenderable(CRenderableComponent *AObject) = 0;
 	virtual void RemoveUpdatable(CUpdatable *AObject)= 0;
 
 protected:
@@ -820,13 +764,13 @@ class CScene : public CAbstractScene
 {
 	friend class CSceneManager;
 public:
-	virtual void AddRenderable(CRenderable *AObject);
+	virtual void AddRenderable(CRenderableComponent *AObject);
 	virtual void AddUpdatable(CUpdatable *AObject);
-	virtual void RemoveRenderable(CRenderable *AObject);
+	virtual void RemoveRenderable(CRenderableComponent *AObject);
 	virtual void RemoveUpdatable(CUpdatable *AObject);
 
 protected:
-	vector<CRenderable*> RenderableObjects;
+	vector<CRenderableComponent *> RenderableObjects;
 	vector<CUpdatable*> UpdatableObjects;
 	virtual void Render();
 	virtual void Update(float dt);
@@ -840,7 +784,7 @@ protected:
 class CGlobalScene : public CScene
 {
 public:
-	void AddRenderable(CRenderable *AObject);
+	void AddRenderable(CRenderableComponent *AObject);
 	void AddUpdatable(CUpdatable *AObject);
 };
 
@@ -876,7 +820,7 @@ protected:
 *	other @todo: inherit from CRenderComponent and then add to global root object
 *		make update position throug events. Compllicity for nothing, as i call it.
 */
-class CMouseCursor : public CRenderable
+class CMouseCursor : public CRenderableComponent
 {
 public:
 	CBox Box;
@@ -884,12 +828,11 @@ public:
 	{		
 		Box = CBox(Vector2(-2.0f, -2.0f), Vector2(1.0f, 1.0f));
 		SetLayer(512);
-		Color = COLOR_GREEN;
+		SetColor(COLOR_GREEN);
+		SetModel(CRenderManager::CreateModelBox(4.0f, 4.0f, MODEL_TYPE_LINES));
+		CUpdateManager::Instance()->RootGameObject->Attach(this);
 	}
-	void Render()
-	{
-		CRenderManager::Instance()->DrawLinedBox(this, Box);
-	}
+
 };
 
 #endif // _2DE_GRAPHICS_LOW_H_

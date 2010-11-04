@@ -528,10 +528,10 @@ public:
 	}
 
 	template<typename TypeIterator>
-	void Detach(TypeIterator &Iterator)
+	void Detach(const TypeIterator &Iterator)
 	{
 		(*Iterator)->Parent = NULL;
-		std::swap(Iterator, --Children.end());
+		std::swap(*Iterator, *(--Children.end()));
 		Children.pop_back();
 	}
 
@@ -541,8 +541,6 @@ public:
 	}
 
 };
-
-typedef bool (*CObjectCallback)(CObject *Caller);	// FFFFFUUUUU~
 
 // Template class for some manager
 template <typename C>	// C - container type

@@ -5,36 +5,18 @@
 #include "2de_GraphicsLow.h"
 #include "2de_Update.h"
 
-class CUnitBase : public CRenderable, public CUpdatable
-{
-	
-};
-
 class CTileset : public CResource
 {
 public:
 	CTileset();
 	~CTileset();
-
 	bool Load();
 	void Unload();
-
 	bool SaveToFile(const string &AFilename);
-
 	void SetSettings(byte ATileWidth, byte ATileHeight, int AHorNumTiles, int AVerNumTiles);
 	Vector2Array<4> GetCellTC(int CellIndex);
-
-	CTexture* GetTexture() const
-	{
-		assert(Texture != NULL);
-		return Texture;
-	}
-	void SetTexture(const string &TextureName)
-	{
-		Texture = CTextureManager::Instance()->Get(TextureName);
-	}
-
-	void RenderTileSet(); //FOR DEBUGGING
+	CTexture* GetTexture() const;
+	void SetTexture(const string &TextureName);
 
 	unsigned int TileWidth;
 	unsigned int TileHeight;
@@ -50,14 +32,7 @@ private:
 class CTileSetManager : public CCommonManager <list <CTileset*> >/*public CList*/, public CTSingleton<CTileSetManager>
 {
 public:
-	CTileset* GetTileset(const string &ATilesetName)
-	{
-		CTileset *Tileset = NULL;
-		Tileset = dynamic_cast<CTileset*>(Get(ATilesetName));
-		if (Tileset)
-			Tileset->CheckLoad();
-		return Tileset;
-	}
+	CTileset* GetTileset(const string &ATilesetName);
 
 protected:
 	CTileSetManager();
@@ -73,64 +48,21 @@ struct CMapCellInfo
 	Vector2 pos[4];
 };
 
+//	class CLevelMap	- helper class representing some common level map. Had CResourceRefCounter<CTileset> TileSet;
+//	class CCompas - should represent some graphics, always pointing to origin or particular target. Just like compas.
+
 /**
-* Cells: >^
+*	Default title screen for any thing make with engine. Easily disablable and replaceable
+*	Also in CRenerable era was rendered like 
+*	CRenderManager::Instance()->DrawTexturedBox(this, 
+*		CBox(Vector2(-50.0f, -50.0f), Vector2(50.0f, 50.0f)),
+*		Texture, CBox(V2_ZERO, V2_DIR_UP + V2_DIR_RIGHT).GetVertices());
 */
-
-class CLevelMap : /*public CResource,*/ public CRenderable
+class CDefaultTitleScreen : public CRenderableComponent
 {
 public:
-	CLevelMap();
-	CLevelMap(size_t AHorizontalCellsCount, size_t AVerticalCellsCount,
-		const string &ATilesetName, const string &AName);
-	virtual ~CLevelMap();
-	
-	bool GenCells();
-// 	bool LoadFromFile();
-// 	bool SaveToFile();
-	void Render();
-	CMapCellInfo* GetMapCell(size_t HorizontalIndex, size_t VerticalIndex);
-	CMapCellInfo* GetMapCell(Vector2 APosition) // Position inside map with scaling in mind
-	{
-		return GetMapCell((int)APosition.x / (GetScaling() * TileSet->TileWidth), (int)APosition.y / (GetScaling() * TileSet->TileHeight));
-	}
-	CBox GetCellAABB(const Vector2 &V);
-
-private:
-	size_t HorizontalCellsCount;
-	size_t VerticalCellsCount;
-	CMapCellInfo *Cells;
-	CResourceRefCounter<CTileset> TileSet;
-
-	int GetCellIndex(int h, int v);
-};
-
-class CCompas : public CRenderable
-{
-public:
-	CCompas();
-	~CCompas();
-	void Render();
-};
-
-class CDefaultTitleScreen : public CRenderable
-{
-public:
-	CDefaultTitleScreen() : Texture(NULL), TextDeku("Deku"), TextTeam("Team")
-	{
-		int ScrWidth = CGLWindow::Instance()->GetWidth();
-		int ScrHeight = CGLWindow::Instance()->GetHeight();
-		SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
-	}
-	void SetTexture(CTexture* ATexture)
-	{
-		assert(ATexture != NULL);
-		Texture = ATexture;
-	}
-	void Render()
-	{
-		CRenderManager::Instance()->DrawTexturedBox(this, CBox(Vector2(-50.0f, -50.0f), Vector2(50.0f, 50.0f)), Texture, CBox(V2_ZERO, V2_DIR_UP + V2_DIR_RIGHT).GetVertices());
-	}
+	CDefaultTitleScreen();
+	void SetTexture(CTexture* ATexture);
 
 private:
 	CResourceRefCounter<CTexture> Texture;

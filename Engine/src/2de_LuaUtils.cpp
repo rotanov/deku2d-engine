@@ -135,18 +135,11 @@ namespace LuaAPI
 		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -1));
 		if (!rcobj)
 		{
-			// backward compatibility
-			CRenderable *robj = static_cast<CRenderable *>(lua_touserdata(L, -1));
-			if (!robj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
-
-			lua_pushnumber(L, robj->GetPosition().x);
-			lua_pushnumber(L, robj->GetPosition().y);
-			return 2;
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
 		}
 
-		lua_pushnumber(L, rcobj->Configuration.GetPosition().x);
-		lua_pushnumber(L, rcobj->Configuration.GetPosition().y);
+		lua_pushnumber(L, rcobj->GetPosition().x);
+		lua_pushnumber(L, rcobj->GetPosition().y);
 		return 2;
 	}
 
@@ -156,19 +149,15 @@ namespace LuaAPI
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
 
-		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -3));
+		CObject* cobj = static_cast<CObject*>(lua_touserdata(L, -3));
+		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(cobj);
 		if (!rcobj)
 		{
-			// backward compatibility
-			CRenderable *robj = static_cast<CRenderable *>(lua_touserdata(L, -3));
-			if (!robj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
-
-			robj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
 			return 0;
 		}
 
-		rcobj->Configuration.SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		rcobj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 		return 0;
 	}
 
