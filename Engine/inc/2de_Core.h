@@ -380,33 +380,14 @@ private:
 	protected:
 		CGameObject *GameObject;
 
-		bool IsEnd() const
-		{
-			return true;
-		}
-
-		bool IsValid() const
-		{
-			return true;
-		}
+		bool IsEnd() const;
+		bool IsValid() const;
 
 	public:
-		traverse_iterator(CGameObject &AGameObject) : GameObject(&AGameObject)
-		{
-
-		}
-
-		CGameObject& operator *()
-		{
-			return *GameObject;
-		}
-
-		const CGameObject& operator *() const 
-		{
-			return *GameObject;
-		}
+		traverse_iterator(CGameObject &AGameObject);
+		CGameObject& operator *();
+		const CGameObject& operator *() const;
 	};
-
 
 public:	
 	CGameObject *Parent;
@@ -419,58 +400,15 @@ public:
 		unsigned int Index; // Index of current object in it's parent Children
 
 	public:
-		traverse_iterator_bfs(CGameObject &AGameObject) : traverse_iterator(AGameObject), Index(0)
-		{
-			Queue.push(GameObject);
-		}
+		traverse_iterator_bfs(CGameObject &AGameObject);
 
-		bool Ok()
-		{
-			return GameObject != NULL;
-		}
+		bool Ok();
 
-		traverse_iterator_bfs& operator++()
-		{
-			if (GameObject->Parent != NULL && Index + 1 < GameObject->Parent->Children.size())
-			{
-				Index++;
-				GameObject = GameObject->Parent->Children[Index];
-				Queue.push(GameObject);
-			}
-			else if (!Queue.empty())
-			{
-				GameObject = Queue.front();
-				Queue.pop();
-				if (GameObject != NULL && GameObject->Children.size() > 0)
-				{
-					GameObject = GameObject->Children[0];
-					if (GameObject->Children.size() > 0)
-						Queue.push(GameObject);
-				}
-				Index = 0;
-			}
-			else
-			{
-				GameObject = NULL;
-				Index = 0;
-			}
-			return *this;
-		}
+		traverse_iterator_bfs& operator++();
+		traverse_iterator_bfs& operator--();
 
-		traverse_iterator_bfs& operator--()
-		{
-			return *this;
-		}
-
-		bool operator ==(const traverse_iterator_bfs &rhs) const
-		{
-			return true;			
-		}
-
-		bool operator !=(const traverse_iterator_bfs &rhs) const
-		{
-			return !(*this == rhs);
-		}
+		bool operator ==(const traverse_iterator_bfs &rhs) const;
+		bool operator !=(const traverse_iterator_bfs &rhs) const;
 	};
 
 	class traverse_iterator_dfs : public traverse_iterator
@@ -482,50 +420,12 @@ public:
 
 	};
 
-	CGameObject() : Parent(NULL)
-	{
+	CGameObject();
+	virtual ~CGameObject();
 
-	}
+	void Attach(CGameObject* AGameObject);
 
-	virtual ~CGameObject()
-	{
-		while (Children.size() > 0)
-			// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
-			Children.back()->SetParent(Parent);
-		SetParent(NULL);
-	}
-
-	void Attach(CGameObject* AGameObject)
-	{
-		assert(AGameObject != this);
-		if (AGameObject == this)
-		{
-			//log("Warning", "Recursive dependency in scene graph");
-			return;
-		}
-		Children.push_back(AGameObject);
-		AGameObject->SetParent(this);
-	}
-
-	void SetParent(CGameObject* AGameObject)
-	{
-		assert(AGameObject != this);
-		if (AGameObject == this)
-		{
-			//log("Warning", "Recursive dependency in scene graph");
-			return;
-		}
-		if (Parent != NULL)
-		{
-			vector<CGameObject *>::iterator it = std::find(Parent->Children.begin(), Parent->Children.end(), this);
-			Parent->Detach(it);
-		}
-		Parent = AGameObject;
-		if (Parent == NULL)
-			return;
-		if (std::find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
-			Parent->Children.push_back(this);
-	}
+	void SetParent(CGameObject* AGameObject);
 
 	template<typename TypeIterator>
 	void Detach(const TypeIterator &Iterator)
@@ -535,11 +435,7 @@ public:
 		Children.pop_back();
 	}
 
-	virtual void JustDoIt()
-	{
-
-	}
-
+	virtual void JustDoIt();
 };
 
 // Template class for some manager

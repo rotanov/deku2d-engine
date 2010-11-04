@@ -95,6 +95,7 @@ public:
 		HelpText->SetPosition(Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f));
 		HelpText->SetText("Sound: q - play, w - stop\nMusic: a - play, s - stop\nMusic volume: z - down, x - up\n"
 			"You can try to enter file name and click Play\nto play it as music");
+		CUpdateManager::Instance()->RootGameObject->Attach(HelpText);
 	}
 };
 
@@ -106,9 +107,11 @@ public:
 		LoadFileButton = CFactory::Instance()->New<CButton>("LoadFileButton");
 		LoadFileButton->SetBox(CBox(400, 270, 100, 32));
 		LoadFileButton->SetText("Play");
+		CUpdateManager::Instance()->RootGameObject->Attach(LoadFileButton);
 
 		FileNameEdit = CFactory::Instance()->New<CEdit>("FileNameEdit");
 		FileNameEdit->SetBox(CBox(80, 270, 300, 32));
+		CUpdateManager::Instance()->RootGameObject->Attach(FileNameEdit);
 	}
 private:
 	CEdit *FileNameEdit;

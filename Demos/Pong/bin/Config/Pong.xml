@@ -15,5 +15,6 @@
 	<Data>
 		<DataPath value="../../../Data" />
 		<doLoadDefaultResourceList value="true" />
+		<InitScript value="PongInit" />
 	</Data>
 </Configuration>

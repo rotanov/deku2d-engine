@@ -132,6 +132,148 @@ void CObject::ProcessEvent(const CEvent &AEvent)
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CGameObject::traverse_iterator
+
+bool CGameObject::traverse_iterator::IsEnd() const
+{
+	return true;
+}
+
+bool CGameObject::traverse_iterator::IsValid() const
+{
+	return true;
+}
+
+CGameObject::traverse_iterator::traverse_iterator(CGameObject &AGameObject) : GameObject(&AGameObject)
+{
+
+}
+
+CGameObject& CGameObject::traverse_iterator::operator *()
+{
+	return *GameObject;
+}
+
+const CGameObject& CGameObject::traverse_iterator::operator *() const 
+{
+	return *GameObject;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CGameObject::traverse_iterator_bfs
+
+CGameObject::traverse_iterator_bfs::traverse_iterator_bfs(CGameObject &AGameObject) : traverse_iterator(AGameObject), Index(0)
+{
+	Queue.push(GameObject);
+}
+
+bool CGameObject::traverse_iterator_bfs::Ok()
+{
+	return GameObject != NULL;
+}
+
+CGameObject::traverse_iterator_bfs& CGameObject::traverse_iterator_bfs::operator++()
+{
+	if (GameObject->Parent != NULL && Index + 1 < GameObject->Parent->Children.size())
+	{
+		Index++;
+		GameObject = GameObject->Parent->Children[Index];
+		Queue.push(GameObject);
+	}
+	else if (!Queue.empty())
+	{
+		GameObject = Queue.front();
+		Queue.pop();
+		if (GameObject != NULL && GameObject->Children.size() > 0)
+		{
+			GameObject = GameObject->Children[0];
+			if (GameObject->Children.size() > 0)
+				Queue.push(GameObject);
+		}
+		Index = 0;
+	}
+	else
+	{
+		GameObject = NULL;
+		Index = 0;
+	}
+	return *this;
+}
+
+CGameObject::traverse_iterator_bfs& CGameObject::traverse_iterator_bfs::operator--()
+{
+	return *this;
+}
+
+bool CGameObject::traverse_iterator_bfs::operator ==(const CGameObject::traverse_iterator_bfs &rhs) const
+{
+	return true;			
+}
+
+bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse_iterator_bfs &rhs) const
+{
+	return !(*this == rhs);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CGameObject
+
+CGameObject::CGameObject() : Parent(NULL)
+{
+
+}
+
+CGameObject::~CGameObject()
+{
+	while (Children.size() > 0)
+		// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
+		Children.back()->SetParent(Parent);
+	SetParent(NULL);
+}
+
+void CGameObject::Attach(CGameObject* AGameObject)
+{
+	assert(AGameObject != this);
+	assert(AGameObject != NULL);
+	if (AGameObject == this)
+	{
+		//log("Warning", "Recursive dependency in scene graph");
+		return;
+	}
+	Children.push_back(AGameObject);
+	AGameObject->SetParent(this);
+
+	CEvent *AttachedEvent = new CEvent("Attached", this);
+	AttachedEvent->SetData("Name", AGameObject->GetName());
+	CEventManager::Instance()->TriggerEvent(AttachedEvent);
+}
+
+void CGameObject::SetParent(CGameObject* AGameObject)
+{
+	assert(AGameObject != this);
+	if (AGameObject == this)
+	{
+		//log("Warning", "Recursive dependency in scene graph");
+		return;
+	}
+	if (Parent != NULL)
+	{
+		vector<CGameObject *>::iterator it = std::find(Parent->Children.begin(), Parent->Children.end(), this);
+		Parent->Detach(it);
+	}
+	Parent = AGameObject;
+	if (Parent == NULL)
+		return;
+	if (std::find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
+		Parent->Children.push_back(this);
+}
+
+void CGameObject::JustDoIt()
+{
+
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CSingletonManager
 
 CSingletonManager *CSingletonManager::_instance = NULL;

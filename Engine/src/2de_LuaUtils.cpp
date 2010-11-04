@@ -10,17 +10,27 @@ namespace LuaAPI
 {
 	// some of these functions are really will be left in the API, others are just temporarily ones for testing..
 
+	// userdata GetObject(string Name)
+	int GetObject(lua_State *L)
+	{
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetObject API call");
 
+		lua_pushlightuserdata(L, CFactory::Instance()->Get<CObject>(lua_tostring(L, -1)));
+		return 1;
+	}
+
+	// void Attach(component Destination, component Object)
 	int Attach(lua_State *L)
 	{
 		CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
 		GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -2));
 		if (!GameObjectSource)
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
 
 		GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -1));
 		if (!GameObjectDestination)
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
 
 		GameObjectSource->Attach(GameObjectDestination);
 		return 0;
@@ -36,13 +46,6 @@ namespace LuaAPI
 		return 0;
 	}
 
-	// bool IsSpacePressed()
-	int IsSpacePressed(lua_State *L)
-	{
-		lua_pushboolean(L, (CEngine::Instance()->keys[SDLK_SPACE]) ? true : false);
-		return 1;
-	}
-
 	// number GetDeltaTime()
 	int GetDeltaTime(lua_State *L)
 	{
@@ -50,8 +53,6 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// example of using light user data objects
-	
 	// userdata CreateNewText(string Name)
 	int CreateNewText(lua_State *L)
 	{
@@ -71,36 +72,6 @@ namespace LuaAPI
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetText API call");
 
 		lua_pushstring(L, text->GetText().c_str());
-		return 1;
-	}
-
-	// userdata GetTextObject(string Name)
-	int GetTextObject(lua_State *L)
-	{
-		if (!lua_isstring(L, -1))
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetTextObject API call");
-
-		CText *result = CFactory::Instance()->Get<CText>(lua_tostring(L, -1));
-
-		if (!result)
-			return 0;
-
-		lua_pushlightuserdata(L, result);
-		return 1;
-	}
-
-	// userdata GetFontObject(string Name)
-	int GetFontObject(lua_State *L)
-	{
-		if (!lua_isstring(L, -1))
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetFontObject API call");
-
-		CFont *result = CFactory::Instance()->Get<CFont>(lua_tostring(L, -1));
-
-		if (!result)
-			return 0;
-
-		lua_pushlightuserdata(L, result);
 		return 1;
 	}
 
@@ -530,15 +501,13 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	luaopen_base(State);
 
+	lua_register(State, "GetObject", &LuaAPI::GetObject);
 	lua_register(State, "Attach", &LuaAPI::Attach);
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
 	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
-	lua_register(State, "IsSpacePressed", &LuaAPI::IsSpacePressed);
 	lua_register(State, "CreateNewText", &LuaAPI::CreateNewText);
 	lua_register(State, "SetText", &LuaAPI::SetText);
 	lua_register(State, "GetText", &LuaAPI::GetText);
-	lua_register(State, "GetTextObject", &LuaAPI::GetTextObject);
-	lua_register(State, "GetFontObject", &LuaAPI::GetFontObject);
 	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
 	lua_register(State, "GetFont", &LuaAPI::GetFont);
 	lua_register(State, "GetPosition", &LuaAPI::GetPosition);
@@ -580,6 +549,11 @@ void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
 			CLuaVirtualMachine::Instance()->CreateLuaObject(Name, this);
 			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
 		}
+	}
+	else if (AEvent.GetName() == "Attached")
+	{
+		if (AEvent.GetData<string>("Name") == Name)
+			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnAttached");
 	}
 	else
 	{

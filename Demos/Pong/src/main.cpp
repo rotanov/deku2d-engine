@@ -1,9 +1,6 @@
 #include "2de_Engine.h"
 #include "Pong.h"
 
-
-CPongGame *PongGame = NULL;
-
 class CChangeSceneToPackMan : public CAbstractAction
 {
 public:
@@ -78,10 +75,8 @@ bool CCustomStateHandler::OnInitialize()
 	CAbstractScene *PongScene = CSceneManager::Instance()->CreateScene();
 	CAbstractScene *SomeScene = CSceneManager::Instance()->GetCurrentScene();
 	CSceneManager::Instance()->SetCurrentScene(PongScene);
-	//PongGame = CFactory::Instance()->New<CPongGame>("PongGame");
+
 	//CSceneManager::Instance()->SetCurrentScene(SomeScene);
-
-
 	//CTimeredAction<CChangeSceneToPackMan> *Action = CFactory::Instance()->New<CTimeredAction<CChangeSceneToPackMan> >("Change Scene Timered Action");
 	//Action->Action.PongScn = PongScene;
 	//Action->SetLife(1.0f);
@@ -95,8 +90,6 @@ bool CCustomStateHandler::OnInitialize()
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_Vector2"));
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_CBox"));
 
-	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("PongPlayers"));
-
 	CRenderableComponent *PlayerOne = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 	CRenderableComponent *PlayerTwo = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 	CRenderableComponent *Ball = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_BALL_SIZE, PONG_BALL_SIZE));
@@ -106,22 +99,15 @@ bool CCustomStateHandler::OnInitialize()
 	CScriptableComponent *BallScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("BallScript"));
 	CScriptableComponent *PongGame = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongGameScript"));
 
-	PlayerOne->Attach(PlayerOneScriptable);
-	PlayerTwo->Attach(PlayerTwoScriptable);
-	Ball->Attach(BallScriptable);
-
-	CUpdateManager::Instance()->RootGameObject->Attach(PlayerOne);
-	CUpdateManager::Instance()->RootGameObject->Attach(PlayerTwo);
-	CUpdateManager::Instance()->RootGameObject->Attach(Ball);
-	CUpdateManager::Instance()->RootGameObject->Attach(PongGame);
-
-	// receiving Create event is useless on initialization... this is HACK:
+	CFactory::Instance()->Add(PlayerOne, "PlayerOne");
+	CFactory::Instance()->Add(PlayerTwo, "PlayerTwo");
+	CFactory::Instance()->Add(Ball, "Ball");
 	CFactory::Instance()->Add(PlayerOneScriptable, "PlayerOneScriptable");
 	CFactory::Instance()->Add(PlayerTwoScriptable, "PlayerTwoScriptable");
 	CFactory::Instance()->Add(BallScriptable, "BallScriptable");
 	CFactory::Instance()->Add(PongGame, "PongGame");
 
-	// when there will be runner, that constructs objects from XML, it should trigger Create event for all objects after they're attached to each other... or we should use something like OnAttach...
+	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 
 	return true;
 }
