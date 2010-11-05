@@ -147,8 +147,8 @@ namespace LuaAPI
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
 
-		CObject* cobj = static_cast<CObject*>(lua_touserdata(L, -3));
-		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(cobj);
+		//CObject* cobj = static_cast<CObject*>();
+		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -3));
 		if (!rcobj)
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");

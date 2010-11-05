@@ -5,7 +5,7 @@
 #include "2de_Math.h"
 #include "2de_Update.h"
 
-class CPhysicalObject : public CUpdatable
+class CPhysicalObject /*: public CUpdatable*/
 {
 public:
 	CBox *box;

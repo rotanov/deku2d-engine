@@ -269,11 +269,6 @@ void CResourceManager::PerformUnload()
 	Log("INFO", "Resource manager cleared auto-unload queue");
 }
 
-void CResourceManager::Update(float dt)
-{
-	SinceLastUnload += dt;
-}
-
 float CResourceManager::GetAutoUnloadInterval() const
 {
 	return AutoUnloadInterval;
@@ -287,6 +282,7 @@ void CResourceManager::SetAutoUnloadInterval(float AAutoUnloadInterval)
 CResourceManager::CResourceManager() : SinceLastUnload(0.0f), AutoUnloadInterval(15.0f)
 {
 	SetName("ResourceManager");
+	CEventManager::Instance()->Subscribe("EveryFrame", this);
 }
 
 CResourceManager::~CResourceManager()
@@ -297,3 +293,10 @@ CResourceManager::~CResourceManager()
 	}
 }
 
+void CResourceManager::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "EveryFrame")
+	{
+		SinceLastUnload += CEngine::Instance()->GetDeltaTime();
+	}
+}

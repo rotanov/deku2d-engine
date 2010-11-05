@@ -813,10 +813,6 @@ bool CRenderManager::DrawObjects()
 	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
 	{
 		data = *i;
-		if (data->isDestroyed() || !data->GetVisibility() ||
-			!CSceneManager::Instance()->InScope(data->GetScene()))
-			continue;
-		data->Render();
 #if defined(_2DE_DEBUG_DRAW_BOXES)
 		DrawLinedBox(&TempRenderInfo, data->GetBox());
 #endif
@@ -854,12 +850,26 @@ void CRenderManager::TransfomationTraverse(CGameObject *Next)
 		if (RenderComponent != NULL)
 		{
 			Transformator.PushTransformation(RenderComponent->GetTransformation());
+			if (RenderComponent->isDestroyed() || !RenderComponent->GetVisibility() ||
+				!CSceneManager::Instance()->InScope(RenderComponent->GetScene()))
+			{
+				Transformator.PopTransformation();
+				continue;
+			}
 			Renderer->PushModel(&RenderComponent->GetConfiguration(), RenderComponent->GetModel());
 			Transformator.PopTransformation();
 		}
 	}
 	for(unsigned int i = 0; i < Next->Children.size(); i++)
+	{
+		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
+		if (RenderComponent != NULL)
+			if (RenderComponent->isDestroyed() || !RenderComponent->GetVisibility() ||
+				!CSceneManager::Instance()->InScope(RenderComponent->GetScene()))
+				continue;
+
 		TransfomationTraverse(Next->Children[i]);
+	}
 	if (RenderComponent != NULL)
 		Transformator.PopTransformation();
 }
@@ -915,6 +925,7 @@ CModel* CRenderManager::CreateModelText(const CText *AText)
 		dx += Font->Boxes[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
 	}
 	CModel *Model = new CModel(MODEL_TYPE_TRIANGLES, AText->GetFont()->GetTexture(), 6 * AText->Length(), Vertices, TexCoords);
+	CFactory::Instance()->Add(Model);
 	delete [] Vertices;
 	delete [] TexCoords;
 	return Model;
@@ -1214,23 +1225,23 @@ void CScene::AddRenderable(CRenderableComponent *AObject)
 	CRenderManager::Instance()->Add(AObject);
 }
 
-void CScene::AddUpdatable(CUpdatable *AObject)
-{
-	UpdatableObjects.push_back(AObject);
-	CUpdateManager::Instance()->Add(AObject);
-}
+// void CScene::AddUpdatable(CUpdatable *AObject)
+// {
+// 	UpdatableObjects.push_back(AObject);
+// 	CUpdateManager::Instance()->Add(AObject);
+// }
 
-void CScene::RemoveUpdatable(CUpdatable *AObject)
-{
-	vector<CUpdatable *>::iterator it = find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject);
-
-	if (it == UpdatableObjects.end())
-		return;
-	
-	UpdatableObjects.erase(it);
-
-	//AObject->PutIntoScene()
-}
+// void CScene::RemoveUpdatable(CUpdatable *AObject)
+// {
+// 	vector<CUpdatable *>::iterator it = find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject);
+// 
+// 	if (it == UpdatableObjects.end())
+// 		return;
+// 	
+// 	UpdatableObjects.erase(it);
+// 
+// 	//AObject->PutIntoScene()
+// }
 
 void CScene::RemoveRenderable(CRenderableComponent *AObject)
 {
@@ -1244,10 +1255,10 @@ void CScene::RemoveRenderable(CRenderableComponent *AObject)
 
 CScene::~CScene()
 {
-	for (vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
-	{
-		(*i)->SetDestroyed();
-	}
+// 	for (vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
+// 	{
+// 		(*i)->SetDestroyed();
+// 	}
 	for (vector<CRenderableComponent*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
 	{
 		(*i)->SetDestroyed();
@@ -1262,10 +1273,10 @@ void CGlobalScene::AddRenderable(CRenderableComponent *AObject)
 	CRenderManager::Instance()->Add(AObject);
 }
 
-void CGlobalScene::AddUpdatable(CUpdatable *AObject)
-{
-	CUpdateManager::Instance()->Add(AObject);
-}
+// void CGlobalScene::AddUpdatable(CUpdatable *AObject)
+// {
+// 	CUpdateManager::Instance()->Add(AObject);
+// }
 
 //////////////////////////////////////////////////////////////////////////
 // CSceneManager
@@ -1439,6 +1450,9 @@ void CVertexDataHolder::RenderPrimitive( GLenum Type )
 	glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder::Colors);
 	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
 	glDrawArrays(Type, 0, CPrmitiveVertexDataHolder::VertexCount);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void CVertexDataHolder::Grow()
@@ -1629,11 +1643,13 @@ void CFFPRenderer::CBetterVertexHolder::RenderPrimitive(GLuint Type)
 {
 	if (VertexCount == 0)
 		return;
+	glColorPointer(4, GL_FLOAT, 0, Colors);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-	glColorPointer(4, GL_FLOAT, 0, Colors);
 	glDrawArrays(Type, 0, VertexCount);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 }
 
 void CFFPRenderer::CBetterVertexHolder::Clear()
@@ -1802,15 +1818,20 @@ void CFFPRenderer::CBetterTextureVertexHolder::RenderPrimitive(GLuint Type)
 {
 	if (VertexCount == 0)
 		return;
+
+	glColorPointer(4, GL_FLOAT, 0, Colors);
+	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-	glColorPointer(4, GL_FLOAT, 0, Colors);
-	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+
 	glDrawArrays(Type, 0, VertexCount);
 
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void CFFPRenderer::CBetterTextureVertexHolder::Clear()
@@ -2023,13 +2044,15 @@ void CRenderableComponent::SetPosition(const Vector2 &APosition)
 	Configuration.SetPosition(APosition);
 }
 
-const CModel* CRenderableComponent::GetModel() const
+CModel* CRenderableComponent::GetModel() const
 {
 	return Model;
 }
 
-void CRenderableComponent::SetModel(const CModel *AModel)
+void CRenderableComponent::SetModel(CModel *AModel)
 {
+	if (Model == NULL)
+		delete Model;
 	Model = AModel;
 }
 

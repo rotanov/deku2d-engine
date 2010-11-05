@@ -13,10 +13,8 @@ public:
 bool CCustomStateHandler::OnInitialize()
 {
 	//CNinjaStoryGame *NinjaStoryGame = new CNinjaStoryGame();
-	CAbstractScene *SomeNewScene = CSceneManager::Instance()->CreateScene();
-	CSceneManager::Instance()->SetCurrentScene(SomeNewScene);
-
-	CTemporaryBouncingTextTest *BouncingTextTest = CFactory::Instance()->New<CTemporaryBouncingTextTest>("BouncingTextTest");
+	//CAbstractScene *SomeNewScene = CSceneManager::Instance()->CreateScene();
+	//CSceneManager::Instance()->SetCurrentScene(SomeNewScene);
 
 	return true;
 }

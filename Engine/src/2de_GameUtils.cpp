@@ -159,15 +159,24 @@ CTileset* CTileSetManager::GetTileset(const string &ATilesetName)
 
 //////////////////////////////////////////////////////////////////////////
 // Default title screen
-CDefaultTitleScreen::CDefaultTitleScreen() : Texture(NULL), TextDeku("Deku"), TextTeam("Team")
+CDefaultTitleScreen::CDefaultTitleScreen()
 {
 	int ScrWidth = CGLWindow::Instance()->GetWidth();
 	int ScrHeight = CGLWindow::Instance()->GetHeight();
 	SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
+	CUpdateManager::Instance()->RootGameObject->Attach(this);
+	this->Attach(&TextTeam);
+	this->Attach(&TextDeku);
+	TextDeku.SetPosition(Vector2(40.0f, -47.0f));
+	TextTeam.SetPosition(Vector2(40.0f, -74.0f));
+	TextDeku.SetScaling(2);
+	TextTeam.SetScaling(2);
+	TextDeku.SetText("Deku");
+	TextTeam.SetText("Team");
 }
 
 void CDefaultTitleScreen::SetTexture(CTexture* ATexture)
 {
 	assert(ATexture != NULL);
-	Texture = ATexture;
+	SetModel(CRenderManager::CreateModelBox(256, 256, MODEL_TYPE_TRIANGLES, ATexture));
 }

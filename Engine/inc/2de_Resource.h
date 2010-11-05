@@ -154,7 +154,7 @@ private:
 * CResourceManager - resources manager.
 */
 
-class CResourceManager : public CTSingleton<CResourceManager>, public CUpdatable
+class CResourceManager : public CTSingleton<CResourceManager>
 {
 public:
 	bool LoadResources();
@@ -167,7 +167,7 @@ public:
 
 	void PerformUnload();
 
-	void Update(float dt);
+	void ProcessEvent(const CEvent &AEvent);
 
 	float GetAutoUnloadInterval() const;
 	void SetAutoUnloadInterval(float AAutoUnloadInterval);

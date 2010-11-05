@@ -266,8 +266,8 @@ public:
 	void SetScaling(float AScaling);
 	void SetLayer(int Layer);
 	void SetPosition(const Vector2 &APosition);
-	const CModel* GetModel() const;
-	void SetModel(const CModel *AModel);
+	CModel* GetModel() const;
+	void SetModel(CModel *AModel);
 	void SetTransformation(const CTransformation &ATransformation);
 	const CTransformation& GetTransformation() const;
 	CTransformation& GetTransformation();
@@ -277,7 +277,7 @@ public:
 
 private:
 	CRenderConfig Configuration;
-	const CModel *Model;
+	CResourceRefCounter<CModel> Model;
 	CBox Box; //	Axis Aligned Bounding Box for culling
 	CAbstractScene *Scene;
 	bool Visible;
@@ -614,36 +614,75 @@ public:
 			Vertices[i * 2 + 1] = Vertices[(i+1)%Precision * 2];
 
 		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, Precision * 2, Vertices);//CFactory::Instance()->New<CModel>("New circle cmodel");
+		CFactory::Instance()->Add(Result);
 		
 		return Result;
 		SAFE_DELETE_ARRAY(Vertices);
 	}
 
-	static CModel* CreateModelBox(float Width, float Height, EModelType AModelType = MODEL_TYPE_LINES)
+	static CModel* CreateModelBox(float Width, float Height, 
+		EModelType AModelType = MODEL_TYPE_LINES, CTexture * ATexture = NULL,
+		const Vector2Array<4> &ATexCoords = V2_QUAD_BIN)
 	{
-		Vector2 Vertices[8];
+		CModel *Result = NULL;
 		float wd2 = Width * 0.5f, hd2 = Height * 0.5f;
-		Vertices[0] = Vector2(-wd2, -hd2);
-		Vertices[1] = Vector2( wd2, -hd2);
+		switch(AModelType)
+		{
+		case MODEL_TYPE_LINES:
+			{
+				Vector2 Vertices[8];
+				Vertices[0] = Vector2(-wd2, -hd2);
+				Vertices[1] = Vector2( wd2, -hd2);
 
-		Vertices[2] = Vector2( wd2, -hd2);
-		Vertices[3] = Vector2( wd2,  hd2);
+				Vertices[2] = Vector2( wd2, -hd2);
+				Vertices[3] = Vector2( wd2,  hd2);
 
-		Vertices[4] = Vector2( wd2,  hd2);
-		Vertices[5] = Vector2(-wd2,  hd2);
+				Vertices[4] = Vector2( wd2,  hd2);
+				Vertices[5] = Vector2(-wd2,  hd2);
 
-		Vertices[6] = Vector2(-wd2,  hd2);
-		Vertices[7] = Vector2(-wd2, -hd2);
-		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 8, Vertices);
+				Vertices[6] = Vector2(-wd2,  hd2);
+				Vertices[7] = Vector2(-wd2, -hd2);
+				Result = new CModel(AModelType, 0, 8, Vertices);
+				CFactory::Instance()->Add(Result);
+			}
+			break;
+		case MODEL_TYPE_TRIANGLES:
+			{
+				Vector2 Vertices[6];
+				Vector2 TexCoords[6];
+				Vertices[0] = Vector2(-wd2, -hd2);
+				Vertices[1] = Vector2( wd2, -hd2);
+				Vertices[2] = Vector2( wd2, hd2);
+
+				Vertices[3] = Vector2(-wd2, -hd2);
+				Vertices[4] = Vector2( wd2,  hd2);
+				Vertices[5] = Vector2(-wd2,  hd2);
+
+				TexCoords[0] = ATexCoords[0];
+				TexCoords[1] = ATexCoords[1];
+				TexCoords[2] = ATexCoords[2];
+
+				TexCoords[3] = ATexCoords[0];
+				TexCoords[4] = ATexCoords[2];
+				TexCoords[5] = ATexCoords[3];
+
+				Result = new CModel(AModelType, ATexture, 6, Vertices, TexCoords);
+				CFactory::Instance()->Add(Result);
+			}
+			break;
+		default:
+			break;
+		}
 		return Result;
 	}
 
-	static CModel* CreateModelLine(const Vector2 &v0, const Vector2 &v1, EModelType AModelType = MODEL_TYPE_LINES)
+	static CModel* CreateModelLine(const Vector2 &v0, const Vector2 &v1)
 	{
 		Vector2 Vertices[2];
 		Vertices[0] = v0;
 		Vertices[1] = v1;
 		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
+		CFactory::Instance()->Add(Result);
 		return Result;
 	}
 
@@ -741,9 +780,9 @@ class CAbstractScene : public CObject
 	friend class CSceneManager;
 public:
 	virtual void AddRenderable(CRenderableComponent *AObject) = 0;
-	virtual void AddUpdatable(CUpdatable *AObject) = 0;
+	//virtual void AddUpdatable(CUpdatable *AObject) = 0;
 	virtual void RemoveRenderable(CRenderableComponent *AObject) = 0;
-	virtual void RemoveUpdatable(CUpdatable *AObject)= 0;
+	//virtual void RemoveUpdatable(CUpdatable *AObject)= 0;
 
 protected:
 	virtual void Render() = 0;
@@ -765,13 +804,13 @@ class CScene : public CAbstractScene
 	friend class CSceneManager;
 public:
 	virtual void AddRenderable(CRenderableComponent *AObject);
-	virtual void AddUpdatable(CUpdatable *AObject);
+	//virtual void AddUpdatable(CUpdatable *AObject);
 	virtual void RemoveRenderable(CRenderableComponent *AObject);
-	virtual void RemoveUpdatable(CUpdatable *AObject);
+	//virtual void RemoveUpdatable(CUpdatable *AObject);
 
 protected:
 	vector<CRenderableComponent *> RenderableObjects;
-	vector<CUpdatable*> UpdatableObjects;
+	//vector<CUpdatable*> UpdatableObjects;
 	virtual void Render();
 	virtual void Update(float dt);
 	CScene(){}
@@ -785,7 +824,7 @@ class CGlobalScene : public CScene
 {
 public:
 	void AddRenderable(CRenderableComponent *AObject);
-	void AddUpdatable(CUpdatable *AObject);
+	//void AddUpdatable(CUpdatable *AObject);
 };
 
 /**

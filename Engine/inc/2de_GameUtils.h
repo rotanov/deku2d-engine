@@ -65,7 +65,6 @@ public:
 	void SetTexture(CTexture* ATexture);
 
 private:
-	CResourceRefCounter<CTexture> Texture;
 	CText TextDeku;
 	CText TextTeam;
 };

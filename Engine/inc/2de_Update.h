@@ -5,24 +5,19 @@
 
 class CAbstractScene;	// Separate header, may be?
 
-class CUpdatable : public virtual CObject
-{
-public:
-	bool Active;
-	CUpdatable();
-	~CUpdatable();
-	bool isDead() const;
-	void SetDead();
-	virtual void Update(float dt) = 0;
-	void PutIntoScene(CAbstractScene *AScene);
-	CAbstractScene* GetScene() const;
+/*
+	interesting part of interface:
+		bool Active;
+		bool isDead() const;
+		void SetDead();
+		virtual void Update(float dt) = 0;
+		void PutIntoScene(CAbstractScene *AScene);
+		CAbstractScene* GetScene() const;
+		CAbstractScene *Scene;
+		bool Dead;	
+*/
 
-private:
-	bool Dead;
-	CAbstractScene *Scene;
-};
-
-class CUpdateManager : public CCommonManager <list<CUpdatable*> >, public CTSingleton <CUpdateManager>
+class CUpdateManager : public CTSingleton <CUpdateManager>
 {
 public:	
 	bool UpdateObjects();
@@ -31,41 +26,6 @@ public:
 protected:
 	CUpdateManager();
 	friend class CTSingleton<CUpdateManager>;
-};
-
-class CAbstractAction
-{
-public:
-	virtual void Execute() = 0;
-};
-
-template <typename ActionT>
-class CTimeredAction : public CUpdatable
-{
-public:	
-	CTimeredAction() : Action(), Life(0.0f), Age(0.0f)
-	{
-
-	}
-	void SetLife(float ALife)
-	{
-		Life = ALife;
-	}
-	void Update(float dt)
-	{
-		Age += dt;
-		if (Age >= Life)
-		{
-			Action.Execute();
-			SetDestroyed();
-		}
-	}
-
-	ActionT Action;
-
-private:
-	float Life;
-	float Age;
 };
 
 class CTimerComponent : public CGameObject

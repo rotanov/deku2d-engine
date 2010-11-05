@@ -203,20 +203,12 @@
 				RelativePath=".\src\main.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\src\Pong.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="inc"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\inc\Pong.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource"
