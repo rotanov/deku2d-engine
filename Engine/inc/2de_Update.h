@@ -68,4 +68,25 @@ private:
 	float Age;
 };
 
+class CTimerComponent : public CGameObject
+{
+public:
+	CTimerComponent();
+	CTimerComponent(float AInterval);
+
+	void ProcessEvent(const CEvent &AEvent);
+
+	bool isEnabled() const;
+	void SetEnabled(bool AEnabled);
+
+	float GetInterval() const;
+	void SetInterval(float AInterval);
+
+private:
+	bool Enabled;
+	float Interval;
+	float Accumulated;
+
+};
+
 #endif // _2DE_UPDATE_H_

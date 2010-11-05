@@ -99,6 +99,10 @@ bool CCustomStateHandler::OnInitialize()
 	CScriptableComponent *BallScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("BallScript"));
 	CScriptableComponent *PongGame = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongGameScript"));
 
+	CTimerComponent *MemoryUsageUpdateTimer = new CTimerComponent(3);
+	MemoryUsageUpdateTimer->SetEnabled(true);
+
+	CFactory::Instance()->Add(MemoryUsageUpdateTimer, "MemoryUsageUpdateTimer");
 	CFactory::Instance()->Add(PlayerOne, "PlayerOne");
 	CFactory::Instance()->Add(PlayerTwo, "PlayerTwo");
 	CFactory::Instance()->Add(Ball, "Ball");

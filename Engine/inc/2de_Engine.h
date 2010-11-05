@@ -49,8 +49,7 @@ public:
 	void Pause();
 	void ShutDown();
 
-	//bool AddEventFunction(EventFunc func);		// Until event system created.
-	//bool AddKeyInputFunction(KeyInputFunc AKeyInputFunction, CObject* AKeyFuncCaller);
+	bool isFinalizing() const;
 
 	// Toggle - это переключить, а тут по смыслу - Set.. и геттеров нема - неудобно...
 	void ToggleExitOnEscape(bool AdoExitOnEscape); // it seems to me, that it's too much overkill for such small option...  И как ты предлагаешь её выставлять, блеа? Ящитаю всё ок.
@@ -94,6 +93,7 @@ private:
 	bool LimitFPS();
 	
 	bool Initialized;
+	bool Finalizing;
 	float dt;
 	bool isHaveFocus;
 	bool userReInit;

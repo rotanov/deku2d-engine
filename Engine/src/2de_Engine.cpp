@@ -10,6 +10,7 @@ CEngine::CEngine()
 	memset(keys, 0, sizeof(keys));
 
 	Initialized = false;
+	Finalizing = false;
 	isHaveFocus = true;
 	userReInit = false;
 
@@ -155,6 +156,7 @@ bool CEngine::Initialize()
 
 void CEngine::Finalize()
 {
+	Finalizing = true;
 	CResourceRefCounterState::DisableRC();
 	CFactory::Instance()->DestroyAll();
 	CSingletonManager::Instance()->Clear();
@@ -473,6 +475,11 @@ void CEngine::ShutDown()
 	SDL_Event Event;
 	Event.type = SDL_QUIT;
 	SDL_PushEvent(&Event);
+}
+
+bool CEngine::isFinalizing() const
+{
+	return Finalizing;
 }
 
 void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)

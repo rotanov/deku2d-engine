@@ -62,6 +62,8 @@ CObject& CObject::operator=(const CObject &AObject)
 
 CObject::~CObject()
 {
+	if (!CEngine::Instance()->isFinalizing())
+		CEventManager::Instance()->UnsubscribeFromAll(this);
 }
 
 void CObject::IncRefCount()

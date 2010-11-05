@@ -9,7 +9,11 @@ function BallScriptable:OnCreate()
 	SubscribeToEvent("Attached", self.object)
 end
 
-function BallScriptable:OnAttached()
+function BallScriptable:OnAttached(event)
+	if GetEventData(event, "Name") ~= GetName(self.object) then
+		return
+	end
+
 	self.Parent = GetParent(self.object)
 	self:Initialize()
 end

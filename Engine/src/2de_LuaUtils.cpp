@@ -20,6 +20,17 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// string GetName(userdata Object)
+	int GetName(lua_State *L)
+	{
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetName API call");
+
+		lua_pushstring(L, obj->GetName().c_str());
+		return 1;
+	}
+
 	// void Attach(component Destination, component Object)
 	int Attach(lua_State *L)
 	{
@@ -215,6 +226,31 @@ namespace LuaAPI
 		return 0;
 	}
 
+	// userdata GetEventSender(userdata Event)
+	int GetEventSender(lua_State *L)
+	{
+		CEvent *obj = static_cast<CEvent *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetEventSender API call");
+
+		lua_pushlightuserdata(L, obj->GetSender());
+		return 1;
+	}
+
+	// string GetEventData(userdata Event, string DataName)
+	int GetEventData(lua_State *L)
+	{
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetEventData API call");
+
+		CEvent *obj = static_cast<CEvent *>(lua_touserdata(L, -2));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetEventData API call");
+
+		lua_pushstring(L, obj->GetData<string>(lua_tostring(L, -1)).c_str());
+		return 1;
+	}
+
 	// number sin(number n)
 	int sin(lua_State *L)
 	{
@@ -276,6 +312,13 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// number GetMemoryUsage()
+	int GetMemoryUsage(lua_State *L)
+	{
+		lua_pushnumber(L, CLuaVirtualMachine::Instance()->GetMemoryUsage());
+		return 1;
+	}
+
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -315,6 +358,8 @@ string CScript::GetScriptText() const
 
 CLuaVirtualMachine::CLuaVirtualMachine()
 {
+	SetName("CLuaVirtualMachine");
+
 	State = luaL_newstate();
 	if (!State)
 	{
@@ -392,56 +437,14 @@ void CLuaVirtualMachine::RegisterAPIFunction(const string &AName, lua_CFunction 
 	lua_register(State, AName.c_str(), AFunc);
 }
 
-// TODO: add possibility to call functions with arguments and return values..
-
 bool CLuaVirtualMachine::CallFunction(const string &AFunctionName)
 {
-	if (!State)
-		return false;
-
-	lua_getglobal(State, AFunctionName.c_str());
-
-	if (lua_pcall(State, 0, 0, 0) != 0)
-	{
-		LastError = lua_tostring(State, -1);
-		Log("ERROR", "Lua: %s", LastError.c_str());
-		return false;
-	}
-
-	return true;
+	return CLuaFunctionCall(AFunctionName).Call();
 }
 
 bool CLuaVirtualMachine::CallMethodFunction(const string &AObjectName, const string &AFunctionName)
 {
-	if (!State)
-		return false;
-
-	lua_getglobal(State, AObjectName.c_str());
-	if (lua_isnil(State, -1))
-	{
-		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such object", AObjectName.c_str(), AFunctionName.c_str());
-		lua_pop(State, 1);
-		return false;
-	}
-
-	lua_getfield(State, -1, AFunctionName.c_str());
-	if (lua_isnil(State, -1))
-	{
-		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such function", AObjectName.c_str(), AFunctionName.c_str());
-		lua_pop(State, 2);
-		return false;
-	}
-
-	lua_insert(State, -2);
-
-	if (lua_pcall(State, 1, 0, 0) != 0)
-	{
-		LastError = lua_tostring(State, -1);
-		Log("ERROR", "Lua: %s", LastError.c_str());
-		return false;
-	}
-
-	return true;
+	return CLuaFunctionCall(AObjectName, AFunctionName).Call();
 }
 
 /**
@@ -502,6 +505,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	luaopen_base(State);
 
 	lua_register(State, "GetObject", &LuaAPI::GetObject);
+	lua_register(State, "GetName", &LuaAPI::GetName);
 	lua_register(State, "Attach", &LuaAPI::Attach);
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
 	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
@@ -518,15 +522,141 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
 	lua_register(State, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
 	lua_register(State, "TriggerEvent", &LuaAPI::TriggerEvent);
+	lua_register(State, "GetEventSender", &LuaAPI::GetEventSender);
+	lua_register(State, "GetEventData", &LuaAPI::GetEventData);
 	lua_register(State, "sin", &LuaAPI::sin);
 	lua_register(State, "cos", &LuaAPI::cos);
 	lua_register(State, "Abs", &LuaAPI::Abs);
 	lua_register(State, "Random_Int", &LuaAPI::Random_Int);
 	lua_register(State, "Random_Float", &LuaAPI::Random_Float);
 	lua_register(State, "GetParent", &LuaAPI::GetParent);
+	lua_register(State, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
 
 	lua_pushnumber(State, PI);
 	lua_setglobal(State, "PI");
+}
+
+//////////////////////////////////////////////////////////////////////////
+// CLuaFunctionCall
+
+CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCount /*= 0*/) : FunctionName(AFunctionName), ArgumentsCount(0),
+	ResultsCount(AResultsCount), Called(false), Broken(false)
+{
+	State = CLuaVirtualMachine::Instance()->State;
+	if (!State)
+	{
+		Broken = true;
+		return;
+	}
+
+	OldStackTop = lua_gettop(State);
+	lua_getglobal(State, FunctionName.c_str());
+}
+
+CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount /*= 0*/) : ObjectName(AObjectName),
+	FunctionName(AFunctionName), ResultsCount(AResultsCount), ArgumentsCount(1), Called(false), Broken(false)
+{
+	State = CLuaVirtualMachine::Instance()->State;
+	if (!State)
+	{
+		Broken = true;
+		return;
+	}
+
+	OldStackTop = lua_gettop(State);
+
+	lua_getglobal(State, ObjectName.c_str());
+	if (lua_isnil(State, -1))
+	{
+		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such object", ObjectName.c_str(), FunctionName.c_str());
+		lua_pop(State, 1);
+		Broken = true;
+		return;
+	}
+
+	lua_getfield(State, -1, FunctionName.c_str());
+	if (lua_isnil(State, -1))
+	{
+		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such function", ObjectName.c_str(), FunctionName.c_str());
+		lua_pop(State, 2);
+		Broken = true;
+		return;
+	}
+
+	lua_insert(State, -2);
+}
+
+CLuaFunctionCall::~CLuaFunctionCall()
+{
+	if (!Broken)
+		lua_settop(State, OldStackTop);
+}
+
+bool CLuaFunctionCall::Call()
+{
+	if (Broken)
+		return false;
+	if (Called)
+	{
+		Log("ERROR", "Can't call the same function again, create new CLuaFunctionCall object");
+		return false;
+	}
+
+	Called = true;
+
+	if (lua_pcall(State, ArgumentsCount, ResultsCount, 0) != 0)
+	{
+		CLuaVirtualMachine::Instance()->LastError = lua_tostring(State, -1);
+		Log("ERROR", "Lua: %s", CLuaVirtualMachine::Instance()->LastError.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+void CLuaFunctionCall::PushArgument(lua_Number Argument)
+{
+	if (Broken)
+		return;
+	if (Called)
+	{
+		Log("ERROR", "Can't push arguments after function call");
+		return;
+	}
+
+	lua_pushnumber(State, Argument);
+
+	ArgumentsCount++;
+}
+
+void CLuaFunctionCall::PushArgument(const string &Argument)
+{
+	if (Broken)
+		return;
+	if (Called)
+	{
+		Log("ERROR", "Can't push arguments after function call");
+		return;
+	}
+
+	lua_pushstring(State, Argument.c_str());
+
+	ArgumentsCount++;
+}
+
+void CLuaFunctionCall::PushArgument(void *Argument)
+{
+	if (Broken)
+		return;
+	if (Called)
+	{
+		Log("ERROR", "Can't push arguments after function call");
+		return;
+	}
+
+	lua_pushlightuserdata(State, Argument);
+
+	ArgumentsCount++;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -540,8 +670,6 @@ CScriptableComponent::CScriptableComponent(CScript *AScript)
 
 void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
 {
-	// TODO: possibility to get event parameters from script
-
 	if (AEvent.GetName() == "Create")
 	{
 		if (AEvent.GetData<string>("Name") == Name)
@@ -550,35 +678,11 @@ void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
 			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
 		}
 	}
-	else if (AEvent.GetName() == "Attached")
-	{
-		if (AEvent.GetData<string>("Name") == Name)
-			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnAttached");
-	}
 	else
 	{
-		CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "On" + AEvent.GetName());
+		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
+		fc.PushArgument(const_cast<CEvent *>(&AEvent));
+		fc.Call();
 	}
 }
-
-
-// маленький помощник, чтобы самим не считать количество lua_push...() и lua_pop()
-// 	пока не юзается, но может понадобится, так что оставлю..
-/*class LuaStackGuard
-{
-public:
-	LuaStackGuard(lua_State* L) : luaState_(L)
-	{
-		top_ = lua_gettop(L);
-	}
-
-	~LuaStackGuard()
-	{
-		lua_settop(luaState_, top_);
-	}
-
-private:
-	lua_State* luaState_;
-	int top_;
-};*/
 

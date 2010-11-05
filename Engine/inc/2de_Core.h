@@ -248,6 +248,12 @@ C Type2Val()
 	return ValueGenerator.ID;
 }
 
+template<typename T>
+struct identity
+{
+	typedef T type;
+};
+
 
 /**
 * CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
@@ -256,12 +262,6 @@ C Type2Val()
 class CVariantConvert	// Looks more like a namespace
 {
 public:
-	template<typename T>
-	struct identity
-	{
-		typedef T type;
-	};
-
 	template<typename T>
 	static T from_string_impl(const string &s, identity<T>)
 	{
@@ -299,7 +299,7 @@ public:
 template<typename T>
 T from_string(const string &s)
 {
-	return CVariantConvert::from_string_impl(s, CVariantConvert::identity<T>());
+	return CVariantConvert::from_string_impl(s, identity<T>());
 }
 
 class CObject; // forward declaration
