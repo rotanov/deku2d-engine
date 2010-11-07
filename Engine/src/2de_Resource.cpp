@@ -73,12 +73,18 @@ void CResource::SetLoadSource(byte *AData, size_t ALength)
 
 bool CResource::Load()
 {
+	if (Loaded)
+		return true;
+
 	Log("INFO", "Resources: LOAD - %s", GetName().c_str());
 	return (Loaded = FirstTimeLoaded = true);
 }
 
 void CResource::Unload()
 {
+	if (!Loaded)
+		return;
+
 	Log("INFO", "Resources: UNLOAD - %s", GetName().c_str());
 	Loaded = false;
 }

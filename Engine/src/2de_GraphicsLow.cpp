@@ -99,8 +99,9 @@ const CTransformation& CRenderConfig::GetTransformation() const
 {
 	return Transformation;
 }
+
 //////////////////////////////////////////////////////////////////////////
-// CRenderable
+// CRenderableComponent
 
 CRenderableComponent::~CRenderableComponent()
 {
@@ -110,7 +111,7 @@ CRenderableComponent::~CRenderableComponent()
 }
 
 // Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--
-const CBox CRenderableComponent::GetBox() const
+const CBox CRenderableComponent::GetBox() const		// why const CBox? it's a copy of CBox object, not a reference, why should it be const?..
 {
  	CBox TempBox = Box;
  	TempBox.Min *= GetScaling();
@@ -930,6 +931,7 @@ CModel* CRenderManager::CreateModelText(const CText *AText)
 	delete [] TexCoords;
 	return Model;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CFontManager
 
@@ -1505,7 +1507,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 
 		if (!flag)
 		{
-			TexturedGeometry.push_back(new CBetterTextureVertexHolder());
+			TexturedGeometry.push_back(new CBetterTextureVertexHolder()); // memory leak's here
 			TexIDs.push_back(AModel->GetTexture()->GetTexID());
 			index = TexIDs.size() - 1;
 		}
@@ -1874,6 +1876,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 
 /////////////////////////////////////////////////////////////////////////
 // CModel
+
 CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
 			   CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
 			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 

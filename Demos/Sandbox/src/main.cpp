@@ -19,18 +19,20 @@ public:
 	void OnFinalize();
 };
 
-class CSomeUpdatable : public CUpdatable
+class CSomeUpdatable : public CObject
 {
 public:
-	void Update(float dt)
+	void ProcessEvent(const CEvent &AEvent)
 	{
-		CRenderableComponent *MagicCircle = CFactory::Instance()->Get<CRenderableComponent>("Magic circle");
-		MagicCircle->SetAngle(MagicCircle->GetAngle() + 1000.0f * dt);
-		CRenderableComponent *temptext = CFactory::Instance()->Get<CRenderableComponent>("Mouse cursor");
-		temptext->SetAngle(temptext->GetAngle() + 100.0f * dt);
-		CRenderableComponent *onemore = CFactory::Instance()->Get<CRenderableComponent>("Magic square");
-		onemore->SetAngle(temptext->GetAngle() + 100.0f * dt);
-
+		if (AEvent.GetName() == "EveryFrame")
+		{
+			CRenderableComponent *MagicCircle = CFactory::Instance()->Get<CRenderableComponent>("Magic circle");
+			MagicCircle->SetAngle(MagicCircle->GetAngle() + 1000.0f * CEngine::Instance()->GetDeltaTime());
+			CRenderableComponent *temptext = CFactory::Instance()->Get<CRenderableComponent>("Mouse cursor");
+			temptext->SetAngle(temptext->GetAngle() + 100.0f * CEngine::Instance()->GetDeltaTime());
+			CRenderableComponent *onemore = CFactory::Instance()->Get<CRenderableComponent>("Magic square");
+			onemore->SetAngle(temptext->GetAngle() + 100.0f * CEngine::Instance()->GetDeltaTime());
+		}
 	}
 };
 

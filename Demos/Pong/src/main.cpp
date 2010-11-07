@@ -1,16 +1,6 @@
 #include "2de_Engine.h"
 #include "Pong.h"
 
-class CChangeSceneToPackMan : public CAbstractAction
-{
-public:
-	CAbstractScene *PongScn;
-	virtual void Execute()
-	{
-		CSceneManager::Instance()->SetCurrentScene(PongScn);
-	}	
-};
-
 class CTempKeyBindMan : public CObject
 {
 public:
@@ -77,9 +67,6 @@ bool CCustomStateHandler::OnInitialize()
 	CSceneManager::Instance()->SetCurrentScene(PongScene);
 
 	//CSceneManager::Instance()->SetCurrentScene(SomeScene);
-	//CTimeredAction<CChangeSceneToPackMan> *Action = CFactory::Instance()->New<CTimeredAction<CChangeSceneToPackMan> >("Change Scene Timered Action");
-	//Action->Action.PongScn = PongScene;
-	//Action->SetLife(1.0f);
 
 	CTempKeyBindMan *tkbm = CFactory::Instance()->New<CTempKeyBindMan>("TempKeyBindMan");
 
