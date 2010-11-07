@@ -59,8 +59,8 @@
 #define DIRENT_H
 
 #include <windows.h>
-#include <string.h>
-#include <assert.h>
+#include <cstring>
+#include <cassert>
 
 #define DIRENT_MAX_PATH 1024
 
@@ -69,7 +69,7 @@ typedef struct dirent {
   char d_name[DIRENT_MAX_PATH + 1];
 
   /* file attributes */
-    unsigned char d_type;
+  unsigned char d_type;
 } dirent;
 
 /* File types for `d_type'.  */

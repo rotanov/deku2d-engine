@@ -3,13 +3,12 @@
 
 #include "2de_Core.h"
 
-extern const unsigned int IMAGE_SHROOM_TITLE_WIDTH;
-extern const unsigned int IMAGE_SHROOM_TITLE_HEIGHT;
+extern unsigned int  IMAGE_SHROOM_TITLE_SIZE;
 extern char IMAGE_SHROOM_TITLE_DATA[];
 
-extern const unsigned int IMAGE_DEFAULT_FONT_WIDTH;
-extern const unsigned int IMAGE_DEFAULT_FONT_HEIGHT;
-extern char IMAGE_DEFAULT_FONT_DATA[];
+// extern const unsigned int IMAGE_DEFAULT_FONT_WIDTH;
+// extern const unsigned int IMAGE_DEFAULT_FONT_HEIGHT;
+// extern char IMAGE_DEFAULT_FONT_DATA[];
 
 
 class CImageData
@@ -24,6 +23,7 @@ public:
 	CImageData();
 	~CImageData();
 	bool LoadFromFile(const string &Filename);
+	bool LoadFromMemory(void * Ptr, ILuint Size);
 };
 
 #endif // _2DE_IMAGE_UTILS_H_

@@ -339,7 +339,7 @@ bool CScript::Load()
 	}
 	else if (Source == LOAD_SOURCE_MEMORY)
 	{
-		CMemory mem(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
+		CMemory mem(static_cast<byte*>(MemoryLoadData), MemoryLoadLength, CStorage::OPEN_MODE_READ);
 		ScriptText = mem.GetContent();
 	}
 

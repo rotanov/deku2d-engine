@@ -5,17 +5,42 @@
 
 class CAbstractScene;	// Separate header, may be?
 
-/*
-	interesting part of interface:
-		bool Active;
-		bool isDead() const;
-		void SetDead();
-		virtual void Update(float dt) = 0;
-		void PutIntoScene(CAbstractScene *AScene);
-		CAbstractScene* GetScene() const;
-		CAbstractScene *Scene;
-		bool Dead;	
-*/
+// Instead let there be visitor
+
+class IVisitorBase
+{
+public:	
+	virtual ~IVisitorBase() {};
+};
+
+template <typename T>
+class IVisitor : public IVisitorBase
+{
+public:
+	virtual void Visit(T&) = 0;
+};
+
+class IVisitableBase
+{
+public:
+	virtual ~IVisitableBase() {}
+	virtual void Accept(IVisitorBase&) = 0;
+
+protected:
+	template <class T> 
+	static void ConcreteAccept(T& visited, IVisitorBase& visitor)
+	{
+		if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
+			ptr->Visit(visited);
+		return;
+	}
+};
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
 
 class CUpdateManager : public CTSingleton <CUpdateManager>
 {

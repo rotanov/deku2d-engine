@@ -164,20 +164,7 @@ float CRenderableComponent::Height()
 //////////////////////////////////////////////////////////////////////////
 // CGLImagedata
 
-CGLImageData::CGLImageData()
-{
-	TexID = Width = Height = BPP = 0;
-	//doCleanData = true;
-	Data = NULL;
-}
-
-CGLImageData::~CGLImageData()
-{
-	if (glIsTexture(TexID))
-		glDeleteTextures(1, &TexID);
-}
-
-bool CGLImageData::MakeTexture()
+bool CTexture::MakeTexture()
 {
 	if (Data == NULL)
 		return false;
@@ -195,7 +182,7 @@ bool CGLImageData::MakeTexture()
 	return true;
 }
 
-bool CGLImageData::LoadTexture(const string &Filename)
+bool CTexture::LoadTexture(const string &Filename)
 {
 	if (!LoadFromFile(Filename))
 	{
@@ -215,22 +202,29 @@ bool CGLImageData::LoadTexture(const string &Filename)
 	return true;
 }
 
-bool CGLImageData::LoadTexture(size_t AWidth, size_t AHeight, const byte* Address)
+bool CTexture::LoadTexture(void* Address, unsigned int Size)
 {
-	doCleanData = false;
-	Data = const_cast<byte *>(Address);
-	Width = AWidth;
-	Height = AHeight;
-	BPP = 4;
+	if (!LoadFromMemory(Address, Size))
+	{
+		Log("ERROR", "Can't load image->");
+		return false;
+	}
+
 	if (!MakeTexture())
 	{
 		Log("ERROR", "Can't load texture in video memory");
 		return false;
 	}
+
+	if (doCleanData)
+	{
+		delete [] Data;
+		Data = NULL;
+	}
 	return true;
 }
 
-GLuint CGLImageData::GetTexID()
+GLuint CTexture::GetTexID()
 {
 	if (TexID == 0)
 		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
@@ -445,7 +439,7 @@ void CGLWindow::SetCaption(const string &ACaption)
 
 void CGLWindow::SetBackgroundColor(const RGBAf &AColor)
 {
-	glClearColor(AColor.x, AColor.y, AColor.z, AColor.w);
+	glClearColor(AColor.r, AColor.g, AColor.b, AColor.a);
 }
 
 void CGLWindow::SetBPP(byte ABPP)
@@ -529,14 +523,13 @@ bool CFont::Load()
 
 		// assert(MemoryLoadData != NULL);
 
-		while (*MemoryLoadData)
-			MemoryLoadData++;
-
-		MemoryLoadData++;
+		while ((*static_cast<byte*>(MemoryLoadData)))
+			MemoryLoadData = static_cast<byte*>(MemoryLoadData) + 1;
+		MemoryLoadData = static_cast<byte*>(MemoryLoadData) + 1;
 
 		Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
 
-		memcpy(Boxes, MemoryLoadData, sizeof(Boxes));
+		memcpy(Boxes, static_cast<byte*>(MemoryLoadData), sizeof(Boxes));
 		for (int i = 0; i < 256; i++)
 		{
 			if (Boxes[i].Min.x > Boxes[i].Max.x)
@@ -944,11 +937,13 @@ CFontManager::CFontManager() : DefaultFont(NULL)
 void CFontManager::Init()
 {
 	CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
-	DefaultFontTexture->LoadTexture(IMAGE_DEFAULT_FONT_WIDTH, IMAGE_DEFAULT_FONT_HEIGHT, reinterpret_cast<byte *>(IMAGE_DEFAULT_FONT_DATA));
+	DefaultFontTexture->SetLoadSource(BINARY_DATA_FONT_FONT, BINARY_DATA_FONT_FONT_SIZE);
+	//DefaultFontTexture->LoadTexture(IMAGE_DEFAULT_FONT_WIDTH, IMAGE_DEFAULT_FONT_HEIGHT, reinterpret_cast<byte *>(IMAGE_DEFAULT_FONT_DATA));
+	DefaultFontTexture->Load();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// wtf is it? incapsulate it please or whatever...
 	
 	DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
-	DefaultFont->SetLoadSource(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_DEFAULT_FONT_SIZE);
+	DefaultFont->SetLoadSource(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_FONT_FONT_SIZE);
 	DefaultFont->SetPersistent(true);
 	DefaultFont->Load(); // maybe no need to explicitly call Load here..
 
@@ -996,12 +991,17 @@ GLuint CTexture::GetTexID() const
 
 CTexture::CTexture()
 {
+	TexID = Width = Height = BPP = 0;
+	doCleanData = true;
+	Data = NULL;
 	SetName("CTexture");
 	CTextureManager::Instance()->Add(this);
 }
 
 CTexture::~CTexture()
 {
+	if (glIsTexture(TexID))
+		glDeleteTextures(1, &TexID);
 	Unload();
 	CTextureManager::Instance()->Remove(this);
 }
@@ -1027,7 +1027,8 @@ bool CTexture::Load()
 	else if (Source = LOAD_SOURCE_MEMORY)
 	{
 		// TODO: implement loading from memory..
-		throw std::logic_error("Unimplemented!!");
+		if (!LoadTexture(MemoryLoadData, MemoryLoadLength))
+			return false;
 	}
 
 	CResource::Load();

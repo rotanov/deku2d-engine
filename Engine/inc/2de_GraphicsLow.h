@@ -46,31 +46,13 @@ const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
 const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
 const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 
+extern const unsigned int BINARY_DATA_FONT_FONT_SIZE;
+extern char BINARY_DATA_FONT_FONT[];
+
 extern const unsigned int BINARY_DATA_DEFAULT_FONT_SIZE;
 extern char BINARY_DATA_DEFAULT_FONT[];
 
 class CAbstractScene;
-
-/**
-*	CGLImageData - like CImageData, but can load itself as a texture;
-*	It's a little strange, i think, but it's working and has not caused any trouble
-*	so I'll leave that hierarchy the way it is now 'til the problems occure.
-*/
-class CGLImageData : public CImageData
-{
-public:
-	CGLImageData();
-	virtual ~CGLImageData();
-	bool LoadTexture(const string &Filename);
-	bool LoadTexture(size_t AWidth, size_t AHeight, const byte* Address);	// From memory
-	virtual GLuint GetTexID();
-
-protected:
-	GLuint TexID;
-
-private:
-	bool MakeTexture();
-};
 
 /**
 *	CTexture — is as CGLImageData, but also has CResource functionality
@@ -78,9 +60,18 @@ private:
 *	save to file, but function is defined @todo: implement saving of textures to
 *	file. And don't even try to think when we'll need such possibility
 */
-class CTexture : public CGLImageData, public CResource
+class CTexture : public CImageData, public CResource
 {
 public:
+	bool LoadTexture(const string &Filename);
+	bool LoadTexture(void* Address, unsigned int Size);
+	virtual GLuint GetTexID();
+
+
+	GLuint TexID;
+
+	bool MakeTexture();
+
 	CTexture();
 	virtual ~CTexture();
 	bool Load();

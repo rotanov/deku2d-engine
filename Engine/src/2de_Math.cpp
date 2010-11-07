@@ -61,17 +61,14 @@ Vector2& Vector2::operator ^=(const Matrix2& M)
 bool SqareEq(float a, float b, float c, float &t0, float &t1)
 {
 	float d = b * b - 4.0f * a * c;
-	if (d < 0)	return false;
+	if (d < 0.0f)
+		return false;
 	d = static_cast<float>(sqrt(d));
-	float oo2a = 1 / (2.0f * a);
+	float oo2a = 1.0f / (2.0f * a);
 	t0 = (- b + d) * oo2a;
 	t1 = (- b - d) * oo2a;
 	if (t1 > t0)
-	{
-		float t = t0;
-		t0 = t1;
-		t1 = t;
-	}
+		std::swap(t0, t1);
 	return true;
 }
 
@@ -144,7 +141,7 @@ bool CPolygon::Collide(const CPolygon &A,
 		iNumAxes++;
 	}
 
-	for (int j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
+	for (unsigned int j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
 	{
 		Vector2 E0 = A[j];
 		Vector2 E1 = A[i];
@@ -160,7 +157,7 @@ bool CPolygon::Collide(const CPolygon &A,
 		iNumAxes++;
 	}
 
-	for (int j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
+	for (unsigned int j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
 	{
 		Vector2 E0 = B[j];
 		Vector2 E1 = B[i];
@@ -173,8 +170,9 @@ bool CPolygon::Collide(const CPolygon &A,
 			return false;
 		}
 
-		iNumAxes++;
+		iNumAxes++;	
 	}
+
 
 	if (B.GetVertexCount() == 2)
 	{
@@ -220,7 +218,7 @@ void GetInterval(const CPolygon &Polygon, const Vector2& xAxis, float& min, floa
 {
 	min = max = (Polygon[0] * xAxis);
 
-	for (int i = 1; i < Polygon.GetVertexCount(); i ++)
+	for (unsigned int i = 1; i < Polygon.GetVertexCount(); i ++)
 	{
 		float d = (Polygon[i] * xAxis);
 		if (d < min) min = d; else if (d > max) max = d;
@@ -610,7 +608,7 @@ void CPolygon::CalcBox()
 	Box.Min.y = 0xffffff;
 	Box.Max.x = -0xffffff;
 	Box.Max.x = -0xffffff;
-	for (int i = 0; i < VerticesCount; i++)
+	for (unsigned int i = 0; i < VerticesCount; i++)
 	{
 		Box.Add(Vertices[i]);
 	}

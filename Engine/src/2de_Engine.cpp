@@ -120,9 +120,9 @@ bool CEngine::Initialize()
 
 	//	Создание текстуры из памяти
 	CTexture *TitleScreenShroomTexture;
-	TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
-	TitleScreenShroomTexture->LoadTexture(IMAGE_SHROOM_TITLE_WIDTH, IMAGE_SHROOM_TITLE_HEIGHT,
-		reinterpret_cast<byte *>(IMAGE_SHROOM_TITLE_DATA));
+ 	TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
+ 	TitleScreenShroomTexture->SetLoadSource(IMAGE_SHROOM_TITLE_DATA, IMAGE_SHROOM_TITLE_SIZE);
+	TitleScreenShroomTexture->Load();
 
 	// Создание и установка текущей сцены
 	CAbstractScene *TitleScreen = CSceneManager::Instance()->CreateScene();

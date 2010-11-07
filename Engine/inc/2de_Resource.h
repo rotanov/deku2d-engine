@@ -99,7 +99,7 @@ public:
 
 	ELoadSource GetLoadSource() const;
 	void SetLoadSource(const string &AFilename);
-	void SetLoadSource(byte *AData, size_t ALength);
+	void SetLoadSource(void *AData, size_t ALength);
 
 	virtual bool Load();
 	virtual void Unload();
@@ -121,7 +121,7 @@ public:
 protected:
 	ELoadSource Source;
 	string Filename;
-	byte *MemoryLoadData;
+	void *MemoryLoadData;
 	size_t MemoryLoadLength;
 
 	bool Loaded;

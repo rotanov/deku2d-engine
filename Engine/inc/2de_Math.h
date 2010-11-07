@@ -201,7 +201,6 @@ public:
 	{
 		return Vector2(-x, -y);
 	}
-	// Cкалярное произведение векторов. / Dot product.
 	__INLINE float operator *(const Vector2 &V) const
 	{
 		return x * V.x + y * V.y;
@@ -867,16 +866,10 @@ public:
 	}
 };
 
-union Vector4
+class Vector4
 {
-	struct
-	{
-		float x, y, z, w;
-	};
-	struct
-	{
-		float r, g, b, a;
-	};
+public:
+	float x, y, z, w;
 
 	__INLINE float operator[](int i)
 	{
@@ -1014,37 +1007,121 @@ union Vector4
 };
 
 typedef Vector4 Quaternion;
-typedef Vector4 RGBAf;
-
-// <чятик, чятик (радость)>
 
 /**
-/	я не совсем понимаю, зачем это делать именно так? разве нам нужны для 
-/	цвета векторные операции? да нет, не нужны.. зато очень нужна возможность
-/	конвертировать RGBAub в RGBAf, например.. и как это сделаешь теперь, если это
-/	всего-лишь тайпдеф от вектора.. а ведь я щас как раз делаю CGUIStyle и заебусь
-/	высчитывать флоаты для дефолтных цветов...
+*	Despite Vector4 (aka Quaternion) and RGBAf have much in common they
+*	have some difference and I decided get rid of union and put them into
+*	separate classes without common base class. That's it.
 */
+class RGBAf
+{
+public:
+		float r, g, b, a;
 
-/**
-/	Ты ошибаешься и нам как раз таки нужны векторные операции для цвета.
-/	Фишку с конвертацией можно прокрутить унаследовава от Vector4. Опять же,
-/	Я хочу ещё работу с HSV добавить.
-*/
+		RGBAf(float Ar = 0.0f, float Ag = 0.0f, float Ab = 0.0f, float Aa = 1.0f) : r(Ar), g(Ag),	b(Ab), a(Aa) {}
 
-/**
-/	ну вот если унаследовать, тогда другой разговор - это будет хорошо..
-/	но не тайпдефить же..
-*/
+		__INLINE RGBAf& operator =(const RGBAf& rhs)
+		{
+			r = rhs.r;
+			g = rhs.g;
+			b = rhs.b;
+			a = rhs.a;
+			return *this;
+		}
 
-// </чятик, чятик (радость)>
+		__INLINE RGBAf operator +(const RGBAf &rhs) const
+		{			
+			return RGBAf(r + rhs.r , g + rhs.g, b + rhs.b, a + rhs.a);
+		}
+
+		__INLINE RGBAf operator -(const RGBAf &rhs) const
+		{
+			return RGBAf(r - rhs.r , g - rhs.g, b - rhs.b, a - rhs.a);
+		}
+
+		__INLINE RGBAf operator *(float rhs) const
+		{
+			return RGBAf(r * rhs, g * rhs, b * rhs, a * rhs);
+		}
+
+		__INLINE RGBAf operator /(float rhs) const
+		{
+			float rhs_1 = 1.0f / rhs;
+			return (*this) * rhs_1;
+		}
+
+		__INLINE RGBAf& operator +=(const RGBAf &rhs)
+		{
+			r += rhs.r;
+			g += rhs.g;
+			b += rhs.b;
+			a += rhs.a;
+			return *this;
+		}
+
+		__INLINE RGBAf& operator -=(const RGBAf &rhs)
+		{
+			r -= rhs.r;
+			g -= rhs.g;
+			b -= rhs.b;
+			a -= rhs.a;
+			return *this;
+		}
+
+		__INLINE RGBAf& operator *=(float rhs)
+		{
+			this->r *= rhs;
+			this->g *= rhs;
+			this->b *= rhs;
+			this->a *= rhs;
+			return *this;
+		}
+
+		__INLINE RGBAf& operator /=(float rhs)
+		{
+			float rhs_1 = 1.0f / rhs;
+			return (*this) *= rhs_1;
+		}
+
+		__INLINE bool operator ==(const RGBAf &rhs) const
+		{
+			return Equal(r, rhs.r) && Equal(g, rhs.g) && Equal(b, rhs.b) && Equal(a, rhs.a);
+		}
+
+		__INLINE bool operator !=(const RGBAf &rhs) const
+		{
+			return !((*this) == rhs);
+		}
+
+		__INLINE static RGBAf Random(const RGBAf &vMin, const RGBAf &vMax)
+		{
+			return RGBAf
+				(
+					Random_Float(vMin.r, vMax.r),
+					Random_Float(vMin.g, vMax.g),
+					Random_Float(vMin.b, vMax.b),
+					Random_Float(vMin.a, vMax.a)
+				);
+		}
+
+		__INLINE float& operator [](unsigned int i)
+		{
+			assert(i < 4);
+			return *(&r + i);
+		}
+
+		__INLINE float operator [](unsigned int i) const
+		{
+			assert(i < 4);
+			return *(&r + i);
+		}
+};
 
 /**
 *	CBox - rectangle representation for common needs.	
 *	It is always Axis Aligned.
 *	If you need more general rectangle - use CRentangle geometry representation
 */
-
 class CBox
 {
 public:
@@ -1090,32 +1167,6 @@ public:
 */
 
 bool SqareEq(float a, float b, float c, float &t0, float &t1);
-
-/**
-*	CalcFrustumVertices(...) - функция вычисляет координаты вершин
-*	усеченной пирамиды, образуемой пирамидой камеры и 2мя плоскостями отсечения.
-*/
-
-void CalcFrustumVertices(float fovy, float aspect, float znear, float zfar, Vector3 cpos, Vector3 cat,Vector3 cup, Vector3 v[8]);
-
-/**
-*	PointsPlaneSide(...) - фунция проверяет лежат ли все точки
-*	по одну сторону от плоскост или нет. если нет то возвращает 0
-*	если да - то знак полуплоскости
-*/
-
-int PointsPlaneSide(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
-int PointPlanesSide(Vector3 *a, Vector3 *n,int *iV, Vector3 offset, Matrix3 R, Vector3 point, int fnum, Vector3 &normal, float &depth);
-int PointPlanesSideEx(Vector3 *a, Vector3 *n, unsigned short *iV, Vector3 offset, Matrix3 R, Vector3 point,int  fnum, Vector3 &normal, float &depth, Vector3 scaling);
-
-
-float FindMTD(Vector3 a, Vector3 n,Vector3 offset,Matrix3 R, Vector3 *points, int pnum);
-bool CullBox(Vector3 _min, Vector3 _max, Vector3 pos, Vector3 scaling, Matrix3 R,
-				float fovy, float aspect, float znear, float zfar,
-				Vector3 cpos, Vector3 cat, Vector3 cup);
-
-// непонятная функция. походу я её откуда-то рипанул, надо разобраться
-int inclusion(Vector3 *p, int *iV,  int nVert,  int nFaces,  Vector3 q);
 
 /**
 *	HalfPlaneSign - определяет знак полуплоскости точки x относительно прямой, лежащей на отрезке [u0, u1].
@@ -1257,14 +1308,14 @@ public:
 	//bool CheckOrienation();
 };
 
-class CSegment : public CGeometry  // Are we really need it?
+class CSegment : public CGeometry
 {
 public:
 	Vector2 v0, v1;
 
 	CSegment(const Vector2 &Av0, const Vector2 &Av1) : v0(Av0), v1(Av1)
 	{
-		assert(v0 != v1);	// I suppose we don't really need such segments, but we would like to notice the occurrence of such ones
+		assert(v0 != v1);
 	}
 };
 

@@ -32,6 +32,8 @@
 	#pragma warning (disable	:	4005)	// Macro redefinition
 	#pragma warning (disable	:	4714)	// __forceinline not inlined
 	#pragma warning (disable	:	4005)	// Macro redefinition
+	#pragma warning (disable	:	4355)	// this in initializer list
+	#pragma warning (disable	:	4505)	// for dirent: unreferenced function has been removed
 
 	#define VC_LEANMEAN
 	#define _CRT_SECURE_NO_DEPRECATE
@@ -390,6 +392,15 @@ private:
 	};
 
 public:	
+	bool Active;
+// 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
+// 	void SetDead();
+//	virtual void Update(float dt) = 0;
+//	void PutIntoScene(CAbstractScene *AScene);
+// 	CAbstractScene* GetScene() const;
+// 	CAbstractScene *Scene;
+	bool Dead;	
+
 	CGameObject *Parent;
 	std::vector<CGameObject*> Children;
 
@@ -417,6 +428,10 @@ public:
 		std::vector<std::pair<CGameObject*, unsigned int> > Path;
 
 	public:
+		traverse_iterator_dfs(CGameObject &AGameObject) : traverse_iterator(AGameObject)
+		{
+
+		}
 
 	};
 
