@@ -1,6 +1,8 @@
 #include "2de_Math.h"
 
 #include <cstring>
+#include <cstdio>
+using namespace std;
 
 template<typename T>
 __INLINE void SAFE_DELETE_ARRAY(T*& a)
@@ -339,6 +341,7 @@ bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, 
 {
 	if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
 		return false;
+
 	if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
 		return false;
 	if (!IntersectLines(u0, u1, v0, v1, Result))
