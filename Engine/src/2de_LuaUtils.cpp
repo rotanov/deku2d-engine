@@ -342,6 +342,11 @@ bool CScript::Load()
 		CMemory mem(static_cast<byte*>(MemoryLoadData), MemoryLoadLength, CStorage::OPEN_MODE_READ);
 		ScriptText = mem.GetContent();
 	}
+	else
+	{
+		Log("ERROR", "Can't load script: no load source specified");
+		return false;
+	}
 
 	CResource::Load();
 
@@ -425,7 +430,6 @@ bool CLuaVirtualMachine::RunScript(CScript *AScript)
 		return RunString(AScript->GetScriptText());
 	}
 
-	// can't happen
 	return false;
 }
 

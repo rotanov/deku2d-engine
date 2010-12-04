@@ -60,13 +60,11 @@ class CAbstractScene;
 *	save to file, but function is defined @todo: implement saving of textures to
 *	file. And don't even try to think when we'll need such possibility
 */
+
 class CTexture : public CImageData, public CResource
 {
 public:
-	bool LoadTexture(const string &Filename);
-	bool LoadTexture(void* Address, unsigned int Size);
 	virtual GLuint GetTexID();
-
 
 	GLuint TexID;
 
@@ -92,6 +90,7 @@ public:
 *	CTextureManager — actually a useless class used as a container for textures;
 *	in order to access texture; So @todo: get rid of CTextureManager
 */
+
 class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSingleton <CTextureManager> 
 {
 protected:
@@ -104,6 +103,7 @@ protected:
 *	which affects to object position, orientation and size;
 *	@todo: access to transformation matrices
 */
+
 class CTransformation
 {
 private:
@@ -140,6 +140,7 @@ public:
 *	texture and texture coordinates. 
 *	@todo: should be resource;
 */
+
 enum EModelType
 {
 	MODEL_TYPE_NOT_A_MODEL = -1,
@@ -177,6 +178,7 @@ private:
 *	Configuration of object, that represents object transformation
 *	and some render options.
 */
+
 enum EBlendingMode
 {
 	BLEND_MODE_OPAQUE = 0,
@@ -223,6 +225,7 @@ private:
 /**
 *	CRenderableComponent - AOP way replacement for CRenderable.
 */
+
 class CRenderableComponent : public CGameObject
 {
 public:
@@ -678,20 +681,10 @@ public:
 	}
 
 	static CModel* CreateModelText(const CText *AText);
+
+	void SetSwapInterval(int interval = 1);
 };
 
-#if defined(_WIN32)
-	#define SWAP_INTERVAL_PROC PFNWGLSWAPINTERVALFARPROC 
-#elif defined(__linux)
-	#define SWAP_INTERVAL_PROC PFNGLXSWAPINTERVALSGIPROC
-#endif
-
-#ifndef APIENTRY
-#define APIENTRY
-#endif
-
-typedef int (APIENTRY *SWAP_INTERVAL_PROC)(int);
-void setVSync(int interval = 1);
 
 /**
 *	CGLWindow Provides functionality for creating window and holding info about window.

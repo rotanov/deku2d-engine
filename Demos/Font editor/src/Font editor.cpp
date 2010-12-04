@@ -278,7 +278,7 @@ void CFontEditor::Render()
 	}
 }
 
-void CFontEditor::Update(float dt)
+/*void CFontEditor::Update(float dt)
 {
 	MousePosition = CEngine::Instance()->MousePos;
 
@@ -344,7 +344,7 @@ void CFontEditor::Update(float dt)
 	}
 	
 	return;
-}
+}*/
 
 CFontEditor::~CFontEditor()
 {

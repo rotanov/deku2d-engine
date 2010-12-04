@@ -16,52 +16,48 @@ bool CImageData::LoadFromFile(const string &Filename)
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 	ilEnable(IL_ORIGIN_SET);
 	ilBindImage(ILID);
+
 	if (!ilLoadImage(Filename.c_str()))
 		return false;
-	Width = ilGetInteger(IL_IMAGE_WIDTH);
-	Height = ilGetInteger(IL_IMAGE_HEIGHT);
 
-	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	InitImageData();
 
-	Data = new byte[Width * Height * 4];
-	ilCopyPixels(0, 0, 0, Width, Height, 1, IL_RGBA, IL_UNSIGNED_BYTE, Data);
-
-	// хорошо бы писать в лог что-то поумнее, но для того, чтобы достать вменяемый текст ошибки, нужно подключать ILU: iluGetErrorString(ilGetError())
-	// учитывая, что из него никаких больше функций не нужно, мне его подключать не охота..
-	if (ilGetError() != IL_NO_ERROR)
-		Log("ERROR", "IL failed");
-
-	//bpp = ilGetInteger(IL_IMAGE_FORMAT);
-	//bpp = ilGetInteger(IL_IMAGE_BPP);	// если вдруг на будущее, то IL_IMAGE_BYTES_PER_PIXEL
-	BPP = 4;
 	ilDeleteImage(ILID);
 	return true;
 }
 
-bool CImageData::LoadFromMemory(void * Ptr, ILuint Size)
+bool CImageData::LoadFromMemory(void *Ptr, ILuint Size)
 {
 	unsigned int ILID = ilGenImage();
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 	ilEnable(IL_ORIGIN_SET);
 	ilBindImage(ILID);
-	if (!ilLoadL(IL_PNG, Ptr, Size))
+
+	if (!ilLoadL(IL_TYPE_UNKNOWN, Ptr, Size))
 		return false;
+
+	InitImageData();
+
+	ilDeleteImage(ILID);
+	return true;
+}
+
+// well, i just was not able to cook some good name for this function...
+void CImageData::InitImageData()
+{
 	Width = ilGetInteger(IL_IMAGE_WIDTH);
 	Height = ilGetInteger(IL_IMAGE_HEIGHT);
 
+	//bpp = ilGetInteger(IL_IMAGE_FORMAT);
+	//bpp = ilGetInteger(IL_IMAGE_BPP);	// you meant IL_IMAGE_BYTES_PER_PIXEL, didn't you?
+	BPP = 4;
+
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	Data = new byte[Width * Height * 4];
+	Data = new byte[Width * Height * BPP];
 	ilCopyPixels(0, 0, 0, Width, Height, 1, IL_RGBA, IL_UNSIGNED_BYTE, Data);
 
-	// хорошо бы писать в лог что-то поумнее, но для того, чтобы достать вменяемый текст ошибки, нужно подключать ILU: iluGetErrorString(ilGetError())
-	// учитывая, что из него никаких больше функций не нужно, мне его подключать не охота..
+	// we can get an error message using ILU (iluGetErrorString(ilGetError())), but it's not worth to be dependent on it..
 	if (ilGetError() != IL_NO_ERROR)
 		Log("ERROR", "IL failed");
-
-	//bpp = ilGetInteger(IL_IMAGE_FORMAT);
-	//bpp = ilGetInteger(IL_IMAGE_BPP);	// если вдруг на будущее, то IL_IMAGE_BYTES_PER_PIXEL
-	BPP = 4;
-	ilDeleteImage(ILID);
-	return true;
 }

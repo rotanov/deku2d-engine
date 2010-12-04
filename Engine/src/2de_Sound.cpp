@@ -45,6 +45,11 @@ bool CSound::Load()
 			return false;
 		}
 	}
+	else
+	{
+		Log("ERROR", "Can't load sound: no load source specified");
+		return false;
+	}
 
 	CResource::Load();
 
@@ -119,6 +124,11 @@ bool CMusic::Load()
 			Log("ERROR", "Can't load music from memory: %s", Mix_GetError());
 			return false;
 		}
+	}
+	else
+	{
+		Log("ERROR", "Can't load music: no load source specified");
+		return false;
 	}
 
 	CResource::Load();

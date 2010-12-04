@@ -23,7 +23,10 @@ public:
 	CImageData();
 	~CImageData();
 	bool LoadFromFile(const string &Filename);
-	bool LoadFromMemory(void * Ptr, ILuint Size);
+	bool LoadFromMemory(void *Ptr, ILuint Size);
+
+private:
+	void InitImageData();
 };
 
 #endif // _2DE_IMAGE_UTILS_H_

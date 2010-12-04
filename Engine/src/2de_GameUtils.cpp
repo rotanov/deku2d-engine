@@ -31,15 +31,20 @@ bool CTileset::Load()
 			return false;
 		}
 	}
-// 	else if (Source == LOAD_SOURCE_MEMORY)
-// 	{
-// 		storage = new CMemory(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
-// 		if (!storage->Good())
-// 		{
-// 			Log("ERROR", "Can't open TileSet from memory storage");
-// 			return false;
-// 		}
-// 	}
+	else if (Source == LOAD_SOURCE_MEMORY)
+	{
+		storage = new CMemory(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
+		if (!storage->Good())
+		{
+			Log("ERROR", "Can't open TileSet from memory storage");
+			return false;
+		}
+	}
+	else
+	{
+		Log("ERROR", "Can't load TileSet: no load source specified");
+		return false;
+	}
 
 	string TextureName;
 	storage->ReadString(TextureName);

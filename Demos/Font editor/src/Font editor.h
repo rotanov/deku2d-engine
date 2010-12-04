@@ -34,7 +34,7 @@ bool GoToPrevChar(CObject *Caller);
 bool GoToNextChar(CObject *Caller);
 bool ExposeRect(CObject *Caller);
 
-class CFontEditor : public CRenderable, public CUpdatable
+class CFontEditor : public CRenderable
 {
 	enum EEditorState
 	{

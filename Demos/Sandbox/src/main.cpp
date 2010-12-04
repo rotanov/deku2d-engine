@@ -22,6 +22,10 @@ public:
 class CSomeUpdatable : public CObject
 {
 public:
+	CSomeUpdatable()
+	{
+		CEventManager::Instance()->Subscribe("EveryFrame", this);
+	}
 	void ProcessEvent(const CEvent &AEvent)
 	{
 		if (AEvent.GetName() == "EveryFrame")

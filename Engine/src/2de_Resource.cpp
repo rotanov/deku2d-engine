@@ -37,7 +37,7 @@ bool CResourceRefCounterState::RCDisabled = false;
 //////////////////////////////////////////////////////////////////////////
 // CResource
 
-CResource::CResource() : MemoryLoadData(NULL), MemoryLoadLength(0), Loaded(false), FirstTimeLoaded(false), Persistent(false), RefCount(0)
+CResource::CResource() : Source(LOAD_SOURCE_UNSPECIFIED), MemoryLoadData(NULL), MemoryLoadLength(0), Loaded(false), FirstTimeLoaded(false), Persistent(false), RefCount(0)
 {
 	SetName("CResource");
 }

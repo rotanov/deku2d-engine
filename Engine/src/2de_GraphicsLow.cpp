@@ -8,6 +8,12 @@
 #elif defined(USE_GLEW)
 	#define GLEW_STATIC //GLEW_BUILD
 	#include <GL/glew.h>
+
+	#if defined(_WIN32)
+		#include <GL/wglew.h>
+	#elif defined(__linux) // not only linux, i think.. any platform, that uses GLX..
+		#include <GL/glxew.h>
+	#endif
 #else
 	#include <GL/gl.h>
 	#include <GL/glu.h>
@@ -159,76 +165,6 @@ float CRenderableComponent::Width()
 float CRenderableComponent::Height()
 {
 	return Box.Height();
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CGLImagedata
-
-bool CTexture::MakeTexture()
-{
-	if (Data == NULL)
-		return false;
-	if ((Width & (Width - 1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
-		return false;				//	Ultimate - это использовать NOT_POWER_OF_TWO екстеншон, если он доступен;
-	if ((Height & (Height - 1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
-		return false;				//	Ширина и выстоа стали ближайшими степенями двойки. Но это потом. И это @todo.
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &TexID);
-	glBindTexture(GL_TEXTURE_2D, TexID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	int MODE = (BPP == 3) ? GL_RGB : GL_RGBA;
-	glTexImage2D(GL_TEXTURE_2D, 0, BPP, Width, Height, 0, MODE, GL_UNSIGNED_BYTE, Data);
-	return true;
-}
-
-bool CTexture::LoadTexture(const string &Filename)
-{
-	if (!LoadFromFile(Filename))
-	{
-		Log("ERROR", "Can't load image->");
-		return false;
-	}
-	if (!MakeTexture())
-	{
-		Log("ERROR", "Can't load texture in video memory");
-		return false;
-	}
-	if (doCleanData)
-	{
-		delete [] Data;
-		Data = NULL;
-	}
-	return true;
-}
-
-bool CTexture::LoadTexture(void* Address, unsigned int Size)
-{
-	if (!LoadFromMemory(Address, Size))
-	{
-		Log("ERROR", "Can't load image->");
-		return false;
-	}
-
-	if (!MakeTexture())
-	{
-		Log("ERROR", "Can't load texture in video memory");
-		return false;
-	}
-
-	if (doCleanData)
-	{
-		delete [] Data;
-		Data = NULL;
-	}
-	return true;
-}
-
-GLuint CTexture::GetTexID()
-{
-	if (TexID == 0)
-		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
-	return TexID;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -393,7 +329,8 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 // 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 // 	glEnable(GL_POLYGON_SMOOTH);
 // 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	setVSync(0);
+
+	CRenderManager::Instance()->SetSwapInterval(0);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
@@ -415,6 +352,8 @@ unsigned int CGLWindow::GetHeight() const
 void CGLWindow::SetWidth(unsigned int AWidth)
 {
 	// bad, i think.. if window's already created, we should just resize it..
+	// ah, i got it.. see issue 44 then..
+
 	assert(!isCreated);
 	Width = AWidth;
 }
@@ -451,6 +390,7 @@ void CGLWindow::SetFullscreen(bool AFullscreen)
 {
 	isFullscreen = AFullscreen;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CFont
 
@@ -539,6 +479,11 @@ bool CFont::Load()
 			Width[i] = (Boxes[i].Max.x - Boxes[i].Min.x);
 			Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
 		}
+	}
+	else
+	{
+		Log("ERROR", "Can't load font: no load source specified");
+		return false;
 	}
 
 	CResource::Load();
@@ -925,6 +870,24 @@ CModel* CRenderManager::CreateModelText(const CText *AText)
 	return Model;
 }
 
+void CRenderManager::SetSwapInterval(int interval /*= 1*/)
+{
+#if defined(_WIN32)
+	if (WGLEW_EXT_swap_control)
+	{
+		wglSwapIntervalEXT(interval);
+		return;
+	}
+#elif defined(__linux)
+	if (GLXEW_SGI_swap_control)
+	{
+		glXSwapIntervalSGI(interval);
+		return;
+	}
+#endif
+	Log("ERROR", "swap_control is not supported on your computer");
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CFontManager
 
@@ -969,8 +932,10 @@ CFont* CFontManager::GetDefaultFont()
 	assert(DefaultFont != NULL);
 	return DefaultFont;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // CTexture Manager
+
 CTextureManager::CTextureManager()
 {
 	SetName("Texture manager");
@@ -978,6 +943,32 @@ CTextureManager::CTextureManager()
 
 //////////////////////////////////////////////////////////////////////////
 // CTexture
+
+bool CTexture::MakeTexture()
+{
+	if (Data == NULL)
+		return false;
+	if ((Width & (Width - 1)) != 0)		//	Тут мы просто выходим, если ширина или высота  не является степенью двойки.
+		return false;				//	Ultimate - это использовать NOT_POWER_OF_TWO екстеншон, если он доступен;
+	if ((Height & (Height - 1)) != 0)	//	Иначе - дописывать в память кусок прозрачного цвета, по размеру такой, чтобы
+		return false;				//	Ширина и выстоа стали ближайшими степенями двойки. Но это потом. И это @todo.
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &TexID);
+	glBindTexture(GL_TEXTURE_2D, TexID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	int MODE = (BPP == 3) ? GL_RGB : GL_RGBA;
+	glTexImage2D(GL_TEXTURE_2D, 0, BPP, Width, Height, 0, MODE, GL_UNSIGNED_BYTE, Data);
+	return true;
+}
+
+GLuint CTexture::GetTexID()
+{
+	if (TexID == 0)
+		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
+	return TexID;
+}
+
 GLuint CTexture::GetTexID() const
 {
 	assert(TexID != 0);
@@ -1014,21 +1005,36 @@ bool CTexture::Load()
 
 	if (Source == LOAD_SOURCE_FILE)
 	{
-		if (Filename == "")
+		if (!LoadFromFile(Filename))
 		{
-			// TODO: fix and simplify error message..
-			Log("ERROR", "Trying to load texture with name %s; But it has not been found in ResourceList(s)\n\t or Resource List Has not been loaded", GetName().c_str());
+			Log("ERROR", "Can't load texture from a file");
 			return false;
 		}
-
-		if (!LoadTexture(Filename))
-			return false;
 	}
 	else if (Source = LOAD_SOURCE_MEMORY)
 	{
-		// TODO: implement loading from memory..
-		if (!LoadTexture(MemoryLoadData, MemoryLoadLength))
+		if (!LoadFromMemory(MemoryLoadData, MemoryLoadLength))
+		{
+			Log("ERROR", "Can't load image from memory");
 			return false;
+		}
+	}
+	else
+	{
+		Log("ERROR", "Can't load texture: no load source specified");
+		return false;
+	}
+
+	if (!MakeTexture())
+	{
+		Log("ERROR", "Can't load texture in video memory");
+		return false;
+	}
+
+	if (doCleanData)
+	{
+		delete [] Data;
+		Data = NULL;
 	}
 
 	CResource::Load();
@@ -1052,58 +1058,6 @@ bool CTexture::SaveToFile(const string &AFilename)
 	throw std::logic_error("Unimplemented!!");
 }
 
-
-// всё что я тут понагородил мне самому не нравится... каких-то макросов понаизобретал.. зато универсально и ынтерпрайзно..
-
-#if defined(_WIN32) || defined(__linux)        // <platforms, that support swap interval control>
-
-#if defined(_WIN32)
-#include <windows.h>
-#define GL_GET_PROC_ADDRESS_ARG_TYPE (const char*)
-#define SWAP_INTERVAL_EXTENSION_NAME "WGL_EXT_swap_control"
-#define SWAP_INTERVAL_PROC_NAME_STR "wglSwapIntervalEXT"
-#define SWAP_INTERVAL_PROC_NAME wglSwapIntervalEXT
-#define GET_PROC_ADDRESS_FUNC wglGetProcAddress
-#elif defined(__linux)
-#include <GL/glx.h>
-#define GL_GET_PROC_ADDRESS_ARG_TYPE (const GLubyte*)
-#define SWAP_INTERVAL_EXTENSION_NAME "GLX_SGI_swap_control"
-#define SWAP_INTERVAL_PROC_NAME_STR "glXSwapIntervalSGI"
-#define SWAP_INTERVAL_PROC_NAME glXSwapIntervalSGI
-#define GET_PROC_ADDRESS_FUNC glXGetProcAddress
-#endif
-
-#define GET_PROC_ADDRESS(x,y) ((x(GL_GET_PROC_ADDRESS_ARG_TYPE(y))))
-
-SWAP_INTERVAL_PROC SWAP_INTERVAL_PROC_NAME = 0;
-
-#endif                        // </platforms, that support swap interval control>
-
-// да, функция будет для всех, но для неподдерживаемых она просто ничего не будет делать..
-// это чтобы не городить ифдефы в другом месте..
-
-void setVSync(int interval)
-{
-#if defined(_WIN32) || defined(__linux)        // <platforms, that support swap interval control>
-#if defined(_WIN32)
-	const char *extensions = (const char *) glGetString(GL_EXTENSIONS);
-#elif defined(__linux)
-	const char *extensions = (const char *) glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
-#endif
-
-	if (strstr(extensions, SWAP_INTERVAL_EXTENSION_NAME) != 0)
-	{
-		SWAP_INTERVAL_PROC_NAME = (SWAP_INTERVAL_PROC) GET_PROC_ADDRESS(GET_PROC_ADDRESS_FUNC, SWAP_INTERVAL_PROC_NAME_STR);
-
-		if (SWAP_INTERVAL_PROC_NAME)
-			SWAP_INTERVAL_PROC_NAME(interval);
-	}
-	else
-	{
-		Log("ERROR", SWAP_INTERVAL_EXTENSION_NAME " is not supported on your computer");
-	}
-#endif                        // </platforms, that support swap interval control>
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CText
@@ -1756,6 +1710,7 @@ void CTransformation::Clear()
 	Scaling = 1.0f;
 	Rotation = 0.0f;
 }
+
 //////////////////////////////////////////////////////////////////////////
 // Transformator
 

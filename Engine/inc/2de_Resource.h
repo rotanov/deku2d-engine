@@ -88,6 +88,7 @@ class CResource : public virtual CObject
 public:
 	enum ELoadSource
 	{
+		LOAD_SOURCE_UNSPECIFIED,
 		LOAD_SOURCE_FILE,
 		LOAD_SOURCE_MEMORY,
 	};
