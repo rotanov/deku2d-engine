@@ -63,7 +63,7 @@ void CResource::SetLoadSource(const string &AFilename)
 	FirstTimeLoaded = false;
 }
 
-void CResource::SetLoadSource(void *AData, size_t ALength)
+void CResource::SetLoadSource(byte *AData, size_t ALength)
 {
 	Source = LOAD_SOURCE_MEMORY;
 	MemoryLoadData = AData;

@@ -4,7 +4,7 @@
 #include "2de_Core.h"
 
 extern unsigned int  IMAGE_SHROOM_TITLE_SIZE;
-extern char IMAGE_SHROOM_TITLE_DATA[];
+extern byte IMAGE_SHROOM_TITLE_DATA[];
 
 // extern const unsigned int IMAGE_DEFAULT_FONT_WIDTH;
 // extern const unsigned int IMAGE_DEFAULT_FONT_HEIGHT;
