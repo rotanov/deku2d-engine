@@ -51,30 +51,31 @@ public:
 
 	bool isFinalizing() const;
 
-	// Toggle - это переключить, а тут по смыслу - Set.. и геттеров нема - неудобно...
-	void ToggleExitOnEscape(bool AdoExitOnEscape); // it seems to me, that it's too much overkill for such small option...  И как ты предлагаешь её выставлять, блеа? Ящитаю всё ок.
-	void ToggleLimitFPS(bool AdoLimitFPS);
-	void ToggleCalcFPS(bool AdoCalcFPS);
-	void ToggleKeyRepeat(bool AdoKeyRepeat); // temporarily here.. basically, we need key repeat in GUI only, so in future it'll be handled by focusable GUI widget-groups (forms, panels, whatever..)
-	void ToggleShowFPS(bool AdoShowFPS);
-
 	template<typename T>
 	void SetStateHandler();
 
-	float GetDeltaTime() const;
+	bool IsExitOnEscapeEnabled() const;
+	bool IsLimitFPSEnabled() const;
+	bool IsCalcFPSEnabled() const;
+	bool IsKeyRepeatEnabled() const;
+	bool IsShowFPSEnabled(bool AdoShowFPS) const;
+	void SetExitOnEscape(bool AdoExitOnEscape);
+	void SetDoLimitFPS(bool AdoLimitFPS);
+	void SetDoCalcFPS(bool AdoCalcFPS);
 
+	// temporarily here.. basically, we need key repeat in GUI only, so in 
+	// future it'll be handled by focusable GUI widget-groups (forms, panels, whatever..)
+	void SetDoKeyRepeat(bool AdoKeyRepeat); 
+	void SetDoShowFPS(bool AdoShowFPS);
+
+	float GetDeltaTime() const;
 	string GetProgramName() const;
 	void SetProgramName(const string &AProgramName);
-
 	unsigned long GetFPSLimit() const;
 	void SetFPSLimit(unsigned long AFPSLimit);
-
+	bool IsKeyDown(const SDLKey& AKey) const;
+	const Vector2& GetMousePosition() const;
 	unsigned long GetFPS() const;
-
-
-	// may leave it in something like CLowLevelInput, even when Event system will be ready...
-	int keys[SDLK_LAST];	//FFUUU~ for sure. Wait till the Event system.
-	Vector2 MousePos;
 
 protected:
 	CEngine();
@@ -82,19 +83,13 @@ protected:
 
 private:
 	CMouseCursor *Cursor;
+	bool Keys[SDLK_LAST];
+	Vector2 MousePosition;
+	float dt;
 
-	bool Initialize();
-	void Finalize();
-	bool ProcessEvents();
-	bool ProcessArguments(int argc, char *argv[]);
-	
-	// possibly incapsulate into something.. too many things in this class are dedicated to fps...
-	void CalcFPS();
-	bool LimitFPS();
-	
 	bool Initialized;
 	bool Finalizing;
-	float dt;
+	
 	bool isHaveFocus;
 	bool userReInit;
 
@@ -106,20 +101,19 @@ private:
 	unsigned long FPSLimit;
 
 	string ProgramName;
-
-	//int EventFuncCount;
-	//int KeyInputFuncCount;
-	//CObject *KeyFuncCallers[MAX_KEY_INPUT_FUNCTIONS];
 	CText *FPSText;
-	
-
-	// Временно здесь, будет заменено на систему KeyBinding'a и подписчиков.
-	//EventFunc EventFunctions[MAX_EVENT_FUNCTIONS];
-	//KeyInputFunc KeyInputFunctions[MAX_KEY_INPUT_FUNCTIONS];
 
 	CAbstractStateHandler *StateHandler;
-
 	static CEngine EngineInstance;
+	
+	bool Initialize();
+	void Finalize();
+	bool ProcessEvents();
+	bool ProcessArguments(int argc, char *argv[]);
+
+	// possibly incapsulate into something.. too many things in this class are dedicated to fps...
+	void CalcFPS();
+	bool LimitFPS();
 };
 
 template<typename T>

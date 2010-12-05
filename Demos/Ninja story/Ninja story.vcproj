@@ -211,15 +211,15 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\Res\Resource.h"
+				RelativePath=".\res\Resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Res\Resource.rc"
+				RelativePath=".\res\Resource.rc"
 				>
 			</File>
 			<File
-				RelativePath=".\Res\Shroom.ico"
+				RelativePath=".\res\Shroom.ico"
 				>
 			</File>
 		</Filter>

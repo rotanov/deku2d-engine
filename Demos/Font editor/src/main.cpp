@@ -10,7 +10,7 @@ public:
 bool CCustomStateHandler::OnInitialize()
 {
 	CFontEditor *FontEditor = CFactory::Instance()->New<CFontEditor>("FontEditor");
-	CEngine::Instance()->ToggleKeyRepeat(true); // temporarily for GUI-only programs..
+	CEngine::Instance()->SetDoKeyRepeat(true); // temporarily for GUI-only programs..
 	return true;
 }
 

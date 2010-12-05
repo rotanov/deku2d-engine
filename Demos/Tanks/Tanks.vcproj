@@ -200,18 +200,10 @@
 				RelativePath=".\src\MainTanks.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\src\Tanks.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="inc"
 			>
-			<File
-				RelativePath=".\inc\Tanks.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource"

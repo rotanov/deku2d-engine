@@ -280,7 +280,7 @@ void CFontEditor::Render()
 
 /*void CFontEditor::Update(float dt)
 {
-	MousePosition = CEngine::Instance()->MousePos;
+	MousePosition = CEngine::Instance()->MousePosition;
 
 	switch (State)
 	{

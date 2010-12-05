@@ -13,7 +13,7 @@ public:
 bool CCustomStateHandler::OnInitialize()
 {
 	CTilesetEditor *TilesetEditor = CFactory::Instance()->New<CTilesetEditor>("Tileset editor");
-	CEngine::Instance()->ToggleKeyRepeat(true); // temporarily for GUI-only programs..
+	CEngine::Instance()->SetDoKeyRepeat(true); // temporarily for GUI-only programs..
 	return true;
 }
 

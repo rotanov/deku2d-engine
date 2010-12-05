@@ -366,7 +366,7 @@ void CButton::Render()
 
 void CButton::Update(float dt)
 {
-	Vector2 mouse = CEngine::Instance()->MousePos;
+	Vector2 mouse = CEngine::Instance()->GetMousePosition();
 
 	MouseState.Hovered = GetBox().Inside(mouse);
 	MouseState.Pressed = SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1);
@@ -497,7 +497,7 @@ void CEdit::Render()
 void CEdit::Update(float dt)
 {
 	Text = GetVisibleText();
-	Vector2 mouse = CEngine::Instance()->MousePos;
+	Vector2 mouse = CEngine::Instance()->GetMousePosition();
 
 	MouseState.Hovered = GetBox().Inside(mouse);
 	MouseState.Pressed = (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) && MouseState.Hovered;

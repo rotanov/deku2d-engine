@@ -7,7 +7,7 @@ CEngine CEngine::EngineInstance;
 
 CEngine::CEngine()
 {
-	memset(keys, 0, sizeof(keys));
+	memset(Keys, 0, sizeof(Keys));
 
 	Initialized = false;
 	Finalizing = false;
@@ -277,10 +277,8 @@ bool CEngine::ProcessEvents()
 			{
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;
-				//for (int i = 0; i < KeyInputFuncCount; i++)
-				//{
 
-				if (keys[keysym.sym] == 0)
+				if (!Keys[keysym.sym])
 				{
 					CEvent *e = new CEvent;
 					e->SetName("KeyDown");
@@ -288,8 +286,6 @@ bool CEngine::ProcessEvents()
 					e->SetData("Sym", keysym.sym);
 					e->SetData("Modifiers", keysym.mod);
 					CEventManager::Instance()->TriggerEvent(e);
-
-					//(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, keysym.sym, keysym.mod, TempChar);
 				}
 
 				CEvent *e = new CEvent;
@@ -299,10 +295,7 @@ bool CEngine::ProcessEvents()
 				e->SetData("Modifiers", keysym.mod);
 				CEventManager::Instance()->TriggerEvent(e);
 
-					//(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_PRESS, keysym.sym, keysym.mod, TempChar);
-				//}
-
-				keys[keysym.sym] = 1;
+				Keys[keysym.sym] = true;
 				break;
 			}
 			case SDL_KEYUP:
@@ -322,14 +315,14 @@ bool CEngine::ProcessEvents()
 				e->SetData("Modifiers", keysym.mod);
 				CEventManager::Instance()->TriggerEvent(e);
 
-				keys[keysym.sym] = 0;
+				Keys[keysym.sym] = 0;
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
 			{
 				CEvent *e = new CEvent("MouseDown", NULL);
-				e->SetData("X", MousePos.x);
-				e->SetData("Y", MousePos.y);
+				e->SetData("X", MousePosition.x);
+				e->SetData("Y", MousePosition.y);
 				e->SetData("Button", event.button.button);
 				e->SetData("Modifiers", SDL_GetModState());
 				CEventManager::Instance()->TriggerEvent(e);
@@ -341,8 +334,8 @@ bool CEngine::ProcessEvents()
 			case SDL_MOUSEBUTTONUP:
 			{
 				CEvent *e = new CEvent("MouseUp", NULL);
-				e->SetData("X", MousePos.x);
-				e->SetData("Y", MousePos.y);
+				e->SetData("X", MousePosition.x);
+				e->SetData("Y", MousePosition.y);
 				e->SetData("Button", event.button.button);
 				e->SetData("Modifiers", SDL_GetModState());
 				CEventManager::Instance()->TriggerEvent(e);
@@ -354,8 +347,8 @@ bool CEngine::ProcessEvents()
 			case SDL_MOUSEMOTION:
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
-				MousePos = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
-				Cursor->SetPosition(MousePos);
+				MousePosition = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
+				Cursor->SetPosition(MousePosition);
 				//SDL_Delay(2);
 				break;
 			}
@@ -482,22 +475,22 @@ bool CEngine::isFinalizing() const
 	return Finalizing;
 }
 
-void CEngine::ToggleExitOnEscape(bool AdoExitOnEscape)
+void CEngine::SetExitOnEscape(bool AdoExitOnEscape)
 {
 	doExitOnEscape = AdoExitOnEscape;
 }
 
-void CEngine::ToggleLimitFPS(bool AdoLimitFPS)
+void CEngine::SetDoLimitFPS(bool AdoLimitFPS)
 {
 	doLimitFPS = AdoLimitFPS;
 }
 
-void CEngine::ToggleCalcFPS(bool AdoCalcFPS)
+void CEngine::SetDoCalcFPS(bool AdoCalcFPS)
 {
 	doCalcFPS = AdoCalcFPS;
 }
 
-void CEngine::ToggleKeyRepeat(bool AdoKeyRepeat)
+void CEngine::SetDoKeyRepeat(bool AdoKeyRepeat)
 {
 	int RepeatDelay = AdoKeyRepeat ? SDL_DEFAULT_REPEAT_DELAY : 0;
 	SDL_EnableKeyRepeat(RepeatDelay, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -518,10 +511,9 @@ void CEngine::SetProgramName(const string &AProgramName)
 	ProgramName = AProgramName;
 }
 
-// well, getter and setter do different things.. something wrong here..
 unsigned long CEngine::GetFPSLimit() const
 {
-	return FPSLimit;
+	return 1000 / FPSLimit;
 }
 
 void CEngine::SetFPSLimit(unsigned long AFPSLimit)
@@ -534,8 +526,44 @@ unsigned long CEngine::GetFPS() const
 	return FPSCount;
 }
 
-void CEngine::ToggleShowFPS(bool AdoShowFPS)
+void CEngine::SetDoShowFPS(bool AdoShowFPS)
 {
 	if (FPSText != NULL)
 		FPSText->SetVisibility(AdoShowFPS);
+}
+
+const Vector2& CEngine::GetMousePosition() const
+{
+	return MousePosition;
+}
+
+bool CEngine::IsKeyDown( const SDLKey& AKey ) const
+{
+	return Keys[AKey];
+}
+
+bool CEngine::IsExitOnEscapeEnabled() const
+{
+	return doExitOnEscape;
+}
+
+bool CEngine::IsLimitFPSEnabled() const
+{
+	return doLimitFPS;
+}
+
+bool CEngine::IsCalcFPSEnabled() const
+{
+	return doCalcFPS;
+}
+
+bool CEngine::IsKeyRepeatEnabled() const
+{
+	// Don't know how to extract that information from SDL
+	return false;
+}
+
+bool CEngine::IsShowFPSEnabled( bool AdoShowFPS ) const
+{
+	return FPSText->GetVisibility();
 }

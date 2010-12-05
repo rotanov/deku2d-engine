@@ -247,8 +247,8 @@ public:
 
 void CGlobalRenderObject::Render()
 {
-	MousePos = Ninja->MousePos;
-	if (Ninja->keys[SDLK_g])
+	MousePos = Ninja->MousePosition;
+	if (Ninja->Keys[SDLK_g])
 	{
 		Offset += MousePos - oMp;
 	}
@@ -370,7 +370,7 @@ bool CCustomStateHandler::OnInitialize()
 
 	CGlobalRenderObject *GlobalRenderObject = CFactory::Instance()->New<CGlobalRenderObject>("Global Render Object");
 
-	CEngine::Instance()->ToggleKeyRepeat(true); // temporarily for GUI-only programs..
+	CEngine::Instance()->SetDoKeyRepeat(true); // temporarily for GUI-only programs..
 
 	return true;
 }

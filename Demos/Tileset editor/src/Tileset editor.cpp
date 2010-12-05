@@ -256,7 +256,7 @@ void CTilesetEditor::Render()
 
 void CTilesetEditor::Update(float dt)
 {
-	MousePosition = CEngine::Instance()->MousePos;
+	MousePosition = CEngine::Instance()->MousePosition;
 
 	switch (State)
 	{

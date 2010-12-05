@@ -19,7 +19,7 @@ public:
 	void OnFinalize();
 };
 
-class CSomeUpdatable : public CObject
+class CSomeUpdatable : public CGameObject
 {
 public:
 	CSomeUpdatable()
@@ -43,7 +43,7 @@ public:
 bool CCustomStateHandler::OnInitialize()
 {
 
-	CEngine::Instance()->ToggleShowFPS(true);
+	CEngine::Instance()->SetDoShowFPS(true);
 
 	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(NewScene);
@@ -109,6 +109,7 @@ bool CCustomStateHandler::OnInitialize()
  temptext->Attach(NewRenderableComponent);
 
  CSomeUpdatable *SomeUpdatable = new CSomeUpdatable();//CFactory::Instance()->New<CSomeUpdatable>("some updatable");
+ CUpdateManager::Instance()->RootGameObject->Attach(SomeUpdatable);
 // Mouse cursor
  //sc->Attach(NewRenderableComponent);
 //TestObject->AttachChild(new CUpdatable());

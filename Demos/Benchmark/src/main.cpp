@@ -86,7 +86,7 @@ bool CCustomStateHandler::OnArgumentsProcessing()
 
 bool CCustomStateHandler::OnInitialize()
 {
-	CEngine::Instance()->ToggleKeyRepeat(true);
+	CEngine::Instance()->SetDoKeyRepeat(true);
 	CFactory::Instance()->New<CRectangleTest>("Rectangle test");
 	return true;
 }
