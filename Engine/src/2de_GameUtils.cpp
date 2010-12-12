@@ -166,16 +166,22 @@ CTileset* CTileSetManager::GetTileset(const string &ATilesetName)
 // Default title screen
 CDefaultTitleScreen::CDefaultTitleScreen()
 {
+	CPlaceableComponent *tempPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	int ScrWidth = CGLWindow::Instance()->GetWidth();
 	int ScrHeight = CGLWindow::Instance()->GetHeight();
-	SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
-	CUpdateManager::Instance()->RootGameObject->Attach(this);
-	this->Attach(&TextTeam);
-	this->Attach(&TextDeku);
-	TextDeku.SetPosition(Vector2(40.0f, -47.0f));
-	TextTeam.SetPosition(Vector2(40.0f, -74.0f));
-	TextDeku.SetScaling(2);
-	TextTeam.SetScaling(2);
+	tempPlacing->SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
+	CUpdateManager::Instance()->RootGameObject->Attach(tempPlacing);
+	tempPlacing->Attach(this);
+	CPlaceableComponent *DekuTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
+	CPlaceableComponent *TeamTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
+	tempPlacing->Attach(DekuTextPlacing);
+	tempPlacing->Attach(TeamTextPlacing);
+	DekuTextPlacing->Attach(&TextTeam);
+	TeamTextPlacing->Attach(&TextDeku);
+	DekuTextPlacing->SetPosition(Vector2(40.0f, -47.0f));
+	TeamTextPlacing->SetPosition(Vector2(40.0f, -74.0f));
+	DekuTextPlacing->SetScaling(2);
+	TeamTextPlacing->SetScaling(2);
 	TextDeku.SetText("Deku");
 	TextTeam.SetText("Team");
 }

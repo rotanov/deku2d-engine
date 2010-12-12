@@ -23,5 +23,5 @@ function ScriptableComponent:OnEveryFrame()
 		self.dir.y = -self.dir.y
 	end
 
-	SetPosition(self.text, cur_x + self.dir.x, cur_y + self.dir.y)
+	SetPosition(self.text, cur_x + self.dir.x * GetDeltaTime() * 100, cur_y + self.dir.y * GetDeltaTime() * 100)
 end

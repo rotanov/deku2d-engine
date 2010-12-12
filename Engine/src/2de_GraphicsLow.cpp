@@ -19,16 +19,15 @@
 	#include <GL/glu.h>
 #endif
 
-
 //////////////////////////////////////////////////////////////////////////
-// CRenderableUnitInfo
+// CPlacableComponent
 
-CRenderConfig::CRenderConfig() : Color(COLOR_WHITE), doIgnoreCamera(false),
-	doMirrorHorizontal(false), doMirrorVertical(false)
+CPlaceableComponent::CPlaceableComponent() : doIgnoreCamera(false),
+doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 {
-}
 
-void CRenderConfig::SetAngle(float AAngle)
+}
+void CPlaceableComponent::SetAngle(float AAngle)
 {
 	float Angle = AAngle;
 	if (Abs(AAngle) > 360.0f)
@@ -36,50 +35,105 @@ void CRenderConfig::SetAngle(float AAngle)
 	Transformation.SetAngle(Angle);
 }
 
-float CRenderConfig::GetAngle() const
+float CPlaceableComponent::GetAngle() const
 {
 	return Transformation.GetAngle();
 }
 
-void CRenderConfig::SetLayer(int Layer)
+void CPlaceableComponent::SetLayer(int Layer)
 {
 	Transformation.SetDepth(Layer == 0 ? 0.0f : Layer / 100.0f);	// @todo: get rid of magic number "100.0f"
 }
 
-float CRenderConfig::GetDepth() const
+float CPlaceableComponent::GetDepth() const
 {
 	return Transformation.GetDepth();
 }
 
-float CRenderConfig::GetScaling() const
+float CPlaceableComponent::GetScaling() const
 {
 	return Transformation.GetScaling();
 }
 
-void CRenderConfig::SetScaling(float AScaling)
+void CPlaceableComponent::SetScaling(float AScaling)
 {
 	Transformation.SetScaling(AScaling);
 }
 
-int CRenderConfig::GetLayer() const
+int CPlaceableComponent::GetLayer() const
 {
 	return Transformation.GetDepth() * 100.0f;
 }
 
-const Vector2& CRenderConfig::GetPosition() const
+const Vector2& CPlaceableComponent::GetPosition() const
 {
 	return Transformation.GetTranslation();
 }
 
-Vector2& CRenderConfig::GetPosition()
+Vector2& CPlaceableComponent::GetPosition()
 {
 	return Transformation.GetTranslation();
 }
 
-void CRenderConfig::SetPosition(const Vector2 &APosition)
+void CPlaceableComponent::SetPosition(const Vector2 &APosition)
 {
 	Transformation.SetTranslation(APosition);
 }
+
+void CPlaceableComponent::SetTransformation(const CTransformation &ATransformation)
+{
+	Transformation = ATransformation;
+}
+
+CTransformation& CPlaceableComponent::GetTransformation()
+{
+	return Transformation;
+}
+
+const CTransformation& CPlaceableComponent::GetTransformation() const
+{
+	return Transformation;
+}
+
+bool CPlaceableComponent::isMirrorVertical() const
+{
+	return doMirrorVertical;
+}
+
+void CPlaceableComponent::SetMirrorVertical(bool MirrorOrNot)
+{
+	doMirrorHorizontal = MirrorOrNot;
+}
+
+bool CPlaceableComponent::isMirrorHorizontal() const
+{
+	return doMirrorHorizontal;
+}
+
+void CPlaceableComponent::SetMirrorHorizontal(bool MirrorOrNot)
+{
+	doMirrorHorizontal = MirrorOrNot;
+}
+
+bool CPlaceableComponent::isIgnoringParentTransform() const
+{
+	return doIgnoreCamera;
+}
+
+void CPlaceableComponent::SetIgnoreParentTransform(bool doIgnore)
+{
+	doIgnoreCamera = doIgnore;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// CRenderableUnitInfo
+
+CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(COLOR_WHITE)
+{
+}
+
 
 void CRenderConfig::SetBlendingMode(EBlendingMode ABlendingMode)
 {
@@ -91,20 +145,7 @@ EBlendingMode CRenderConfig::GetBlendingMode() const
 	return BlendingMode;
 }
 
-void CRenderConfig::SetTransformation(const CTransformation &ATransformation)
-{
-	Transformation = ATransformation;
-}
 
-CTransformation& CRenderConfig::GetTransformation()
-{
-	return Transformation;
-}
-
-const CTransformation& CRenderConfig::GetTransformation() const
-{
-	return Transformation;
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CRenderableComponent
@@ -112,40 +153,9 @@ const CTransformation& CRenderConfig::GetTransformation() const
 CRenderableComponent::~CRenderableComponent()
 {
 	CRenderManager::Instance()->Remove(this);
-
-	Scene->RemoveRenderable(this);
 }
 
-// Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--
-const CBox CRenderableComponent::GetBox() const		// why const CBox? it's a copy of CBox object, not a reference, why should it be const?..
-{
- 	CBox TempBox = Box;
- 	TempBox.Min *= GetScaling();
- 	TempBox.Max *= GetScaling();
-	TempBox.Offset(GetPosition());
-	//Box.RotateByAngle(Angle);
-	return TempBox;
-}
 
-void CRenderableComponent::SetBox(const CBox &ABox)
-{
-	Box = ABox;
-}
-
-void CRenderableComponent::PutIntoScene(CAbstractScene *AScene)
-{
-	assert(AScene != NULL);
-	if (Scene != NULL)
-		Scene->RemoveRenderable(this);
-	Scene = AScene;
-	Scene->AddRenderable(this);
-}
-
-CAbstractScene* CRenderableComponent::GetScene() const
-{
-	assert(Scene != NULL);
-	return Scene;
-}
 
 bool CRenderableComponent::GetVisibility() const
 {
@@ -157,15 +167,7 @@ void CRenderableComponent::SetVisibility(bool AVisible)
 	Visible = AVisible;
 }
 
-float CRenderableComponent::Width()
-{
-	return Box.Width();
-}
 
-float CRenderableComponent::Height()
-{
-	return Box.Height();
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CGLWindow
@@ -681,11 +683,6 @@ void CCamera::Free()
 
 void CCamera::DrawDebug()
 {
-	CRenderConfig temp;
-	temp.doIgnoreCamera = true;
-// 	CRenderManager::Instance()->DrawLinedBox(&temp, world);
-// 	CRenderManager::Instance()->DrawLinedBox(&temp, view);
-// 	CRenderManager::Instance()->DrawLinedBox(&temp, outer);
 }
 
 void CCamera::gTranslate()
@@ -727,10 +724,10 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
-	CRenderConfig TempRenderInfo;
-	TempRenderInfo.SetLayer(512);
-	TempRenderInfo.Color = COLOR_RED;
-	TempRenderInfo.doIgnoreCamera = true;
+// 	CRenderConfig TempRenderInfo;
+// 	TempRenderInfo.SetLayer(512);
+// 	TempRenderInfo.Color = COLOR_RED;
+// 	TempRenderInfo.doIgnoreCamera = true;
 	glLoadIdentity();	
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
 	Camera.Update(); // @todo: review camera
@@ -780,24 +777,28 @@ void CRenderManager::EndFrame()
 
 void CRenderManager::TransfomationTraverse(CGameObject *Next)
 {
-	CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next);
-	if (RenderComponent != NULL)
-		Transformator.PushTransformation(RenderComponent->GetTransformation());
+	CPlaceableComponent *PlaceableComponent = dynamic_cast<CPlaceableComponent *>(Next);
+	if (PlaceableComponent != NULL)
+		Transformator.PushTransformation(PlaceableComponent->GetTransformation());
 	for(unsigned int i = 0; i < Next->Children.size(); i++)
 	{
-		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
-		if (RenderComponent != NULL)
+		CPlaceableComponent *PlaceableComponent = dynamic_cast<CPlaceableComponent *>(Next->Children[i]);
+		if (PlaceableComponent != NULL)
 		{
-			Transformator.PushTransformation(RenderComponent->GetTransformation());
-			if (RenderComponent->isDestroyed() || !RenderComponent->GetVisibility() ||
-				!CSceneManager::Instance()->InScope(RenderComponent->GetScene()))
+			Transformator.PushTransformation(PlaceableComponent->GetTransformation());
+			if (PlaceableComponent->isDestroyed() /*|| !RenderComponent->GetVisibility()*/ ||
+				!CSceneManager::Instance()->InScope(PlaceableComponent->GetScene()))
 			{
 				Transformator.PopTransformation();
 				continue;
 			}
-			Renderer->PushModel(&RenderComponent->GetConfiguration(), RenderComponent->GetModel());
-			Transformator.PopTransformation();
 		}
+		CRenderableComponent *RenderableComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
+		if (RenderableComponent != NULL)
+			Renderer->PushModel(&RenderableComponent->GetConfiguration(), RenderableComponent->GetModel());
+
+		if (PlaceableComponent != NULL)
+			Transformator.PopTransformation();
 	}
 	for(unsigned int i = 0; i < Next->Children.size(); i++)
 	{
@@ -809,7 +810,7 @@ void CRenderManager::TransfomationTraverse(CGameObject *Next)
 
 		TransfomationTraverse(Next->Children[i]);
 	}
-	if (RenderComponent != NULL)
+	if (PlaceableComponent != NULL)
 		Transformator.PopTransformation();
 }
 
@@ -1066,14 +1067,12 @@ CText::CText() : Font(CFontManager::Instance()->GetDefaultFont())
 {	
 	assert(Font != NULL);
 	SetText("");
-	SetIgnoreParentTransform(true);
 }
 
 CText::CText(const string &AText) : Font(CFontManager::Instance()->GetDefaultFont())
 {
 	assert(Font != NULL);
 	SetText(Characters);
-	SetIgnoreParentTransform(true);
 }
 
 CFont* CText::GetFont() const
@@ -1104,7 +1103,7 @@ void CText::SetText(const string &AText)
 	if (Characters == AText)
 		return;
 	Characters = AText;
-	SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
+	//SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
 	_UpdateSelfModel();
 }
 
@@ -1114,6 +1113,7 @@ CText& CText::operator =(const string &AText)
 	return *this;
 }
 
+/*
 float CText::StringCoordToCursorPos(int x, int y) const
 {
 	if (Characters.length() == 0)
@@ -1131,6 +1131,7 @@ float CText::StringCoordToCursorPos(int x, int y) const
 	}
 	return (Characters.length() - 1.0f);
 }
+*/
 
 CText::~CText()
 {
@@ -1163,60 +1164,26 @@ CAbstractScene::CAbstractScene()
 //////////////////////////////////////////////////////////////////////////
 // CScene
 
-void CScene::Render()
+void CScene::Add(CGameObject *AObject)
 {
+	GameObjects.push_back(AObject);
+	//CRenderManager::Instance()->Add(AObject);
 }
 
-void CScene::Update(float dt)
+
+void CScene::Remove(CGameObject *AObject)
 {
-// 	for (vector<CRenderable*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
-// 	{
-// 		(*i)->Color.a -= dt / 4.0f;
-// 
-// 	}
-}
+	vector<CGameObject *>::iterator it = find(GameObjects.begin(), GameObjects.end(), AObject);
 
-void CScene::AddRenderable(CRenderableComponent *AObject)
-{
-	RenderableObjects.push_back(AObject);
-	CRenderManager::Instance()->Add(AObject);
-}
-
-// void CScene::AddUpdatable(CUpdatable *AObject)
-// {
-// 	UpdatableObjects.push_back(AObject);
-// 	CUpdateManager::Instance()->Add(AObject);
-// }
-
-// void CScene::RemoveUpdatable(CUpdatable *AObject)
-// {
-// 	vector<CUpdatable *>::iterator it = find(UpdatableObjects.begin(), UpdatableObjects.end(), AObject);
-// 
-// 	if (it == UpdatableObjects.end())
-// 		return;
-// 	
-// 	UpdatableObjects.erase(it);
-// 
-// 	//AObject->PutIntoScene()
-// }
-
-void CScene::RemoveRenderable(CRenderableComponent *AObject)
-{
-	vector<CRenderableComponent *>::iterator it = find(RenderableObjects.begin(), RenderableObjects.end(), AObject);
-
-	if (it == RenderableObjects.end())
+	if (it == GameObjects.end())
 		return;
 	
-	RenderableObjects.erase(it);
+	GameObjects.erase(it);
 }
 
 CScene::~CScene()
 {
-// 	for (vector<CUpdatable*>::iterator i = UpdatableObjects.begin(); i != UpdatableObjects.end(); ++i)
-// 	{
-// 		(*i)->SetDestroyed();
-// 	}
-	for (vector<CRenderableComponent*>::iterator i = RenderableObjects.begin(); i != RenderableObjects.end(); ++i)
+	for (vector<CGameObject*>::iterator i = GameObjects.begin(); i != GameObjects.end(); ++i)
 	{
 		(*i)->SetDestroyed();
 	}
@@ -1225,15 +1192,10 @@ CScene::~CScene()
 //////////////////////////////////////////////////////////////////////////
 // CGlobalScene
 
-void CGlobalScene::AddRenderable(CRenderableComponent *AObject)
+void CGlobalScene::Add(CGameObject *AObject)
 {
-	CRenderManager::Instance()->Add(AObject);
+	//CRenderManager::Instance()->Add(AObject);
 }
-
-// void CGlobalScene::AddUpdatable(CUpdatable *AObject)
-// {
-// 	CUpdateManager::Instance()->Add(AObject);
-// }
 
 //////////////////////////////////////////////////////////////////////////
 // CSceneManager
@@ -1241,16 +1203,6 @@ void CGlobalScene::AddRenderable(CRenderableComponent *AObject)
 CSceneManager::CSceneManager() : CurrentScene(&GlobalScene)
 {
 	SetName("Scene manager");
-}
-
-void CSceneManager::Render()
-{
-	CurrentScene->Render();
-}
-
-void CSceneManager::Update(float dt)
-{
-	CurrentScene->Update(dt);
 }
 
 CAbstractScene* CSceneManager::GetCurrentScene()
@@ -1284,145 +1236,6 @@ void CSceneManager::SetCurrentScene(CAbstractScene *AScene)
 	CurrentScene = AScene;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// CPrimitiveVertexDataHolder
-
-CPrmitiveVertexDataHolder::CPrmitiveVertexDataHolder() : VertexCount(0), ReservedCount(StartSize), Colors(NULL), Vertices(NULL)
-{
-	Colors = new RGBAf [StartSize];
-	Vertices = new Vector3 [StartSize];
-}
-
-CPrmitiveVertexDataHolder::~CPrmitiveVertexDataHolder()
-{
-	delete [] Colors;
-	delete [] Vertices;
-}
-
-void CPrmitiveVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color)
-{
-	assert(Sender != NULL);
-	if (VertexCount == ReservedCount)
-		Grow();
-	Vector2 TempVector = (Vertex * Sender->GetScaling());
-	if (!Equal(Sender->GetAngle(), 0.0f))
-		TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
-	TempVector += Sender->GetPosition();
-	if (!Sender->doIgnoreCamera)
-		TempVector += CRenderManager::Instance()->Camera.GetTranslation();
-	Vertices[VertexCount] = Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Sender->GetDepth());
-	Colors[VertexCount] = Color;
-	VertexCount++;
-}
-
-void CPrmitiveVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex)
-{
-	PushVertex(Sender, Vertex, Sender->Color);
-}
-
-void CPrmitiveVertexDataHolder::RenderPrimitive(GLenum Type)
-{
-	if (VertexCount == 0)
-		return;
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-	glColorPointer(4, GL_FLOAT, 0, Colors);
-	glDrawArrays(Type, 0, VertexCount);
-}
-
-void CPrmitiveVertexDataHolder::Grow()
-{
-	ReservedCount = VertexCount * 2;
-	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
-		NewColors[i] = Colors[i];
-
-	delete[] Colors;
-
-	Colors = NewColors;
-
-	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
-		NewVertices[i] = Vertices[i];
-
-	delete[] Vertices;
-
-	Vertices = NewVertices;
-}
-
-void CPrmitiveVertexDataHolder::Clear()
-{
-	VertexCount = 0;
-}
-
-unsigned int CPrmitiveVertexDataHolder::GetVertexCount()
-{
-	return VertexCount;
-}
-//////////////////////////////////////////////////////////////////////////
-// CVertexDataHolder
-
-CVertexDataHolder::CVertexDataHolder()
-{
-	TexCoords = new Vector2 [StartSize];
-}
-
-CVertexDataHolder::~CVertexDataHolder()
-{
-	delete [] TexCoords;
-}
-
-void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color)
-{
-	assert(false);
-}
-
-void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color, const Vector2 &TexCoord)
-{
-	CPrmitiveVertexDataHolder::PushVertex(Sender, Vertex, Color);
-	if (VertexCount == ReservedCount)
-		Grow();
-	TexCoords[CPrmitiveVertexDataHolder::VertexCount - 1] = TexCoord;
-}
-
-void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex)
-{
-	assert(false);
-}
-
-void CVertexDataHolder::PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const Vector2 &TexCoord)
-{
-	PushVertex(Sender, Vertex, Sender->Color, TexCoord);
-}
-
-void CVertexDataHolder::RenderPrimitive( GLenum Type )
-{
-	if (VertexCount == 0)
-		return;
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, CPrmitiveVertexDataHolder::Vertices);
-	glColorPointer(4, GL_FLOAT, 0, CPrmitiveVertexDataHolder::Colors);
-	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
-	glDrawArrays(Type, 0, CPrmitiveVertexDataHolder::VertexCount);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-}
-
-void CVertexDataHolder::Grow()
-{
-    CPrmitiveVertexDataHolder::Grow();
-	Vector2 *NewTexCoords = new Vector2[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
-		NewTexCoords[i] = TexCoords[i];
-
-	delete[] TexCoords;
-
-	TexCoords = NewTexCoords;
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CRenderer
@@ -1478,7 +1291,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 			if (!Equal(Transformation.GetAngle(), 0.0f))
 				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 			TempVector += Transformation.GetTranslation();//Sender->Position;
-			if (!Sender->doIgnoreCamera)
+			if (!CRenderManager::Instance()->Transformator.doConsiderCamera)
 				TempVector += CRenderManager::Instance()->Camera.GetTranslation();
 			VertexHolder->PushVertex(Vector3
 										(
@@ -1514,9 +1327,9 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 	for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];
-		TempVector = (Vertex * Transformation.GetScaling() * Sender->GetScaling());
- 		if (!Equal(Sender->GetAngle(), 0.0f))
- 			TempVector *= Matrix2(DegToRad(-Sender->GetAngle()));
+		TempVector = (Vertex * Transformation.GetScaling() * Transformation.GetScaling());
+ 		if (!Equal(Transformation.GetAngle(), 0.0f))
+ 			TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 		TempVector += Transformation.GetTranslation();// + Sender->GetPosition();//Sender->Position;
 // 		if (!Sender->doIgnoreCamera)
 // 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
@@ -1892,40 +1705,9 @@ int CModel::GetVertexNumber() const
 
 //////////////////////////////////////////////////////////////////////////
 // CRenderableComponent
-CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel), Box(0, 0, 0, 0), Scene(NULL), Visible(true)
+CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel), Visible(true)
 {
-	SetName("CRenderableComponent");
-	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
-}
-
-bool CRenderableComponent::isMirrorVertical() const
-{
-	return Configuration.doMirrorVertical;
-}
-
-void CRenderableComponent::SetMirrorVertical(bool MirrorOrNot)
-{
-	Configuration.doMirrorHorizontal = MirrorOrNot;
-}
-
-bool CRenderableComponent::isMirrorHorizontal() const
-{
-	return Configuration.doMirrorHorizontal;
-}
-
-void CRenderableComponent::SetMirrorHorizontal(bool MirrorOrNot)
-{
-	Configuration.doMirrorHorizontal = MirrorOrNot;
-}
-
-bool CRenderableComponent::isIgnoringParentTransform() const
-{
-	return Configuration.doIgnoreCamera;
-}
-
-void CRenderableComponent::SetIgnoreParentTransform(bool doIgnore)
-{
-	Configuration.doIgnoreCamera = doIgnore;
+	SetName("CRenderableComponent");	
 }
 
 const RGBAf& CRenderableComponent::GetColor() const
@@ -1943,64 +1725,14 @@ void CRenderableComponent::SetColor(const RGBAf &AColor)
 	Configuration.Color = AColor;
 }
 
-float CRenderableComponent::GetAngle() const
-{
-	return Configuration.GetAngle();
-}
-
 EBlendingMode CRenderableComponent::GetBlendingMode() const
 {
 	return Configuration.GetBlendingMode();
 }
 
-float CRenderableComponent::GetDepth() const
-{
-	return Configuration.GetDepth();
-}
-
-float CRenderableComponent::GetScaling() const
-{
-	return Configuration.GetScaling();
-}
-
-int CRenderableComponent::GetLayer() const
-{
-	return Configuration.GetLayer();
-}
-
-const Vector2& CRenderableComponent::GetPosition() const
-{
-	return Configuration.GetPosition();
-}
-
-Vector2& CRenderableComponent::GetPosition()
-{
-	return Configuration.GetPosition();
-}
-
-void CRenderableComponent::SetAngle(float AAngle)
-{
-	Configuration.SetAngle(AAngle);
-}
-
 void CRenderableComponent::SetBlendingMode(EBlendingMode ABlendingMode)
 {
 	Configuration.SetBlendingMode(ABlendingMode);
-}
-
-void CRenderableComponent::SetScaling(float AScaling)
-{
-	Configuration.SetScaling(AScaling);
-}
-
-void CRenderableComponent::SetLayer(int Layer)
-{
-	Configuration.SetLayer(Layer);
-}
-
-void CRenderableComponent::SetPosition(const Vector2 &APosition)
-{
-	Configuration.SetPosition(APosition);
 }
 
 CModel* CRenderableComponent::GetModel() const
@@ -2028,19 +1760,4 @@ const CRenderConfig& CRenderableComponent::GetConfiguration() const
 CRenderConfig& CRenderableComponent::GetConfiguration()
 {
 	return Configuration;
-}
-
-CTransformation& CRenderableComponent::GetTransformation()
-{
-	return Configuration.GetTransformation();
-}
-
-const CTransformation& CRenderableComponent::GetTransformation() const
-{
-	return Configuration.GetTransformation();
-}
-
-void CRenderableComponent::SetTransformation(const CTransformation &ATransformation)
-{
-	Configuration.SetTransformation(ATransformation);
 }

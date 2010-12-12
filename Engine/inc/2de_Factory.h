@@ -13,12 +13,19 @@ class CFactory : public CTSingleton<CFactory>
 public:
 	template<typename T>
 	T* New(const string &AName);
+
+	template<typename T>
+	T* New();
+
 	template<typename T>
 	void Add(T *AObject, const string &AName = "");
+
 	template<typename T>
 	T* Get(const string &AName);
+
 	template<typename T>
 	T* Remove(const string &AName);
+
 	void Rename(const string &AName, const string &ANewName);
 	void Destroy(CObject *AObject);
 	void CleanUp();
@@ -53,6 +60,13 @@ T* CFactory::New(const string &AName)
 
 	return result;
 }
+
+template <typename T>
+T* CFactory::New()
+{
+	return New<T>("");
+}
+
 
 /**
 * CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified.

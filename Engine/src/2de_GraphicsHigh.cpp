@@ -250,10 +250,10 @@ void CNewSuperParticleSystem::CreateParticle()
 	ParticlesActive++;
 
 	Particles[i].Age = Random_Float(ParticleLife - ParticleLifeVariability, ParticleLife + ParticleLifeVariability);
-	NewRenderable->SetPosition(this->GetPosition());
+//	NewRenderable->SetPosition(this->GetPosition());
 	Particles[i].Velocity = Vector2((rand()%1000 - rand()%1000) / 10.0f, (rand()%1000 - rand()%1000) / 10.0f);
-	NewRenderable->SetScaling(Random_Int(SizeStart - SizeVariability, SizeStart + SizeVariability));
-	Particles[i].DeltaSize = (SizeOver - NewRenderable->GetScaling()) / Particles[i].Age;
+//	NewRenderable->SetScaling(Random_Int(SizeStart - SizeVariability, SizeStart + SizeVariability));
+//	Particles[i].DeltaSize = (SizeOver - NewRenderable->GetScaling()) / Particles[i].Age;
 	NewRenderable->GetColor() = RGBAf::Random(ColorStart - ColorVariability, ColorStart + ColorVariability);
 	RGBAf RealEndColor = RGBAf::Random(ColorOver - ColorVariability, ColorOver + ColorVariability);
 	Particles[i].DeltaColor = (RealEndColor - NewRenderable->GetColor()) / Particles[i].Age;
@@ -275,9 +275,9 @@ void CNewSuperParticleSystem::Update(float dt)
 		CRenderableComponent *TempRenderable = dynamic_cast<CRenderableComponent *>(Children[i]);
 		if (TempRenderable == NULL)
 			continue;
-		TempRenderable->SetPosition(TempRenderable->GetPosition() +  Particles[i].Velocity * dt);
+//		TempRenderable->SetPosition(TempRenderable->GetPosition() +  Particles[i].Velocity * dt);
 		TempRenderable->GetColor() += Particles[i].DeltaColor * dt;
-		TempRenderable->SetScaling(TempRenderable->GetScaling() + Particles[i].DeltaSize*dt);
+//		TempRenderable->SetScaling(TempRenderable->GetScaling() + Particles[i].DeltaSize*dt);
 	}
 
 	float np = Emission * dt;	// + uncreated;

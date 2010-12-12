@@ -84,8 +84,8 @@ void CGUIObjectBase::SetStyle(CGUIStyle *AStyle)
 Vector2 CGUIObjectBase::GlobalToLocal(const Vector2 &Coords) const
 {
 	Vector2 Result;
-	Result.x = std::max(Coords.x - GetBox().Min.x, 0.0f);
-	Result.y = std::max(Coords.y - GetBox().Min.y, 0.0f);
+// 	Result.x = std::max(Coords.x - GetBox().Min.x, 0.0f);
+// 	Result.y = std::max(Coords.y - GetBox().Min.y, 0.0f);
 	return Result;
 }
 
@@ -154,7 +154,7 @@ void CGUIRootObject::Update(float dt)
 
 CGUIObject::CGUIObject()
 {
-	Text.SetLayer(5);
+	//Text.SetLayer(5);
 	CGUIManager::Instance()->Add(this);
 	SetParent(CGUIManager::Instance()->GetRoot());
 }
@@ -205,13 +205,13 @@ const string& CGUIObject::GetText() const
 void CGUIObject::SetText(const string &AText)
 {
 	Text = AText;
-	Text.SetPosition(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f);
+	//Text.SetPosition(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f);
 }
 
 void CGUIObject::SetBox(const CBox &box)
 {
 	//CRenderable::SetBox(box);
-	Text.SetLayer(10);
+	//Text.SetLayer(10);
 	// maybe smthng else
 }
 //////////////////////////////////////////////////////////////////////////
@@ -316,7 +316,7 @@ void CLabel::Render()
 void CLabel::SetBox(const CBox &box)
 {
 	CGUIObject::SetBox(box);
-	Text.SetPosition(Vector2(box.Min.x, box.Min.y));
+	//Text.SetPosition(Vector2(box.Min.x, box.Min.y));
 }
 //////////////////////////////////////////////////////////////////////////
 // CButton
@@ -337,7 +337,7 @@ CButton::CButton(CBox ARect, const char* AText, RGBAf AColor)
 void CButton::SetBox(const CBox &box)
 {
 	CGUIObject::SetBox(box);
-	Text.SetPosition((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f);
+	//Text.SetPosition((box.Min + box.Max) / 2.0f - Vector2(Text.Width(), Text.Height()) / 2.0f);
 }
 
 void CButton::Render()
@@ -358,7 +358,7 @@ void CButton::Render()
 		//temprect_lines.Color = Style->Colors.ButtonBorderPressed;
 	}
 
-	SetLayer(1);
+	//SetLayer(1);
 	//CRenderManager::Instance()->DrawSolidBox(this, GetBox().Inflated(4.0f, 4.0f));
 //	CRenderManager::Instance()->DrawSolidBox(this, GetBox());
 }
@@ -368,7 +368,7 @@ void CButton::Update(float dt)
 {
 	Vector2 mouse = CEngine::Instance()->GetMousePosition();
 
-	MouseState.Hovered = GetBox().Inside(mouse);
+	//MouseState.Hovered = GetBox().Inside(mouse);
 	MouseState.Pressed = SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1);
 	MouseState.PressedInside = MouseState.Hovered && MouseState.Pressed;
 
@@ -452,9 +452,9 @@ CEdit::CEdit() : CursorPos(-1), VisibleTextOffset(0)
 
 void CEdit::Render()
 {
-	SetLayer(1);
-	float StringWidth = Text.Width();
-	float StringHeight = Text.Height();
+	//SetLayer(1);
+	//float StringWidth = Text.Width();
+	//float StringHeight = Text.Height();
 	float CursorDistance = Font->GetStringWidthEx(0, (CursorPos - VisibleTextOffset), GetVisibleText().c_str());
 
 	// Font = Style->Fonts.EditFont; // later: we will be able to change style on fly, so assign font to the pointer every render..
@@ -478,12 +478,12 @@ void CEdit::Render()
 	{
 		if (Selection.Exists())
 		{
-			CBox SelBox(GetBox().Min.x + Style->Metrics.EditMargins.x +
-				Font->GetStringWidthEx(0, std::max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
-				GetBox().Min.y + Style->Metrics.EditMargins.y,
-				GetBox().Min.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0,
-				std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1), GetVisibleText().c_str()),
-				GetBox().Max.y - Style->Metrics.EditMargins.y);
+		//	CBox SelBox(GetBox().Min.x + Style->Metrics.EditMargins.x +
+		//		Font->GetStringWidthEx(0, std::max(Selection.RangeStart() - VisibleTextOffset, -1), GetVisibleText().c_str()),
+/*	*///			GetBox().Min.y + Style->Metrics.EditMargins.y,
+		//		GetBox().Min.x + Style->Metrics.EditMargins.x + Font->GetStringWidthEx(0,
+		//		std::min(Selection.RangeEnd() - VisibleTextOffset, (int)GetVisibleText().length() - 1), GetVisibleText().c_str()),
+		//		GetBox().Max.y - Style->Metrics.EditMargins.y);
 
 			GetColor() = Style->Colors.EditSelection;
 			//CRenderManager::Instance()->DrawSolidBox(this, SelBox);
@@ -499,7 +499,7 @@ void CEdit::Update(float dt)
 	Text = GetVisibleText();
 	Vector2 mouse = CEngine::Instance()->GetMousePosition();
 
-	MouseState.Hovered = GetBox().Inside(mouse);
+	//MouseState.Hovered = GetBox().Inside(mouse);
 	MouseState.Pressed = (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) && MouseState.Hovered;
 
 
@@ -514,29 +514,29 @@ void CEdit::Update(float dt)
 		else
 			Selection.End = CursorPos;
 
-		float Xmi = GetBox().Min.x, Ymi = GetBox().Min.y;
-		float Xma = GetBox().Min.x, Yma = GetBox().Min.y;
+		//float Xmi = GetBox().Min.x, Ymi = GetBox().Min.y;
+		//float Xma = GetBox().Min.x, Yma = GetBox().Min.y;
 
-		CBox LeftScrollArea(Xmi, Ymi, Xmi + 5.0f, Yma);
-		CBox RightScrollArea(Xma - 5.0f, Ymi, Xma, Yma);
+// 		CBox LeftScrollArea(Xmi, Ymi, Xmi + 5.0f, Yma);
+// 		CBox RightScrollArea(Xma - 5.0f, Ymi, Xma, Yma);
 
-		if (LeftScrollArea.Inside(mouse))
-		{
-			// @todo: move this copy-paste from here and from SDLK_LEFT handler to some function...
-			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
-				VisibleTextOffset--;
-		}
-
-		if (RightScrollArea.Inside(mouse))
-		{
-			string RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
-
-			while (!isTextFits(RightIncText.c_str()))
-			{
-				VisibleTextOffset++;
-				RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
-			}
-		}
+// 		if (LeftScrollArea.Inside(mouse))
+// 		{
+// 			// @todo: move this copy-paste from here and from SDLK_LEFT handler to some function...
+// 			if (((CursorPos - VisibleTextOffset)) < 0 && (VisibleTextOffset > 0))
+// 				VisibleTextOffset--;
+// 		}
+// 
+// 		if (RightScrollArea.Inside(mouse))
+// 		{
+// 			string RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
+// 
+// 			while (!isTextFits(RightIncText.c_str()))
+// 			{
+// 				VisibleTextOffset++;
+// 				RightIncText = Text.GetText().substr(VisibleTextOffset, CursorPos - VisibleTextOffset + 2);
+// 			}
+// 		}
 	}
 
 	PreviousMouseState = MouseState;
@@ -679,9 +679,10 @@ void CEdit::ProcessEvent(const CEvent &AEvent)
 
 int CEdit::MouseToCursorPos(const Vector2& MousePosition) const
 {
-	if (!GetBox().Inside(MousePosition))
-		return -1;
-	return Text.StringCoordToCursorPos(MousePosition.x, MousePosition.y) + VisibleTextOffset;
+	//if (!GetBox().Inside(MousePosition))
+	//	return -1;
+	//return Text.StringCoordToCursorPos(MousePosition.x, MousePosition.y) + VisibleTextOffset;
+	return -1;
 }
 
 string CEdit::GetVisibleText() const
@@ -696,18 +697,18 @@ string CEdit::GetVisibleText() const
 
 bool CEdit::isTextFits(const char *AText) const
 {
-	return ((Font->GetStringWidth(AText) + 2.0f * Style->Metrics.EditMargins.x) < GetBox().Width());
+	return true;//((Font->GetStringWidth(AText) + 2.0f * Style->Metrics.EditMargins.x) < GetBox().Width());
 }
 
 void CEdit::SetBox(const CBox &box)
 {
-	float StringHeight = Text.Height();
+	//float StringHeight = Text.Height();
 	CGUIObject::SetBox(box);
-	Text.SetPosition
-		(Vector2(
-			(int)box.Min.x + (int)Style->Metrics.EditMargins.x,
-			(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y
-		));
+// 	Text.SetPosition
+// 		(Vector2(
+// 			(int)box.Min.x + (int)Style->Metrics.EditMargins.x,
+// 			(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y
+// 		));
 }
 
 void CEdit::SetText(const string &AText)
@@ -715,10 +716,10 @@ void CEdit::SetText(const string &AText)
 	ActualText = AText;
 	/*Text.Position.y = (int)((GetBox().Min.y + GetBox().Max.y) / 2.0f - Text.Height() / 2.0f);*/
 	Text = GetVisibleText();
-	Text.SetPosition(Vector2(
-			(int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x,
-			(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y
-		));
+// 	Text.SetPosition(Vector2(
+// 			(int)GetBox().Min.x + (int)Style->Metrics.EditMargins.x,
+// 			(((GetBox().Min + GetBox().Max) - Vector2(Text.Width(), Text.Height())) * 0.5f).y
+// 		));
 	Selection.Clear((CursorPos = -1));
 }
 
@@ -789,7 +790,7 @@ CMenuItem::CMenuItem() : isCycledMenuSwitch(true)//, Focus(Objects.begin())
 
 CMenuItem::CMenuItem(CMenuItem *AParent, const string &AMenuText)
 {
-	SetIgnoreParentTransform(true);
+	//SetIgnoreParentTransform(true);
 //Focus = Objects.begin();
 	SetVisibility(false);
 	isCycledMenuSwitch = true;

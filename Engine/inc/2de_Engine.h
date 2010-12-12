@@ -20,8 +20,6 @@
 
 const int ENGINE_VERSION = 0x001;	// it's a pity that it's not used.. i DO WANT some build counter, that increments automatically every build :)
 const float FIXED_DELTA_TIME = 0.02f;
-const int MAX_EVENT_FUNCTIONS = 8;
-const int MAX_KEY_INPUT_FUNCTIONS = 8;
 
 class CAbstractStateHandler
 {
@@ -82,7 +80,7 @@ protected:
 	~CEngine();
 
 private:
-	CMouseCursor *Cursor;
+	CMouseCursor *Cursor;	// @todo: rename and rearrange these variables according to common sense.
 	bool Keys[SDLK_LAST];
 	Vector2 MousePosition;
 	float dt;

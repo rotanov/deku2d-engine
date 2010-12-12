@@ -108,18 +108,20 @@ using namespace std;
 typedef unsigned char		byte;
 
 //	"Forever" instead of "for(;;)", anyway, just kidding.
-#define Forever for(;;)
+#define forever for(;;)
 
 template<typename T>
 __INLINE void SAFE_DELETE(T*& a)
 {
-	delete a, a = NULL;
+	delete a;
+	a = NULL;
 }
 
 template<typename T>
 __INLINE void SAFE_DELETE_ARRAY(T*& a)
 {
-	delete [] a, a = NULL;
+	delete [] a;
+	a = NULL;
 }
 
 #define DEAD_BEEF 0xdeadbeef
@@ -373,10 +375,11 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
-
+class CAbstractScene;
 class CGameObject : public CObject
 {
 private:
+
 	class traverse_iterator
 	{
 	protected:
@@ -390,6 +393,8 @@ private:
 		CGameObject& operator *();
 		const CGameObject& operator *() const;
 	};
+	
+	CAbstractScene *Scene;
 
 public:	
 	bool Active;
@@ -450,6 +455,8 @@ public:
 		Children.pop_back();
 	}
 
+	void PutIntoScene(CAbstractScene *AScene);
+	CAbstractScene* GetScene() const;
 	virtual void JustDoIt();
 };
 

@@ -135,6 +135,87 @@ public:
 	void Clear();
 };
 
+// SUDDENLY NEW COMPONENT APPEARS
+class CPlaceableComponent : public CGameObject
+{
+public:
+	CPlaceableComponent();
+	float GetAngle() const;
+	float GetDepth() const;
+	int GetLayer() const;	
+	float GetScaling() const;
+	const Vector2& GetPosition() const;
+	Vector2& GetPosition();
+
+	void SetAngle(float AAngle); //	(Degrees)
+
+	void SetScaling(float AScaling);
+	/**
+	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
+	*	implicitly Depth => [-1; 1]?	
+	*/
+	void SetLayer(int Layer);
+	void SetPosition(const Vector2 &APosition);
+
+	void SetTransformation(const CTransformation &ATransformation);
+	CTransformation& GetTransformation();
+	const CTransformation& GetTransformation() const;
+	bool isMirrorVertical() const;
+	void SetMirrorVertical(bool MirrorOrNot);
+	bool isMirrorHorizontal() const;
+	void SetMirrorHorizontal(bool MirrorOrNot);
+	bool isIgnoringParentTransform() const;
+	void SetIgnoreParentTransform(bool doIgnore);
+
+private:
+	CTransformation Transformation;
+	bool doIgnoreCamera;	// all previous transformations are ignored if true
+	bool doMirrorHorizontal;
+	bool doMirrorVertical;
+
+};
+
+// SUDDENLY ONE MORE COMPONENT APPEALS
+class CGeometricComponent : public CGameObject	// "Geometric" or "Geometrical"?
+{
+public:
+	CGeometricComponent() : Box(0, 0, 0, 0)
+	{
+
+	}
+
+	// Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--
+	// why const CBox? it's a copy of CBox object, not a reference, why should it be const?..	
+	const CBox GetBox() const
+	{
+		CBox TempBox = Box;
+//		TempBox.Min *= GetScaling();	// FUCK FUCK FUCK
+//		TempBox.Max *= GetScaling();
+//		TempBox.Offset(GetPosition());
+		//Box.RotateByAngle(Angle);
+		return TempBox;
+	}
+
+	virtual void SetBox(const CBox &ABox)
+	{
+		Box = ABox;
+	}
+
+	float Width()
+	{
+		return Box.Width();
+	}
+
+	float Height()
+	{
+		return Box.Height();
+	}
+	
+
+private:
+	CBox Box; //	Axis Aligned Bounding Box for culling
+};
+
 /**
 *	CModel — represents object geometry, object type and if has - 
 *	texture and texture coordinates. 
@@ -190,36 +271,11 @@ class CRenderConfig
 {
 public:
 	RGBAf Color;
-	bool doIgnoreCamera;		// if true, then all previous transformations are ignored
-	bool doMirrorHorizontal;
-	bool doMirrorVertical;
 	EBlendingMode BlendingMode;
 
 	CRenderConfig();
-	float GetAngle() const;
 	EBlendingMode GetBlendingMode() const;
-	float GetDepth() const;
-	int GetLayer() const;	
-	float GetScaling() const;
-	const Vector2& GetPosition() const;
-	Vector2& GetPosition();
-
-	void SetAngle(float AAngle); //	(Degrees)
 	void SetBlendingMode(EBlendingMode ABlendingMode);
-	void SetScaling(float AScaling);
-	/**
-	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
-	*	implicitly Depth => [-1; 1]?	
-	*/
-	void SetLayer(int Layer);
-	void SetPosition(const Vector2 &APosition);
-
-	void SetTransformation(const CTransformation &ATransformation);
-	CTransformation& GetTransformation();
-	const CTransformation& GetTransformation() const;
-
-private:
-	CTransformation Transformation;	
 };
 
 /**
@@ -231,40 +287,15 @@ class CRenderableComponent : public CGameObject
 public:
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
-	const CBox GetBox() const;
-	float Width();
-	float Height();
-	virtual void SetBox(const CBox &ABox);
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
-	void PutIntoScene(CAbstractScene *AScene);
-	CAbstractScene* GetScene() const;
-	bool isMirrorVertical() const;
-	void SetMirrorVertical(bool MirrorOrNot);
-	bool isMirrorHorizontal() const;
-	void SetMirrorHorizontal(bool MirrorOrNot);
-	bool isIgnoringParentTransform() const;
-	void SetIgnoreParentTransform(bool doIgnore);
 	const RGBAf& GetColor() const;
 	RGBAf& GetColor();
 	void SetColor(const RGBAf &AColor);
-	float GetAngle() const;
 	EBlendingMode GetBlendingMode() const;
-	float GetDepth() const;
-	int GetLayer() const;
-	float GetScaling() const;
-	const Vector2& GetPosition() const;
-	Vector2& GetPosition();
-	void SetAngle(float AAngle);
 	void SetBlendingMode(EBlendingMode ABlendingMode);
-	void SetScaling(float AScaling);
-	void SetLayer(int Layer);
-	void SetPosition(const Vector2 &APosition);
 	CModel* GetModel() const;
 	void SetModel(CModel *AModel);
-	void SetTransformation(const CTransformation &ATransformation);
-	const CTransformation& GetTransformation() const;
-	CTransformation& GetTransformation();
 	CRenderConfig& GetConfiguration();
 	const CRenderConfig& GetConfiguration() const;
 	void SetConfiguration(const CRenderConfig &AConfiguraton);
@@ -272,9 +303,7 @@ public:
 private:
 	CRenderConfig Configuration;
 	CResourceRefCounter<CModel> Model;
-	CBox Box; //	Axis Aligned Bounding Box for culling
-	CAbstractScene *Scene;
-	bool Visible;
+	bool Visible;	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -314,55 +343,6 @@ public:
 };
 
 /**
-*	CPrmitiveVertexDataHolder was useful class to incorporate Colors and Vertices
-*	for pushing and drawing them. Now modern version of that class included in
-*	declaration of CFFPRender and that version is for @todo: get rid of it.
-*/
-class CPrmitiveVertexDataHolder	// for any non textured stuff
-{
-	friend class CRenderManager;
-public:
-	CPrmitiveVertexDataHolder();
-	virtual ~CPrmitiveVertexDataHolder();
-	virtual void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	virtual void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex);
-	virtual void RenderPrimitive(GLenum Type);
-	void Clear();
-	unsigned int GetVertexCount();
-
-protected:
-	static const unsigned int StartSize = 256;
-	unsigned int VertexCount;
-	unsigned int ReservedCount;
-	RGBAf *Colors;
-	Vector3 *Vertices;
-
-	virtual void Grow();
-};
-
-/**
-*	CVertexDataHolder - same as CPrmitiveVertexDataHolde, but for textured primitives
-*/
-class CVertexDataHolder : public CPrmitiveVertexDataHolder
-{
-	friend class CRenderManager;
-public:
-	CVertexDataHolder();
-	~CVertexDataHolder();
-	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const RGBAf &Color);
-	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex);
-	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex,
-		const RGBAf &Color, const Vector2 &TexCoord);
-	void PushVertex(const CRenderConfig *Sender, const Vector2 &Vertex, const Vector2 &TexCoord);
-	void RenderPrimitive(GLenum Type);
-
-private:
-	Vector2 *TexCoords;
-
-	void Grow();
-};
-
-/**
 *	CTransformator holds current transformation and stack of transformations.
 *	Should be updated before use, lol.
 *	Now updated in recursive traverse of CGameObject tree
@@ -378,6 +358,10 @@ public:
 	virtual void PopTransformation();
 	virtual void ClearTransformation();
 	const CTransformation& GetCurrentTransfomation() const;
+
+	bool doConsiderCamera; // Shows if we considering global camera at current depth in trans. tree
+	bool isMirroredHorizontal;
+	bool isMirroredVertical;
 
 	vector<CTransformation> TransformationStack;
 protected:
@@ -421,6 +405,12 @@ public:
 	void Clear();
 
 private:
+	/**
+	*	CPrmitiveVertexDataHolder was useful class to incorporate Colors and Vertices
+	*	for pushing and drawing them. Now modern version of that class included in
+	*	declaration of CFFPRender and that version is for @todo: get rid of it.
+	*/
+
 	class CBetterVertexHolder // For primitives for now
 	{
 	public:
@@ -726,7 +716,7 @@ private:
 };
 
 /**
-*	CText - Text. Cleat enough, lol.
+*	Text.
 *	Shouldn't render itself, should be inherited from CRenderableComponent, not Renderable
 *	So it will have Model and Configuration and there will become some unclear stuff.
 *	Cause CModel wants to be Resource.
@@ -737,7 +727,6 @@ public:
 	CText();
 	~CText();
 	CText(const string &AText);
-	//const CBox GetBox() const;
 	CFont* GetFont() const;
 	string& GetText();
 	const string& GetText() const;
@@ -745,7 +734,8 @@ public:
 	void SetText(const string &AText);
 	CText& operator =(const string &AText);
 	unsigned char operator [] (unsigned int index) const;
-	float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
+	// Such function could be there no more. Text has no info about box and world position now, But We can generate info 'bout box anytime instead
+	//float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
 	unsigned int Length() const;
 
 private:
@@ -763,14 +753,10 @@ class CAbstractScene : public CObject
 {
 	friend class CSceneManager;
 public:
-	virtual void AddRenderable(CRenderableComponent *AObject) = 0;
-	//virtual void AddUpdatable(CUpdatable *AObject) = 0;
-	virtual void RemoveRenderable(CRenderableComponent *AObject) = 0;
-	//virtual void RemoveUpdatable(CUpdatable *AObject)= 0;
+	virtual void Add(CGameObject *AObject) = 0;
+	virtual void Remove(CGameObject *AObject) = 0;
 
 protected:
-	virtual void Render() = 0;
-	virtual void Update(float dt) = 0;
 
 	CAbstractScene();
 	~CAbstractScene(){}
@@ -787,17 +773,16 @@ class CScene : public CAbstractScene
 {
 	friend class CSceneManager;
 public:
-	virtual void AddRenderable(CRenderableComponent *AObject);
-	//virtual void AddUpdatable(CUpdatable *AObject);
-	virtual void RemoveRenderable(CRenderableComponent *AObject);
-	//virtual void RemoveUpdatable(CUpdatable *AObject);
+	virtual void Add(CGameObject *AObject);
+	virtual void Remove(CGameObject *AObject);
 
 protected:
-	vector<CRenderableComponent *> RenderableObjects;
-	//vector<CUpdatable*> UpdatableObjects;
-	virtual void Render();
-	virtual void Update(float dt);
-	CScene(){}
+	vector<CGameObject *> GameObjects;
+
+	CScene()
+	{
+
+	}
 	~CScene();
 };
 
@@ -807,8 +792,8 @@ protected:
 class CGlobalScene : public CScene
 {
 public:
-	void AddRenderable(CRenderableComponent *AObject);
-	//void AddUpdatable(CUpdatable *AObject);
+	void Add(CGameObject *AObject);	
+
 };
 
 /**
@@ -823,8 +808,6 @@ public:
 	CAbstractScene* GetCurrentScene();
 	void SetCurrentScene(CAbstractScene *AScene);
 	bool InScope(CAbstractScene * AScene) const;
-	void Render();
-	void Update(float dt);
 
 private:
 	CAbstractScene *CurrentScene;
@@ -849,11 +832,13 @@ public:
 	CBox Box;
 	CMouseCursor()
 	{		
-		Box = CBox(Vector2(-2.0f, -2.0f), Vector2(1.0f, 1.0f));
-		SetLayer(512);
+		CPlaceableComponent *tempPlaceable = CFactory::Instance()->New<CPlaceableComponent>();
+		tempPlaceable->SetLayer(512);
 		SetColor(COLOR_GREEN);
 		SetModel(CRenderManager::CreateModelBox(4.0f, 4.0f, MODEL_TYPE_LINES));
-		CUpdateManager::Instance()->RootGameObject->Attach(this);
+
+		this->SetParent(tempPlaceable);
+		CUpdateManager::Instance()->RootGameObject->Attach(tempPlaceable);
 	}
 
 };

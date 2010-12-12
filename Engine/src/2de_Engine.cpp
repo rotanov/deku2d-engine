@@ -112,11 +112,12 @@ bool CEngine::Initialize()
 	//////////////////////////////////////////////////////////////////////////
 	//Here goes high level initializations, like default scene as title screen
 	//and FPSText
-
+	CPlaceableComponent *FPSTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->SetText("FPS: 0");
-	FPSText->SetLayer(512);
-	CUpdateManager::Instance()->RootGameObject->Attach(FPSText);
+	FPSTextPlacing->SetLayer(512);
+	CUpdateManager::Instance()->RootGameObject->Attach(FPSTextPlacing);
+	FPSTextPlacing->Attach(FPSText);
 
 	//	Создание текстуры из памяти
 	CTexture *TitleScreenShroomTexture;
@@ -127,16 +128,6 @@ bool CEngine::Initialize()
 	// Создание и установка текущей сцены
 	CAbstractScene *TitleScreen = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(TitleScreen);
-
-	// Инициализация текста	
-	unsigned int ScrWidth = CGLWindow::Instance()->GetWidth();
-	unsigned int ScrHeight = CGLWindow::Instance()->GetHeight();
-	CText *TitleText = CFactory::Instance()->New<CText>("txtDeku");
-	TitleText->SetText("Deku");
-	TitleText->SetPosition(Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 22.0f));
-	TitleText = CFactory::Instance()->New<CText>("txtTeam");
-	TitleText->SetText("team");
-	TitleText->SetPosition(Vector2(ScrWidth * 0.5f + 15.0f, ScrHeight * 0.5f - 35.0f));
 
 	// Создание класса CDefaultTutleScreen (в текущей сцене)
 	CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
@@ -236,10 +227,6 @@ bool CEngine::LimitFPS()
 	return false;
 }
 
-
-#define INPUT_FILTER case SDL_KEYDOWN:case SDL_MOUSEBUTTONDOWN:\
-case SDL_MOUSEBUTTONUP:case SDL_MOUSEMOTION:case SDL_KEYUP:
-
 // possibly move to CEnvironment
 char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 {
@@ -264,13 +251,6 @@ bool CEngine::ProcessEvents()
 	while (SDL_PollEvent(&event)) // @todo: Look here!!!!!! :
 	//	http://osdl.sourceforge.net/main/documentation/rendering/SDL-inputs.html
 	{
-		
-		/*switch (event.type)
-		{
-			INPUT_FILTER
-				for (int i = 0; i < EventFuncCount; i++)
-					(*EventFunctions[i])(event);
-		}*/
 		switch (event.type)
 		{
 			case SDL_KEYDOWN:
@@ -348,7 +328,9 @@ bool CEngine::ProcessEvents()
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
 				MousePosition = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
-				Cursor->SetPosition(MousePosition);
+				CPlaceableComponent *CursorPlacing = dynamic_cast<CPlaceableComponent*>(Cursor->Parent);
+				if (CursorPlacing != NULL)
+					CursorPlacing->SetPosition(MousePosition);
 				//SDL_Delay(2);
 				break;
 			}
@@ -422,12 +404,12 @@ bool CEngine::Run(int argc, char *argv[])
 				{
 					CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
 					CUpdateManager::Instance()->UpdateObjects();
-					CSceneManager::Instance()->Update(dt);
+					//CSceneManager::Instance()->Update(dt);
 					if (doCalcFPS)
 						CalcFPS();
 					CRenderManager::Instance()->BeginFrame();
 					CRenderManager::Instance()->DrawObjects();
-					CSceneManager::Instance()->Render();
+					//CSceneManager::Instance()->Render();
 					
 					// @todo: And look here:(yet it's about mainloopissue) http://gafferongames.com/game-physics/fix-your-timestep/
 				}
@@ -461,6 +443,8 @@ void CEngine::Pause()
 	// i mean full engine level pause or something else
 	// i think more about first
 	// 	i suppose that it may be pause of events processing
+	// Well, then it's decided, CEngine::pause() should pause the engine,
+	// whereas CScene::Pause() should pause the scene.
 }
 
 void CEngine::ShutDown()

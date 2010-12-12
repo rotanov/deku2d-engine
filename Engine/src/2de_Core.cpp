@@ -220,13 +220,14 @@ bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL)
 {
-
+	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 }
 
 CGameObject::~CGameObject()
 {
+	Scene->Remove(this);
 	while (Children.size() > 0)
 		// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
 		Children.back()->SetParent(Parent);
@@ -273,6 +274,21 @@ void CGameObject::SetParent(CGameObject* AGameObject)
 void CGameObject::JustDoIt()
 {
 
+}
+
+void CGameObject::PutIntoScene( CAbstractScene *AScene )
+{
+	assert(AScene != NULL);
+	if (Scene != NULL)
+		Scene->Remove(this);
+	Scene = AScene;
+	Scene->Add(this);
+}
+
+CAbstractScene* CGameObject::GetScene() const
+{
+	assert(Scene != NULL);
+	return Scene;
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -58,7 +58,7 @@ namespace LuaAPI
 	}
 
 	// number GetDeltaTime()
-	int GetDeltaTime(lua_State *L)
+	int GetDeltaTime(lua_State *L)	// This is case when just "dt" is fuckingly (spell checker suggests me to replace "fuckingly" with "motherfucking") ok.
 	{
 		lua_pushnumber(L, CEngine::Instance()->GetDeltaTime());
 		return 1;
@@ -127,10 +127,10 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// (number, number) GetPosition(userdata RenderableComponent)
+	// (number, number) GetPosition(userdata CPlaceableComponent)
 	int GetPosition(lua_State *L)
 	{
-		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -1));
+		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
 		if (!rcobj)
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
@@ -141,14 +141,14 @@ namespace LuaAPI
 		return 2;
 	}
 
-	// void SetPosition(userdata RenderableComponent, number X, number Y)
+	// void SetPosition(userdata CPlaceableComponent, number X, number Y)
 	int SetPosition(lua_State *L)
 	{
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
 
 		//CObject* cobj = static_cast<CObject*>();
-		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -3));
+		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -3));
 		if (!rcobj)
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
@@ -252,7 +252,7 @@ namespace LuaAPI
 	}
 
 	// number sin(number n)
-	int sin(lua_State *L)
+	int sin(lua_State *L)	// WHAT?! Lua cannot into sin() or what?
 	{
 		if (!lua_isnumber(L, -1))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to sin API call");
@@ -261,7 +261,7 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// number cos(number n)
+	// number cos(number n)	// same as above
 	int cos(lua_State *L)
 	{
 		if (!lua_isnumber(L, -1))
@@ -272,7 +272,7 @@ namespace LuaAPI
 	}
 
 	// number Abs(number n)
-	int Abs(lua_State *L)
+	int Abs(lua_State *L)	// same as above
 	{
 		if (!lua_isnumber(L, -1))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Abs API call");

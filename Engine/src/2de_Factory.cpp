@@ -88,3 +88,4 @@ void CFactory::DestroyAll()
 	Objects.clear();
 	CleanUp();
 }
+
