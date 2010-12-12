@@ -11,6 +11,14 @@ function PongPlayer()
 		MovingDown = false,
 		OnCreate = function(self)
 			SubscribeToEvent("EveryFrame", self.object)
+			SubscribeToEvent("Attached", self.object)
+		end,
+		OnAttached = function(self, event)
+			if GetEventData(event, "Name") ~= GetName(self.object) then
+				return
+			end
+
+			self.Place = GetParent(GetParent(self.object))
 		end,
 		MoveUp = function(self)
 			self.MovingUp = true
@@ -43,7 +51,7 @@ function PongPlayer()
 				self.Velocity.y = -self.Velocity.y * 0.5
 			end
 
-			SetPosition(GetParent(self.object), self.Position.x, self.Position.y)
+			SetPosition(self.Place, self.Position.x, self.Position.y)
 		end,
 		GetBox = function(self)
 			return CBox(self.Position, self.Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT))
@@ -83,7 +91,11 @@ function PongPlayerTwo()
 	return t
 end
 
-PlayerOneScriptable = PongPlayerOne()	-- instancing
+if PlayerOneScriptable == nil then
+	PlayerOneScriptable = PongPlayerOne()	-- instancing
+end
 
-PlayerTwoScriptable = PongPlayerTwo()
+if PlayerTwoScriptable == nil then
+	PlayerTwoScriptable = PongPlayerTwo()
+end
 

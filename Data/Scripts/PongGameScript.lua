@@ -6,10 +6,15 @@ function PongGame:OnCreate()
 		PlayerTwo = 0,
 	}
 
-	self.MemUsageText = CreateNewText("MemUsageText")
-	SetPosition(self.MemUsageText, 10, 30)
-	SetText(self.MemUsageText, "not updated yet")
-	Attach(GetObject("RootGameObject"), self.MemUsageText);
+	self.MemUsageText = {
+		text = Create("Text", "MemUsageText"),
+		pos = Create("PlaceableComponent", "MemUsageTextPlace"),
+	}
+
+	SetPosition(self.MemUsageText.pos, 10, 30)
+	SetText(self.MemUsageText.text, "not updated yet")
+	Attach(self.MemUsageText.pos, self.MemUsageText.text);
+	Attach(GetObject("RootGameObject"), self.MemUsageText.pos);
 
 	SubscribeToEvent("PlayerOneScored", self.object)
 	SubscribeToEvent("PlayerTwoScored", self.object)
@@ -18,11 +23,13 @@ end
 
 function PongGame:OnPlayerOneScored()
 	self.Score.PlayerOne = self.Score.PlayerOne + 1
+	SetText(GetObject("PlayerOneScoreText"), self.Score.PlayerOne)
 	self:LogScore()
 end
 
 function PongGame:OnPlayerTwoScored()
 	self.Score.PlayerTwo = self.Score.PlayerTwo + 1
+	SetText(GetObject("PlayerTwoScoreText"), self.Score.PlayerTwo)
 	self:LogScore()
 end
 
@@ -34,7 +41,7 @@ function PongGame:OnTimerTick(event)
 		return
 	end
 
-	SetText(self.MemUsageText, "Lua memory usage: " .. GetMemoryUsage())
+	SetText(self.MemUsageText.text, "Lua memory usage: " .. GetMemoryUsage())
 end
 
 function PongGame:LogScore()

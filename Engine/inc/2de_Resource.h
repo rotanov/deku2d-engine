@@ -83,7 +83,7 @@ private:
 * CResource - base class for resources.
 */
 
-class CResource : public virtual CObject
+class CResource : public CObject
 {
 public:
 	enum ELoadSource

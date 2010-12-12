@@ -36,7 +36,6 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-
 	CEngine::Instance()->SetDoShowFPS(true);
 
 	//CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
@@ -70,12 +69,6 @@ bool CCustomStateHandler::OnInitialize()
 	tempMagicCirclePlacement->Attach(tempMagicSquarePlacement);
 	temptext->Parent->Attach(tempMagicCirclePlacement);
 
-
-	// Lua scripting test
-	//CLuaVirtualMachine::Instance()->RunFile(CResourceManager::Instance()->DataPath + "/Scripts/test.lua");
-	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("test"));
-	//CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("scriptable-test"));
- 
 // CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f))*/);
 // 
 // Vector2Array<4> vert;

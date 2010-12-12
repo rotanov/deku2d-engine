@@ -1089,12 +1089,13 @@ void CText::SetFont(CFont *AFont)
 {
 	assert(AFont != NULL);
 	Font = AFont;
-	SetText(Characters);	// Пересчитать BOX, шрифт же меняется.
-}
-
-void CText::SetText(const string &AText)
-{
-	if (Characters == AText)
+	SetText(Characters);	// Пересчитать BOX, шрифт же меняется.  ///<<<< OLOLOLO --------
+	_UpdateSelfModel();						///			|
+}									///			|
+									///			|
+void CText::SetText(const string &AText)				///			|
+{									///			|
+	if (Characters == AText)	///<<<<	OLOLOLO	----------------------------------------|
 		return;
 	Characters = AText;
 	//SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));

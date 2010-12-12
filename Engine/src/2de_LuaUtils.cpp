@@ -41,7 +41,7 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// void Attach(component Destination, component Object)
+	// void Attach(userdata Destination, userdata Object)
 	int Attach(lua_State *L)
 	{
 		CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
@@ -126,7 +126,7 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// (number, number) GetPosition(userdata CPlaceableComponent)
+	// (number, number) GetPosition(userdata PlaceableComponent)
 	int GetPosition(lua_State *L)
 	{
 		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
@@ -140,7 +140,7 @@ namespace LuaAPI
 		return 2;
 	}
 
-	// void SetPosition(userdata CPlaceableComponent, number X, number Y)
+	// void SetPosition(userdata PlaceableComponent, number X, number Y)
 	int SetPosition(lua_State *L)
 	{
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
@@ -155,6 +155,27 @@ namespace LuaAPI
 		}
 
 		rcobj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		return 0;
+	}
+
+	// void SetScript(userdata ScriptableComponent, userdata Script)
+	int SetScript(lua_State *L)
+	{
+		CScriptableComponent *ScriptableComponent = static_cast<CScriptableComponent *>(lua_touserdata(L, -2));
+		if (!ScriptableComponent)
+		{
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");
+			return 0;
+		}
+
+		CScript *Script = static_cast<CScript *>(lua_touserdata(L, -1));
+		if (!Script)
+		{
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");
+			return 0;
+		}
+
+		ScriptableComponent->SetScript(Script);
 		return 0;
 	}
 
@@ -532,6 +553,9 @@ void CLuaVirtualMachine::TriggerError(const string &AMessage, ...)
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	luaopen_base(State);
+#ifdef _DEBUG
+	luaopen_debug(State);
+#endif // _DEBUG
 
 	lua_register(State, "Create", &LuaAPI::Create);
 	lua_register(State, "GetObject", &LuaAPI::GetObject);
@@ -545,6 +569,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "GetFont", &LuaAPI::GetFont);
 	lua_register(State, "GetPosition", &LuaAPI::GetPosition);
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
+	lua_register(State, "SetScript", &LuaAPI::SetScript);
 	lua_register(State, "GetWindowWidth", &LuaAPI::GetWindowWidth);
 	lua_register(State, "GetWindowHeight", &LuaAPI::GetWindowHeight);
 	lua_register(State, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);

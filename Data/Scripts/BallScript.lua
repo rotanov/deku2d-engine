@@ -14,7 +14,7 @@ function BallScriptable:OnAttached(event)
 		return
 	end
 
-	self.Parent = GetParent(self.object)
+	self.Place = GetParent(GetParent(self.object))
 	self:Initialize()
 end
 
@@ -34,7 +34,7 @@ function BallScriptable:Initialize()
 	self.Velocity = Vector2(cos(Angle), sin(Angle)) * self.BallSpeed
 	self.Position = Vector2(GetWindowWidth() * 0.5, GetWindowHeight() * 0.5)
 
-	SetPosition(self.Parent, self.Position.x, self.Position.y)
+	SetPosition(self.Place, self.Position.x, self.Position.y)
 end
 
 function BallScriptable:OnEveryFrame()
@@ -79,7 +79,7 @@ function BallScriptable:OnEveryFrame()
 		TriggerEvent("PlayerOneScored", self.object)
 	end
 	
-	SetPosition(self.Parent, self.Position.x, self.Position.y)
+	SetPosition(self.Place, self.Position.x, self.Position.y)
 end
 
 function BallScriptable:OnReset()

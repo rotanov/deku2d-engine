@@ -81,11 +81,6 @@ bool CCustomStateHandler::OnInitialize()
 	CRenderableComponent *PlayerTwo = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
 	CRenderableComponent *Ball = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_BALL_SIZE, PONG_BALL_SIZE));
 
-	CScriptableComponent *PlayerOneScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongPlayers"));
-	CScriptableComponent *PlayerTwoScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongPlayers"));
-	CScriptableComponent *BallScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("BallScript"));
-	CScriptableComponent *PongGame = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongGameScript"));
-
 	CTimerComponent *MemoryUsageUpdateTimer = new CTimerComponent(3);
 	MemoryUsageUpdateTimer->SetEnabled(true);
 
@@ -93,10 +88,6 @@ bool CCustomStateHandler::OnInitialize()
 	CFactory::Instance()->Add(PlayerOne, "PlayerOne");
 	CFactory::Instance()->Add(PlayerTwo, "PlayerTwo");
 	CFactory::Instance()->Add(Ball, "Ball");
-	CFactory::Instance()->Add(PlayerOneScriptable, "PlayerOneScriptable");
-	CFactory::Instance()->Add(PlayerTwoScriptable, "PlayerTwoScriptable");
-	CFactory::Instance()->Add(BallScriptable, "BallScriptable");
-	CFactory::Instance()->Add(PongGame, "PongGame");
 
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 
