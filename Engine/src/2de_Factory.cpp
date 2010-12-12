@@ -1,15 +1,40 @@
 #include "2de_Factory.h"
 
+#include "2de_GraphicsLow.h"
+#include "2de_LuaUtils.h"
+
 //////////////////////////////////////////////////////////////////////////
 // CFactory
 
 CFactory::CFactory()
 {
 	SetName("Factory");
+
+	AddClass("RenderableComponent", &CFactory::InternalNew<CRenderableComponent>);
+	AddClass("PlaceableComponent", &CFactory::InternalNew<CPlaceableComponent>);
+	AddClass("GeometricComponent", &CFactory::InternalNew<CGeometricComponent>);
+	AddClass("ScriptableComponent", &CFactory::InternalNew<CScriptableComponent>);
+	AddClass("Text", &CFactory::InternalNew<CText>);
 }
 
 CFactory::~CFactory()
 {	
+}
+
+/**
+* CFactory::CreateByName - creates an object of AClassName class with AName name.
+*/
+
+CObject* CFactory::CreateByName(const string &AClassName, const string &AName)
+{
+	ClassesContainer::iterator it = Classes.find(AClassName);
+	if (it == Classes.end())
+	{
+		Log("ERROR", "Class '%s' can't be created by name", AClassName.c_str());
+		return NULL;
+	}
+
+	return (this->*(it->second))(AName);
 }
 
 /**
@@ -87,5 +112,10 @@ void CFactory::DestroyAll()
 
 	Objects.clear();
 	CleanUp();
+}
+
+void CFactory::AddClass(const string &AClassName, NewFunction ANewFunctionPointer)
+{
+	Classes[AClassName] = ANewFunctionPointer;
 }
 

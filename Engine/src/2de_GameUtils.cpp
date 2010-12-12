@@ -176,8 +176,8 @@ CDefaultTitleScreen::CDefaultTitleScreen()
 	CPlaceableComponent *TeamTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	tempPlacing->Attach(DekuTextPlacing);
 	tempPlacing->Attach(TeamTextPlacing);
-	DekuTextPlacing->Attach(&TextTeam);
-	TeamTextPlacing->Attach(&TextDeku);
+	DekuTextPlacing->Attach(&TextDeku);
+	TeamTextPlacing->Attach(&TextTeam);
 	DekuTextPlacing->SetPosition(Vector2(40.0f, -47.0f));
 	TeamTextPlacing->SetPosition(Vector2(40.0f, -74.0f));
 	DekuTextPlacing->SetScaling(2);

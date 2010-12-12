@@ -11,11 +11,16 @@
 class CFactory : public CTSingleton<CFactory>
 {
 public:
+	typedef CObject* (CFactory::*NewFunction)(const string &);
+	typedef map<string, NewFunction> ClassesContainer;
+
 	template<typename T>
 	T* New(const string &AName);
 
 	template<typename T>
 	T* New();
+
+	CObject* CreateByName(const string &AClassName, const string &AName);
 
 	template<typename T>
 	void Add(T *AObject, const string &AName = "");
@@ -36,6 +41,13 @@ protected:
 	~CFactory();
 	friend class CTSingleton<CFactory>;
 
+	void AddClass(const string &AClassName, NewFunction ANewFunctionPointer);
+
+	template<typename T>
+	CObject *InternalNew(const string &AName);
+
+	ClassesContainer Classes;
+
 	map<string, CObject*> Objects;
 
 	queue<CObject *> Deletion;
@@ -47,6 +59,18 @@ protected:
 
 template<typename T>
 T* CFactory::New(const string &AName)
+{
+	return dynamic_cast<T*>(InternalNew<T>(AName));
+}
+
+template <typename T>
+T* CFactory::New()
+{
+	return New<T>("");
+}
+
+template<typename T>
+CObject* CFactory::InternalNew(const string &AName)
 {
 	if (Objects.count(AName) != 0)
 	{
@@ -60,13 +84,6 @@ T* CFactory::New(const string &AName)
 
 	return result;
 }
-
-template <typename T>
-T* CFactory::New()
-{
-	return New<T>("");
-}
-
 
 /**
 * CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified.
@@ -99,10 +116,6 @@ void CFactory::Add(T *AObject, const string &AName /*= ""*/)
 	Objects[ObjectName] = AObject;
 	//AObject->IncRefCount();
 	AObject->Managed = true;
-
-	CEvent *CreateEvent = new CEvent("Create", this);
-	CreateEvent->SetData("Name", ObjectName);
-	CEventManager::Instance()->TriggerEvent(CreateEvent);
 }
 
 /**

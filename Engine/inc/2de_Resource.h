@@ -173,7 +173,8 @@ public:
 	float GetAutoUnloadInterval() const;
 	void SetAutoUnloadInterval(float AAutoUnloadInterval);
 
-	string DataPath; // make setter, getter
+	string GetDataPath() const;
+	void SetDataPath(const string &ADataPath);
 
 protected:
 	CResourceManager();
@@ -185,6 +186,7 @@ private:
 	set<CResource *> UnloadQueue;
 	CDataLister DataLister;
 	CXML *ResourceList;
+	string DataPath;
 
 	float SinceLastUnload;
 	float AutoUnloadInterval;

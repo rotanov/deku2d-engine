@@ -75,6 +75,7 @@
 #else
 	#include <unistd.h>
 	#include <dirent.h>
+	#define MAX_PATH 260
 #endif //_WIN32
 
 
@@ -91,12 +92,6 @@ using namespace std;
 #else
 	#define __INLINE inline
 #endif
-
-#ifdef _WIN32
-	#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH MAX_PATH
-#else
-	#define CFILE_DEFAULT_MAXIMUM_PATH_LENGTH 260
-#endif //_WIN32
 
 #ifdef _MSC_VER
 	#define snprintf _snprintf
@@ -260,7 +255,7 @@ struct identity
 
 
 /**
-* CVariantConvert - содержит реализации функций конвертирования из строки в произвольный простой тип (из поддерживаемых stringstream).
+* CVariantConvert - contains implementations of functions which convert strings to arbitrary plain type, supported by stringstream.
 */
 
 class CVariantConvert	// Looks more like a namespace
@@ -1021,16 +1016,8 @@ public:
 
 };
 
-
-// @todo: taking into account, that global functions is evil, may be we should move such kind of functions
-//	in some class, named, for example, CEnvironment// Agreed with you.
-// CEnvironment has been created. Some time/date and paths functions has already been moved there.
-// It's good practice to move all platform-dependent code (basically, code with ifdefs)
-// 	to one dedicated place, if it's possible, so we should continue this work.
-
-void DelFNameFromFPath(char *src); // standard function "dirname", anyone?.. or does it work in another way?.. i dunno..
-void DelExtFromFName(char *src);
-void DelLastDirFromPath(char *src);
+// TODO: move this function somewhere.. btw, it's used only in one place: CEnvironment::Paths::GetExecutablePath()
+void DelFNameFromFPath(char *src); // POSIXes have dirname, that does exactly the same, but windows doesn't have it..
 
 __INLINE string itos(int i)
 {
@@ -1057,7 +1044,7 @@ __INLINE string to_string(const T& t)
 }
 
 /**
-* CCaseInsensetiveComparison - класс-функтор, сравнивающий строки регистро-независимо. Используется STL-контейнерами и т. п. вещами.
+* CCaseInsensetiveComparison - functor-class, that compares strings in case-insensetive manner. Used by STL containers, etc.
 */
 
 class CCaseInsensetiveComparison

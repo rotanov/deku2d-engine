@@ -1221,17 +1221,15 @@ string CEnvironment::Paths::GetExecutablePath()
 
 string CEnvironment::Paths::GetWorkingDirectory()
 {
-	string result;
-	char dir[CFILE_DEFAULT_MAXIMUM_PATH_LENGTH];
+	char dir[MAX_PATH];
 
 #ifdef _WIN32
-	GetCurrentDirectory(CFILE_DEFAULT_MAXIMUM_PATH_LENGTH, dir);
+	GetCurrentDirectory(MAX_PATH, dir);
 #else
-	getcwd(dir, CFILE_DEFAULT_MAXIMUM_PATH_LENGTH);
+	getcwd(dir, MAX_PATH);
 #endif //_WIN32
 
-	result = dir;
-	return result;
+	return string(dir);
 }
 
 void CEnvironment::Paths::SetWorkingDirectory(const string &AWorkingDirectory)
@@ -1354,24 +1352,6 @@ void DelFNameFromFPath(char *src)
 {
 	int i = strlen(src)-1;
 	while (src[i] != '/' && src[i] != '\\' && src[i] != ':')
-		i--;
-	src[i+1] = 0;
-}
-
-void DelExtFromFName(char *src)
-{
-	int i = strlen(src)-1;
-	while (src[i] != '.')
-		i--;
-	src[i] = 0;
-}
-
-void DelLastDirFromPath(char *src)
-{
-	int i = strlen(src)-1;
-	while (src[i] == '\\' || src[i] == '/')
-		i--;
-	while (src[i] != '\\' && src[i] != '/')
 		i--;
 	src[i+1] = 0;
 }

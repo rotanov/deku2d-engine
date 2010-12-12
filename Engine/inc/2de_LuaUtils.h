@@ -182,7 +182,9 @@ private:
 class CScriptableComponent : public CGameObject
 {
 public:
-	CScriptableComponent(CScript *AScript);
+	CScriptableComponent();
+
+	void SetScript(CScript *AScript);
 
 	void ProcessEvent(const CEvent &AEvent);
 };

@@ -42,8 +42,8 @@ bool CCustomStateHandler::OnInitialize()
 	//CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	//CSceneManager::Instance()->SetCurrentScene(NewScene);
 
-	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
-	CFactory::Instance()->Add(sc, "ScriptableComponent");
+	CScriptableComponent *sc = CFactory::Instance()->New<CScriptableComponent>("ScriptableComponent");
+	sc->SetScript(CFactory::Instance()->Get<CScript>("scriptable-test"));
 
 	CPlaceableComponent *tempMagicCirclePlacement = CFactory::Instance()->New<CPlaceableComponent>("Magic circle");
 	CPlaceableComponent *tempMagicSquarePlacement = CFactory::Instance()->New<CPlaceableComponent>("Magic square");

@@ -285,6 +285,16 @@ void CResourceManager::SetAutoUnloadInterval(float AAutoUnloadInterval)
 	AutoUnloadInterval = AAutoUnloadInterval;
 }
 
+string CResourceManager::GetDataPath() const
+{
+	return DataPath;
+}
+
+void CResourceManager::SetDataPath(const string &ADataPath)
+{
+	DataPath = ADataPath;
+}
+
 CResourceManager::CResourceManager() : SinceLastUnload(0.0f), AutoUnloadInterval(15.0f)
 {
 	SetName("ResourceManager");

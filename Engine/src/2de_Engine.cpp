@@ -67,7 +67,7 @@ bool CEngine::Initialize()
 	SetFPSLimit(VideoSection["FpsLimit"]);
 
 	CResourceManager *ResourceManager = CResourceManager::Instance();
-	ResourceManager->DataPath = Config->Section("Data")["DataPath"].To<string>();
+	ResourceManager->SetDataPath(Config->Section("Data")["DataPath"]);
 	doLoadDefaultResourceList = Config->Section("Data")["doLoadDefaultResourceList"];
 
 	CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->GetWidth(),
@@ -80,7 +80,7 @@ bool CEngine::Initialize()
 		return false;
 	}
 
-	ilInit(); // Инициализация DevIL
+	ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious..
 	CSoundMixer::Instance()->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 	SDL_EnableUNICODE(1);
@@ -285,8 +285,6 @@ bool CEngine::ProcessEvents()
 
 				char TempChar = TranslateKeyFromUnicodeToChar(event);
 				SDL_keysym keysym = event.key.keysym;				
-				//for (int i = 0; i < KeyInputFuncCount; i++)
-					//(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, keysym.sym, keysym.mod, TempChar);
 
 				CEvent *e = new CEvent;
 				e->SetName("KeyUp");
@@ -306,9 +304,6 @@ bool CEngine::ProcessEvents()
 				e->SetData("Button", event.button.button);
 				e->SetData("Modifiers", SDL_GetModState());
 				CEventManager::Instance()->TriggerEvent(e);
-
-				/*for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_DOWN, event.button.button, SDL_GetModState(), 0);*/
 				break;
 			}
 			case SDL_MOUSEBUTTONUP:
@@ -319,9 +314,6 @@ bool CEngine::ProcessEvents()
 				e->SetData("Button", event.button.button);
 				e->SetData("Modifiers", SDL_GetModState());
 				CEventManager::Instance()->TriggerEvent(e);
-
-				/*for (int i = 0; i < KeyInputFuncCount; i++)
-					(KeyFuncCallers[i]->*KeyInputFunctions[i])(KEY_UP, event.button.button, SDL_GetModState(), 0);*/
 				break;
 			}
 			case SDL_MOUSEMOTION:

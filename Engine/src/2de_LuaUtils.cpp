@@ -10,6 +10,16 @@ namespace LuaAPI
 {
 	// some of these functions are really will be left in the API, others are just temporarily ones for testing..
 
+	// userdata Create(string ClassName, string Name)
+	int Create(lua_State *L)
+	{
+		if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Create API call");
+
+		lua_pushlightuserdata(L, CFactory::Instance()->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
+		return 1;
+	}
+
 	// userdata GetObject(string Name)
 	int GetObject(lua_State *L)
 	{
@@ -35,15 +45,15 @@ namespace LuaAPI
 	int Attach(lua_State *L)
 	{
 		CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
-		GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -2));
-		if (!GameObjectSource)
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
-
-		GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -2));
 		if (!GameObjectDestination)
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
 
-		GameObjectSource->Attach(GameObjectDestination);
+		GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		if (!GameObjectSource)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
+
+		GameObjectDestination->Attach(GameObjectSource);
 		return 0;
 	}
 
@@ -61,17 +71,6 @@ namespace LuaAPI
 	int GetDeltaTime(lua_State *L)	// This is case when just "dt" is fuckingly (spell checker suggests me to replace "fuckingly" with "motherfucking") ok.
 	{
 		lua_pushnumber(L, CEngine::Instance()->GetDeltaTime());
-		return 1;
-	}
-
-	// userdata CreateNewText(string Name)
-	int CreateNewText(lua_State *L)
-	{
-		if (!lua_isstring(L, -1))
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to CreateNewText API call");
-
-		CText *text = CFactory::Instance()->New<CText>(lua_tostring(L, -1));
-		lua_pushlightuserdata(L, text);
 		return 1;
 	}
 
@@ -319,6 +318,32 @@ namespace LuaAPI
 		return 1;
 	}
 
+	void DebugPrintNode(CGameObject *GO)
+	{
+		static int nesting = 0;
+		string out;
+
+		for (int i = 0; i < nesting; i++)
+			out += '\t';
+
+		out += GO->GetName();
+
+		Log("INFO", out.c_str());
+
+		nesting++;
+		for (vector<CGameObject *>::iterator it = GO->Children.begin(); it != GO->Children.end(); ++it)
+		{
+			DebugPrintNode(*it);
+		}
+		nesting--;
+	}
+
+	int DebugPrintComponentTree(lua_State *L)
+	{
+		DebugPrintNode(CUpdateManager::Instance()->RootGameObject);
+		return 0;
+	}
+
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -508,12 +533,12 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	luaopen_base(State);
 
+	lua_register(State, "Create", &LuaAPI::Create);
 	lua_register(State, "GetObject", &LuaAPI::GetObject);
 	lua_register(State, "GetName", &LuaAPI::GetName);
 	lua_register(State, "Attach", &LuaAPI::Attach);
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
 	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
-	lua_register(State, "CreateNewText", &LuaAPI::CreateNewText);
 	lua_register(State, "SetText", &LuaAPI::SetText);
 	lua_register(State, "GetText", &LuaAPI::GetText);
 	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
@@ -535,6 +560,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "Random_Float", &LuaAPI::Random_Float);
 	lua_register(State, "GetParent", &LuaAPI::GetParent);
 	lua_register(State, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
+	lua_register(State, "DebugPrintComponentTree", &LuaAPI::DebugPrintComponentTree);
 
 	lua_pushnumber(State, PI);
 	lua_setglobal(State, "PI");
@@ -666,10 +692,18 @@ void CLuaFunctionCall::PushArgument(void *Argument)
 //////////////////////////////////////////////////////////////////////////
 // CScriptableComponent
 
-CScriptableComponent::CScriptableComponent(CScript *AScript)
+CScriptableComponent::CScriptableComponent()
 {
 	CEventManager::Instance()->Subscribe("Create", this);
+}
+
+void CScriptableComponent::SetScript(CScript *AScript)
+{
 	CLuaVirtualMachine::Instance()->RunScript(AScript);
+
+	CEvent *CreateEvent = new CEvent("Create", this);
+	CreateEvent->SetData("Name", GetName());
+	CEventManager::Instance()->TriggerEvent(CreateEvent);
 }
 
 void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
