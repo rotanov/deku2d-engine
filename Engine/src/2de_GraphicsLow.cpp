@@ -777,41 +777,35 @@ void CRenderManager::EndFrame()
 
 void CRenderManager::TransfomationTraverse(CGameObject *Next)
 {
-	CPlaceableComponent *PlaceableComponent = dynamic_cast<CPlaceableComponent *>(Next);
-	if (PlaceableComponent != NULL)
-		Transformator.PushTransformation(PlaceableComponent->GetTransformation());
+	CPlaceableComponent *PlaceableComponent = NULL;
+	CRenderableComponent *RenderableComponent = NULL;
 	for(unsigned int i = 0; i < Next->Children.size(); i++)
 	{
-		CPlaceableComponent *PlaceableComponent = dynamic_cast<CPlaceableComponent *>(Next->Children[i]);
-		if (PlaceableComponent != NULL)
+		RenderableComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
+		if (RenderableComponent != NULL && RenderableComponent->GetVisibility() && 
+			!RenderableComponent->isDestroyed() && CSceneManager::Instance()->InScope(RenderableComponent->GetScene()))
+		{
+			Renderer->PushModel(&RenderableComponent->GetConfiguration(), RenderableComponent->GetModel());
+			TransfomationTraverse(Next->Children[i]);
+			continue;
+		}
+
+		PlaceableComponent = dynamic_cast<CPlaceableComponent *>(Next->Children[i]);
+		if (PlaceableComponent != NULL && !PlaceableComponent->isDestroyed() &&
+			CSceneManager::Instance()->InScope(PlaceableComponent->GetScene()))
 		{
 			Transformator.PushTransformation(PlaceableComponent->GetTransformation());
-			if (PlaceableComponent->isDestroyed() /*|| !RenderComponent->GetVisibility()*/ ||
-				!CSceneManager::Instance()->InScope(PlaceableComponent->GetScene()))
-			{
-				Transformator.PopTransformation();
-				continue;
-			}
-		}
-		CRenderableComponent *RenderableComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
-		if (RenderableComponent != NULL)
-			Renderer->PushModel(&RenderableComponent->GetConfiguration(), RenderableComponent->GetModel());
 
-		if (PlaceableComponent != NULL)
+			TransfomationTraverse(Next->Children[i]);
+
 			Transformator.PopTransformation();
-	}
-	for(unsigned int i = 0; i < Next->Children.size(); i++)
-	{
-		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
-		if (RenderComponent != NULL)
-			if (RenderComponent->isDestroyed() || !RenderComponent->GetVisibility() ||
-				!CSceneManager::Instance()->InScope(RenderComponent->GetScene()))
-				continue;
 
-		TransfomationTraverse(Next->Children[i]);
+			continue;
+		}
+
+		if (!PlaceableComponent && !RenderableComponent)
+			TransfomationTraverse(Next->Children[i]);
 	}
-	if (PlaceableComponent != NULL)
-		Transformator.PopTransformation();
 }
 
 CModel* CRenderManager::CreateModelText(const CText *AText)

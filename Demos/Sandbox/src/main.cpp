@@ -39,8 +39,8 @@ bool CCustomStateHandler::OnInitialize()
 
 	CEngine::Instance()->SetDoShowFPS(true);
 
-	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
-	CSceneManager::Instance()->SetCurrentScene(NewScene);
+	//CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
+	//CSceneManager::Instance()->SetCurrentScene(NewScene);
 
 	CScriptableComponent *sc = new CScriptableComponent(CFactory::Instance()->Get<CScript>("scriptable-test"));
 	CFactory::Instance()->Add(sc, "ScriptableComponent");
