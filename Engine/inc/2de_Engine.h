@@ -2,6 +2,7 @@
 #define _2DE_ENGINE_H_
 
 #include "2de_Core.h"
+#include "2de_Components.h"
 #include "2de_Config.h"
 #include "2de_Event.h"
 #include "2de_Factory.h"

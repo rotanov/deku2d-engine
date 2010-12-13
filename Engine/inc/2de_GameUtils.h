@@ -2,6 +2,7 @@
 #define _2DE_GAME_UTILS_H_
 
 #include "2de_Core.h"
+#include "2de_Components.h"
 #include "2de_GraphicsLow.h"
 #include "2de_Update.h"
 

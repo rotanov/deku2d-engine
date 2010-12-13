@@ -1,4 +1,5 @@
 SOURCES		=	src/2de_Core.cpp \
+			src/2de_Components.cpp \
 			src/2de_Config.cpp \
 			src/2de_DefaultFont.cpp \
 			src/2de_Engine.cpp \
@@ -20,6 +21,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Xml.cpp
 
 OBJECTS		=	obj/2de_Core.o \
+			obj/2de_Components.o \
 			obj/2de_Config.o \
 			obj/2de_DefaultFont.o \
 			obj/2de_Engine.o \

@@ -20,114 +20,6 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-// CPlacableComponent
-
-CPlaceableComponent::CPlaceableComponent() : doIgnoreCamera(false),
-doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
-{
-
-}
-void CPlaceableComponent::SetAngle(float AAngle)
-{
-	float Angle = AAngle;
-	if (Abs(AAngle) > 360.0f)
-		Angle = AAngle - Sign(AAngle)*((static_cast<int>(AAngle) / 360) * 360.0f); 
-	Transformation.SetAngle(Angle);
-}
-
-float CPlaceableComponent::GetAngle() const
-{
-	return Transformation.GetAngle();
-}
-
-void CPlaceableComponent::SetLayer(int Layer)
-{
-	Transformation.SetDepth(Layer == 0 ? 0.0f : Layer / 100.0f);	// @todo: get rid of magic number "100.0f"
-}
-
-float CPlaceableComponent::GetDepth() const
-{
-	return Transformation.GetDepth();
-}
-
-float CPlaceableComponent::GetScaling() const
-{
-	return Transformation.GetScaling();
-}
-
-void CPlaceableComponent::SetScaling(float AScaling)
-{
-	Transformation.SetScaling(AScaling);
-}
-
-int CPlaceableComponent::GetLayer() const
-{
-	return Transformation.GetDepth() * 100.0f;
-}
-
-const Vector2& CPlaceableComponent::GetPosition() const
-{
-	return Transformation.GetTranslation();
-}
-
-Vector2& CPlaceableComponent::GetPosition()
-{
-	return Transformation.GetTranslation();
-}
-
-void CPlaceableComponent::SetPosition(const Vector2 &APosition)
-{
-	Transformation.SetTranslation(APosition);
-}
-
-void CPlaceableComponent::SetTransformation(const CTransformation &ATransformation)
-{
-	Transformation = ATransformation;
-}
-
-CTransformation& CPlaceableComponent::GetTransformation()
-{
-	return Transformation;
-}
-
-const CTransformation& CPlaceableComponent::GetTransformation() const
-{
-	return Transformation;
-}
-
-bool CPlaceableComponent::isMirrorVertical() const
-{
-	return doMirrorVertical;
-}
-
-void CPlaceableComponent::SetMirrorVertical(bool MirrorOrNot)
-{
-	doMirrorHorizontal = MirrorOrNot;
-}
-
-bool CPlaceableComponent::isMirrorHorizontal() const
-{
-	return doMirrorHorizontal;
-}
-
-void CPlaceableComponent::SetMirrorHorizontal(bool MirrorOrNot)
-{
-	doMirrorHorizontal = MirrorOrNot;
-}
-
-bool CPlaceableComponent::isIgnoringParentTransform() const
-{
-	return doIgnoreCamera;
-}
-
-void CPlaceableComponent::SetIgnoreParentTransform(bool doIgnore)
-{
-	doIgnoreCamera = doIgnore;
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////
 // CRenderableUnitInfo
 
 CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(COLOR_WHITE)
@@ -144,30 +36,6 @@ EBlendingMode CRenderConfig::GetBlendingMode() const
 {
 	return BlendingMode;
 }
-
-
-
-//////////////////////////////////////////////////////////////////////////
-// CRenderableComponent
-
-CRenderableComponent::~CRenderableComponent()
-{
-	CRenderManager::Instance()->Remove(this);
-}
-
-
-
-bool CRenderableComponent::GetVisibility() const
-{
-	return Visible;
-}
-
-void CRenderableComponent::SetVisibility(bool AVisible)
-{
-	Visible = AVisible;
-}
-
-
 
 //////////////////////////////////////////////////////////////////////////
 // CGLWindow
@@ -929,7 +797,7 @@ CFont* CFontManager::GetDefaultFont()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CTexture Manager
+// CTextureManager
 
 CTextureManager::CTextureManager()
 {
@@ -1053,100 +921,6 @@ bool CTexture::SaveToFile(const string &AFilename)
 	throw std::logic_error("Unimplemented!!");
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// CText
-
-CText::CText() : Font(CFontManager::Instance()->GetDefaultFont())
-{	
-	assert(Font != NULL);
-	SetText("");
-}
-
-CText::CText(const string &AText) : Font(CFontManager::Instance()->GetDefaultFont())
-{
-	assert(Font != NULL);
-	SetText(Characters);
-}
-
-CFont* CText::GetFont() const
-{
-	assert(Font != NULL);
-	return Font;
-}
-
-string& CText::GetText()
-{
-	return Characters;
-}
-
-const string& CText::GetText() const
-{
-	return Characters;
-}
-
-void CText::SetFont(CFont *AFont)
-{
-	assert(AFont != NULL);
-	Font = AFont;
-	SetText(Characters);	// Пересчитать BOX, шрифт же меняется.  ///<<<< OLOLOLO --------
-	_UpdateSelfModel();						///			|
-}									///			|
-									///			|
-void CText::SetText(const string &AText)				///			|
-{									///			|
-	if (Characters == AText)	///<<<<	OLOLOLO	----------------------------------------|
-		return;
-	Characters = AText;
-	//SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
-	_UpdateSelfModel();
-}
-
-CText& CText::operator =(const string &AText)
-{
-	SetText(AText);
-	return *this;
-}
-
-/*
-float CText::StringCoordToCursorPos(int x, int y) const
-{
-	if (Characters.length() == 0)
-		return -1;
-	Vector2 Local = Vector2(x, y) - GetPosition();
-	if (Local.x < 0)
-		return -1;
-
-	for (int i = 0; i < Characters.length(); i++)
-	{
-		float SubstrWidth = Font->GetStringWidthEx(0, i, Characters);
-		float SymbolCenterCoord = SubstrWidth - Font->GetDistance() - (Font->SymbolWidth((byte)Characters[i] - 32) / 2.0f);
-		if (Local.x < SymbolCenterCoord)
-			return (i - 1);
-	}
-	return (Characters.length() - 1.0f);
-}
-*/
-
-CText::~CText()
-{
-	
-}
-
-unsigned char CText::operator[](unsigned int index) const
-{
-	return Characters[index];
-}
-
-unsigned int CText::Length() const
-{
-	return Characters.length();
-}
-
-void CText::_UpdateSelfModel()
-{
-	SetModel(CRenderManager::CreateModelText(this));
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CAbstractScene
@@ -1549,13 +1323,10 @@ const CTransformation& CTransformator::GetCurrentTransfomation() const
 {
 	return CurrentTransformation;
 }
-//////////////////////////////////////////////////////////////////////////
-// CModel
-
-
 
 //////////////////////////////////////////////////////////////////////////
-// чотатам
+// CFFPRenderer
+
 CFFPRenderer::CBetterTextureVertexHolder::CBetterTextureVertexHolder() : VertexCount(0), ReservedCount(StartSize) 
 {
 	Colors = new RGBAf [StartSize];
@@ -1698,61 +1469,3 @@ int CModel::GetVertexNumber() const
 	return VerticesNumber;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// CRenderableComponent
-CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel), Visible(true)
-{
-	SetName("CRenderableComponent");	
-}
-
-const RGBAf& CRenderableComponent::GetColor() const
-{
-	return Configuration.Color;
-}
-
-RGBAf& CRenderableComponent::GetColor()
-{
-	return Configuration.Color;
-}
-
-void CRenderableComponent::SetColor(const RGBAf &AColor)
-{
-	Configuration.Color = AColor;
-}
-
-EBlendingMode CRenderableComponent::GetBlendingMode() const
-{
-	return Configuration.GetBlendingMode();
-}
-
-void CRenderableComponent::SetBlendingMode(EBlendingMode ABlendingMode)
-{
-	Configuration.SetBlendingMode(ABlendingMode);
-}
-
-CModel* CRenderableComponent::GetModel() const
-{
-	return Model;
-}
-
-void CRenderableComponent::SetModel(CModel *AModel)
-{
-	if (Model == NULL)
-		delete Model;
-	Model = AModel;
-}
-
-void CRenderableComponent::SetConfiguration(const CRenderConfig &AConfiguraton)
-{
-	Configuration = AConfiguraton;
-}
-
-const CRenderConfig& CRenderableComponent::GetConfiguration() const
-{
-	return Configuration;
-}
-
-CRenderConfig& CRenderableComponent::GetConfiguration()
-{
-	return Configuration;
-}

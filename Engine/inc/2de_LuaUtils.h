@@ -175,18 +175,4 @@ private:
 	lua_State *State;
 };
 
-/**
-* CScriptableComponent - component that is intended to make its parent scriptable.
-*/
-
-class CScriptableComponent : public CGameObject
-{
-public:
-	CScriptableComponent();
-
-	void SetScript(CScript *AScript);
-
-	void ProcessEvent(const CEvent &AEvent);
-};
-
 #endif // _2DE_LUA_UTILS_H_

@@ -40,6 +40,7 @@ const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
 
 const float ROTATIONAL_AXIS_Z = 1.0f;
 
+// i suggest to put it into a namespace.. Color::RED looks a bit nicer, than COLOR_RED..
 const RGBAf COLOR_WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
 const RGBAf COLOR_BLACK = RGBAf(0.00f, 0.00f, 0.00f, 0.00f);
 const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
@@ -135,87 +136,6 @@ public:
 	void Clear();
 };
 
-// SUDDENLY NEW COMPONENT APPEARS
-class CPlaceableComponent : public CGameObject
-{
-public:
-	CPlaceableComponent();
-	float GetAngle() const;
-	float GetDepth() const;
-	int GetLayer() const;	
-	float GetScaling() const;
-	const Vector2& GetPosition() const;
-	Vector2& GetPosition();
-
-	void SetAngle(float AAngle); //	(Degrees)
-
-	void SetScaling(float AScaling);
-	/**
-	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
-	*	implicitly Depth => [-1; 1]?	
-	*/
-	void SetLayer(int Layer);
-	void SetPosition(const Vector2 &APosition);
-
-	void SetTransformation(const CTransformation &ATransformation);
-	CTransformation& GetTransformation();
-	const CTransformation& GetTransformation() const;
-	bool isMirrorVertical() const;
-	void SetMirrorVertical(bool MirrorOrNot);
-	bool isMirrorHorizontal() const;
-	void SetMirrorHorizontal(bool MirrorOrNot);
-	bool isIgnoringParentTransform() const;
-	void SetIgnoreParentTransform(bool doIgnore);
-
-private:
-	CTransformation Transformation;
-	bool doIgnoreCamera;	// all previous transformations are ignored if true
-	bool doMirrorHorizontal;
-	bool doMirrorVertical;
-
-};
-
-// SUDDENLY ONE MORE COMPONENT APPEALS
-class CGeometricComponent : public CGameObject	// "Geometric" or "Geometrical"?
-{
-public:
-	CGeometricComponent() : Box(0, 0, 0, 0)
-	{
-
-	}
-
-	// Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--
-	// why const CBox? it's a copy of CBox object, not a reference, why should it be const?..	
-	const CBox GetBox() const
-	{
-		CBox TempBox = Box;
-//		TempBox.Min *= GetScaling();	// FUCK FUCK FUCK
-//		TempBox.Max *= GetScaling();
-//		TempBox.Offset(GetPosition());
-		//Box.RotateByAngle(Angle);
-		return TempBox;
-	}
-
-	virtual void SetBox(const CBox &ABox)
-	{
-		Box = ABox;
-	}
-
-	float Width()
-	{
-		return Box.Width();
-	}
-
-	float Height()
-	{
-		return Box.Height();
-	}
-	
-
-private:
-	CBox Box; //	Axis Aligned Bounding Box for culling
-};
-
 /**
 *	CModel — represents object geometry, object type and if has - 
 *	texture and texture coordinates. 
@@ -276,34 +196,6 @@ public:
 	CRenderConfig();
 	EBlendingMode GetBlendingMode() const;
 	void SetBlendingMode(EBlendingMode ABlendingMode);
-};
-
-/**
-*	CRenderableComponent - AOP way replacement for CRenderable.
-*/
-
-class CRenderableComponent : public CGameObject
-{
-public:
-	CRenderableComponent(CModel *AModel = NULL);
-	virtual ~CRenderableComponent();
-	bool GetVisibility() const;
-	virtual void SetVisibility(bool AVisible);
-	const RGBAf& GetColor() const;
-	RGBAf& GetColor();
-	void SetColor(const RGBAf &AColor);
-	EBlendingMode GetBlendingMode() const;
-	void SetBlendingMode(EBlendingMode ABlendingMode);
-	CModel* GetModel() const;
-	void SetModel(CModel *AModel);
-	CRenderConfig& GetConfiguration();
-	const CRenderConfig& GetConfiguration() const;
-	void SetConfiguration(const CRenderConfig &AConfiguraton);
-
-private:
-	CRenderConfig Configuration;
-	CResourceRefCounter<CModel> Model;
-	bool Visible;	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -532,6 +424,7 @@ public:
 *	except the functinality to provide a default font is no different from container of fonts;
 *	So if we somehow manage to put this functiality somehere else we'll be able to get rid of that class.
 */
+
 class CFontManager : public CCommonManager <list <CFont*> >, public CTSingleton <CFontManager>
 {
 public:
@@ -558,6 +451,9 @@ class CGrLine;
 *	Manages all stuff for drawing stuff. Traverse tree, applying transformations,
 *	Calls renderer to render some stuff...etc
 */
+
+class CRenderableComponent;
+
 class CRenderManager : public CCommonManager <list <CRenderableComponent*> >, public CTSingleton <CRenderManager>
 {
 protected:
@@ -682,6 +578,7 @@ public:
 *	window properties in runtime? I think only to have access to window Width() and Height()
 *	if so, then this class can easily can be eliminated.
 */
+
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
@@ -716,39 +613,10 @@ private:
 };
 
 /**
-*	Text.
-*	Shouldn't render itself, should be inherited from CRenderableComponent, not Renderable
-*	So it will have Model and Configuration and there will become some unclear stuff.
-*	Cause CModel wants to be Resource.
-*/
-class CText : public CRenderableComponent
-{
-public:
-	CText();
-	~CText();
-	CText(const string &AText);
-	CFont* GetFont() const;
-	string& GetText();
-	const string& GetText() const;
-	void SetFont(CFont *AFont);
-	void SetText(const string &AText);
-	CText& operator =(const string &AText);
-	unsigned char operator [] (unsigned int index) const;
-	// Such function could be there no more. Text has no info about box and world position now, But We can generate info 'bout box anytime instead
-	//float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
-	unsigned int Length() const;
-
-private:
-	string Characters;
-	CResourceRefCounter<CFont> Font;
-
-	void _UpdateSelfModel();
-};
-
-/**
 *	CAbstractScene - common interface to Scene. There are two of them - Common Scene and
 *	Global Scene // replace scene with sense, lol.
 */
+
 class CAbstractScene : public CObject
 {
 	friend class CSceneManager;
@@ -767,8 +635,9 @@ private:
 };
 
 /**
-*	CSene	
+*	CScene	
 */
+
 class CScene : public CAbstractScene
 {
 	friend class CSceneManager;
@@ -789,6 +658,7 @@ protected:
 /**
 *	CGlobalScene
 */
+
 class CGlobalScene : public CScene
 {
 public:
@@ -799,6 +669,7 @@ public:
 /**
 *	CSceneManager
 */
+
 class CSceneManager : CCommonManager <list<CScene*> >, public CTSingleton<CSceneManager>
 {
 	friend class CTSingleton<CSceneManager>;
@@ -817,30 +688,6 @@ private:
 protected:
 	~CSceneManager();
 	CSceneManager();
-};
-
-/**
-*	CMouseCursor	
-*	@todo: <strike>make CMouseCusor a separate class</strike>, draw at topmost layer,
-*		add possibility to load textured cursors, etc.
-*	other @todo: inherit from CRenderComponent and then add to global root object
-*		make update position throug events. Compllicity for nothing, as i call it.
-*/
-class CMouseCursor : public CRenderableComponent
-{
-public:
-	CBox Box;
-	CMouseCursor()
-	{		
-		CPlaceableComponent *tempPlaceable = CFactory::Instance()->New<CPlaceableComponent>();
-		tempPlaceable->SetLayer(512);
-		SetColor(COLOR_GREEN);
-		SetModel(CRenderManager::CreateModelBox(4.0f, 4.0f, MODEL_TYPE_LINES));
-
-		this->SetParent(tempPlaceable);
-		CUpdateManager::Instance()->RootGameObject->Attach(tempPlaceable);
-	}
-
 };
 
 #endif // _2DE_GRAPHICS_LOW_H_

@@ -3,6 +3,9 @@
 
 #include "2de_Core.h"
 #include "2de_Event.h"
+#include "2de_Xml.h"
+
+class CGameObject;
 
 /**
 * CFactory - oversees creation of any objects. The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
@@ -11,8 +14,16 @@
 class CFactory : public CTSingleton<CFactory>
 {
 public:
-	typedef CObject* (CFactory::*NewFunction)(const string &);
-	typedef map<string, NewFunction> ClassesContainer;
+	typedef CObject* (CFactory::*TNewFunction)(const string &);
+	struct CClassDescription
+	{
+		CClassDescription(TNewFunction ANewFunction = NULL, bool AIsComponent = false) : NewFunction(ANewFunction), IsComponent(AIsComponent)
+		{
+		}
+		TNewFunction NewFunction;
+		bool IsComponent;
+	};
+	typedef map<string, CClassDescription> ClassesContainer;
 
 	template<typename T>
 	T* New(const string &AName);
@@ -20,7 +31,7 @@ public:
 	template<typename T>
 	T* New();
 
-	CObject* CreateByName(const string &AClassName, const string &AName);
+	CObject* CreateByName(const string &AClassName, const string &AName, set<string> *UsedPrototypes = NULL);
 
 	template<typename T>
 	void Add(T *AObject, const string &AName = "");
@@ -36,12 +47,16 @@ public:
 	void CleanUp();
 	void DestroyAll();
 
+	bool IsClassExists(const string &AName);
+
 protected:
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
 
-	void AddClass(const string &AClassName, NewFunction ANewFunctionPointer);
+	void AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent = true);
+
+	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<string> *UsedPrototypes);
 
 	template<typename T>
 	CObject *InternalNew(const string &AName);
@@ -75,7 +90,8 @@ CObject* CFactory::InternalNew(const string &AName)
 	if (Objects.count(AName) != 0)
 	{
 		Log("ERROR", "Object with name '%s' already exists", AName.c_str());
-		throw std::logic_error("Object with name '" + AName + "' already exists.");
+		return NULL;
+		//throw std::logic_error("Object with name '" + AName + "' already exists.");
 	}
 
 	T* result = new T;

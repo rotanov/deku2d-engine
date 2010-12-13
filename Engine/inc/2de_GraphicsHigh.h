@@ -2,6 +2,7 @@
 #define _2DE_GRAPHICS_HIGH_H_
 
 #include "2de_Core.h"
+#include "2de_Components.h"
 #include "2de_GraphicsLow.h"
 #include "2de_Math.h"
 #include "2de_Update.h"
@@ -108,5 +109,31 @@ private:
 	vector<CNewSuperParticle> Particles;
 };
 
+/**
+*	CMouseCursor	
+*	@todo: <strike>make CMouseCusor a separate class</strike>, draw at topmost layer,
+*		add possibility to load textured cursors, etc.
+*	other @todo: inherit from CRenderComponent and then add to global root object
+*		make update position throug events. Compllicity for nothing, as i call it.
+*
+*	is it related to low graphics? possibly move to 2de_GraphicsHigh..
+*/
+
+class CMouseCursor : public CRenderableComponent
+{
+public:
+	CBox Box;
+	CMouseCursor()
+	{		
+		CPlaceableComponent *tempPlaceable = CFactory::Instance()->New<CPlaceableComponent>();
+		tempPlaceable->SetLayer(512);
+		SetColor(COLOR_GREEN);
+		SetModel(CRenderManager::CreateModelBox(4.0f, 4.0f, MODEL_TYPE_LINES));
+
+		SetParent(tempPlaceable);
+		CUpdateManager::Instance()->RootGameObject->Attach(tempPlaceable);
+	}
+
+};
 
 #endif // _2DE_GRAPHICS_HIGH_H_

@@ -98,9 +98,14 @@ public:
 	CXML& operator=(const CXML &ASource);
 
 	void LoadFromFile(const string &AFilename);
+	void LoadFromMemory(byte *AData, size_t ALength);
+
 	void SaveToFile(const string &AFilename);
 
 	CXMLChildrenList Root;
+
+private:
+	void LoadFromStorage(CStorage &AStorage);
 };
 
 /**

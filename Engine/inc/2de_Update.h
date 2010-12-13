@@ -3,8 +3,6 @@
 
 #include "2de_Core.h"
 
-class CAbstractScene;	// Separate header, may be?
-
 // Instead let there be visitor
 
 class IVisitorBase
@@ -39,36 +37,22 @@ protected:
 
 //////////////////////////////////////////////////////////////////////////
 
+/**
+* Ruins of the mighty CUpdateManager
+*/
+
+class CGameObject;
+
 class CUpdateManager : public CTSingleton <CUpdateManager>
 {
 public:	
 	bool UpdateObjects();
-	CGameObject *RootGameObject;
+	CGameObject *RootGameObject;	// TODO: move somewhere.. possibly to CEngine or some other place..
+					// 	also, easily obtainable from factory using CFactory::Instance()->Get("RootGameObject");
 
 protected:
 	CUpdateManager();
 	friend class CTSingleton<CUpdateManager>;
-};
-
-class CTimerComponent : public CGameObject
-{
-public:
-	CTimerComponent();
-	CTimerComponent(float AInterval);
-
-	void ProcessEvent(const CEvent &AEvent);
-
-	bool isEnabled() const;
-	void SetEnabled(bool AEnabled);
-
-	float GetInterval() const;
-	void SetInterval(float AInterval);
-
-private:
-	bool Enabled;
-	float Interval;
-	float Accumulated;
-
 };
 
 #endif // _2DE_UPDATE_H_

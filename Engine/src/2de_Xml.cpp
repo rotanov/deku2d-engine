@@ -279,13 +279,13 @@ CXML& CXML::operator=(const CXML &ASource)
 void CXML::LoadFromFile(const string &AFilename)
 {
 	CFile file(AFilename, CFile::OPEN_MODE_READ);
-	string AllContent = file.GetContent();
-	file.Close();
+	LoadFromStorage(file);
+}
 
-	Root.DeleteAll();
-
-	CXMLParser parser(AllContent);
-	Root = parser.Parse();
+void CXML::LoadFromMemory(byte *AData, size_t ALength)
+{
+	CMemory mem(AData, ALength, CMemory::OPEN_MODE_READ);
+	LoadFromStorage(mem);
 }
 
 void CXML::SaveToFile(const string &AFilename)
@@ -296,6 +296,17 @@ void CXML::SaveToFile(const string &AFilename)
 		file.WriteText((*it)->GetText());
 
 	file.Close();
+}
+
+void CXML::LoadFromStorage(CStorage &AStorage)
+{
+	string AllContent = AStorage.GetContent();
+	AStorage.Close();
+
+	Root.DeleteAll();
+
+	CXMLParser parser(AllContent);
+	Root = parser.Parse();
 }
 
 //////////////////////////////////////////////////////////////////////////

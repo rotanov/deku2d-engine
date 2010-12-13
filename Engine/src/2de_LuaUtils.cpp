@@ -714,38 +714,3 @@ void CLuaFunctionCall::PushArgument(void *Argument)
 	ArgumentsCount++;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// CScriptableComponent
-
-CScriptableComponent::CScriptableComponent()
-{
-	CEventManager::Instance()->Subscribe("Create", this);
-}
-
-void CScriptableComponent::SetScript(CScript *AScript)
-{
-	CLuaVirtualMachine::Instance()->RunScript(AScript);
-
-	CEvent *CreateEvent = new CEvent("Create", this);
-	CreateEvent->SetData("Name", GetName());
-	CEventManager::Instance()->TriggerEvent(CreateEvent);
-}
-
-void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
-{
-	if (AEvent.GetName() == "Create")
-	{
-		if (AEvent.GetData<string>("Name") == Name)
-		{
-			CLuaVirtualMachine::Instance()->CreateLuaObject(Name, this);
-			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
-		}
-	}
-	else
-	{
-		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
-		fc.PushArgument(const_cast<CEvent *>(&AEvent));
-		fc.Call();
-	}
-}
-

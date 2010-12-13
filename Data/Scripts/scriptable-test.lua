@@ -13,6 +13,9 @@ function ScriptableComponent:OnCreate()
 	SubscribeToEvent("KeyDown", self.object)
 
 	Log("LUATEST", "ScriptableComponent created on Lua side")
+
+	Attach(GetObject("RootGameObject"), Create("ProtoTest", "ProtoTestInstance"))
+	Log("LUATEST", "ProtoTest's Instance summoned from XML on Lua side")
 end
 
 function ScriptableComponent:OnEveryFrame()
