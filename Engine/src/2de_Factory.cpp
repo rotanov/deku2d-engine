@@ -163,6 +163,9 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<
 
 	for (CXMLChildrenList::Iterator it = ANode->Children.Begin(); it != ANode->Children.End(); ++it)
 	{
+		if ((*it)->GetType() != CXMLNode::XML_NODE_TYPE_NORMAL)
+			continue;
+
 		NodeName = (*it)->GetName(); 
 		if (IsClassExists(NodeName))
 		{

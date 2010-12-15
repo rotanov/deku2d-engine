@@ -30,6 +30,17 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// void Destroy(userdata Object)
+	int Destroy(lua_State *L)
+	{
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Destroy API call");
+
+		CFactory::Instance()->Destroy(obj);
+		return 0;
+	}
+
 	// string GetName(userdata Object)
 	int GetName(lua_State *L)
 	{
@@ -38,6 +49,17 @@ namespace LuaAPI
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetName API call");
 
 		lua_pushstring(L, obj->GetName().c_str());
+		return 1;
+	}
+
+	// userdata GetParent(userdata Object)
+	int GetParent(lua_State *L)
+	{
+		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetParent API call");
+
+		lua_pushlightuserdata(L, obj->Parent);
 		return 1;
 	}
 
@@ -146,7 +168,6 @@ namespace LuaAPI
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
 
-		//CObject* cobj = static_cast<CObject*>();
 		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -3));
 		if (!rcobj)
 		{
@@ -155,6 +176,36 @@ namespace LuaAPI
 		}
 
 		rcobj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		return 0;
+	}
+
+	// number GetAngle(userdata PlaceableComponent)
+	int GetAngle(lua_State *L)
+	{
+		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
+		if (!rcobj)
+		{
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetAngle API call");
+		}
+
+		lua_pushnumber(L, rcobj->GetAngle());
+		return 1;
+	}
+
+	// void SetAngle(userdata PlaceableComponent, number Angle)
+	int SetAngle(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetAngle API call");
+
+		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -2));
+		if (!rcobj)
+		{
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetAngle API call");
+			return 0;
+		}
+
+		rcobj->SetAngle(lua_tonumber(L, -1));
 		return 0;
 	}
 
@@ -272,7 +323,7 @@ namespace LuaAPI
 	}
 
 	// number sin(number n)
-	int sin(lua_State *L)	// WHAT?! Lua cannot into sin() or what?
+	int sin(lua_State *L)	// WHAT?! Lua cannot into sin() or what? // having multiple implementations (C++ and Lua) of the same functions can generally lead to some troubles.. it's VERY unlikely, though, but who knows?..
 	{
 		if (!lua_isnumber(L, -1))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to sin API call");
@@ -318,17 +369,6 @@ namespace LuaAPI
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Float API call");
 
 		lua_pushnumber(L, ::Random_Float(lua_tonumber(L, -2), lua_tonumber(L, -1)));
-		return 1;
-	}
-
-	// userdata GetParent(userdata Object)
-	int GetParent(lua_State *L)
-	{
-		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
-		if (!obj)
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetParent API call");
-
-		lua_pushlightuserdata(L, obj->Parent);
 		return 1;
 	}
 
@@ -503,7 +543,7 @@ bool CLuaVirtualMachine::CallMethodFunction(const string &AObjectName, const str
 
 void CLuaVirtualMachine::CreateLuaObject(const string &AName, CObject *AObject)
 {
-	// Note: object must already exist on Lua side. ObjectName = { } in any Lua file will suffice.
+	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
 
 	lua_getglobal(State, AName.c_str());
 	if (lua_isnil(State, -1))
@@ -557,36 +597,51 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	luaopen_debug(State);
 #endif // _DEBUG
 
+	// object management
 	lua_register(State, "Create", &LuaAPI::Create);
 	lua_register(State, "GetObject", &LuaAPI::GetObject);
+	lua_register(State, "Destroy", &LuaAPI::Destroy);
 	lua_register(State, "GetName", &LuaAPI::GetName);
+	lua_register(State, "GetParent", &LuaAPI::GetParent);
 	lua_register(State, "Attach", &LuaAPI::Attach);
+
+	// engine
 	lua_register(State, "Log", &LuaAPI::WriteToLog);
 	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
+
+	// various getters and setters, uncategorized yet
 	lua_register(State, "SetText", &LuaAPI::SetText);
 	lua_register(State, "GetText", &LuaAPI::GetText);
 	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
 	lua_register(State, "GetFont", &LuaAPI::GetFont);
 	lua_register(State, "GetPosition", &LuaAPI::GetPosition);
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
+	lua_register(State, "GetAngle", &LuaAPI::GetAngle);
+	lua_register(State, "SetAngle", &LuaAPI::SetAngle);
 	lua_register(State, "SetScript", &LuaAPI::SetScript);
 	lua_register(State, "GetWindowWidth", &LuaAPI::GetWindowWidth);
 	lua_register(State, "GetWindowHeight", &LuaAPI::GetWindowHeight);
 	lua_register(State, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
+
+	// event management
 	lua_register(State, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
 	lua_register(State, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
 	lua_register(State, "TriggerEvent", &LuaAPI::TriggerEvent);
 	lua_register(State, "GetEventSender", &LuaAPI::GetEventSender);
 	lua_register(State, "GetEventData", &LuaAPI::GetEventData);
+
+	// math
 	lua_register(State, "sin", &LuaAPI::sin);
 	lua_register(State, "cos", &LuaAPI::cos);
 	lua_register(State, "Abs", &LuaAPI::Abs);
 	lua_register(State, "Random_Int", &LuaAPI::Random_Int);
 	lua_register(State, "Random_Float", &LuaAPI::Random_Float);
-	lua_register(State, "GetParent", &LuaAPI::GetParent);
+
+	// lua & debug
 	lua_register(State, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
 	lua_register(State, "DebugPrintComponentTree", &LuaAPI::DebugPrintComponentTree);
 
+	// constants
 	lua_pushnumber(State, PI);
 	lua_setglobal(State, "PI");
 }

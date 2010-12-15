@@ -13,27 +13,6 @@ public:
 	void OnFinalize();
 };
 
-class CSomeUpdatable : public CGameObject
-{
-public:
-	CSomeUpdatable()
-	{
-		CEventManager::Instance()->Subscribe("EveryFrame", this);
-	}
-	void ProcessEvent(const CEvent &AEvent)
-	{
-		if (AEvent.GetName() == "EveryFrame")
-		{
-			CPlaceableComponent *MagicCircle = CFactory::Instance()->Get<CPlaceableComponent>("Magic circle");
-			MagicCircle->SetAngle(MagicCircle->GetAngle() + 1000.0f * CEngine::Instance()->GetDeltaTime());
-			CPlaceableComponent *temptext = static_cast<CPlaceableComponent*>(CFactory::Instance()->Get<CGameObject>("Mouse cursor")->Parent);
-			temptext->SetAngle(temptext->GetAngle() + 100.0f * CEngine::Instance()->GetDeltaTime());
-			CPlaceableComponent *onemore = CFactory::Instance()->Get<CPlaceableComponent>("Magic square");
-			onemore->SetAngle(temptext->GetAngle() + 100.0f * CEngine::Instance()->GetDeltaTime());
-		}
-	}
-};
-
 bool CCustomStateHandler::OnInitialize()
 {
 	CEngine::Instance()->SetDoShowFPS(true);
@@ -41,33 +20,12 @@ bool CCustomStateHandler::OnInitialize()
 	//CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	//CSceneManager::Instance()->SetCurrentScene(NewScene);
 
-	CScriptableComponent *sc = CFactory::Instance()->New<CScriptableComponent>("ScriptableComponent");
-	sc->SetScript(CFactory::Instance()->Get<CScript>("scriptable-test"));
+	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 
-	CPlaceableComponent *tempMagicCirclePlacement = CFactory::Instance()->New<CPlaceableComponent>("Magic circle");
-	CPlaceableComponent *tempMagicSquarePlacement = CFactory::Instance()->New<CPlaceableComponent>("Magic square");
+	// TODO: get rid of these 2 lines when CModel will be real resource
+	CFactory::Instance()->Get<CRenderableComponent>("Magic square renderable")->SetModel(CRenderManager::CreateModelCircle(20.0f, MODEL_TYPE_LINES, 4));
+	CFactory::Instance()->Get<CRenderableComponent>("Magic circle renderable")->SetModel(CRenderManager::CreateModelCircle(10.0f, MODEL_TYPE_LINES, 16));
 
-	tempMagicSquarePlacement->SetPosition(Vector2(50.0f, 50.0f));
-	tempMagicCirclePlacement->SetPosition(Vector2(100.0f, 100.0f));
-
-
-
-
-	CRenderableComponent *NewRenderableComponent = CFactory::Instance()->New<CRenderableComponent>();
-	NewRenderableComponent->SetModel(CRenderManager::CreateModelCircle(20.0f, MODEL_TYPE_LINES, 4));
-	CRenderableComponent *magic_square = CFactory::Instance()->New<CRenderableComponent>();
-	magic_square->SetModel(CRenderManager::CreateModelCircle(10.0f, MODEL_TYPE_LINES, 16));
-
-	CRenderableComponent *temptext = CFactory::Instance()->Get<CRenderableComponent>("Mouse cursor");
-	CSomeUpdatable *SomeUpdatable = new CSomeUpdatable();
-
-	tempMagicCirclePlacement->Attach(NewRenderableComponent);
-	tempMagicSquarePlacement->Attach(magic_square);
-
-	CUpdateManager::Instance()->RootGameObject->Attach(SomeUpdatable);
-	CUpdateManager::Instance()->RootGameObject->Attach(sc);
-	tempMagicCirclePlacement->Attach(tempMagicSquarePlacement);
-	temptext->Parent->Attach(tempMagicCirclePlacement);
 
 // CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f))*/);
 // 

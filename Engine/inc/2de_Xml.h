@@ -115,12 +115,24 @@ private:
 class CXMLNode
 {
 public:
+	enum EXMLNodeType
+	{
+		XML_NODE_TYPE_UNDEFINED,
+		XML_NODE_TYPE_NORMAL,
+		XML_NODE_TYPE_PROLOG,
+		XML_NODE_TYPE_COMMENT,
+		XML_NODE_TYPE_TEXT,
+		XML_NODE_TYPE_ERRONEOUS,
+	};
+
 	typedef CXMLChildrenList::Iterator ChildrenIterator;
 
 	CXMLNode();
 	virtual ~CXMLNode();
 
 	virtual CXMLNode* Copy() = 0;
+
+	EXMLNodeType GetType() const;
 
 	virtual string GetValue() const;
 	virtual void SetValue(const string &AValue);
@@ -159,6 +171,7 @@ protected:
 	CXMLNode *Parent;
 	string Name;
 	unsigned int Depth;
+	EXMLNodeType Type;
 
 	map<string, string, CCaseInsensetiveComparison> Attributes;
 };
@@ -174,6 +187,8 @@ protected:
 class CXMLErroneousNode : public CXMLNode
 {
 public:
+	CXMLErroneousNode();
+
 	CXMLErroneousNode* Copy();
 
 	string GetValue() const;

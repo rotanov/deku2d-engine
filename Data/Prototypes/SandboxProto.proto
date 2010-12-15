@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Prototype Name="SandboxProto">
+	<PlaceableComponent Name="TextPos" PositionX="150" PositionY="250">
+		<Text Name="TestText" Text="Deku2D engine rules the fucking world!" />
+		<ScriptableComponent Name="TextMovementScriptable" Script="scriptable-test" />
+		<TimerComponent Name="TextChangeTimer" Enabled="true" Interval="1" />
+	</PlaceableComponent>
+	<!-- well, the following geometric objects should not be here, but i don't want to make a separate file, so i just reattach them in script.. -->
+	<PlaceableComponent Name="Magic square" PositionX="100" PositionY="100">
+		<RenderableComponent Name="Magic square renderable" />
+		<PlaceableComponent Name="Magic circle" PositionX="50" PositionY="50">
+			<RenderableComponent Name="Magic circle renderable" />
+		</PlaceableComponent>
+	</PlaceableComponent>
+	<ScriptableComponent Name="RotateScriptable" Script="scriptable-test" />
+</Prototype>

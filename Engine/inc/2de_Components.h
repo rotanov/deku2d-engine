@@ -82,6 +82,7 @@ public:
 
 	void SetParent(CGameObject* AGameObject);
 
+	// TODO: make Detach usable, especially from the outer world..
 	template<typename TypeIterator>
 	void Detach(const TypeIterator &Iterator)
 	{
@@ -102,6 +103,7 @@ class CPlaceableComponent : public CGameObject
 {
 public:
 	CPlaceableComponent();
+
 	float GetAngle() const;
 	float GetDepth() const;
 	int GetLayer() const;	
@@ -111,23 +113,26 @@ public:
 
 	void SetAngle(float AAngle); //	(Degrees)
 
-	void SetScaling(float AScaling);
 	/**
 	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
 	*	implicitly Depth => [-1; 1]?	
 	*/
 	void SetLayer(int Layer);
+	void SetScaling(float AScaling);
 	void SetPosition(const Vector2 &APosition);
 
-	void SetTransformation(const CTransformation &ATransformation);
 	CTransformation& GetTransformation();
 	const CTransformation& GetTransformation() const;
-	bool isMirrorVertical() const;
-	void SetMirrorVertical(bool MirrorOrNot);
+	void SetTransformation(const CTransformation &ATransformation);
+
 	bool isMirrorHorizontal() const;
 	void SetMirrorHorizontal(bool MirrorOrNot);
+	bool isMirrorVertical() const;
+	void SetMirrorVertical(bool MirrorOrNot);
 	bool isIgnoringParentTransform() const;
 	void SetIgnoreParentTransform(bool doIgnore);
+
+	void Deserialize(CXMLNode *AXML);
 
 private:
 	CTransformation Transformation;
@@ -187,6 +192,7 @@ class CRenderableComponent : public CGameObject
 public:
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
+
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
 	const RGBAf& GetColor() const;
@@ -217,8 +223,9 @@ class CText : public CRenderableComponent
 {
 public:
 	CText();
-	~CText();
 	CText(const string &AText);
+	~CText();
+
 	CFont* GetFont() const;
 	string& GetText();
 	const string& GetText() const;
@@ -229,6 +236,8 @@ public:
 	// Such function could be there no more. Text has no info about box and world position now, But We can generate info 'bout box anytime instead
 	//float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
 	unsigned int Length() const;
+
+	void Deserialize(CXMLNode *AXML);
 
 private:
 	string Characters;

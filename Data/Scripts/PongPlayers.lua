@@ -91,11 +91,5 @@ function PongPlayerTwo()
 	return t
 end
 
-if PlayerOneScriptable == nil then
-	PlayerOneScriptable = PongPlayerOne()	-- instancing
-end
-
-if PlayerTwoScriptable == nil then
-	PlayerTwoScriptable = PongPlayerTwo()
-end
-
+PlayerOneScriptable = PlayerOneScriptable or PongPlayerOne()	-- instancing
+PlayerTwoScriptable = PlayerTwoScriptable or PongPlayerTwo()

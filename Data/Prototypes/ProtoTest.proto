@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<Prototype Name="ProtoTest">
-	<ScriptableComponent Name="ProtoScriptable" Script="ProtoScript">
-		<TimerComponent Name="ProtoTimer" Enabled="true" Interval="1" />
-	</ScriptableComponent>
-</Prototype>

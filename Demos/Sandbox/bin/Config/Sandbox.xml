@@ -16,5 +16,6 @@
 	<Data>
 		<DataPath value="../../../Data" />
 		<doLoadDefaultResourceList value="true" />
+		<InitScript value="SandboxInit" />
 	</Data>
 </Configuration>

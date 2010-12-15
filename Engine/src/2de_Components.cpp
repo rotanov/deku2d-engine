@@ -270,6 +270,26 @@ void CPlaceableComponent::SetIgnoreParentTransform(bool doIgnore)
 	doIgnoreCamera = doIgnore;
 }
 
+void CPlaceableComponent::Deserialize(CXMLNode *AXML)
+{
+	if (AXML->HasAttribute("Angle"))
+		SetAngle(from_string<float>(AXML->GetAttribute("Angle")));
+
+	if (AXML->HasAttribute("PositionX"))
+		SetPosition(Vector2(from_string<float>(AXML->GetAttribute("PositionX")), GetPosition().y));
+
+	if (AXML->HasAttribute("PositionY"))
+		SetPosition(Vector2(GetPosition().x, from_string<float>(AXML->GetAttribute("PositionY"))));
+
+	if (AXML->HasAttribute("Scaling"))
+		SetScaling(from_string<float>(AXML->GetAttribute("Scaling")));
+
+	if (AXML->HasAttribute("Layer"))
+		SetLayer(from_string<int>(AXML->GetAttribute("Layer")));
+
+	// TODO: add more..
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CRenderableComponent
 
@@ -378,7 +398,12 @@ const string& CText::GetText() const
 
 void CText::SetFont(CFont *AFont)
 {
-	assert(AFont != NULL);
+	if (!AFont)
+	{
+		Log("ERROR", "NULL pointer passed to CText::SetFont");
+		return;
+	}
+
 	Font = AFont;
 	SetText(Characters);	// Пересчитать BOX, шрифт же меняется.  ///<<<< OLOLOLO --------
 	_UpdateSelfModel();						///			|
@@ -432,6 +457,18 @@ unsigned char CText::operator[](unsigned int index) const
 unsigned int CText::Length() const
 {
 	return Characters.length();
+}
+
+void CText::Deserialize(CXMLNode *AXML)
+{
+	if (AXML->HasAttribute("Text"))
+	{
+		SetText(AXML->GetAttribute("Text"));
+	}
+	if (AXML->HasAttribute("Font"))
+	{
+		SetFont(CFactory::Instance()->Get<CFont>(AXML->GetAttribute("Font")));
+	}
 }
 
 void CText::_UpdateSelfModel()

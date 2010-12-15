@@ -1,26 +1,16 @@
-ScriptableComponent = { }
+TextMovementScriptable = TextMovementScriptable or { }
 
-function ScriptableComponent:OnCreate()
+function TextMovementScriptable:OnCreate()
 	self.dir = {x = 1, y = 1}
-	self.text_pos = Create("PlaceableComponent", "TextPlace")
-	self.text = Create("Text", "ScriptableComponentTestText")
-	Attach(self.object, self.text_pos);
-	Attach(self.text_pos, self.text);
-	SetPosition(self.text_pos, 150, 250)
-	SetText(self.text, "Deku2D engine rules the fucking world!")
 
 	SubscribeToEvent("EveryFrame", self.object)
 	SubscribeToEvent("KeyDown", self.object)
-
-	Log("LUATEST", "ScriptableComponent created on Lua side")
-
-	Attach(GetObject("RootGameObject"), Create("ProtoTest", "ProtoTestInstance"))
-	Log("LUATEST", "ProtoTest's Instance summoned from XML on Lua side")
+	SubscribeToEvent("TimerTick", self.object)
 end
 
-function ScriptableComponent:OnEveryFrame()
+function TextMovementScriptable:OnEveryFrame()
 	local cur_x, cur_y
-	cur_x, cur_y = GetPosition(self.text_pos)
+	cur_x, cur_y = GetPosition(GetObject("TextPos"))
 
 	if cur_x < 0 or cur_x > GetWindowWidth() then
 		self.dir.x = -self.dir.x
@@ -29,9 +19,29 @@ function ScriptableComponent:OnEveryFrame()
 		self.dir.y = -self.dir.y
 	end
 
-	SetPosition(self.text_pos, cur_x + self.dir.x * GetDeltaTime() * 100, cur_y + self.dir.y * GetDeltaTime() * 100)
+	SetPosition(GetObject("TextPos"), cur_x + self.dir.x * GetDeltaTime() * 100, cur_y + self.dir.y * GetDeltaTime() * 100)
 end
 
-function ScriptableComponent:OnKeyDown()
+function TextMovementScriptable:OnKeyDown()
 	DebugPrintComponentTree()
+end
+
+function TextMovementScriptable:OnTimerTick(event)
+	if GetEventData(event, "Name") ~= "TextChangeTimer" then
+		return
+	end
+
+	SetText(GetObject("TestText"), GetText(GetObject("TestText")) .. "!")
+end
+
+RotateScriptable = RotateScriptable or { }
+
+function RotateScriptable:OnCreate()
+	SubscribeToEvent("EveryFrame", self.object)
+end
+
+function RotateScriptable:OnEveryFrame()
+	SetAngle(GetObject("Magic square"), GetAngle(GetObject("Magic square")) + 1000.0 * GetDeltaTime())
+	SetAngle(GetParent(GetObject("Mouse cursor")), GetAngle(GetParent(GetObject("Mouse cursor"))) + 100.0 * GetDeltaTime())
+	SetAngle(GetObject("Magic circle"), GetAngle(GetObject("Magic circle")) + 100.0 * GetDeltaTime())
 end

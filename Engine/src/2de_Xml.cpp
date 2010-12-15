@@ -312,13 +312,18 @@ void CXML::LoadFromStorage(CStorage &AStorage)
 //////////////////////////////////////////////////////////////////////////
 // CXMLNode
 
-CXMLNode::CXMLNode() : Children(this), Parent(NULL), Depth(0)
+CXMLNode::CXMLNode() : Children(this), Parent(NULL), Depth(0), Type(XML_NODE_TYPE_UNDEFINED)
 {
 
 }
 
 CXMLNode::~CXMLNode()
 {
+}
+
+CXMLNode::EXMLNodeType CXMLNode::GetType() const
+{
+	return Type;
 }
 
 string CXMLNode::GetValue() const
@@ -483,6 +488,11 @@ string CXMLNode::GetTabulation() const
 //////////////////////////////////////////////////////////////////////////
 // CXMLErroneousNode
 
+CXMLErroneousNode::CXMLErroneousNode()
+{
+	Type = XML_NODE_TYPE_ERRONEOUS;
+}
+
 CXMLErroneousNode* CXMLErroneousNode::Copy()
 {
 	Log("WARNING", "You're trying to copy erronoues XML node");
@@ -611,6 +621,7 @@ string CXMLNodeWithAttributes::GetContent() const
 
 CXMLPrologNode::CXMLPrologNode()
 {
+	Type = XML_NODE_TYPE_PROLOG;
 	Name = "xml";
 	SetVersion("1.0");
 }
@@ -647,6 +658,7 @@ string CXMLPrologNode::GetEndingSequence() const
 
 CXMLNormalNode::CXMLNormalNode(const string &AName)
 {
+	Type = XML_NODE_TYPE_NORMAL;
 	SetName(AName);
 }
 
@@ -737,6 +749,7 @@ void CXMLSingleValueNode::SetValue(const string &AValue)
 
 CXMLCommentNode::CXMLCommentNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(AValue)
 {
+	Type = XML_NODE_TYPE_COMMENT;
 }
 
 CXMLCommentNode* CXMLCommentNode::Copy()
@@ -761,6 +774,7 @@ string CXMLCommentNode::GetEndingSequence() const
 
 CXMLTextNode::CXMLTextNode(const string &AValue /*= ""*/) : CXMLSingleValueNode(AValue)
 {
+	Type = XML_NODE_TYPE_TEXT;
 }
 
 CXMLTextNode* CXMLTextNode::Copy()
