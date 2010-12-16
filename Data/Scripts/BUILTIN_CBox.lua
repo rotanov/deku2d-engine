@@ -1,4 +1,4 @@
-CBox = { }
+CBox = CBox or { }
 
 function CBox(AMin, AMax)
 	local t = {

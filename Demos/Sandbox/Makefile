@@ -1,7 +1,6 @@
-SOURCES		=	src/main.cpp \
-			src/game.cpp
+SOURCES		=	src/main.cpp
 
-HEADERS		=	inc/Game.h
+HEADERS		=
 
 TARGET		=	bin/Sandbox
 ENGINE_LIB	=	../../Engine/lib/libDeku2d.a

@@ -1,4 +1,4 @@
-Vector2 = { }
+Vector2 = Vector2 or { }
 
 Vector2_mt = {
 	__add = function(a, b)

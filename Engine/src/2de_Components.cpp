@@ -595,6 +595,7 @@ CPrototype::CPrototype()
 
 CPrototype::~CPrototype()
 {
+	Unload();
 }
 
 bool CPrototype::Load()

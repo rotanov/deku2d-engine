@@ -647,6 +647,7 @@ bool CMemory::Open(byte *ABeginningPointer, long ALength, EOpenMode AMode)
 
 	BeginningPointer = ABeginningPointer;
 	CurrentPointer = BeginningPointer;
+	Length = ALength;
 	Mode = AMode;
 
 	return true;

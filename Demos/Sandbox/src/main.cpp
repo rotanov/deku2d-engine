@@ -1,5 +1,4 @@
 #include "2de_Engine.h"
-#include "Game.h"
 
 #define ENGINE CEngine::Instance()
 #define RENDER CRenderManager::Instance()
@@ -22,9 +21,14 @@ bool CCustomStateHandler::OnInitialize()
 
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 
-	// TODO: get rid of these 2 lines when CModel will be real resource
-	CFactory::Instance()->Get<CRenderableComponent>("Magic square renderable")->SetModel(CRenderManager::CreateModelCircle(20.0f, MODEL_TYPE_LINES, 4));
-	CFactory::Instance()->Get<CRenderableComponent>("Magic circle renderable")->SetModel(CRenderManager::CreateModelCircle(10.0f, MODEL_TYPE_LINES, 16));
+	// TODO: get rid of these lines when CModel will be real resource
+	CRenderableComponent *MagicSquare = CFactory::Instance()->Get<CRenderableComponent>("Magic square renderable");
+	if (MagicSquare)
+		MagicSquare->SetModel(CRenderManager::CreateModelCircle(20.0f, MODEL_TYPE_LINES, 4));
+
+	CRenderableComponent *MagicCircle = CFactory::Instance()->Get<CRenderableComponent>("Magic circle renderable");
+	if (MagicCircle)
+		MagicCircle->SetModel(CRenderManager::CreateModelCircle(10.0f, MODEL_TYPE_LINES, 16));
 
 
 // CRenderableComponent *NewNewRenderableComponent = new CRenderableComponent(/*new CModelLine(Vector2(0.0f, 0.0f), Vector2(-64.0f, 64.0f))*/);

@@ -223,17 +223,27 @@ bool CResourceSectionLoader<T>::Load(CXML *ResourceList)
 	for (CXMLNode::ChildrenIterator it = section->Children.Begin(); it != section->Children.End(); ++it)
 	{
 		ResNode = *it;
-		ResName = ResNode->GetAttribute("name");
-		if (ResName.empty())
+		if (ResNode->GetType() != CXMLNode::XML_NODE_TYPE_NORMAL)
+			continue;
+
+		if (!ResNode->HasAttribute("name"))
 		{
 			Log("WARNING", "Name isn't specified for resource in resource list XML");
 			continue;
 		}
 
+		ResName = ResNode->GetAttribute("name");
+
 		Resource = Factory->New<T>(ResName);
 		if (Resource == NULL)
 		{
 			Log("WARNING", "Error loading resource: '%s'", ResName.c_str());
+			continue;
+		}
+
+		if (ResNode->Children.First()->GetType() != CXMLNode::XML_NODE_TYPE_TEXT)
+		{
+			Log("WARNING", "File path isn't specified for resource '%s' in resource list XML", Resource->GetName().c_str());
 			continue;
 		}
 

@@ -47,8 +47,8 @@ const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
 const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
 const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 
-extern const unsigned int BINARY_DATA_FONT_FONT_SIZE;
-extern byte BINARY_DATA_FONT_FONT[];
+extern const unsigned int BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
+extern byte BINARY_DATA_DEFAULT_FONT_TEXTURE[];
 
 extern const unsigned int BINARY_DATA_DEFAULT_FONT_SIZE;
 extern byte BINARY_DATA_DEFAULT_FONT[];

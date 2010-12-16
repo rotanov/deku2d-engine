@@ -76,12 +76,14 @@ bool CCustomStateHandler::OnInitialize()
 
 	CRenderableComponent *PlayerR = new CRenderableComponent(CRenderManager::CreateModelBox(32, 64));
 
-	CScriptableComponent *PlayerScriptable = new CScriptableComponent(CFactory::Instance()->Get<CScript>("Player"));
+	CScriptableComponent *PlayerScriptable = CFactory::Instance()->New<CScriptableComponent>("PlayerOneScriptable");
+	
+	PlayerScriptable->SetScript(CFactory::Instance()->Get<CScript>("Player"));
 
 //	CScriptableComponent *PongGame = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongGameScript"));
 
 	CFactory::Instance()->Add(PlayerR, "PlayerOne");
-	CFactory::Instance()->Add(PlayerScriptable, "PlayerOneScriptable");
+	//CFactory::Instance()->Add(PlayerScriptable, "PlayerOneScriptable");
 //	CFactory::Instance()->Add(PongGame, "PongGame");
 
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));

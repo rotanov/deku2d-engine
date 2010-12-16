@@ -280,80 +280,68 @@ bool CFont::Load()
 	if (Loaded)
 		return true;
 
+	CStorage *storage;
+
 	if (Source == LOAD_SOURCE_FILE)
 	{
-		if (Filename == "")
-			return false;
-
-		CFile file;
-		if (!file.Open(Filename, CFile::OPEN_MODE_READ))
+		storage = new CFile(Filename, CFile::OPEN_MODE_READ);
+		if (!storage->Good())
 		{
-			Log("ERROR", "Can't Load Font '%s': file couldn't be opened", GetName().c_str());
+			Log("ERROR", "Can't open font file '%s'", Filename.c_str());
 			return false;
 		}
 
-		string FontImageName;
-		file.ReadString(FontImageName);
-
-		CTextureManager *TexMan = CTextureManager::Instance();
-		Texture = TexMan->Get(FontImageName);
-
-		if (Texture == NULL)
-			return false;
-
-		Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
-
-		// 	int Vertices[4*256];
-		// 	file.Read(Vertices, sizeof(Vertices));
-		// 	for(int i = 0; i < 256; i++)
-		// 	{
-		// 		bbox[i].Min.x = Vertices[i * 4 + 0];
-		// 		bbox[i].Min.y = Vertices[i * 4 + 2];
-		// 		bbox[i].Max.x = Vertices[i * 4 + 1];
-		// 		bbox[i].Max.y = Vertices[i * 4 + 3];
-		// 	}	// Для конвертирования из старого формата.
-		file.Read(Boxes, sizeof(Boxes));
-
-		file.Close();
-		for (int i = 0; i < 256; i++)
-		{
-			if (Boxes[i].Min.x > Boxes[i].Max.x)
-				swap(Boxes[i].Min.x, Boxes[i].Max.x);
-			if (Boxes[i].Min.y > Boxes[i].Max.y)
-				swap(Boxes[i].Min.y, Boxes[i].Max.y);
-			Width[i] = (Boxes[i].Max.x - Boxes[i].Min.x);
-			Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
-		}
 	}
 	else if (Source == LOAD_SOURCE_MEMORY)
 	{
-		// TODO: see issue 42, take away common code..
-		if (MemoryLoadData == NULL || MemoryLoadLength == 0)
-			return false;
-
-		// assert(MemoryLoadData != NULL);
-
-		while ((*static_cast<byte*>(MemoryLoadData)))
-			MemoryLoadData = static_cast<byte*>(MemoryLoadData) + 1;
-		MemoryLoadData = static_cast<byte*>(MemoryLoadData) + 1;
-
-		Texture = CTextureManager::Instance()->Get("DefaultFontTexture");
-
-		memcpy(Boxes, static_cast<byte*>(MemoryLoadData), sizeof(Boxes));
-		for (int i = 0; i < 256; i++)
+		storage = new CMemory(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
+		if (!storage->Good())
 		{
-			if (Boxes[i].Min.x > Boxes[i].Max.x)
-				swap(Boxes[i].Min.x, Boxes[i].Max.x);
-			if (Boxes[i].Min.y > Boxes[i].Max.y)
-				swap(Boxes[i].Min.y, Boxes[i].Max.y);
-			Width[i] = (Boxes[i].Max.x - Boxes[i].Min.x);
-			Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
+			Log("ERROR", "Can't open font from memory storage");
+			return false;
 		}
 	}
 	else
 	{
 		Log("ERROR", "Can't load font: no load source specified");
 		return false;
+	}
+
+	string FontImageName;
+	storage->ReadString(FontImageName);
+
+	Texture = CFactory::Instance()->Get<CTexture>(FontImageName);
+	if (Texture == NULL)
+	{
+		Log("ERROR", "Can't load font: font texture is NULL");
+		return false;
+	}
+
+	Texture->CheckLoad(); // я не помню, зачем я это сюда добавил, но у меня чёто падало без этого, хотя может и не из-за этого...
+
+	// 	int Vertices[4*256];
+	// 	file.Read(Vertices, sizeof(Vertices));
+	// 	for(int i = 0; i < 256; i++)
+	// 	{
+	// 		bbox[i].Min.x = Vertices[i * 4 + 0];
+	// 		bbox[i].Min.y = Vertices[i * 4 + 2];
+	// 		bbox[i].Max.x = Vertices[i * 4 + 1];
+	// 		bbox[i].Max.y = Vertices[i * 4 + 3];
+	// 	}	// Для конвертирования из старого формата.
+
+	storage->Read(Boxes, sizeof(Boxes));
+
+	storage->Close();
+	delete storage;
+
+	for (int i = 0; i < 256; i++)
+	{
+		if (Boxes[i].Min.x > Boxes[i].Max.x)
+			swap(Boxes[i].Min.x, Boxes[i].Max.x);
+		if (Boxes[i].Min.y > Boxes[i].Max.y)
+			swap(Boxes[i].Min.y, Boxes[i].Max.y);
+		Width[i] = (Boxes[i].Max.x - Boxes[i].Min.x);
+		Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
 	}
 
 	CResource::Load();
@@ -763,15 +751,16 @@ CFontManager::CFontManager() : DefaultFont(NULL)
 void CFontManager::Init()
 {
 	CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
-	DefaultFontTexture->SetLoadSource(BINARY_DATA_FONT_FONT, BINARY_DATA_FONT_FONT_SIZE);
-	//DefaultFontTexture->LoadTexture(IMAGE_DEFAULT_FONT_WIDTH, IMAGE_DEFAULT_FONT_HEIGHT, reinterpret_cast<byte *>(IMAGE_DEFAULT_FONT_DATA));
+	DefaultFontTexture->SetLoadSource(BINARY_DATA_DEFAULT_FONT_TEXTURE, BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE);
+	DefaultFontTexture->SetPersistent(true);
 	DefaultFontTexture->Load();
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// wtf is it? incapsulate it please or whatever...
 	
 	DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
-	DefaultFont->SetLoadSource(reinterpret_cast<byte *>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_FONT_FONT_SIZE);
+	DefaultFont->SetLoadSource(BINARY_DATA_DEFAULT_FONT, BINARY_DATA_DEFAULT_FONT_SIZE);
 	DefaultFont->SetPersistent(true);
-	DefaultFont->Load(); // maybe no need to explicitly call Load here..
+	DefaultFont->Load();
 
 	assert(DefaultFont != NULL);
 }
@@ -854,8 +843,6 @@ CTexture::CTexture()
 
 CTexture::~CTexture()
 {
-	if (glIsTexture(TexID))
-		glDeleteTextures(1, &TexID);
 	Unload();
 	CTextureManager::Instance()->Remove(this);
 }
@@ -910,7 +897,8 @@ void CTexture::Unload()
 	if (!Loaded)
 		return;
 
-	glDeleteTextures(1, &TexID);
+	if (glIsTexture(TexID))
+		glDeleteTextures(1, &TexID);
 
 	CResource::Unload();
 }
