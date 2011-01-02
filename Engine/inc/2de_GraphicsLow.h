@@ -65,16 +65,13 @@ class CAbstractScene;
 class CTexture : public CImageData, public CResource
 {
 public:
-	virtual GLuint GetTexID();
-
-	GLuint TexID;
-
-	bool MakeTexture();
-
 	CTexture();
 	virtual ~CTexture();
+
 	bool Load();
 	void Unload();
+
+	bool MakeTexture();
 
 	/**
 	*	As I think for now this one should save Texture to file.
@@ -83,8 +80,12 @@ public:
 	*	Less trivial is some intermediate textures for gfx;
 	*/
 	bool SaveToFile(const string &AFilename);
+
 	GLuint GetTexID() const;
 	//GLuint GetTexID();
+
+private:
+	GLuint TexID;
 };
 
 /**
@@ -487,8 +488,8 @@ public:
 		{
 			Vector2 P
 					(	
-						cos(PI * (float)i / ((float)Precision/ 2.0f)),
-						sin(PI * (float)i / ((float)Precision/2.0f))
+						cos(PI * (float)i / ((float)Precision / 2.0f)),
+						sin(PI * (float)i / ((float)Precision / 2.0f))
 					);
 			Vertices[i * 2] = P * Radius;
 		}
@@ -498,9 +499,10 @@ public:
 
 		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, Precision * 2, Vertices);//CFactory::Instance()->New<CModel>("New circle cmodel");
 		CFactory::Instance()->Add(Result);
+		Result->DisableLoading();
 		
-		return Result;
 		SAFE_DELETE_ARRAY(Vertices);
+		return Result;
 	}
 
 	static CModel* CreateModelBox(float Width, float Height, 
@@ -527,6 +529,7 @@ public:
 				Vertices[7] = Vector2(-wd2, -hd2);
 				Result = new CModel(AModelType, 0, 8, Vertices);
 				CFactory::Instance()->Add(Result);
+				Result->DisableLoading();
 			}
 			break;
 		case MODEL_TYPE_TRIANGLES:
@@ -551,6 +554,7 @@ public:
 
 				Result = new CModel(AModelType, ATexture, 6, Vertices, TexCoords);
 				CFactory::Instance()->Add(Result);
+				Result->DisableLoading();
 			}
 			break;
 		default:
@@ -566,6 +570,7 @@ public:
 		Vertices[1] = v1;
 		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
 		CFactory::Instance()->Add(Result);
+		Result->DisableLoading();
 		return Result;
 	}
 

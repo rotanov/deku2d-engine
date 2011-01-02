@@ -71,6 +71,15 @@ void CResource::SetLoadSource(byte *AData, size_t ALength)
 	FirstTimeLoaded = false;
 }
 
+void CResource::DisableLoading()
+{
+	Source = LOAD_SOURCE_DISABLED;
+	Filename = "";
+	MemoryLoadData = NULL;
+	MemoryLoadLength = 0;
+	FirstTimeLoaded = false;
+}
+
 bool CResource::BasicLoad()
 {
 	if (Loaded)

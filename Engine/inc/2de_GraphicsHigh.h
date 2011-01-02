@@ -115,8 +115,6 @@ private:
 *		add possibility to load textured cursors, etc.
 *	other @todo: inherit from CRenderComponent and then add to global root object
 *		make update position throug events. Compllicity for nothing, as i call it.
-*
-*	is it related to low graphics? possibly move to 2de_GraphicsHigh..
 */
 
 class CMouseCursor : public CRenderableComponent

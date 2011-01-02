@@ -1265,13 +1265,13 @@ void RemoveTrack(unsigned long addr)
 
 void DumpUnfreed()
 {
+	if (allocList == NULL)
+		return;
+
 	FILE *fo = fopen("Memory.log", "w");
 	AllocList::iterator i;
 	unsigned long totalSize = 0;
 	char buf[1024];
-
-	if (allocList == NULL)
-		return;
 
 	for (i = allocList->begin(); i != allocList->end(); i++)
 	{

@@ -20,7 +20,7 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-// CRenderableUnitInfo
+// CRenderConfig
 
 CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(COLOR_WHITE)
 {
@@ -690,6 +690,7 @@ CModel* CRenderManager::CreateModelText(const CText *AText)
 	}
 	CModel *Model = new CModel(MODEL_TYPE_TRIANGLES, AText->GetFont()->GetTexture(), 6 * AText->Length(), Vertices, TexCoords);
 	CFactory::Instance()->Add(Model);
+	Model->DisableLoading();
 	delete [] Vertices;
 	delete [] TexCoords;
 	return Model;
@@ -786,13 +787,6 @@ bool CTexture::MakeTexture()
 	int MODE = (BPP == 3) ? GL_RGB : GL_RGBA;
 	glTexImage2D(GL_TEXTURE_2D, 0, BPP, Width, Height, 0, MODE, GL_UNSIGNED_BYTE, Data);
 	return true;
-}
-
-GLuint CTexture::GetTexID()
-{
-	if (TexID == 0)
-		Log("ERROR", "GLImageData. Trying to access TexID but it is 0");
-	return TexID;
 }
 
 GLuint CTexture::GetTexID() const
@@ -1393,8 +1387,7 @@ CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/,
 
 CModel::~CModel()
 {
-	SAFE_DELETE_ARRAY(Vertices);
-	SAFE_DELETE_ARRAY(TexCoords);
+	Unload();
 }
 
 void CModel::SetTexture(CTexture *ATexture)
@@ -1458,9 +1451,13 @@ bool CModel::Load()
 	{
 		XML.LoadFromMemory(MemoryLoadData, MemoryLoadLength);
 	}
+	else if (Source == LOAD_SOURCE_DISABLED)
+	{
+		return CResource::BasicLoad();
+	}
 	else
 	{
-		Log("ERROR", "Can't load prototype: no load source specified");
+		Log("ERROR", "Can't load model: no load source specified");
 		return false;
 	}
 
@@ -1471,8 +1468,6 @@ bool CModel::Load()
 		Log("ERROR", "Model named '%s' has invalid format", Name.c_str());
 		return false;
 	}
-
-	SetName(XMLNode->GetAttribute("Name"));
 
 	if (XMLNode->HasAttribute("Texture"))
 		Texture = CFactory::Instance()->Get<CTexture>(XMLNode->GetAttribute("Texture"));
@@ -1490,7 +1485,7 @@ bool CModel::Load()
 
 	XMLNode = XMLNode->Children.First("Vertices")->Children.First();
 	if (XMLNode->IsErroneous())
-		Log("Warning", "Model without vertices");
+		Log("WARNING", "Model without vertices");
 	else if (ModelType != MODEL_TYPE_NOT_A_MODEL)
 	{
 		string vertices_text = XMLNode->GetValue();
@@ -1502,7 +1497,7 @@ bool CModel::Load()
 		for(unsigned i = 0; i < tokens.size() / 2; i++)
 		{
 			Vertices[i].x = from_string<float>(tokens[i * 2 + 0]);
-			Vertices[i].y = from_string<float>(tokens[i * 2+ 1]);
+			Vertices[i].y = from_string<float>(tokens[i * 2 + 1]);
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}
@@ -1511,7 +1506,7 @@ bool CModel::Load()
 	{
 		XMLNode = XMLNode->Children.First("TexCoords")->Children.First();
 		if (XMLNode->IsErroneous())
-			Log("Warning", "Texture present, but no tex coords found");
+			Log("WARNING", "Texture present, but no tex coords found");
 		string texcoords_text = XMLNode->GetValue();
 		istringstream iss(texcoords_text);
 		vector<string> tokens;
@@ -1520,7 +1515,7 @@ bool CModel::Load()
 		for(unsigned i = 0; i < tokens.size() / 2; i++)
 		{
 			TexCoords[i].x = from_string<float>(tokens[i * 2 + 0]);
-			TexCoords[i].y = from_string<float>(tokens[i * 2+ 1]);
+			TexCoords[i].y = from_string<float>(tokens[i * 2 + 1]);
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}

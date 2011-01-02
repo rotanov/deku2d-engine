@@ -484,6 +484,13 @@ void CText::Deserialize(CXMLNode *AXML)
 
 void CText::_UpdateSelfModel()
 {
+	if (Model != NULL)
+	{
+		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
+		Model->SetDestroyed();
+		Model = NULL;
+	}
+
 	SetModel(CRenderManager::CreateModelText(this));
 }
 

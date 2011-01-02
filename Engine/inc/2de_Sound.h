@@ -73,7 +73,7 @@ protected:
 };
 
 /**
-* CSoundMixer - звуковой микшер, отвечающий за инициализацию и деинициализацию звуковой системы, а также воспроизведение звука и музыки.
+* CSoundMixer - sound mixer, that is responsible for initialization/deinitialization of sound system and playing sounds and music.
 */
 
 namespace SoundMixerHooks

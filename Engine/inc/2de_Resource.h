@@ -91,6 +91,7 @@ public:
 		LOAD_SOURCE_UNSPECIFIED,
 		LOAD_SOURCE_FILE,
 		LOAD_SOURCE_MEMORY,
+		LOAD_SOURCE_DISABLED,
 	};
 
 	CResource();
@@ -101,6 +102,7 @@ public:
 	ELoadSource GetLoadSource() const;
 	void SetLoadSource(const string &AFilename);
 	void SetLoadSource(byte *AData, size_t ALength);
+	void DisableLoading();
 
 	// Must be implemented in all descendants
 	// Load() should perform loading resource from either memory or file

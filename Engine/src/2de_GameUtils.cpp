@@ -4,6 +4,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // CTileset
+
 CTileset::CTileset() : TileWidth(0), TileHeight(0), HorNumTiles(0), VerNumTiles(0), BBox(NULL), Texture(NULL)
 {
 	CTileSetManager::Instance()->Add(this);
@@ -148,6 +149,7 @@ void CTileset::SetTexture(const string &TextureName)
 
 //////////////////////////////////////////////////////////////////////////
 // CTileSetManager
+
 CTileSetManager::CTileSetManager()
 {
 	SetName("Tileset manager");
@@ -163,7 +165,8 @@ CTileset* CTileSetManager::GetTileset(const string &ATilesetName)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Default title screen
+// CDefaultTitleScreen
+
 CDefaultTitleScreen::CDefaultTitleScreen()
 {
 	CPlaceableComponent *tempPlacing = CFactory::Instance()->New<CPlaceableComponent>();

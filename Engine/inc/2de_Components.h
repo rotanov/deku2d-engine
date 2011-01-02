@@ -208,9 +208,11 @@ public:
 
 	void Deserialize(CXMLNode *AXML);
 
+protected:
+	CResourceRefCounter<CModel> Model;
+
 private:
 	CRenderConfig Configuration;
-	CResourceRefCounter<CModel> Model;
 	bool Visible;	
 };
 
