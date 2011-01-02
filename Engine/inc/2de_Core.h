@@ -40,6 +40,8 @@
 	#define NOMINMAX
 #endif // _MSC_VER
 
+#define _SECURE_SCL 0
+
 #include <IL/il.h>
 #include <SDL/SDL.h>
 
@@ -63,6 +65,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <iterator>
 
 #include <sys/stat.h>
 

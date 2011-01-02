@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Model Name="TestModel" Texture="pakenemy" ModelType="Triangles">
+	<Vertices>
+		0.0f 0.0f
+		32.0f 0.0f
+		32.0f 32.0f
+		0.0f 0.0f
+		32.0f 32.0f
+		0.0f 32.0f		
+	</Vertices>
+	<TexCoords>
+		0.0f 0.0f
+		1.0f 0.0f
+		1.0f 1.0f
+		0.0f 0.0f
+		1.0f 1.0f
+		0.0f 1.0f	
+	</TexCoords>
+</Model>

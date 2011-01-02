@@ -194,10 +194,6 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\src\game.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\main.cpp"
 				>
 			</File>
@@ -205,10 +201,6 @@
 		<Filter
 			Name="inc"
 			>
-			<File
-				RelativePath=".\inc\Game.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource"

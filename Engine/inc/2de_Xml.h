@@ -80,7 +80,7 @@ public:
 
 private:
 	StorageType Backend;
-	CXMLNode *Node;
+	CXMLNode *OwnerNode;	// OwnerNode, not just Owner because it's now clear that it's Node, Not ChildrenList or something. Rename if want.
 
 	friend class CXMLNode;
 };

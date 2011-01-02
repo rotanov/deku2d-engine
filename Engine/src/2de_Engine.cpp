@@ -96,6 +96,7 @@ bool CEngine::Initialize()
 	ResourceManager->AddSection<CMusic>("Music");
 	ResourceManager->AddSection<CScript>("Scripts");
 	ResourceManager->AddSection<CPrototype>("Prototypes");
+	ResourceManager->AddSection<CModel>("Models");
 
 	if (doLoadDefaultResourceList)
 	{

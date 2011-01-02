@@ -325,6 +325,8 @@ void CRenderableComponent::SetBlendingMode(EBlendingMode ABlendingMode)
 
 CModel* CRenderableComponent::GetModel() const
 {
+	if (Model != NULL)
+		Model->CheckLoad();
 	return Model;
 }
 
@@ -364,6 +366,15 @@ void CRenderableComponent::SetVisibility(bool AVisible)
 {
 	Visible = AVisible;
 }
+
+void CRenderableComponent::Deserialize( CXMLNode *AXML )
+{
+	if (AXML->HasAttribute("Model"))
+	{
+		SetModel(CFactory::Instance()->Get<CModel>(AXML->GetAttribute("Model")));
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // CText
@@ -623,7 +634,7 @@ bool CPrototype::Load()
 		return false;
 	}
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }
@@ -633,7 +644,7 @@ void CPrototype::Unload()
 	if (!Loaded)
 		return;
 
-	CResource::Unload();
+	CResource::BasicUnload();
 }
 
 CXMLNode* CPrototype::GetRootNode()

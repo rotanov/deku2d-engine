@@ -10,6 +10,7 @@
 		<RenderableComponent Name="Magic square renderable" />
 		<PlaceableComponent Name="Magic circle" PositionX="50" PositionY="50">
 			<RenderableComponent Name="Magic circle renderable" />
+			<RenderableComponent Name="Magic circle renderable with model" Model="TestModel" />
 		</PlaceableComponent>
 	</PlaceableComponent>
 	<ScriptableComponent Name="RotateScriptable" Script="SandboxScript" />

@@ -51,7 +51,7 @@ bool CSound::Load()
 		return false;
 	}
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }
@@ -70,7 +70,7 @@ void CSound::Unload()
 		Data = NULL;
 	}
 
-	CResource::Unload();
+	CResource::BasicUnload();
 }
 
 Mix_Chunk* CSound::GetData()
@@ -131,7 +131,7 @@ bool CMusic::Load()
 		return false;
 	}
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }
@@ -149,7 +149,7 @@ void CMusic::Unload()
 		Data = NULL;
 	}
 
-	CResource::Unload();
+	CResource::BasicUnload();
 }
 
 Mix_Music* CMusic::GetData()

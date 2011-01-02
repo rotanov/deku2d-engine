@@ -14,6 +14,11 @@ class CScript : public CResource
 {
 public:
 	bool Load();
+	void Unload()
+	{
+		// Guess that SCript doesn't has memory-heavy part and do nothing here
+		CResource::BasicUnload();
+	}
 	string GetScriptText() const;
 
 private:

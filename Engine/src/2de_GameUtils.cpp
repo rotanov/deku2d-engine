@@ -66,7 +66,7 @@ bool CTileset::Load()
 	storage->Close();
 	delete storage;
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }
@@ -82,7 +82,7 @@ void CTileset::Unload()
 		BBox = NULL;
 	}
 
-	CResource::Unload();
+	CResource::BasicUnload();
 }
 
 bool CTileset::SaveToFile(const string &AFilename)

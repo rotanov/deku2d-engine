@@ -434,7 +434,7 @@ bool CScript::Load()
 		return false;
 	}
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }

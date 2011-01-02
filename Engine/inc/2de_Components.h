@@ -206,6 +206,8 @@ public:
 	const CRenderConfig& GetConfiguration() const;
 	void SetConfiguration(const CRenderConfig &AConfiguraton);
 
+	void Deserialize(CXMLNode *AXML);
+
 private:
 	CRenderConfig Configuration;
 	CResourceRefCounter<CModel> Model;

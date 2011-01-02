@@ -167,6 +167,9 @@ public:
 	virtual int GetVertexNumber() const;
 	//const RGBAf* GetColors() const;
 
+	bool Load();
+	void Unload();
+
 private:
 	CResourceRefCounter<CTexture> Texture;
 	EModelType ModelType;

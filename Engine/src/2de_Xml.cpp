@@ -92,7 +92,7 @@ CXMLNode* CXMLChildrenList::Iterator::operator*()
 //////////////////////////////////////////////////////////////////////////
 // CChildrenList
 
-CXMLChildrenList::CXMLChildrenList(CXMLNode *ANode /*= NULL*/) : Node(ANode)
+CXMLChildrenList::CXMLChildrenList(CXMLNode *ANode /*= NULL*/) : OwnerNode(ANode)
 {
 }
 
@@ -153,26 +153,26 @@ CXMLNode* CXMLChildrenList::operator[](size_t AID)
 
 void CXMLChildrenList::AddFirst(CXMLNode *ANode)
 {
-	ANode->SetParent(Node);
+	ANode->SetParent(OwnerNode);
 	Backend.push_front(ANode);
 }
 
 void CXMLChildrenList::AddLast(CXMLNode *ANode)
 {
-	ANode->SetParent(Node);
+	ANode->SetParent(OwnerNode);
 	Backend.push_back(ANode);
 }
 
 void CXMLChildrenList::AddAfter(const Iterator &AIterator, CXMLNode *ANode)
 {
-	ANode->SetParent(Node);
+	ANode->SetParent(OwnerNode);
 	StorageType::iterator iter = AIterator.Backend;
 	Backend.insert(++iter, ANode);
 }
 
 void CXMLChildrenList::AddBefore(const Iterator &AIterator, CXMLNode *ANode)
 {
-	ANode->SetParent(Node);
+	ANode->SetParent(OwnerNode);
 	Backend.insert(AIterator.Backend, ANode);
 }
 

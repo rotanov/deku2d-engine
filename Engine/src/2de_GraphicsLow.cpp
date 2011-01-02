@@ -344,7 +344,7 @@ bool CFont::Load()
 		Height[i] = (Boxes[i].Max.y - Boxes[i].Min.y);
 	}
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }
@@ -357,7 +357,7 @@ void CFont::Unload()
 	Texture = NULL;
 	// well, nothing else in font are allocated dynamically, so nothing to clear..
 
-	CResource::Unload();
+	CResource::BasicUnload();
 }
 
 bool CFont::SaveToFile(const string &AFilename)
@@ -580,38 +580,12 @@ CRenderManager::~CRenderManager()
 
 bool CRenderManager::DrawObjects()
 {
-// 	CRenderConfig TempRenderInfo;
-// 	TempRenderInfo.SetLayer(512);
-// 	TempRenderInfo.Color = COLOR_RED;
-// 	TempRenderInfo.doIgnoreCamera = true;
 	glLoadIdentity();	
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
 	Camera.Update(); // @todo: review camera
 
-// 	CGameObject *GameObject = CUpdateManager::Instance()->RootGameObject;
-// 	for(CGameObject::traverse_iterator_bfs i(*GameObject); i.Ok(); ++i)
-// 	{
-// 		CRenderableComponent *RenderComponent = dynamic_cast<CRenderableComponent *>(&(*i));
-// 		if (RenderComponent != NULL)
-// 		{
-// 			Transformator.PushTransformation(&RenderComponent->Configuration);
-// 			Renderer->PushModel(&RenderComponent->Configuration, RenderComponent->Model);
-// 			Transformator.PopTransformation();
-// 		}
-// 	}
-
 	TransfomationTraverse(CUpdateManager::Instance()->RootGameObject);
-/*
-	for (ManagerConstIterator i = Objects.begin(); i != Objects.end(); ++i)
-	{
-		data = *i;
-#if defined(_2DE_DEBUG_DRAW_BOXES)
-		DrawLinedBox(&TempRenderInfo, data->GetBox());
-#endif
-	}
-*/	// stands here to hold some logic
 
-	//////////////////////////////////////////////////////////////////////////
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
 	glTranslatef(0.375, 0.375, 0);
@@ -887,7 +861,7 @@ bool CTexture::Load()
 		Data = NULL;
 	}
 
-	CResource::Load();
+	CResource::BasicLoad();
 
 	return true;
 }
@@ -900,7 +874,7 @@ void CTexture::Unload()
 	if (glIsTexture(TexID))
 		glDeleteTextures(1, &TexID);
 
-	CResource::Unload();
+	CResource::BasicUnload();
 }
 
 bool CTexture::SaveToFile(const string &AFilename)
@@ -1044,7 +1018,8 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 		for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
 		{
 			Vertex = AModel->GetVertices()[i];
-			TempVector = (Vertex * Transformation.GetScaling());
+			//TempVector = (Vertex * Transformation.GetScaling());
+			TempVector = (Vertex * Transformation.GetScaling() * Transformation.GetScaling());
 			if (!Equal(Transformation.GetAngle(), 0.0f))
 				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 			TempVector += Transformation.GetTranslation();//Sender->Position;
@@ -1434,6 +1409,8 @@ void CModel::SetModelType(EModelType AModelType)
 
 CTexture* CModel::GetTexture() const
 {
+	if (Texture != NULL)
+		Texture->CheckLoad();
 	return Texture;
 }
 
@@ -1455,5 +1432,101 @@ EModelType CModel::GetModelType() const
 int CModel::GetVertexNumber() const
 {
 	return VerticesNumber;
+}
+
+void CModel::Unload()
+{
+	if (!Loaded)
+		return;
+	SAFE_DELETE_ARRAY(Vertices);
+	SAFE_DELETE_ARRAY(TexCoords);
+	ModelType = MODEL_TYPE_NOT_A_MODEL;
+	Texture = NULL;
+	CResource::BasicUnload();
+}
+
+bool CModel::Load()
+{
+	if (Loaded)
+		return true;
+	CXML XML;
+	if (Source == LOAD_SOURCE_FILE)
+	{
+		XML.LoadFromFile(Filename);
+	}
+	else if (Source == LOAD_SOURCE_MEMORY)
+	{
+		XML.LoadFromMemory(MemoryLoadData, MemoryLoadLength);
+	}
+	else
+	{
+		Log("ERROR", "Can't load prototype: no load source specified");
+		return false;
+	}
+
+	CXMLNode *XMLNode = XML.Root.First("Model");
+
+	if (XMLNode->IsErroneous() || !XMLNode->HasAttribute("Name") || !XMLNode->HasAttribute("ModelType"))
+	{
+		Log("ERROR", "Model named '%s' has invalid format", Name.c_str());
+		return false;
+	}
+
+	SetName(XMLNode->GetAttribute("Name"));
+
+	if (XMLNode->HasAttribute("Texture"))
+		Texture = CFactory::Instance()->Get<CTexture>(XMLNode->GetAttribute("Texture"));
+
+	string ModelTypeArgValue = XMLNode->GetAttribute("ModelType");
+	if (ModelTypeArgValue == "Points")
+		ModelType = MODEL_TYPE_POINTS;
+	else if (ModelTypeArgValue == "Lines")
+		ModelType = MODEL_TYPE_LINES;
+	else if (ModelTypeArgValue == "Triangles")
+		ModelType = MODEL_TYPE_TRIANGLES;
+	else
+		ModelType = MODEL_TYPE_NOT_A_MODEL;
+
+
+	XMLNode = XMLNode->Children.First("Vertices")->Children.First();
+	if (XMLNode->IsErroneous())
+		Log("Warning", "Model without vertices");
+	else if (ModelType != MODEL_TYPE_NOT_A_MODEL)
+	{
+		string vertices_text = XMLNode->GetValue();
+		istringstream iss(vertices_text);
+		vector<string> tokens;
+		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		Vertices = new Vector2[tokens.size() / 2];
+		VerticesNumber = tokens.size() / 2;
+		for(unsigned i = 0; i < tokens.size() / 2; i++)
+		{
+			Vertices[i].x = from_string<float>(tokens[i * 2 + 0]);
+			Vertices[i].y = from_string<float>(tokens[i * 2+ 1]);
+		}
+		XMLNode = XMLNode->GetParent()->GetParent();
+	}
+
+	if (Texture != NULL)
+	{
+		XMLNode = XMLNode->Children.First("TexCoords")->Children.First();
+		if (XMLNode->IsErroneous())
+			Log("Warning", "Texture present, but no tex coords found");
+		string texcoords_text = XMLNode->GetValue();
+		istringstream iss(texcoords_text);
+		vector<string> tokens;
+		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		TexCoords = new Vector2[tokens.size() / 2];
+		for(unsigned i = 0; i < tokens.size() / 2; i++)
+		{
+			TexCoords[i].x = from_string<float>(tokens[i * 2 + 0]);
+			TexCoords[i].y = from_string<float>(tokens[i * 2+ 1]);
+		}
+		XMLNode = XMLNode->GetParent()->GetParent();
+	}
+
+	CResource::BasicLoad();
+
+	return true;
 }
 

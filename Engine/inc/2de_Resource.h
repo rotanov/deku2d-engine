@@ -102,10 +102,12 @@ public:
 	void SetLoadSource(const string &AFilename);
 	void SetLoadSource(byte *AData, size_t ALength);
 
-	virtual bool Load();
-	virtual void Unload();
+	// Must be implemented in all descendants
+	// Load() should perform loading resource from either memory or file
+	// Unload() should free memory-heavy part of the resource
+	virtual bool Load() = 0;
+	virtual void Unload() = 0;
 
-	// make CSaveableResource
 	virtual bool SaveToFile(const string &AFilename)
 	{
 		throw std::logic_error("Unimplemented for this type of resource");
@@ -129,6 +131,17 @@ protected:
 	bool FirstTimeLoaded;
 	bool Persistent;
 
+	// These two must be called in descendants::Load/Unload after successful (un)loading.
+	// CALL IT OR DIE
+	bool BasicLoad();
+	void BasicUnload();
+
+};
+
+class CSaveableResource : public CResource
+{
+public:
+	virtual bool SaveToFile(const string &AFilename) = 0;
 };
 
 /**

@@ -71,7 +71,7 @@ void CResource::SetLoadSource(byte *AData, size_t ALength)
 	FirstTimeLoaded = false;
 }
 
-bool CResource::Load()
+bool CResource::BasicLoad()
 {
 	if (Loaded)
 		return true;
@@ -80,7 +80,7 @@ bool CResource::Load()
 	return (Loaded = FirstTimeLoaded = true);
 }
 
-void CResource::Unload()
+void CResource::BasicUnload()
 {
 	if (!Loaded)
 		return;
