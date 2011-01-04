@@ -478,107 +478,19 @@ public:
 	CTransformator Transformator;
 	~CRenderManager();
 	bool DrawObjects();
-//	void Print(const CText *Text, const string &Characters);
 
-	static CModel* CreateModelCircle(float Radius, EModelType AModelType = MODEL_TYPE_LINES, int Precision = 16)
-	{
-		Vector2 *Vertices = new Vector2 [Precision * 2];
-
-		for (int i = 0; i < Precision; i ++)
-		{
-			Vector2 P
-					(	
-						cos(PI * (float)i / ((float)Precision / 2.0f)),
-						sin(PI * (float)i / ((float)Precision / 2.0f))
-					);
-			Vertices[i * 2] = P * Radius;
-		}
-
-		for (int i = 0; i < Precision; i ++)
-			Vertices[i * 2 + 1] = Vertices[(i+1)%Precision * 2];
-
-		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, Precision * 2, Vertices);//CFactory::Instance()->New<CModel>("New circle cmodel");
-		CFactory::Instance()->Add(Result);
-		Result->DisableLoading();
-		
-		SAFE_DELETE_ARRAY(Vertices);
-		return Result;
-	}
-
+	static CModel* CreateModelCircle(float Radius, EModelType AModelType = MODEL_TYPE_LINES, int Precision = 16);
 	static CModel* CreateModelBox(float Width, float Height, 
 		EModelType AModelType = MODEL_TYPE_LINES, CTexture * ATexture = NULL,
-		const Vector2Array<4> &ATexCoords = V2_QUAD_BIN)
-	{
-		CModel *Result = NULL;
-		float wd2 = Width * 0.5f, hd2 = Height * 0.5f;
-		switch(AModelType)
-		{
-		case MODEL_TYPE_LINES:
-			{
-				Vector2 Vertices[8];
-				Vertices[0] = Vector2(-wd2, -hd2);
-				Vertices[1] = Vector2( wd2, -hd2);
-
-				Vertices[2] = Vector2( wd2, -hd2);
-				Vertices[3] = Vector2( wd2,  hd2);
-
-				Vertices[4] = Vector2( wd2,  hd2);
-				Vertices[5] = Vector2(-wd2,  hd2);
-
-				Vertices[6] = Vector2(-wd2,  hd2);
-				Vertices[7] = Vector2(-wd2, -hd2);
-				Result = new CModel(AModelType, 0, 8, Vertices);
-				CFactory::Instance()->Add(Result);
-				Result->DisableLoading();
-			}
-			break;
-		case MODEL_TYPE_TRIANGLES:
-			{
-				Vector2 Vertices[6];
-				Vector2 TexCoords[6];
-				Vertices[0] = Vector2(-wd2, -hd2);
-				Vertices[1] = Vector2( wd2, -hd2);
-				Vertices[2] = Vector2( wd2, hd2);
-
-				Vertices[3] = Vector2(-wd2, -hd2);
-				Vertices[4] = Vector2( wd2,  hd2);
-				Vertices[5] = Vector2(-wd2,  hd2);
-
-				TexCoords[0] = ATexCoords[0];
-				TexCoords[1] = ATexCoords[1];
-				TexCoords[2] = ATexCoords[2];
-
-				TexCoords[3] = ATexCoords[0];
-				TexCoords[4] = ATexCoords[2];
-				TexCoords[5] = ATexCoords[3];
-
-				Result = new CModel(AModelType, ATexture, 6, Vertices, TexCoords);
-				CFactory::Instance()->Add(Result);
-				Result->DisableLoading();
-			}
-			break;
-		default:
-			break;
-		}
-		return Result;
-	}
-
-	static CModel* CreateModelLine(const Vector2 &v0, const Vector2 &v1)
-	{
-		Vector2 Vertices[2];
-		Vertices[0] = v0;
-		Vertices[1] = v1;
-		CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
-		CFactory::Instance()->Add(Result);
-		Result->DisableLoading();
-		return Result;
-	}
-
+		const Vector2Array<4> &ATexCoords = V2_QUAD_BIN);
+	static CModel* CreateModelLine(const Vector2 &v0, const Vector2 &v1);
 	static CModel* CreateModelText(const CText *AText);
 
+	static EModelType SelectModelTypeByStringIdentifier(const string &Identifier);
+	static EBlendingMode SelectBlendingModeByIdentifier(const string &Identifier);
+	
 	void SetSwapInterval(int interval = 1);
 };
-
 
 /**
 *	CGLWindow Provides functionality for creating window and holding info about window.

@@ -589,6 +589,7 @@ bool CRenderManager::DrawObjects()
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
 	glTranslatef(0.375, 0.375, 0);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Comment left here for debug purposes
 	Renderer->Render();
 	Renderer->Clear();
 	return true;
@@ -712,6 +713,161 @@ void CRenderManager::SetSwapInterval(int interval /*= 1*/)
 	}
 #endif
 	Log("ERROR", "swap_control is not supported on your computer");
+}
+
+CModel* CRenderManager::CreateModelCircle( float Radius, EModelType AModelType /*= MODEL_TYPE_LINES*/, int Precision /*= 16*/ )
+{
+	Vector2 *Vertices = NULL;
+	unsigned NumberOfVertices = 0;
+	switch (AModelType)
+	{
+	case MODEL_TYPE_LINES:
+		NumberOfVertices = Precision * 2;
+		Vertices = new Vector2 [NumberOfVertices];
+		for (int i = 0; i < Precision; i++)
+		{
+			Vector2 P
+				(	
+					cos(PI * (float)i / ((float)Precision / 2.0f)),
+					sin(PI * (float)i / ((float)Precision / 2.0f))
+				);
+			Vertices[i * 2] = P * Radius;
+		}
+
+		for (int i = 0; i < Precision; i ++)
+			Vertices[i * 2 + 1] = Vertices[(i + 1) % Precision * 2];
+		break;
+	case MODEL_TYPE_TRIANGLES:
+		NumberOfVertices = Precision * 3;
+		Vertices = new Vector2 [NumberOfVertices];
+		for (int i = 0; i < Precision; i++)
+		{
+			Vector2 P
+				(	
+				cos(PI * (float)i / ((float)Precision / 2.0f)),
+				sin(PI * (float)i / ((float)Precision / 2.0f))
+				);
+			Vertices[i * 3] = P * Radius;
+		}
+
+		for (int i = 0; i < Precision; i ++)
+		{
+			Vertices[i * 3 + 2] = V2_ZERO;
+			Vertices[i * 3 + 1] = Vertices[(i + 1) % Precision * 3];
+		}
+		break;
+	case MODEL_TYPE_POINTS:
+		NumberOfVertices = Precision;
+		Vertices = new Vector2 [NumberOfVertices];
+		for (int i = 0; i < Precision; i++)
+		{
+			Vector2 P
+				(	
+				cos(PI * (float)i / ((float)Precision / 2.0f)),
+				sin(PI * (float)i / ((float)Precision / 2.0f))
+				);
+			Vertices[i] = P * Radius;
+		}
+		break;
+	default:
+		// write something to log
+		return NULL;
+	}
+
+	CModel *Result = new CModel(AModelType, 0, NumberOfVertices, Vertices);
+	CFactory::Instance()->Add(Result);
+	Result->DisableLoading();
+	SAFE_DELETE_ARRAY(Vertices);
+	return Result;
+}
+
+CModel* CRenderManager::CreateModelBox( float Width, float Height, EModelType AModelType /*= MODEL_TYPE_LINES*/, CTexture * ATexture /*= NULL*/, const Vector2Array<4> &ATexCoords /*= V2_QUAD_BIN*/ )
+{
+	CModel *Result = NULL;
+	float wd2 = Width * 0.5f, hd2 = Height * 0.5f;
+	switch(AModelType)
+	{
+	case MODEL_TYPE_LINES:
+		{
+			Vector2 Vertices[8];
+			Vertices[0] = Vector2(-wd2, -hd2);
+			Vertices[1] = Vector2( wd2, -hd2);
+
+			Vertices[2] = Vector2( wd2, -hd2);
+			Vertices[3] = Vector2( wd2,  hd2);
+
+			Vertices[4] = Vector2( wd2,  hd2);
+			Vertices[5] = Vector2(-wd2,  hd2);
+
+			Vertices[6] = Vector2(-wd2,  hd2);
+			Vertices[7] = Vector2(-wd2, -hd2);
+			Result = new CModel(AModelType, 0, 8, Vertices);
+			CFactory::Instance()->Add(Result);
+			Result->DisableLoading();
+		}
+		break;
+	case MODEL_TYPE_TRIANGLES:
+		{
+			Vector2 Vertices[6];
+			Vector2 TexCoords[6];
+			Vertices[0] = Vector2(-wd2, -hd2);
+			Vertices[1] = Vector2( wd2, -hd2);
+			Vertices[2] = Vector2( wd2, hd2);
+
+			Vertices[3] = Vector2(-wd2, -hd2);
+			Vertices[4] = Vector2( wd2,  hd2);
+			Vertices[5] = Vector2(-wd2,  hd2);
+
+			TexCoords[0] = ATexCoords[0];
+			TexCoords[1] = ATexCoords[1];
+			TexCoords[2] = ATexCoords[2];
+
+			TexCoords[3] = ATexCoords[0];
+			TexCoords[4] = ATexCoords[2];
+			TexCoords[5] = ATexCoords[3];
+
+			Result = new CModel(AModelType, ATexture, 6, Vertices, TexCoords);
+			CFactory::Instance()->Add(Result);
+			Result->DisableLoading();
+		}
+		break;
+	default:
+		break;
+	}
+	return Result;
+}
+
+CModel* CRenderManager::CreateModelLine( const Vector2 &v0, const Vector2 &v1 )
+{
+	Vector2 Vertices[2];
+	Vertices[0] = v0;
+	Vertices[1] = v1;
+	CModel *Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
+	CFactory::Instance()->Add(Result);
+	Result->DisableLoading();
+	return Result;
+}
+
+EModelType CRenderManager::SelectModelTypeByStringIdentifier( const string &Identifier )
+{
+	if (Identifier == "Points")
+		return MODEL_TYPE_POINTS;
+	if (Identifier == "Lines")
+		return MODEL_TYPE_LINES;
+	if (Identifier == "Triangles")
+		return MODEL_TYPE_TRIANGLES;
+	return MODEL_TYPE_NOT_A_MODEL;
+}
+
+EBlendingMode CRenderManager::SelectBlendingModeByIdentifier( const string &Identifier )
+{
+	if (Identifier == "Opaque")
+		return BLEND_MODE_OPAQUE;
+	if (Identifier == "Transparent")
+		return BLEND_MODE_TRANSPARENT;
+	if (Identifier == "Additive")
+		return BLEND_MODE_ADDITIVE;
+	return BLEND_MODE_OPAQUE;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1473,15 +1629,7 @@ bool CModel::Load()
 		Texture = CFactory::Instance()->Get<CTexture>(XMLNode->GetAttribute("Texture"));
 
 	string ModelTypeArgValue = XMLNode->GetAttribute("ModelType");
-	if (ModelTypeArgValue == "Points")
-		ModelType = MODEL_TYPE_POINTS;
-	else if (ModelTypeArgValue == "Lines")
-		ModelType = MODEL_TYPE_LINES;
-	else if (ModelTypeArgValue == "Triangles")
-		ModelType = MODEL_TYPE_TRIANGLES;
-	else
-		ModelType = MODEL_TYPE_NOT_A_MODEL;
-
+	ModelType = CRenderManager::SelectModelTypeByStringIdentifier(ModelTypeArgValue);
 
 	XMLNode = XMLNode->Children.First("Vertices")->Children.First();
 	if (XMLNode->IsErroneous())

@@ -367,12 +367,90 @@ void CRenderableComponent::SetVisibility(bool AVisible)
 	Visible = AVisible;
 }
 
-void CRenderableComponent::Deserialize( CXMLNode *AXML )
+void CRenderableComponent::Deserialize(CXMLNode *AXML)
 {
 	if (AXML->HasAttribute("Model"))
 	{
-		SetModel(CFactory::Instance()->Get<CModel>(AXML->GetAttribute("Model")));
+		string ModelName = AXML->GetAttribute("Model");
+		if (ModelName == "Circle")
+		{
+			float Radius = 64.0f; // DEFAULT_CIRCLE_RADIUS
+			if (AXML->HasAttribute("Radius"))
+				Radius = from_string<float>(AXML->GetAttribute("Radius"));
+			unsigned Precision = 16; // DEF
+			if (AXML->HasAttribute("Precision"))
+				Precision = from_string<unsigned>(AXML->GetAttribute("Precision"));
+			EModelType ModelType = MODEL_TYPE_LINES;
+			if (AXML->HasAttribute("ModelType"))
+				ModelType = CRenderManager::SelectModelTypeByStringIdentifier(AXML->GetAttribute("ModelType"));
+			SetModel(CRenderManager::Instance()->CreateModelCircle(Radius, ModelType, Precision));
+		}
+		else if (ModelName == "Box")
+		{
+			float Width = 32.0f, Height = 32.0f;
+			if (AXML->HasAttribute("Width"))
+				Width = from_string<float>(AXML->GetAttribute("Width"));
+			if (AXML->HasAttribute("Height"))
+				Height = from_string<float>(AXML->GetAttribute("Height"));
+			CTexture *Texture = NULL;
+			if (AXML->HasAttribute("Texture"))
+				Texture = CFactory::Instance()->Get<CTexture>(AXML->GetAttribute("Texture"));
+			Vector2Array<4> TexCoords;
+			if (Texture != NULL && AXML->HasAttribute("TexCoords"))
+			{
+				istringstream iss(AXML->GetAttribute("TexCoords"));
+				vector<string> tokens;
+				copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+				for(unsigned i = 0; i < 4; i++)
+					TexCoords[i] = from_string<float>(tokens[i]);
+			}
+			if (Texture != NULL && !AXML->HasAttribute("TexCoords"))
+				TexCoords = V2_QUAD_BIN;
+
+			EModelType ModelType = MODEL_TYPE_LINES;
+			if (AXML->HasAttribute("ModelType"))
+				ModelType = CRenderManager::SelectModelTypeByStringIdentifier(AXML->GetAttribute("ModelType"));
+
+			SetModel(CRenderManager::Instance()->CreateModelBox(Width, Height, ModelType, Texture, TexCoords));
+			
+		}
+		else if (ModelName == "Line")
+		{
+			Vector2 p0 = V2_ZERO, p1 = V2_ZERO;
+			if (AXML->HasAttribute("Points"))
+			{
+				istringstream iss(AXML->GetAttribute("Points"));
+				vector<string> tokens;
+				copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+				p0.x = from_string<float>(tokens[0]);
+				p0.y = from_string<float>(tokens[1]);
+				p1.x = from_string<float>(tokens[2]);
+				p1.y = from_string<float>(tokens[3]);
+			}
+			SetModel(CRenderManager::Instance()->CreateModelLine(p0, p1));
+		}
+		else
+			SetModel(CFactory::Instance()->Get<CModel>(ModelName));
 	}
+
+	if (AXML->HasAttribute("Visible"))
+		SetVisibility(from_string<bool>(AXML->GetAttribute("Visible")));
+
+	if (AXML->HasAttribute("Color"))
+	{
+		RGBAf AColor = COLOR_WHITE;
+		istringstream iss(AXML->GetAttribute("Color"));
+		vector<string> tokens;
+		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		AColor.r = from_string<float>(tokens[0]);
+		AColor.g = from_string<float>(tokens[1]);
+		AColor.b = from_string<float>(tokens[2]);
+		AColor.a = from_string<float>(tokens[3]);
+		SetColor(AColor);
+	}
+
+	if (AXML->HasAttribute("BlendingMode"))
+		SetBlendingMode(CRenderManager::SelectBlendingModeByIdentifier(AXML->GetAttribute("BlendingMode")));
 }
 
 

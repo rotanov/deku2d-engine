@@ -41,7 +41,7 @@ function RotateScriptable:OnCreate()
 end
 
 function RotateScriptable:OnEveryFrame()
-	SetAngle(GetObject("Magic square"), GetAngle(GetObject("Magic square")) + 1000.0 * GetDeltaTime())
-	SetAngle(GetParent(GetObject("Mouse cursor")), GetAngle(GetParent(GetObject("Mouse cursor"))) + 100.0 * GetDeltaTime())
-	SetAngle(GetObject("Magic circle"), GetAngle(GetObject("Magic circle")) + 100.0 * GetDeltaTime())
+	SetAngle(GetObject("Magic square"), GetAngle(GetObject("Magic square")) + 20.0 * GetDeltaTime())
+	SetAngle(GetParent(GetObject("Mouse cursor")), GetAngle(GetParent(GetObject("Mouse cursor"))) + 10.0 * GetDeltaTime())
+	SetAngle(GetObject("Magic circle"), GetAngle(GetObject("Magic circle")) + 10.0 * GetDeltaTime())
 end
