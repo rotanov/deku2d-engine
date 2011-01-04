@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Prototype Name="B" RecursionLimit="1">
+	<PlaceableComponent PositionX="20" PositionY="20">
+		<RenderableComponent Model="Circle" Width="10" Height="10" />
+		<A />
+	</PlaceableComponent>
+	<PlaceableComponent PositionX="20" PositionY="200">
+		<RenderableComponent Model="Circle" Width="10" Height="10" />
+		<A />
+	</PlaceableComponent>
+</Prototype>

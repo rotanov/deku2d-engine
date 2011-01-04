@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Prototype Name="A" RecursionLimit="1">
+	<PlaceableComponent PositionX="20" PositionY="20">
+		<RenderableComponent Model="Box" Width="10" Height="10" />
+		<B />
+	</PlaceableComponent>
+</Prototype>

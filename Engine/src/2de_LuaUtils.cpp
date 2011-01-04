@@ -59,7 +59,7 @@ namespace LuaAPI
 		if (!obj)
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetParent API call");
 
-		lua_pushlightuserdata(L, obj->Parent);
+		lua_pushlightuserdata(L, obj->GetParent());
 		return 1;
 	}
 
@@ -379,7 +379,7 @@ namespace LuaAPI
 		return 1;
 	}
 
-	void DebugPrintNode(CGameObject *GO)
+	/*void DebugPrintNode(CGameObject *GO)
 	{
 		static int nesting = 0;
 		string out;
@@ -397,11 +397,47 @@ namespace LuaAPI
 			DebugPrintNode(*it);
 		}
 		nesting--;
+	}*/
+	void DebugPrintNode(CGameObject *GO, map<int, bool> *LastChild)
+	{
+		static int nesting = 0;
+		string out;
+
+		for (int i = 0; i < nesting; i++)
+		{
+			if ((*LastChild)[i])
+				out += "   ";
+			else
+				out += "|  ";
+		}
+
+		(*LastChild)[nesting + 1] = false;
+
+		if ((*LastChild)[nesting])
+			out += "`- ";
+		else
+			out += "|- ";
+
+		out += GO->GetName();
+
+		Log("INFO", out.c_str());
+
+		nesting++;
+		for (vector<CGameObject *>::iterator it = GO->Children.begin(); it != GO->Children.end(); ++it)
+		{
+			if (it == --GO->Children.end())
+				(*LastChild)[nesting] = true;
+			DebugPrintNode(*it, LastChild);
+		}
+		nesting--;
 	}
 
 	int DebugPrintComponentTree(lua_State *L)
 	{
-		DebugPrintNode(CUpdateManager::Instance()->RootGameObject);
+		map<int, bool> *LastChild = new map<int, bool>;
+		(*LastChild)[0] = true;
+		DebugPrintNode(CUpdateManager::Instance()->RootGameObject, LastChild);
+		delete LastChild;
 		return 0;
 	}
 

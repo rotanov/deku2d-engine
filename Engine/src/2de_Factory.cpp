@@ -25,7 +25,7 @@ CFactory::~CFactory()
 * CFactory::CreateByName - creates an object of AClassName class with AName name.
 */
 
-CObject* CFactory::CreateByName(const string &AClassName, const string &AName, set<string> *UsedPrototypes /*= NULL*/)
+CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes /*= NULL*/)
 {
 	ClassesContainer::iterator it = Classes.find(AClassName);
 	if (it != Classes.end())
@@ -49,14 +49,22 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, s
 
 	CGameObject *result = CFactory::Instance()->New<CGameObject>(AName);
 
-	set<string> *FirstUsedPrototypes = NULL;
+	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
 
 	if (!UsedPrototypes)
 	{
-		FirstUsedPrototypes = new set<string>;
+		FirstUsedPrototypes = new UsedPrototypesContainer;
 		UsedPrototypes = FirstUsedPrototypes;
 	}
-	UsedPrototypes->insert(AClassName);
+
+	int ProtoRecursionLimit = -1;
+	if (xml->HasAttribute("RecursionLimit"))
+	{
+		ProtoRecursionLimit = from_string<int>(xml->GetAttribute("RecursionLimit"));
+	}
+
+	if (!UsedPrototypes->count(AClassName))
+		(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
 
 	TraversePrototypeNode(xml, result, UsedPrototypes);
 
@@ -155,7 +163,7 @@ void CFactory::AddClass(const string &AClassName, TNewFunction ANewFunctionPoint
 	Classes[AClassName] = CClassDescription(ANewFunctionPointer, AIsComponent);
 }
 
-void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<string> *UsedPrototypes)
+void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes)
 {
 	CGameObject *child;
 	string NodeName;
@@ -179,8 +187,13 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<
 		{
 			if (UsedPrototypes->count(NodeName) != 0)
 			{
-				Log("ERROR", "Recursive reference in prototype");
-				continue;
+				if ((*UsedPrototypes)[NodeName] < 1)
+				{
+					if ((*UsedPrototypes)[NodeName] <= -1)
+						Log("ERROR", "Recursive reference in prototype");
+					continue;
+				}
+				--(*UsedPrototypes)[NodeName];
 			}
 	
 		}
@@ -198,8 +211,6 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<
 
 		AObject->Attach(child);
 
-		UsedPrototypes->insert(NodeName);
-
 		//// i don't see any point in forbidding it..
 		//	children correctly attach themselves to the root of prototype reference..
 		//	more than that, it's may be useful for extending prototype references in different places..
@@ -214,6 +225,9 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<
 			//Log("ERROR", "Prototype references can't have children");
 
 		//}
+
+		if (UsedPrototypes->count(NodeName) != 0)
+			++(*UsedPrototypes)[NodeName];
 	}
 }
 

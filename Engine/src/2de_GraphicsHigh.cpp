@@ -267,7 +267,7 @@ void CNewSuperParticleSystem::Update(float dt)
 		if (Equal(Particles[i].Age, 0.0f))
 		{
 			//_swap(i, ParticlesActive-1);
-			Detach(&Children[i]);
+			Detach(Children[i]);
 			ParticlesActive--;
 			i--;
 			continue;

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Prototype Name="SandboxProto">
 	<PlaceableComponent Name="TextPos" PositionX="150" PositionY="250">
-		<Text Name="TestText" Text="Deku2D engine rules the fucking world!" />
+		<Text Name="TestText" Text="Deku2D engine rules the fucking world!" Color="0 1 0 1" />
 		<ScriptableComponent Name="TextMovementScriptable" Script="SandboxScript" />
 		<TimerComponent Name="TextChangeTimer" Enabled="true" Interval="1" />
 	</PlaceableComponent>

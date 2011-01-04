@@ -13,8 +13,7 @@
 
 class CGameObject : public CObject
 {
-private:
-
+public:	
 	class traverse_iterator
 	{
 	protected:
@@ -28,26 +27,11 @@ private:
 		CGameObject& operator *();
 		const CGameObject& operator *() const;
 	};
-	
-	CAbstractScene *Scene;
-
-public:	
-	bool Active;
-// 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
-// 	void SetDead();
-//	virtual void Update(float dt) = 0;
-//	void PutIntoScene(CAbstractScene *AScene);
-// 	CAbstractScene* GetScene() const;
-// 	CAbstractScene *Scene;
-	bool Dead;	
-
-	CGameObject *Parent;
-	std::vector<CGameObject*> Children;
 
 	class traverse_iterator_bfs : public traverse_iterator
 	{
 	private:
-		std::queue<CGameObject*> Queue;
+		queue<CGameObject*> Queue;
 		unsigned int Index; // Index of current object in it's parent Children
 
 	public:
@@ -79,23 +63,41 @@ public:
 	virtual ~CGameObject();
 
 	void Attach(CGameObject* AGameObject);
+	void Detach(CGameObject* AGameObject);
 
-	void SetParent(CGameObject* AGameObject);
-
-	// TODO: make Detach usable, especially from the outer world..
-	template<typename TypeIterator>
+	/*template<typename TypeIterator>
 	void Detach(const TypeIterator &Iterator)
 	{
 		(*Iterator)->Parent = NULL;
 		std::swap(*Iterator, *(--Children.end()));
 		Children.pop_back();
-	}
+	}*/
+
+	CGameObject* GetParent() const;
+	void SetParent(CGameObject* AGameObject);
 
 	void PutIntoScene(CAbstractScene *AScene);
 	CAbstractScene* GetScene() const;
 	virtual void JustDoIt();
 
 	virtual void Deserialize(CXMLNode *AXML);
+
+	bool Active;
+	bool Dead;	
+
+// 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
+// 	void SetDead();
+//	virtual void Update(float dt) = 0;
+//	void PutIntoScene(CAbstractScene *AScene);
+// 	CAbstractScene* GetScene() const;
+// 	CAbstractScene *Scene;
+
+	vector<CGameObject *> Children;
+
+private:
+	CGameObject *Parent;
+	CAbstractScene *Scene;
+
 };
 
 // SUDDENLY NEW COMPONENT APPEARS

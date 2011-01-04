@@ -24,6 +24,7 @@ public:
 		bool IsComponent;
 	};
 	typedef map<string, CClassDescription> ClassesContainer;
+	typedef map<string, int> UsedPrototypesContainer;
 
 	template<typename T>
 	T* New(const string &AName);
@@ -31,7 +32,7 @@ public:
 	template<typename T>
 	T* New();
 
-	CObject* CreateByName(const string &AClassName, const string &AName, set<string> *UsedPrototypes = NULL);
+	CObject* CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes = NULL);
 
 	template<typename T>
 	void Add(T *AObject, const string &AName = "");
@@ -56,7 +57,7 @@ protected:
 
 	void AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent = true);
 
-	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, set<string> *UsedPrototypes);
+	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes);
 
 	template<typename T>
 	CObject *InternalNew(const string &AName);

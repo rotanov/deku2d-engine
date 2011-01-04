@@ -322,7 +322,7 @@ bool CEngine::ProcessEvents()
 			{
 				// Здесь можно раздавать позицию мыши всем попросившим.
 				MousePosition = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
-				CPlaceableComponent *CursorPlacing = dynamic_cast<CPlaceableComponent*>(Cursor->Parent);
+				CPlaceableComponent *CursorPlacing = dynamic_cast<CPlaceableComponent*>(Cursor->GetParent());
 				if (CursorPlacing != NULL)
 					CursorPlacing->SetPosition(MousePosition);
 				//SDL_Delay(2);

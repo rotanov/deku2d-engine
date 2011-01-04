@@ -77,18 +77,6 @@ bool CCustomStateHandler::OnInitialize()
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_Vector2"));
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_CBox"));
 
-	CRenderableComponent *PlayerOne = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
-	CRenderableComponent *PlayerTwo = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT));
-	CRenderableComponent *Ball = new CRenderableComponent(CRenderManager::CreateModelBox(PONG_BALL_SIZE, PONG_BALL_SIZE));
-
-	CTimerComponent *MemoryUsageUpdateTimer = new CTimerComponent(3);
-	MemoryUsageUpdateTimer->SetEnabled(true);
-
-	CFactory::Instance()->Add(MemoryUsageUpdateTimer, "MemoryUsageUpdateTimer");
-	CFactory::Instance()->Add(PlayerOne, "PlayerOne");
-	CFactory::Instance()->Add(PlayerTwo, "PlayerTwo");
-	CFactory::Instance()->Add(Ball, "Ball");
-
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 
 	return true;

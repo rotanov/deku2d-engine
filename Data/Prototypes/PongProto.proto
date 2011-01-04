@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<Prototype Name="PongProto">
+	<TimerComponent Name="MemoryUsageUpdateTimer" Enabled="true" Interval="3" />
+	<PlaceableComponent Name="PlayerOnePlace">
+		<RenderableComponent Name="PlayerOne" Model="Box" Width="24" Height="96">
+			<ScriptableComponent Name="PlayerOneScriptable" Script="PongPlayers" />
+		</RenderableComponent>
+	</PlaceableComponent>
+	<PlaceableComponent Name="PlayerTwoPlace">
+		<RenderableComponent Name="PlayerTwo" Model="Box" Width="24" Height="96">
+			<ScriptableComponent Name="PlayerTwoScriptable" Script="PongPlayers" />
+		</RenderableComponent>
+	</PlaceableComponent>
+	<PlaceableComponent Name="BallPlace">
+		<RenderableComponent Name="Ball" Model="Box" Width="24" Height="24">
+			<ScriptableComponent Name="BallScriptable" Script="BallScript" />
+		</RenderableComponent>
+	</PlaceableComponent>
+	<PlaceableComponent Name="PlayerOneScoreTextPlace">
+		<Text Name="PlayerOneScoreText" Text="0" Font="hge" />
+	</PlaceableComponent>
+	<PlaceableComponent Name="PlayerTwoScoreTextPlace">
+		<Text Name="PlayerTwoScoreText" Text="0" Font="hge" />
+	</PlaceableComponent>
+	<ScriptableComponent Name="PongGame" Script="PongGameScript" />
+</Prototype>

@@ -105,13 +105,18 @@ CGameObject::~CGameObject()
 
 void CGameObject::Attach(CGameObject* AGameObject)
 {
-	assert(AGameObject != this);
-	assert(AGameObject != NULL);
-	if (AGameObject == this)
+	if (!AGameObject)
 	{
-		//log("Warning", "Recursive dependency in scene graph");
+		Log("ERROR", "NULL pointer passed to CGameObject::Attach");
 		return;
 	}
+
+	if (AGameObject == this)
+	{
+		Log("ERROR", "Can't attach object '%s' to itself", GetName().c_str());
+		return;
+	}
+
 	Children.push_back(AGameObject);
 	AGameObject->SetParent(this);
 
@@ -120,27 +125,57 @@ void CGameObject::Attach(CGameObject* AGameObject)
 	CEventManager::Instance()->TriggerEvent(AttachedEvent);
 }
 
-void CGameObject::SetParent(CGameObject* AGameObject)
+void CGameObject::Detach(CGameObject* AGameObject)
 {
-	assert(AGameObject != this);
-	if (AGameObject == this)
+	if (!AGameObject)
 	{
-		//log("Warning", "Recursive dependency in scene graph");
+		Log("ERROR", "NULL pointer passed to CGameObject::Detach");
 		return;
 	}
-	if (Parent != NULL)
+
+	vector<CGameObject *>::iterator it = find(Children.begin(), Children.end(), AGameObject);
+	if (it == Children.end())
 	{
-		vector<CGameObject *>::iterator it = std::find(Parent->Children.begin(), Parent->Children.end(), this);
-		Parent->Detach(it);
-	}
-	Parent = AGameObject;
-	if (Parent == NULL)
+		Log("ERROR", "Can't detach: object '%s' is not attached to object '%s'", AGameObject->GetName().c_str(), GetName().c_str());
 		return;
-	if (std::find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
-		Parent->Children.push_back(this);
+	}
+
+	Children.erase(it);
+	AGameObject->Parent = NULL;
+
+	CEvent *DetachedEvent = new CEvent("Detached", this);
+	DetachedEvent->SetData("Name", AGameObject->GetName());
+	CEventManager::Instance()->TriggerEvent(DetachedEvent);
 }
 
-void CGameObject::PutIntoScene( CAbstractScene *AScene )
+CGameObject* CGameObject::GetParent() const
+{
+	return Parent;
+}
+
+void CGameObject::SetParent(CGameObject* AGameObject)
+{
+	if (AGameObject == this)
+	{
+		Log("ERROR", "Object '%s' can't be parent of itself", GetName().c_str());
+		return;
+	}
+
+	if (Parent != NULL)
+	{
+		Parent->Detach(this);
+	}
+
+	Parent = AGameObject;
+
+	if (Parent != NULL)
+	{
+		if (find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
+			Parent->Children.push_back(this);
+	}
+}
+
+void CGameObject::PutIntoScene(CAbstractScene *AScene)
 {
 	assert(AScene != NULL);
 	if (Scene != NULL)
@@ -442,11 +477,18 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 		istringstream iss(AXML->GetAttribute("Color"));
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-		AColor.r = from_string<float>(tokens[0]);
-		AColor.g = from_string<float>(tokens[1]);
-		AColor.b = from_string<float>(tokens[2]);
-		AColor.a = from_string<float>(tokens[3]);
-		SetColor(AColor);
+		if (tokens.size() != 4)
+		{
+			Log("WARNING", "Atribute 'Color' has invalid format");
+		}
+		else
+		{
+			AColor.r = from_string<float>(tokens[0]);
+			AColor.g = from_string<float>(tokens[1]);
+			AColor.b = from_string<float>(tokens[2]);
+			AColor.a = from_string<float>(tokens[3]);
+			SetColor(AColor);
+		}
 	}
 
 	if (AXML->HasAttribute("BlendingMode"))
@@ -550,6 +592,8 @@ unsigned int CText::Length() const
 
 void CText::Deserialize(CXMLNode *AXML)
 {
+	CRenderableComponent::Deserialize(AXML);
+
 	if (AXML->HasAttribute("Text"))
 	{
 		SetText(AXML->GetAttribute("Text"));
