@@ -1640,6 +1640,11 @@ bool CModel::Load()
 		istringstream iss(vertices_text);
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0))
+		{
+			Log("WARNING", "Model verticies count uneven.");
+			return false;
+		}
 		Vertices = new Vector2[tokens.size() / 2];
 		VerticesNumber = tokens.size() / 2;
 		for(unsigned i = 0; i < tokens.size() / 2; i++)
@@ -1659,6 +1664,11 @@ bool CModel::Load()
 		istringstream iss(texcoords_text);
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0) || tokens.size() != VerticesNumber)
+		{
+			Log("WARNING", "Model verticies count uneven.");
+			return false;
+		}
 		TexCoords = new Vector2[tokens.size() / 2];
 		for(unsigned i = 0; i < tokens.size() / 2; i++)
 		{

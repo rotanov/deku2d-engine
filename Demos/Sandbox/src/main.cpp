@@ -14,8 +14,8 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	//CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
-	//CSceneManager::Instance()->SetCurrentScene(NewScene);
+	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
+	CSceneManager::Instance()->SetCurrentScene(NewScene);
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 	return true;
 }

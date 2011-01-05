@@ -4,6 +4,7 @@ function ParentRecolorer:OnCreate()
 	self.Test = 0
 	SubscribeToEvent("Attached", self.object)
 	SubscribeToEvent("KeyDown", self.object)
+	SubscribeToEvent("EveryFrame", self.object)
 end
 
 function ParentRecolorer:OnAttached(event)
@@ -17,4 +18,8 @@ end
 
 function ParentRecolorer:OnKeyDown()
 	Log("TEST", GetName(self.object) .. " " .. self.Test)
+end
+
+function RotateScriptable:OnEveryFrame()
+	SetAngle(GetParent(GetParent(self.object)), GetAngle(GetParent(GetParent(self.object))) + 200.0 * GetDeltaTime())
 end

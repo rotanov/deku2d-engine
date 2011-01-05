@@ -310,11 +310,22 @@ void CPlaceableComponent::Deserialize(CXMLNode *AXML)
 	if (AXML->HasAttribute("Angle"))
 		SetAngle(from_string<float>(AXML->GetAttribute("Angle")));
 
-	if (AXML->HasAttribute("PositionX"))
-		SetPosition(Vector2(from_string<float>(AXML->GetAttribute("PositionX")), GetPosition().y));
+	if (AXML->HasAttribute("Position"))
+	{
+		Vector2 APosition = V2_ZERO;
+		istringstream iss(AXML->GetAttribute("Position"));
+		vector<string> tokens;
+		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		if (tokens.size() == 2)
+		{
+			APosition.x = from_string<float>(tokens[0]);
+			APosition.y = from_string<float>(tokens[1]);
+		}
+		else
+			Log("Warning", "Incorrect position in prototype.");
 
-	if (AXML->HasAttribute("PositionY"))
-		SetPosition(Vector2(GetPosition().x, from_string<float>(AXML->GetAttribute("PositionY"))));
+		SetPosition(APosition);
+	}
 
 	if (AXML->HasAttribute("Scaling"))
 		SetScaling(from_string<float>(AXML->GetAttribute("Scaling")));
@@ -322,7 +333,7 @@ void CPlaceableComponent::Deserialize(CXMLNode *AXML)
 	if (AXML->HasAttribute("Layer"))
 		SetLayer(from_string<int>(AXML->GetAttribute("Layer")));
 
-	// TODO: add more..
+	// TODO: add more..	// Later
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -436,8 +447,11 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 				istringstream iss(AXML->GetAttribute("TexCoords"));
 				vector<string> tokens;
 				copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-				for(unsigned i = 0; i < 4; i++)
-					TexCoords[i] = from_string<float>(tokens[i]);
+				if (tokens.size() == 4)
+					for(unsigned i = 0; i < 4; i++)
+						TexCoords[i] = from_string<float>(tokens[i]);
+				else
+					Log("Warning", "Incorrect TexCoords format");
 			}
 			if (Texture != NULL && !AXML->HasAttribute("TexCoords"))
 				TexCoords = V2_QUAD_BIN;
@@ -457,10 +471,15 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 				istringstream iss(AXML->GetAttribute("Points"));
 				vector<string> tokens;
 				copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-				p0.x = from_string<float>(tokens[0]);
-				p0.y = from_string<float>(tokens[1]);
-				p1.x = from_string<float>(tokens[2]);
-				p1.y = from_string<float>(tokens[3]);
+				if (tokens.size() == 4)
+				{
+					p0.x = from_string<float>(tokens[0]);
+					p0.y = from_string<float>(tokens[1]);
+					p1.x = from_string<float>(tokens[2]);
+					p1.y = from_string<float>(tokens[3]);
+				}
+				else
+					Log("Warning", "Incorrect Points format");
 			}
 			SetModel(CRenderManager::Instance()->CreateModelLine(p0, p1));
 		}
@@ -477,18 +496,16 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 		istringstream iss(AXML->GetAttribute("Color"));
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-		if (tokens.size() != 4)
-		{
-			Log("WARNING", "Atribute 'Color' has invalid format");
-		}
-		else
+		if (tokens.size() == 4)
 		{
 			AColor.r = from_string<float>(tokens[0]);
 			AColor.g = from_string<float>(tokens[1]);
 			AColor.b = from_string<float>(tokens[2]);
 			AColor.a = from_string<float>(tokens[3]);
-			SetColor(AColor);
 		}
+		else
+			Log("WARNING", "Attribute color has improper format.");
+		SetColor(AColor);
 	}
 
 	if (AXML->HasAttribute("BlendingMode"))
