@@ -41,7 +41,7 @@ public:
 
 	bool CallFunction(const string &AFunctionName);
 	bool CallMethodFunction(const string &AObjectName, const string &AFunctionName);
-	void CreateLuaObject(const string &AName, CObject *AObject);
+	void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
 
 	int GetMemoryUsage() const;
 	void RunGC();

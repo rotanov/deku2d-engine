@@ -209,6 +209,23 @@ namespace LuaAPI
 		return 0;
 	}
 
+	// void SetColor(userdata RenderableComponent, number R, number G, number B, number A)
+	int SetColor(lua_State *L)
+	{
+		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2) || !lua_isnumber(L, -3) || !lua_isnumber(L, -4))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetColor API call");
+
+		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -5));
+		if (!rcobj)
+		{
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetColor API call");
+			return 0;
+		}
+
+		rcobj->SetColor(RGBAf(lua_tonumber(L, -4), lua_tonumber(L, -3), lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		return 0;
+	}
+
 	// void SetScript(userdata ScriptableComponent, userdata Script)
 	int SetScript(lua_State *L)
 	{
@@ -573,13 +590,62 @@ bool CLuaVirtualMachine::CallMethodFunction(const string &AObjectName, const str
 	return CLuaFunctionCall(AObjectName, AFunctionName).Call();
 }
 
+static void DeepCopy(lua_State *State)
+{
+	if (!lua_istable(State, -1))
+	{
+		lua_pushvalue(State, -1);
+		return;
+	}
+	int table_idx = lua_gettop(State);
+	
+	lua_getmetatable(State, -1);
+
+	lua_newtable(State);
+	int newtable_idx = lua_gettop(State);
+
+	lua_pushnil(State);
+	while (lua_next(State, table_idx) != 0)
+	{
+		lua_pushvalue(State, -2);
+		lua_insert(State, -2);
+		if (lua_istable(State, -1))
+		{
+			DeepCopy(State);
+			lua_insert(State, -2);
+			lua_pop(State, 1);
+		}
+
+		lua_settable(State, newtable_idx);
+	}
+
+	lua_insert(State, -2);
+	lua_setmetatable(State, -1);
+}
+
 /**
-* CLuaVirtualMachine::CreateLuaObject - creates a new Lua object, puts it in the global namespace table under AName name and sets its "object" field to AObject.
+* CLuaVirtualMachine::CreateLuaObject - creates a new Lua object of AClassName class, puts it in the global namespace table under AName name and sets its "object" field to AObject.
 */
 
-void CLuaVirtualMachine::CreateLuaObject(const string &AName, CObject *AObject)
+void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject)
 {
 	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
+
+	if (AClassName != AName)
+	{
+		lua_getglobal(State, AClassName.c_str());
+		if (lua_isnil(State, -1) || !lua_istable(State, -1))
+		{
+			Log("ERROR", "An error occured while creating '%s': its class '%s' must be defined in Lua script first", AName.c_str(), AClassName.c_str());
+			lua_pop(State, 1);
+			return;
+		}
+
+		DeepCopy(State);
+
+		lua_setglobal(State, AName.c_str());
+		lua_pop(State, 1);
+	}
 
 	lua_getglobal(State, AName.c_str());
 	if (lua_isnil(State, -1))
@@ -592,6 +658,8 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AName, CObject *AObject)
 	lua_pushlightuserdata(State, AObject);
 	lua_setfield(State, -2, "object");
 	lua_pop(State, 1);
+
+	Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
 }
 
 int CLuaVirtualMachine::GetMemoryUsage() const
@@ -654,6 +722,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
 	lua_register(State, "GetAngle", &LuaAPI::GetAngle);
 	lua_register(State, "SetAngle", &LuaAPI::SetAngle);
+	lua_register(State, "SetColor", &LuaAPI::SetColor);
 	lua_register(State, "SetScript", &LuaAPI::SetScript);
 	lua_register(State, "GetWindowWidth", &LuaAPI::GetWindowWidth);
 	lua_register(State, "GetWindowHeight", &LuaAPI::GetWindowHeight);

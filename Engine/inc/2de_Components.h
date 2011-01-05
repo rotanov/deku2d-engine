@@ -266,6 +266,9 @@ public:
 	void ProcessEvent(const CEvent &AEvent);
 
 	void Deserialize(CXMLNode *AXML);
+
+private:
+	string ClassName;
 };
 
 /**

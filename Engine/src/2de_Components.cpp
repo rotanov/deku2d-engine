@@ -639,7 +639,7 @@ void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
 	{
 		if (AEvent.GetData<string>("Name") == Name)
 		{
-			CLuaVirtualMachine::Instance()->CreateLuaObject(Name, this);
+			CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
 			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
 		}
 	}
@@ -653,6 +653,11 @@ void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
 
 void CScriptableComponent::Deserialize(CXMLNode *AXML)
 {
+	if (AXML->HasAttribute("ClassName"))
+	{
+		ClassName = AXML->GetAttribute("ClassName");
+	}
+
 	if (AXML->HasAttribute("Script"))
 	{
 		SetScript(CFactory::Instance()->Get<CScript>(AXML->GetAttribute("Script")));
