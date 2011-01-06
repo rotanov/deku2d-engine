@@ -95,6 +95,8 @@ private:
 
 class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSingleton <CTextureManager> 
 {
+public:
+	void ReloadTextures();
 protected:
 	CTextureManager();
 	friend class CTSingleton <CTextureManager>;
@@ -294,7 +296,7 @@ class CFFPRenderer : public CAbstractRenderer
 public:
 	CFFPRenderer();
 	~CFFPRenderer();
-	bool Initilize();
+	bool Initialize();
 	bool Finalize();
 	void PushModel(const CRenderConfig *ARenderInfo, const CModel * AModel);
 	void Render();
@@ -502,20 +504,24 @@ public:
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
-	bool gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte ABPP, const string &ACaption);
-	bool gCreateWindow();
-	void SetSize();
-	bool glInitSystem();
-	void glSuicide();
-	void glResize(GLsizei Width, GLsizei Height);
-	void glInit(GLsizei Width, GLsizei Height);
+	bool Create(int AWidth, int AHeight, byte ABPP, bool AFullscreen, const string &ACaption);
+	bool Create();
+
+	bool Initialize();
+	void GLInit();
+
 	unsigned int GetWidth() const;
 	unsigned int GetHeight() const;
-	void SetFullscreen(bool AFullscreen);
-	void SetBPP(byte ABPP);
+	bool GetBPP() const;
+	bool GetFullscreen() const;
+	string GetCaption() const;
+	RGBAf GetBackgroundColor() const;
+
 	void SetWidth(unsigned int AWidth);
 	void SetHeight(unsigned int AHeight);
-	string GetCaption() const;
+	void SetSize(unsigned int AWidth, unsigned int AHeight);
+	void SetBPP(byte ABPP);
+	void SetFullscreen(bool AFullscreen);
 	void SetCaption(const string &ACaption);
 	void SetBackgroundColor(const RGBAf &AColor);
 
@@ -524,12 +530,21 @@ protected:
 	friend class CTSingleton<CGLWindow>;
 
 private:
-	byte BPP;
+	struct WindowVideoParameters
+	{
+		unsigned int Width;
+		unsigned int Height;
+		byte BPP;
+		bool isFullscreen;
+	};
+
+	WindowVideoParameters Parameters;
+	WindowVideoParameters NewParameters;
+
 	string Caption;
-	unsigned int Height;
+	RGBAf BackgroundColor;
 	bool isCreated;
-	bool isFullscreen;
-	unsigned int Width;	
+
 };
 
 /**

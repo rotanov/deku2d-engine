@@ -23,7 +23,7 @@ function TextMovementScriptable:OnEveryFrame()
 end
 
 function TextMovementScriptable:OnKeyDown()
-	DebugPrintComponentTree()
+	--DebugPrintComponentTree()
 end
 
 function TextMovementScriptable:OnTimerTick(event)

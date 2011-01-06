@@ -110,6 +110,8 @@ public:
 	virtual bool Load() = 0;
 	virtual void Unload() = 0;
 
+	bool Reload();
+
 	virtual bool SaveToFile(const string &AFilename)
 	{
 		throw std::logic_error("Unimplemented for this type of resource");

@@ -79,6 +79,22 @@ namespace LuaAPI
 		return 0;
 	}
 
+	// void Detach(userdata Destination, Object)
+	int Detach(lua_State *L)
+	{
+		CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
+		GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -2));
+		if (!GameObjectDestination)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Detach API call");
+
+		GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		if (!GameObjectSource)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Detach API call");
+
+		GameObjectDestination->Detach(GameObjectSource);
+		return 0;
+	}
+
 	// void Log(string Event, string Text)
 	int WriteToLog(lua_State *L)
 	{
@@ -708,6 +724,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "GetName", &LuaAPI::GetName);
 	lua_register(State, "GetParent", &LuaAPI::GetParent);
 	lua_register(State, "Attach", &LuaAPI::Attach);
+	lua_register(State, "Detach", &LuaAPI::Detach);
 
 	// engine
 	lua_register(State, "Log", &LuaAPI::WriteToLog);

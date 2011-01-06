@@ -80,6 +80,19 @@ void CResource::DisableLoading()
 	FirstTimeLoaded = false;
 }
 
+/**
+* CResource::Reload - unloads and loads the resource again if it's loaded, does nothing otherwise.
+*/
+
+bool CResource::Reload()
+{
+	if (!Loaded)
+		return false;
+
+	Unload();
+	return Load();
+}
+
 bool CResource::BasicLoad()
 {
 	if (Loaded)
@@ -157,7 +170,7 @@ void CDataLister::ExploreDirectory(string Path)
 	DIR *dirp = opendir(Path.c_str());
 	if (!dirp)
 	{
-		Log("ERROR", "Error opening directory '%s', while fetching data list.", Path.c_str());
+		Log("ERROR", "Error opening directory '%s', while fetching data list", Path.c_str());
 		return;
 	}
 

@@ -74,7 +74,7 @@ bool CEngine::Initialize()
 		CGLWindow::Instance()->GetHeight()); // Update camera due to update of wh from config
 
 
-	if (!CGLWindow::Instance()->gCreateWindow())
+	if (!CGLWindow::Instance()->Create())
 	{
 		Log("ERROR", "Window creation failed");
 		return false;
@@ -114,6 +114,7 @@ bool CEngine::Initialize()
 	//////////////////////////////////////////////////////////////////////////
 	//Here goes high level initializations, like default scene as title screen
 	//and FPSText
+	// TODO: hide it somewhere..
 	CPlaceableComponent *FPSTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->SetText("FPS: 0");
@@ -149,6 +150,7 @@ bool CEngine::Initialize()
 
 void CEngine::Finalize()
 {
+	Log("INFO", "Finalization started");
 	Finalizing = true;
 	CResourceRefCounterState::DisableRC();
 	CFactory::Instance()->DestroyAll();
@@ -352,7 +354,8 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_VIDEORESIZE:
 			{
-				CGLWindow::Instance()->glResize(event.resize.w, event.resize.h);
+				CGLWindow::Instance()->SetSize(event.resize.w, event.resize.h);
+				CGLWindow::Instance()->Initialize();
 				break;
 			}
 			case SDL_QUIT:

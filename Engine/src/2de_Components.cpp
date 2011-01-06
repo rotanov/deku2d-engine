@@ -320,11 +320,10 @@ void CPlaceableComponent::Deserialize(CXMLNode *AXML)
 		{
 			APosition.x = from_string<float>(tokens[0]);
 			APosition.y = from_string<float>(tokens[1]);
+			SetPosition(APosition);
 		}
 		else
-			Log("Warning", "Incorrect position in prototype.");
-
-		SetPosition(APosition);
+			Log("WARNING", "Incorrect position in prototype");
 	}
 
 	if (AXML->HasAttribute("Scaling"))
@@ -451,7 +450,7 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 					for(unsigned i = 0; i < 4; i++)
 						TexCoords[i] = from_string<float>(tokens[i]);
 				else
-					Log("Warning", "Incorrect TexCoords format");
+					Log("WARNING", "Attribute 'TexCoords' has improper format");
 			}
 			if (Texture != NULL && !AXML->HasAttribute("TexCoords"))
 				TexCoords = V2_QUAD_BIN;
@@ -479,7 +478,7 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 					p1.y = from_string<float>(tokens[3]);
 				}
 				else
-					Log("Warning", "Incorrect Points format");
+					Log("WARNING", "Attribute 'Points' has improper format");
 			}
 			SetModel(CRenderManager::Instance()->CreateModelLine(p0, p1));
 		}
@@ -502,10 +501,10 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 			AColor.g = from_string<float>(tokens[1]);
 			AColor.b = from_string<float>(tokens[2]);
 			AColor.a = from_string<float>(tokens[3]);
+			SetColor(AColor);
 		}
 		else
-			Log("WARNING", "Attribute color has improper format.");
-		SetColor(AColor);
+			Log("WARNING", "Attribute 'Color' has improper format");
 	}
 
 	if (AXML->HasAttribute("BlendingMode"))

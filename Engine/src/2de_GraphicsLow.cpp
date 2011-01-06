@@ -40,30 +40,38 @@ EBlendingMode CRenderConfig::GetBlendingMode() const
 //////////////////////////////////////////////////////////////////////////
 // CGLWindow
 
-CGLWindow::CGLWindow() : isCreated(false)
+CGLWindow::CGLWindow()
 {
 	SetName("GLWindow");
-	Width = 640;	//@todo!!! Default magic numbers - delete them!
-	Height = 480;
-	isFullscreen = false;
-	BPP = 32;
-	Caption = "Warning: CGLWindow class instance have not been initialized properly";
+	NewParameters.Width = 640;	//@todo!!! Default magic numbers - delete them! // well, this is not the worst place for magic numbers..
+	NewParameters.Height = 480;
+	NewParameters.BPP = 32;
+	NewParameters.isFullscreen = false;
+	Parameters = NewParameters;
+	Caption = "Some Deku2D-using program";
+	BackgroundColor = RGBAf(0.0, 0.0, 0.0, 0.5);
+	isCreated = false;
 }
 
-bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte ABPP, const string &ACaption)
+bool CGLWindow::Create(int AWidth, int AHeight, byte ABPP, bool AFullscreen, const string &ACaption)
 {
-	isFullscreen = AFullscreen;
+	if (isCreated)
+	{
+		Log("WARNING", "CGLWindow::Create called again, when the window is already created, it is pointless");
+		return true;
+	}
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		Log("ERROR", "Video initialization failed: %s\n", SDL_GetError());
-		Log("ERROR", "Last WARNING was critical. Now exiting...");
-		SDL_Quit();
+		SDL_Quit();	// you are not allowed to switch off the whole SDL, you fucking Video Subsystem! TODO: possibly replace by SDL_QuitSubsystem..
+		return false;
 	}
 
-	Width = AWidth;
-	Height = AHeight;
-	BPP = ABPP;
-
+	NewParameters.Width = AWidth;
+	NewParameters.Height = AHeight;
+	NewParameters.BPP = ABPP;
+	NewParameters.isFullscreen = AFullscreen;
 	SetCaption(ACaption);
 
 	const SDL_VideoInfo *info = NULL;
@@ -71,11 +79,10 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 
 	if (info == NULL)
 	{
-		Log("ERROR", "Aaaa! SDL WARNING: %s", SDL_GetError());
-		Log("ERROR", "Last WARNING was critical. Now exiting...");
+		Log("ERROR", "Getting video info failed: %s", SDL_GetError());
 		SDL_Quit();
+		return false;
 	}
-
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,		8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,		8);
@@ -87,33 +94,43 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 	// 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1);
 	// 	glEnable(0x809D);
 
+
+	return Initialize();
+}
+
+bool CGLWindow::Create()
+{
+	return Create(NewParameters.Width, NewParameters.Height, NewParameters.BPP, NewParameters.isFullscreen, Caption);
+}
+
+bool CGLWindow::Initialize()
+{
 	int flags = SDL_OPENGL | SDL_RESIZABLE;// | SDL_NOFRAME;
-	if (isFullscreen == true)
+	if (NewParameters.isFullscreen)
 	{
 		flags |= SDL_FULLSCREEN;
 	}
 
-	SDL_Surface *screen = SDL_SetVideoMode(Width, Height, BPP, flags);
+	SDL_Surface *screen = SDL_SetVideoMode(NewParameters.Width, NewParameters.Height, NewParameters.BPP, flags);
 	if (screen == NULL)
 	{
 		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
-		Log("ERROR", "Last WARNING was critical. Now exiting...");
-		SDL_Quit();
+		//SDL_Quit();
+		return false;
 	}
+
+	Parameters.Width = screen->w;
+	Parameters.Height = screen->h;
+	Parameters.BPP = screen->format->BitsPerPixel;
+	Parameters.isFullscreen = screen->flags & SDL_FULLSCREEN;
 
 	GLenum glewError = glewInit();
 	if (GLEW_OK != glewError)
 	{
 		/* Problem: glewInit failed, something is seriously wrong. */
-		Log("ERROR", "%s", glewGetErrorString(glewError));
+		Log("ERROR", "GLEW initialization failed: %s", glewGetErrorString(glewError));
 		return false;
 	}
-
-	SDL_Event resizeEvent;
-	resizeEvent.type = SDL_VIDEORESIZE;
-	resizeEvent.resize.w = Width;
-	resizeEvent.resize.h = Height;
-	SDL_PushEvent(&resizeEvent);
 
 	//glCreateShader()
 
@@ -146,47 +163,31 @@ bool CGLWindow::gCreateWindow(bool AFullscreen, int AWidth, int AHeight, byte AB
 	}
 	*/
 
-	glInit(Width, Height);
+	GLInit();
+
+	if (isCreated)
+		CTextureManager::Instance()->ReloadTextures();
+
 	return isCreated = true;
 }
 
-bool CGLWindow::gCreateWindow()
-{
-	return gCreateWindow(isFullscreen, Width, Height, BPP, Caption);
-}
+/**
+* CGLWindow::GLInit - low-level OpenGL initialization. Should not contain anything complicated, basically only calls to glSomething state setting functions...
+*/
 
-bool CGLWindow::glInitSystem()
-{
-	return true;
-}
-
-void CGLWindow::glSuicide()
-{
-}
-
-void CGLWindow::glResize(GLsizei Width, GLsizei Height)
-{
-	if (Height == 0)		
-		Height = 1;
-	glViewport(0, 0, Width, Height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, Width, 0.0f, Height, -100.0f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
-}
-
-void CGLWindow::glInit(GLsizei Width, GLsizei Height)
+void CGLWindow::GLInit()
 {
 	glShadeModel(GL_SMOOTH);	//GL_SMOOTH GL_FLAT
 
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	//glClearColor(0.0, 0.0, 0.0, 0.5);
-	SetBackgroundColor(RGBAf(0.0, 0.0, 0.0, 0.5));
+	//SetBackgroundColor(RGBAf(0.0, 0.0, 0.0, 0.5));
+	glClearColor(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.a);
 
-	glViewport(0, 0, Width, Height);
+	glViewport(0, 0, Parameters.Width, Parameters.Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0.0f, Width, 0.0f, Height, -100.0f, 100.0f);
+	glOrtho(0.0f, Parameters.Width, 0.0f, Parameters.Height, -100.0f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_DEPTH_TEST);
@@ -211,33 +212,58 @@ void CGLWindow::glInit(GLsizei Width, GLsizei Height)
 
 unsigned int CGLWindow::GetWidth() const
 {
-	return Width;
+	return Parameters.Width;
 }
 
 unsigned int CGLWindow::GetHeight() const
 {
-	return Height;
+	return Parameters.Height;
 }
 
-void CGLWindow::SetWidth(unsigned int AWidth)
+bool CGLWindow::GetBPP() const
 {
-	// bad, i think.. if window's already created, we should just resize it..
-	// ah, i got it.. see issue 44 then..
-
-	assert(!isCreated);
-	Width = AWidth;
+	return Parameters.BPP; 
 }
 
-void CGLWindow::SetHeight(unsigned int AHeight)
+bool CGLWindow::GetFullscreen() const
 {
-	// same as in SetWidth
-	assert(!isCreated);
-	Height = AHeight;
+	return Parameters.isFullscreen;
 }
 
 string CGLWindow::GetCaption() const
 {
 	return Caption;
+}
+
+RGBAf CGLWindow::GetBackgroundColor() const
+{
+	return BackgroundColor;
+}
+
+void CGLWindow::SetWidth(unsigned int AWidth)
+{
+	NewParameters.Width = AWidth;
+}
+
+void CGLWindow::SetHeight(unsigned int AHeight)
+{
+	NewParameters.Height = AHeight;
+}
+
+void CGLWindow::SetSize(unsigned int AWidth, unsigned int AHeight)
+{
+	NewParameters.Width = AWidth;
+	NewParameters.Height = AHeight;
+}
+
+void CGLWindow::SetBPP(byte ABPP)
+{
+	NewParameters.BPP = ABPP;
+}
+
+void CGLWindow::SetFullscreen(bool AFullscreen)
+{
+	NewParameters.isFullscreen = AFullscreen;
 }
 
 void CGLWindow::SetCaption(const string &ACaption)
@@ -248,17 +274,10 @@ void CGLWindow::SetCaption(const string &ACaption)
 
 void CGLWindow::SetBackgroundColor(const RGBAf &AColor)
 {
-	glClearColor(AColor.r, AColor.g, AColor.b, AColor.a);
-}
+	BackgroundColor = AColor;
 
-void CGLWindow::SetBPP(byte ABPP)
-{
-	BPP = ABPP;
-}
-
-void CGLWindow::SetFullscreen(bool AFullscreen)
-{
-	isFullscreen = AFullscreen;
+	if (isCreated)
+		glClearColor(AColor.r, AColor.g, AColor.b, AColor.a);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -924,6 +943,16 @@ CTextureManager::CTextureManager()
 	SetName("Texture manager");
 }
 
+void CTextureManager::ReloadTextures()
+{
+	for (ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
+	{
+		(*it)->Reload();
+	}
+
+	Log("INFO", "Textures have been reloaded successfully");
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CTexture
 
@@ -1123,7 +1152,7 @@ void CSceneManager::SetCurrentScene(CAbstractScene *AScene)
 
 
 
-bool CFFPRenderer::Initilize()
+bool CFFPRenderer::Initialize()
 {
 	// do something
 	return true;
@@ -1642,7 +1671,7 @@ bool CModel::Load()
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0))
 		{
-			Log("WARNING", "Model verticies count uneven.");
+			Log("WARNING", "Model verticies count is uneven");
 			return false;
 		}
 		Vertices = new Vector2[tokens.size() / 2];
@@ -1666,7 +1695,7 @@ bool CModel::Load()
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0) || tokens.size() != VerticesNumber)
 		{
-			Log("WARNING", "Model verticies count uneven.");
+			Log("WARNING", "Model verticies count is uneven");
 			return false;
 		}
 		TexCoords = new Vector2[tokens.size() / 2];

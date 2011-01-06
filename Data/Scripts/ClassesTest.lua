@@ -1,9 +1,12 @@
 ParentRecolorer = ParentRecolorer or { }
 
+RecCount = RecCount or 0
+
 function ParentRecolorer:OnCreate()
 	self.Test = 0
+	RecCount = RecCount + 1
+	self.velcoef = RecCount
 	SubscribeToEvent("Attached", self.object)
-	SubscribeToEvent("KeyDown", self.object)
 	SubscribeToEvent("EveryFrame", self.object)
 end
 
@@ -16,10 +19,6 @@ function ParentRecolorer:OnAttached(event)
 	SetColor(GetParent(self.object), 1, 0, 0, 1)
 end
 
-function ParentRecolorer:OnKeyDown()
-	Log("TEST", GetName(self.object) .. " " .. self.Test)
-end
-
-function RotateScriptable:OnEveryFrame()
-	SetAngle(GetParent(GetParent(self.object)), GetAngle(GetParent(GetParent(self.object))) + 200.0 * GetDeltaTime())
+function ParentRecolorer:OnEveryFrame()
+	SetAngle(GetParent(GetParent(self.object)), GetAngle(GetParent(GetParent(self.object))) + self.velcoef * 100.0 * GetDeltaTime())
 end

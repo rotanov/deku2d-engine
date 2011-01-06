@@ -1,9 +1,19 @@
 <?xml version="1.0"?>
-<Prototype Name="A" RecursionLimit="2">
+<Prototype Name="A" RecursionLimit="9">
+    <PlaceableComponent Position="0 60">
+        <RenderableComponent Model="Box" Width="10" Height="10">
+            <ScriptableComponent Script="ClassesTest" ClassName="ParentRecolorer" />
+        </RenderableComponent>
+        <A />
+    </PlaceableComponent>
+    <A />
+</Prototype>
+<!--<?xml version="1.0"?>
+<Prototype Name="A" RecursionLimit="8">
 	<PlaceableComponent Position="20 20">
 		<RenderableComponent Model="Box" Width="10" Height="10">
 			<ScriptableComponent Script="ClassesTest" ClassName="ParentRecolorer" />
 		</RenderableComponent>
 		<A />
 	</PlaceableComponent>
-</Prototype>
+</Prototype>-->
