@@ -38,6 +38,26 @@ EBlendingMode CRenderConfig::GetBlendingMode() const
 }
 
 //////////////////////////////////////////////////////////////////////////
+// CGLWindow::WindowVideoParameters
+
+bool CGLWindow::WindowVideoParameters::operator==(const CGLWindow::WindowVideoParameters &rhs) const
+{
+	return (Width == rhs.Width && Height == rhs.Height && BPP == rhs.BPP && isFullscreen == rhs.isFullscreen);
+}
+
+bool CGLWindow::WindowVideoParameters::operator!=(const CGLWindow::WindowVideoParameters &rhs) const
+{
+	return (Width != rhs.Width || Height != rhs.Height || BPP != rhs.BPP || isFullscreen != rhs.isFullscreen);
+}
+
+string CGLWindow::WindowVideoParameters::GetString() const
+{
+	stringstream ss;
+	ss << Width << "x" << Height << "x" << (int)BPP << " (" << (isFullscreen ? "fullscreen" : "windowed") << ")";
+	return ss.str();
+}
+
+//////////////////////////////////////////////////////////////////////////
 // CGLWindow
 
 CGLWindow::CGLWindow()
@@ -84,6 +104,13 @@ bool CGLWindow::Create(int AWidth, int AHeight, byte ABPP, bool AFullscreen, con
 		return false;
 	}
 
+	Desktop.Width = info->current_w;
+	Desktop.Height = info->current_h;
+	Desktop.BPP = info->vfmt->BitsPerPixel;
+	Desktop.isFullscreen = true;
+
+	Log("INFO", "Current desktop video mode: %s", Desktop.GetString().c_str());
+
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,		8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,		8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,		8);
@@ -114,15 +141,22 @@ bool CGLWindow::Initialize()
 	SDL_Surface *screen = SDL_SetVideoMode(NewParameters.Width, NewParameters.Height, NewParameters.BPP, flags);
 	if (screen == NULL)
 	{
-		Log("ERROR", "Setting video mode failed: %s\n", SDL_GetError());
-		//SDL_Quit();
+		Log("ERROR", "Setting video mode failed: %s", SDL_GetError());
 		return false;
 	}
 
-	Parameters.Width = screen->w;
-	Parameters.Height = screen->h;
-	Parameters.BPP = screen->format->BitsPerPixel;
-	Parameters.isFullscreen = screen->flags & SDL_FULLSCREEN;
+
+	NewParameters.Width = screen->w;
+	NewParameters.Height = screen->h;
+	NewParameters.BPP = screen->format->BitsPerPixel;
+	NewParameters.isFullscreen = screen->flags & SDL_FULLSCREEN;
+
+	if ((NewParameters != Parameters) || !isCreated)
+	{
+		Log("INFO", "New video mode: %s", NewParameters.GetString().c_str());
+	}
+
+	Parameters = NewParameters;
 
 	GLenum glewError = glewInit();
 	if (GLEW_OK != glewError)
@@ -278,6 +312,22 @@ void CGLWindow::SetBackgroundColor(const RGBAf &AColor)
 
 	if (isCreated)
 		glClearColor(AColor.r, AColor.g, AColor.b, AColor.a);
+}
+
+CGLWindow::WindowVideoParameters CGLWindow::GetVideoMode() const
+{
+	return Parameters;
+}
+
+void CGLWindow::SetVideoMode(const CGLWindow::WindowVideoParameters &AVideoMode)
+{
+	NewParameters = AVideoMode;
+	Initialize();
+}
+
+CGLWindow::WindowVideoParameters CGLWindow::GetDesktopVideoMode() const
+{
+	return Desktop;
 }
 
 //////////////////////////////////////////////////////////////////////////

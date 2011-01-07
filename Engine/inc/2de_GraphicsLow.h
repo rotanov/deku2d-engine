@@ -504,6 +504,18 @@ public:
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
+	struct WindowVideoParameters
+	{
+		unsigned int Width;
+		unsigned int Height;
+		byte BPP;
+		bool isFullscreen;
+
+		bool operator==(const WindowVideoParameters &rhs) const;
+		bool operator!=(const WindowVideoParameters &rhs) const;
+		string GetString() const;
+	};
+
 	bool Create(int AWidth, int AHeight, byte ABPP, bool AFullscreen, const string &ACaption);
 	bool Create();
 
@@ -525,21 +537,19 @@ public:
 	void SetCaption(const string &ACaption);
 	void SetBackgroundColor(const RGBAf &AColor);
 
+	WindowVideoParameters GetVideoMode() const;
+	void SetVideoMode(const WindowVideoParameters &AVideoMode);
+
+	WindowVideoParameters GetDesktopVideoMode() const;
+
 protected:
 	CGLWindow();
 	friend class CTSingleton<CGLWindow>;
 
 private:
-	struct WindowVideoParameters
-	{
-		unsigned int Width;
-		unsigned int Height;
-		byte BPP;
-		bool isFullscreen;
-	};
-
 	WindowVideoParameters Parameters;
 	WindowVideoParameters NewParameters;
+	WindowVideoParameters Desktop;
 
 	string Caption;
 	RGBAf BackgroundColor;

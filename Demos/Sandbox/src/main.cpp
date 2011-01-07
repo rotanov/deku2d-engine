@@ -20,13 +20,14 @@ public:
 			{
 				CGLWindow::Instance()->SetFullscreen(false);
 				CGLWindow::Instance()->SetSize(640, 480);
+				CGLWindow::Instance()->Initialize();
 			}
 			else
 			{
-				CGLWindow::Instance()->SetSize(1920, 1080);
-				CGLWindow::Instance()->SetFullscreen(true);
+				/*CGLWindow::Instance()->SetSize(2048, 1152);
+				CGLWindow::Instance()->SetFullscreen(true);*/
+				CGLWindow::Instance()->SetVideoMode(CGLWindow::Instance()->GetDesktopVideoMode());
 			}
-			CGLWindow::Instance()->Initialize();
 		}
 	}
 
