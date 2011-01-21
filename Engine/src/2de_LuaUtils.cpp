@@ -124,6 +124,7 @@ namespace LuaAPI
 	}
 
 	// void SetText(userdata TextObject, string NewText)
+	// Why not SetTextText if we already have SetTextFont on the other hand why not just SetFont?
 	int SetText(lua_State *L)
 	{
 		CText *text = static_cast<CText *>(lua_touserdata(L, -2));

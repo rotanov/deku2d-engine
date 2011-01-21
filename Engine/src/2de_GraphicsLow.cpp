@@ -132,11 +132,7 @@ bool CGLWindow::Create()
 
 bool CGLWindow::Initialize()
 {
-	int flags = SDL_OPENGL | SDL_RESIZABLE;// | SDL_NOFRAME;
-	if (NewParameters.isFullscreen)
-	{
-		flags |= SDL_FULLSCREEN;
-	}
+	int flags = SDL_OPENGL | SDL_RESIZABLE | (NewParameters.isFullscreen * SDL_FULLSCREEN);	// | SDL_NOFRAME;
 
 	SDL_Surface *screen = SDL_SetVideoMode(NewParameters.Width, NewParameters.Height, NewParameters.BPP, flags);
 	if (screen == NULL)

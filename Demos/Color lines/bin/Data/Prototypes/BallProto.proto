@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Prototype Name="BallProto" RecursionLimit="0">
+    <PlaceableComponent Position="16 16">
+        <RenderableComponent Model="Circle" Radius="16.0f" ModelType="Triangles" BlendingMode="Opaque"/>
+    </PlaceableComponent>
+	<ScriptableComponent Script="BallScript" ClassName="BallScript"/>
+</Prototype>

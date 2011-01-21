@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Prototype Name="GridProto" RecursionLimit="1">
+    <PlaceableComponent Position="0 0">
+        <RenderableComponent Model="GridModel" />
+    </PlaceableComponent>
+	<ScriptableComponent Script="GridScript" ClassName="GridScript"/>
+</Prototype>

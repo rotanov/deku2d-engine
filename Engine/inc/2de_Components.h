@@ -144,7 +144,13 @@ private:
 
 };
 
-// SUDDENLY ONE MORE COMPONENT APPEALS
+/**
+ *	CGeometricComponent - class of component that represents geometrical interpretation of some object
+ *	It has to have some connection with something. Obvious "something" in this case is a connection with
+ *	corresponding physical component. But there are some questions:
+ *		a) Is there some other, non-physical component?
+ *		b) How to support this kind of relation?
+ */
 class CGeometricComponent : public CGameObject	// "Geometric" or "Geometrical"?
 {
 public:

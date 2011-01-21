@@ -120,7 +120,7 @@ void CGameObject::Attach(CGameObject* AGameObject)
 	Children.push_back(AGameObject);
 	AGameObject->SetParent(this);
 
-	CEvent *AttachedEvent = new CEvent("Attached", this);
+	CEvent *AttachedEvent = new CEvent("Attached", this);	// I think we also need some other "Attached" event. For object that has been attached
 	AttachedEvent->SetData("Name", AGameObject->GetName());
 	CEventManager::Instance()->TriggerEvent(AttachedEvent);
 }
@@ -143,7 +143,7 @@ void CGameObject::Detach(CGameObject* AGameObject)
 	Children.erase(it);
 	AGameObject->Parent = NULL;
 
-	CEvent *DetachedEvent = new CEvent("Detached", this);
+	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
 	DetachedEvent->SetData("Name", AGameObject->GetName());
 	CEventManager::Instance()->TriggerEvent(DetachedEvent);
 }
@@ -212,6 +212,8 @@ void CPlaceableComponent::SetAngle(float AAngle)
 	float Angle = AAngle;
 	if (Abs(AAngle) > 360.0f)
 		Angle = AAngle - Sign(AAngle)*((static_cast<int>(AAngle) / 360) * 360.0f); 
+	if (Angle < 0.0f)
+		Angle = 360.0f + Angle;
 	Transformation.SetAngle(Angle);
 }
 

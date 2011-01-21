@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<Configuration>
+	<Video>
+		<WindowWidth value="640" />
+		<WindowHeight value="480" />
+		<WindowBPP value="32" />
+		<WindowCaption value="Color lines" />
+		<DoCalcFps value="true" />
+		<DoLimitFps value="false" />
+		<FpsLimit value="60" />
+	</Video>
+	<Sound>
+		<MusicVolume value="10" />
+	</Sound>
+	<Data>
+		<DataPath value="Data" />
+		<InitScript value="LinesInit" />
+		<doLoadDefaultResourceList value="true" />
+		<ForceReindex value="true" />
+	</Data>
+</Configuration>

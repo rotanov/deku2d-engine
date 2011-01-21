@@ -1,0 +1,1 @@
+BallScript = BallScript or { }function BallScript:OnCreate()	SubscribeToEvent("EveryFrame", self.object)endfunction BallScript:OnEveryFrame()end

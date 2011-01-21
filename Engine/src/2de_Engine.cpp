@@ -80,7 +80,7 @@ bool CEngine::Initialize()
 		return false;
 	}
 
-	ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious..
+	ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious.. // If function was called DevILInit() I shall agree with you. But it's fucking "ilInit()"
 	CSoundMixer::Instance()->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 	SDL_EnableUNICODE(1);
