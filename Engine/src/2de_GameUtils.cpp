@@ -169,6 +169,7 @@ CTileset* CTileSetManager::GetTileset(const string &ATilesetName)
 
 CDefaultTitleScreen::CDefaultTitleScreen()
 {
+	CEventManager::Instance()->Subscribe("WindowResize", this);
 	CPlaceableComponent *tempPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	int ScrWidth = CGLWindow::Instance()->GetWidth();
 	int ScrHeight = CGLWindow::Instance()->GetHeight();
@@ -193,4 +194,12 @@ void CDefaultTitleScreen::SetTexture(CTexture* ATexture)
 {
 	assert(ATexture != NULL);
 	SetModel(CRenderManager::CreateModelBox(256, 256, MODEL_TYPE_TRIANGLES, ATexture));
+}
+
+void CDefaultTitleScreen::ProcessEvent( const CEvent &AEvent )
+{
+	if (AEvent.GetName() != "WindowResize")
+		return;
+	if (this->GetParent() != NULL)
+		static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(CGLWindow::Instance()->GetSize() * 0.5f);
 }

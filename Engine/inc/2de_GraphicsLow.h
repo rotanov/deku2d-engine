@@ -504,7 +504,7 @@ public:
 class CGLWindow : public CTSingleton<CGLWindow>
 {
 public:
-	struct WindowVideoParameters
+	struct WindowVideoParameters	// Where is fucking "C"? "struct" is deprecated by our docs. I missed this with variable, really.
 	{
 		unsigned int Width;
 		unsigned int Height;
@@ -524,6 +524,7 @@ public:
 
 	unsigned int GetWidth() const;
 	unsigned int GetHeight() const;
+	Vector2 GetSize() const;
 	bool GetBPP() const;
 	bool GetFullscreen() const;
 	string GetCaption() const;
@@ -536,6 +537,7 @@ public:
 	void SetFullscreen(bool AFullscreen);
 	void SetCaption(const string &ACaption);
 	void SetBackgroundColor(const RGBAf &AColor);
+	void Resize(unsigned AWidth, unsigned AHeight);
 
 	WindowVideoParameters GetVideoMode() const;
 	void SetVideoMode(const WindowVideoParameters &AVideoMode);

@@ -327,7 +327,13 @@ bool CEngine::ProcessEvents()
 				CPlaceableComponent *CursorPlacing = dynamic_cast<CPlaceableComponent*>(Cursor->GetParent());
 				if (CursorPlacing != NULL)
 					CursorPlacing->SetPosition(MousePosition);
-				//SDL_Delay(2);
+
+				CEvent *e = new CEvent("MouseMove", NULL);
+				e->SetData("X", MousePosition.x);
+				e->SetData("Y", MousePosition.y);
+				e->SetData("Modifiers", SDL_GetModState());
+				CEventManager::Instance()->TriggerEvent(e);
+
 				break;
 			}
 			case SDL_ACTIVEEVENT:

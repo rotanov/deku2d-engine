@@ -63,6 +63,25 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// Temporary solution for asquiring children
+	// Userdata object, number - child index
+	int GetChild(lua_State *L)
+	{
+		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -2));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetChild API call");
+
+		if (!lua_isnumber(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetChild API call");
+
+		int ChildIndex = lua_tonumber(L, -1);
+		if (ChildIndex >= obj->Children.size())
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetChild API call");
+
+		lua_pushlightuserdata(L, obj->Children[ChildIndex]);
+		return 1;
+	}
+
 	// void Attach(userdata Destination, userdata Object)
 	int Attach(lua_State *L)
 	{
@@ -724,6 +743,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "Destroy", &LuaAPI::Destroy);
 	lua_register(State, "GetName", &LuaAPI::GetName);
 	lua_register(State, "GetParent", &LuaAPI::GetParent);
+	lua_register(State, "GetChild", &LuaAPI::GetChild);
 	lua_register(State, "Attach", &LuaAPI::Attach);
 	lua_register(State, "Detach", &LuaAPI::Detach);
 

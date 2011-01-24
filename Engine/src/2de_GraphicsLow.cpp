@@ -197,6 +197,7 @@ bool CGLWindow::Initialize()
 
 	if (isCreated)
 		CTextureManager::Instance()->ReloadTextures();
+	CEventManager::Instance()->TriggerEvent(new CEvent("WindowResize", NULL));
 
 	return isCreated = true;
 }
@@ -324,6 +325,20 @@ void CGLWindow::SetVideoMode(const CGLWindow::WindowVideoParameters &AVideoMode)
 CGLWindow::WindowVideoParameters CGLWindow::GetDesktopVideoMode() const
 {
 	return Desktop;
+}
+
+Vector2 CGLWindow::GetSize() const
+{
+	return Vector2(Parameters.Width, Parameters.Height);
+}
+
+void CGLWindow::Resize( unsigned AWidth, unsigned AHeight )
+{
+	SDL_Event Event;
+	Event.type = SDL_VIDEORESIZE;
+	Event.resize.w = AWidth;
+	Event.resize.h = AHeight;
+	SDL_PushEvent(&Event);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1196,8 +1211,6 @@ void CSceneManager::SetCurrentScene(CAbstractScene *AScene)
 //////////////////////////////////////////////////////////////////////////
 // CRenderer
 
-
-
 bool CFFPRenderer::Initialize()
 {
 	// do something
@@ -1244,7 +1257,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 		{
 			Vertex = AModel->GetVertices()[i];
 			//TempVector = (Vertex * Transformation.GetScaling());
-			TempVector = (Vertex * Transformation.GetScaling() * Transformation.GetScaling());
+			TempVector = (Vertex * Transformation.GetScaling());
 			if (!Equal(Transformation.GetAngle(), 0.0f))
 				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 			TempVector += Transformation.GetTranslation();//Sender->Position;
@@ -1284,7 +1297,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 	for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];
-		TempVector = (Vertex * Transformation.GetScaling() * Transformation.GetScaling());
+		TempVector = (Vertex * Transformation.GetScaling());
  		if (!Equal(Transformation.GetAngle(), 0.0f))
  			TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 		TempVector += Transformation.GetTranslation();// + Sender->GetPosition();//Sender->Position;

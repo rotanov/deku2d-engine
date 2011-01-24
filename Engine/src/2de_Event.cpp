@@ -31,11 +31,14 @@ void CEventManager::Unsubscribe(const string &AEventName, CObject *Subscriber)
 
 void CEventManager::UnsubscribeFromAll(CObject *Subscriber)
 {
+	vector<SubscribersContainer::iterator> ToDelete;
 	for (SubscribersContainer::iterator it = Subscribers.begin(); it != Subscribers.end(); ++it)
 	{
 		if (it->second == Subscriber)
-			Subscribers.erase(it);
+			ToDelete.push_back(it);
 	}
+	for(vector<SubscribersContainer::iterator>::iterator i = ToDelete.begin(); i != ToDelete.end(); ++i)
+		Subscribers.erase(*i);
 }
 
 void CEventManager::TriggerEvent(const string &AEventName, CObject *ASender)

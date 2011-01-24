@@ -188,10 +188,18 @@
 		<Filter
 			Name="Headers"
 			>
+			<File
+				RelativePath=".\src\Color Lines.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Source"
 			>
+			<File
+				RelativePath=".\src\Color Lines.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\src\main.cpp"
 				>

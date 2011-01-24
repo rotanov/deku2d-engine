@@ -85,6 +85,11 @@ public:
 	bool Active;
 	bool Dead;	
 
+	void SetDestroyedSubtree()
+	{
+		CGameObject::_DestroySubtree(this);
+	}
+
 // 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
 // 	void SetDead();
 //	virtual void Update(float dt) = 0;
@@ -98,6 +103,14 @@ private:
 	CGameObject *Parent;
 	CAbstractScene *Scene;
 
+	static void _DestroySubtree(CGameObject *NextObject)
+	{
+		if (NextObject == NULL)
+			return;
+		for(vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
+			_DestroySubtree(*i);
+		NextObject->SetDestroyed();
+	}
 };
 
 // SUDDENLY NEW COMPONENT APPEARS

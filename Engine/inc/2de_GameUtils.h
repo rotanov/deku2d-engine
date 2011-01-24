@@ -64,6 +64,7 @@ class CDefaultTitleScreen : public CRenderableComponent
 public:
 	CDefaultTitleScreen();
 	void SetTexture(CTexture* ATexture);
+	void ProcessEvent(const CEvent &AEvent);
 
 private:
 	CText TextDeku;

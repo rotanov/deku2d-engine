@@ -15,6 +15,7 @@ static float SineTable[SINE_COSINE_TABLE_DIM], CosineTable[SINE_COSINE_TABLE_DIM
 
 int Random_Int(int min, int max)
 {
+	assert(max - min + 1);
 	g_seed = 214013*g_seed + 2531011;
 	return min + (g_seed^g_seed>>15) % (max - min + 1);
 }
