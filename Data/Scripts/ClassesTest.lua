@@ -6,8 +6,8 @@ function ParentRecolorer:OnCreate()
 	self.Test = 0
 	RecCount = RecCount + 1
 	self.velcoef = RecCount
-	SubscribeToEvent("Attached", self.object)
-	SubscribeToEvent("EveryFrame", self.object)
+	SubscribeToEvent(self.object, "Attached")
+	SubscribeToEvent(self.object, "EveryFrame")
 end
 
 function ParentRecolorer:OnAttached(event)

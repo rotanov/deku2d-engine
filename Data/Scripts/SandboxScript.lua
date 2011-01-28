@@ -3,9 +3,9 @@ TextMovementScriptable = TextMovementScriptable or { }
 function TextMovementScriptable:OnCreate()
 	self.dir = {x = 1, y = 1}
 
-	SubscribeToEvent("EveryFrame", self.object)
-	SubscribeToEvent("KeyDown", self.object)
-	SubscribeToEvent("TimerTick", self.object)
+	SubscribeToEvent(self.object, "EveryFrame")
+	SubscribeToEvent(self.object, "KeyDown")
+	SubscribeToEvent(self.object, "TimerTick")
 end
 
 function TextMovementScriptable:OnEveryFrame()
@@ -37,7 +37,7 @@ end
 RotateScriptable = RotateScriptable or { }
 
 function RotateScriptable:OnCreate()
-	SubscribeToEvent("EveryFrame", self.object)
+	SubscribeToEvent(self.object, "EveryFrame")
 end
 
 function RotateScriptable:OnEveryFrame()

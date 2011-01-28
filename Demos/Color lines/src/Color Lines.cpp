@@ -106,7 +106,7 @@ void CGridGame::ProcessEvent( const CEvent &AEvent )
 		return;
 	}
 
-	if (!TurnTargetCell.isValid())
+	if (!TurnTargetCell.isValid() && CellSelection.isValid())
 	{
 		if (CellSelection.isValid())
 			if (Cells[CellSelection.GetX()][CellSelection.GetY()].GetColorIdentifier() == -1) 
@@ -117,6 +117,8 @@ void CGridGame::ProcessEvent( const CEvent &AEvent )
 				return;
 			}
 	}
+	else
+		return;
 
 	if (ProcessBFS(TurnSourceCell.GetX(), TurnSourceCell.GetY(), TurnTargetCell.GetX(), TurnTargetCell.GetY()))
 	{

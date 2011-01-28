@@ -4,9 +4,9 @@ PONG_BALL_SIZE = 24
 
 function BallScriptable:OnCreate()
 	self.BallSpeed = 250
-	SubscribeToEvent("EveryFrame", self.object)
-	SubscribeToEvent("Reset", self.object)
-	SubscribeToEvent("Attached", self.object)
+	SubscribeToEvent(self.object, "EveryFrame")
+	SubscribeToEvent(self.object, "Reset")
+	SubscribeToEvent(self.object, "Attached")
 end
 
 function BallScriptable:OnAttached(event)

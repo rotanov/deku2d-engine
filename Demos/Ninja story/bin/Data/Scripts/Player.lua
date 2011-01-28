@@ -6,7 +6,7 @@ function PongPlayer()
 		MovingUp = false,
 		MovingDown = false,
 		OnCreate = function(self)
-			SubscribeToEvent("EveryFrame", self.object)
+			SubscribeToEvent(self.object, "EveryFrame")
 		end,
 		MoveLeft = function(self)
 			--self.MovingUp = true
@@ -47,8 +47,8 @@ function PongPlayerOne()
 	t.OnPlayerMoveRight = t.MoveRight
 	t.OnCreate = function(self)
 		PongPlayer().OnCreate(self)	-- calling superclass method
-		SubscribeToEvent("PlayerMoveLeft", self.object)
-		SubscribeToEvent("PlayerMoveRight", self.object)
+		SubscribeToEvent(self.object, "PlayerMoveLeft")
+		SubscribeToEvent(self.object, "PlayerMoveRight")
 	end
 	return t
 end

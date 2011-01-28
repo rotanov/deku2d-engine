@@ -305,17 +305,17 @@ namespace LuaAPI
 		return 2;
 	}
 
-	// void SubscribeToEvent(string EventName, userdata Object)
+	// void SubscribeToEvent(userdata Object, string EventName)
 	int SubscribeToEvent(lua_State *L)
 	{
-		if (!lua_isstring(L, -2))
+		if (!lua_isstring(L, -1))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SubscribeToEvent API call");
 
-		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -2));
 		if (!obj)
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SubscribeToEvent API call");
 
-		CEventManager::Instance()->Subscribe(lua_tostring(L, -2), obj);
+		CEventManager::Instance()->Subscribe(lua_tostring(L, -1), obj);
 
 		return 0;
 	}

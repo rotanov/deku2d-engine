@@ -10,8 +10,8 @@ function PongPlayer()
 		MovingUp = false,
 		MovingDown = false,
 		OnCreate = function(self)
-			SubscribeToEvent("EveryFrame", self.object)
-			SubscribeToEvent("Attached", self.object)
+			SubscribeToEvent(self.object, "EveryFrame")
+			SubscribeToEvent(self.object, "Attached")
 		end,
 		OnAttached = function(self, event)
 			if GetEventData(event, "Name") ~= GetName(self.object) then
@@ -69,9 +69,9 @@ function PongPlayerOne()
 	t.OnPlayerOneStop = t.Stop
 	t.OnCreate = function(self)
 		PongPlayer().OnCreate(self)	-- calling superclass method
-		SubscribeToEvent("PlayerOneMoveUp", self.object)
-		SubscribeToEvent("PlayerOneMoveDown", self.object)
-		SubscribeToEvent("PlayerOneStop", self.object)
+		SubscribeToEvent(self.object, "PlayerOneMoveUp")
+		SubscribeToEvent(self.object, "PlayerOneMoveDown")
+		SubscribeToEvent(self.object, "PlayerOneStop")
 	end
 	return t
 end
@@ -84,9 +84,9 @@ function PongPlayerTwo()
 	t.OnPlayerTwoStop = t.Stop
 	t.OnCreate = function(self)
 		PongPlayer().OnCreate(self)
-		SubscribeToEvent("PlayerTwoMoveUp", self.object)
-		SubscribeToEvent("PlayerTwoMoveDown", self.object)
-		SubscribeToEvent("PlayerTwoStop", self.object)
+		SubscribeToEvent(self.object, "PlayerTwoMoveUp")
+		SubscribeToEvent(self.object, "PlayerTwoMoveDown")
+		SubscribeToEvent(self.object, "PlayerTwoStop")
 	end
 	return t
 end

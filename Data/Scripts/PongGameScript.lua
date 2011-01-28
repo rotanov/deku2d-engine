@@ -16,9 +16,9 @@ function PongGame:OnCreate()
 	Attach(self.MemUsageText.pos, self.MemUsageText.text);
 	Attach(GetObject("RootGameObject"), self.MemUsageText.pos);
 
-	SubscribeToEvent("PlayerOneScored", self.object)
-	SubscribeToEvent("PlayerTwoScored", self.object)
-	SubscribeToEvent("TimerTick", self.object)
+	SubscribeToEvent(self.object, "PlayerOneScored")
+	SubscribeToEvent(self.object, "PlayerTwoScored")
+	SubscribeToEvent(self.object, "TimerTick")
 end
 
 function PongGame:OnPlayerOneScored()
