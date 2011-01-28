@@ -76,7 +76,7 @@ bool CCustomStateHandler::OnInitialize()
 
 	CRenderableComponent *PlayerR = new CRenderableComponent(CRenderManager::CreateModelBox(32, 64));
 
-	CScriptableComponent *PlayerScriptable = CFactory::Instance()->New<CScriptableComponent>("PlayerOneScriptable");
+	CGameObject *PlayerScriptable = CFactory::Instance()->New<CGameObject>("PlayerOneScriptable");
 	
 	PlayerScriptable->SetScript(CFactory::Instance()->Get<CScript>("Player"));
 

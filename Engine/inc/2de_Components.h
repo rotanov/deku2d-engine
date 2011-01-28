@@ -13,6 +13,9 @@
 
 class CGameObject : public CObject
 {
+private:
+	string ClassName;
+
 public:	
 	class traverse_iterator
 	{
@@ -72,6 +75,10 @@ public:
 		std::swap(*Iterator, *(--Children.end()));
 		Children.pop_back();
 	}*/
+
+	void SetScript(CScript *AScript);
+	void ProcessEvent(const CEvent &AEvent);
+	
 
 	CGameObject* GetParent() const;
 	void SetParent(CGameObject* AGameObject);
@@ -269,25 +276,6 @@ private:
 	CResourceRefCounter<CFont> Font;
 
 	void _UpdateSelfModel();
-};
-
-/**
-* CScriptableComponent - component that is intended to make its parent scriptable.
-*/
-
-class CScriptableComponent : public CGameObject
-{
-public:
-	CScriptableComponent();
-
-	void SetScript(CScript *AScript);
-
-	void ProcessEvent(const CEvent &AEvent);
-
-	void Deserialize(CXMLNode *AXML);
-
-private:
-	string ClassName;
 };
 
 /**

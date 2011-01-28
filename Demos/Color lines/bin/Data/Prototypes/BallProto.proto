@@ -3,5 +3,5 @@
     <PlaceableComponent Position="0 0">
         <RenderableComponent Model="Box" Width="1.0" Height="1.0" ModelType="Triangles" BlendingMode="Transparent" Texture="ball" />
     </PlaceableComponent>	
-	<ScriptableComponent Script="BallScript" ClassName="BallScript"/>
+	<GameObject Script="BallScript" ClassName="BallScript"/>
 </Prototype>

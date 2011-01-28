@@ -2,7 +2,7 @@
 <Prototype Name="A" RecursionLimit="10">
     <PlaceableComponent Position="0 60">
         <RenderableComponent Model="Box" Width="10" Height="10">
-            <ScriptableComponent Script="ClassesTest" ClassName="ParentRecolorer" />
+            <GameObject Script="ClassesTest" ClassName="ParentRecolorer" />
         </RenderableComponent>
         <A />
     </PlaceableComponent>

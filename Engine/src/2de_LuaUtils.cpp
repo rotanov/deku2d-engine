@@ -265,7 +265,7 @@ namespace LuaAPI
 	// void SetScript(userdata ScriptableComponent, userdata Script)
 	int SetScript(lua_State *L)
 	{
-		CScriptableComponent *ScriptableComponent = static_cast<CScriptableComponent *>(lua_touserdata(L, -2));
+		CGameObject *ScriptableComponent = static_cast<CGameObject *>(lua_touserdata(L, -2));
 		if (!ScriptableComponent)
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");

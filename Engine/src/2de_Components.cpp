@@ -92,6 +92,7 @@ bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse
 CGameObject::CGameObject() : Parent(NULL), Scene(NULL)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
+	CEventManager::Instance()->Subscribe("Create", this);
 }
 
 CGameObject::~CGameObject()
@@ -197,7 +198,42 @@ void CGameObject::JustDoIt()
 
 void CGameObject::Deserialize(CXMLNode *AXML)
 {
+	if (AXML->HasAttribute("ClassName"))
+	{
+		ClassName = AXML->GetAttribute("ClassName");
+	}
 
+	if (AXML->HasAttribute("Script"))
+	{
+		SetScript(CFactory::Instance()->Get<CScript>(AXML->GetAttribute("Script")));
+	}
+}
+
+void CGameObject::SetScript(CScript *AScript)
+{
+	CLuaVirtualMachine::Instance()->RunScript(AScript);
+
+	CEvent *CreateEvent = new CEvent("Create", this);
+	CreateEvent->SetData("Name", GetName());
+	CEventManager::Instance()->TriggerEvent(CreateEvent);
+}
+
+void CGameObject::ProcessEvent(const CEvent &AEvent)
+{
+	if (AEvent.GetName() == "Create")
+	{
+		if (AEvent.GetData<string>("Name") == Name)
+		{
+			CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
+			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
+		}
+	}
+	else
+	{
+		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
+		fc.PushArgument(const_cast<CEvent *>(&AEvent));
+		fc.Call();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -309,6 +345,8 @@ void CPlaceableComponent::SetIgnoreParentTransform(bool doIgnore)
 
 void CPlaceableComponent::Deserialize(CXMLNode *AXML)
 {
+	CGameObject::Deserialize(AXML);
+
 	if (AXML->HasAttribute("Angle"))
 		SetAngle(from_string<float>(AXML->GetAttribute("Angle")));
 
@@ -416,6 +454,8 @@ void CRenderableComponent::SetVisibility(bool AVisible)
 
 void CRenderableComponent::Deserialize(CXMLNode *AXML)
 {
+	CGameObject::Deserialize(AXML);
+
 	if (AXML->HasAttribute("Model"))
 	{
 		string ModelName = AXML->GetAttribute("Model");
@@ -634,53 +674,6 @@ void CText::_UpdateSelfModel()
 	SetModel(CRenderManager::CreateModelText(this));
 }
 
-//////////////////////////////////////////////////////////////////////////
-// CScriptableComponent
-
-CScriptableComponent::CScriptableComponent()
-{
-	CEventManager::Instance()->Subscribe("Create", this);
-}
-
-void CScriptableComponent::SetScript(CScript *AScript)
-{
-	CLuaVirtualMachine::Instance()->RunScript(AScript);
-
-	CEvent *CreateEvent = new CEvent("Create", this);
-	CreateEvent->SetData("Name", GetName());
-	CEventManager::Instance()->TriggerEvent(CreateEvent);
-}
-
-void CScriptableComponent::ProcessEvent(const CEvent &AEvent)
-{
-	if (AEvent.GetName() == "Create")
-	{
-		if (AEvent.GetData<string>("Name") == Name)
-		{
-			CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
-			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
-		}
-	}
-	else
-	{
-		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
-		fc.PushArgument(const_cast<CEvent *>(&AEvent));
-		fc.Call();
-	}
-}
-
-void CScriptableComponent::Deserialize(CXMLNode *AXML)
-{
-	if (AXML->HasAttribute("ClassName"))
-	{
-		ClassName = AXML->GetAttribute("ClassName");
-	}
-
-	if (AXML->HasAttribute("Script"))
-	{
-		SetScript(CFactory::Instance()->Get<CScript>(AXML->GetAttribute("Script")));
-	}
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CTimerComponent
@@ -737,6 +730,8 @@ void CTimerComponent::SetInterval(float AInterval)
 
 void CTimerComponent::Deserialize(CXMLNode *AXML)
 {
+	CGameObject::Deserialize(AXML);
+
 	if (AXML->HasAttribute("Interval"))
 	{
 		SetInterval(from_string<float>(AXML->GetAttribute("Interval")));

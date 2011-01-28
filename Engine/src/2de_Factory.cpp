@@ -12,7 +12,7 @@ CFactory::CFactory()
 	AddClass("RenderableComponent", &CFactory::InternalNew<CRenderableComponent>);
 	AddClass("PlaceableComponent", &CFactory::InternalNew<CPlaceableComponent>);
 	AddClass("GeometricComponent", &CFactory::InternalNew<CGeometricComponent>);
-	AddClass("ScriptableComponent", &CFactory::InternalNew<CScriptableComponent>);
+	AddClass("GameObject", &CFactory::InternalNew<CGameObject>);
 	AddClass("Text", &CFactory::InternalNew<CText>);
 	AddClass("TimerComponent", &CFactory::InternalNew<CTimerComponent>);
 }
@@ -48,6 +48,7 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	}
 
 	CGameObject *result = CFactory::Instance()->New<CGameObject>(AName);
+	result->Deserialize(xml);
 
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
 

@@ -2,6 +2,6 @@
 <Prototype Name="GridProto">
     <PlaceableComponent Position="0 0" Scaling="1.0">
         <RenderableComponent Model="GridModel" BlengingMode="Transparent"/>
-		<ScriptableComponent Script="GridScript" ClassName="GridScript"/>
+		<GameObject Script="GridScript" ClassName="GridScript"/>
     </PlaceableComponent>	
 </Prototype>
