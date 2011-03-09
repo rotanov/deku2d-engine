@@ -19,9 +19,9 @@ Vector2_mt = {
 }
 
 function Vector2(ax, ay)
-	local t = {
+	local t_ = {
 		x = ax or 0,
 		y = ay or 0
 	}
-	return setmetatable(t, Vector2_mt)
+	return setmetatable(t_, Vector2_mt)
 end

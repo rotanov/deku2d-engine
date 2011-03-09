@@ -254,8 +254,8 @@ void CNewSuperParticleSystem::CreateParticle()
 	Particles[i].Velocity = Vector2((rand()%1000 - rand()%1000) / 10.0f, (rand()%1000 - rand()%1000) / 10.0f);
 //	NewRenderable->SetScaling(Random_Int(SizeStart - SizeVariability, SizeStart + SizeVariability));
 //	Particles[i].DeltaSize = (SizeOver - NewRenderable->GetScaling()) / Particles[i].Age;
-	NewRenderable->GetColor() = RGBAf::Random(ColorStart - ColorVariability, ColorStart + ColorVariability);
-	RGBAf RealEndColor = RGBAf::Random(ColorOver - ColorVariability, ColorOver + ColorVariability);
+	NewRenderable->GetColor() = RandomRange(ColorStart - ColorVariability, ColorStart + ColorVariability);
+	RGBAf RealEndColor = RandomRange(ColorOver - ColorVariability, ColorOver + ColorVariability);
 	Particles[i].DeltaColor = (RealEndColor - NewRenderable->GetColor()) / Particles[i].Age;
 }
 

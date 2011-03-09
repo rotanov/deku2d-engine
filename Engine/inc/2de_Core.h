@@ -103,7 +103,7 @@ using namespace std;
 //#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
 
-typedef unsigned char		byte;
+typedef unsigned char byte;
 
 //	"Forever" instead of "for(;;)", anyway, just kidding.
 #define forever for(;;)

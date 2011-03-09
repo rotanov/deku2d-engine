@@ -74,7 +74,7 @@ public:
 	int					Emission;					//	Number of particles per frame or second
 
 	float				ParticleLife;
-	int					ParticleLifeVariability;
+	float				ParticleLifeVariability;
 
 	RGBAf				ColorStart;
 	RGBAf				ColorOver;

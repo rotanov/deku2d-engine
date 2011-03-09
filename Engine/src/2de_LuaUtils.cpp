@@ -404,27 +404,28 @@ namespace LuaAPI
 		lua_pushnumber(L, ::Abs(lua_tonumber(L, -1)));
 		return 1;
 	}
-
+#undef Random_Int
 	// number Random_Int(number min, number max)
 	int Random_Int(lua_State *L)
 	{
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Int API call");
 
-		lua_pushnumber(L, ::Random_Int(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		lua_pushnumber(L, ::RandomRange<int>(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 		return 1;
 	}
-
+#define Random_Int RandomRange<int>
+#undef Random_Float
 	// number Random_Float(number min, number max)
 	int Random_Float(lua_State *L)
 	{
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Float API call");
 
-		lua_pushnumber(L, ::Random_Float(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		lua_pushnumber(L, ::RandomRange<float>(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 		return 1;
 	}
-
+#define Random_Float RandomRange<float>
 	// number GetMemoryUsage()
 	int GetMemoryUsage(lua_State *L)
 	{
@@ -777,9 +778,12 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "sin", &LuaAPI::sin);
 	lua_register(State, "cos", &LuaAPI::cos);
 	lua_register(State, "Abs", &LuaAPI::Abs);
+#undef Random_Int
+#undef Random_Float
 	lua_register(State, "Random_Int", &LuaAPI::Random_Int);
 	lua_register(State, "Random_Float", &LuaAPI::Random_Float);
-
+#define Random_Int RandomRange<int>
+#define Random_Float RandomRange<float>
 	// lua & debug
 	lua_register(State, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
 	lua_register(State, "DebugPrintComponentTree", &LuaAPI::DebugPrintComponentTree);

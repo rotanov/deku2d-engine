@@ -1,8 +1,8 @@
 /**
 *	created:	2007/11/06 2:03
 *	filename: 	2de_Math.h
-*	author:		Mapholameth
-*	purpose:	General mathemathical routines and classes
+*	author:		D. Rotanov
+*	purpose:	General mathematical routines and classes
 */
 
 #ifndef _2DE_MATH_UTILS_H_
@@ -12,12 +12,15 @@
 #include <cassert>
 #include <stdexcept>
 
+#ifndef _2DE_CORE_H_
 #if defined(_MSC_VER)
 	#define __INLINE __forceinline
 #elif __GNUC__ >= 4
 	#define __INLINE __inline __attribute__ ((always_inline))
 #else
 	#define __INLINE inline
+#endif
+typedef unsigned char byte;
 #endif
 
 // If enabled then optimized version of 
@@ -33,6 +36,7 @@ const float deganglem =	static_cast<float>(SINE_COSINE_TABLE_DIM) / 360.0f;
 const float radanglem =	static_cast<float>(SINE_COSINE_TABLE_DIM) / PI2;
 const float PI_d180 = PI / 180.0f;
 const float d180_PI	= 180.0f / PI;
+extern unsigned int g_seed;
 
 class Vector2;
 class Matrix2;
@@ -45,8 +49,30 @@ float fCosr(float angle);
 float fCosd(float angle);
 float fCosi(int index);
 
-int Random_Int(int min, int max);
-float Random_Float(float min, float max);
+#define Random_Int RandomRange<int>
+#define Random_Float RandomRange<float>
+
+template <typename T>
+__INLINE T RandomRange(const T &AMin, const T &AMax)
+{
+	assert(false)
+}
+
+template <>
+__INLINE int RandomRange<int>(const int &min, const int &max)
+{
+	assert(max - min + 1);
+	g_seed = 214013*g_seed + 2531011;
+	return min + (g_seed^g_seed>>15) % (max - min + 1);
+}
+
+template <>
+__INLINE float RandomRange<float>(const float &min, const float &max)
+{
+	g_seed = 214013 * g_seed + 2531011;
+	//return min + g_seed * (1.0f / 4294967295.0f) * (max - min);
+	return min + (g_seed >> 16) * (1.0f / 65535.0f) * (max - min);
+}
 
 template<typename T>
 __INLINE T Clamp(const T &x , const T &min, const T &max)
@@ -251,33 +277,6 @@ public:
 		y = Clamp(y, min.y, max.y);
 	}
 
-	__INLINE static Vector2 Random(float Min, float Max)
-	{
-		return Vector2
-			(
-				Random_Float(Min, Max),
-				Random_Float(Min, Max)
-			);
-	}
-
-	__INLINE static Vector2 Random(float xMin, float xMax, float yMin, float yMax)
-	{
-		return Vector2
-			(
-			Random_Float(xMin, xMax),
-			Random_Float(yMin, yMax)
-			);
-	}
-
-	__INLINE static Vector2 Random(const Vector2 &vMin, const Vector2 &vMax)
-	{
-		return Vector2
-			(
-			Random_Float(vMin.x, vMax.x),
-			Random_Float(vMin.y, vMax.y)
-			);
-	}
-
 };
 
 const Vector2 V2_ZERO		= Vector2(0.0f, 0.0f);
@@ -285,6 +284,17 @@ const Vector2 V2_DIR_LEFT	= Vector2(-1.0f, 0.0f);
 const Vector2 V2_DIR_RIGHT	= (-V2_DIR_LEFT);
 const Vector2 V2_DIR_UP		= Vector2(0.0f, 1.0f);
 const Vector2 V2_DIR_DOWN	= (-V2_DIR_UP);
+
+template<>
+__INLINE Vector2 RandomRange<Vector2>(const Vector2 &AMin, const Vector2 &AMax)
+{
+	return Vector2
+		(
+			Random_Float(AMin.x, AMax.x),
+			Random_Float(AMin.y, AMax.y)
+		);
+}
+
 
 const Vector2 V2_DIRECTIONS[4] = {V2_DIR_LEFT, V2_DIR_DOWN, V2_DIR_RIGHT, V2_DIR_UP,};
 
@@ -994,33 +1004,35 @@ public:
 		m.m[2].z = 1.0f - (xx + yy);
     }
 
-	__INLINE static Vector4 Random(const Vector4 &vMin, const Vector4 &vMax)
-	{
-		return Vector4
-			(
-				Random_Float(vMin.x, vMax.x),
-				Random_Float(vMin.y, vMax.y),
-				Random_Float(vMin.z, vMax.z),
-				Random_Float(vMin.w, vMax.w)
-			);
-	}
+
 };
+
+template <>
+__INLINE Vector4 RandomRange<Vector4>(const Vector4 &AMin, const Vector4 &AMax)
+{
+	return Vector4
+		(
+			RandomRange(AMin.x, AMax.x),
+			RandomRange(AMin.y, AMax.y),
+			RandomRange(AMin.z, AMax.z),
+			RandomRange(AMin.w, AMax.w)
+		);
+}
 
 typedef Vector4 Quaternion;
 
 /**
-*	Despite Vector4 (aka Quaternion) and RGBAf have much in common they
-*	have some difference and I decided get rid of union and put them into
+*	Despite Vector4 (aka Quaternion) and RGBA have much in common they
+*	have some difference and I decided to get rid of union and put them into
 *	separate classes without common base class. That's it.
 */
-class RGBAf
+template <typename T>
+class RGBA
 {
 public:
-		float r, g, b, a;
+		T r, g, b, a;
 
-		RGBAf(float Ar = 0.0f, float Ag = 0.0f, float Ab = 0.0f, float Aa = 1.0f) : r(Ar), g(Ag),	b(Ab), a(Aa) {}
-
-		__INLINE RGBAf& operator =(const RGBAf& rhs)
+		__INLINE RGBA& operator =(const RGBA& rhs)
 		{
 			r = rhs.r;
 			g = rhs.g;
@@ -1029,28 +1041,28 @@ public:
 			return *this;
 		}
 
-		__INLINE RGBAf operator +(const RGBAf &rhs) const
+		__INLINE RGBA operator +(const RGBA &rhs) const
 		{			
-			return RGBAf(r + rhs.r , g + rhs.g, b + rhs.b, a + rhs.a);
+			return RGBA(r + rhs.r , g + rhs.g, b + rhs.b, a + rhs.a);
 		}
 
-		__INLINE RGBAf operator -(const RGBAf &rhs) const
+		__INLINE RGBA operator -(const RGBA &rhs) const
 		{
-			return RGBAf(r - rhs.r , g - rhs.g, b - rhs.b, a - rhs.a);
+			return RGBA(r - rhs.r , g - rhs.g, b - rhs.b, a - rhs.a);
 		}
 
-		__INLINE RGBAf operator *(float rhs) const
+		__INLINE RGBA operator *(float rhs) const
 		{
-			return RGBAf(r * rhs, g * rhs, b * rhs, a * rhs);
+			return RGBA(r * rhs, g * rhs, b * rhs, a * rhs);
 		}
 
-		__INLINE RGBAf operator /(float rhs) const
+		__INLINE RGBA operator /(float rhs) const
 		{
 			float rhs_1 = 1.0f / rhs;
 			return (*this) * rhs_1;
 		}
 
-		__INLINE RGBAf& operator +=(const RGBAf &rhs)
+		__INLINE RGBA& operator +=(const RGBA &rhs)
 		{
 			r += rhs.r;
 			g += rhs.g;
@@ -1059,7 +1071,7 @@ public:
 			return *this;
 		}
 
-		__INLINE RGBAf& operator -=(const RGBAf &rhs)
+		__INLINE RGBA& operator -=(const RGBA &rhs)
 		{
 			r -= rhs.r;
 			g -= rhs.g;
@@ -1068,7 +1080,7 @@ public:
 			return *this;
 		}
 
-		__INLINE RGBAf& operator *=(float rhs)
+		__INLINE RGBA& operator *=(float rhs)
 		{
 			this->r *= rhs;
 			this->g *= rhs;
@@ -1077,45 +1089,261 @@ public:
 			return *this;
 		}
 
-		__INLINE RGBAf& operator /=(float rhs)
+		__INLINE RGBA& operator /=(float rhs)
 		{
 			float rhs_1 = 1.0f / rhs;
 			return (*this) *= rhs_1;
 		}
 
-		__INLINE bool operator ==(const RGBAf &rhs) const
+		__INLINE bool operator ==(const RGBA &rhs) const
 		{
 			return Equal(r, rhs.r) && Equal(g, rhs.g) && Equal(b, rhs.b) && Equal(a, rhs.a);
 		}
 
-		__INLINE bool operator !=(const RGBAf &rhs) const
+		__INLINE bool operator !=(const RGBA &rhs) const
 		{
 			return !((*this) == rhs);
 		}
 
-		__INLINE static RGBAf Random(const RGBAf &vMin, const RGBAf &vMax)
-		{
-			return RGBAf
-				(
-					Random_Float(vMin.r, vMax.r),
-					Random_Float(vMin.g, vMax.g),
-					Random_Float(vMin.b, vMax.b),
-					Random_Float(vMin.a, vMax.a)
-				);
-		}
-
-		__INLINE float& operator [](unsigned int i)
+		__INLINE T& operator [](unsigned int i)
 		{
 			assert(i < 4);
 			return *(&r + i);
 		}
 
-		__INLINE float operator [](unsigned int i) const
+		__INLINE T operator [](unsigned int i) const
 		{
 			assert(i < 4);
 			return *(&r + i);
 		}
 };
+
+template <>
+class RGBA<float>
+{
+public:
+	float r, g, b, a;
+	RGBA(float Ar = 0.0f, float Ag = 0.0f, float Ab = 0.0f, float Aa = 1.0f) : r(Ar), g(Ag),	b(Ab), a(Aa) {}
+	__INLINE RGBA& operator =(const RGBA& rhs)
+	{
+		r = rhs.r;
+		g = rhs.g;
+		b = rhs.b;
+		a = rhs.a;
+		return *this;
+	}
+
+	__INLINE RGBA operator +(const RGBA &rhs) const
+	{			
+		return RGBA(r + rhs.r , g + rhs.g, b + rhs.b, a + rhs.a);
+	}
+
+	__INLINE RGBA operator -(const RGBA &rhs) const
+	{
+		return RGBA(r - rhs.r , g - rhs.g, b - rhs.b, a - rhs.a);
+	}
+
+	__INLINE RGBA operator *(float rhs) const
+	{
+		return RGBA(r * rhs, g * rhs, b * rhs, a * rhs);
+	}
+
+	__INLINE RGBA operator /(float rhs) const
+	{
+		float rhs_1 = 1.0f / rhs;
+		return (*this) * rhs_1;
+	}
+
+	__INLINE RGBA& operator +=(const RGBA &rhs)
+	{
+		r += rhs.r;
+		g += rhs.g;
+		b += rhs.b;
+		a += rhs.a;
+		return *this;
+	}
+
+	__INLINE RGBA& operator -=(const RGBA &rhs)
+	{
+		r -= rhs.r;
+		g -= rhs.g;
+		b -= rhs.b;
+		a -= rhs.a;
+		return *this;
+	}
+
+	__INLINE RGBA& operator *=(float rhs)
+	{
+		this->r *= rhs;
+		this->g *= rhs;
+		this->b *= rhs;
+		this->a *= rhs;
+		return *this;
+	}
+
+	__INLINE RGBA& operator /=(float rhs)
+	{
+		float rhs_1 = 1.0f / rhs;
+		return (*this) *= rhs_1;
+	}
+
+	__INLINE bool operator ==(const RGBA &rhs) const
+	{
+		return Equal(r, rhs.r) && Equal(g, rhs.g) && Equal(b, rhs.b) && Equal(a, rhs.a);
+	}
+
+	__INLINE bool operator !=(const RGBA &rhs) const
+	{
+		return !((*this) == rhs);
+	}
+
+	__INLINE float& operator [](unsigned int i)
+	{
+		assert(i < 4);
+		return *(&r + i);
+	}
+
+	__INLINE float operator [](unsigned int i) const
+	{
+		assert(i < 4);
+		return *(&r + i);
+	}
+
+};
+
+template <>
+class RGBA<byte>
+{
+public:
+	byte r, g, b, a;
+	RGBA(byte Ar = 0, byte Ag = 0, byte Ab = 0, byte Aa = 255) : r(Ar), g(Ag),	b(Ab), a(Aa) {}
+	__INLINE RGBA& operator =(const RGBA& rhs)
+	{
+		r = rhs.r;
+		g = rhs.g;
+		b = rhs.b;
+		a = rhs.a;
+		return *this;
+	}
+
+	__INLINE RGBA operator +(const RGBA &rhs) const
+	{			
+		return RGBA(r + rhs.r , g + rhs.g, b + rhs.b, a + rhs.a);
+	}
+
+	__INLINE RGBA operator -(const RGBA &rhs) const
+	{
+		return RGBA(r - rhs.r , g - rhs.g, b - rhs.b, a - rhs.a);
+	}
+
+	__INLINE RGBA operator *(float rhs) const
+	{
+		return RGBA(r * rhs, g * rhs, b * rhs, a * rhs);
+	}
+
+	__INLINE RGBA operator /(float rhs) const
+	{
+		float rhs_1 = 1.0f / rhs;
+		return (*this) * rhs_1;
+	}
+
+	__INLINE RGBA& operator +=(const RGBA &rhs)
+	{
+		r += rhs.r;
+		g += rhs.g;
+		b += rhs.b;
+		a += rhs.a;
+		return *this;
+	}
+
+	__INLINE RGBA& operator -=(const RGBA &rhs)
+	{
+		r -= rhs.r;
+		g -= rhs.g;
+		b -= rhs.b;
+		a -= rhs.a;
+		return *this;
+	}
+
+	__INLINE RGBA& operator *=(float rhs)
+	{
+		this->r *= rhs;
+		this->g *= rhs;
+		this->b *= rhs;
+		this->a *= rhs;
+		return *this;
+	}
+
+	__INLINE RGBA& operator /=(float rhs)
+	{
+		float rhs_1 = 1.0f / rhs;
+		return (*this) *= rhs_1;
+	}
+
+	__INLINE bool operator ==(const RGBA &rhs) const
+	{
+		return Equal(r, rhs.r) && Equal(g, rhs.g) && Equal(b, rhs.b) && Equal(a, rhs.a);
+	}
+
+	__INLINE bool operator !=(const RGBA &rhs) const
+	{
+		return !((*this) == rhs);
+	}
+
+	__INLINE byte& operator [](unsigned int i)
+	{
+		assert(i < 4);
+		return *(&r + i);
+	}
+
+	__INLINE byte operator [](unsigned int i) const
+	{
+		assert(i < 4);
+		return *(&r + i);
+	}
+
+};
+
+typedef RGBA<float> RGBAf;
+typedef RGBA<byte> RGBAub;
+
+template <typename T >
+__INLINE RGBA<T> RandomRange(const RGBA<T> &AMin, const RGBA<T> &AMax)
+{
+	return RGBA<T>
+		(
+			RandomRange(AMin.r, AMax.r),
+			RandomRange(AMin.g, AMax.g),
+			RandomRange(AMin.b, AMax.b),
+			RandomRange(AMin.a, AMax.a)
+		);
+}
+
+/*
+template <>
+RGBAf RandomRange<RGBAf>(const RGBAf &AMin, const RGBAf &AMax)
+{
+	return RGBAf
+		(
+			Random_Float(AMin.r, AMax.r),
+			Random_Float(AMin.g, AMax.g),
+			Random_Float(AMin.b, AMax.b),
+			Random_Float(AMin.a, AMax.a)
+		);
+}
+
+template <>
+RGBAub RandomRange<RGBAub>(const RGBAub &AMin, const RGBAub &AMax)
+{
+	return RGBAub
+		(
+			Random_Int(AMin.r, AMax.r),
+			Random_Int(AMin.g, AMax.g),
+			Random_Int(AMin.b, AMax.b),
+			Random_Int(AMin.a, AMax.a)
+		);
+}
+*/
 
 /**
 *	CBox - rectangle representation for common needs.	
