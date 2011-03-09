@@ -12,15 +12,22 @@
 #include <cassert>
 #include <stdexcept>
 
-#ifndef _2DE_CORE_H_
-#if defined(_MSC_VER)
-	#define __INLINE __forceinline
-#elif __GNUC__ >= 4
-	#define __INLINE __inline __attribute__ ((always_inline))
-#else
-	#define __INLINE inline
+#ifndef __INLINE
+	#if defined(_MSC_VER)
+		#define __INLINE __forceinline
+	#elif __GNUC__ >= 4
+		#define __INLINE __inline __attribute__ ((always_inline))
+	#else
+		#define __INLINE inline
+	#endif
 #endif
-typedef unsigned char byte;
+
+#if defined(min)
+	#undef min
+#endif
+
+#if defined(max)
+	#undef max
 #endif
 
 // If enabled then optimized version of 
@@ -55,7 +62,7 @@ float fCosi(int index);
 template <typename T>
 __INLINE T RandomRange(const T &AMin, const T &AMax)
 {
-	assert(false)
+	assert(false);
 }
 
 template <>
@@ -1212,11 +1219,11 @@ public:
 };
 
 template <>
-class RGBA<byte>
+class RGBA<unsigned char>
 {
 public:
-	byte r, g, b, a;
-	RGBA(byte Ar = 0, byte Ag = 0, byte Ab = 0, byte Aa = 255) : r(Ar), g(Ag),	b(Ab), a(Aa) {}
+	unsigned char r, g, b, a;
+	RGBA(unsigned char Ar = 0, unsigned char Ag = 0, unsigned char Ab = 0, unsigned char Aa = 255) : r(Ar), g(Ag),	b(Ab), a(Aa) {}
 	__INLINE RGBA& operator =(const RGBA& rhs)
 	{
 		r = rhs.r;
@@ -1290,13 +1297,13 @@ public:
 		return !((*this) == rhs);
 	}
 
-	__INLINE byte& operator [](unsigned int i)
+	__INLINE unsigned char& operator [](unsigned int i)
 	{
 		assert(i < 4);
 		return *(&r + i);
 	}
 
-	__INLINE byte operator [](unsigned int i) const
+	__INLINE unsigned char operator [](unsigned int i) const
 	{
 		assert(i < 4);
 		return *(&r + i);
@@ -1305,7 +1312,7 @@ public:
 };
 
 typedef RGBA<float> RGBAf;
-typedef RGBA<byte> RGBAub;
+typedef RGBA<unsigned char> RGBAub;
 
 template <typename T >
 __INLINE RGBA<T> RandomRange(const RGBA<T> &AMin, const RGBA<T> &AMax)
