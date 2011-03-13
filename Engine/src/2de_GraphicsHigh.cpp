@@ -2,7 +2,7 @@
 
 // Texture coordinates generations for arbitrary polygon
 // 	glBegin(GL_TRIANGLE_FAN);
-// 	for (unsigned int i = 0; i < poly.GetVertexCount(); i++)
+// 	for (unsigned i = 0; i < poly.GetVertexCount(); i++)
 // 	{
 // #ifdef G_POLY_TEXTURE_ENABLE
 // 		glTexCoord2f(poly[i].x/G_POLY_TEX_CELL_SIZE, poly[i].y/G_POLY_TEX_CELL_SIZE);

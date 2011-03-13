@@ -36,7 +36,7 @@ void CEvent::SetSender(CObject *ASender)
 //////////////////////////////////////////////////////////////////////////
 // CObject
 
-unsigned int CObject::CObjectCount = 0;
+unsigned CObject::CObjectCount = 0;
 
 CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)) /*, RefCount(0) */
 {
@@ -98,7 +98,7 @@ void CObject::SetName(const string &AObjectName)
 	Name = AObjectName;
 }
 
-unsigned int CObject::GetID() const
+unsigned CObject::GetID() const
 {
 	return ID;
 }

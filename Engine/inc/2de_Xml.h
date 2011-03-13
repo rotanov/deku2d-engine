@@ -170,7 +170,7 @@ protected:
 
 	CXMLNode *Parent;
 	string Name;
-	unsigned int Depth;
+	unsigned Depth;
 	EXMLNodeType Type;
 
 	map<string, string, CCaseInsensetiveComparison> Attributes;

@@ -241,12 +241,12 @@ void CGLWindow::GLInit()
 	glAlphaFunc(GL_GREATER, 0);
 }
 
-unsigned int CGLWindow::GetWidth() const
+unsigned CGLWindow::GetWidth() const
 {
 	return Parameters.Width;
 }
 
-unsigned int CGLWindow::GetHeight() const
+unsigned CGLWindow::GetHeight() const
 {
 	return Parameters.Height;
 }
@@ -271,17 +271,17 @@ RGBAf CGLWindow::GetBackgroundColor() const
 	return BackgroundColor;
 }
 
-void CGLWindow::SetWidth(unsigned int AWidth)
+void CGLWindow::SetWidth(unsigned AWidth)
 {
 	NewParameters.Width = AWidth;
 }
 
-void CGLWindow::SetHeight(unsigned int AHeight)
+void CGLWindow::SetHeight(unsigned AHeight)
 {
 	NewParameters.Height = AHeight;
 }
 
-void CGLWindow::SetSize(unsigned int AWidth, unsigned int AHeight)
+void CGLWindow::SetSize(unsigned AWidth, unsigned AHeight)
 {
 	NewParameters.Width = AWidth;
 	NewParameters.Height = AHeight;
@@ -470,11 +470,11 @@ float CFont::GetStringWidthEx(int t1, int t2, const string &text)
 {
 	if (t1 > t2 || t2 < 0)
 		return 0;
-	if ((unsigned int)t2 >= text.length())
+	if ((unsigned)t2 >= text.length())
 		return 0;
 
 	int r = 0;
-	for (unsigned int i = t1; i <= t2; i++)
+	for (unsigned i = t1; i <= t2; i++)
 		r += Width[(byte)text[i]-32] + Distance;
 	return r;
 }
@@ -491,10 +491,10 @@ float CFont::GetStringHeightEx(int t1, int t2, const string &text)
 {
 	if (t1 > t2 || t2 < 0)
 		return 0;
-	if ((unsigned int)t2 >= text.length())
+	if ((unsigned)t2 >= text.length())
 		return 0;
 	float r = 0, l = text.length();
-	for (unsigned int i = 0; i < text.length(); i++)
+	for (unsigned i = 0; i < text.length(); i++)
 		r = std::max(Height[(byte)text[i] - 32], r);
 	return r;
 }
@@ -535,12 +535,12 @@ float CFont::GetDistance() const
 	return Distance;
 }
 
-float CFont::SymbolWidth(unsigned int Index) const
+float CFont::SymbolWidth(unsigned Index) const
 {
 	return Width[Index];
 }
 
-Vector2Array<4> CFont::GetTexCoords(unsigned int Charachter) /*const Vector2Array<4>& GetTexCoords(unsigned int Charachter) // <-- warning: reference to local variable result returned */
+Vector2Array<4> CFont::GetTexCoords(unsigned Charachter) /*const Vector2Array<4>& GetTexCoords(unsigned Charachter) // <-- warning: reference to local variable result returned */
 {
 	Vector2Array<4> result;
 	result[0] = Vector2(Boxes[Charachter - 32].Min.x / Texture->Width,
@@ -690,7 +690,7 @@ void CRenderManager::TransfomationTraverse(CGameObject *Next)
 {
 	CPlaceableComponent *PlaceableComponent = NULL;
 	CRenderableComponent *RenderableComponent = NULL;
-	for(unsigned int i = 0; i < Next->Children.size(); i++)
+	for(unsigned i = 0; i < Next->Children.size(); i++)
 	{
 		RenderableComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
 		if (RenderableComponent != NULL && RenderableComponent->GetVisibility() && 
@@ -735,7 +735,7 @@ CModel* CRenderManager::CreateModelText(const CText *AText)
 	float liheight;
 	float maxliheight = 0.0f;
 
-	for (unsigned int i = 0; i < AText->Length(); i++)
+	for (unsigned i = 0; i < AText->Length(); i++)
 	{
 		if (RText[i] == '\n')
 		{
@@ -1234,7 +1234,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 	{
 		bool flag = false;
 		int index = -1;
-		for(unsigned int i = 0; i < TexIDs.size(); i++)
+		for(unsigned i = 0; i < TexIDs.size(); i++)
 			if (TexIDs[i] == AModel->GetTexture()->GetTexID())
 			{
 				flag = true;
@@ -1253,7 +1253,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 
 		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
 		CTransformation Transformation = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
-		for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
+		for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 		{
 			Vertex = AModel->GetVertices()[i];
 			//TempVector = (Vertex * Transformation.GetScaling());
@@ -1294,7 +1294,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 
 	Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
 	CTransformation Transformation = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
-	for(unsigned int i  = 0; i < AModel->GetVertexNumber(); i++)
+	for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];
 		TempVector = (Vertex * Transformation.GetScaling());
@@ -1346,7 +1346,7 @@ CFFPRenderer::~CFFPRenderer()
 
 void CFFPRenderer::Clear()
 {
-	for(unsigned int i = 0; i < TOTAL_HOLDERS; i++)
+	for(unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		PrimitiveHolders[i].Clear();
 }
 
@@ -1397,7 +1397,7 @@ void CFFPRenderer::CBetterVertexHolder::Clear()
 	VertexCount = 0;
 }
 
-unsigned int CFFPRenderer::CBetterVertexHolder::GetVertexCount()
+unsigned CFFPRenderer::CBetterVertexHolder::GetVertexCount()
 {
 	return VertexCount;
 }
@@ -1406,7 +1406,7 @@ void CFFPRenderer::CBetterVertexHolder::_Grow()
 {
 	ReservedCount = VertexCount * 2;
 	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned i = 0; i < VertexCount; i++)
 		NewColors[i] = Colors[i];
 
 	delete[] Colors;
@@ -1414,7 +1414,7 @@ void CFFPRenderer::CBetterVertexHolder::_Grow()
 	Colors = NewColors;
 
 	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned i = 0; i < VertexCount; i++)
 		NewVertices[i] = Vertices[i];
 
 	delete[] Vertices;
@@ -1577,7 +1577,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::Clear()
 	VertexCount = 0;
 }
 
-unsigned int CFFPRenderer::CBetterTextureVertexHolder::GetVertexCount()
+unsigned CFFPRenderer::CBetterTextureVertexHolder::GetVertexCount()
 {
 	return VertexCount;
 }
@@ -1586,7 +1586,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 {
 	ReservedCount = VertexCount * 2;
 	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned i = 0; i < VertexCount; i++)
 		NewColors[i] = Colors[i];
 
 	delete[] Colors;
@@ -1594,7 +1594,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 	Colors = NewColors;
 
 	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned i = 0; i < VertexCount; i++)
 		NewVertices[i] = Vertices[i];
 
 	delete[] Vertices;
@@ -1602,7 +1602,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 	Vertices = NewVertices;
 
 	Vector2 *NewTexCoords = new Vector2[ReservedCount];
-	for (unsigned int i = 0; i < VertexCount; i++)
+	for (unsigned i = 0; i < VertexCount; i++)
 		NewTexCoords[i] = TexCoords[i];
 
 	delete [] TexCoords;
@@ -1614,7 +1614,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 // CModel
 
 CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
-			   CTexture * ATexture /*= NULL*/, unsigned int AVerticesNumber /*= 0*/,
+			   CTexture * ATexture /*= NULL*/, unsigned AVerticesNumber /*= 0*/,
 			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
 	Texture(ATexture), ModelType(AModelType), Vertices(NULL),
 	TexCoords(NULL), VerticesNumber(AVerticesNumber)

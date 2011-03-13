@@ -19,10 +19,10 @@ public:
 	CTexture* GetTexture() const;
 	void SetTexture(const string &TextureName);
 
-	unsigned int TileWidth;
-	unsigned int TileHeight;
-	unsigned int HorNumTiles;
-	unsigned int VerNumTiles;
+	unsigned TileWidth;
+	unsigned TileHeight;
+	unsigned HorNumTiles;
+	unsigned VerNumTiles;
 	CBox* BBox;
 
 private:

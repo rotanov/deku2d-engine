@@ -11,8 +11,8 @@
 #define _2DE_DEBUG_DRAW_BOXES
 
 // OpenGL is not included in the interface now, so I'll redefine it myself
-typedef unsigned int GLuint;
-typedef unsigned int GLenum;
+typedef unsigned GLuint;
+typedef unsigned GLenum;
 typedef int GLsizei;
 
 //////////////////////////////////////////////////////////////////////////
@@ -47,10 +47,10 @@ const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
 const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
 const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 
-extern const unsigned int BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
+extern const unsigned BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
 extern byte BINARY_DATA_DEFAULT_FONT_TEXTURE[];
 
-extern const unsigned int BINARY_DATA_DEFAULT_FONT_SIZE;
+extern const unsigned BINARY_DATA_DEFAULT_FONT_SIZE;
 extern byte BINARY_DATA_DEFAULT_FONT[];
 
 class CAbstractScene;
@@ -158,7 +158,7 @@ class CModel : public CResource
 {
 public:
 	CModel(EModelType AModelType = MODEL_TYPE_NOT_A_MODEL, CTexture * ATexture = NULL,
-		unsigned int AVerticesNumber = 0, Vector2* AVertices = NULL, 
+		unsigned AVerticesNumber = 0, Vector2* AVertices = NULL, 
 		Vector2* ATexCoords = NULL);
 	~CModel();
 	void SetTexture(CTexture *ATexture);
@@ -178,7 +178,7 @@ private:
 	EModelType ModelType;
 	Vector2 *Vertices;
 	Vector2 *TexCoords;
-	unsigned int VerticesNumber;
+	unsigned VerticesNumber;
 };
 
 /**
@@ -317,12 +317,12 @@ private:
 		virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
 		virtual void RenderPrimitive(GLuint);
 		void Clear();
-		unsigned int GetVertexCount();
+		unsigned GetVertexCount();
 
 	protected:
-		static const unsigned int StartSize = 256;
-		unsigned int VertexCount;
-		unsigned int ReservedCount;
+		static const unsigned StartSize = 256;
+		unsigned VertexCount;
+		unsigned ReservedCount;
 		RGBAf *Colors;
 		Vector3 *Vertices;
 
@@ -337,12 +337,12 @@ private:
 		virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord);
 		virtual void RenderPrimitive(GLuint);
 		void Clear();
-		unsigned int GetVertexCount();
+		unsigned GetVertexCount();
 
 	protected:
-		static const unsigned int StartSize = 256;
-		unsigned int VertexCount;
-		unsigned int ReservedCount;
+		static const unsigned StartSize = 256;
+		unsigned VertexCount;
+		unsigned ReservedCount;
 		RGBAf *Colors;
 		Vector3 *Vertices;
 		Vector2 *TexCoords;
@@ -382,9 +382,9 @@ public:
 	void SetTexture(const string &TextureName);
 	CBox GetSymbolsBBOX();
 	float GetDistance() const;
-	float SymbolWidth(unsigned int Index) const;
-	Vector2Array<4> GetTexCoords(unsigned int Charachter);
-	//const Vector2Array<4>& GetTexCoords(unsigned int Charachter)
+	float SymbolWidth(unsigned Index) const;
+	Vector2Array<4> GetTexCoords(unsigned Charachter);
+	//const Vector2Array<4>& GetTexCoords(unsigned Charachter)
 	// <-- warning: reference to local variable ‘result’ returned;
 	// This function is not for user, so there should be some kind of guard
 	// To let using of this function only for what needs it
@@ -506,8 +506,8 @@ class CGLWindow : public CTSingleton<CGLWindow>
 public:
 	struct WindowVideoParameters	// Where is fucking "C"? "struct" is deprecated by our docs. I missed this with variable, really.
 	{
-		unsigned int Width;
-		unsigned int Height;
+		unsigned Width;
+		unsigned Height;
 		byte BPP;
 		bool isFullscreen;
 
@@ -522,17 +522,17 @@ public:
 	bool Initialize();
 	void GLInit();
 
-	unsigned int GetWidth() const;
-	unsigned int GetHeight() const;
+	unsigned GetWidth() const;
+	unsigned GetHeight() const;
 	Vector2 GetSize() const;
 	bool GetBPP() const;
 	bool GetFullscreen() const;
 	string GetCaption() const;
 	RGBAf GetBackgroundColor() const;
 
-	void SetWidth(unsigned int AWidth);
-	void SetHeight(unsigned int AHeight);
-	void SetSize(unsigned int AWidth, unsigned int AHeight);
+	void SetWidth(unsigned AWidth);
+	void SetHeight(unsigned AHeight);
+	void SetSize(unsigned AWidth, unsigned AHeight);
 	void SetBPP(byte ABPP);
 	void SetFullscreen(bool AFullscreen);
 	void SetCaption(const string &ACaption);

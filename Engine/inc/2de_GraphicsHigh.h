@@ -50,9 +50,9 @@ private:
 	CResourceRefCounter<CTexture> Texture;
 	unsigned long EllapsedTime;
 	unsigned long LastTime;
-	unsigned int CurrentFrame;
-	unsigned int CurrentRow;
-	unsigned int CurrentColumn;
+	unsigned CurrentFrame;
+	unsigned CurrentRow;
+	unsigned CurrentColumn;
 	bool isFirstTimeRendering;
 	size_t AnimationsCount;
 	SAnimationInfo *animations;

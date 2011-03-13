@@ -43,7 +43,7 @@ const float deganglem =	static_cast<float>(SINE_COSINE_TABLE_DIM) / 360.0f;
 const float radanglem =	static_cast<float>(SINE_COSINE_TABLE_DIM) / PI2;
 const float PI_d180 = PI / 180.0f;
 const float d180_PI	= 180.0f / PI;
-extern unsigned int g_seed;
+extern unsigned g_seed;
 
 class Vector2;
 class Matrix2;
@@ -327,12 +327,12 @@ private:
 public:
 	Vector2Array(const Vector2 *Vertices)
 	{
-		for(unsigned int i = 0; i < N; i++)
+		for(unsigned i = 0; i < N; i++)
 			Elements[i] = Vertices[i];
 	}
 	Vector2Array()
 	{
-		for(unsigned int i = 0; i < N; i++)
+		for(unsigned i = 0; i < N; i++)
 			Elements[i] = V2_ZERO;
 	}
 	Vector2& operator [](size_t Index)
@@ -1112,13 +1112,13 @@ public:
 			return !((*this) == rhs);
 		}
 
-		__INLINE T& operator [](unsigned int i)
+		__INLINE T& operator [](unsigned i)
 		{
 			assert(i < 4);
 			return *(&r + i);
 		}
 
-		__INLINE T operator [](unsigned int i) const
+		__INLINE T operator [](unsigned i) const
 		{
 			assert(i < 4);
 			return *(&r + i);
@@ -1204,13 +1204,13 @@ public:
 		return !((*this) == rhs);
 	}
 
-	__INLINE float& operator [](unsigned int i)
+	__INLINE float& operator [](unsigned i)
 	{
 		assert(i < 4);
 		return *(&r + i);
 	}
 
-	__INLINE float operator [](unsigned int i) const
+	__INLINE float operator [](unsigned i) const
 	{
 		assert(i < 4);
 		return *(&r + i);
@@ -1297,13 +1297,13 @@ public:
 		return !((*this) == rhs);
 	}
 
-	__INLINE unsigned char& operator [](unsigned int i)
+	__INLINE unsigned char& operator [](unsigned i)
 	{
 		assert(i < 4);
 		return *(&r + i);
 	}
 
-	__INLINE unsigned char operator [](unsigned int i) const
+	__INLINE unsigned char operator [](unsigned i) const
 	{
 		assert(i < 4);
 		return *(&r + i);
@@ -1365,7 +1365,7 @@ public:
 	CBox();
 	CBox(const Vector2 &AMin, const Vector2 &AMax);
 	CBox(float xmin, float ymin, float xmax, float ymax);
-	CBox(int x, int y, unsigned int width, unsigned int height);
+	CBox(int x, int y, unsigned width, unsigned height);
 	CBox(const Vector2 &Center, float Width, float Height);
 	CBox(const Vector2 &Center, float Radius);
 	CBox(const Vector2Array<4> &Vertices);
@@ -1450,7 +1450,7 @@ public:
 	{
 		return Box;
 	}
-	virtual void CopyVertices(Vector2 *Destination, unsigned int &VerticesCount)
+	virtual void CopyVertices(Vector2 *Destination, unsigned &VerticesCount)
 	{
 		if (Destination == NULL)
 			return;
@@ -1486,15 +1486,15 @@ class CPolygon : public CGeometry
 {
 public:
 	CPolygon();
-	CPolygon(unsigned int AVerticesCount);
+	CPolygon(unsigned AVerticesCount);
 	~CPolygon();
-	void Reset(unsigned int AVerticesCount);
+	void Reset(unsigned AVerticesCount);
 	void CalcBox();
 	void AddVertex(const Vector2 &Vertex);
-	void RemoveVertex(unsigned int Index);
-	Vector2& operator [](unsigned int Index);
-	const Vector2& operator [](unsigned int Index) const;
-	unsigned int GetVertexCount() const;
+	void RemoveVertex(unsigned Index);
+	Vector2& operator [](unsigned Index);
+	const Vector2& operator [](unsigned Index) const;
+	unsigned GetVertexCount() const;
 
 	static bool	Collide	(	const CPolygon &A,
 							const Vector2 &Apos,
@@ -1507,7 +1507,7 @@ public:
 							Vector2& n,
 							float& depth);
 private:
-	unsigned int VerticesCount;
+	unsigned VerticesCount;
 	Vector2 *Vertices;
 };
 

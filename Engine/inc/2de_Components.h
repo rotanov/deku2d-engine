@@ -35,7 +35,7 @@ public:
 	{
 	private:
 		queue<CGameObject*> Queue;
-		unsigned int Index; // Index of current object in it's parent Children
+		unsigned Index; // Index of current object in it's parent Children
 
 	public:
 		traverse_iterator_bfs(CGameObject &AGameObject);
@@ -52,7 +52,7 @@ public:
 	class traverse_iterator_dfs : public traverse_iterator
 	{
 	private:
-		std::vector<std::pair<CGameObject*, unsigned int> > Path;
+		std::vector<std::pair<CGameObject*, unsigned> > Path;
 
 	public:
 		traverse_iterator_dfs(CGameObject &AGameObject) : traverse_iterator(AGameObject)
@@ -264,10 +264,10 @@ public:
 	void SetFont(CFont *AFont);
 	void SetText(const string &AText);
 	CText& operator =(const string &AText);
-	unsigned char operator [] (unsigned int index) const;
+	unsigned char operator [] (unsigned index) const;
 	// Such function could be there no more. Text has no info about box and world position now, But We can generate info 'bout box anytime instead
 	//float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
-	unsigned int Length() const;
+	unsigned Length() const;
 
 	void Deserialize(CXMLNode *AXML);
 

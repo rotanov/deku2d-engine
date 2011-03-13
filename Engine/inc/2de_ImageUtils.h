@@ -4,11 +4,11 @@
 #include "2de_Core.h"
 #include "2de_Math.h"
 
-extern unsigned int  IMAGE_SHROOM_TITLE_SIZE;
+extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
 extern byte IMAGE_SHROOM_TITLE_DATA[];
 
-// extern const unsigned int IMAGE_DEFAULT_FONT_WIDTH;
-// extern const unsigned int IMAGE_DEFAULT_FONT_HEIGHT;
+// extern const unsigned IMAGE_DEFAULT_FONT_WIDTH;
+// extern const unsigned IMAGE_DEFAULT_FONT_HEIGHT;
 // extern char IMAGE_DEFAULT_FONT_DATA[];
 
 

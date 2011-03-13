@@ -17,7 +17,7 @@
 	#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
 	#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
 	#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
-	#pragma warning (disable	:	4291)	//	void *operator new(unsigned int,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
+	#pragma warning (disable	:	4291)	//	void *operator new(unsigned,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
 	//after w4
 	#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
 	#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
@@ -346,7 +346,7 @@ public:
 	string GetName() const;
 	virtual void SetName(const string &AObjectName);
 
-	unsigned int GetID() const;
+	unsigned GetID() const;
 
 	bool isDestroyed() const;
 	void SetDestroyed();
@@ -358,7 +358,7 @@ public:
 protected:
 	bool Managed;
 	bool Destroyed;
-	unsigned int ID;
+	unsigned ID;
 	string Name;
 
 private:
@@ -366,7 +366,7 @@ private:
 	CObject& operator=(const CObject &AObject);
 	//size_t RefCount;
 
-	static unsigned int CObjectCount;
+	static unsigned CObjectCount;
 
 	friend class CFactory;
 };
@@ -1035,7 +1035,7 @@ inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fnam
 void RemoveTrack(unsigned long addr);
 void DumpUnfreed();
 
-inline void * operator new(unsigned int size, const char *file, int line)
+inline void * operator new(unsigned size, const char *file, int line)
 {
 	void *ptr = (void *)malloc(size);
 	AddTrack((unsigned long)ptr, size, file, line);

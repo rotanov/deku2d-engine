@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <cstdio>
-using namespace std;
+#include <limits>
 
 template<typename T>
 __INLINE void SAFE_DELETE_ARRAY(T*& a)
@@ -10,7 +10,7 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 	delete [] a, a = NULL;
 }
 
-unsigned int g_seed = 152406923;
+unsigned g_seed = 152406923;
 static float SineTable[SINE_COSINE_TABLE_DIM], CosineTable[SINE_COSINE_TABLE_DIM];
 
 Vector2 Vector2::operator *(const Matrix2& M) const
@@ -128,7 +128,7 @@ bool CPolygon::Collide(const CPolygon &A,
 		iNumAxes++;
 	}
 
-	for (unsigned int j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
+	for (unsigned j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
 	{
 		Vector2 E0 = A[j];
 		Vector2 E1 = A[i];
@@ -144,7 +144,7 @@ bool CPolygon::Collide(const CPolygon &A,
 		iNumAxes++;
 	}
 
-	for (unsigned int j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
+	for (unsigned j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
 	{
 		Vector2 E0 = B[j];
 		Vector2 E1 = B[i];
@@ -205,7 +205,7 @@ void GetInterval(const CPolygon &Polygon, const Vector2& xAxis, float& min, floa
 {
 	min = max = (Polygon[0] * xAxis);
 
-	for (unsigned int i = 1; i < Polygon.GetVertexCount(); i ++)
+	for (unsigned i = 1; i < Polygon.GetVertexCount(); i ++)
 	{
 		float d = (Polygon[i] * xAxis);
 		if (d < min) min = d; else if (d > max) max = d;
@@ -382,7 +382,7 @@ CBox::CBox(float xmin, float ymin, float xmax, float ymax) : Min(xmin, ymin), Ma
 	assert(xmin <= xmax && ymin <= ymax);
 }
 
-CBox::CBox(int x, int y, unsigned int width, unsigned int height) : Min(x, y), Max(x + width, y + height) {}
+CBox::CBox(int x, int y, unsigned width, unsigned height) : Min(x, y), Max(x + width, y + height) {}
 
 CBox::CBox(const Vector2 &Center, float Width, float Height) : Min(Center), Max(Center)
 {
@@ -407,11 +407,11 @@ void CBox::Add(const Vector2 &Point)
 {
 	if (Point.x > Max.x)
 		Max.x = Point.x;
-	else if (Point.x < Min.x)
+	if (Point.x < Min.x)
 		Min.x = Point.x;
 	if (Point.y > Max.y)
 		Max.y = Point.y;
-	else if (Point.y < Min.y)
+	if (Point.y < Min.y)
 		Min.y = Point.y;
 }
 
@@ -582,26 +582,28 @@ CCircle::CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius
 //////////////////////////////////////////////////////////////////////////
 // CPolygon
 
-void CPolygon::Reset(unsigned int AVerticesCount)
+void CPolygon::Reset(unsigned AVerticesCount)
 {
 	SAFE_DELETE_ARRAY(Vertices);
-	Vertices = new Vector2 [VerticesCount];
+	Vertices = new Vector2[VerticesCount];
 }
 
 void CPolygon::CalcBox()
 {
 	assert(VerticesCount != 0 && Vertices != NULL);
-	Box.Min.x = 0xffffff; // @todo: replace by something lookubg more normal
-	Box.Min.y = 0xffffff;
-	Box.Max.x = -0xffffff;
-	Box.Max.x = -0xffffff;
-	for (unsigned int i = 0; i < VerticesCount; i++)
+	
+	Box.Min.x = std::numeric_limits<float>::max();
+	Box.Min.y = std::numeric_limits<float>::max();
+	Box.Max.x = std::numeric_limits<float>::min();
+	Box.Max.y = std::numeric_limits<float>::min();
+
+	for (unsigned i = 0; i < VerticesCount; i++)
 	{
 		Box.Add(Vertices[i]);
 	}
 }
 
-CPolygon::CPolygon(unsigned int AVerticesCount) : VerticesCount(AVerticesCount)
+CPolygon::CPolygon(unsigned AVerticesCount) : VerticesCount(AVerticesCount)
 {
 	Vertices = new Vector2 [VerticesCount];
 	memset(Vertices, 0, sizeof(Vertices));
@@ -620,30 +622,30 @@ CPolygon::~CPolygon()
 void CPolygon::AddVertex(const Vector2 &Vertex)
 {
 	Vector2 *TempVertices = new Vector2 [VerticesCount + 1];
-	for (unsigned int i = 0; i < VerticesCount; i++)
+	for (unsigned i = 0; i < VerticesCount; i++)
 		TempVertices[i] = Vertices[i];
 	TempVertices[VerticesCount++] = Vertex;
 	SAFE_DELETE_ARRAY(Vertices);
 	Vertices = TempVertices;
 }
 
-Vector2& CPolygon::operator[](unsigned int Index)
+Vector2& CPolygon::operator[](unsigned Index)
 {
 	assert(Index >= 0 && Index < VerticesCount);
 	return Vertices[Index];
 }
 
-const Vector2& CPolygon::operator[](unsigned int Index) const
+const Vector2& CPolygon::operator[](unsigned Index) const
 {
 	assert(Index >= 0 && Index < VerticesCount);
 	return Vertices[Index];
 }
 
-void CPolygon::RemoveVertex(unsigned int Index)
+void CPolygon::RemoveVertex(unsigned Index)
 {
 	assert(Index >= 0 && Index < VerticesCount);
 	Vector2 *TempVertices = new Vector2 [VerticesCount - 1];
-	for (unsigned int i = 0; i < VerticesCount; i++)
+	for (unsigned i = 0; i < VerticesCount; i++)
 	{
 		if (i > Index)
 			TempVertices[i - 1] = Vertices[i];
@@ -654,7 +656,7 @@ void CPolygon::RemoveVertex(unsigned int Index)
 	Vertices = TempVertices;
 }
 
-unsigned int CPolygon::GetVertexCount() const
+unsigned CPolygon::GetVertexCount() const
 {
 	return VerticesCount;
 }

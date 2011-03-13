@@ -638,12 +638,12 @@ CText::~CText()
 	
 }
 
-unsigned char CText::operator[](unsigned int index) const
+unsigned char CText::operator[](unsigned index) const
 {
 	return Characters[index];
 }
 
-unsigned int CText::Length() const
+unsigned CText::Length() const
 {
 	return Characters.length();
 }

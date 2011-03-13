@@ -12,7 +12,7 @@ CImageData::~CImageData()
 
 bool CImageData::LoadFromFile(const string &Filename)
 {
-	unsigned int ILID = ilGenImage();
+	unsigned ILID = ilGenImage();
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 	ilEnable(IL_ORIGIN_SET);
 	ilBindImage(ILID);
@@ -28,7 +28,7 @@ bool CImageData::LoadFromFile(const string &Filename)
 
 bool CImageData::LoadFromMemory(void *Ptr, ILuint Size)
 {
-	unsigned int ILID = ilGenImage();
+	unsigned ILID = ilGenImage();
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 	ilEnable(IL_ORIGIN_SET);
 	ilBindImage(ILID);
