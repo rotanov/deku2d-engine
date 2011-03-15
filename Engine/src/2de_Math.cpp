@@ -579,6 +579,17 @@ CCircle::CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius
 	CalcBox();
 }
 
+float CCircle::GetRadius() const
+{
+	return Radius;
+}
+
+void CCircle::CalcBox()
+{
+	Box.Min = Vector2(Position.x - Radius, Position.y - Radius);
+	Box.Min = Vector2(Position.x + Radius, Position.y + Radius);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CPolygon
 
@@ -603,15 +614,12 @@ void CPolygon::CalcBox()
 	}
 }
 
-CPolygon::CPolygon(unsigned AVerticesCount) : VerticesCount(AVerticesCount)
+CPolygon::CPolygon(unsigned AVerticesCount) : VerticesCount(AVerticesCount), Vertices(NULL)
 {
+	if (AVerticesCount == 0)
+		return;
 	Vertices = new Vector2 [VerticesCount];
 	memset(Vertices, 0, sizeof(Vertices));
-}
-
-CPolygon::CPolygon() : VerticesCount(0), Vertices(NULL)
-{
-
 }
 
 CPolygon::~CPolygon()
@@ -659,4 +667,54 @@ void CPolygon::RemoveVertex(unsigned Index)
 unsigned CPolygon::GetVertexCount() const
 {
 	return VerticesCount;
+}
+
+float CPolygon::CalcArea() const
+{
+	float result = 0.0f;
+	Vector2 p0;
+	Vector2 p1;
+	for(unsigned i = 0; i < VerticesCount; i++)
+	{
+		p0 = Vertices[i % VerticesCount];
+		p1 = Vertices[(i + 1) % VerticesCount];
+		result += (p1.x - p0.x) * 0.5 * (p1.y + p0.y);
+	}
+	return result;
+}
+
+void CPolygon::OffsetToCenter() const
+{
+	Vector2 p;
+	for(unsigned i = 0; i < VerticesCount; i++)
+		p += Vertices[i];
+	p /= VerticesCount;
+	for(unsigned i = 0; i < VerticesCount; i++)
+		Vertices[i] -= p;
+}
+
+CPolygon CPolygon::MakeCircle( float Radius /*= 1.0f*/, unsigned Precision /*= 16*/ )
+{
+	CPolygon NewPolygon(Precision);
+	float angle = 0.0f;
+	float _1dstuff = 1.0f / (static_cast<float>(Precision) * 0.5f);
+	for (unsigned i = 0; i < Precision; i++)
+	{
+		angle = PI * static_cast<float>(i) * _1dstuff;
+		NewPolygon[i] = Vector2(cos(angle), sin(angle)) * Radius;
+	}
+	return NewPolygon;
+}
+
+CPolygon CPolygon::MakeBox( float Width /*= 1.0f*/, float Height /*= 1.0f*/ )
+{
+	float Width_d2 = Width * 0.5f;
+	float Height_d2 = Height * 0.5f;
+	CPolygon NewPolygon(4);
+	NewPolygon.Reset(4);
+	NewPolygon[0] = Vector2(-Width_d2, -Height_d2);
+	NewPolygon[1] = Vector2(+Width_d2, -Height_d2);
+	NewPolygon[2] = Vector2(+Width_d2, +Height_d2);
+	NewPolygon[3] = Vector2(-Width_d2, +Height_d2);
+	return NewPolygon;
 }

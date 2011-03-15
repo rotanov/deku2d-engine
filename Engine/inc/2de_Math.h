@@ -1470,12 +1470,10 @@ class CCircle : public CGeometry
 {
 	Vector2 Position;
 	float Radius;
+public:
 	CCircle(Vector2 APosition, float ARadius);
-	void CalcBox()
-	{
-		Box.Min = Vector2(Position.x - Radius, Position.y - Radius);
-		Box.Min = Vector2(Position.x + Radius, Position.y + Radius);
-	}
+	float GetRadius() const;
+	void CalcBox();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -1485,7 +1483,6 @@ class CCircle : public CGeometry
 class CPolygon : public CGeometry
 {
 public:
-	CPolygon();
 	CPolygon(unsigned AVerticesCount);
 	~CPolygon();
 	void Reset(unsigned AVerticesCount);
@@ -1495,6 +1492,10 @@ public:
 	Vector2& operator [](unsigned Index);
 	const Vector2& operator [](unsigned Index) const;
 	unsigned GetVertexCount() const;
+	float CalcArea() const;
+	void OffsetToCenter() const;
+	static CPolygon MakeCircle(float Radius = 1.0f, unsigned Precision = 16);
+	static CPolygon MakeBox(float Width = 1.0f, float Height = 1.0f);
 
 	static bool	Collide	(	const CPolygon &A,
 							const Vector2 &Apos,
