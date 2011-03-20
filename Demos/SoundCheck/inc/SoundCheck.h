@@ -92,7 +92,9 @@ public:
 	CHelpText()
 	{
 		CText *HelpText = CFactory::Instance()->New<CText>("HelpText");
-		HelpText->SetPosition(Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f));
+		//  We can't set position to text, since placing is a separate component
+		//	So i commented it out
+		//	HelpText->SetPosition(Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f));
 		HelpText->SetText("Sound: q - play, w - stop\nMusic: a - play, s - stop\nMusic volume: z - down, x - up\n"
 			"You can try to enter file name and click Play\nto play it as music");
 		CUpdateManager::Instance()->RootGameObject->Attach(HelpText);

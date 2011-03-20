@@ -38,6 +38,8 @@
 	#define VC_LEANMEAN
 	#define _CRT_SECURE_NO_DEPRECATE
 	#define NOMINMAX
+	#undef min
+	#undef max
 #endif // _MSC_VER
 
 #define _SECURE_SCL 0
@@ -100,7 +102,7 @@ using namespace std;
 	#define snprintf _snprintf
 #endif //_MSC_VER
 
-//#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
+// #define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
 
 typedef unsigned char byte;
@@ -654,6 +656,70 @@ T* CTSingleton<T>::_instance = 0;
 template <typename T>
 set<const type_info *> CTSingleton<T>::UnderConstruction;
 #endif // _DEBUG
+
+/**
+ * Let there be Visitor
+ * Taken from http://www.everfall.com/paste/id.php?bqa1eibc559f
+ * http://www.gamedev.ru/community/oo_design/articles/?id=431
+ */
+
+class IVisitorBase
+{
+public:	
+	virtual ~IVisitorBase() {};
+};
+
+template <typename T, typename R = void>
+class IVisitor : public IVisitorBase
+{
+public:
+	typedef R CReturnType;
+	virtual CReturnType Visit(T&) = 0;
+};
+
+template <typename R = void>
+class IVisitableBase
+{
+public:
+	typedef R CReturnType;
+	virtual ~IVisitableBase() {}
+	virtual CReturnType Accept(IVisitorBase&) = 0;
+
+protected:
+	template <class T> 
+	static CReturnType ConcreteAccept(T& visited, IVisitorBase& visitor)
+	{
+		if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+		{
+			return ptr->Visit(visited);
+		}
+		return CReturnType();
+	}
+};
+
+template <typename R = void>
+class IVisitableObject : public CObject
+{
+public:
+	typedef R CReturnType;
+	virtual ~IVisitableObject() {}
+	virtual CReturnType Accept(IVisitorBase&) = 0;
+
+protected:
+	template <class T> 
+	static CReturnType ConcreteAccept(T& visited, IVisitorBase& visitor)
+	{
+		if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+		{
+			return ptr->Visit(visited);
+		}
+		return CReturnType();
+	}
+};
+
+#define D2D_DECLARE_VISITABLE()	\
+	virtual CReturnType Accept(IVisitorBase& visitor)	\
+	{ return ConcreteAccept(*this, visitor); }
 
 /**
 * CStorage - base class for CFile and CMemory classes, that describes their interface.

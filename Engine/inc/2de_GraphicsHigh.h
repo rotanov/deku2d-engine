@@ -43,7 +43,7 @@ public:
 	bool LoadFromFile(const string &Filename);
 	bool SaveToFile(const string &Filename);
 
-	RGBAf		Color;
+	RGBAf Color;
 	bool mirror_h;
 
 private:

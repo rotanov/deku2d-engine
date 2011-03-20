@@ -1632,6 +1632,8 @@ CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/,
 CModel::~CModel()
 {
 	Unload();
+	SAFE_DELETE_ARRAY(Vertices);
+	SAFE_DELETE_ARRAY(TexCoords);
 }
 
 void CModel::SetTexture(CTexture *ATexture)

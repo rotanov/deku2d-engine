@@ -34,6 +34,7 @@ CEngine::CEngine()
 
 CEngine::~CEngine()
 {
+	delete StateHandler;
 	delete SpatialManager;
 }
 

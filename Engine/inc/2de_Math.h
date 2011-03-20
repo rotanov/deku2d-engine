@@ -1555,4 +1555,36 @@ public:
 	}
 };
 
+// @todo: Design below-like family of Collide functions for
+// Point vs. Circle vs. Box vs. Polygon ( total of six )
+template <typename G1, typename G2>
+bool tCollide(	const G1 &BodyA,
+					const Vector2 &Apos,
+					const Vector2 &Avel,
+					const Matrix2 &Aorient,
+				const G2 &BodyB,
+					const Vector2 &Bpos, 
+					const Vector2 &Bvel, 
+					const Matrix2 &Borient,
+				Vector2 &Normal, float &Depth)
+{
+
+}
+
+template <>
+__INLINE bool tCollide (	const CPolygon &A,
+									const Vector2 &Apos,
+									const Vector2 &Avel,
+									const Matrix2 &Aorient,
+									const CPolygon &B,
+									const Vector2 &Bpos, 
+									const Vector2 &Bvel, 
+									const Matrix2 &Borient,
+									Vector2& Normal,
+									float& Depth)
+{
+	return CPolygon::Collide(A, Apos, Avel, Aorient, B, Bpos, Bvel, Borient, Normal, Depth);
+}
+
+
 #endif // _2DE_MATH_UTILS_H_

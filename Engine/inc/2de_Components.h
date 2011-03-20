@@ -11,12 +11,13 @@
 * CGameObject - the base class for all components.
 */
 
-class CGameObject : public CObject
+class CGameObject : public IVisitableObject<>
 {
 private:
 	string ClassName;
 
 public:	
+	D2D_DECLARE_VISITABLE()
 	class traverse_iterator
 	{
 	protected:
@@ -124,6 +125,7 @@ private:
 class CPlaceableComponent : public CGameObject
 {
 public:
+	D2D_DECLARE_VISITABLE()
 	CPlaceableComponent();
 
 	float GetAngle() const;
@@ -174,6 +176,8 @@ private:
 class CGeometricComponent : public CGameObject	// "Geometric" or "Geometrical"?
 {
 public:
+	D2D_DECLARE_VISITABLE()
+
 	CGeometricComponent() : Box(0, 0, 0, 0)
 	{
 
@@ -218,6 +222,8 @@ private:
 class CRenderableComponent : public CGameObject
 {
 public:
+	D2D_DECLARE_VISITABLE()
+
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
 
@@ -254,6 +260,8 @@ private:
 class CText : public CRenderableComponent
 {
 public:
+	D2D_DECLARE_VISITABLE()
+
 	CText();
 	CText(const string &AText);
 	~CText();
@@ -285,6 +293,8 @@ private:
 class CTimerComponent : public CGameObject
 {
 public:
+	D2D_DECLARE_VISITABLE()
+
 	CTimerComponent();
 	CTimerComponent(float AInterval);
 
