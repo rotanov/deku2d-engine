@@ -20,6 +20,38 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////
+// temp
+
+class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>
+{
+public:
+	void Visit(CPlaceableComponent& Placing)
+	{
+		//Log("INFO", "%s - is Placeable", Placing.GetName().c_str());
+		if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
+		{
+			CRenderManager::Instance()->Transformator.PushTransformation(Placing.GetTransformation());
+			//TransfomationTraverse(Next->Children[i]);
+			//CRenderManager::Instance()->Transformator.PopTransformation();
+		}
+		Placing.Active= true;
+		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
+			Placing.Active = false;
+	}
+
+	void Visit(CRenderableComponent& Graphics)
+	{
+		//Log("INFO", "%s - is Renderable", Graphics.GetName().c_str());
+		if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
+				CSceneManager::Instance()->InScope(Graphics.GetScene()))
+			CRenderManager::Instance()->Renderer->PushModel(&Graphics.GetConfiguration(), Graphics.GetModel());
+		Graphics.Active= true;
+		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
+			Graphics.Active = false;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////
 // CRenderConfig
 
 CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(COLOR_WHITE)
@@ -664,7 +696,10 @@ bool CRenderManager::DrawObjects()
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
 	Camera.Update(); // @todo: review camera
 
-	TransfomationTraverse(CUpdateManager::Instance()->RootGameObject);
+//	TransfomationTraverse(CUpdateManager::Instance()->RootGameObject);
+
+	CDrawVisitor Visitor;
+	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &Visitor );
 
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
@@ -1505,6 +1540,9 @@ void CTransformator::PushTransformation(const CTransformation &ATransformation)
 
 void CTransformator::PopTransformation()
 {
+	assert(TransformationStack.size() != 0);
+	if (TransformationStack.size() == 0)
+		return;
 	CurrentTransformation = TransformationStack.back();
 	TransformationStack.pop_back();
 }

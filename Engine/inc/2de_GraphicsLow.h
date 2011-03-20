@@ -466,6 +466,7 @@ protected:
 	CRenderManager();
 	friend class CTSingleton <CRenderManager>;
 	friend class CEngine;
+	friend class CDrawVisitor;
 
 private:
 	CAbstractRenderer *Renderer;

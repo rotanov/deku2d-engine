@@ -63,6 +63,8 @@ public:
 
 	};
 
+	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor);
+
 	CGameObject();
 	virtual ~CGameObject();
 
@@ -92,6 +94,7 @@ public:
 
 	bool Active;
 	bool Dead;	
+	// Enabled
 
 	void SetDestroyedSubtree()
 	{
@@ -260,7 +263,8 @@ private:
 class CText : public CRenderableComponent
 {
 public:
-	D2D_DECLARE_VISITABLE()
+	// Treat as CRenderableComponent for now
+	//D2D_DECLARE_VISITABLE()
 
 	CText();
 	CText(const string &AText);

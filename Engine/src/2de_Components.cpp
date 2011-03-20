@@ -236,6 +236,20 @@ void CGameObject::ProcessEvent(const CEvent &AEvent)
 	}
 }
 
+void CGameObject::DFSIterate( CGameObject *Next, IVisitorBase *Visitor )
+{
+	if (!Next->Active)
+		return;
+	Next->Accept(*Visitor);
+	for(unsigned i = 0; i < Next->Children.size(); i++)
+		DFSIterate(Next->Children[i], Visitor);
+	// EPIC FAIL KLUDGE
+	CPlaceableComponent * Placing = dynamic_cast<CPlaceableComponent*>(Next);
+	if (Placing != NULL && Placing->Active)
+		CRenderManager::Instance()->Transformator.PopTransformation();
+	// EPIC FAIL KLUDGE
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CPlaceableComponent
 

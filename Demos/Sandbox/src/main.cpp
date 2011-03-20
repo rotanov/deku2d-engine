@@ -73,5 +73,5 @@ int main(int argc, char *argv[])
 	Ninja->SetProgramName("Sandbox");
 	Ninja->SetStateHandler<CCustomStateHandler>();
 	Ninja->Run(argc, argv);
-	return 0;
+	return EXIT_SUCCESS;
 }
