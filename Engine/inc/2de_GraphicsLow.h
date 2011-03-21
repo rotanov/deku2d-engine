@@ -169,16 +169,18 @@ public:
 	EModelType GetModelType() const;
 	virtual int GetVertexNumber() const;
 	//const RGBAf* GetColors() const;
-
+	const CBox& GetBox() const;
 	bool Load();
 	void Unload();
 
 private:
+	CBox Box;
 	CResourceRefCounter<CTexture> Texture;
 	EModelType ModelType;
 	Vector2 *Vertices;
 	Vector2 *TexCoords;
 	unsigned VerticesNumber;
+	void __UpdateBox();
 };
 
 /**

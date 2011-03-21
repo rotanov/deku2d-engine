@@ -11,7 +11,7 @@
 
 	#if defined(_WIN32)
 		#include <GL/wglew.h>
-	#elif defined(__linux) // not only linux, i think.. any platform, that uses GLX..
+	#elif defined(__linux) // not only Linux, i think.. any platform, that uses GLX..
 		#include <GL/glxew.h>
 	#endif
 #else
@@ -25,6 +25,9 @@
 class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>
 {
 public:
+	CBox UpwayBox;
+	stack<CPlaceableComponent *> LPPStack;
+
 	void VisitOnEnter(CPlaceableComponent &Placing)
 	{
 		if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
@@ -32,6 +35,8 @@ public:
 		Placing.Active= true;
 		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
 			Placing.Active = false;
+		if (Placing.Active)
+			LPPStack.push(&Placing);
 	}
 
 	void VisitOnLeave(CPlaceableComponent &Placing)
@@ -39,6 +44,7 @@ public:
 		if (!Placing.Active)
 			return;
 		CRenderManager::Instance()->Transformator.PopTransformation();
+		LPPStack.pop();
 	}
 
 	void VisitOnEnter(CRenderableComponent &Graphics)
@@ -50,7 +56,10 @@ public:
 		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
 			Graphics.Active = false;
 	}
-	void VisitOnLeave(CRenderableComponent &){}// does nothing for now
+	void VisitOnLeave(CRenderableComponent &Graphics)
+	{
+		LPPStack.top()->UpdateBox(Graphics.GetBox().Inflated(30, 30));
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -1656,7 +1665,7 @@ void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
 CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
 			   CTexture * ATexture /*= NULL*/, unsigned AVerticesNumber /*= 0*/,
 			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
-	Texture(ATexture), ModelType(AModelType), Vertices(NULL),
+	Box(), Texture(ATexture), ModelType(AModelType), Vertices(NULL),
 	TexCoords(NULL), VerticesNumber(AVerticesNumber)
 {
 	if (VerticesNumber == 0)
@@ -1667,6 +1676,7 @@ CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/,
 		return;
 	TexCoords = new Vector2[VerticesNumber];
 	std::copy(ATexCoords, ATexCoords + VerticesNumber, TexCoords);
+	__UpdateBox();
 }
 
 CModel::~CModel()
@@ -1721,6 +1731,7 @@ void CModel::Unload()
 	SAFE_DELETE_ARRAY(TexCoords);
 	ModelType = MODEL_TYPE_NOT_A_MODEL;
 	Texture = NULL;
+	Box = CBox();
 	CResource::BasicUnload();
 }
 
@@ -1809,7 +1820,18 @@ bool CModel::Load()
 	}
 
 	CResource::BasicLoad();
-
+	__UpdateBox();
 	return true;
+}
+
+const CBox& CModel::GetBox() const
+{
+	return Box;
+}
+
+void CModel::__UpdateBox()
+{
+	for(unsigned i = 0; i < VerticesNumber; i++)
+		Box.Add(Vertices[i]);
 }
 

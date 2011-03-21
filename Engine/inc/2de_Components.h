@@ -132,6 +132,7 @@ public:
 	CPlaceableComponent();
 
 	float GetAngle() const;
+	const CBox& GetBox() const;
 	float GetDepth() const;
 	int GetLayer() const;	
 	float GetScaling() const;
@@ -158,10 +159,11 @@ public:
 	void SetMirrorVertical(bool MirrorOrNot);
 	bool isIgnoringParentTransform() const;
 	void SetIgnoreParentTransform(bool doIgnore);
-
+	void UpdateBox(const CBox& ABox);
 	void Deserialize(CXMLNode *AXML);
 
 private:
+	CBox Box;
 	CTransformation Transformation;
 	bool doIgnoreCamera;	// all previous transformations are ignored if true
 	bool doMirrorHorizontal;
@@ -230,6 +232,7 @@ public:
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
 
+	const CBox& GetBox() const;
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
 	const RGBAf& GetColor() const;
@@ -242,7 +245,6 @@ public:
 	CRenderConfig& GetConfiguration();
 	const CRenderConfig& GetConfiguration() const;
 	void SetConfiguration(const CRenderConfig &AConfiguraton);
-
 	void Deserialize(CXMLNode *AXML);
 
 protected:

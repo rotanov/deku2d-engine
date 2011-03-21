@@ -249,8 +249,12 @@ void CGameObject::DFSIterate( CGameObject *Next, IVisitorBase *Visitor )
 //////////////////////////////////////////////////////////////////////////
 // CPlaceableComponent
 
-CPlaceableComponent::CPlaceableComponent() : doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
+CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 {
+#ifdef _DEBUG
+	CRenderableComponent* DebugBox = CFactory::Instance()->New<CRenderableComponent>();
+	Attach(DebugBox);
+#endif
 }
 
 void CPlaceableComponent::SetAngle(float AAngle)
@@ -383,6 +387,23 @@ void CPlaceableComponent::Deserialize(CXMLNode *AXML)
 		SetLayer(from_string<int>(AXML->GetAttribute("Layer")));
 
 	// TODO: add more..	// Later
+}
+
+const CBox& CPlaceableComponent::GetBox() const
+{
+	return Box;
+}
+
+void CPlaceableComponent::UpdateBox( const CBox& ABox )
+{
+	Box.Union(ABox);
+#ifdef _DEBUG
+	CRenderableComponent *DebugBox = dynamic_cast<CRenderableComponent*>(Children[0]);
+	if (NULL != DebugBox)
+	{
+		DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
+	}
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -561,6 +582,14 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 
 	if (AXML->HasAttribute("BlendingMode"))
 		SetBlendingMode(CRenderManager::SelectBlendingModeByIdentifier(AXML->GetAttribute("BlendingMode")));
+}
+
+const CBox& CRenderableComponent::GetBox() const
+{
+	//assert(Model != 0);
+	if (Model == NULL)
+		return CBox();
+	return Model->GetBox();
 }
 
 
