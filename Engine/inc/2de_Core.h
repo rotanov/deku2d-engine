@@ -661,6 +661,9 @@ set<const type_info *> CTSingleton<T>::UnderConstruction;
  * Let there be Visitor
  * Taken from http://www.everfall.com/paste/id.php?bqa1eibc559f
  * http://www.gamedev.ru/community/oo_design/articles/?id=431
+ * Cause it's Hierarchical visitor there will be
+ * VisitOnEnter
+ * VisitOnLeave
  */
 
 class IVisitorBase
@@ -674,7 +677,8 @@ class IVisitor : public IVisitorBase
 {
 public:
 	typedef R CReturnType;
-	virtual CReturnType Visit(T&) = 0;
+	virtual CReturnType VisitOnEnter(T&) = 0;
+	virtual CReturnType VisitOnLeave(T&) = 0;
 };
 
 template <typename R = void>
@@ -683,15 +687,25 @@ class IVisitableBase
 public:
 	typedef R CReturnType;
 	virtual ~IVisitableBase() {}
-	virtual CReturnType Accept(IVisitorBase&) = 0;
+	virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
+	virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
 
 protected:
-	template <class T> 
-	static CReturnType ConcreteAccept(T& visited, IVisitorBase& visitor)
+	template <typename T>
+	static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
 	{
 		if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
 		{
-			return ptr->Visit(visited);
+			return ptr->VisitOnEnter(visited);
+		}
+		return CReturnType();
+	}
+	template <typename T>
+	static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
+	{
+		if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+		{
+			return ptr->VisitOnLeave(visited);
 		}
 		return CReturnType();
 	}
@@ -703,23 +717,35 @@ class IVisitableObject : public CObject
 public:
 	typedef R CReturnType;
 	virtual ~IVisitableObject() {}
-	virtual CReturnType Accept(IVisitorBase&) = 0;
+	virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
+	virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
 
 protected:
-	template <class T> 
-	static CReturnType ConcreteAccept(T& visited, IVisitorBase& visitor)
+	template <typename T> 
+	static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
 	{
 		if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
 		{
-			return ptr->Visit(visited);
+			return ptr->VisitOnEnter(visited);
+		}
+		return CReturnType();
+	}
+	template <typename T> 
+	static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
+	{
+		if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+		{
+			return ptr->VisitOnLeave(visited);
 		}
 		return CReturnType();
 	}
 };
 
 #define D2D_DECLARE_VISITABLE()	\
-	virtual CReturnType Accept(IVisitorBase& visitor)	\
-	{ return ConcreteAccept(*this, visitor); }
+	virtual CReturnType AcceptOnEnter(IVisitorBase& visitor)	\
+	{ return ConcreteAcceptOnEnter(*this, visitor); }	\
+	virtual CReturnType AcceptOnLeave(IVisitorBase& visitor)	\
+	{ return ConcreteAcceptOnLeave(*this, visitor); }
 
 /**
 * CStorage - base class for CFile and CMemory classes, that describes their interface.

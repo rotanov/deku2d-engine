@@ -240,14 +240,10 @@ void CGameObject::DFSIterate( CGameObject *Next, IVisitorBase *Visitor )
 {
 	if (!Next->Active)
 		return;
-	Next->Accept(*Visitor);
+	Next->AcceptOnEnter(*Visitor);
 	for(unsigned i = 0; i < Next->Children.size(); i++)
 		DFSIterate(Next->Children[i], Visitor);
-	// EPIC FAIL KLUDGE
-	CPlaceableComponent * Placing = dynamic_cast<CPlaceableComponent*>(Next);
-	if (Placing != NULL && Placing->Active)
-		CRenderManager::Instance()->Transformator.PopTransformation();
-	// EPIC FAIL KLUDGE
+	Next->AcceptOnLeave(*Visitor);
 }
 
 //////////////////////////////////////////////////////////////////////////

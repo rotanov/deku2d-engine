@@ -25,23 +25,24 @@
 class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>
 {
 public:
-	void Visit(CPlaceableComponent& Placing)
+	void VisitOnEnter(CPlaceableComponent &Placing)
 	{
-		//Log("INFO", "%s - is Placeable", Placing.GetName().c_str());
 		if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
-		{
 			CRenderManager::Instance()->Transformator.PushTransformation(Placing.GetTransformation());
-			//TransfomationTraverse(Next->Children[i]);
-			//CRenderManager::Instance()->Transformator.PopTransformation();
-		}
 		Placing.Active= true;
 		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
 			Placing.Active = false;
 	}
 
-	void Visit(CRenderableComponent& Graphics)
+	void VisitOnLeave(CPlaceableComponent &Placing)
 	{
-		//Log("INFO", "%s - is Renderable", Graphics.GetName().c_str());
+		if (!Placing.Active)
+			return;
+		CRenderManager::Instance()->Transformator.PopTransformation();
+	}
+
+	void VisitOnEnter(CRenderableComponent &Graphics)
+	{
 		if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
 				CSceneManager::Instance()->InScope(Graphics.GetScene()))
 			CRenderManager::Instance()->Renderer->PushModel(&Graphics.GetConfiguration(), Graphics.GetModel());
@@ -49,6 +50,7 @@ public:
 		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
 			Graphics.Active = false;
 	}
+	void VisitOnLeave(CRenderableComponent &){}// does nothing for now
 };
 
 //////////////////////////////////////////////////////////////////////////
