@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdio>
 #include <limits>
+#include <algorithm>
 
 template<typename T>
 __INLINE void SAFE_DELETE_ARRAY(T*& a)
@@ -365,6 +366,60 @@ float DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
 		return (p - u1).Length() * Sign(HalfPlaneSign(u0, u1, p));
 
 	return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
+}
+
+__INLINE void CalcConvexHull(std::vector<Vector2> &a )
+{
+	class CalcConvexHullHelper
+	{
+	public:
+		static __INLINE bool cmp (Vector2 a, Vector2 b)
+		{
+			return a.x < b.x || a.x == b.x && a.y < b.y;
+		}
+
+		/**
+		* cw and cww is some strange way to Implement HalfPlaneSign() with
+		* devilish copy-paste and having 3 instead of 2 multyplications
+		* @todo: replace by HalfPlaneSign
+		*/
+		static __INLINE bool cw (Vector2 a, Vector2 b, Vector2 c)
+		{
+			return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y) < 0;
+		}
+
+		static __INLINE bool ccw (Vector2 a, Vector2 b, Vector2 c)
+		{
+			return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y) > 0;
+		}
+	};
+
+	if (a.size() == 1)  return;
+	sort (a.begin(), a.end(), &CalcConvexHullHelper::cmp);
+	Vector2 p1 = a[0],  p2 = a.back();
+	std::vector<Vector2> up, down;
+	up.push_back (p1);
+	down.push_back (p1);
+	for (size_t i=1; i<a.size(); ++i)
+	{
+		if (i==a.size()-1 || CalcConvexHullHelper::cw (p1, a[i], p2))
+		{
+			while (up.size()>=2 && !CalcConvexHullHelper::cw (up[up.size()-2], up[up.size()-1], a[i]))
+				up.pop_back();
+			up.push_back (a[i]);
+		}
+		if (i==a.size()-1 || CalcConvexHullHelper::ccw (p1, a[i], p2))
+		{
+			while (down.size()>=2 && !CalcConvexHullHelper::ccw (down[down.size()-2], down[down.size()-1], a[i]))
+				down.pop_back();
+			down.push_back (a[i]);
+		}
+	}
+	a.clear();
+	for (size_t i=0; i<up.size(); ++i)
+		a.push_back (up[i]);
+	for (size_t i=down.size()-2; i>0; --i)
+		a.push_back (down[i]);
 }
 
 //////////////////////////////////////////////////////////////////////////

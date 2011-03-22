@@ -47,6 +47,12 @@ const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
 const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
 const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 
+extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
+extern byte IMAGE_SHROOM_TITLE_DATA[];
+// extern const unsigned IMAGE_DEFAULT_FONT_WIDTH;
+// extern const unsigned IMAGE_DEFAULT_FONT_HEIGHT;
+// extern char IMAGE_DEFAULT_FONT_DATA[];
+
 extern const unsigned BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
 extern byte BINARY_DATA_DEFAULT_FONT_TEXTURE[];
 
@@ -60,6 +66,9 @@ class CAbstractScene;
 *	can Load() and Unload() and even SaveToFile(). Wait, it still can't
 *	save to file, but function is defined @todo: implement saving of textures to
 *	file. And don't even try to think when we'll need such possibility
+*	@todo: Look at loading issue, described in MakeTexture implementation
+*	Make able to save texture to file if it was unloaded from memory
+*	hint: use glGetTexture or glTexSubImage2D
 */
 
 class CTexture : public CImageData, public CResource
@@ -86,6 +95,7 @@ public:
 
 private:
 	GLuint TexID;
+	bool doCleanData;
 };
 
 /**

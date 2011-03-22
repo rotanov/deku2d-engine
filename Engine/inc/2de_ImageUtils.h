@@ -1,43 +1,29 @@
 #ifndef _2DE_IMAGE_UTILS_H_
 #define _2DE_IMAGE_UTILS_H_
 
-#include "2de_Core.h"
 #include "2de_Math.h"
+#include <IL/il.h>
 
-extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
-extern byte IMAGE_SHROOM_TITLE_DATA[];
-
-// extern const unsigned IMAGE_DEFAULT_FONT_WIDTH;
-// extern const unsigned IMAGE_DEFAULT_FONT_HEIGHT;
-// extern char IMAGE_DEFAULT_FONT_DATA[];
-
+/**
+*	Since I found it useful to use this module separated from Deku2d I did that:
+*	#define _2DE_IMAGE_UTILS_SEPARATED_ - you can define it somewhere before header appers
+*	and it should work fine.
+*/
 
 class CImageData
 {
 public:
-	byte			*Data;
-	size_t			Height;
-	size_t			Width;
-	byte			BPP;
-	bool			doCleanData;
+	unsigned char *Data;
+	unsigned Height;
+	unsigned Width;
+	unsigned char BPP;
 
 	CImageData();
 	~CImageData();
-	bool LoadFromFile(const string &Filename);
+	bool LoadFromFile(const std::string &Filename);
 	bool LoadFromMemory(void *Ptr, ILuint Size);
-
-	RGBAub& operator [](unsigned Index)
-	{
-		assert(Index >= 0 && Index < Width * Height);
-		return (reinterpret_cast<RGBAub *>(Data))[Index];
-	}
-
-	RGBAub& operator ()(unsigned col, unsigned row)
-	{
-		assert(col * row >= 0 && col * row < Width * Height);
-		return (reinterpret_cast<RGBAub *>(Data))[ row * Width + col ];
-		return RGBAub();
-	}
+	RGBAub& operator [](unsigned Index);
+	RGBAub& operator ()(unsigned col, unsigned row);
 
 private:
 	void InitImageData();

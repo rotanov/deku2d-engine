@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cassert>
 #include <stdexcept>
+#include <vector>
 
 #ifndef __INLINE
 	#if defined(_MSC_VER)
@@ -1437,6 +1438,14 @@ bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, con
 */
 
 bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);
+
+/**
+*	CalcConvexHull does exactly how it named.
+*	Taken from http://www.e-maxx.ru/algo/convex_hull_graham and slightly 
+*	modified in order to fit naming conventions and interfaces
+*/
+
+__INLINE void CalcConvexHull (std::vector<Vector2> &a);
 
 //////////////////////////////////////////////////////////////////////////
 //	CGeometry

@@ -1,16 +1,19 @@
 #include "2de_ImageUtils.h"
 
-CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0), doCleanData(true)
+#ifndef _2DE_IMAGE_UTILS_SEPARATED_
+	#include "2de_Core.h"
+#endif
+
+CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0)
 {
 }
 
 CImageData::~CImageData()
 {
-	if (doCleanData && Data != NULL)
-		delete [] Data;
+	delete [] Data;
 }
 
-bool CImageData::LoadFromFile(const string &Filename)
+bool CImageData::LoadFromFile(const std::string &Filename)
 {
 	unsigned ILID = ilGenImage();
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
@@ -54,10 +57,27 @@ void CImageData::InitImageData()
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	Data = new byte[Width * Height * BPP];
+	Data = new unsigned char[Width * Height * BPP];
 	ilCopyPixels(0, 0, 0, Width, Height, 1, IL_RGBA, IL_UNSIGNED_BYTE, Data);
 
 	// we can get an error message using ILU (iluGetErrorString(ilGetError())), but it's not worth to be dependent on it..
 	if (ilGetError() != IL_NO_ERROR)
+#ifndef _2DE_IMAGE_UTILS_SEPARATED_
 		Log("ERROR", "IL failed");
+#else
+		fprintf(stderr, "IL failed");
+#endif
+}
+
+RGBAub& CImageData::operator []( unsigned Index )
+{
+	assert(Index >= 0 && Index < Width * Height);
+	return (reinterpret_cast<RGBAub *>(Data))[Index];
+}
+
+RGBAub& CImageData::operator ()( unsigned col, unsigned row )
+{
+	assert(col * row >= 0 && col * row < Width * Height);
+	return (reinterpret_cast<RGBAub *>(Data))[ row * Width + col ];
+	return RGBAub();
 }

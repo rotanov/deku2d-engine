@@ -1092,11 +1092,8 @@ GLuint CTexture::GetTexID() const
 	return TexID;
 }
 
-CTexture::CTexture()
+CTexture::CTexture() : TexID(0), doCleanData(true)
 {
-	TexID = Width = Height = BPP = 0;
-	doCleanData = true;
-	Data = NULL;
 	SetName("CTexture");
 	CTextureManager::Instance()->Add(this);
 }
@@ -1106,7 +1103,6 @@ CTexture::~CTexture()
 	Unload();
 	CTextureManager::Instance()->Remove(this);
 }
-
 
 bool CTexture::Load()
 {
