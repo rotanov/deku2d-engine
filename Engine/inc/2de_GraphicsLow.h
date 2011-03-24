@@ -40,12 +40,14 @@ const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
 
 const float ROTATIONAL_AXIS_Z = 1.0f;
 
-// i suggest to put it into a namespace.. Color::RED looks a bit nicer, than COLOR_RED..
-const RGBAf COLOR_WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
-const RGBAf COLOR_BLACK = RGBAf(0.00f, 0.00f, 0.00f, 0.00f);
-const RGBAf COLOR_RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
-const RGBAf COLOR_GREEN	= RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
-const RGBAf COLOR_BLUE	= RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
+namespace color
+{
+	const RGBAf WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
+	const RGBAf BLACK = RGBAf(0.00f, 0.00f, 0.00f, 0.00f);
+	const RGBAf RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
+	const RGBAf GREEN = RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
+	const RGBAf BLUE = RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
+}
 
 extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
 extern byte IMAGE_SHROOM_TITLE_DATA[];
@@ -486,7 +488,6 @@ private:
 	void SetBlendingMode();
 	void BeginFrame();
 	void EndFrame();
-	void TransfomationTraverse(CGameObject *Next);
 
 public:
 	CCamera	Camera;

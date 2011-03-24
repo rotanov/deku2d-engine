@@ -13,6 +13,8 @@
 
 class CGameObject : public IVisitableObject<>
 {
+public:
+	string somebadshitidentifier;
 private:
 	string ClassName;
 
@@ -164,10 +166,13 @@ public:
 
 private:
 	CBox Box;
-	CTransformation Transformation;
+	
 	bool doIgnoreCamera;	// all previous transformations are ignored if true
 	bool doMirrorHorizontal;
 	bool doMirrorVertical;
+
+public: // TODO: TEMPORARILITYTRIORUOYTORT I was need to make transform between origins
+	CTransformation Transformation;
 
 };
 

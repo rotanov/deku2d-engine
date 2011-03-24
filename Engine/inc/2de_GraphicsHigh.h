@@ -89,9 +89,9 @@ public:
 	float				Age;
 
 	CNewSuperParticleSystem(int AMaxParticles = 100, int AEmission = 100, float ASystemLife = -1, 
-		float AParticleLife = 1, const RGBAf &AColorStart = COLOR_WHITE, const RGBAf &AColorEnd = COLOR_WHITE,
+		float AParticleLife = 1, const RGBAf &AColorStart = color::WHITE, const RGBAf &AColorEnd = color::WHITE,
 		float ASizeStart = 1, float ASizeEnd = 1, int AParticleLifeVariability = 1, 
-		const RGBAf &AColorVariability = COLOR_BLACK, float ASizeVariability = 1);
+		const RGBAf &AColorVariability = color::BLACK, float ASizeVariability = 1);
 	~CNewSuperParticleSystem();
 	void Update(float dt);
 	void CreateParticle();
@@ -125,7 +125,7 @@ public:
 	{		
 		CPlaceableComponent *tempPlaceable = CFactory::Instance()->New<CPlaceableComponent>();
 		tempPlaceable->SetLayer(512);
-		SetColor(COLOR_GREEN);
+		SetColor(color::GREEN);
 		SetModel(CRenderManager::CreateModelBox(4.0f, 4.0f, MODEL_TYPE_LINES));
 
 		SetParent(tempPlaceable);

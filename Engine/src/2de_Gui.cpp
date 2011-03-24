@@ -15,16 +15,16 @@ CGUIStyle::CGUIStyle()
 	Colors.ButtonBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
 	Colors.ButtonBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
 	Colors.ButtonBorderPressed = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-	Colors.ButtonText = COLOR_BLACK;
+	Colors.ButtonText = color::BLACK;
 	Colors.ButtonInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
-	Colors.EditBackground = COLOR_WHITE;
-	Colors.EditBackgroundHovered = COLOR_WHITE;
+	Colors.EditBackground = color::WHITE;
+	Colors.EditBackgroundHovered = color::WHITE;
 	Colors.EditBorder = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
 	Colors.EditBorderHovered = RGBAf(0.75f, 0.75f, 0.75f, 1.0f);
-	Colors.EditText = COLOR_BLACK;
+	Colors.EditText = color::BLACK;
 	Colors.EditInactiveText = RGBAf(0.2f, 0.2f, 0.2f, 1.0f);
 	Colors.EditSelection = RGBAf(0.0f, 0.4f, 0.8f, 0.5f);
-	Colors.LabelText = COLOR_WHITE;
+	Colors.LabelText = color::WHITE;
 
 	Metrics.FocusRectSpacing = 5.0f;
 	Metrics.FocusRectLineWidth = 0.5f;

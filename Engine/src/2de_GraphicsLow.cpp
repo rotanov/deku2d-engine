@@ -43,8 +43,18 @@ public:
 	{
 		if (!Placing.Active)
 			return;
-		CRenderManager::Instance()->Transformator.PopTransformation();
+		
 		LPPStack.pop();
+		CRenderManager::Instance()->Transformator.PopTransformation();
+		if (LPPStack.size() > 0)
+		{
+			CBox newBox = Placing.GetBox().Inflated(2, 2);
+			CTransformation Transformation = Placing.Transformation;
+			newBox.Min = ( newBox.Min * Transformation.GetScaling() ) * Matrix2(DegToRad(-Transformation.GetAngle())) + Transformation.GetTranslation();
+			newBox.Max = ( newBox.Max * Transformation.GetScaling() ) * Matrix2(DegToRad(-Transformation.GetAngle())) + Transformation.GetTranslation();
+			LPPStack.top()->UpdateBox(newBox);
+		}
+
 	}
 
 	void VisitOnEnter(CRenderableComponent &Graphics)
@@ -58,14 +68,18 @@ public:
 	}
 	void VisitOnLeave(CRenderableComponent &Graphics)
 	{
-		LPPStack.top()->UpdateBox(Graphics.GetBox().Inflated(30, 30));
+		if (LPPStack.size() > 0)
+		{
+			if ( Graphics.somebadshitidentifier != "debugbox" )
+				LPPStack.top()->UpdateBox(Graphics.GetBox().Inflated(2, 2));
+		}
 	}
 };
 
 //////////////////////////////////////////////////////////////////////////
 // CRenderConfig
 
-CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(COLOR_WHITE)
+CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(color::WHITE)
 {
 }
 
@@ -707,8 +721,6 @@ bool CRenderManager::DrawObjects()
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
 	Camera.Update(); // @todo: review camera
 
-//	TransfomationTraverse(CUpdateManager::Instance()->RootGameObject);
-
 	CDrawVisitor Visitor;
 	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &Visitor );
 
@@ -730,39 +742,6 @@ void CRenderManager::EndFrame()
 {
 	glFinish();
 	SDL_GL_SwapBuffers();
-}
-
-void CRenderManager::TransfomationTraverse(CGameObject *Next)
-{
-	CPlaceableComponent *PlaceableComponent = NULL;
-	CRenderableComponent *RenderableComponent = NULL;
-	for(unsigned i = 0; i < Next->Children.size(); i++)
-	{
-		RenderableComponent = dynamic_cast<CRenderableComponent *>(Next->Children[i]);
-		if (RenderableComponent != NULL && RenderableComponent->GetVisibility() && 
-			!RenderableComponent->isDestroyed() && CSceneManager::Instance()->InScope(RenderableComponent->GetScene()))
-		{
-			Renderer->PushModel(&RenderableComponent->GetConfiguration(), RenderableComponent->GetModel());
-			TransfomationTraverse(Next->Children[i]);
-			continue;
-		}
-
-		PlaceableComponent = dynamic_cast<CPlaceableComponent *>(Next->Children[i]);
-		if (PlaceableComponent != NULL && !PlaceableComponent->isDestroyed() &&
-			CSceneManager::Instance()->InScope(PlaceableComponent->GetScene()))
-		{
-			Transformator.PushTransformation(PlaceableComponent->GetTransformation());
-
-			TransfomationTraverse(Next->Children[i]);
-
-			Transformator.PopTransformation();
-
-			continue;
-		}
-
-		if (!PlaceableComponent && !RenderableComponent)
-			TransfomationTraverse(Next->Children[i]);
-	}
 }
 
 CModel* CRenderManager::CreateModelText(const CText *AText)
@@ -1668,11 +1647,11 @@ CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/,
 		return;
 	Vertices = new Vector2[VerticesNumber];
 	std::copy(AVertices, AVertices + VerticesNumber, Vertices);
+	__UpdateBox();
 	if (ATexCoords == NULL)
 		return;
 	TexCoords = new Vector2[VerticesNumber];
 	std::copy(ATexCoords, ATexCoords + VerticesNumber, TexCoords);
-	__UpdateBox();
 }
 
 CModel::~CModel()

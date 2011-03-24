@@ -232,7 +232,7 @@ bool CSprite::SetTexture(const string &TextureName)
 
 CSprite::CSprite() : EllapsedTime(0), LastTime(0), CurrentFrame(0), CurrentRow(0), CurrentColumn(0),
 isFirstTimeRendering(true), AnimationsCount(0), animations(NULL), anim(NULL),
-Color(COLOR_WHITE), mirror_h(false)
+Color(color::WHITE), mirror_h(false)
 {
 	SetName("CSprite");
 }

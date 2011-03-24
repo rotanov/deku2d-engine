@@ -89,7 +89,7 @@ bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL), somebadshitidentifier()
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);
@@ -254,6 +254,7 @@ CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMir
 #ifdef _DEBUG
 	CRenderableComponent* DebugBox = CFactory::Instance()->New<CRenderableComponent>();
 	Attach(DebugBox);
+	DebugBox->somebadshitidentifier = "debugbox";
 #endif
 }
 
@@ -401,7 +402,12 @@ void CPlaceableComponent::UpdateBox( const CBox& ABox )
 	CRenderableComponent *DebugBox = dynamic_cast<CRenderableComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
-		DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
+		//if ( DebugBox->GetModel() == NULL)
+			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
+		//else
+		//{
+//			CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES);
+//		}
 	}
 #endif
 }
@@ -451,6 +457,7 @@ void CRenderableComponent::SetModel(CModel *AModel)
 	if (Model == NULL)
 		delete Model;
 	Model = AModel;
+	
 }
 
 void CRenderableComponent::SetConfiguration(const CRenderConfig &AConfiguraton)
@@ -564,7 +571,7 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 
 	if (AXML->HasAttribute("Color"))
 	{
-		RGBAf AColor = COLOR_WHITE;
+		RGBAf AColor = color::WHITE;
 		istringstream iss(AXML->GetAttribute("Color"));
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
@@ -586,9 +593,7 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 
 const CBox& CRenderableComponent::GetBox() const
 {
-	//assert(Model != 0);
-	if (Model == NULL)
-		return CBox();
+	assert(Model != 0);
 	return Model->GetBox();
 }
 
