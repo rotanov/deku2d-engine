@@ -232,3 +232,18 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 	}
 }
 
+#ifdef _DEBUG
+
+void CFactory::InsertDebugInfo( CObject* Source )
+{
+	if (typeid(*Source) == typeid(CDebugBoxComponent))
+		return;
+	CGameObject *GameObject = dynamic_cast<CGameObject*>(Source);
+	if (GameObject == NULL)
+		return;
+	GameObject->Attach(New<CDebugBoxComponent>());
+}
+
+#endif
+
+

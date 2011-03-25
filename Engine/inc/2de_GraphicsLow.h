@@ -148,6 +148,9 @@ public:
 	void SetScaling(float AScaling);
 	void SetTranslation(const Vector2 &Position);
 
+	Vector2 Apply(const Vector2 &AVector);
+	CBox Apply(const CBox &ABox);
+
 	void Clear();
 };
 

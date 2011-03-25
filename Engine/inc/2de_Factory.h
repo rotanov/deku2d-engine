@@ -59,6 +59,10 @@ protected:
 
 	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes);
 
+#ifdef _DEBUG
+	void InsertDebugInfo( CObject* Source );
+#endif
+
 	template<typename T>
 	CObject *InternalNew(const string &AName);
 
@@ -98,6 +102,12 @@ CObject* CFactory::InternalNew(const string &AName)
 	T* result = new T;
 
 	Add(result, AName);
+
+#ifdef _DEBUG
+
+	InsertDebugInfo(result);
+
+#endif
 
 	return result;
 }

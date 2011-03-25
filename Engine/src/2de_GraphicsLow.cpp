@@ -2,6 +2,7 @@
 
 #include "2de_Math.h"
 #include "2de_Engine.h"
+#include <limits>
 
 #if defined(USE_SDL_OPENGL)
 	#include <SDL/SDL_opengl.h>
@@ -26,12 +27,16 @@ class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, 
 {
 public:
 	CBox UpwayBox;
-	stack<CPlaceableComponent *> LPPStack;
+	stack<CPlaceableComponent *> LPPStack; // Last Placeable Parent
 
 	void VisitOnEnter(CPlaceableComponent &Placing)
 	{
 		if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
+		{
 			CRenderManager::Instance()->Transformator.PushTransformation(Placing.GetTransformation());
+			Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+		}
 		Placing.Active= true;
 		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
 			Placing.Active = false;
@@ -46,12 +51,11 @@ public:
 		
 		LPPStack.pop();
 		CRenderManager::Instance()->Transformator.PopTransformation();
+		return;
 		if (LPPStack.size() > 0)
 		{
-			CBox newBox = Placing.GetBox().Inflated(2, 2);
-			CTransformation Transformation = Placing.Transformation;
-			newBox.Min = ( newBox.Min * Transformation.GetScaling() ) * Matrix2(DegToRad(-Transformation.GetAngle())) + Transformation.GetTranslation();
-			newBox.Max = ( newBox.Max * Transformation.GetScaling() ) * Matrix2(DegToRad(-Transformation.GetAngle())) + Transformation.GetTranslation();
+			CBox newBox = Placing.GetBox();
+			newBox = LPPStack.top()->Transformation.Apply(newBox);
 			LPPStack.top()->UpdateBox(newBox);
 		}
 
@@ -61,18 +65,128 @@ public:
 	{
 		if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
 				CSceneManager::Instance()->InScope(Graphics.GetScene()))
+		{
 			CRenderManager::Instance()->Renderer->PushModel(&Graphics.GetConfiguration(), Graphics.GetModel());
+			Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+
+		}
 		Graphics.Active= true;
 		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
 			Graphics.Active = false;
 	}
+
 	void VisitOnLeave(CRenderableComponent &Graphics)
 	{
 		if (LPPStack.size() > 0)
 		{
-			if ( Graphics.somebadshitidentifier != "debugbox" )
-				LPPStack.top()->UpdateBox(Graphics.GetBox().Inflated(2, 2));
+//			if ( Graphics.somebadshitidentifier != "debugbox" )
+			{
+				CBox newBox = Graphics.GetBox().Inflated(1, 1);
+				Graphics.UpdateBox(newBox);
+				/*
+				newBox = LPPStack.top()->Transformation.Apply(newBox);
+				CPlaceableComponent* temp = LPPStack.top();
+				LPPStack.pop();
+				if (LPPStack.size() != 0)
+				{
+					LPPStack.top()->UpdateBox(newBox);
+					newBox = Graphics.GetBox().Inflated(1, 1);
+					newBox = LPPStack.top()->Transformation.Apply(newBox);
+				}
+				LPPStack.push(temp);
+				LPPStack.top()->UpdateBox(newBox);
+				*/
+			}
 		}
+	}
+};
+
+class CUpdateVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
+{
+public:
+	CBox UpwayBox;
+	stack<CPlaceableComponent *> LPPStack; // Last Placeable Parent
+
+	void VisitOnEnter(CPlaceableComponent &Placing)
+	{
+		if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
+		{
+			CRenderManager::Instance()->Transformator.PushTransformation(Placing.GetTransformation());
+			Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+		}
+		Placing.Active= true;
+		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
+			Placing.Active = false;
+		if (Placing.Active)
+			LPPStack.push(&Placing);
+	}
+
+	void VisitOnLeave(CPlaceableComponent &Placing)
+	{
+		if (!Placing.Active)
+			return;
+		
+		LPPStack.pop();
+		CRenderManager::Instance()->Transformator.PopTransformation();
+		return;
+		if (LPPStack.size() > 0)
+		{
+			CBox newBox = Placing.GetBox();
+			newBox = LPPStack.top()->Transformation.Apply(newBox);
+			LPPStack.top()->UpdateBox(newBox);
+		}
+
+	}
+
+	void VisitOnEnter(CRenderableComponent &Graphics)
+	{
+		if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
+				CSceneManager::Instance()->InScope(Graphics.GetScene()))
+		{
+			//CRenderManager::Instance()->Renderer->PushModel(&Graphics.GetConfiguration(), Graphics.GetModel());
+			Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+
+		}
+		Graphics.Active= true;
+		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
+			Graphics.Active = false;
+	}
+
+	void VisitOnLeave(CRenderableComponent &Graphics)
+	{
+		if (LPPStack.size() > 0)
+		{
+			//if ( Graphics.somebadshitidentifier != "debugbox" )
+			{
+				CBox newBox = Graphics.GetBox().Inflated(1, 1);
+				Graphics.UpdateBox(newBox);
+				/*
+				newBox = LPPStack.top()->Transformation.Apply(newBox);
+				CPlaceableComponent* temp = LPPStack.top();
+				LPPStack.pop();
+				if (LPPStack.size() != 0)
+				{
+					LPPStack.top()->UpdateBox(newBox);
+					newBox = Graphics.GetBox().Inflated(1, 1);
+					newBox = LPPStack.top()->Transformation.Apply(newBox);
+				}
+				LPPStack.push(temp);
+				LPPStack.top()->UpdateBox(newBox);
+				*/
+			}
+		}
+	}
+
+	void VisitOnEnter(CDebugBoxComponent &DebugBox)
+	{
+
+	}
+	void VisitOnLeave(CDebugBoxComponent &DebugBox)
+	{
+
 	}
 };
 
@@ -721,8 +835,10 @@ bool CRenderManager::DrawObjects()
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
 	Camera.Update(); // @todo: review camera
 
-	CDrawVisitor Visitor;
-	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &Visitor );
+	CDrawVisitor DrawVisitor;
+	CUpdateVisitor UpdateVisitor;
+	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &UpdateVisitor );
+	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &DrawVisitor );
 
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
@@ -1513,6 +1629,28 @@ void CTransformation::Clear()
 	Translation = V2_ZERO;
 	Scaling = 1.0f;
 	Rotation = 0.0f;
+}
+
+Vector2 CTransformation::Apply( const Vector2 &AVector )
+{
+	Vector2 newVector = ( AVector * Matrix2(DegToRad(-Rotation)) + Translation ) * Scaling;
+	return newVector;
+}
+
+CBox CTransformation::Apply( const CBox &ABox )
+{
+	CBox newBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+	Vector2 newTL = ( Vector2(ABox.Min.x, ABox.Max.y) * Matrix2(DegToRad(-Rotation)) ) * Scaling;
+	Vector2 newBR = ( Vector2(ABox.Max.x, ABox.Min.y) * Matrix2(DegToRad(-Rotation)) ) * Scaling;
+	Vector2 newTR = ( ABox.Max * Matrix2(DegToRad(-Rotation)) ) * Scaling;
+	Vector2 newBL = ( ABox.Min * Matrix2(DegToRad(-Rotation)) ) * Scaling;
+	newBox.Add(newTL);
+	newBox.Add(newTR);
+	newBox.Add(newBL);
+	newBox.Add(newBR);
+	newBox.Offset(Translation);
+	return newBox;
 }
 
 //////////////////////////////////////////////////////////////////////////

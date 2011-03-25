@@ -117,6 +117,7 @@ bool CEngine::Initialize()
 	//and FPSText
 	// TODO: hide it somewhere..
 	CPlaceableComponent *FPSTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
+	FPSTextPlacing->GetTransformation().SetTranslation(Vector2(20.0f, 20.0f));
 	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->SetText("FPS: 0");
 	FPSTextPlacing->SetLayer(512);

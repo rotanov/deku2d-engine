@@ -13,8 +13,6 @@
 
 class CGameObject : public IVisitableObject<>
 {
-public:
-	string somebadshitidentifier;
 private:
 	string ClassName;
 
@@ -143,6 +141,9 @@ public:
 
 	void SetAngle(float AAngle); //	(Degrees)
 
+	// temp
+	void SetBox(const CBox &ABox);
+
 	/**
 	*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
 	*	implicitly Depth => [-1; 1]?	
@@ -238,6 +239,7 @@ public:
 	virtual ~CRenderableComponent();
 
 	const CBox& GetBox() const;
+	void SetBox(const CBox& ABox);
 	bool GetVisibility() const;
 	virtual void SetVisibility(bool AVisible);
 	const RGBAf& GetColor() const;
@@ -252,12 +254,22 @@ public:
 	void SetConfiguration(const CRenderConfig &AConfiguraton);
 	void Deserialize(CXMLNode *AXML);
 
+	CBox Box;
+	void UpdateBox( const CBox& ABox );
+
+
 protected:
 	CResourceRefCounter<CModel> Model;
 
 private:
 	CRenderConfig Configuration;
 	bool Visible;	
+};
+
+class CDebugBoxComponent : public CRenderableComponent
+{
+public:
+	virtual ~CDebugBoxComponent(){}
 };
 
 /**

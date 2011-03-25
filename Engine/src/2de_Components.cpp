@@ -89,7 +89,7 @@ bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL), somebadshitidentifier()
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);
@@ -251,11 +251,7 @@ void CGameObject::DFSIterate( CGameObject *Next, IVisitorBase *Visitor )
 
 CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 {
-#ifdef _DEBUG
-	CRenderableComponent* DebugBox = CFactory::Instance()->New<CRenderableComponent>();
-	Attach(DebugBox);
-	DebugBox->somebadshitidentifier = "debugbox";
-#endif
+	SetName("CRenderableComponent");	
 }
 
 void CPlaceableComponent::SetAngle(float AAngle)
@@ -395,19 +391,24 @@ const CBox& CPlaceableComponent::GetBox() const
 	return Box;
 }
 
+void CPlaceableComponent::SetBox(const CBox &ABox)
+{
+	Box = ABox;
+}
+
 void CPlaceableComponent::UpdateBox( const CBox& ABox )
 {
 	Box.Union(ABox);
 #ifdef _DEBUG
-	CRenderableComponent *DebugBox = dynamic_cast<CRenderableComponent*>(Children[0]);
+	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
 		//if ( DebugBox->GetModel() == NULL)
 			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
 		//else
-		//{
-//			CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES);
-//		}
+		{
+			
+		}
 	}
 #endif
 }
@@ -595,6 +596,28 @@ const CBox& CRenderableComponent::GetBox() const
 {
 	assert(Model != 0);
 	return Model->GetBox();
+}
+
+void CRenderableComponent::UpdateBox( const CBox& ABox )
+{
+	Box.Union(ABox);
+#ifdef _DEBUG
+	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
+	if (NULL != DebugBox)
+	{
+		//if ( DebugBox->GetModel() == NULL)
+		DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
+		//else
+		{
+
+		}
+	}
+#endif
+}
+
+void CRenderableComponent::SetBox( const CBox& ABox )
+{
+	Box = ABox;
 }
 
 

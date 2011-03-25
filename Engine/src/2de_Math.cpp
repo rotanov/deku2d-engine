@@ -5,12 +5,6 @@
 #include <limits>
 #include <algorithm>
 
-template<typename T>
-__INLINE void SAFE_DELETE_ARRAY(T*& a)
-{
-	delete [] a, a = NULL;
-}
-
 unsigned g_seed = 152406923;
 static float SineTable[SINE_COSINE_TABLE_DIM], CosineTable[SINE_COSINE_TABLE_DIM];
 
@@ -429,12 +423,12 @@ CBox::CBox() : Min(V2_ZERO), Max(V2_ZERO) {}
 
 CBox::CBox(const Vector2 &AMin, const Vector2 &AMax) : Min(AMin), Max(AMax)
 {
-	assert(Min.x <= Max.x && Min.y <= Max.y);
+	//assert(Min.x <= Max.x && Min.y <= Max.y);
 }
 
 CBox::CBox(float xmin, float ymin, float xmax, float ymax) : Min(xmin, ymin), Max(xmax, ymax)
 {
-	assert(xmin <= xmax && ymin <= ymax);
+	//assert(xmin <= xmax && ymin <= ymax);
 }
 
 CBox::CBox(int x, int y, unsigned width, unsigned height) : Min(x, y), Max(x + width, y + height) {}
@@ -650,7 +644,7 @@ void CCircle::CalcBox()
 
 void CPolygon::Reset(unsigned AVerticesCount)
 {
-	SAFE_DELETE_ARRAY(Vertices);
+	delete [] Vertices;
 	Vertices = new Vector2[VerticesCount];
 }
 
@@ -679,7 +673,7 @@ CPolygon::CPolygon(unsigned AVerticesCount) : VerticesCount(AVerticesCount), Ver
 
 CPolygon::~CPolygon()
 {
-	SAFE_DELETE_ARRAY(Vertices);
+	delete [] Vertices;
 }
 
 void CPolygon::AddVertex(const Vector2 &Vertex)
@@ -688,7 +682,7 @@ void CPolygon::AddVertex(const Vector2 &Vertex)
 	for (unsigned i = 0; i < VerticesCount; i++)
 		TempVertices[i] = Vertices[i];
 	TempVertices[VerticesCount++] = Vertex;
-	SAFE_DELETE_ARRAY(Vertices);
+	delete [] Vertices;
 	Vertices = TempVertices;
 }
 
@@ -715,7 +709,7 @@ void CPolygon::RemoveVertex(unsigned Index)
 		if (i < Index)
 			TempVertices[i] = Vertices[i];
 	}
-	SAFE_DELETE_ARRAY(Vertices);
+	delete [] Vertices;
 	Vertices = TempVertices;
 }
 
