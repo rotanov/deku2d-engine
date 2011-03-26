@@ -15,7 +15,7 @@ private:
 	void CleanUp();
 	void WritePrompt();
 	void Input(const string &AText);
-	CEdit *CommandLineEdit;
+	CGameObject *CommandLineEdit;
 	CText *CommandOutput;
 	list<string> CommandHistory;
 	list<string>::iterator CommandHistoryIterator;

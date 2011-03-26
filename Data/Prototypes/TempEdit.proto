@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Prototype Name="TempEdit">
+	<PlaceableComponent Position="220 50">
+		<RenderableComponent Model="Box" Width="400" Height="20">
+			<PlaceableComponent Position="-198 -7">
+				<Text>
+					<ScriptableComponent Script="ClassesTest" ClassName="TempEditScript" />
+				</Text>
+			</PlaceableComponent>
+		</RenderableComponent>
+	</PlaceableComponent>
+</Prototype>

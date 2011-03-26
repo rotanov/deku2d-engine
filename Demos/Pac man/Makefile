@@ -16,7 +16,7 @@ LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lGLEW -lSDL_mixer -l
 
 all: ${TARGET}
 
-debug: CFLAGS := -g3 ${CFLAGS}
+debug: CFLAGS := -g3 -D_DEBUG ${CFLAGS}
 debug: all
 
 strict: CFLAGS := -Wall ${CFLAGS}

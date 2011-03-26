@@ -89,7 +89,7 @@ bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true), Dead(false)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);

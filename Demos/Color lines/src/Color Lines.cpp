@@ -319,11 +319,11 @@ void CGridGame::SpawnBall(const CCellSelection &DestCell, unsigned ColorIdentifi
 
 bool CGridGame::ProcessBFS(int SourceX, int SourceY, int DestinationX, int DestinationY)
 {
-	queue<pair<int, int>> Queue;
+	queue<pair<int, int> > Queue;
 	Queue.push(make_pair(SourceX, SourceY));
 	unsigned MapMarks[CELLS_COUNT][CELLS_COUNT];
-	static const unsigned INFINITY = static_cast<unsigned>(-1);
-	memset(MapMarks, INFINITY, CELLS_COUNT * CELLS_COUNT * sizeof(int));
+	static const unsigned DEKU_INFINITY = static_cast<unsigned>(-1);
+	memset(MapMarks, DEKU_INFINITY, CELLS_COUNT * CELLS_COUNT * sizeof(int));
 	MapMarks[SourceX][SourceY] = 0;
 
 	while (!Queue.empty())
@@ -358,7 +358,7 @@ bool CGridGame::ProcessBFS(int SourceX, int SourceY, int DestinationX, int Desti
 	}
 
 	unsigned DestMark = MapMarks[DestinationX][DestinationY];
-	if (DestMark == INFINITY)
+	if (DestMark == DEKU_INFINITY)
 		return false;
 	int x = DestinationX,  y = DestinationY;
 	while (DestMark != 0)

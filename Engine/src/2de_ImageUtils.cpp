@@ -79,5 +79,5 @@ RGBAub& CImageData::operator ()( unsigned col, unsigned row )
 {
 	assert(col * row >= 0 && col * row < Width * Height);
 	return (reinterpret_cast<RGBAub *>(Data))[ row * Width + col ];
-	return RGBAub();
+	//return RGBAub();
 }

@@ -180,4 +180,15 @@ private:
 	lua_State *State;
 };
 
+namespace LuaAPI
+{
+
+template<typename T>
+bool CheckType(T *obj)
+{
+	return (obj != NULL) && (typeid(*obj) == typeid(T));
+}
+
+};
+
 #endif // _2DE_LUA_UTILS_H_

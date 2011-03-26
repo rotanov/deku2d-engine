@@ -1,6 +1,7 @@
-SOURCES		=	src/main.cpp
+SOURCES		=	src/main.cpp \
+			src/Color\ Lines.cpp
 
-HEADERS		=	
+HEADERS		=	src/Color\ Lines.h
 
 TARGET		=	bin/Color\ lines
 ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
@@ -15,7 +16,7 @@ LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lGLEW -lSDL_mixer -l
 
 all: ${TARGET}
 
-debug: CFLAGS := -g3 ${CFLAGS}
+debug: CFLAGS := -g3 -D_DEBUG ${CFLAGS}
 debug: all
 
 strict: CFLAGS := -Wall ${CFLAGS}

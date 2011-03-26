@@ -674,7 +674,7 @@ public:
 };
 
 template <typename T, typename R = void>
-class IVisitor : public IVisitorBase
+class IVisitor : virtual public IVisitorBase
 {
 public:
 	typedef R CReturnType;

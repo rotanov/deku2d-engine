@@ -135,7 +135,7 @@ namespace LuaAPI
 	int GetText(lua_State *L)
 	{
 		CText *text = static_cast< ::CText *>(lua_touserdata(L, -1));
-		if (!text)
+		if (!CheckType(text))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetText API call");
 
 		lua_pushstring(L, text->GetText().c_str());
@@ -147,7 +147,7 @@ namespace LuaAPI
 	int SetText(lua_State *L)
 	{
 		CText *text = static_cast<CText *>(lua_touserdata(L, -2));
-		if (!text)
+		if (!CheckType(text))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetText API call");
 
 		if (!lua_isstring(L, -1))
@@ -162,11 +162,11 @@ namespace LuaAPI
 	int SetTextFont(lua_State *L)
 	{
 		CText *text = static_cast<CText *>(lua_touserdata(L, -2));
-		if (!text)
+		if (!CheckType(text))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
 	
 		CFont *font = static_cast<CFont *>(lua_touserdata(L, -1));
-		if (!font)
+		if (!CheckType(font))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
 
 		text->SetFont(font);
@@ -187,14 +187,14 @@ namespace LuaAPI
 	// (number, number) GetPosition(userdata PlaceableComponent)
 	int GetPosition(lua_State *L)
 	{
-		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
-		if (!rcobj)
+		CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
+		if (!CheckType(obj))
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
 		}
 
-		lua_pushnumber(L, rcobj->GetPosition().x);
-		lua_pushnumber(L, rcobj->GetPosition().y);
+		lua_pushnumber(L, obj->GetPosition().x);
+		lua_pushnumber(L, obj->GetPosition().y);
 		return 2;
 	}
 
@@ -204,27 +204,27 @@ namespace LuaAPI
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
 
-		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -3));
-		if (!rcobj)
+		CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -3));
+		if (!CheckType(obj))
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
 			return 0;
 		}
 
-		rcobj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
+		obj->SetPosition(Vector2(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 		return 0;
 	}
 
 	// number GetAngle(userdata PlaceableComponent)
 	int GetAngle(lua_State *L)
 	{
-		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
-		if (!rcobj)
+		CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
+		if (!CheckType(obj))
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetAngle API call");
 		}
 
-		lua_pushnumber(L, rcobj->GetAngle());
+		lua_pushnumber(L, obj->GetAngle());
 		return 1;
 	}
 
@@ -234,14 +234,14 @@ namespace LuaAPI
 		if (!lua_isnumber(L, -1))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetAngle API call");
 
-		CPlaceableComponent *rcobj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -2));
-		if (!rcobj)
+		CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -2));
+		if (!CheckType(obj))
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetAngle API call");
 			return 0;
 		}
 
-		rcobj->SetAngle(lua_tonumber(L, -1));
+		obj->SetAngle(lua_tonumber(L, -1));
 		return 0;
 	}
 
@@ -251,8 +251,9 @@ namespace LuaAPI
 		if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2) || !lua_isnumber(L, -3) || !lua_isnumber(L, -4))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetColor API call");
 
-		CRenderableComponent *rcobj = static_cast<CRenderableComponent *>(lua_touserdata(L, -5));
-		if (!rcobj)
+		CObject *obj = static_cast<CObject *>(lua_touserdata(L, -5));
+		CRenderableComponent *rcobj = dynamic_cast<CRenderableComponent *>(obj);
+		if (rcobj == NULL)
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetColor API call");
 			return 0;
@@ -266,14 +267,14 @@ namespace LuaAPI
 	int SetScript(lua_State *L)
 	{
 		CGameObject *ScriptableComponent = static_cast<CGameObject *>(lua_touserdata(L, -2));
-		if (!ScriptableComponent)
+		if (!CheckType(ScriptableComponent))
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");
 			return 0;
 		}
 
 		CScript *Script = static_cast<CScript *>(lua_touserdata(L, -1));
-		if (!Script)
+		if (!CheckType(Script))
 		{
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");
 			return 0;
@@ -354,7 +355,7 @@ namespace LuaAPI
 	int GetEventSender(lua_State *L)
 	{
 		CEvent *obj = static_cast<CEvent *>(lua_touserdata(L, -1));
-		if (!obj)
+		if (!CheckType(obj))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetEventSender API call");
 
 		lua_pushlightuserdata(L, obj->GetSender());
@@ -368,7 +369,7 @@ namespace LuaAPI
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetEventData API call");
 
 		CEvent *obj = static_cast<CEvent *>(lua_touserdata(L, -2));
-		if (!obj)
+		if (!CheckType(obj))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetEventData API call");
 
 		lua_pushstring(L, obj->GetData<string>(lua_tostring(L, -1)).c_str());
@@ -734,6 +735,7 @@ void CLuaVirtualMachine::TriggerError(const string &AMessage, ...)
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
 	luaopen_base(State);
+	luaopen_string(State);
 #ifdef _DEBUG
 	luaopen_debug(State);
 #endif // _DEBUG

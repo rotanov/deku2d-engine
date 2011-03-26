@@ -27,12 +27,19 @@ CLuaConsole::CLuaConsole()
 	CommandHistory.push_front("");
 	CommandHistoryIterator = CommandHistory.begin();
 
-	CommandLineEdit = CFactory::Instance()->New<CEdit>("CommandLineEdit");
-	CommandLineEdit->SetBox(CBox(10, 30, CGLWindow::Instance()->GetWidth() - 20, 30));
+	//CommandLineEdit = CFactory::Instance()->New<CEdit>("CommandLineEdit");
+	//CommandLineEdit->SetBox(CBox(10, 30, CGLWindow::Instance()->GetWidth() - 20, 30));
+
+	CommandLineEdit = dynamic_cast<CGameObject *>(CFactory::Instance()->CreateByName("TempEdit", "CommandLineEdit"));
+	CUpdateManager::Instance()->RootGameObject->Attach(CommandLineEdit);
 
 	CommandOutput = CFactory::Instance()->New<CText>("CommandOutput");
-	
-	// FEIL // CommandOutput->SetPosition(Vector2(10, CGLWindow::Instance()->GetHeight() - 20));
+
+	CPlaceableComponent *CommandOutputPlace = CFactory::Instance()->New<CPlaceableComponent>("CommandOutputPlace");
+	CommandOutputPlace->SetPosition(Vector2(10, CGLWindow::Instance()->GetHeight() - 20));
+
+	CommandOutputPlace->Attach(CommandOutput);
+	CUpdateManager::Instance()->RootGameObject->Attach(CommandOutputPlace);
 
 	WriteLine("Welcome to Deku2D engine Lua console!");
 	WritePrompt();
@@ -46,20 +53,20 @@ void CLuaConsole::ProcessEvent(const CEvent &AEvent)
 		switch (key)
 		{
 		case SDLK_RETURN:
-			Input(CommandLineEdit->GetText());
+			Input(dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->GetText());
 			break;
 		case SDLK_UP:
 			if (CommandHistoryIterator != --CommandHistory.end())
 			{
 				++CommandHistoryIterator;
-				CommandLineEdit->SetText(*CommandHistoryIterator);
+				dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText(*CommandHistoryIterator);
 			}
 			break;
 		case SDLK_DOWN:
 			if (CommandHistoryIterator != CommandHistory.begin())
 			{
 				--CommandHistoryIterator;
-				CommandLineEdit->SetText(*CommandHistoryIterator);
+				dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText(*CommandHistoryIterator);
 			}
 			break;
 		}
@@ -107,10 +114,10 @@ void CLuaConsole::Input(const string &AText)
 	CommandHistoryIterator = CommandHistory.begin();
 
 	WriteLine(AText);
-	if (!CLuaVirtualMachine::Instance()->RunString(CommandLineEdit->GetText()))
+	if (!CLuaVirtualMachine::Instance()->RunString(AText))
 	{
 		WriteLine(CLuaVirtualMachine::Instance()->GetLastError());
 	}
 	WritePrompt();
-	CommandLineEdit->SetText("");
+	dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText("");
 }

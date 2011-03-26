@@ -23,7 +23,7 @@
 //////////////////////////////////////////////////////////////////////////
 // temp
 
-class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
+class CDrawVisitor : virtual public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
 {
 public:
 
@@ -57,7 +57,7 @@ public:
 	}
 };
 
-class CUpdateVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
+class CUpdateVisitor : virtual public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
 {
 public:
 	CBox UpwayBox;
