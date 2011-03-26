@@ -113,7 +113,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="false"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;NOMINMAX"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;NOMINMAX;"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"

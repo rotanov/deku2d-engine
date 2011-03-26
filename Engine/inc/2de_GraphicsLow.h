@@ -192,7 +192,11 @@ private:
 	CBox Box;
 	CResourceRefCounter<CTexture> Texture;
 	EModelType ModelType;
+// KLUDGE
+public:
 	Vector2 *Vertices;
+//
+private:
 	Vector2 *TexCoords;
 	unsigned VerticesNumber;
 	void __UpdateBox();

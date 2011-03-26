@@ -82,14 +82,13 @@ public:
 	{
 		if (!Placing.Active)
 			return;
-		
+
+		CBox newBox = Placing.GetBox().Inflated(1, 1);
+		newBox = LPPStack.top()->Transformation.Apply(newBox);
 		LPPStack.pop();
 		CRenderManager::Instance()->Transformator.PopTransformation();
-		return;
 		if (LPPStack.size() > 0)
 		{
-			CBox newBox = Placing.GetBox();
-			newBox = LPPStack.top()->Transformation.Apply(newBox);
 			LPPStack.top()->UpdateBox(newBox);
 		}
 	}
@@ -110,24 +109,12 @@ public:
 
 	void VisitOnLeave(CRenderableComponent &Graphics)
 	{
-		if (LPPStack.size() > 0)
-		{
-			CBox newBox = Graphics.GetBox().Inflated(1, 1);
-			Graphics.UpdateBox(newBox);
-			///*
-			newBox = LPPStack.top()->Transformation.Apply(newBox);
-			CPlaceableComponent* temp = LPPStack.top();
-			LPPStack.pop();
-			if (LPPStack.size() != 0)
-			{
-				LPPStack.top()->UpdateBox(newBox);
-				newBox = Graphics.GetBox().Inflated(1, 1);
-				newBox = LPPStack.top()->Transformation.Apply(newBox);
-			}
-			LPPStack.push(temp);
-			LPPStack.top()->UpdateBox(newBox);
-			//*/
-		}
+		if (LPPStack.size() == 0)
+			return;
+		CBox newBox = Graphics.GetBox().Inflated(1, 1);
+		Graphics.UpdateBox(newBox);
+		newBox = LPPStack.top()->Transformation.Apply(newBox);
+		LPPStack.top()->UpdateBox(newBox);
 	}
 
 	void VisitOnEnter(CDebugBoxComponent &DebugBox)
@@ -141,6 +128,7 @@ public:
 		if (!DebugBox.GetVisibility() || DebugBox.isDestroyed() || !CSceneManager::Instance()->InScope(DebugBox.GetScene()))
 			DebugBox.Active = false;
 	}
+
 	void VisitOnLeave(CDebugBoxComponent &DebugBox)
 	{
 

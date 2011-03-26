@@ -60,6 +60,9 @@ bool CCustomStateHandler::OnInitialize()
 	//CSceneManager::Instance()->SetCurrentScene(NewScene);
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 	CUpdateManager::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CTest>("SetSizeTest"));
+	//CMusic = CMusicManager::Instance()->
+	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("Iggy"));
+	CSoundMixer::Instance()->SetMusicVolume(128);
 	return true;
 }
 

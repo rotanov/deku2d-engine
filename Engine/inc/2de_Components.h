@@ -260,7 +260,9 @@ public:
 	void UpdateBox( const CBox& ABox );
 
 
-protected:
+//protected:
+	//KLUDGE!!!
+public:
 	CResourceRefCounter<CModel> Model;
 
 private:

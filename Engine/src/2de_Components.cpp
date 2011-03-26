@@ -89,7 +89,7 @@ bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);
@@ -405,11 +405,22 @@ void CPlaceableComponent::UpdateBox( const CBox& ABox )
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
-		//if ( DebugBox->GetModel() == NULL)
+		if ( DebugBox->GetModel() == NULL)
 			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
-		//else
+		else
 		{
-			
+			float wd2 = Box.Width() * 0.5f, hd2 = Box.Height() * 0.5f;
+			DebugBox->Model->Vertices[0] = Vector2(-wd2, -hd2);
+			DebugBox->Model->Vertices[1] = Vector2( wd2, -hd2);
+
+			DebugBox->Model->Vertices[2] = Vector2( wd2, -hd2);
+			DebugBox->Model->Vertices[3] = Vector2( wd2,  hd2);
+
+			DebugBox->Model->Vertices[4] = Vector2( wd2,  hd2);
+			DebugBox->Model->Vertices[5] = Vector2(-wd2,  hd2);
+
+			DebugBox->Model->Vertices[6] = Vector2(-wd2,  hd2);
+			DebugBox->Model->Vertices[7] = Vector2(-wd2, -hd2);
 		}
 	}
 #endif
@@ -610,12 +621,24 @@ void CRenderableComponent::UpdateBox( const CBox& ABox )
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
-		//if ( DebugBox->GetModel() == NULL)
-		DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
-		//else
+		if ( DebugBox->GetModel() == NULL)
+			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
+		else
 		{
+			float wd2 = Box.Width() * 0.5f, hd2 = Box.Height() * 0.5f;
+			DebugBox->Model->Vertices[0] = Vector2(-wd2, -hd2);
+			DebugBox->Model->Vertices[1] = Vector2( wd2, -hd2);
 
+			DebugBox->Model->Vertices[2] = Vector2( wd2, -hd2);
+			DebugBox->Model->Vertices[3] = Vector2( wd2,  hd2);
+
+			DebugBox->Model->Vertices[4] = Vector2( wd2,  hd2);
+			DebugBox->Model->Vertices[5] = Vector2(-wd2,  hd2);
+
+			DebugBox->Model->Vertices[6] = Vector2(-wd2,  hd2);
+			DebugBox->Model->Vertices[7] = Vector2(-wd2, -hd2);
 		}
+
 	}
 #endif
 }

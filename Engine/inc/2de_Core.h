@@ -68,6 +68,7 @@
 #include <typeinfo>
 #include <vector>
 #include <iterator>
+#include <limits>
 
 #include <sys/stat.h>
 
