@@ -407,20 +407,18 @@ void CPlaceableComponent::UpdateBox( const CBox& ABox )
 	{
 		if ( DebugBox->GetModel() == NULL)
 			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
-		else
 		{
-			float wd2 = Box.Width() * 0.5f, hd2 = Box.Height() * 0.5f;
-			DebugBox->Model->Vertices[0] = Vector2(-wd2, -hd2);
-			DebugBox->Model->Vertices[1] = Vector2( wd2, -hd2);
+			DebugBox->Model->Vertices[0] = Vector2( Box.Min.x, Box.Min.y);
+			DebugBox->Model->Vertices[1] = Vector2( Box.Max.x, Box.Min.y);
 
-			DebugBox->Model->Vertices[2] = Vector2( wd2, -hd2);
-			DebugBox->Model->Vertices[3] = Vector2( wd2,  hd2);
+			DebugBox->Model->Vertices[2] = Vector2( Box.Max.x, Box.Min.y);
+			DebugBox->Model->Vertices[3] = Vector2( Box.Max.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[4] = Vector2( wd2,  hd2);
-			DebugBox->Model->Vertices[5] = Vector2(-wd2,  hd2);
+			DebugBox->Model->Vertices[4] = Vector2( Box.Max.x, Box.Max.y);
+			DebugBox->Model->Vertices[5] = Vector2( Box.Min.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[6] = Vector2(-wd2,  hd2);
-			DebugBox->Model->Vertices[7] = Vector2(-wd2, -hd2);
+			DebugBox->Model->Vertices[6] = Vector2( Box.Min.x, Box.Max.y);
+			DebugBox->Model->Vertices[7] = Vector2( Box.Min.x, Box.Min.y);
 		}
 	}
 #endif
@@ -623,22 +621,19 @@ void CRenderableComponent::UpdateBox( const CBox& ABox )
 	{
 		if ( DebugBox->GetModel() == NULL)
 			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
-		else
 		{
-			float wd2 = Box.Width() * 0.5f, hd2 = Box.Height() * 0.5f;
-			DebugBox->Model->Vertices[0] = Vector2(-wd2, -hd2);
-			DebugBox->Model->Vertices[1] = Vector2( wd2, -hd2);
+			DebugBox->Model->Vertices[0] = Vector2( Box.Min.x, Box.Min.y);
+			DebugBox->Model->Vertices[1] = Vector2( Box.Max.x, Box.Min.y);
 
-			DebugBox->Model->Vertices[2] = Vector2( wd2, -hd2);
-			DebugBox->Model->Vertices[3] = Vector2( wd2,  hd2);
+			DebugBox->Model->Vertices[2] = Vector2( Box.Max.x, Box.Min.y);
+			DebugBox->Model->Vertices[3] = Vector2( Box.Max.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[4] = Vector2( wd2,  hd2);
-			DebugBox->Model->Vertices[5] = Vector2(-wd2,  hd2);
+			DebugBox->Model->Vertices[4] = Vector2( Box.Max.x, Box.Max.y);
+			DebugBox->Model->Vertices[5] = Vector2( Box.Min.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[6] = Vector2(-wd2,  hd2);
-			DebugBox->Model->Vertices[7] = Vector2(-wd2, -hd2);
+			DebugBox->Model->Vertices[6] = Vector2( Box.Min.x, Box.Max.y);
+			DebugBox->Model->Vertices[7] = Vector2( Box.Min.x, Box.Min.y);
 		}
-
 	}
 #endif
 }

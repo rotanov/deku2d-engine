@@ -217,6 +217,7 @@ enum EBlendingMode
 class CRenderConfig
 {
 public:
+	bool doIgnoreTransform; 
 	RGBAf Color;
 	EBlendingMode BlendingMode;
 

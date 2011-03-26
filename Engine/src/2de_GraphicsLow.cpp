@@ -82,9 +82,9 @@ public:
 	{
 		if (!Placing.Active)
 			return;
-
-		CBox newBox = Placing.GetBox().Inflated(1, 1);
-		newBox = LPPStack.top()->Transformation.Apply(newBox);
+		assert(&Placing == LPPStack.top());
+		CBox newBox = Placing.GetBox();
+		//newBox = LPPStack.top()->Transformation.Apply(newBox);
 		LPPStack.pop();
 		CRenderManager::Instance()->Transformator.PopTransformation();
 		if (LPPStack.size() > 0)
@@ -111,9 +111,9 @@ public:
 	{
 		if (LPPStack.size() == 0)
 			return;
-		CBox newBox = Graphics.GetBox().Inflated(1, 1);
+		CBox newBox = Graphics.GetBox();
+		newBox = Graphics.WorldTransform.Apply(newBox);//LPPStack.top()->Transformation.Apply(newBox);
 		Graphics.UpdateBox(newBox);
-		newBox = LPPStack.top()->Transformation.Apply(newBox);
 		LPPStack.top()->UpdateBox(newBox);
 	}
 
@@ -138,7 +138,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // CRenderConfig
 
-CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(color::WHITE)
+CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(color::WHITE), doIgnoreTransform(false)
 {
 }
 
@@ -1338,13 +1338,16 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 		for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 		{
 			Vertex = AModel->GetVertices()[i];
-			//TempVector = (Vertex * Transformation.GetScaling());
-			TempVector = (Vertex * Transformation.GetScaling());
-			if (!Equal(Transformation.GetAngle(), 0.0f))
-				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
-			TempVector += Transformation.GetTranslation();//Sender->Position;
-			if (!CRenderManager::Instance()->Transformator.doConsiderCamera)
-				TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+			TempVector = Vertex;
+			if (!Sender->doIgnoreTransform)
+			{
+				TempVector *= Transformation.GetScaling();
+				if (!Equal(Transformation.GetAngle(), 0.0f))
+					TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
+				TempVector += Transformation.GetTranslation();
+				if (!CRenderManager::Instance()->Transformator.doConsiderCamera)
+					TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+			}
 			VertexHolder->PushVertex(Vector3
 										(
 											static_cast<int>(TempVector.x),
@@ -1379,12 +1382,16 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 	for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];
-		TempVector = (Vertex * Transformation.GetScaling());
- 		if (!Equal(Transformation.GetAngle(), 0.0f))
- 			TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
-		TempVector += Transformation.GetTranslation();// + Sender->GetPosition();//Sender->Position;
-// 		if (!Sender->doIgnoreCamera)
-// 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+		TempVector = Vertex;
+		if (!Sender->doIgnoreTransform)
+		{
+			TempVector *= Transformation.GetScaling();
+ 			if (!Equal(Transformation.GetAngle(), 0.0f))
+ 				TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
+			TempVector += Transformation.GetTranslation();
+	// 		if (!Sender->doIgnoreCamera)
+	// 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+		}
 		VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color);
 	}
 

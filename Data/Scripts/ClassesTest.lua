@@ -20,7 +20,7 @@ function ParentRecolorer:OnAttached(event)
 end
 
 function ParentRecolorer:OnEveryFrame()
-	SetAngle(GetParent(GetParent(self.object)), GetAngle(GetParent(GetParent(self.object))) + self.velcoef * 100.0 * GetDeltaTime())
+	SetAngle(GetParent(GetParent(self.object)), GetAngle(GetParent(GetParent(self.object))) + self.velcoef * 10.0 * GetDeltaTime())
 end
 
 TempEditScript = TempEditScript or { }

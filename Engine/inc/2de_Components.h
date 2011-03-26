@@ -274,6 +274,13 @@ class CDebugBoxComponent : public CRenderableComponent
 {
 public:
 	D2D_DECLARE_VISITABLE()
+
+	CDebugBoxComponent()
+	{
+		CRenderConfig NewConfiguration = GetConfiguration();
+		NewConfiguration.doIgnoreTransform = true;
+		SetConfiguration(NewConfiguration);
+	}
 	virtual ~CDebugBoxComponent(){}
 };
 
