@@ -23,82 +23,37 @@
 //////////////////////////////////////////////////////////////////////////
 // temp
 
-class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>
+class CDrawVisitor : public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
 {
 public:
-	CBox UpwayBox;
-	stack<CPlaceableComponent *> LPPStack; // Last Placeable Parent
 
 	void VisitOnEnter(CPlaceableComponent &Placing)
 	{
-		if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
-		{
-			CRenderManager::Instance()->Transformator.PushTransformation(Placing.GetTransformation());
-			Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
-				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
-		}
-		Placing.Active= true;
-		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
-			Placing.Active = false;
-		if (Placing.Active)
-			LPPStack.push(&Placing);
 	}
 
 	void VisitOnLeave(CPlaceableComponent &Placing)
 	{
-		if (!Placing.Active)
-			return;
-		
-		LPPStack.pop();
-		CRenderManager::Instance()->Transformator.PopTransformation();
-		return;
-		if (LPPStack.size() > 0)
-		{
-			CBox newBox = Placing.GetBox();
-			newBox = LPPStack.top()->Transformation.Apply(newBox);
-			LPPStack.top()->UpdateBox(newBox);
-		}
-
 	}
 
 	void VisitOnEnter(CRenderableComponent &Graphics)
 	{
-		if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
-				CSceneManager::Instance()->InScope(Graphics.GetScene()))
-		{
-			CRenderManager::Instance()->Renderer->PushModel(&Graphics.GetConfiguration(), Graphics.GetModel());
-			Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
-				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
-
-		}
-		Graphics.Active= true;
-		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
-			Graphics.Active = false;
+		CRenderManager::Instance()->Renderer->PushModel(Graphics.WorldTransform,
+			&Graphics.GetConfiguration(), Graphics.GetModel());
 	}
 
 	void VisitOnLeave(CRenderableComponent &Graphics)
 	{
-		if (LPPStack.size() > 0)
-		{
-//			if ( Graphics.somebadshitidentifier != "debugbox" )
-			{
-				CBox newBox = Graphics.GetBox().Inflated(1, 1);
-				Graphics.UpdateBox(newBox);
-				/*
-				newBox = LPPStack.top()->Transformation.Apply(newBox);
-				CPlaceableComponent* temp = LPPStack.top();
-				LPPStack.pop();
-				if (LPPStack.size() != 0)
-				{
-					LPPStack.top()->UpdateBox(newBox);
-					newBox = Graphics.GetBox().Inflated(1, 1);
-					newBox = LPPStack.top()->Transformation.Apply(newBox);
-				}
-				LPPStack.push(temp);
-				LPPStack.top()->UpdateBox(newBox);
-				*/
-			}
-		}
+
+	}
+
+	void VisitOnEnter(CDebugBoxComponent &DebugBox)
+	{
+		CRenderManager::Instance()->Renderer->PushModel(DebugBox.WorldTransform,
+			&DebugBox.GetConfiguration(), DebugBox.GetModel());
+	}
+	void VisitOnLeave(CDebugBoxComponent &DebugBox)
+	{
+
 	}
 };
 
@@ -137,7 +92,6 @@ public:
 			newBox = LPPStack.top()->Transformation.Apply(newBox);
 			LPPStack.top()->UpdateBox(newBox);
 		}
-
 	}
 
 	void VisitOnEnter(CRenderableComponent &Graphics)
@@ -145,10 +99,9 @@ public:
 		if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
 				CSceneManager::Instance()->InScope(Graphics.GetScene()))
 		{
-			//CRenderManager::Instance()->Renderer->PushModel(&Graphics.GetConfiguration(), Graphics.GetModel());
 			Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
 				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
-
+			Graphics.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 		}
 		Graphics.Active= true;
 		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
@@ -159,30 +112,34 @@ public:
 	{
 		if (LPPStack.size() > 0)
 		{
-			//if ( Graphics.somebadshitidentifier != "debugbox" )
+			CBox newBox = Graphics.GetBox().Inflated(1, 1);
+			Graphics.UpdateBox(newBox);
+			///*
+			newBox = LPPStack.top()->Transformation.Apply(newBox);
+			CPlaceableComponent* temp = LPPStack.top();
+			LPPStack.pop();
+			if (LPPStack.size() != 0)
 			{
-				CBox newBox = Graphics.GetBox().Inflated(1, 1);
-				Graphics.UpdateBox(newBox);
-				/*
-				newBox = LPPStack.top()->Transformation.Apply(newBox);
-				CPlaceableComponent* temp = LPPStack.top();
-				LPPStack.pop();
-				if (LPPStack.size() != 0)
-				{
-					LPPStack.top()->UpdateBox(newBox);
-					newBox = Graphics.GetBox().Inflated(1, 1);
-					newBox = LPPStack.top()->Transformation.Apply(newBox);
-				}
-				LPPStack.push(temp);
 				LPPStack.top()->UpdateBox(newBox);
-				*/
+				newBox = Graphics.GetBox().Inflated(1, 1);
+				newBox = LPPStack.top()->Transformation.Apply(newBox);
 			}
+			LPPStack.push(temp);
+			LPPStack.top()->UpdateBox(newBox);
+			//*/
 		}
 	}
 
 	void VisitOnEnter(CDebugBoxComponent &DebugBox)
 	{
-
+		if (DebugBox.GetVisibility() && !DebugBox.isDestroyed() &&
+			CSceneManager::Instance()->InScope(DebugBox.GetScene()))
+		{
+			DebugBox.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+		}
+		DebugBox.Active= true;
+		if (!DebugBox.GetVisibility() || DebugBox.isDestroyed() || !CSceneManager::Instance()->InScope(DebugBox.GetScene()))
+			DebugBox.Active = false;
 	}
 	void VisitOnLeave(CDebugBoxComponent &DebugBox)
 	{
@@ -1360,7 +1317,7 @@ bool CFFPRenderer::Finalize()
 	return false;
 }
 
-void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
+void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderConfig *Sender, const CModel * AModel)
 {
 	if (AModel == NULL)
 		return;
@@ -1389,7 +1346,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 		CBetterTextureVertexHolder * VertexHolder = TexturedGeometry[index];
 
 		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
-		CTransformation Transformation = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+		CTransformation Transformation = ATransform; //CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 		for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 		{
 			Vertex = AModel->GetVertices()[i];
@@ -1430,7 +1387,7 @@ void CFFPRenderer::PushModel(const CRenderConfig *Sender, const CModel * AModel)
 	}
 
 	Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
-	CTransformation Transformation = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+	CTransformation Transformation = ATransform;//CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 	for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 	{
 		Vertex = AModel->GetVertices()[i];

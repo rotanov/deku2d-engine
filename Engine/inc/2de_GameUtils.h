@@ -67,8 +67,8 @@ public:
 	void ProcessEvent(const CEvent &AEvent);
 
 private:
-	CText TextDeku;
-	CText TextTeam;
+	CText *TextDeku;
+	CText *TextTeam;
 };
 
 #endif // _2DE_GAME_UTILS_H

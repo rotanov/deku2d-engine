@@ -169,6 +169,9 @@ CTileset* CTileSetManager::GetTileset(const string &ATilesetName)
 
 CDefaultTitleScreen::CDefaultTitleScreen()
 {
+	TextDeku = CFactory::Instance()->New<CText>();
+	TextTeam = CFactory::Instance()->New<CText>();
+
 	CEventManager::Instance()->Subscribe("WindowResize", this);
 	CPlaceableComponent *tempPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	int ScrWidth = CGLWindow::Instance()->GetWidth();
@@ -180,14 +183,14 @@ CDefaultTitleScreen::CDefaultTitleScreen()
 	CPlaceableComponent *TeamTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	tempPlacing->Attach(DekuTextPlacing);
 	tempPlacing->Attach(TeamTextPlacing);
-	DekuTextPlacing->Attach(&TextDeku);
-	TeamTextPlacing->Attach(&TextTeam);
+	DekuTextPlacing->Attach(TextDeku);
+	TeamTextPlacing->Attach(TextTeam);
 	DekuTextPlacing->SetPosition(Vector2(40.0f, -47.0f));
 	TeamTextPlacing->SetPosition(Vector2(40.0f, -74.0f));
 	DekuTextPlacing->SetScaling(2);
 	TeamTextPlacing->SetScaling(2);
-	TextDeku.SetText("Deku");
-	TextTeam.SetText("Team");
+	TextDeku->SetText("Deku");
+	TextTeam->SetText("Team");
 }
 
 void CDefaultTitleScreen::SetTexture(CTexture* ATexture)

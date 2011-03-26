@@ -13,10 +13,13 @@
 
 class CGameObject : public IVisitableObject<>
 {
+	friend class CFactory;
 private:
 	string ClassName;
 
 public:	
+	CGameObject();
+	virtual ~CGameObject();
 	D2D_DECLARE_VISITABLE()
 	class traverse_iterator
 	{
@@ -65,8 +68,6 @@ public:
 
 	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor);
 
-	CGameObject();
-	virtual ~CGameObject();
 
 	void Attach(CGameObject* AGameObject);
 	void Detach(CGameObject* AGameObject);
@@ -234,6 +235,7 @@ class CRenderableComponent : public CGameObject
 {
 public:
 	D2D_DECLARE_VISITABLE()
+	CTransformation WorldTransform;
 
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
@@ -269,6 +271,7 @@ private:
 class CDebugBoxComponent : public CRenderableComponent
 {
 public:
+	D2D_DECLARE_VISITABLE()
 	virtual ~CDebugBoxComponent(){}
 };
 

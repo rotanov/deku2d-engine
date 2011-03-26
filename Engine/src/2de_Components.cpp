@@ -399,6 +399,8 @@ void CPlaceableComponent::SetBox(const CBox &ABox)
 void CPlaceableComponent::UpdateBox( const CBox& ABox )
 {
 	Box.Union(ABox);
+	if (typeid(*this) == typeid(CDebugBoxComponent))
+		return;
 #ifdef _DEBUG
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
@@ -601,7 +603,10 @@ const CBox& CRenderableComponent::GetBox() const
 void CRenderableComponent::UpdateBox( const CBox& ABox )
 {
 	Box.Union(ABox);
+	if (typeid(*this) == typeid(CDebugBoxComponent))
+		return;
 #ifdef _DEBUG
+
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{

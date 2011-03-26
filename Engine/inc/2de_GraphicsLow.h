@@ -299,7 +299,7 @@ public:
 	}
 	virtual bool Initialize(){return false;};// = 0;
 	virtual bool Finalize(){return false;};// = 0;
-	virtual void PushModel(const CRenderConfig *, const CModel *){};// = 0;
+	virtual void PushModel(const CTransformation &, const CRenderConfig *, const CModel *){};// = 0;
 	virtual void Render(){};// = 0;
 	virtual void Clear() = 0;
 };
@@ -315,7 +315,7 @@ public:
 	~CFFPRenderer();
 	bool Initialize();
 	bool Finalize();
-	void PushModel(const CRenderConfig *ARenderInfo, const CModel * AModel);
+	void PushModel(const CTransformation& ATransform, const CRenderConfig *ARenderInfo, const CModel * AModel);
 	void Render();
 	void Clear();
 
