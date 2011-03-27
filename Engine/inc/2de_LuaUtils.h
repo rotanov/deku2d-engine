@@ -77,6 +77,8 @@ public:
 	void PushArgument(const string &Argument);
 	void PushArgument(void *Argument);
 
+	void SetArgumentsCount(int AArgumentsCount);
+
 	template<typename T>
 	T PopResult()
 	{

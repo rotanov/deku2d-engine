@@ -58,10 +58,14 @@ bool CCustomStateHandler::OnInitialize()
 {
 	//CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	//CSceneManager::Instance()->SetCurrentScene(NewScene);
+
+	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_Vector2"));
+	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_CBox"));
+
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 	CUpdateManager::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CTest>("SetSizeTest"));
 	//CMusic = CMusicManager::Instance()->
-	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("Iggy"));
+	CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("Iggy"), 0, -1);
 	CSoundMixer::Instance()->SetMusicVolume(128);
 	return true;
 }

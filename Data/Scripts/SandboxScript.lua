@@ -11,11 +11,12 @@ end
 function TextMovementScriptable:OnEveryFrame()
 	local cur_x, cur_y
 	cur_x, cur_y = GetPosition(GetObject("TextPos"))
+	local box = GetBox(GetObject("TextPos"))
 
-	if cur_x < 0 or cur_x > GetWindowWidth() then
+	if box.Min.x < 0 or box.Max.x > GetWindowWidth() then
 		self.dir.x = -self.dir.x
 	end
-	if cur_y < 0 or cur_y > GetWindowHeight() then
+	if box.Min.y < 0 or box.Max.y > GetWindowHeight() then
 		self.dir.y = -self.dir.y
 	end
 

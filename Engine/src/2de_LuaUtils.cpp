@@ -215,6 +215,34 @@ namespace LuaAPI
 		return 0;
 	}
 
+	// table(CBox) GetBox(userdata PlaceableComponent)
+	int GetBox(lua_State *L)
+	{
+		CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
+		if (!CheckType(obj))
+		{
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetBox API call");
+		}
+
+		CLuaFunctionCall fc3("CBox", 1);
+
+		CBox box = obj->GetBox();
+		CLuaFunctionCall fc1("Vector2", 1);
+		fc1.PushArgument(box.Min.x);
+		fc1.PushArgument(box.Min.y);
+		fc1.Call();
+
+		CLuaFunctionCall fc2("Vector2", 1);
+		fc2.PushArgument(box.Max.x);
+		fc2.PushArgument(box.Max.y);
+		fc2.Call();
+
+		fc3.SetArgumentsCount(2);
+		fc3.Call();
+
+		return 1;
+	}
+
 	// number GetAngle(userdata PlaceableComponent)
 	int GetAngle(lua_State *L)
 	{
@@ -761,6 +789,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(State, "GetFont", &LuaAPI::GetFont);
 	lua_register(State, "GetPosition", &LuaAPI::GetPosition);
 	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
+	lua_register(State, "GetBox", &LuaAPI::GetBox);
 	lua_register(State, "GetAngle", &LuaAPI::GetAngle);
 	lua_register(State, "SetAngle", &LuaAPI::SetAngle);
 	lua_register(State, "SetColor", &LuaAPI::SetColor);
@@ -810,6 +839,13 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCoun
 
 	OldStackTop = lua_gettop(State);
 	lua_getglobal(State, FunctionName.c_str());
+	if (lua_isnil(State, -1))
+	{
+		Log("ERROR", "An error occured while trying to call function '%s': no such function", FunctionName.c_str());
+		lua_pop(State, 1);
+		Broken = true;
+		return;
+	}
 }
 
 CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount /*= 0*/) : ObjectName(AObjectName),
@@ -847,8 +883,8 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFun
 
 CLuaFunctionCall::~CLuaFunctionCall()
 {
-	if (!Broken)
-		lua_settop(State, OldStackTop);
+	/*if (!Broken)
+		lua_settop(State, OldStackTop);*/
 }
 
 bool CLuaFunctionCall::Call()
@@ -916,5 +952,10 @@ void CLuaFunctionCall::PushArgument(void *Argument)
 	lua_pushlightuserdata(State, Argument);
 
 	ArgumentsCount++;
+}
+
+void CLuaFunctionCall::SetArgumentsCount(int AArgumentsCount)
+{
+	ArgumentsCount = AArgumentsCount;
 }
 

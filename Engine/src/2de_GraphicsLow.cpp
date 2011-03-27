@@ -448,7 +448,7 @@ Vector2 CGLWindow::GetSize() const
 	return Vector2(Parameters.Width, Parameters.Height);
 }
 
-void CGLWindow::Resize( unsigned AWidth, unsigned AHeight )
+void CGLWindow::Resize(unsigned AWidth, unsigned AHeight)
 {
 	SDL_Event Event;
 	Event.type = SDL_VIDEORESIZE;
@@ -782,8 +782,8 @@ bool CRenderManager::DrawObjects()
 
 	CDrawVisitor DrawVisitor;
 	CUpdateVisitor UpdateVisitor;
-	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &UpdateVisitor );
-	CUpdateManager::Instance()->RootGameObject->DFSIterate( CUpdateManager::Instance()->RootGameObject, &DrawVisitor );
+	CUpdateManager::Instance()->RootGameObject->DFSIterate(CUpdateManager::Instance()->RootGameObject, &UpdateVisitor);
+	CUpdateManager::Instance()->RootGameObject->DFSIterate(CUpdateManager::Instance()->RootGameObject, &DrawVisitor);
 
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
@@ -881,7 +881,7 @@ void CRenderManager::SetSwapInterval(int interval /*= 1*/)
 	Log("ERROR", "swap_control is not supported on your computer");
 }
 
-CModel* CRenderManager::CreateModelCircle( float Radius, EModelType AModelType /*= MODEL_TYPE_LINES*/, int Precision /*= 16*/ )
+CModel* CRenderManager::CreateModelCircle(float Radius, EModelType AModelType /*= MODEL_TYPE_LINES*/, int Precision /*= 16*/)
 {
 	Vector2 *Vertices = NULL;
 	unsigned NumberOfVertices = 0;
@@ -947,7 +947,7 @@ CModel* CRenderManager::CreateModelCircle( float Radius, EModelType AModelType /
 	return Result;
 }
 
-CModel* CRenderManager::CreateModelBox( float Width, float Height, EModelType AModelType /*= MODEL_TYPE_LINES*/, CTexture * ATexture /*= NULL*/, const Vector2Array<4> &ATexCoords /*= V2_QUAD_BIN*/ )
+CModel* CRenderManager::CreateModelBox(float Width, float Height, EModelType AModelType /*= MODEL_TYPE_LINES*/, CTexture * ATexture /*= NULL*/, const Vector2Array<4> &ATexCoords /*= V2_QUAD_BIN*/)
 {
 	CModel *Result = NULL;
 	float wd2 = Width * 0.5f, hd2 = Height * 0.5f;
@@ -1003,7 +1003,7 @@ CModel* CRenderManager::CreateModelBox( float Width, float Height, EModelType AM
 	return Result;
 }
 
-CModel* CRenderManager::CreateModelLine( const Vector2 &v0, const Vector2 &v1 )
+CModel* CRenderManager::CreateModelLine(const Vector2 &v0, const Vector2 &v1)
 {
 	Vector2 Vertices[2];
 	Vertices[0] = v0;
@@ -1014,7 +1014,7 @@ CModel* CRenderManager::CreateModelLine( const Vector2 &v0, const Vector2 &v1 )
 	return Result;
 }
 
-EModelType CRenderManager::SelectModelTypeByStringIdentifier( const string &Identifier )
+EModelType CRenderManager::SelectModelTypeByStringIdentifier(const string &Identifier)
 {
 	if (Identifier == "Points")
 		return MODEL_TYPE_POINTS;
@@ -1025,7 +1025,7 @@ EModelType CRenderManager::SelectModelTypeByStringIdentifier( const string &Iden
 	return MODEL_TYPE_NOT_A_MODEL;
 }
 
-EBlendingMode CRenderManager::SelectBlendingModeByIdentifier( const string &Identifier )
+EBlendingMode CRenderManager::SelectBlendingModeByIdentifier(const string &Identifier )
 {
 	if (Identifier == "Opaque")
 		return BLEND_MODE_OPAQUE;
@@ -1583,13 +1583,13 @@ void CTransformation::Clear()
 	Rotation = 0.0f;
 }
 
-Vector2 CTransformation::Apply( const Vector2 &AVector )
+Vector2 CTransformation::Apply(const Vector2 &AVector)
 {
-	Vector2 newVector = ( AVector * Matrix2(DegToRad(-Rotation)) + Translation ) * Scaling;
+	Vector2 newVector = (AVector * Matrix2(DegToRad(-Rotation)) + Translation) * Scaling;
 	return newVector;
 }
 
-CBox CTransformation::Apply( const CBox &ABox )
+CBox CTransformation::Apply(const CBox &ABox)
 {
 	CBox newBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
 				std::numeric_limits<float>::min(), std::numeric_limits<float>::min());

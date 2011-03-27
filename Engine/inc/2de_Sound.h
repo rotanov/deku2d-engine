@@ -90,7 +90,7 @@ class CSoundMixer : public CTSingleton<CSoundMixer>
 public:
 	bool PlaySound(CSound *Sound, int Time = -1);
 	void StopAllSound();
-	bool PlayMusic(CMusic *Music, int FadeInTime = 0);
+	bool PlayMusic(CMusic *Music, int FadeInTime = 0, int Loops = 1);
 	void PauseMusic();
 	void ResumeMusic();
 	void StopMusic(int FadeOutTime = 0);

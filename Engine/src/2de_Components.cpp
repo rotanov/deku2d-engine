@@ -236,12 +236,12 @@ void CGameObject::ProcessEvent(const CEvent &AEvent)
 	}
 }
 
-void CGameObject::DFSIterate( CGameObject *Next, IVisitorBase *Visitor )
+void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 {
 	if (!Next->Active)
 		return;
 	Next->AcceptOnEnter(*Visitor);
-	for(unsigned i = 0; i < Next->Children.size(); i++)
+	for (unsigned i = 0; i < Next->Children.size(); i++)
 		DFSIterate(Next->Children[i], Visitor);
 	Next->AcceptOnLeave(*Visitor);
 }
@@ -396,7 +396,7 @@ void CPlaceableComponent::SetBox(const CBox &ABox)
 	Box = ABox;
 }
 
-void CPlaceableComponent::UpdateBox( const CBox& ABox )
+void CPlaceableComponent::UpdateBox(const CBox& ABox)
 {
 	Box.Union(ABox);
 	if (typeid(*this) == typeid(CDebugBoxComponent))
@@ -405,20 +405,20 @@ void CPlaceableComponent::UpdateBox( const CBox& ABox )
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
-		if ( DebugBox->GetModel() == NULL)
+		if (DebugBox->GetModel() == NULL)
 			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
 		{
-			DebugBox->Model->Vertices[0] = Vector2( Box.Min.x, Box.Min.y);
-			DebugBox->Model->Vertices[1] = Vector2( Box.Max.x, Box.Min.y);
+			DebugBox->Model->Vertices[0] = Vector2(Box.Min.x, Box.Min.y);
+			DebugBox->Model->Vertices[1] = Vector2(Box.Max.x, Box.Min.y);
 
-			DebugBox->Model->Vertices[2] = Vector2( Box.Max.x, Box.Min.y);
-			DebugBox->Model->Vertices[3] = Vector2( Box.Max.x, Box.Max.y);
+			DebugBox->Model->Vertices[2] = Vector2(Box.Max.x, Box.Min.y);
+			DebugBox->Model->Vertices[3] = Vector2(Box.Max.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[4] = Vector2( Box.Max.x, Box.Max.y);
-			DebugBox->Model->Vertices[5] = Vector2( Box.Min.x, Box.Max.y);
+			DebugBox->Model->Vertices[4] = Vector2(Box.Max.x, Box.Max.y);
+			DebugBox->Model->Vertices[5] = Vector2(Box.Min.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[6] = Vector2( Box.Min.x, Box.Max.y);
-			DebugBox->Model->Vertices[7] = Vector2( Box.Min.x, Box.Min.y);
+			DebugBox->Model->Vertices[6] = Vector2(Box.Min.x, Box.Max.y);
+			DebugBox->Model->Vertices[7] = Vector2(Box.Min.x, Box.Min.y);
 		}
 	}
 #endif
@@ -609,7 +609,7 @@ const CBox& CRenderableComponent::GetBox() const
 	return Model->GetBox();
 }
 
-void CRenderableComponent::UpdateBox( const CBox& ABox )
+void CRenderableComponent::UpdateBox(const CBox& ABox)
 {
 	Box.Union(ABox);
 	if (typeid(*this) == typeid(CDebugBoxComponent))
@@ -619,26 +619,26 @@ void CRenderableComponent::UpdateBox( const CBox& ABox )
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
-		if ( DebugBox->GetModel() == NULL)
+		if (DebugBox->GetModel() == NULL)
 			DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
 		{
-			DebugBox->Model->Vertices[0] = Vector2( Box.Min.x, Box.Min.y);
-			DebugBox->Model->Vertices[1] = Vector2( Box.Max.x, Box.Min.y);
+			DebugBox->Model->Vertices[0] = Vector2(Box.Min.x, Box.Min.y);
+			DebugBox->Model->Vertices[1] = Vector2(Box.Max.x, Box.Min.y);
 
-			DebugBox->Model->Vertices[2] = Vector2( Box.Max.x, Box.Min.y);
-			DebugBox->Model->Vertices[3] = Vector2( Box.Max.x, Box.Max.y);
+			DebugBox->Model->Vertices[2] = Vector2(Box.Max.x, Box.Min.y);
+			DebugBox->Model->Vertices[3] = Vector2(Box.Max.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[4] = Vector2( Box.Max.x, Box.Max.y);
-			DebugBox->Model->Vertices[5] = Vector2( Box.Min.x, Box.Max.y);
+			DebugBox->Model->Vertices[4] = Vector2(Box.Max.x, Box.Max.y);
+			DebugBox->Model->Vertices[5] = Vector2(Box.Min.x, Box.Max.y);
 
-			DebugBox->Model->Vertices[6] = Vector2( Box.Min.x, Box.Max.y);
-			DebugBox->Model->Vertices[7] = Vector2( Box.Min.x, Box.Min.y);
+			DebugBox->Model->Vertices[6] = Vector2(Box.Min.x, Box.Max.y);
+			DebugBox->Model->Vertices[7] = Vector2(Box.Min.x, Box.Min.y);
 		}
 	}
 #endif
 }
 
-void CRenderableComponent::SetBox( const CBox& ABox )
+void CRenderableComponent::SetBox(const CBox& ABox)
 {
 	Box = ABox;
 }

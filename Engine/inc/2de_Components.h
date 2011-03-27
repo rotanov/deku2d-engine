@@ -257,7 +257,7 @@ public:
 	void Deserialize(CXMLNode *AXML);
 
 	CBox Box;
-	void UpdateBox( const CBox& ABox );
+	void UpdateBox(const CBox& ABox);
 
 
 //protected:

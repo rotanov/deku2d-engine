@@ -1155,10 +1155,10 @@ void CEnvironment::Variables::Set(const string &AName, const string &AValue)
 }
 
 /**
-* CEnvironment::LogToStdOut - упрощённый лог на стандартный вывод, в обход синглтонного ада CLog'а.
+* CEnvironment::LogToStdOut - simplified log to the standard output, the way around singleton hell of CLog.
 *
-* Эта функция используется макросом Log при задефайненом SIMPLIFIED_LOG (по-умолчанию это не так). Также можно использовать вручную.
-* В основном нужна при отладке, а также, когда движок не запущен, а залогировать что-то очень хочется.
+* This function is used by Log macro if SIMPLIFIED_LOG is defined (this is false by default). Also can be used manually.
+* Generally, it's useful in cases of debugging, and when the engine is not started, but you want to log something.
 */
 
 void CEnvironment::LogToStdOut(const char *Event, const char *Format, ...)
@@ -1177,6 +1177,8 @@ void CEnvironment::LogToStdOut(const char *Event, const char *Format, ...)
 
 	cout << "[" << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] ["
 		<< Event << "] " << buffer << endl;
+	
+	delete[] buffer;
 }
 
 string CEnvironment::GetLineTerminator()

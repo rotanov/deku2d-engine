@@ -250,7 +250,7 @@ void CSoundMixer::StopAllSound()
 	Mix_HaltChannel(-1);
 }
 
-bool CSoundMixer::PlayMusic(CMusic *Music, int FadeInTime /*= 0*/)
+bool CSoundMixer::PlayMusic(CMusic *Music, int FadeInTime /*= 0*/, int Loops /*= 1*/)
 {
 	if (!Initialized)
 		return false;
@@ -270,11 +270,11 @@ bool CSoundMixer::PlayMusic(CMusic *Music, int FadeInTime /*= 0*/)
 
 	if (FadeInTime == 0)
 	{
-		result = Mix_PlayMusic(MusicData, 1);
+		result = Mix_PlayMusic(MusicData, Loops);
 	}
 	else
 	{
-		result = Mix_FadeInMusic(MusicData, 1, FadeInTime);
+		result = Mix_FadeInMusic(MusicData, Loops, FadeInTime);
 	}
 
 	if (result == -1)

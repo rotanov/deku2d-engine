@@ -199,7 +199,7 @@ public:
 private:
 	Vector2 *TexCoords;
 	unsigned VerticesNumber;
-	void __UpdateBox();
+	void __UpdateBox();	// why not call it ___________________________UpdateBox() ? Enlarge your underscore!
 };
 
 /**
