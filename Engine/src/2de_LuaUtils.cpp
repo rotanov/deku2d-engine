@@ -563,6 +563,12 @@ string CScript::GetScriptText() const
 	return ScriptText;
 }
 
+void CScript::Unload()
+{
+	// Guess that SCript doesn't have memory-heavy part and do nothing here
+	CResource::BasicUnload();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CLuaVirtualMachine
 
@@ -570,8 +576,8 @@ CLuaVirtualMachine::CLuaVirtualMachine()
 {
 	SetName("CLuaVirtualMachine");
 
-	State = luaL_newstate();
-	if (!State)
+	L = luaL_newstate();
+	if (!L)
 	{
 		Log("ERROR", "Lua state initialization failed");
 		return;
@@ -582,17 +588,17 @@ CLuaVirtualMachine::CLuaVirtualMachine()
 
 CLuaVirtualMachine::~CLuaVirtualMachine()
 {
-	lua_close(State);
+	lua_close(L);
 }
 
 bool CLuaVirtualMachine::RunFile(const string &AFilename)
 {
-	if (!State)
+	if (!L)
 		return false;
 
-	if (luaL_dofile(State, AFilename.c_str()) !=0)
+	if (luaL_dofile(L, AFilename.c_str()) !=0)
 	{
-		LastError = lua_tostring(State, -1);
+		LastError = lua_tostring(L, -1);
 		Log("ERROR", "Lua: %s", LastError.c_str());
 		return false;
 	}
@@ -602,12 +608,12 @@ bool CLuaVirtualMachine::RunFile(const string &AFilename)
 
 bool CLuaVirtualMachine::RunString(const string &AString)
 {
-	if (!State)
+	if (!L)
 		return false;
 	
-	if (luaL_dostring(State, AString.c_str()) != 0)
+	if (luaL_dostring(L, AString.c_str()) != 0)
 	{
-		LastError = lua_tostring(State, -1);
+		LastError = lua_tostring(L, -1);
 		Log("ERROR", "Lua: %s", LastError.c_str());
 		return false;
 	}
@@ -617,7 +623,7 @@ bool CLuaVirtualMachine::RunString(const string &AString)
 
 bool CLuaVirtualMachine::RunScript(CScript *AScript)
 {
-	if (!State)
+	if (!L)
 		return false;
 
 	if (AScript == NULL)
@@ -640,10 +646,10 @@ bool CLuaVirtualMachine::RunScript(CScript *AScript)
 
 void CLuaVirtualMachine::RegisterAPIFunction(const string &AName, lua_CFunction AFunc)
 {
-	if (!State)
+	if (!L)
 		return;
 
-	lua_register(State, AName.c_str(), AFunc);
+	lua_register(L, AName.c_str(), AFunc);
 }
 
 bool CLuaVirtualMachine::CallFunction(const string &AFunctionName)
@@ -690,7 +696,8 @@ static void DeepCopy(lua_State *State)
 }
 
 /**
-* CLuaVirtualMachine::CreateLuaObject - creates a new Lua object of AClassName class, puts it in the global namespace table under AName name and sets its "object" field to AObject.
+* CLuaVirtualMachine::CreateLuaObject - creates a new Lua object of AClassName class,
+* puts it in the global namespace table under AName name and sets its "object" field to AObject.
 */
 
 void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject)
@@ -699,49 +706,62 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 
 	if (AClassName != AName)
 	{
-		lua_getglobal(State, AClassName.c_str());
-		if (lua_isnil(State, -1) || !lua_istable(State, -1))
+		lua_getglobal(L, AClassName.c_str());
+		if (lua_isnil(L, -1) || !lua_istable(L, -1))
 		{
-			Log("ERROR", "An error occured while creating '%s': its class '%s' must be defined in Lua script first", AName.c_str(), AClassName.c_str());
-			lua_pop(State, 1);
+			Log("ERROR", "An error occurred while creating '%s': its class '%s' must be defined in Lua script first", AName.c_str(), AClassName.c_str());
+			lua_pop(L, 1);
 			return;
 		}
 
-		DeepCopy(State);
+		DeepCopy(L);
 
-		lua_setglobal(State, AName.c_str());
-		lua_pop(State, 1);
+		lua_setglobal(L, AName.c_str());
+		lua_pop(L, 1);
 	}
 
-	lua_getglobal(State, AName.c_str());
-	if (lua_isnil(State, -1))
+	lua_getglobal(L, AName.c_str());
+	if (lua_isnil(L, -1))
 	{
-		Log("ERROR", "An error occured while creating '%s': object must be defined in Lua script first", AName.c_str());
-		lua_pop(State, 1);
+		Log("ERROR", "An error occurred while creating '%s': object must be defined in Lua script first", AName.c_str());
+		lua_pop(L, 1);
 		return;
 	}
 
-	lua_pushlightuserdata(State, AObject);
-	lua_setfield(State, -2, "object");
-	lua_pop(State, 1);
+	lua_pushlightuserdata(L, AObject);
+	lua_setfield(L, -2, "object");
+	
+
+	CGameObject *GameObject = dynamic_cast< CGameObject * >(AObject);
+	if (GameObject)
+	{
+		for (CGameObject::LNOMType::iterator i = GameObject->LocalNameObjectMapping.begin(); 
+			i != GameObject->LocalNameObjectMapping.end(); ++i)
+		{
+			lua_pushlightuserdata(L, i->second);
+			lua_setfield(L, -2, i->first.c_str());
+		}
+	}
+
+	lua_pop(L, 1);
 
 	Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
 }
 
 int CLuaVirtualMachine::GetMemoryUsage() const
 {
-	if (!State)
+	if (!L)
 		return 0;
 
-	return lua_gc(State, LUA_GCCOUNT, 0);
+	return lua_gc(L, LUA_GCCOUNT, 0);
 }
 
 void CLuaVirtualMachine::RunGC()
 {
-	if (!State)
+	if (!L)
 		return;
 
-	lua_gc(State, LUA_GCCOLLECT, 0);
+	lua_gc(L, LUA_GCCOLLECT, 0);
 }
 
 string CLuaVirtualMachine::GetLastError() const
@@ -751,77 +771,77 @@ string CLuaVirtualMachine::GetLastError() const
 
 void CLuaVirtualMachine::TriggerError(const string &AMessage, ...)
 {
-	if (!State)
+	if (!L)
 		return;
 	
 	va_list args;
 	va_start(args, AMessage);
-	luaL_error(State, AMessage.c_str(), args);
+	luaL_error(L, AMessage.c_str(), args);
 	va_end(args);
 }
 
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
-	luaopen_base(State);
-	luaopen_string(State);
+	luaopen_base(L);
+	luaopen_string(L);
 #ifdef _DEBUG
-	luaopen_debug(State);
+	luaopen_debug(L);
 #endif // _DEBUG
 
 	// object management
-	lua_register(State, "Create", &LuaAPI::Create);
-	lua_register(State, "GetObject", &LuaAPI::GetObject);
-	lua_register(State, "Destroy", &LuaAPI::Destroy);
-	lua_register(State, "GetName", &LuaAPI::GetName);
-	lua_register(State, "GetParent", &LuaAPI::GetParent);
-	lua_register(State, "GetChild", &LuaAPI::GetChild);
-	lua_register(State, "Attach", &LuaAPI::Attach);
-	lua_register(State, "Detach", &LuaAPI::Detach);
+	lua_register(L, "Create", &LuaAPI::Create);
+	lua_register(L, "GetObject", &LuaAPI::GetObject);
+	lua_register(L, "Destroy", &LuaAPI::Destroy);
+	lua_register(L, "GetName", &LuaAPI::GetName);
+	lua_register(L, "GetParent", &LuaAPI::GetParent);
+	lua_register(L, "GetChild", &LuaAPI::GetChild);
+	lua_register(L, "Attach", &LuaAPI::Attach);
+	lua_register(L, "Detach", &LuaAPI::Detach);
 
 	// engine
-	lua_register(State, "Log", &LuaAPI::WriteToLog);
-	lua_register(State, "GetDeltaTime", &LuaAPI::GetDeltaTime);
+	lua_register(L, "Log", &LuaAPI::WriteToLog);
+	lua_register(L, "GetDeltaTime", &LuaAPI::GetDeltaTime);
 
 	// various getters and setters, uncategorized yet
-	lua_register(State, "SetText", &LuaAPI::SetText);
-	lua_register(State, "GetText", &LuaAPI::GetText);
-	lua_register(State, "SetTextFont", &LuaAPI::SetTextFont);
-	lua_register(State, "GetFont", &LuaAPI::GetFont);
-	lua_register(State, "GetPosition", &LuaAPI::GetPosition);
-	lua_register(State, "SetPosition", &LuaAPI::SetPosition);
-	lua_register(State, "GetBox", &LuaAPI::GetBox);
-	lua_register(State, "GetAngle", &LuaAPI::GetAngle);
-	lua_register(State, "SetAngle", &LuaAPI::SetAngle);
-	lua_register(State, "SetColor", &LuaAPI::SetColor);
-	lua_register(State, "SetScript", &LuaAPI::SetScript);
-	lua_register(State, "GetWindowWidth", &LuaAPI::GetWindowWidth);
-	lua_register(State, "GetWindowHeight", &LuaAPI::GetWindowHeight);
-	lua_register(State, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
+	lua_register(L, "SetText", &LuaAPI::SetText);
+	lua_register(L, "GetText", &LuaAPI::GetText);
+	lua_register(L, "SetTextFont", &LuaAPI::SetTextFont);
+	lua_register(L, "GetFont", &LuaAPI::GetFont);
+	lua_register(L, "GetPosition", &LuaAPI::GetPosition);
+	lua_register(L, "SetPosition", &LuaAPI::SetPosition);
+	lua_register(L, "GetBox", &LuaAPI::GetBox);
+	lua_register(L, "GetAngle", &LuaAPI::GetAngle);
+	lua_register(L, "SetAngle", &LuaAPI::SetAngle);
+	lua_register(L, "SetColor", &LuaAPI::SetColor);
+	lua_register(L, "SetScript", &LuaAPI::SetScript);
+	lua_register(L, "GetWindowWidth", &LuaAPI::GetWindowWidth);
+	lua_register(L, "GetWindowHeight", &LuaAPI::GetWindowHeight);
+	lua_register(L, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
 
 	// event management
-	lua_register(State, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
-	lua_register(State, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
-	lua_register(State, "TriggerEvent", &LuaAPI::TriggerEvent);
-	lua_register(State, "GetEventSender", &LuaAPI::GetEventSender);
-	lua_register(State, "GetEventData", &LuaAPI::GetEventData);
+	lua_register(L, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
+	lua_register(L, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
+	lua_register(L, "TriggerEvent", &LuaAPI::TriggerEvent);
+	lua_register(L, "GetEventSender", &LuaAPI::GetEventSender);
+	lua_register(L, "GetEventData", &LuaAPI::GetEventData);
 
 	// math
-	lua_register(State, "sin", &LuaAPI::sin);
-	lua_register(State, "cos", &LuaAPI::cos);
-	lua_register(State, "Abs", &LuaAPI::Abs);
+	lua_register(L, "sin", &LuaAPI::sin);
+	lua_register(L, "cos", &LuaAPI::cos);
+	lua_register(L, "Abs", &LuaAPI::Abs);
 #undef Random_Int
 #undef Random_Float
-	lua_register(State, "Random_Int", &LuaAPI::Random_Int);
-	lua_register(State, "Random_Float", &LuaAPI::Random_Float);
+	lua_register(L, "Random_Int", &LuaAPI::Random_Int);
+	lua_register(L, "Random_Float", &LuaAPI::Random_Float);
 #define Random_Int RandomRange<int>
 #define Random_Float RandomRange<float>
 	// lua & debug
-	lua_register(State, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
-	lua_register(State, "DebugPrintComponentTree", &LuaAPI::DebugPrintComponentTree);
+	lua_register(L, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
+	lua_register(L, "DebugPrintComponentTree", &LuaAPI::DebugPrintComponentTree);
 
 	// constants
-	lua_pushnumber(State, PI);
-	lua_setglobal(State, "PI");
+	lua_pushnumber(L, PI);
+	lua_setglobal(L, "PI");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -830,7 +850,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCount /*= 0*/) : FunctionName(AFunctionName), ArgumentsCount(0),
 	ResultsCount(AResultsCount), Called(false), Broken(false)
 {
-	State = CLuaVirtualMachine::Instance()->State;
+	State = CLuaVirtualMachine::Instance()->L;
 	if (!State)
 	{
 		Broken = true;
@@ -851,7 +871,7 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCoun
 CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount /*= 0*/) : ObjectName(AObjectName),
 	FunctionName(AFunctionName), ResultsCount(AResultsCount), ArgumentsCount(1), Called(false), Broken(false)
 {
-	State = CLuaVirtualMachine::Instance()->State;
+	State = CLuaVirtualMachine::Instance()->L;
 	if (!State)
 	{
 		Broken = true;
@@ -958,4 +978,3 @@ void CLuaFunctionCall::SetArgumentsCount(int AArgumentsCount)
 {
 	ArgumentsCount = AArgumentsCount;
 }
-

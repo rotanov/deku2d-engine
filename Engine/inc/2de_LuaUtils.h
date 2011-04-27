@@ -14,11 +14,7 @@ class CScript : public CResource
 {
 public:
 	bool Load();
-	void Unload()
-	{
-		// Guess that SCript doesn't has memory-heavy part and do nothing here
-		CResource::BasicUnload();
-	}
+	void Unload();
 	string GetScriptText() const;
 
 private:
@@ -56,7 +52,7 @@ protected:
 private:
 	void RegisterStandardAPI();
 
-	lua_State *State;
+	lua_State *L;
 
 	string LastError;
 

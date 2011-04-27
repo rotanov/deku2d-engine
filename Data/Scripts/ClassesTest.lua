@@ -47,3 +47,14 @@ function TempEditScript:OnKeyDown(event)
 		SetText(GetParent(self.object), GetText(GetParent(self.object)) .. char)
 	end
 end
+
+function LogHelper(...)
+  local t = {...}
+  local tempString = ''
+  for i = 1,#t do 
+    tempString = tempString .. tostring(t[i]) .. "\t"
+  end
+  Log( "LUA OUT", tempString)
+end
+print = LogHelper
+for k,v in pairs(_G) do print(tostring(k),tostring(v)) end

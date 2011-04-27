@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Prototype Name="SandboxProto">
+<Prototype Name="SandboxProto" Script="SandboxScript">
 	<PlaceableComponent Name="TextPos" Position="150 250">
 		<Text Name="TestText" Text="Deku2D engine rules the fucking world!" Color="0 1 0 1" />
 		<GameObject Name="TextMovementScriptable" Script="SandboxScript" />

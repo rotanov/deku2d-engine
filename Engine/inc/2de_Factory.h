@@ -57,7 +57,7 @@ protected:
 
 	void AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent = true);
 
-	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes);
+	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
 
 #ifdef _DEBUG
 	void InsertDebugInfo( CObject* Source );
@@ -71,6 +71,7 @@ protected:
 	map<string, CObject*> Objects;
 
 	queue<CObject *> Deletion;
+
 };
 
 /**

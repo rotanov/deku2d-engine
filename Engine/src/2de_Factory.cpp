@@ -48,7 +48,7 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	}
 
 	CGameObject *result = CFactory::Instance()->New<CGameObject>(AName);
-	result->Deserialize(xml);
+	
 
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
 
@@ -67,7 +67,8 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	if (!UsedPrototypes->count(AClassName))
 		(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
 
-	TraversePrototypeNode(xml, result, UsedPrototypes);
+	TraversePrototypeNode(xml, result, UsedPrototypes, result);
+	result->Deserialize(xml);
 
 	if (FirstUsedPrototypes)
 	{
@@ -164,7 +165,7 @@ void CFactory::AddClass(const string &AClassName, TNewFunction ANewFunctionPoint
 	Classes[AClassName] = CClassDescription(ANewFunctionPointer, AIsComponent);
 }
 
-void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes)
+void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto)
 {
 	CGameObject *child;
 	string NodeName;
@@ -201,6 +202,8 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 
 		ChildName = (*it)->HasAttribute("Name") ? (*it)->GetAttribute("Name") : "";
 		child = dynamic_cast<CGameObject *>(CreateByName(NodeName, ChildName, UsedPrototypes));
+		if (ChildName != "")
+			CurrentProto->LocalNameObjectMapping[ ChildName ] = child;
 
 		if (!child)
 		{
@@ -208,7 +211,7 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 			continue;
 		}
 
-		child->Deserialize(*it);
+		
 
 		AObject->Attach(child);
 
@@ -219,13 +222,15 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 
 		//if (IsClassExists(NodeName))
 		//{
-			TraversePrototypeNode(*it, child, UsedPrototypes);
+			TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
 		//}
 		//else
 		//{
 			//Log("ERROR", "Prototype references can't have children");
 
 		//}
+
+		child->Deserialize(*it);
 
 		if (UsedPrototypes->count(NodeName) != 0)
 			++(*UsedPrototypes)[NodeName];

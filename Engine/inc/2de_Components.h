@@ -18,6 +18,10 @@ private:
 	string ClassName;
 
 public:	
+
+	typedef std::map< std::string, CObject* > LNOMType;
+	LNOMType LocalNameObjectMapping;
+
 	CGameObject();
 	virtual ~CGameObject();
 	D2D_DECLARE_VISITABLE()
@@ -125,7 +129,9 @@ private:
 	}
 };
 
-// SUDDENLY NEW COMPONENT APPEARS
+/**
+*	Serves as transform node in transform tree.
+*/
 class CPlaceableComponent : public CGameObject
 {
 public:

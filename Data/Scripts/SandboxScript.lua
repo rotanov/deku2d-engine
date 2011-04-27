@@ -46,3 +46,22 @@ function RotateScriptable:OnEveryFrame()
 	SetAngle(GetParent(GetObject("Mouse cursor")), GetAngle(GetParent(GetObject("Mouse cursor"))) + 100.0 * GetDeltaTime())
 	SetAngle(GetObject("Magic circle"), GetAngle(GetObject("Magic circle")) + 100.0 * GetDeltaTime())
 end
+
+SandboxInst = SandboxInst or {}
+
+function SandboxInst:OnCreate()
+  SubscribeToEvent(self.object, "EveryFrame")
+  SubscribeToEvent(self.object, "TimerTick")
+end
+
+function SandboxInst:OnEveryFrame()
+  SetColor( self['TestText'] , 1, 1, 0, 1)
+end
+
+function SandboxInst:OnTimerTick(event)
+	if GetEventData(event, "Name") ~= "TextChangeTimer" then
+		return
+	end
+
+	SetText(self.TestText, GetText(self.TestText) .. "?")
+end
