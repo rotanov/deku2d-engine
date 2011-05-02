@@ -40,6 +40,7 @@
 	#define NOMINMAX
 	#undef min
 	#undef max
+	#undef GetClassName
 #endif // _MSC_VER
 
 #define _SECURE_SCL 0
@@ -85,7 +86,31 @@
 #endif //_WIN32
 
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::map;
+using std::stack;
+using std::ostream;
+using std::multimap;
+using std::stringstream;
+using std::list;
+using std::queue;
+using std::pair;
+using std::set;
+using std::ostringstream;
+using std::istringstream;
+using std::swap;
+using std::istream_iterator;
+using std::back_inserter;
+using std::max;
+using std::copy;
+using std::endl;
+using std::cout;
+using std::min;
+using std::ofstream;
+using std::ios_base;
+using std::cerr;
+
 
 //#define USE_SDL_OPENGL
 //#define USING_OPENGL
@@ -253,13 +278,15 @@ C Type2Val()
 	return ValueGenerator.ID;
 }
 
+#if _MSC_VER > 9 
+
 template<typename T>
 struct identity
 {
 	typedef T type;
 };
 
-
+#endif
 /**
 * CVariantConvert - contains implementations of functions which convert strings to arbitrary plain type, supported by stringstream.
 */
@@ -272,7 +299,7 @@ public:
 	{
 		T result;
 		stringstream ss;
-		ss >> noskipws;
+		ss >> std::noskipws;
 		ss.str(s);
 		ss >> result;
 		return result;

@@ -10,8 +10,8 @@ end
 
 function TextMovementScriptable:OnEveryFrame()
 	local cur_x, cur_y
-	cur_x, cur_y = GetPosition(GetObject("TextPos"))
-	local box = GetBox(GetObject("TextPos"))
+	cur_x, cur_y = GetPosition(self.TextPos)
+	local box = GetBox(self.TextPos)
 
 	if box.Min.x < 0 or box.Max.x > GetWindowWidth() then
 		self.dir.x = -self.dir.x
@@ -20,11 +20,7 @@ function TextMovementScriptable:OnEveryFrame()
 		self.dir.y = -self.dir.y
 	end
 
-	SetPosition(GetObject("TextPos"), cur_x + self.dir.x * GetDeltaTime() * 100, cur_y + self.dir.y * GetDeltaTime() * 100)
-end
-
-function TextMovementScriptable:OnKeyDown()
-	--DebugPrintComponentTree()
+	SetPosition(self.TextPos, cur_x + self.dir.x * GetDeltaTime() * 100, cur_y + self.dir.y * GetDeltaTime() * 100)
 end
 
 function TextMovementScriptable:OnTimerTick(event)
@@ -32,7 +28,7 @@ function TextMovementScriptable:OnTimerTick(event)
 		return
 	end
 
-	SetText(GetObject("TestText"), GetText(GetObject("TestText")) .. "!")
+	SetText(self.TestText, GetText(self.TestText) .. "!")
 end
 
 RotateScriptable = RotateScriptable or { }

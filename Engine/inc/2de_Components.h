@@ -7,6 +7,10 @@
 #include "2de_Resource.h"
 #include "2de_Xml.h"
 
+#if defined(GetClassName)
+	#undef GetClassName
+#endif
+
 /**
 * CGameObject - the base class for all components.
 */
@@ -18,7 +22,7 @@ private:
 	string ClassName;
 
 public:	
-	typedef std::map< std::string, CObject* > LNOMType;
+	typedef std::map< std::string, CGameObject* > LNOMType;
 	LNOMType LocalNameObjectMapping;
 
 	CGameObject();
@@ -86,6 +90,15 @@ public:
 	void SetScript(CScript *AScript);
 	void FinalizeCreation();
 	void ProcessEvent(const CEvent &AEvent);
+	const string& GetClassName() const
+	{
+		return ClassName;
+	}
+
+	void SetClassName(const string & AClassName)
+	{
+		ClassName = AClassName;
+	}
 	
 
 	CGameObject* GetParent() const;

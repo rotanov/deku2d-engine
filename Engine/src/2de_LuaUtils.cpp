@@ -759,11 +759,17 @@ void CLuaVirtualMachine::SetProtoFields(const string &AClassName, const string &
 		lua_pop(L, 1);
 		return;
 	}
-
+	string className = "";
 	for (CGameObject::LNOMType::iterator i = AGameObject->LocalNameObjectMapping.begin(); 
 		i != AGameObject->LocalNameObjectMapping.end(); ++i)
 	{
-		lua_pushlightuserdata(L, i->second);
+		className = (i->second->GetClassName().empty() ? i->second->GetName() : i->second->GetClassName());
+		lua_getglobal(L, className.c_str());
+		if (lua_isnil(L, -1))
+		{
+			lua_pop(L, 1);
+			lua_pushlightuserdata(L, i->second);
+		}
 		lua_setfield(L, -2, i->first.c_str());
 	}
 

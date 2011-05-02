@@ -201,9 +201,10 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 		}
 
 		ChildName = (*it)->HasAttribute("Name") ? (*it)->GetAttribute("Name") : "";
+		string localChildName = (*it)->HasAttribute("LocalName") ? (*it)->GetAttribute("LocalName") : "";
 		child = dynamic_cast<CGameObject *>(CreateByName(NodeName, ChildName, UsedPrototypes));
-		if (ChildName != "")
-			CurrentProto->LocalNameObjectMapping[ ChildName ] = child;
+		if (localChildName != "")
+			CurrentProto->LocalNameObjectMapping[ localChildName ] = child;
 
 		if (!child)
 		{

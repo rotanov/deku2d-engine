@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
-<Prototype Name="A" RecursionLimit="10">
-    <PlaceableComponent Position="0 60">
-        <RenderableComponent Model="Box" Width="10" Height="10">
-            <GameObject Script="ClassesTest" ClassName="ParentRecolorer" />
+<Prototype Name="A" Script="ClassesTest" ClassName="A" RecursionLimit="10">
+    <PlaceableComponent LocalName = "pos" Position="0 60">
+        <RenderableComponent LocalName = "model" Model="Box" Width="10" Height="10">
         </RenderableComponent>
-        <A />
+        <A LocalName="A" />
     </PlaceableComponent>
 </Prototype>

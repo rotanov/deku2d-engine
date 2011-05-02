@@ -1,8 +1,8 @@
-ParentRecolorer = ParentRecolorer or { }
+A = A or { }
 
 RecCount = RecCount or 0
 
-function ParentRecolorer:OnCreate()
+function A:OnCreate()
 	self.Test = 0
 	RecCount = RecCount + 1
 	self.velcoef = RecCount
@@ -10,17 +10,18 @@ function ParentRecolorer:OnCreate()
 	SubscribeToEvent(self.object, "EveryFrame")
 end
 
-function ParentRecolorer:OnAttached(event)
+function A:OnAttached(event)
 	if GetEventData(event, "Name") ~= GetName(self.object) then
 		return
 	end
 
 	self.Test = self.Test + 1
-	SetColor(GetParent(self.object), 1, 0, 0, 1)
+	--SetColor(GetParent(self), 1, 0, 0, 1)
+	SetColor(self.model, 1, 0, 0, 1)
 end
 
-function ParentRecolorer:OnEveryFrame()
-	SetAngle(GetParent(GetParent(self.object)), GetAngle(GetParent(GetParent(self.object))) + self.velcoef * 10.0 * GetDeltaTime())
+function A:OnEveryFrame()
+	SetAngle(self.pos, GetAngle(self.pos) + self.velcoef * 10.0 * GetDeltaTime())
 end
 
 TempEditScript = TempEditScript or { }
@@ -47,5 +48,3 @@ function TempEditScript:OnKeyDown(event)
 		SetText(GetParent(self.object), GetText(GetParent(self.object)) .. char)
 	end
 end
-
-DumpGlobals()
