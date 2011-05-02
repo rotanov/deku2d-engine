@@ -36,6 +36,7 @@ public:
 	bool CallFunction(const string &AFunctionName);
 	bool CallMethodFunction(const string &AObjectName, const string &AFunctionName);
 	void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
+	void SetProtoFields(const string &AClassName, const string &AName, CGameObject *AGameObject);
 
 	int GetMemoryUsage() const;
 	void RunGC();

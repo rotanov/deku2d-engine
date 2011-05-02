@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Prototype Name="GridProto">
-    <PlaceableComponent Position="0 0" Scaling="1.0">
+    <PlaceableComponent Position="0 0" Scaling="1.0" Layer="-10">
         <RenderableComponent Model="GridModel" BlengingMode="Transparent"/>
 		<GameObject Script="GridScript" ClassName="GridScript"/>
     </PlaceableComponent>	

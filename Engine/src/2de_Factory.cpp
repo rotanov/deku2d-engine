@@ -48,7 +48,7 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	}
 
 	CGameObject *result = CFactory::Instance()->New<CGameObject>(AName);
-	
+	result->Deserialize(xml);
 
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
 
@@ -68,13 +68,13 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 		(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
 
 	TraversePrototypeNode(xml, result, UsedPrototypes, result);
-	result->Deserialize(xml);
 
 	if (FirstUsedPrototypes)
 	{
 		delete FirstUsedPrototypes;
 	}
 
+	result->FinalizeCreation();
 	return result;
 }
 
@@ -210,7 +210,7 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 			Log("ERROR", "Can't create object from prototype: NULL returned by CreateByName");
 			continue;
 		}
-
+		child->Deserialize(*it);
 		AObject->Attach(child);
 
 //		Uncomment the following if you want to disallow additional children attached to prototype included within other prototype.
@@ -224,7 +224,7 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 // 			Log("ERROR", "Prototype references can't have children");
 // 		}
 
-		child->Deserialize(*it);
+		
 
 		if (UsedPrototypes->count(NodeName) != 0)
 			++(*UsedPrototypes)[NodeName];

@@ -233,6 +233,11 @@ void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 	Next->AcceptOnLeave(*Visitor);
 }
 
+void CGameObject::FinalizeCreation()
+{
+	CLuaVirtualMachine::Instance()->SetProtoFields(ClassName.empty() ? Name : ClassName, Name, this);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CPlaceableComponent
 

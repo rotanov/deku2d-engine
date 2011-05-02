@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Prototype Name="BallProto">
-    <PlaceableComponent Position="0 0">
+    <PlaceableComponent Position="0 0" Layer="10">
         <RenderableComponent Model="Box" Width="1.0" Height="1.0" ModelType="Triangles" BlendingMode="Transparent" Texture="ball" />
     </PlaceableComponent>	
 	<GameObject Script="BallScript" ClassName="BallScript"/>

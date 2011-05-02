@@ -32,12 +32,12 @@ void CBruteForceSpatialManager::Update()
 	// <strike> @todo: nothing </strike>
 	for (DataT::iterator i = Data.begin(); i != Data.end(); ++i)
 	{
-		CGameObject *gameObject = dynamic_cast<CGameObject*>(i->first);
-		if (!gameObject)
-			continue;
-		CPlaceableComponent * placing = dynamic_cast<CPlaceableComponent*>(gameObject->GetParent());
-		if (!placing)
-			continue;
+// 		CGameObject *gameObject = dynamic_cast<CGameObject*>(i->first);
+// 		if (!gameObject)
+// 			continue;
+// 		CPlaceableComponent * placing = dynamic_cast<CPlaceableComponent*>(gameObject->GetParent());
+// 		if (!placing)
+// 			continue;
 		/*
 		CTransformation tempTransform = placing->GetTransformation();
 		tempTransform.SetTranslation(tempTransform.GetTranslation() + Vector2(0, -9) * CEngine::Instance()->GetDeltaTime());

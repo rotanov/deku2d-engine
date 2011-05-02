@@ -18,7 +18,6 @@ private:
 	string ClassName;
 
 public:	
-
 	typedef std::map< std::string, CObject* > LNOMType;
 	LNOMType LocalNameObjectMapping;
 
@@ -85,6 +84,7 @@ public:
 	}*/
 
 	void SetScript(CScript *AScript);
+	void FinalizeCreation();
 	void ProcessEvent(const CEvent &AEvent);
 	
 

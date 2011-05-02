@@ -748,6 +748,29 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 	Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
 }
 
+void CLuaVirtualMachine::SetProtoFields(const string &AClassName, const string &AName, CGameObject *AGameObject)
+{
+	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
+
+	lua_getglobal(L, AName.c_str());
+	if (lua_isnil(L, -1))
+	{
+		Log("ERROR", "An error occurred while creating '%s': object must be defined in Lua script first", AName.c_str());
+		lua_pop(L, 1);
+		return;
+	}
+
+	for (CGameObject::LNOMType::iterator i = AGameObject->LocalNameObjectMapping.begin(); 
+		i != AGameObject->LocalNameObjectMapping.end(); ++i)
+	{
+		lua_pushlightuserdata(L, i->second);
+		lua_setfield(L, -2, i->first.c_str());
+	}
+
+	lua_pop(L, 1);
+}
+
+
 int CLuaVirtualMachine::GetMemoryUsage() const
 {
 	if (!L)
