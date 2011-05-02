@@ -84,7 +84,6 @@ public:
 			return;
 		assert(&Placing == LPPStack.top());
 		CBox newBox = Placing.GetBox();
-		//newBox = LPPStack.top()->Transformation.Apply(newBox);
 		LPPStack.pop();
 		CRenderManager::Instance()->Transformator.PopTransformation();
 		if (LPPStack.size() > 0)
@@ -112,9 +111,10 @@ public:
 		if (LPPStack.size() == 0)
 			return;
 		CBox newBox = Graphics.GetBox();
-		newBox = Graphics.WorldTransform.Apply(newBox);//LPPStack.top()->Transformation.Apply(newBox);
+		newBox = Graphics.WorldTransform.Apply(newBox);
 		Graphics.UpdateBox(newBox);
 		LPPStack.top()->UpdateBox(newBox);
+		CEngine::Instance()->SpatialManager->PushBox(&Graphics, newBox);
 	}
 
 	void VisitOnEnter(CDebugBoxComponent &DebugBox)

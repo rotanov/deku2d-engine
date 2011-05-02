@@ -959,6 +959,14 @@ __INLINE RGBA<T> RandomRange(const RGBA<T> &AMin, const RGBA<T> &AMax)
 		);
 }
 
+template <unsigned COLUMNS, unsigned ROWS>
+class Matrix
+{
+public:
+	float e[ROWS][COLUMNS];
+
+};
+
 /**
 *	CBox - rectangle representation for common needs.	
 *	It is always Axis Aligned.

@@ -409,6 +409,8 @@ bool CEngine::Run(int argc, char *argv[])
 				{
 					CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
 					CUpdateManager::Instance()->UpdateObjects();
+					SpatialManager->Update();
+					SpatialManager->Clear();
 					//CSceneManager::Instance()->Update(dt);
 					if (doCalcFPS)
 						CalcFPS();

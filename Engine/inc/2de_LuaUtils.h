@@ -9,7 +9,6 @@
 /**
 * CScript - represents script resource type.
 */
-
 class CScript : public CResource
 {
 public:
@@ -26,7 +25,6 @@ private:
 *
 * Registers engine Lua API functions, and allows running Lua-scripts by filename, resource pointer or from string.
 */
-
 class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
 {
 public:
@@ -99,14 +97,14 @@ private:
 			return NULL;
 		}
 
-		if (!lua_islightuserdata(State, -1))
+		if (!lua_islightuserdata(L, -1))
 		{
 			Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
 			return NULL;
 		}
 
-		T res = static_cast<T>(lua_touserdata(State, -1));
-		lua_pop(State, 1);
+		T res = static_cast<T>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
 		ResultsCount--;
 		return res;
 	}
@@ -127,14 +125,14 @@ private:
 			return "";
 		}
 
-		if (!lua_isstring(State, -1))
+		if (!lua_isstring(L, -1))
 		{
 			Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
 			return "";
 		}
 
-		string res = lua_tostring(State, -1);
-		lua_pop(State, 1);
+		string res = lua_tostring(L, -1);
+		lua_pop(L, 1);
 		ResultsCount--;
 		return res;
 	}
@@ -155,14 +153,14 @@ private:
 			return 0;
 		}
 
-		if (!lua_isnumber(State, -1))
+		if (!lua_isnumber(L, -1))
 		{
 			Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
 			return 0;
 		}
 
-		lua_Number res = lua_tonumber(State, -1);
-		lua_pop(State, 1);
+		lua_Number res = lua_tonumber(L, -1);
+		lua_pop(L, 1);
 		ResultsCount--;
 		return res;
 	}
@@ -175,7 +173,7 @@ private:
 	bool Called;
 	bool Broken;
 	int OldStackTop;
-	lua_State *State;
+	lua_State *L;
 };
 
 namespace LuaAPI

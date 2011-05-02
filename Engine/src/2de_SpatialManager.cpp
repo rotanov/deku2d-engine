@@ -1,4 +1,6 @@
 #include "2de_SpatialManager.h"
+#include "2de_Components.h"
+#include "2de_Engine.h"
 
 void CBruteForceSpatialManager::PushBox(CObject *Host, const CBox &Box)
 {
@@ -28,6 +30,20 @@ void CBruteForceSpatialManager::Clear()
 void CBruteForceSpatialManager::Update()
 {
 	// <strike> @todo: nothing </strike>
+	for (DataT::iterator i = Data.begin(); i != Data.end(); ++i)
+	{
+		CGameObject *gameObject = dynamic_cast<CGameObject*>(i->first);
+		if (!gameObject)
+			continue;
+		CPlaceableComponent * placing = dynamic_cast<CPlaceableComponent*>(gameObject->GetParent());
+		if (!placing)
+			continue;
+		/*
+		CTransformation tempTransform = placing->GetTransformation();
+		tempTransform.SetTranslation(tempTransform.GetTranslation() + Vector2(0, -9) * CEngine::Instance()->GetDeltaTime());
+		placing->SetTransformation(tempTransform);
+		*/
+	}
 }
 
 void CBruteForceSpatialManager::GetKNearestNeighbours(const Vector2 &Position, vector<CObject *> &Destination)

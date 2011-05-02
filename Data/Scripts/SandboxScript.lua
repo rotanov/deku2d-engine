@@ -65,3 +65,5 @@ function SandboxInst:OnTimerTick(event)
 
 	SetText(self.TestText, GetText(self.TestText) .. "?")
 end
+
+DumpGlobals()

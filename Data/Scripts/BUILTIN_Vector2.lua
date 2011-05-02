@@ -1,6 +1,6 @@
 Vector2 = Vector2 or { }
 
-Vector2_mt = {
+local Vector2_mt = {
 	__add = function(a, b)
 		return Vector2(a.x + b.x, a.y + b.y)
 	end,

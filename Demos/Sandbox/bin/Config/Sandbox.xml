@@ -17,5 +17,6 @@
 		<DataPath value="../../../Data" />
 		<doLoadDefaultResourceList value="true" />
 		<InitScript value="SandboxInit" />
+		<ForceReindex value="true" />
 	</Data>
 </Configuration>

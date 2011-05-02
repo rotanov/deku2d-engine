@@ -211,24 +211,18 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 			continue;
 		}
 
-		
-
 		AObject->Attach(child);
 
-		//// i don't see any point in forbidding it..
-		//	children correctly attach themselves to the root of prototype reference..
-		//	more than that, it's may be useful for extending prototype references in different places..
-		//	if you see any point in forbidding it - uncomment the following if-check:
-
-		//if (IsClassExists(NodeName))
-		//{
+//		Uncomment the following if you want to disallow additional children attached to prototype included within other prototype.
+//
+// 		if (IsClassExists(NodeName))
+// 		{
 			TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
-		//}
-		//else
-		//{
-			//Log("ERROR", "Prototype references can't have children");
-
-		//}
+// 		}
+// 		else
+// 		{
+// 			Log("ERROR", "Prototype references can't have children");
+// 		}
 
 		child->Deserialize(*it);
 

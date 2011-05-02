@@ -42,10 +42,11 @@ private:
 class CRectangleTest : public CObject
 {
 public:
-	CText CounterText;
+	CText *CounterText;
 	int RectangleCount;
 	CRectangleTest()
 	{
+		CounterText = CFactory::Instance()->New<CText>();
 		RectangleCount = 0;
 		CEventManager::Instance()->Subscribe("KeyPress", this);
 		if (CCommandLineArgumentsManager::Instance()->IsOptionExists("rectangles"))
@@ -60,8 +61,8 @@ public:
 			RectangleCount = 0;
 		}
 		CPlaceableComponent *TextPlace = CFactory::Instance()->New<CPlaceableComponent>("TextPlace");
-		TextPlace->Attach(&CounterText);
-		CounterText.SetText("Rectangles count: " + itos(RectangleCount));
+		TextPlace->Attach(CounterText);
+		CounterText->SetText("Rectangles count: " + itos(RectangleCount));
 		TextPlace->SetLayer(1);
 		TextPlace->SetPosition(Vector2(0.0f, 15.0f));
 		CUpdateManager::Instance()->RootGameObject->Attach(TextPlace);
@@ -74,7 +75,7 @@ public:
 			//for(int i = 0; i < 43000; i++)
 			CFactory::Instance()->New<CRotatingQuad>("");
 			//CounterText.SetText("Rectangles count: " + itos(RectangleCount += 43000));
-			CounterText.SetText("Rectangles count: " + itos(RectangleCount += 1));
+			CounterText->SetText("Rectangles count: " + itos(RectangleCount += 1));
 		}
 	}
 };

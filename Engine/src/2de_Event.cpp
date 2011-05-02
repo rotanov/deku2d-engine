@@ -50,7 +50,7 @@ void CEventManager::TriggerEvent(CEvent *AEvent)
 {
 	for (SubscribersContainer::iterator it = Subscribers.lower_bound(AEvent->GetName()); it != Subscribers.upper_bound(AEvent->GetName()); ++it)
 	{
-		it->second->ProcessEvent(*AEvent); 
+		it->second->ProcessEvent(*AEvent);
 	}
 
 	delete AEvent;	// I mean why delete is here? Dis is bad bad bad bad bad i think. What sort of convention is it?

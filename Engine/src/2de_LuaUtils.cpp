@@ -850,19 +850,19 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCount /*= 0*/) : FunctionName(AFunctionName), ArgumentsCount(0),
 	ResultsCount(AResultsCount), Called(false), Broken(false)
 {
-	State = CLuaVirtualMachine::Instance()->L;
-	if (!State)
+	L = CLuaVirtualMachine::Instance()->L;
+	if (!L)
 	{
 		Broken = true;
 		return;
 	}
 
-	OldStackTop = lua_gettop(State);
-	lua_getglobal(State, FunctionName.c_str());
-	if (lua_isnil(State, -1))
+	OldStackTop = lua_gettop(L);
+	lua_getglobal(L, FunctionName.c_str());
+	if (lua_isnil(L, -1))
 	{
-		Log("ERROR", "An error occured while trying to call function '%s': no such function", FunctionName.c_str());
-		lua_pop(State, 1);
+		Log("ERROR", "An error occurred while trying to call function '%s': no such function", FunctionName.c_str());
+		lua_pop(L, 1);
 		Broken = true;
 		return;
 	}
@@ -871,34 +871,34 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCoun
 CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount /*= 0*/) : ObjectName(AObjectName),
 	FunctionName(AFunctionName), ResultsCount(AResultsCount), ArgumentsCount(1), Called(false), Broken(false)
 {
-	State = CLuaVirtualMachine::Instance()->L;
-	if (!State)
+	L = CLuaVirtualMachine::Instance()->L;
+	if (!L)
 	{
 		Broken = true;
 		return;
 	}
 
-	OldStackTop = lua_gettop(State);
+	OldStackTop = lua_gettop(L);
 
-	lua_getglobal(State, ObjectName.c_str());
-	if (lua_isnil(State, -1))
+	lua_getglobal(L, ObjectName.c_str());
+	if (lua_isnil(L, -1))
 	{
-		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such object", ObjectName.c_str(), FunctionName.c_str());
-		lua_pop(State, 1);
+		Log("ERROR", "An error occurred while trying to call method function '%s:%s': no such object", ObjectName.c_str(), FunctionName.c_str());
+		lua_pop(L, 1);
 		Broken = true;
 		return;
 	}
 
-	lua_getfield(State, -1, FunctionName.c_str());
-	if (lua_isnil(State, -1))
+	lua_getfield(L, -1, FunctionName.c_str());
+	if (lua_isnil(L, -1))
 	{
-		Log("ERROR", "An error occured while trying to call method function '%s:%s': no such function", ObjectName.c_str(), FunctionName.c_str());
-		lua_pop(State, 2);
+		Log("ERROR", "An error occurred while trying to call method function '%s:%s': no such function", ObjectName.c_str(), FunctionName.c_str());
+		lua_pop(L, 2);
 		Broken = true;
 		return;
 	}
 
-	lua_insert(State, -2);
+	lua_insert(L, -2);
 }
 
 CLuaFunctionCall::~CLuaFunctionCall()
@@ -919,9 +919,9 @@ bool CLuaFunctionCall::Call()
 
 	Called = true;
 
-	if (lua_pcall(State, ArgumentsCount, ResultsCount, 0) != 0)
+	if (lua_pcall(L, ArgumentsCount, ResultsCount, 0) != 0)
 	{
-		CLuaVirtualMachine::Instance()->LastError = lua_tostring(State, -1);
+		CLuaVirtualMachine::Instance()->LastError = lua_tostring(L, -1);
 		Log("ERROR", "Lua: %s", CLuaVirtualMachine::Instance()->LastError.c_str());
 		return false;
 	}
@@ -939,7 +939,7 @@ void CLuaFunctionCall::PushArgument(lua_Number Argument)
 		return;
 	}
 
-	lua_pushnumber(State, Argument);
+	lua_pushnumber(L, Argument);
 
 	ArgumentsCount++;
 }
@@ -954,7 +954,7 @@ void CLuaFunctionCall::PushArgument(const string &Argument)
 		return;
 	}
 
-	lua_pushstring(State, Argument.c_str());
+	lua_pushstring(L, Argument.c_str());
 
 	ArgumentsCount++;
 }
@@ -969,7 +969,7 @@ void CLuaFunctionCall::PushArgument(void *Argument)
 		return;
 	}
 
-	lua_pushlightuserdata(State, Argument);
+	lua_pushlightuserdata(L, Argument);
 
 	ArgumentsCount++;
 }

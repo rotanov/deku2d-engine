@@ -212,28 +212,15 @@ void CGameObject::Deserialize(CXMLNode *AXML)
 void CGameObject::SetScript(CScript *AScript)
 {
 	CLuaVirtualMachine::Instance()->RunScript(AScript);
-
-	CEvent *CreateEvent = new CEvent("Create", this);
-	CreateEvent->SetData("Name", GetName());
-	CEventManager::Instance()->TriggerEvent(CreateEvent);
+	CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
+	CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
 }
 
 void CGameObject::ProcessEvent(const CEvent &AEvent)
 {
-	if (AEvent.GetName() == "Create")
-	{
-		if (AEvent.GetData<string>("Name") == Name)
-		{
-			CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
-			CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
-		}
-	}
-	else
-	{
-		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
-		fc.PushArgument(const_cast<CEvent *>(&AEvent));
-		fc.Call();
-	}
+	CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
+	fc.PushArgument(const_cast<CEvent *>(&AEvent));
+	fc.Call();
 }
 
 void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
@@ -573,6 +560,23 @@ void CRenderableComponent::Deserialize(CXMLNode *AXML)
 					Log("WARNING", "Attribute 'Points' has improper format");
 			}
 			SetModel(CRenderManager::Instance()->CreateModelLine(p0, p1));
+		}
+		else if (ModelName == "Line loop" && AXML->HasAttribute("Points"))
+		{
+			Vector2 *Vertices = NULL;
+			istringstream iss(AXML->GetAttribute("Points"));
+			vector<string> tokens;
+			copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+			Vertices = new Vector2 [(tokens.size() / 2) * 2];
+			for(unsigned i = 0; i < tokens.size(); i += 2)
+			{
+				Vertices[i] = Vector2(from_string<float>(tokens[i]), from_string<float>(tokens[i + 1]));
+				Vertices[i + 1] = Vector2(from_string<float>(tokens[(i + 2) % tokens.size()]), from_string<float>(tokens[(i + 3) % tokens.size()]));
+			}
+			CModel *LinesModel = new CModel(MODEL_TYPE_LINES, 0, (tokens.size() / 2) * 2, Vertices);
+			CFactory::Instance()->Add(LinesModel);
+			LinesModel->DisableLoading();
+			SetModel(LinesModel);
 		}
 		else
 			SetModel(CFactory::Instance()->Get<CModel>(ModelName));
