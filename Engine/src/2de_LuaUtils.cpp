@@ -577,11 +577,21 @@ CLuaVirtualMachine::CLuaVirtualMachine()
 	SetName("CLuaVirtualMachine");
 
 	L = luaL_newstate();
+	luaL_openlibs(L);
+	
 	if (!L)
 	{
 		Log("ERROR", "Lua state initialization failed");
 		return;
 	}
+
+	string scriptsPath = CEnvironment::Paths::GetWorkingDirectory() + "/" + CResourceManager::Instance()->GetDataPath() + "/Scripts/";
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "path");
+	lua_pushstring(L, (";" + scriptsPath + "?.lua").c_str() );
+	lua_concat(L, 2);
+	lua_setfield(L, -2, "path");
+	lua_pop(L, 1);
 
 	RegisterStandardAPI();
 }
@@ -662,37 +672,37 @@ bool CLuaVirtualMachine::CallMethodFunction(const string &AObjectName, const str
 	return CLuaFunctionCall(AObjectName, AFunctionName).Call();
 }
 
-static void DeepCopy(lua_State *State)
+static void DeepCopy(lua_State *L)
 {
-	if (!lua_istable(State, -1))
+	if (!lua_istable(L, -1))
 	{
-		lua_pushvalue(State, -1);
+		lua_pushvalue(L, -1);
 		return;
 	}
-	int table_idx = lua_gettop(State);
+	int table_idx = lua_gettop(L);
 	
-	lua_getmetatable(State, -1);
+	lua_getmetatable(L, -1);
 
-	lua_newtable(State);
-	int newtable_idx = lua_gettop(State);
+	lua_newtable(L);
+	int newtable_idx = lua_gettop(L);
 
-	lua_pushnil(State);
-	while (lua_next(State, table_idx) != 0)
+	lua_pushnil(L);
+	while (lua_next(L, table_idx) != 0)
 	{
-		lua_pushvalue(State, -2);
-		lua_insert(State, -2);
-		if (lua_istable(State, -1))
+		lua_pushvalue(L, -2);
+		lua_insert(L, -2);
+		if (lua_istable(L, -1))
 		{
-			DeepCopy(State);
-			lua_insert(State, -2);
-			lua_pop(State, 1);
+			DeepCopy(L);
+			lua_insert(L, -2);
+			lua_pop(L, 1);
 		}
 
-		lua_settable(State, newtable_idx);
+		lua_settable(L, newtable_idx);
 	}
 
-	lua_insert(State, -2);
-	lua_setmetatable(State, -1);
+	lua_insert(L, -2);
+	lua_setmetatable(L, -1);
 }
 
 /**

@@ -74,9 +74,6 @@ bool CCustomStateHandler::OnInitialize()
 	// 	1. precompile built-in Lua scripts
 	// 	2. automatically load them
 
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_Vector2"));
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_CBox"));
-
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 
 	return true;

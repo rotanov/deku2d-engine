@@ -138,6 +138,7 @@ bool CEngine::Initialize()
 	CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
 	Tscn->SetTexture(TitleScreenShroomTexture);
 	
+	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("main"));	
 	
 	if (!StateHandler->OnInitialize())
 	{

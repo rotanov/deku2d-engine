@@ -71,9 +71,6 @@ bool CCustomStateHandler::OnInitialize()
 // 	CAbstractScene *SomeNewScene = CSceneManager::Instance()->CreateScene();
 // 	CSceneManager::Instance()->SetCurrentScene(SomeNewScene);
 
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_Vector2"));
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("BUILTIN_CBox"));
-
 	CRenderableComponent *PlayerR = new CRenderableComponent(CRenderManager::CreateModelBox(32, 64));
 
 	CGameObject *PlayerScriptable = CFactory::Instance()->New<CGameObject>("PlayerOneScriptable");

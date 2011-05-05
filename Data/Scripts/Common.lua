@@ -63,3 +63,16 @@ Preprocessor = Preprocessor or
     return self.Get( self, name, ... )()
   end,
 }
+
+FSA = FSA or
+{
+  [ 'Execute' ] = function( self, ... )
+    if not self.state then
+      error( 'FSA: state unspecified' )
+    elseif not self[ self.state ] then
+      error( string.format( 'State \'%s\' not found in FSA', self.state ) )
+    end
+    self[ self.state ]( ... )
+  end,
+  [ 'state' ] = nil,
+}
