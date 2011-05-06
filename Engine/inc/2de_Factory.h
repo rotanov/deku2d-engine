@@ -59,7 +59,7 @@ protected:
 
 	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 	void InsertDebugInfo( CObject* Source );
 #endif
 
@@ -104,7 +104,7 @@ CObject* CFactory::InternalNew(const string &AName)
 
 	Add(result, AName);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 
 	InsertDebugInfo(result);
 

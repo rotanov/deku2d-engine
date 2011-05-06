@@ -30,7 +30,10 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	ClassesContainer::iterator it = Classes.find(AClassName);
 	if (it != Classes.end())
 	{
-		return (this->*(it->second.NewFunction))(AName);
+		CGameObject *result = dynamic_cast<CGameObject*>((this->*(it->second.NewFunction))(AName));
+		result->SetClassName(AClassName);
+		result->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+		return result;
 	}
 
 	CPrototype *proto = CFactory::Instance()->Get<CPrototype>(AClassName);
@@ -232,7 +235,8 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 	}
 }
 
-#ifdef _DEBUG
+
+#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 
 void CFactory::InsertDebugInfo( CObject* Source )
 {

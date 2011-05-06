@@ -12,12 +12,16 @@
 class CScript : public CResource
 {
 public:
+	CScript();
 	bool Load();
 	void Unload();
 	string GetScriptText() const;
+	void SetRunned();
+	bool IsRunned();
 
 private:
 	string ScriptText;
+	bool Runned;
 };
 
 /** 

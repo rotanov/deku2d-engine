@@ -15,8 +15,9 @@ namespace LuaAPI
 	{
 		if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Create API call");
-
-		lua_pushlightuserdata(L, CFactory::Instance()->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
+		CGameObject* GameObject = dynamic_cast<CGameObject*>(CFactory::Instance()->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
+		lua_getglobal(L, GameObject->GetName().c_str());
+		//lua_pushlightuserdata(L, );
 		return 1;
 	}
 
@@ -569,13 +570,28 @@ void CScript::Unload()
 	CResource::BasicUnload();
 }
 
+void CScript::SetRunned()
+{
+	Runned = true;
+}
+
+bool CScript::IsRunned()
+{
+	return Runned;
+}
+
+CScript::CScript() : Runned(false)
+{
+
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CLuaVirtualMachine
 
 CLuaVirtualMachine::CLuaVirtualMachine()
 {
 	SetName("CLuaVirtualMachine");
-
+	
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	
@@ -592,7 +608,6 @@ CLuaVirtualMachine::CLuaVirtualMachine()
 	lua_concat(L, 2);
 	lua_setfield(L, -2, "path");
 	lua_pop(L, 1);
-
 	RegisterStandardAPI();
 }
 
@@ -606,7 +621,7 @@ bool CLuaVirtualMachine::RunFile(const string &AFilename)
 	if (!L)
 		return false;
 
-	if (luaL_dofile(L, AFilename.c_str()) !=0)
+	if (luaL_dofile(L, AFilename.c_str()) != 0)
 	{
 		LastError = lua_tostring(L, -1);
 		Log("ERROR", "Lua: %s", LastError.c_str());
@@ -635,13 +650,16 @@ bool CLuaVirtualMachine::RunScript(CScript *AScript)
 {
 	if (!L)
 		return false;
-
 	if (AScript == NULL)
 	{
 		Log("ERROR", "Script is NULL in CLuaVirtualMachine::RunScript");
 		return false;
 	}
-	
+
+	if (AScript->IsRunned())
+		return true;
+
+	AScript->SetRunned();
 	if (AScript->GetLoadSource() == CResource::LOAD_SOURCE_FILE)
 	{
 		return RunFile(AScript->GetFilename());
@@ -650,7 +668,7 @@ bool CLuaVirtualMachine::RunScript(CScript *AScript)
 	{
 		return RunString(AScript->GetScriptText());
 	}
-
+	
 	return false;
 }
 
@@ -713,7 +731,6 @@ static void DeepCopy(lua_State *L)
 void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject)
 {
 	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
-
 	if (AClassName != AName)
 	{
 		lua_getglobal(L, AClassName.c_str());
@@ -727,9 +744,10 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 		DeepCopy(L);
 
 		lua_setglobal(L, AName.c_str());
-		lua_pop(L, 1);
-	}
 
+//		lua_pop(L, 1);
+
+	}
 	lua_getglobal(L, AName.c_str());
 	if (lua_isnil(L, -1))
 	{
@@ -737,10 +755,8 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 		lua_pop(L, 1);
 		return;
 	}
-
 	lua_pushlightuserdata(L, AObject);
 	lua_setfield(L, -2, "object");
-	
 
 	CGameObject *GameObject = dynamic_cast< CGameObject * >(AObject);
 	if (GameObject)
@@ -752,16 +768,13 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 			lua_setfield(L, -2, i->first.c_str());
 		}
 	}
-
 	lua_pop(L, 1);
-
 	Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
 }
 
 void CLuaVirtualMachine::SetProtoFields(const string &AClassName, const string &AName, CGameObject *AGameObject)
 {
 	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
-
 	lua_getglobal(L, AName.c_str());
 	if (lua_isnil(L, -1))
 	{
@@ -773,7 +786,7 @@ void CLuaVirtualMachine::SetProtoFields(const string &AClassName, const string &
 	for (CGameObject::LNOMType::iterator i = AGameObject->LocalNameObjectMapping.begin(); 
 		i != AGameObject->LocalNameObjectMapping.end(); ++i)
 	{
-		className = (i->second->GetClassName().empty() ? i->second->GetName() : i->second->GetClassName());
+		className = i->second->GetName();//(i->second->GetClassName().empty() ? i->second->GetName() : i->second->GetClassName());
 		lua_getglobal(L, className.c_str());
 		if (lua_isnil(L, -1))
 		{
@@ -782,7 +795,6 @@ void CLuaVirtualMachine::SetProtoFields(const string &AClassName, const string &
 		}
 		lua_setfield(L, -2, i->first.c_str());
 	}
-
 	lua_pop(L, 1);
 }
 
@@ -821,12 +833,6 @@ void CLuaVirtualMachine::TriggerError(const string &AMessage, ...)
 
 void CLuaVirtualMachine::RegisterStandardAPI()
 {
-	luaopen_base(L);
-	luaopen_string(L);
-#ifdef _DEBUG
-	luaopen_debug(L);
-#endif // _DEBUG
-
 	// object management
 	lua_register(L, "Create", &LuaAPI::Create);
 	lua_register(L, "GetObject", &LuaAPI::GetObject);
@@ -927,7 +933,6 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFun
 		Broken = true;
 		return;
 	}
-
 	lua_getfield(L, -1, FunctionName.c_str());
 	if (lua_isnil(L, -1))
 	{
@@ -936,7 +941,6 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFun
 		Broken = true;
 		return;
 	}
-
 	lua_insert(L, -2);
 }
 
@@ -957,14 +961,12 @@ bool CLuaFunctionCall::Call()
 	}
 
 	Called = true;
-
 	if (lua_pcall(L, ArgumentsCount, ResultsCount, 0) != 0)
 	{
 		CLuaVirtualMachine::Instance()->LastError = lua_tostring(L, -1);
 		Log("ERROR", "Lua: %s", CLuaVirtualMachine::Instance()->LastError.c_str());
 		return false;
 	}
-
 	return true;
 }
 

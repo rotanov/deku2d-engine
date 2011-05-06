@@ -1,29 +1,30 @@
-A = A or { }
+A =
+{
+	[ 'OnCreate' ] = function (self)
+		self.depth = 1
+		SubscribeToEvent(self.object, "Attached")
+		SubscribeToEvent(self.object, "EveryFrame")
+	end,
 
-RecCount = RecCount or 0
+	[ 'OnAttached' ] = function (self, event)
+		if GetEventData(event, "Name") ~= GetName(self.object) then
+			return
+		end
+		self.model:SetColor(1, 0, 0, 1)
+	end,
 
-function A:OnCreate()
-	self.Test = 0
-	RecCount = RecCount + 1
-	self.velcoef = RecCount
-	SubscribeToEvent(self.object, "Attached")
-	SubscribeToEvent(self.object, "EveryFrame")
-end
+	[ 'OnEveryFrame' ] = function (self)
+	
+		-- Here until order of attach and creation will not be Ok.
+		if self.A then
+			self.A.depth = self.depth + 1
+		end
 
-function A:OnAttached(event)
-	if GetEventData(event, "Name") ~= GetName(self.object) then
-		return
-	end
+		SetAngle(self.pos.object, GetAngle(self.pos.object) + self.depth * 100.0 * GetDeltaTime())
+	end,
+}
 
-	self.Test = self.Test + 1
-	--SetColor(GetParent(self), 1, 0, 0, 1)
-	SetColor(self.model, 1, 0, 0, 1)
-end
-
-function A:OnEveryFrame()
-	SetAngle(self.pos, GetAngle(self.pos) + self.velcoef * 10.0 * GetDeltaTime())
-end
-
+--[[
 TempEditScript = TempEditScript or { }
 
 function TempEditScript:OnCreate()
@@ -48,3 +49,4 @@ function TempEditScript:OnKeyDown(event)
 		SetText(GetParent(self.object), GetText(GetParent(self.object)) .. char)
 	end
 end
+--]]

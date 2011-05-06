@@ -153,6 +153,8 @@ __INLINE void SAFE_DELETE_ARRAY(T*& a)
 #define DEAD_BEEF 0xdeadbeef
 #define DEAD_FOOD 0xdeadf00d
 
+#define DISABLE_DEBUG_BOXES
+
 namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html 
 						// if it won't come in handy, I'll remove it.
 	namespace typetag_private {

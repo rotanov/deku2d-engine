@@ -98,8 +98,8 @@ CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true), Dead(false
 CGameObject::~CGameObject()
 {
 	Scene->Remove(this);
+	// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
 	while (Children.size() > 0)
-		// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
 		Children.back()->SetParent(Parent);
 	SetParent(NULL);
 }
@@ -121,7 +121,7 @@ void CGameObject::Attach(CGameObject* AGameObject)
 	Children.push_back(AGameObject);
 	AGameObject->SetParent(this);
 
-	CEvent *AttachedEvent = new CEvent("Attached", this);	// I think we also need some other "Attached" event. For object that has been attached
+	CEvent *AttachedEvent = new CEvent("Attached", this);
 	AttachedEvent->SetData("Name", AGameObject->GetName());
 	CEventManager::Instance()->TriggerEvent(AttachedEvent);
 }
@@ -393,7 +393,7 @@ void CPlaceableComponent::UpdateBox(const CBox& ABox)
 	Box.Union(ABox);
 	if (typeid(*this) == typeid(CDebugBoxComponent))
 		return;
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)
 	{
@@ -623,7 +623,7 @@ void CRenderableComponent::UpdateBox(const CBox& ABox)
 	Box.Union(ABox);
 	if (typeid(*this) == typeid(CDebugBoxComponent))
 		return;
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 
 	CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(Children[0]);
 	if (NULL != DebugBox)

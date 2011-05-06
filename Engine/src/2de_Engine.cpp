@@ -138,7 +138,15 @@ bool CEngine::Initialize()
 	CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
 	Tscn->SetTexture(TitleScreenShroomTexture);
 	
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>("main"));	
+	CScript *mainScript = CFactory::Instance()->Get<CScript>("Main");
+	if (mainScript == NULL)
+		mainScript = CFactory::Instance()->Get<CScript>("main");
+	if (mainScript == NULL)
+	{
+		Log("ERROR", "Unable to load Main.lua");
+		return false;
+	}
+	CLuaVirtualMachine::Instance()->RunScript(mainScript);	
 	
 	if (!StateHandler->OnInitialize())
 	{

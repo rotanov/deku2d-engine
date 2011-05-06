@@ -20,6 +20,12 @@ function DumpGlobals()
 	end
 end
 
+function DumpA()
+	for k, v in pairs(A) do
+		print(k, v)
+	end
+end
+
 -- 2do: add memorization pattern in order to remember produced results
 -- The thing below is very stupid, so it doesn't any lexical analisys
 -- just simple plaint text iterative gsub
