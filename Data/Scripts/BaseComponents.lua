@@ -23,6 +23,10 @@ function GameObject:Destroy()
 	Destroy(self.object)
 end
 
+function GameObject:DestroyFull()
+	DestroySubtree(self.object)
+end
+
 function GameObject:GetName()
 	return GetName(self.object)
 end
@@ -59,7 +63,11 @@ function PlaceableComponent:OnCreate()
 end
 
 function PlaceableComponent:SetPosition(x, y)
-	SetPosition(self.object, x, y)
+	if type(x) == "table" then
+		SetPosition(self.object, x.x, x.y)
+	else
+		SetPosition(self.object, x, y)
+	end
 end
 
 function PlaceableComponent:GetPosition()

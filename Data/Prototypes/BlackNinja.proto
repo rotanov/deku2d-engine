@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Prototype Name="BlackNinja" Script="ClassesTest" ClassName="BlackNinja">
+    <PlaceableComponent LocalName = "pos" Position="0 0">
+        <RenderableComponent LocalName = "model" Model="Box" Width="64" Height="64">
+        </RenderableComponent>
+    </PlaceableComponent>
+</Prototype>
