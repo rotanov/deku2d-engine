@@ -32,7 +32,7 @@ function GameObject:Subscribe(event)
 end
 
 function GameObject:GetParent()
-	return GetParent(self.object)
+	return GetObjectTable(GetParent(self.object))
 end
 
 function GameObject:Unsubscribe(eventName)

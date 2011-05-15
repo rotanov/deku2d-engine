@@ -81,7 +81,6 @@ protected:
 	~CEngine();
 
 private:
-	CMouseCursor *Cursor;	// @todo: rename and rearrange these variables according to common sense.
 	bool Keys[SDLK_LAST];
 	Vector2 MousePosition;
 	float dt;

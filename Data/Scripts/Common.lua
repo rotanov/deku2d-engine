@@ -107,5 +107,10 @@ Class =
 setmetatable(Class, class_mt)
 
 function GetObjectTable(object) -- userdata
-	return _G[GetName(object)]
+	return _G[GetName(object)] or object
+end
+
+_GetObjectHelper = GetObject
+GetObject = function(name)
+	return _G[name] or GetObjectTable(_GetObjectHelper(name))
 end

@@ -2,12 +2,12 @@ A = GameObject:Derive()
 
 function A:OnCreate()
 	self.depth = 1
-	SubscribeToEvent(self.object, "Attached")
-	SubscribeToEvent(self.object, "EveryFrame")
+	self:Subscribe("Attached")
+	self:Subscribe("EveryFrame")
 end
 
 function A:OnAttached(event)
-	if GetEventData(event, "Name") ~= GetName(self.object) then
+	if GetEventData(event, "Name") ~= self:GetName() then
 		return
 	end
 	self.model:SetColor(1, 0, 0, 1)

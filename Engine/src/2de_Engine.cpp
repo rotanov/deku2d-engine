@@ -110,7 +110,21 @@ bool CEngine::Initialize()
 
 	CFactory::Instance(); // Factory should be initialized after all other managers
 
-	Cursor = CFactory::Instance()->New<CMouseCursor>("Mouse cursor");
+	CScript *mainScript = CFactory::Instance()->Get<CScript>("Main");
+	if (mainScript == NULL)
+		mainScript = CFactory::Instance()->Get<CScript>("main");
+	if (mainScript == NULL)
+	{
+		Log("ERROR", "Unable to load Main.lua");
+		return false;
+	}
+	CLuaVirtualMachine::Instance()->RunScript(mainScript);	
+
+	CGameObject* Cursor = dynamic_cast<CGameObject*>(CFactory::Instance()->CreateByName("MouseProto", "Mouse cursor"));
+	if (Cursor != NULL)
+		CUpdateManager::Instance()->RootGameObject->Attach(Cursor);
+	else
+		SDL_ShowCursor(1);
 
 	//////////////////////////////////////////////////////////////////////////
 	//Here goes high level initializations, like default scene as title screen
@@ -137,16 +151,6 @@ bool CEngine::Initialize()
 	// Создание класса CDefaultTutleScreen (в текущей сцене)
 	CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
 	Tscn->SetTexture(TitleScreenShroomTexture);
-	
-	CScript *mainScript = CFactory::Instance()->Get<CScript>("Main");
-	if (mainScript == NULL)
-		mainScript = CFactory::Instance()->Get<CScript>("main");
-	if (mainScript == NULL)
-	{
-		Log("ERROR", "Unable to load Main.lua");
-		return false;
-	}
-	CLuaVirtualMachine::Instance()->RunScript(mainScript);	
 	
 	if (!StateHandler->OnInitialize())
 	{
@@ -333,18 +337,12 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_MOUSEMOTION:
 			{
-				// Здесь можно раздавать позицию мыши всем попросившим.
 				MousePosition = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
-				CPlaceableComponent *CursorPlacing = dynamic_cast<CPlaceableComponent*>(Cursor->GetParent());
-				if (CursorPlacing != NULL)
-					CursorPlacing->SetPosition(MousePosition);
-
 				CEvent *e = new CEvent("MouseMove", NULL);
 				e->SetData("X", MousePosition.x);
 				e->SetData("Y", MousePosition.y);
 				e->SetData("Modifiers", SDL_GetModState());
 				CEventManager::Instance()->TriggerEvent(e);
-
 				break;
 			}
 			case SDL_ACTIVEEVENT:
