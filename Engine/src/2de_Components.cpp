@@ -1,90 +1,5 @@
 #include "2de_Components.h"
-
 #include "2de_Engine.h"
-
-//////////////////////////////////////////////////////////////////////////
-// CGameObject::traverse_iterator
-
-bool CGameObject::traverse_iterator::IsEnd() const
-{
-	return true;
-}
-
-bool CGameObject::traverse_iterator::IsValid() const
-{
-	return true;
-}
-
-CGameObject::traverse_iterator::traverse_iterator(CGameObject &AGameObject) : GameObject(&AGameObject)
-{
-
-}
-
-CGameObject& CGameObject::traverse_iterator::operator *()
-{
-	return *GameObject;
-}
-
-const CGameObject& CGameObject::traverse_iterator::operator *() const 
-{
-	return *GameObject;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CGameObject::traverse_iterator_bfs
-
-CGameObject::traverse_iterator_bfs::traverse_iterator_bfs(CGameObject &AGameObject) : traverse_iterator(AGameObject), Index(0)
-{
-	Queue.push(GameObject);
-}
-
-bool CGameObject::traverse_iterator_bfs::Ok()
-{
-	return GameObject != NULL;
-}
-
-CGameObject::traverse_iterator_bfs& CGameObject::traverse_iterator_bfs::operator++()
-{
-	if (GameObject->Parent != NULL && Index + 1 < GameObject->Parent->Children.size())
-	{
-		Index++;
-		GameObject = GameObject->Parent->Children[Index];
-		Queue.push(GameObject);
-	}
-	else if (!Queue.empty())
-	{
-		GameObject = Queue.front();
-		Queue.pop();
-		if (GameObject != NULL && GameObject->Children.size() > 0)
-		{
-			GameObject = GameObject->Children[0];
-			if (GameObject->Children.size() > 0)
-				Queue.push(GameObject);
-		}
-		Index = 0;
-	}
-	else
-	{
-		GameObject = NULL;
-		Index = 0;
-	}
-	return *this;
-}
-
-CGameObject::traverse_iterator_bfs& CGameObject::traverse_iterator_bfs::operator--()
-{
-	return *this;
-}
-
-bool CGameObject::traverse_iterator_bfs::operator ==(const CGameObject::traverse_iterator_bfs &rhs) const
-{
-	return true;			
-}
-
-bool CGameObject::traverse_iterator_bfs::operator !=(const CGameObject::traverse_iterator_bfs &rhs) const
-{
-	return !(*this == rhs);
-}
 
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
@@ -98,7 +13,8 @@ CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true), Dead(false
 CGameObject::~CGameObject()
 {
 	Scene->Remove(this);
-	// Note, that here we adding children to parent in reverse order, i think it's not that important for now.
+	//	Note, that here we adding children to parent in reverse order, i think it's not that important for now.
+	//	That order is not important at all. Overall comment should be removed.
 	while (Children.size() > 0)
 		Children.back()->SetParent(Parent);
 	SetParent(NULL);
@@ -142,7 +58,24 @@ void CGameObject::Detach(CGameObject* AGameObject)
 	}
 
 	Children.erase(it);
-	AGameObject->Parent = NULL;
+	AGameObject->SetParent( NULL );
+
+	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
+	DetachedEvent->SetData("Name", AGameObject->GetName());
+	CEventManager::Instance()->TriggerEvent(DetachedEvent);
+}
+
+void CGameObject::Detach( unsigned index )
+{
+	if (index >= Children.size())
+	{
+		Log("ERROR", "CGameObject::Detach: index out of bounds");
+		return;
+	}
+
+	CGameObject *AGameObject = *(Children.begin() + index);
+	Children.erase(Children.begin() + index);
+	AGameObject->SetParent( NULL );
 
 	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
 	DetachedEvent->SetData("Name", AGameObject->GetName());
@@ -168,6 +101,14 @@ void CGameObject::SetParent(CGameObject* AGameObject)
 	}
 
 	Parent = AGameObject;
+
+	/*
+		@todo: parent field
+		Бежим от парента вверх, пока не найдём объект, который обладает луа таблицей прототипа.
+		Найдя его запоминаем. В его таблицу может что-то заполняем, но вряд ли.
+		А в луа таблицу объекта, которого парент меняем, если он прототипом явлется проставляем поле
+		парент с указанием на вышеобозначенного найдёныша.
+	*/
 
 	if (Parent != NULL)
 	{
@@ -225,10 +166,10 @@ void CGameObject::ProcessEvent(const CEvent &AEvent)
 
 void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 {
-	if (!Next->Active)
+	if (!Next->IsActive())
 		return;
 	Next->AcceptOnEnter(*Visitor);
-	for (unsigned i = 0; i < Next->Children.size(); i++)
+	for (unsigned i = 0; i < Next->GetChildCount(); i++)
 		DFSIterate(Next->Children[i], Visitor);
 	Next->AcceptOnLeave(*Visitor);
 }
@@ -236,6 +177,50 @@ void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 void CGameObject::FinalizeCreation()
 {
 	CLuaVirtualMachine::Instance()->SetProtoFields(ClassName.empty() ? Name : ClassName, Name, this);
+}
+
+void CGameObject::SetDestroyedSubtree()
+{
+	CGameObject::_DestroySubtree(this);
+}
+
+void CGameObject::_DestroySubtree( CGameObject *NextObject )
+{
+	if (NextObject == NULL)
+		return;
+	for(vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
+		_DestroySubtree(*i);
+	NextObject->SetDestroyed();
+}
+
+const string& CGameObject::GetClassName() const
+{
+	return ClassName;
+}
+
+void CGameObject::SetClassName( const string & AClassName )
+{
+	ClassName = AClassName;
+}
+
+CGameObject* CGameObject::GetChild( unsigned index )
+{
+	return Children[index];
+}
+
+unsigned CGameObject::GetChildCount()
+{
+	return Children.size();
+}
+
+void CGameObject::SetActive( bool AActive )
+{
+	Active = AActive;
+}
+
+bool CGameObject::IsActive() const
+{
+	return Active;
 }
 
 //////////////////////////////////////////////////////////////////////////

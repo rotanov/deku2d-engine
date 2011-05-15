@@ -71,16 +71,16 @@ public:
 			Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
 				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
 		}
-		Placing.Active= true;
+		Placing.SetActive(true);
 		if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
-			Placing.Active = false;
-		if (Placing.Active)
+			Placing.SetActive(false);
+		if (Placing.IsActive())
 			LPPStack.push(&Placing);
 	}
 
 	void VisitOnLeave(CPlaceableComponent &Placing)
 	{
-		if (!Placing.Active)
+		if (!Placing.IsActive())
 			return;
 		assert(&Placing == LPPStack.top());
 		CBox newBox = Placing.GetBox();
@@ -101,9 +101,9 @@ public:
 				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
 			Graphics.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 		}
-		Graphics.Active= true;
+		Graphics.SetActive(true);
 		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
-			Graphics.Active = false;
+			Graphics.SetActive(false);
 	}
 
 	void VisitOnLeave(CRenderableComponent &Graphics)
@@ -124,9 +124,9 @@ public:
 		{
 			DebugBox.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 		}
-		DebugBox.Active= true;
+		DebugBox.SetActive(true);
 		if (!DebugBox.GetVisibility() || DebugBox.isDestroyed() || !CSceneManager::Instance()->InScope(DebugBox.GetScene()))
-			DebugBox.Active = false;
+			DebugBox.SetActive(false);
 	}
 
 	void VisitOnLeave(CDebugBoxComponent &DebugBox)
@@ -1048,14 +1048,14 @@ CFontManager::CFontManager() : DefaultFont(NULL)
 void CFontManager::Init()
 {
 	CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
-	DefaultFontTexture->SetLoadSource(BINARY_DATA_DEFAULT_FONT_TEXTURE, BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE);
+	DefaultFontTexture->SetLoadSource(reinterpret_cast<unsigned char*>(BINARY_DATA_DEFAULT_FONT_TEXTURE), BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE);
 	DefaultFontTexture->SetPersistent(true);
 	DefaultFontTexture->Load();
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// wtf is it? incapsulate it please or whatever...
 	
 	DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
-	DefaultFont->SetLoadSource(BINARY_DATA_DEFAULT_FONT, BINARY_DATA_DEFAULT_FONT_SIZE);
+	DefaultFont->SetLoadSource(reinterpret_cast<unsigned char*>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_DEFAULT_FONT_SIZE);
 	DefaultFont->SetPersistent(true);
 	DefaultFont->Load();
 

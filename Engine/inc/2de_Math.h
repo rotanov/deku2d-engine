@@ -470,13 +470,6 @@ public:
 		return static_cast<float>(sqrt(static_cast<double>(x * x + y * y + z * z)));
 	}
 
-	Vector3 RotateAroundAxis(const Vector3& P, const Vector3& D, float angle)
-	{
-		// to be implemented properly
-		assert(false);
-		return *this;
-	}
-
 	float Normalize()
 	{
 		float l = Length();
@@ -878,7 +871,13 @@ public:
 
 	__INLINE RGBA operator *(float rhs) const
 	{
-		return RGBA(r * rhs, g * rhs, b * rhs, a * rhs);
+		return RGBA
+			(
+				static_cast<unsigned char>(r * rhs),
+				static_cast<unsigned char>(g * rhs),
+				static_cast<unsigned char>(b * rhs),
+				static_cast<unsigned char>(a * rhs)
+			);
 	}
 
 	__INLINE RGBA operator /(float rhs) const
@@ -907,10 +906,10 @@ public:
 
 	__INLINE RGBA& operator *=(float rhs)
 	{
-		this->r *= rhs;
-		this->g *= rhs;
-		this->b *= rhs;
-		this->a *= rhs;
+		this->r = static_cast<unsigned char>(this->r * rhs);
+		this->g = static_cast<unsigned char>(this->g * rhs);
+		this->b = static_cast<unsigned char>(this->b * rhs);
+		this->a = static_cast<unsigned char>(this->a * rhs);
 		return *this;
 	}
 

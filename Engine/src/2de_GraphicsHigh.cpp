@@ -267,12 +267,12 @@ void CNewSuperParticleSystem::Update(float dt)
 		if (Equal(Particles[i].Age, 0.0f))
 		{
 			//_swap(i, ParticlesActive-1);
-			Detach(Children[i]);
+			Detach(i);
 			ParticlesActive--;
 			i--;
 			continue;
 		}
-		CRenderableComponent *TempRenderable = dynamic_cast<CRenderableComponent *>(Children[i]);
+		CRenderableComponent *TempRenderable = dynamic_cast<CRenderableComponent *>(this->GetChild(i));
 		if (TempRenderable == NULL)
 			continue;
 //		TempRenderable->SetPosition(TempRenderable->GetPosition() +  Particles[i].Velocity * dt);

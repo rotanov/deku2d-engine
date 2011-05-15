@@ -1,34 +1,105 @@
-RenderableComponent = RenderableComponent or
-{
-	[ 'SetColor' ] = function(self, r, g, b, a)
-		SetColor( self.object, r, g, b, a)
-	end,
-	[ 'OnCreate' ] = function(self)
-	end,
-}
+GameObject = Class:Derive()
 
-PlaceableComponent = PlaceableComponent or
-{
-	[ 'OnCreate' ] = function(self)
-	end,
+function GameObject:OnCreate()
+end
+
+function GameObject:Attach(other)
+	if type(other) == "table" then
+		Attach(self.object, other.object)
+	elseif type(other) == "userdata" then
+		Attach(self.object, other)
+	end
+end
+
+function GameObject:Detach(other)
+	if type(other) == "table" then
+		Detach(self.object, other.object)
+	elseif type(other) == "userdata" then
+		Detach(self.object, other)
+	end
+end
+
+function GameObject:Destroy()
+	Destroy(self.object)
+end
+
+function GameObject:GetName()
+	return GetName(self.object)
+end
+
+function GameObject:Subscribe(event)
+	SubscribeToEvent(self.object, event)
+end
+
+function GameObject:GetParent()
+	return GetParent(self.object)
+end
+
+function GameObject:Unsubscribe(eventName)
+	UnsubscribeFromEvent(self.object, eventName)
+end
+
+function GameObject:TriggerEvent(eventName)
+	TriggerEvent(eventName, self.object)
+end
+
+--------------------------------------------------------------------------------
+
+RenderableComponent = GameObject:Derive()
+
+function RenderableComponent:SetColor(r, g, b, a)
+	SetColor(self.object, r, g, b, a)
+end
+
+--------------------------------------------------------------------------------
+
+PlaceableComponent = GameObject:Derive()
+
+function PlaceableComponent:OnCreate()
+end
+
+function PlaceableComponent:SetPosition(x, y)
+	SetPosition(self.object, x, y)
+end
+
+function PlaceableComponent:GetPosition()
+	return GetPosition(self.object)
+end
+
+function PlaceableComponent:SetAngle(angle)
+	SetAngle(self.object, angle)
+end
+
+function PlaceableComponent:GetAngle()
+	return GetAngle(self.object)
+end
+
+--------------------------------------------------------------------------------
+
+GeometricComponent = GameObject:Derive()
+
+--------------------------------------------------------------------------------
 	
-	[ 'SetPosition' ] = function(self, x, y)
-		SetPosition( self.object, x, y )
-	end,
-}
+Text = RenderableComponent:Derive()
 
-GeometricComponent = GeometricComponent or
-{
-}
-	
-GameObject = GameObject or
-{
-}
+function Text:SetText(text)
+	SetText(self.object, text)
+end
 
-Text = Text or
-{
-}
+function Text:GetText()
+	return GetText(self.object)
+end
 
-TimerComponent = TimerComponent or
-{
-}
+function Text:SetTextFont(font)
+	if type(font) == "userdata" then
+		SetTextFont(self.object, font)
+	elseif type(font) == "string" and GetFont(font) then
+		SetTextFont(self.object, GetFont(font))
+	end
+end
+
+--------------------------------------------------------------------------------
+
+TimerComponent = GameObject:Derive()
+
+--------------------------------------------------------------------------------

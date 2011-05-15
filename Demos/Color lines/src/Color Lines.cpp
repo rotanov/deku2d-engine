@@ -32,10 +32,10 @@ CGridGame::CGridGame() : EventManager(NULL), Factory(NULL)
 	Grid = static_cast<CGameObject*>(Factory->CreateByName("GridProto", "LinesGrid"));
 	CUpdateManager::Instance()->RootGameObject->Attach(Grid);
 
-	static_cast<CRenderableComponent*>(Grid->Children[0]->Children[0])->SetColor(RGBAf(.6f, 0.6f, 0.8f, 1.0f));
-	static_cast<CPlaceableComponent*>(Grid->Children[0])->SetScaling(static_cast<float>(CELL_SIZE));
+	static_cast<CRenderableComponent*>(Grid->GetChild(0)->GetChild(0))->SetColor(RGBAf(.6f, 0.6f, 0.8f, 1.0f));
+	static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetScaling(static_cast<float>(CELL_SIZE));
 	GridPos = CGLWindow::Instance()->GetSize() * 0.5f - Vector2(CELLS_COUNT * CELL_SIZE / 2, CELLS_COUNT * CELL_SIZE / 2);
-	static_cast<CPlaceableComponent*>(Grid->Children[0])->SetPosition(GridPos);
+	static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetPosition(GridPos);
 
 	EventManager->Subscribe("MouseDown", this);
 	EventManager->Subscribe("KeyDown", this);
@@ -47,7 +47,7 @@ CGridGame::CGridGame() : EventManager(NULL), Factory(NULL)
 	GridMouseHighlight = Factory->New<CRenderableComponent>("GridMouseHighlight");
 	GridMouseHighlight->SetModel(CRenderManager::CreateModelBox(1.05f, 1.05f, MODEL_TYPE_TRIANGLES));
 	GridMouseHighlightPlacing = Factory->New<CPlaceableComponent>("GridMouseHighlightPlacing");
-	Grid->Children[0]->Attach(GridMouseHighlightPlacing);
+	Grid->GetChild(0)->Attach(GridMouseHighlightPlacing);
 	GridMouseHighlightPlacing->Attach(GridMouseHighlight);
 	GridMouseHighlightPlacing;
 	GridMouseHighlight->SetColor(RGBAf(1.0f, 1.0f, 1.0f, 0.5f));
@@ -61,7 +61,7 @@ void CGridGame::InitializeGame()
 	FreeCellsPool.clear();
 	for(unsigned i = 0; i < CELLS_COUNT; i++)
 		for(unsigned j = 0; j < CELLS_COUNT; j++)
-			SpawnBall(CCellSelection(i, j), -1);
+			SpawnBall(CCellSelection(i, j), std::numeric_limits<unsigned>::max());
 
 	// Sorry, ignoring "no more than 3 same color balls" condition
 	for(unsigned i = 0; i < 5; i++)
@@ -75,7 +75,7 @@ void CGridGame::ProcessEvent( const CEvent &AEvent )
 	{
 		GridPos = CGLWindow::Instance()->GetSize() * 0.5f - 
 			Vector2(CELLS_COUNT * CELL_SIZE / 2, CELLS_COUNT* CELL_SIZE / 2);
-		static_cast<CPlaceableComponent*>(Grid->Children[0])->SetPosition(GridPos);	
+		static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetPosition(GridPos);	
 		return;
 	}
 
@@ -123,7 +123,7 @@ void CGridGame::ProcessEvent( const CEvent &AEvent )
 	if (ProcessBFS(TurnSourceCell.GetX(), TurnSourceCell.GetY(), TurnTargetCell.GetX(), TurnTargetCell.GetY()))
 	{
 		SpawnBall(TurnTargetCell, Cells[TurnSourceCell.GetX()][TurnSourceCell.GetY()].GetColorIdentifier());
-		SpawnBall(TurnSourceCell, -1);
+		SpawnBall(TurnSourceCell, std::numeric_limits<unsigned>::max());
 
 		bool win_some_lines = (ProcessFilledLines(TurnTargetCell.GetX(), TurnTargetCell.GetY(),
 			Cells[TurnTargetCell.GetX()][TurnTargetCell.GetY()].GetColorIdentifier()));
@@ -262,7 +262,7 @@ void CGridGame::RemoveBalls(int Dir, unsigned x, unsigned y, unsigned color )
 		break;
 	}
 
-	SpawnBall(CCellSelection(x, y) , -1);
+	SpawnBall(CCellSelection(x, y) , std::numeric_limits<unsigned>::max());
 }
 
 bool CGridGame::ProcessFilledLines( unsigned x, unsigned y, unsigned color ) /* sounds like I'm going to make something very bad */
@@ -293,7 +293,7 @@ bool CGridGame::ProcessFilledLines( unsigned x, unsigned y, unsigned color ) /* 
 		RemoveBalls(DIRECTION_RIGHT_DOWN, x + 1, y - 1, color);
 	}
 	if (AtLeastOneLine)
-		SpawnBall(CCellSelection(x, y) , -1);
+		SpawnBall(CCellSelection(x, y) , std::numeric_limits<unsigned>::max());
 	return AtLeastOneLine;
 }
 
@@ -308,7 +308,7 @@ void CGridGame::SpawnBall(const CCellSelection &DestCell, unsigned ColorIdentifi
 	Cells[x][y].SetupAt(x, y, ColorIdentifier);
 
 	vector<CCell*>::iterator FreeingCell =  std::find(FreeCellsPool.begin(), FreeCellsPool.end(), &Cells[x][y]);
-	if (ColorIdentifier != -1 && FreeingCell != FreeCellsPool.end())
+	if (ColorIdentifier != std::numeric_limits<unsigned>::max() && FreeingCell != FreeCellsPool.end())
 	{
 		std::swap(*FreeingCell, *(FreeCellsPool.end() - 1));
 		FreeCellsPool.erase(FreeCellsPool.end() - 1);
@@ -401,7 +401,7 @@ bool CGridGame::ProcessBFS(int SourceX, int SourceY, int DestinationX, int Desti
 void CGridGame::SpawnFloorHightlight( unsigned x, unsigned y, unsigned TTL )
 {
 	CLiveBox *NewLiveBox = Factory->New<CLiveBox>();
-	Grid->Children[0]->Attach(static_cast<CGameObject*>(NewLiveBox));
+	Grid->GetChild(0)->Attach(static_cast<CGameObject*>(NewLiveBox));
 	NewLiveBox->Placing->SetPosition(Vector2(x, y) * CELL_SIZE  + Vector2(16, 16));
 	NewLiveBox->TTL = TTL * 0.15f;
 }
@@ -448,7 +448,7 @@ bool CGridGame::CCell::isClear()
 void CGridGame::CCell::MakeVisualPart()
 {
 	VisualPart = static_cast<CGameObject*>(CFactory::Instance()->CreateByName("BallProto", ""));
-	static_cast<CPlaceableComponent*>(VisualPart->Children[0])->SetPosition
+	static_cast<CPlaceableComponent*>(VisualPart->GetChild(0))->SetPosition
 		(
 			Vector2
 			(
@@ -456,14 +456,14 @@ void CGridGame::CCell::MakeVisualPart()
 				Coords.GetY() * CELL_SIZE + CELL_SIZE / 2
 			)
 		);
-	static_cast<CRenderableComponent*>(VisualPart->Children[0]->Children[0])->SetColor(LINES_COLORS[ColorIdentifier]);
+	static_cast<CRenderableComponent*>(VisualPart->GetChild(0)->GetChild(0))->SetColor(LINES_COLORS[ColorIdentifier]);
 }
 
 void CGridGame::CCell::Invalidate()
 {
 	if (VisualPart != NULL)
 		VisualPart->SetDestroyedSubtree(), VisualPart = NULL;
-	ColorIdentifier = -1;
+	ColorIdentifier = std::numeric_limits<unsigned>::max();
 	Coords = CCellSelection();
 }
 
@@ -474,7 +474,7 @@ void CGridGame::CCell::SetupAt( int x, int y, unsigned Color )
 	if (!Coords.isValid())
 		return;
 	ColorIdentifier = Color;
-	if (Color != -1)
+	if (Color != std::numeric_limits<unsigned>::max())
 		MakeVisualPart();
 }
 

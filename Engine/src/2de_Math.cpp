@@ -431,7 +431,9 @@ CBox::CBox(float xmin, float ymin, float xmax, float ymax) : Min(xmin, ymin), Ma
 	//assert(xmin <= xmax && ymin <= ymax);
 }
 
-CBox::CBox(int x, int y, unsigned width, unsigned height) : Min(x, y), Max(x + width, y + height) {}
+CBox::CBox(int x, int y, unsigned width, unsigned height) : 
+	Min(static_cast<float>(x), static_cast<float>(y)),
+	Max(static_cast<float>(x + width), static_cast<float>(y + height)) {}
 
 CBox::CBox(const Vector2 &Center, float Width, float Height) : Min(Center), Max(Center)
 {
@@ -645,7 +647,8 @@ void CCircle::CalcBox()
 void CPolygon::Reset(unsigned AVerticesCount)
 {
 	delete [] Vertices;
-	Vertices = new Vector2[VerticesCount];
+	VerticesCount = AVerticesCount;
+	Vertices = new Vector2[AVerticesCount];
 }
 
 void CPolygon::CalcBox()
@@ -727,7 +730,7 @@ float CPolygon::CalcArea() const
 	{
 		p0 = Vertices[i % VerticesCount];
 		p1 = Vertices[(i + 1) % VerticesCount];
-		result += (p1.x - p0.x) * 0.5 * (p1.y + p0.y);
+		result += (p1.x - p0.x) * 0.5f * (p1.y + p0.y);
 	}
 	return result;
 }
@@ -737,7 +740,7 @@ void CPolygon::OffsetToCenter() const
 	Vector2 p;
 	for(unsigned i = 0; i < VerticesCount; i++)
 		p += Vertices[i];
-	p /= VerticesCount;
+	p = p / static_cast<float>(VerticesCount);
 	for(unsigned i = 0; i < VerticesCount; i++)
 		Vertices[i] -= p;
 }

@@ -76,10 +76,10 @@ namespace LuaAPI
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetChild API call");
 
 		int ChildIndex = lua_tonumber(L, -1);
-		if (ChildIndex >= obj->Children.size())
+		if (ChildIndex >= obj->GetChildCount())
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetChild API call");
 
-		lua_pushlightuserdata(L, obj->Children[ChildIndex]);
+		lua_pushlightuserdata(L, obj->GetChild(ChildIndex));
 		return 1;
 	}
 
@@ -507,11 +507,11 @@ namespace LuaAPI
 		Log("INFO", out.c_str());
 
 		nesting++;
-		for (vector<CGameObject *>::iterator it = GO->Children.begin(); it != GO->Children.end(); ++it)
+		for (unsigned i = 0; i < GO->GetChildCount(); i++)
 		{
-			if (it == --GO->Children.end())
+			if (i == GO->GetChildCount() - 1)
 				(*LastChild)[nesting] = true;
-			DebugPrintNode(*it, LastChild);
+			DebugPrintNode(GO->GetChild(i), LastChild);
 		}
 		nesting--;
 	}

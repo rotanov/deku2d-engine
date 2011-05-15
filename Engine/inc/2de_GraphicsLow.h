@@ -50,16 +50,16 @@ namespace color
 }
 
 extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
-extern byte IMAGE_SHROOM_TITLE_DATA[];
+extern char IMAGE_SHROOM_TITLE_DATA[];
 // extern const unsigned IMAGE_DEFAULT_FONT_WIDTH;
 // extern const unsigned IMAGE_DEFAULT_FONT_HEIGHT;
 // extern char IMAGE_DEFAULT_FONT_DATA[];
 
 extern const unsigned BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
-extern byte BINARY_DATA_DEFAULT_FONT_TEXTURE[];
+extern char BINARY_DATA_DEFAULT_FONT_TEXTURE[];
 
 extern const unsigned BINARY_DATA_DEFAULT_FONT_SIZE;
-extern byte BINARY_DATA_DEFAULT_FONT[];
+extern char BINARY_DATA_DEFAULT_FONT[];
 
 class CAbstractScene;
 

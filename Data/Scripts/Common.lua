@@ -9,20 +9,28 @@ function LogHelper(...)
   for i = 1,#t do 
     tempString = tempString .. tostring(t[i]) .. "\t"
   end
-  Log( "LUA OUT", tempString)
+  Log( "LUA", tempString)
 end
 
 print = LogHelper
 
-function DumpGlobals()
-	for k, v in pairs(_G) do
-		print(k, v)
+function Dump(value, depth, done)
+	done = done or {}
+	depth = depth or 0
+	if done[value] then
+		return
 	end
-end
-
-function DumpA()
-	for k, v in pairs(A) do
-		print(k, v)
+	done[value] = true
+	local tabs = ("|\t"):rep(depth)
+	if type(value) == "table" then
+		for k, v in pairs(value) do
+			print(tabs .. k, v)
+			if type(v) == "table" then
+				Dump(v, depth + 1, done)
+			end
+		end
+	else
+		print( tabs .. value)
 	end
 end
 
@@ -82,3 +90,22 @@ FSA = FSA or
   end,
   [ 'state' ] = nil,
 }
+
+--[[ CLASS ]]--
+local class_mt = {}
+Class = 
+{
+	Derive = function(self)
+		local t = {}
+		for k,v in pairs(self) do
+			t[k] = v
+		end
+		setmetatable(t, getmetatable(self))
+		return t
+	end,
+}
+setmetatable(Class, class_mt)
+
+function GetObjectTable(object) -- userdata
+	return _G[GetName(object)]
+end

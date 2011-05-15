@@ -53,12 +53,14 @@ void CLuaConsole::ProcessEvent(const CEvent &AEvent)
 		switch (key)
 		{
 		case SDLK_RETURN:
+			// Это пиздец
 			Input(dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->GetText());
 			break;
 		case SDLK_UP:
 			if (CommandHistoryIterator != --CommandHistory.end())
 			{
 				++CommandHistoryIterator;
+				// Это пиздец
 				dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText(*CommandHistoryIterator);
 			}
 			break;
@@ -66,6 +68,7 @@ void CLuaConsole::ProcessEvent(const CEvent &AEvent)
 			if (CommandHistoryIterator != CommandHistory.begin())
 			{
 				--CommandHistoryIterator;
+				// Это пиздец
 				dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText(*CommandHistoryIterator);
 			}
 			break;

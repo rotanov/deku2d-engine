@@ -18,128 +18,48 @@
 class CGameObject : public IVisitableObject<>
 {
 	friend class CFactory;
-private:
-	string ClassName;
-
 public:	
-	typedef std::map< std::string, CGameObject* > LNOMType;
-	LNOMType LocalNameObjectMapping;
+	typedef std::map< std::string, CGameObject* > LNOMType;	// ???
+	LNOMType LocalNameObjectMapping; // ???
 
+	D2D_DECLARE_VISITABLE()
 	CGameObject();
 	virtual ~CGameObject();
-	D2D_DECLARE_VISITABLE()
-	class traverse_iterator
-	{
-	protected:
-		CGameObject *GameObject;
-
-		bool IsEnd() const;
-		bool IsValid() const;
-
-	public:
-		traverse_iterator(CGameObject &AGameObject);
-		CGameObject& operator *();
-		const CGameObject& operator *() const;
-	};
-
-	class traverse_iterator_bfs : public traverse_iterator
-	{
-	private:
-		queue<CGameObject*> Queue;
-		unsigned Index; // Index of current object in it's parent Children
-
-	public:
-		traverse_iterator_bfs(CGameObject &AGameObject);
-
-		bool Ok();
-
-		traverse_iterator_bfs& operator++();
-		traverse_iterator_bfs& operator--();
-
-		bool operator ==(const traverse_iterator_bfs &rhs) const;
-		bool operator !=(const traverse_iterator_bfs &rhs) const;
-	};
-
-	class traverse_iterator_dfs : public traverse_iterator
-	{
-	private:
-		std::vector<std::pair<CGameObject*, unsigned> > Path;
-
-	public:
-		traverse_iterator_dfs(CGameObject &AGameObject) : traverse_iterator(AGameObject)
-		{
-
-		}
-
-	};
-
-	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor);
-
-
+	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor); // Not here
 	void Attach(CGameObject* AGameObject);
 	void Detach(CGameObject* AGameObject);
-
-	/*template<typename TypeIterator>
-	void Detach(const TypeIterator &Iterator)
-	{
-		(*Iterator)->Parent = NULL;
-		std::swap(*Iterator, *(--Children.end()));
-		Children.pop_back();
-	}*/
-
+	void Detach(unsigned index);
 	void SetScript(CScript *AScript);
 	void FinalizeCreation();
 	void ProcessEvent(const CEvent &AEvent);
-	const string& GetClassName() const
-	{
-		return ClassName;
-	}
-
-	void SetClassName(const string & AClassName)
-	{
-		ClassName = AClassName;
-	}
-	
-
+	const string& GetClassName() const;
+	void SetClassName(const string & AClassName);
 	CGameObject* GetParent() const;
 	void SetParent(CGameObject* AGameObject);
-
 	void PutIntoScene(CAbstractScene *AScene);
 	CAbstractScene* GetScene() const;
 	virtual void JustDoIt();
-
 	virtual void Deserialize(CXMLNode *AXML);
-
-	bool Active;
-	bool Dead;	
-	// Enabled
-
-	void SetDestroyedSubtree()
-	{
-		CGameObject::_DestroySubtree(this);
-	}
-
+	void SetDestroyedSubtree();
+	CGameObject* GetChild(unsigned index);
+	unsigned GetChildCount();
+	bool IsActive() const;
+	void SetActive(bool AActive);
 // 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
 // 	void SetDead();
 //	virtual void Update(float dt) = 0;
-//	void PutIntoScene(CAbstractScene *AScene);
-// 	CAbstractScene* GetScene() const;
-// 	CAbstractScene *Scene;
-
-	vector<CGameObject *> Children;
 
 private:
 	CGameObject *Parent;
 	CAbstractScene *Scene;
+	vector<CGameObject *> Children;
+	string ClassName;
+	// not used
+	bool Active;
+	bool Dead;	
+	bool Enabled;
 
-	static void _DestroySubtree(CGameObject *NextObject)
-	{
-		if (NextObject == NULL)
-			return;
-		for(vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
-			_DestroySubtree(*i);
-		NextObject->SetDestroyed();
-	}
+	static void _DestroySubtree(CGameObject *NextObject);
 };
 
 /**
