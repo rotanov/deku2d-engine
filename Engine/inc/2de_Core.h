@@ -6,34 +6,34 @@
 	// если уж у строгого GCC остался 1 варнинг (ну может 3, если считать и демки), то у похуистического мсвс ну никак не может быть 25..
 
 	//#pragma warning (disable	:	4312)   //
-	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
-	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
-	#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
-	#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
-	#pragma warning (disable	:	4996)	
-	#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
-	#pragma warning (disable	:	4996)	//	rare
-	#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
-	#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
-	#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
-	#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
-	#pragma warning (disable	:	4291)	//	void *operator new(unsigned,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
+// 	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
+// 	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
+// 	#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
+// 	#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
+// 	#pragma warning (disable	:	4996)	
+// 	#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
+// 	#pragma warning (disable	:	4996)	//	rare
+// 	#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
+// 	#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
+// 	#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
+// 	#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
+// 	#pragma warning (disable	:	4291)	//	void *operator new(unsigned,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
 	//after w4
-	#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
-	#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
-	 #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
-	#pragma warning (disable	:	4100)	//	unreferenced formal parameter
-	 #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
-	#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
-	 #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
-	#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
-	#pragma warning (disable	:	4702)	//	unreachable code ^^"
-	#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
-	#pragma warning (disable	:	4005)	// Macro redefinition
-	#pragma warning (disable	:	4714)	// __forceinline not inlined
-	#pragma warning (disable	:	4005)	// Macro redefinition
-	#pragma warning (disable	:	4355)	// this in initializer list
-	#pragma warning (disable	:	4505)	// for dirent: unreferenced function has been removed
+// 	#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
+// 	#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
+// 	 #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
+// 	#pragma warning (disable	:	4100)	//	unreferenced formal parameter
+// 	 #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
+// 	#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
+// 	 #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
+// 	#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
+// 	#pragma warning (disable	:	4702)	//	unreachable code ^^"
+// 	#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
+// 	#pragma warning (disable	:	4005)	// Macro redefinition
+// 	#pragma warning (disable	:	4714)	// __forceinline not inlined
+// 	#pragma warning (disable	:	4005)	// Macro redefinition
+// 	#pragma warning (disable	:	4355)	// this in initializer list
+// 	#pragma warning (disable	:	4505)	// for dirent: unreferenced function has been removed
 
 	#define VC_LEANMEAN
 	#define _CRT_SECURE_NO_DEPRECATE

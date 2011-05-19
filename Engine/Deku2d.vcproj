@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)\Engine\inc\;inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

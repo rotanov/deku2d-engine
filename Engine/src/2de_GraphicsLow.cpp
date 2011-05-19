@@ -716,7 +716,7 @@ void CCamera::Update()
 	}
 	*/
 	v = Vector2(*Atx, *Aty) - Point;
-	if (Abs(v.x) < 0.001f && Abs(v.y) < 0.001f)
+	if (std::fabs(v.x) < 0.001f && std::fabs(v.y) < 0.001f)
 		v = V2_ZERO;
 	Point += v*0.05f;
 

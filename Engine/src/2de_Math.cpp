@@ -321,10 +321,19 @@ bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, 
 {
 	if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
 		return false;
-
 	if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
 		return false;
+	// In the "IntersectLines" lies check if lines are parallel, but at that point we're already know that they're not
 	if (!IntersectLines(u0, u1, v0, v1, Result))
+		return false;
+	return true;
+}
+
+bool AreSegmentsIntersect( const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1 )
+{
+	if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
+		return false;
+	if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
 		return false;
 	return true;
 }
@@ -335,7 +344,7 @@ bool IntersectCircles(const Vector2 &p0, const float r0, const Vector2 &p1, cons
 	if ((Sqr(p0p1.x) + Sqr(p0p1.y)) >= Sqr(r0 + r1))
 		return false;
 	Normal = p0p1.Normalized();
-	Depth = Abs(r1 - r0);
+	Depth = std::fabs(r1 - r0);
 	return true;
 }
 
@@ -374,7 +383,7 @@ __INLINE void CalcConvexHull(std::vector<Vector2> &a )
 
 		/**
 		* cw and cww is some strange way to Implement HalfPlaneSign() with
-		* devilish copy-paste and having 3 instead of 2 multyplications
+		* devilish copy-paste and having 3 instead of 2 multiplications
 		* @todo: replace by HalfPlaneSign
 		*/
 		static __INLINE bool cw (Vector2 a, Vector2 b, Vector2 c)
@@ -418,7 +427,6 @@ __INLINE void CalcConvexHull(std::vector<Vector2> &a )
 
 //////////////////////////////////////////////////////////////////////////
 // CAABB
-
 CBox::CBox() : Min(V2_ZERO), Max(V2_ZERO) {}
 
 CBox::CBox(const Vector2 &AMin, const Vector2 &AMax) : Min(AMin), Max(AMax)
@@ -666,7 +674,7 @@ void CPolygon::CalcBox()
 	}
 }
 
-CPolygon::CPolygon(unsigned AVerticesCount) : VerticesCount(AVerticesCount), Vertices(NULL)
+CPolygon::CPolygon(unsigned AVerticesCount /* = 0 */) : VerticesCount(AVerticesCount), Vertices(NULL)
 {
 	if (AVerticesCount == 0)
 		return;
@@ -769,4 +777,40 @@ CPolygon CPolygon::MakeBox( float Width /*= 1.0f*/, float Height /*= 1.0f*/ )
 	NewPolygon[2] = Vector2(+Width_d2, +Height_d2);
 	NewPolygon[3] = Vector2(-Width_d2, +Height_d2);
 	return NewPolygon;
+}
+
+bool CPolygon::IsSelfIntersects() const
+{
+	for (unsigned i = 0; i < VerticesCount; i++)
+	{
+		unsigned j = (i + 1) % VerticesCount;
+		for( unsigned k = i + 1; k < VerticesCount; k++)
+		{
+			unsigned l = (k + 1) % VerticesCount;
+			if (AreSegmentsIntersect(Vertices[i], Vertices[j], Vertices[k], Vertices[l]))
+				return true;
+		}
+	}
+	return false;
+}
+
+bool CPolygon::IsConvex() const
+{
+	if (VerticesCount < 4)
+		return true;
+	unsigned positiveCount = 0;
+	unsigned negativeCount = 0;
+	unsigned j, k;
+	for (unsigned i = 0; i < VerticesCount; i++)
+	{
+		j = (i + 1) % VerticesCount;
+		k = (i + 2) % VerticesCount;
+		if (HalfPlaneSign(Vertices[i], Vertices[j], Vertices[k]) > 0)
+			positiveCount++;
+		else
+			negativeCount++;
+		if (positiveCount * negativeCount != 0)
+			return false;
+	}
+	return true;
 }

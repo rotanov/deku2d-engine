@@ -234,7 +234,7 @@ CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMir
 void CPlaceableComponent::SetAngle(float AAngle)
 {
 	float Angle = AAngle;
-	if (Abs(AAngle) > 360.0f)
+	if (std::fabs(AAngle) > 360.0f)
 		Angle = AAngle - Sign(AAngle)*((static_cast<int>(AAngle) / 360) * 360.0f); 
 	if (Angle < 0.0f)
 		Angle = 360.0f + Angle;

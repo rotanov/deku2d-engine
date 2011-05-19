@@ -434,13 +434,13 @@ namespace LuaAPI
 		return 1;
 	}
 
-	// number Abs(number n)
+	// number Abs(number n)	-- господа, вы ебанулись в API такое экспортить. Пиздец. Ещё можно унарный минус заэкспортить. Так на всякий случай.
 	int Abs(lua_State *L)	// same as above
 	{
 		if (!lua_isnumber(L, -1))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Abs API call");
 
-		lua_pushnumber(L, ::Abs(lua_tonumber(L, -1)));
+		lua_pushnumber(L, ::std::fabs(lua_tonumber(L, -1)));
 		return 1;
 	}
 #undef Random_Int

@@ -111,15 +111,15 @@ __INLINE T Cube(const T &x)
 }
 
 template<typename T>
-__INLINE T Abs(const T &x)
+__INLINE T Abs(const T& x)
 {
 	return x < 0 ? -x : x;
 }
 
-__INLINE float Abs(float x)
+template<>
+__INLINE float Abs(const float &x)
 {
-	*(int *)&x &= 0x7fffffff;
-	return x;
+	return std::fabs(x);
 }
 
 template<typename T>
@@ -1045,6 +1045,13 @@ bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, con
 bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result);
 
 /**
+*	AreSegmentsIntersect(): checks if segments intersect.
+*	Notice, that it is segments, not infinite lines.
+*	@todo: check out coincident lines case.
+*/
+bool AreSegmentsIntersect(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1);
+
+/**
 *	CalcConvexHull does exactly how it named.
 *	Taken from http://www.e-maxx.ru/algo/convex_hull_graham and slightly 
 *	modified in order to fit naming conventions and interfaces
@@ -1093,7 +1100,7 @@ public:
 class CPolygon : public CGeometry
 {
 public:
-	CPolygon(unsigned AVerticesCount);
+	CPolygon(unsigned AVerticesCount = 0);
 	~CPolygon();
 	void Reset(unsigned AVerticesCount);
 	void CalcBox();
@@ -1104,6 +1111,11 @@ public:
 	unsigned GetVertexCount() const;
 	float CalcArea() const;
 	void OffsetToCenter() const;
+	// Checks if polygon convex and oriented (either clock- or counter clock- wise)
+	// Hope it will be optimized by compiler
+	bool IsConvex() const;
+	// BRUTAL HARSH CRUCIAL FORCE ALGORITHM Which runs in O(n^2)
+	bool IsSelfIntersects() const;
 	static CPolygon MakeCircle(float Radius = 1.0f, unsigned Precision = 16);
 	static CPolygon MakeBox(float Width = 1.0f, float Height = 1.0f);
 
