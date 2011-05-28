@@ -60,14 +60,7 @@ function BlackNinja:OnKeyDown(event)
 		self.vn = Vector2( self.v.x / vLen, self.v.y / vLen )		
 	end
 	if sym == SDLK._z then
-		local projectile = Create('ProjectileProto', '')
-		Attach(self:GetParent(), projectile.object)
-		projectile.pos:SetPosition(self.pos:GetPosition())
-		--self.pos:Attach(projectile)
-		local mc = GetObject('Mouse cursor')
-		local mcx, mcy = mc.pos:GetPosition()
-		local x, y = self.pos:GetPosition()
-		projectile.v = -Vector2(x- mcx, y - mcy)
+		self.shooting = true
 	end
 end
 
@@ -79,6 +72,8 @@ function BlackNinja:OnKeyUp(event)
 		self.v = self.v - inc
 		--local vLen = math.sqrt( self.v.x * self.v.x + self.v.y * self.v.y )
 		--self.vn = Vector2( self.v.x / vLen, self.v.y / vLen )		
+	elseif sym == SDLK._z then
+		self.shooting = false
 	end
 end
 
@@ -93,6 +88,18 @@ function BlackNinja:OnEveryFrame()
 	end	
 	--]]
 	self.pos:SetPosition(Vector2(x, y) + self.v * 100 * GetDeltaTime())
+	
+	if self.shooting then
+		local projectile = Create('ProjectileProto', '')
+		Attach(self:GetParent(), projectile.object)
+		projectile.pos:SetPosition(self.pos:GetPosition())
+		--self.pos:Attach(projectile)
+		local mc = GetObject('Mouse cursor')
+		local mcx, mcy = mc.pos:GetPosition()
+		local x, y = self.pos:GetPosition()
+		projectile.v = -Vector2(x- mcx, y - mcy)	
+	end
+	
 end
 
 --------------------------------------------------------------------------------

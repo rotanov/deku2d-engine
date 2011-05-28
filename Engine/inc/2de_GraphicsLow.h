@@ -51,9 +51,6 @@ namespace color
 
 extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
 extern char IMAGE_SHROOM_TITLE_DATA[];
-// extern const unsigned IMAGE_DEFAULT_FONT_WIDTH;
-// extern const unsigned IMAGE_DEFAULT_FONT_HEIGHT;
-// extern char IMAGE_DEFAULT_FONT_DATA[];
 
 extern const unsigned BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
 extern char BINARY_DATA_DEFAULT_FONT_TEXTURE[];
@@ -64,7 +61,7 @@ extern char BINARY_DATA_DEFAULT_FONT[];
 class CAbstractScene;
 
 /**
-*	CTexture — is as CGLImageData, but also has CResource functionality
+*	CTexture is like CGLImageData, but also has CResource functionality
 *	can Load() and Unload() and even SaveToFile(). Wait, it still can't
 *	save to file, but function is defined @todo: implement saving of textures to
 *	file. And don't even try to think when we'll need such possibility
@@ -91,9 +88,7 @@ public:
 	*	Less trivial is some intermediate textures for gfx;
 	*/
 	bool SaveToFile(const string &AFilename);
-
 	GLuint GetTexID() const;
-	//GLuint GetTexID();
 
 private:
 	GLuint TexID;
@@ -469,20 +464,16 @@ private:
 	CFont *DefaultFont;
 };
 
-class CText;	// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-class CGrRect;
-class CGrPoint;
-class CGrLine;
-
 /**
 *	CRenderManager - some monster which definitely can't be eliminated.
 *	Manages all stuff for drawing stuff. Traverse tree, applying transformations,
 *	Calls renderer to render some stuff...etc
 */
 
+class CText;
 class CRenderableComponent;
 
-class CRenderManager : public CCommonManager <list <CRenderableComponent*> >, public CTSingleton <CRenderManager>
+class CRenderManager : public CCommonManager <std::vector <CRenderableComponent*> >, public CTSingleton <CRenderManager>
 {
 protected:
 	CRenderManager();
@@ -583,7 +574,7 @@ private:
 
 /**
 *	CAbstractScene - common interface to Scene. There are two of them - Common Scene and
-*	Global Scene // replace scene with sense, lol.
+*	Global Scene
 */
 
 class CAbstractScene : public CObject
