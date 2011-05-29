@@ -865,7 +865,6 @@ CXMLNode* CXMLParser::ParseNode()
 	
 	int start = Current;
 
-	// определяем тип ноды
 	if (Text[Current] == '<')
 	{
 		Current++;

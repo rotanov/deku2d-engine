@@ -280,15 +280,12 @@ C Type2Val()
 	return ValueGenerator.ID;
 }
 
-#if _MSC_VER > 9 
-
 template<typename T>
 struct identity
 {
 	typedef T type;
 };
 
-#endif
 /**
 * CVariantConvert - contains implementations of functions which convert strings to arbitrary plain type, supported by stringstream.
 */
@@ -646,7 +643,7 @@ private:
 	static T * _instance;
 
 #ifdef _DEBUG
-	static set<const type_info *> UnderConstruction;
+	static set<const std::type_info *> UnderConstruction;
 #endif // _DEBUG
 };
 
@@ -684,7 +681,7 @@ T* CTSingleton<T>::_instance = 0;
 
 #ifdef _DEBUG
 template <typename T>
-set<const type_info *> CTSingleton<T>::UnderConstruction;
+set<const std::type_info *> CTSingleton<T>::UnderConstruction;
 #endif // _DEBUG
 
 /**
