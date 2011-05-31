@@ -173,7 +173,7 @@ protected:
 	unsigned Depth;
 	EXMLNodeType Type;
 
-	map<string, string, CCaseInsensetiveComparison> Attributes;
+	map<string, string, CCaseInsensitiveComparison> Attributes;
 };
 
 /**

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Prototype Name="MouseProto" Script="MouseScript" ClassName="Mouse">
-    <PlaceableComponent LocalName = "pos" Position="0 0">
+    <PlaceableComponent LocalName = "pos" Position="0 0" Layer="512">
         <RenderableComponent LocalName = "model" Model="Box" Width="10" Height="10">
         </RenderableComponent>
     </PlaceableComponent>

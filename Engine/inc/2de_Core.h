@@ -1079,10 +1079,10 @@ __INLINE string to_string(const T& t)
 }
 
 /**
-* CCaseInsensetiveComparison - functor-class, that compares strings in case-insensetive manner. Used by STL containers, etc.
+* CCaseInsensetiveComparison - functor-class, that compares strings in case-insensitive manner. Used by STL containers, etc.
 */
 
-class CCaseInsensetiveComparison
+class CCaseInsensitiveComparison
 {
 public:
 	bool operator()(const string &lhs, const string &rhs) const

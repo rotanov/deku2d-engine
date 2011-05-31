@@ -569,13 +569,13 @@ bool CXMLErroneousNode::IsErroneous() const
 
 bool CXMLNodeWithAttributes::HasAttribute(const string &AName) const
 {
-	map<string, string, CCaseInsensetiveComparison>::const_iterator iter = Attributes.find(AName);
+	map<string, string, CCaseInsensitiveComparison>::const_iterator iter = Attributes.find(AName);
 	return (iter != Attributes.end());
 }
 
 string CXMLNodeWithAttributes::GetAttribute(const string &AName) const
 {
-	map<string, string, CCaseInsensetiveComparison>::const_iterator iter = Attributes.find(AName);
+	map<string, string, CCaseInsensitiveComparison>::const_iterator iter = Attributes.find(AName);
 	if (iter == Attributes.end())
 	{
 		Log("WARNING", "Attribute '%s' has not been found in XML node", AName.c_str());
@@ -607,7 +607,7 @@ string CXMLNodeWithAttributes::GetContent() const
 
 	if (!Attributes.empty())
 	{
-		for (map<string, string, CCaseInsensetiveComparison>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
+		for (map<string, string, CCaseInsensitiveComparison>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
 		{
 			result += " " + it->first + "=\"" + CXMLHelper::Instance()->EntitiesEncode(it->second) + "\"";
 		}

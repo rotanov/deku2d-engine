@@ -40,7 +40,7 @@ public:
 			{
 				/*CGLWindow::Instance()->SetSize(2048, 1152);
 				CGLWindow::Instance()->SetFullscreen(true);*/
-				CGLWindow::Instance()->SetVideoMode(CGLWindow::Instance()->GetDesktopVideoMode());
+ 				CGLWindow::Instance()->SetVideoMode(CGLWindow::Instance()->GetDesktopVideoMode());
 			}
 		}
 	}

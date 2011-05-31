@@ -100,10 +100,12 @@ private:
 *	in order to access texture; So @todo: get rid of CTextureManager
 */
 
-class CTextureManager : public CCommonManager <list <CTexture*> >, public CTSingleton <CTextureManager> 
+class CTextureManager : public CCommonManager <vector <CTexture*> >, public CTSingleton <CTextureManager> 
 {
 public:
-	void ReloadTextures();
+	bool UnloadTextures();
+	bool LoadTextures();
+
 protected:
 	CTextureManager();
 	friend class CTSingleton <CTextureManager>;
@@ -357,7 +359,7 @@ private:
 		unsigned GetVertexCount();
 
 	protected:
-		static const unsigned StartSize = 256;
+		static const unsigned START_SIZE = 256;
 		unsigned VertexCount;
 		unsigned ReservedCount;
 		RGBAf *Colors;
@@ -367,10 +369,11 @@ private:
 		virtual void _Grow();
 	};
 
-#define TOTAL_HOLDERS (MODEL_TYPE_TRIANGLES * (BLEND_MODE_ADDITIVE + 1))
+#define TOTAL_HOLDERS (MODEL_TYPE_TRIANGLES * (BLEND_MODE_ADDITIVE + 1))	// no
 	CBetterVertexHolder PrimitiveHolders[TOTAL_HOLDERS];	// 9 total
-	vector<CBetterTextureVertexHolder*> TexturedGeometry; // per texture i.e. one texture => single DIP
-	vector<GLuint> TexIDs;
+	//vector<CBetterTextureVertexHolder*> TexturedGeometry; // per texture i.e. one texture => single DIP
+	//vector<GLuint> TexIDs;
+	map<CTexture*, CBetterTextureVertexHolder*> texturedGeometry[3];	// по количеству режимов смешивания
 };
 
 /**

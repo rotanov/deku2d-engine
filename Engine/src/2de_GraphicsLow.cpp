@@ -248,6 +248,8 @@ bool CGLWindow::Create()
 
 bool CGLWindow::Initialize()
 {
+	CTextureManager::Instance()->UnloadTextures();
+
 	int flags = SDL_OPENGL | SDL_RESIZABLE | (NewParameters.isFullscreen * SDL_FULLSCREEN);	// | SDL_NOFRAME;
 
 	SDL_Surface *screen = SDL_SetVideoMode(NewParameters.Width, NewParameters.Height, NewParameters.BPP, flags);
@@ -280,7 +282,7 @@ bool CGLWindow::Initialize()
 
 	//glCreateShader()
 
-	/* Some code snippets for OpenGL-features aviability check:
+	/* Some code snippets for OpenGL-features availability check:
 
 		if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
 		printf("Ready for GLSL\n");
@@ -311,8 +313,8 @@ bool CGLWindow::Initialize()
 
 	GLInit();
 
-	if (isCreated)
-		CTextureManager::Instance()->ReloadTextures();
+	// if (isCreated) commented because now we are sure to unload textures before
+	CTextureManager::Instance()->LoadTextures();
 	CEventManager::Instance()->TriggerEvent(new CEvent("WindowResize", NULL));
 
 	return isCreated = true;
@@ -350,8 +352,8 @@ void CGLWindow::GLInit()
 
 	CRenderManager::Instance()->SetSwapInterval(0);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
 //	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0);
@@ -1090,14 +1092,26 @@ CTextureManager::CTextureManager()
 	SetName("Texture manager");
 }
 
-void CTextureManager::ReloadTextures()
+bool CTextureManager::UnloadTextures()
 {
-	for (ManagerIterator it = Objects.begin(); it != Objects.end(); ++it)
-	{
-		(*it)->Reload();
-	}
+	for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
+		(*i)->Unload();
 
-	Log("INFO", "Textures have been reloaded successfully");
+	Log("INFO", "Textures have been unloaded successfully");
+	return true;
+}
+
+bool CTextureManager::LoadTextures()
+{
+	for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
+		if (!(*i)->Load())
+		{
+			Log("ERROR", "Error loading textures.");
+			return false;
+		}
+
+	Log("INFO", "Textures have been loaded successfully");
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1195,7 +1209,7 @@ void CTexture::Unload()
 
 	if (glIsTexture(TexID))
 		glDeleteTextures(1, &TexID);
-
+	TexID = 0;
 	CResource::BasicUnload();
 }
 
@@ -1316,22 +1330,13 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 	{
 		bool flag = false;
 		int index = -1;
-		for(unsigned i = 0; i < TexIDs.size(); i++)
-			if (TexIDs[i] == AModel->GetTexture()->GetTexID())
-			{
-				flag = true;
-				index = i;
-				break;
-			}
 
-		if (!flag)
+		if (texturedGeometry[Sender->GetBlendingMode()].find(AModel->GetTexture()) == texturedGeometry[Sender->GetBlendingMode()].end())
 		{
-			TexturedGeometry.push_back(new CBetterTextureVertexHolder()); // memory leak's here
-			TexIDs.push_back(AModel->GetTexture()->GetTexID());
-			index = TexIDs.size() - 1;
+			texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()] = new CBetterTextureVertexHolder();
 		}
 
-		CBetterTextureVertexHolder * VertexHolder = TexturedGeometry[index];
+		CBetterTextureVertexHolder * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
 
 		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
 		CTransformation Transformation = ATransform; //CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
@@ -1418,14 +1423,34 @@ void CFFPRenderer::Render()
 	glDisable(GL_POLYGON_SMOOTH);
 
 	glEnable(GL_TEXTURE_2D);
-	for(unsigned i = 0; i < TexturedGeometry.size(); i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, TexIDs[i]);
-		TexturedGeometry[i]->RenderPrimitive(GL_TRIANGLES);
-		TexturedGeometry[i]->Clear();
-	}
 
+	glDisable(GL_BLEND);
+	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
+	{
+		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
+		i->second->RenderPrimitive(GL_TRIANGLES);
+		i->second->Clear();
+	}
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// should disable depth test
+	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[TRANSPARENT].begin(); i != texturedGeometry[TRANSPARENT].end(); ++i)
+	{
+		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
+		i->second->RenderPrimitive(GL_TRIANGLES);
+		i->second->Clear();
+	}
+	// and enable here
+	glDepthMask(GL_FALSE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
+	{
+		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
+		i->second->RenderPrimitive(GL_TRIANGLES);
+		i->second->Clear();
+	}
 	Clear();
+	glDepthMask(GL_TRUE);
 }
 
 CFFPRenderer::~CFFPRenderer()
@@ -1642,11 +1667,11 @@ const CTransformation& CTransformator::GetCurrentTransfomation() const
 //////////////////////////////////////////////////////////////////////////
 // CFFPRenderer
 
-CFFPRenderer::CBetterTextureVertexHolder::CBetterTextureVertexHolder() : VertexCount(0), ReservedCount(StartSize) 
+CFFPRenderer::CBetterTextureVertexHolder::CBetterTextureVertexHolder() : VertexCount(0), ReservedCount(START_SIZE) 
 {
-	Colors = new RGBAf [StartSize];
-	Vertices = new Vector3 [StartSize];
-	TexCoords = new Vector2[StartSize];
+	Colors = new RGBAf [START_SIZE];
+	Vertices = new Vector3 [START_SIZE];
+	TexCoords = new Vector2[START_SIZE];
 }
 
 CFFPRenderer::CBetterTextureVertexHolder::~CBetterTextureVertexHolder()
