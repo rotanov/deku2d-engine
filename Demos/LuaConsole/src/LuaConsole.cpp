@@ -53,23 +53,23 @@ void CLuaConsole::ProcessEvent(const CEvent &AEvent)
 		switch (key)
 		{
 		case SDLK_RETURN:
-			// Это пиздец
-			Input(dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->GetText());
+			// Р­С‚Рѕ РїРёР·РґРµС† // Р° С‚Рѕ!
+			Input(dynamic_cast<CText *>(CommandLineEdit->GetChild(0)->GetChild(0)->GetChild(0)->GetChild(0))->GetText());
 			break;
 		case SDLK_UP:
 			if (CommandHistoryIterator != --CommandHistory.end())
 			{
 				++CommandHistoryIterator;
-				// Это пиздец
-				dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText(*CommandHistoryIterator);
+				// Р­С‚Рѕ РїРёР·РґРµС†
+				dynamic_cast<CText *>(CommandLineEdit->GetChild(0)->GetChild(0)->GetChild(0)->GetChild(0))->SetText(*CommandHistoryIterator);
 			}
 			break;
 		case SDLK_DOWN:
 			if (CommandHistoryIterator != CommandHistory.begin())
 			{
 				--CommandHistoryIterator;
-				// Это пиздец
-				dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText(*CommandHistoryIterator);
+				// Р­С‚Рѕ РїРёР·РґРµС†
+				dynamic_cast<CText *>(CommandLineEdit->GetChild(0)->GetChild(0)->GetChild(0)->GetChild(0))->SetText(*CommandHistoryIterator);
 			}
 			break;
 		}
@@ -122,5 +122,5 @@ void CLuaConsole::Input(const string &AText)
 		WriteLine(CLuaVirtualMachine::Instance()->GetLastError());
 	}
 	WritePrompt();
-	dynamic_cast<CText *>(CommandLineEdit->Children[0]->Children[0]->Children[0]->Children[0])->SetText("");
+	dynamic_cast<CText *>(CommandLineEdit->GetChild(0)->GetChild(0)->GetChild(0)->GetChild(0))->SetText("");
 }

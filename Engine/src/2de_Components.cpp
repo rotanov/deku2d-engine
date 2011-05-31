@@ -58,14 +58,14 @@ void CGameObject::Detach(CGameObject* AGameObject)
 	}
 
 	Children.erase(it);
-	AGameObject->SetParent( NULL );
+	AGameObject->Parent = NULL;
 
 	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
 	DetachedEvent->SetData("Name", AGameObject->GetName());
 	CEventManager::Instance()->TriggerEvent(DetachedEvent);
 }
 
-void CGameObject::Detach( unsigned index )
+void CGameObject::Detach(unsigned index)
 {
 	if (index >= Children.size())
 	{
@@ -75,7 +75,7 @@ void CGameObject::Detach( unsigned index )
 
 	CGameObject *AGameObject = *(Children.begin() + index);
 	Children.erase(Children.begin() + index);
-	AGameObject->SetParent( NULL );
+	AGameObject->Parent = NULL;
 
 	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
 	DetachedEvent->SetData("Name", AGameObject->GetName());
@@ -184,11 +184,11 @@ void CGameObject::SetDestroyedSubtree()
 	CGameObject::_DestroySubtree(this);
 }
 
-void CGameObject::_DestroySubtree( CGameObject *NextObject )
+void CGameObject::_DestroySubtree(CGameObject *NextObject)
 {
 	if (NextObject == NULL)
 		return;
-	for(vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
+	for (vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
 		_DestroySubtree(*i);
 	NextObject->SetDestroyed();
 }
@@ -198,12 +198,12 @@ const string& CGameObject::GetClassName() const
 	return ClassName;
 }
 
-void CGameObject::SetClassName( const string & AClassName )
+void CGameObject::SetClassName(const string & AClassName)
 {
 	ClassName = AClassName;
 }
 
-CGameObject* CGameObject::GetChild( unsigned index )
+CGameObject* CGameObject::GetChild(unsigned index)
 {
 	return Children[index];
 }
@@ -213,7 +213,7 @@ unsigned CGameObject::GetChildCount()
 	return Children.size();
 }
 
-void CGameObject::SetActive( bool AActive )
+void CGameObject::SetActive(bool AActive)
 {
 	Active = AActive;
 }
