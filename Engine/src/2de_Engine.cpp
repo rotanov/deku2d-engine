@@ -81,7 +81,7 @@ bool CEngine::Initialize()
 		return false;
 	}
 
-	ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious.. // If function was called DevILInit() I shall agree with you. But it's fucking "ilInit()"
+	ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious.. // If function was called DevILInit() I shall agree with you. But it's fucking "ilInit()" // You think "il" doesn't clearly denote "Image Library"?
 	CSoundMixer::Instance()->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 	SDL_EnableUNICODE(1);
@@ -193,7 +193,7 @@ bool CEngine::ProcessArguments(int argc, char *argv[])
 
 	if (ArgMan->GetFlag("version", 'v'))
 	{
-		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2010  Deku Team" << endl << endl;
+		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2009-2011  Deku Team" << endl << endl;
 		return false;
 	}
 
@@ -535,7 +535,7 @@ const Vector2& CEngine::GetMousePosition() const
 	return MousePosition;
 }
 
-bool CEngine::IsKeyDown( const SDLKey& AKey ) const
+bool CEngine::IsKeyDown(const SDLKey& AKey) const
 {
 	return Keys[AKey];
 }
@@ -561,7 +561,7 @@ bool CEngine::IsKeyRepeatEnabled() const
 	return false;
 }
 
-bool CEngine::IsShowFPSEnabled( bool AdoShowFPS ) const
+bool CEngine::IsShowFPSEnabled(bool AdoShowFPS) const
 {
 	return FPSText->GetVisibility();
 }

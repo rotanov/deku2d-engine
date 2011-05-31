@@ -104,7 +104,6 @@ class CTextureManager : public CCommonManager <vector <CTexture*> >, public CTSi
 {
 public:
 	bool UnloadTextures();
-	bool LoadTextures();
 
 protected:
 	CTextureManager();

@@ -6,9 +6,9 @@
 class CXMLNode; // forward declaration
 
 /**
-* CXMLChildrenList - класс, представляющий собой список детей XML-узла.
+* CXMLChildrenList - a class that represents XML-node children list.
 *
-* Является обёрткой над std::list<CXMLNode *>, расширяющей и дополняющей его специализированными функциями.
+* This class is a wrapper around std::list<CXMLNode *>, that extends it with special functions.
 */
 
 class CXMLChildrenList
@@ -86,7 +86,7 @@ private:
 };
 
 /**
-* CXML - основной класс для работы с XML, представляющий объектную модель XML-документа как целое.
+* CXML - the main class for working with XML that provides the object model of an XML-document as a whole.
 */
 
 class CXML
@@ -109,7 +109,7 @@ private:
 };
 
 /**
-* CXMLNode - базовый класс XML-узла. Обеспечивает полиморфизм.
+* CXMLNode - an XML-node base class for polymorphism.
 */
 
 class CXMLNode
@@ -126,6 +126,8 @@ public:
 	};
 
 	typedef CXMLChildrenList::Iterator ChildrenIterator;
+	typedef map<string, string, CCaseInsensitiveComparison> AttributesContainer;
+	typedef AttributesContainer::const_iterator AttributesIterator;
 
 	CXMLNode();
 	virtual ~CXMLNode();
@@ -173,15 +175,15 @@ protected:
 	unsigned Depth;
 	EXMLNodeType Type;
 
-	map<string, string, CCaseInsensitiveComparison> Attributes;
+	AttributesContainer Attributes;
 };
 
 /**
-* CXMLErroneousNode - класс ошибочного XML-узла. Статический объект данного класса возвращается в тех случаях, где по смыслу возвращался бы NULL.
+* CXMLErroneousNode - an erroneous XML-node class. Static instance of this class is returned in cases, where otherwise NULL would be returned.
 *
-* С помощью статического объекта этого класса достигаются две цели:
-* 	1. Ошибочные действия пользователя над XML-деревом не вызывают падение из-за NULL-dereferencing'а.
-* 	2. Пользователь надёжно уведомляется о возникших ошибках посредством лога.
+* Two goals are achieved using the static instance of this class:
+* 	1. Erroneous actions of a user on an XML-tree don't cause crashes due to NULL-dereferencings.
+* 	2. The user is properly notified about the occured errors by means of the log.
 */
 
 class CXMLErroneousNode : public CXMLNode
@@ -213,7 +215,7 @@ public:
 static CXMLErroneousNode ErroneousNode;
 
 /**
-* CXMLNodeWithAttributes - класс XML-узла, имеющего аттрибуты. Используется как базовый класс для CXMLNormalNode и CXMLPrologNode.
+* CXMLNodeWithAttributes - a class for an XML-node that has attributes. Used as a base class for CXMLNormalNode and CXMLPrologNode.
 */
 
 class CXMLNodeWithAttributes : public CXMLNode
@@ -231,7 +233,7 @@ protected:
 };
 
 /**
-* CXMLPrologNode - класс XML-узла - пролога.
+* CXMLPrologNode - an XML prolog node class.
 */
 
 class CXMLPrologNode : public CXMLNodeWithAttributes
@@ -250,7 +252,7 @@ protected:
 };
 
 /**
-* CXMLNormalNode - класс XML-узла - элемента, то есть узла, который может иметь детей.
+* CXMLNormalNode - an XML element class, i. e. a node that can have children.
 */
 
 class CXMLNormalNode : public CXMLNodeWithAttributes
@@ -277,9 +279,9 @@ protected:
 };
 
 /**
-* CXMLSingleValueNode - класс XML-узла с одиночным текстовым значением.
+* CXMLSingleValueNode - a class for a XML-node with single text value.
 *
-* Является базовым классом для комментариев и текстовых узлов.
+* It is a base class for comment and text nodes.
 */
 
 class CXMLSingleValueNode : public CXMLNode
@@ -295,7 +297,7 @@ protected:
 };
 
 /**
-* CXMLCommentNode - класс XML-узла - комментария.
+* CXMLCommentNode - an XML comment node class.
 */
 
 class CXMLCommentNode : public CXMLSingleValueNode
@@ -311,7 +313,7 @@ protected:
 };
 
 /**
-* CXMLTextNode - класс текстового узла XML.
+* CXMLTextNode - an XML text node class.
 */
 
 class CXMLTextNode : public CXMLSingleValueNode
@@ -325,7 +327,7 @@ public:
 };
 
 /**
-* CXMLParser - парсер XML.
+* CXMLParser - an XML parser.
 */
 
 class CXMLParser
@@ -367,7 +369,7 @@ private:
 };
 
 /**
-* CXMLHelper - класс, содержащий некоторые вспомогательные функции для XML, в частности для парсера.
+* CXMLHelper - a class that contains some helper-functions for XML, particularly for the parser.
 */
 
 class CXMLHelper

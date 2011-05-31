@@ -27,12 +27,20 @@ CFactory::~CFactory()
 
 CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes /*= NULL*/)
 {
+	// this function is kind of difficult to understand, because of many error checks and code that can be taken out..
+	// TODO: simplify it, make more clear and short..
+
 	ClassesContainer::iterator it = Classes.find(AClassName);
 	if (it != Classes.end())
 	{
-		CGameObject *result = dynamic_cast<CGameObject*>((this->*(it->second.NewFunction))(AName));
-		result->SetClassName(AClassName);
-		result->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+		CObject *result = (this->*(it->second.NewFunction))(AName);
+		CGameObject *go = dynamic_cast<CGameObject*>(result);
+		if (go)
+		{
+			go->SetClassName(AClassName);
+			go->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+		}
+
 		return result;
 	}
 
@@ -63,9 +71,7 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 
 	int ProtoRecursionLimit = -1;
 	if (xml->HasAttribute("RecursionLimit"))
-	{
 		ProtoRecursionLimit = from_string<int>(xml->GetAttribute("RecursionLimit"));
-	}
 
 	if (!UsedPrototypes->count(AClassName))
 		(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
@@ -73,9 +79,7 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	TraversePrototypeNode(xml, result, UsedPrototypes, result);
 
 	if (FirstUsedPrototypes)
-	{
 		delete FirstUsedPrototypes;
-	}
 
 	result->FinalizeCreation();
 	return result;
@@ -220,13 +224,9 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 //		Uncomment the following if you want to disallow additional children attached to prototype included within other prototype.
 //
 // 		if (IsClassExists(NodeName))
-// 		{
 			TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
-// 		}
 // 		else
-// 		{
 // 			Log("ERROR", "Prototype references can't have children");
-// 		}
 
 		
 

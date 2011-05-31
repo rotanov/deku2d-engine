@@ -248,7 +248,8 @@ bool CGLWindow::Create()
 
 bool CGLWindow::Initialize()
 {
-	CTextureManager::Instance()->UnloadTextures();
+	if (isCreated)
+		CTextureManager::Instance()->UnloadTextures();
 
 	int flags = SDL_OPENGL | SDL_RESIZABLE | (NewParameters.isFullscreen * SDL_FULLSCREEN);	// | SDL_NOFRAME;
 
@@ -313,8 +314,6 @@ bool CGLWindow::Initialize()
 
 	GLInit();
 
-	// if (isCreated) commented because now we are sure to unload textures before
-	CTextureManager::Instance()->LoadTextures();
 	CEventManager::Instance()->TriggerEvent(new CEvent("WindowResize", NULL));
 
 	return isCreated = true;
@@ -1101,19 +1100,6 @@ bool CTextureManager::UnloadTextures()
 	return true;
 }
 
-bool CTextureManager::LoadTextures()
-{
-	for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
-		if (!(*i)->Load())
-		{
-			Log("ERROR", "Error loading textures.");
-			return false;
-		}
-
-	Log("INFO", "Textures have been loaded successfully");
-	return true;
-}
-
 //////////////////////////////////////////////////////////////////////////
 // CTexture
 
@@ -1434,7 +1420,7 @@ void CFFPRenderer::Render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// should disable depth test
-	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[TRANSPARENT].begin(); i != texturedGeometry[TRANSPARENT].end(); ++i)
+	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);

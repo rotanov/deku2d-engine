@@ -7,6 +7,7 @@
 #include "2de_Resource.h"
 #include "2de_Xml.h"
 
+// shouldn't be here..
 #if defined(GetClassName)
 	#undef GetClassName
 #endif

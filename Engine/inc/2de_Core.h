@@ -2,8 +2,7 @@
 #define _2DE_CORE_H_
 
 #ifdef _MSC_VER
-	// чёрт возьми, перепроверьте это уже кто-нибудь и удалите лишнее...
-	// если уж у строгого GCC остался 1 варнинг (ну может 3, если считать и демки), то у похуистического мсвс ну никак не может быть 25..
+	// DAMNIT, move it somewhere and delete unnecessary ones, please..
 
 	//#pragma warning (disable	:	4312)   //
 // 	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
@@ -605,9 +604,9 @@ void CSingletonHolder<...>::DestroySingleton()
 
 
 /**
- * CTSingleton - шаблонизированный класс синглтона с автоматическим удалением через SingletoneKiller.
+ * CTSingleton - singleton template class with automatic deletion using CSingletonManager.
  *
- * Для использования нужно наследовать класс от него следующим образом:
+ * To use it just inherit a class from it as follows:
  * 	class CSomeClass : public CTSingleton<CSomeClass>
  * 	{
  * 	public:
@@ -861,11 +860,11 @@ private:
 };
 
 /**
-* CFile - класс, представляющий собой интерфейс к чтению и записи файлов.
+* CFile - a class that provides interface to reading and writing of files.
 *
-* Каждый экземпляр класса управляет отдельным файлом, реализует принцип RAII.
-* Является надстройкой над stdio. Также дополняет его всякими функциями-ленивчиками, типа получить всё содержимое в строку и т. п.
-* Нельзя копировать и присваивать.
+* Each instance of the class represents a single file, implementing RAII principle.
+* This class is a front-end for stdio. Also extends it with some lazy-functions, like get file contents into a string.
+* Can't be copied or assigned.
 */
 
 class CFile : public CStorage
@@ -927,7 +926,7 @@ private:
 };
 
 /**
-* CFileSystem - класс, содержащий статические функции для кросслпатформенной работы с файловой системой.
+* CFileSystem - a class that contains static functions for working with file system in a cross-platform way.
 */
 
 class CFileSystem
@@ -940,7 +939,7 @@ public:
 };
 
 /**
-* CLog - класс для работы с логом.
+* CLog - a class for logging.
 */
 
 class CLog : public CTSingleton<CLog>
@@ -1003,9 +1002,9 @@ private:
 #endif // SIMPLIFIED_LOG
 
 /**
-* CEnvironment - содержит статические функции и возможно какие-нибудь константы, которые относятся к окружению выполнения.
+* CEnvironment - contains static functions and probably some constants that related to environment.
 *
-* В идеале, в будущем, весь (ну или не весь, хз пока) платформо-зависимый код следует скинуть куда-то в это место.
+* Ideally in future all (or not all) platform-dependent code should be here.
 */
 
 class CEnvironment
@@ -1079,7 +1078,7 @@ __INLINE string to_string(const T& t)
 }
 
 /**
-* CCaseInsensetiveComparison - functor-class, that compares strings in case-insensitive manner. Used by STL containers, etc.
+* CCaseInsensitiveComparison - functor-class, that compares strings in case-insensitive manner. Used by STL containers, etc.
 */
 
 class CCaseInsensitiveComparison

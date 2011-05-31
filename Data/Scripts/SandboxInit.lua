@@ -15,6 +15,28 @@ local ninja = Create("BlackNinja", "")
 ninja.pos:SetPosition(320, 240)
 Attach(GetObject("RootGameObject"), ninja.object)
 
+--[[for i = 0, 10 do
+	local ninja = Create("BlackNinja", "")
+	ninja.pos:SetPosition(i * 50, 240)
+	Attach(GetObject("RootGameObject"), ninja.object)
+end
+
+for i = 0, 10 do
+	local ninja = Create("BlackNinja", "")
+	ninja.pos:SetPosition(i * 50, 100)
+	Attach(GetObject("RootGameObject"), ninja.object)
+end
+
+for i = 0, 10 do
+	local ninja = Create("BlackNinja", "")
+	ninja.pos:SetPosition(i * 50, 380)
+	Attach(GetObject("RootGameObject"), ninja.object)
+end]]
+
+--local another_ninja = Create("BlackNinja", "")
+--another_ninja.pos:SetPosition(350, 100)
+--Attach(GetObject("RootGameObject"), another_ninja.object)
+
 --Attach(GetObject("RootGameObject"), Create("SandboxProto", "SandboxInst").object)
 --Attach(GetParent(GetObject("Mouse cursor")), GetObject("Magic square"))
 
