@@ -982,7 +982,7 @@ CXMLNormalNode* CXMLParser::ParseNormal()
 			AttrStart = Current;
 			pair<string, string> attr = ParseAttribute();
 
-			if (attr.first == "")
+			if (attr.first.empty())
 				ReportError("ERROR", "Failed to read attribute at", AttrStart);
 			else
 				result->SetAttribute(attr.first, attr.second);
@@ -1043,7 +1043,7 @@ CXMLPrologNode* CXMLParser::ParseProlog()
 				AttrStart = Current;
 				pair<string, string> attr = ParseAttribute();
 
-				if (attr.first == "")
+				if (attr.first.empty())
 					ReportError("ERROR", "Failed to read attribute at", AttrStart);
 
 				if (attr.first == "version")

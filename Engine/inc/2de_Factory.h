@@ -59,6 +59,9 @@ protected:
 
 	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
 
+	CXMLNode* GetPrototypeXML(const string &AName);
+	CObject* CreateClassInstance(const string &AClassName, const string &AName);
+
 #if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 	void InsertDebugInfo( CObject* Source );
 #endif
@@ -184,16 +187,15 @@ T* CFactory::Remove(const string &AName)
 	}
 
 	T* result = dynamic_cast<T *>(Objects[AName]);
-	if (result == NULL)
+	if (!result)
 	{
 		Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
+		return NULL;
 	}
-	else
-	{
-		result->Managed = false;
-		Objects.erase(AName);
-		//CObject::DecRefCount(result);
-	}
+
+	result->Managed = false;
+	Objects.erase(AName);
+	//CObject::DecRefCount(result);
 
 	return result;
 }

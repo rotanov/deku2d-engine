@@ -23,7 +23,7 @@ bool CSound::Load()
 
 	if (Source == LOAD_SOURCE_FILE)
 	{
-		if (Filename == "")
+		if (Filename.empty())
 			return false;
 	
 		Data = Mix_LoadWAV(Filename.c_str());
@@ -101,7 +101,7 @@ bool CMusic::Load()
 
 	if (Source == LOAD_SOURCE_FILE) 
 	{
-		if (Filename == "")
+		if (Filename.empty())
 			return false;
 	
 		Data = Mix_LoadMUS(Filename.c_str());

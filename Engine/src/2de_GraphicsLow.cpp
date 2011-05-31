@@ -559,7 +559,7 @@ void CFont::Unload()
 
 bool CFont::SaveToFile(const string &AFilename)
 {
-	if (AFilename == "")
+	if (AFilename.empty())
 		return false;
 
 	if (!Texture)

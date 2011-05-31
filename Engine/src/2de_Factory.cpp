@@ -22,39 +22,20 @@ CFactory::~CFactory()
 }
 
 /**
-* CFactory::CreateByName - creates an object of AClassName class with AName name.
+* CFactory::CreateByName - creates an object of AClassName type with AName name.
+*
+* AClassName could be an internal class or a prototype resource name.
 */
 
 CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes /*= NULL*/)
 {
-	// this function is kind of difficult to understand, because of many error checks and code that can be taken out..
-	// TODO: simplify it, make more clear and short..
-
-	ClassesContainer::iterator it = Classes.find(AClassName);
-	if (it != Classes.end())
-	{
-		CObject *result = (this->*(it->second.NewFunction))(AName);
-		CGameObject *go = dynamic_cast<CGameObject*>(result);
-		if (go)
-		{
-			go->SetClassName(AClassName);
-			go->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
-		}
-
+	if (CObject *result = CreateClassInstance(AClassName, AName))
 		return result;
-	}
 
-	CPrototype *proto = CFactory::Instance()->Get<CPrototype>(AClassName);
-	if (!proto)
+	CXMLNode *xml = GetPrototypeXML(AClassName);
+	if (!xml)
 	{
-		Log("ERROR", "Class '%s' can't be created by name", AClassName.c_str());
-		return NULL;
-	}
-
-	CXMLNode *xml = proto->GetRootNode();
-	if (xml->IsErroneous() || !xml->HasAttribute("Name") || xml->GetAttribute("Name") != AClassName)
-	{
-		Log("ERROR", "Can't create prototype-class '%s' due to an error in XML", AClassName.c_str());
+		Log("ERROR", "Can't create '%s' by name", AClassName.c_str());
 		return NULL;
 	}
 
@@ -62,12 +43,8 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	result->Deserialize(xml);
 
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
-
 	if (!UsedPrototypes)
-	{
-		FirstUsedPrototypes = new UsedPrototypesContainer;
-		UsedPrototypes = FirstUsedPrototypes;
-	}
+		UsedPrototypes = FirstUsedPrototypes = new UsedPrototypesContainer;
 
 	int ProtoRecursionLimit = -1;
 	if (xml->HasAttribute("RecursionLimit"))
@@ -177,6 +154,7 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 	CGameObject *child;
 	string NodeName;
 	string ChildName;
+	string LocalChildName;
 
 	for (CXMLChildrenList::Iterator it = ANode->Children.Begin(); it != ANode->Children.End(); ++it)
 	{
@@ -204,14 +182,15 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 				}
 				--(*UsedPrototypes)[NodeName];
 			}
-	
 		}
 
 		ChildName = (*it)->HasAttribute("Name") ? (*it)->GetAttribute("Name") : "";
-		string localChildName = (*it)->HasAttribute("LocalName") ? (*it)->GetAttribute("LocalName") : "";
+		LocalChildName = (*it)->HasAttribute("LocalName") ? (*it)->GetAttribute("LocalName") : "";
+
 		child = dynamic_cast<CGameObject *>(CreateByName(NodeName, ChildName, UsedPrototypes));
-		if (localChildName != "")
-			CurrentProto->LocalNameObjectMapping[ localChildName ] = child;
+
+		if (!LocalChildName.empty())
+			CurrentProto->LocalNameObjectMapping[LocalChildName] = child;
 
 		if (!child)
 		{
@@ -221,18 +200,53 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 		child->Deserialize(*it);
 		AObject->Attach(child);
 
-//		Uncomment the following if you want to disallow additional children attached to prototype included within other prototype.
-//
-// 		if (IsClassExists(NodeName))
-			TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
-// 		else
-// 			Log("ERROR", "Prototype references can't have children");
+		// Uncomment the following if you want to disallow additional children attached to prototype included within other prototype.
+		//if (!IsClassExists(NodeName))
+		//	Log("ERROR", "Prototype references can't have children");
+		//else
 
-		
+		TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
 
 		if (UsedPrototypes->count(NodeName) != 0)
 			++(*UsedPrototypes)[NodeName];
 	}
+}
+
+CXMLNode* CFactory::GetPrototypeXML(const string &AName)
+{
+	CPrototype *proto = CFactory::Instance()->Get<CPrototype>(AName);
+	if (!proto)
+	{
+		Log("ERROR", "No such prototype: '%s'", AName.c_str());
+		return NULL;
+	}
+
+	CXMLNode *xml = proto->GetRootNode();
+	if (xml->IsErroneous() || !xml->HasAttribute("Name") || xml->GetAttribute("Name") != AName)
+	{
+		Log("ERROR", "Prototype '%s' XML contains an error", AName.c_str());
+		return NULL;
+	}
+
+	return xml;
+}
+
+CObject* CFactory::CreateClassInstance(const string &AClassName, const string &AName)
+{
+	ClassesContainer::iterator it = Classes.find(AClassName);
+	if (it == Classes.end())
+		return NULL;
+
+	CObject *result = (this->*(it->second.NewFunction))(AName);
+
+	CGameObject *go = dynamic_cast<CGameObject*>(result);
+	if (go)
+	{
+		go->SetClassName(AClassName);
+		go->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+	}
+
+	return result;
 }
 
 
