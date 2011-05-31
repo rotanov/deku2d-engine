@@ -254,12 +254,15 @@ char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
 	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
 	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
 
-#else
+#elif HAVE_ICONV
 	// вообще говоря, наверное даже кроссплатформенно, если хотите - уберите WinAPI и #ifdef
 	// хорошо, как-нибудь уберём.
-	char *iconv_str_out = SDL_iconv_string("CP1251", "UTF16", (char *) &event.key.keysym.unicode, 2);
+	char *iconv_str_out = SDL_iconv_string("CP1251", "UTF-16", (char *) &event.key.keysym.unicode, 2);
 	TempChar = iconv_str_out[0];
 	SDL_free(iconv_str_out);
+#else
+	if ((event.key.keysym.unicode & 0xFF80) == 0)
+		TempChar = event.key.keysym.unicode & 0x7F;
 #endif //_WIN32
 	return TempChar;
 }
