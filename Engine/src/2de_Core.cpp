@@ -304,7 +304,7 @@ bool CStorage::ReadLineS(string &Buffer)
 	
 	Buffer.clear();
 
-	byte b;
+	byte b = 0;
 
 	// theoretically (not tested) makes processing somewhat faster on average strings, but consumes more memory..
 	Buffer.reserve(READ_BUFFER_DEFAULT_SIZE);

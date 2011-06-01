@@ -267,8 +267,7 @@ class CTimerComponent : public CGameObject
 public:
 	D2D_DECLARE_VISITABLE()
 
-	CTimerComponent();
-	CTimerComponent(float AInterval);
+	CTimerComponent(float AInterval = 0.0f);
 
 	void ProcessEvent(const CEvent &AEvent);
 

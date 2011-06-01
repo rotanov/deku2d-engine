@@ -21,7 +21,7 @@ CGameObject::~CGameObject()
 	SetParent(NULL);
 }
 
-void CGameObject::Attach(CGameObject* AGameObject)
+void CGameObject::Attach(CGameObject *AGameObject)
 {
 	if (!AGameObject)
 	{
@@ -43,7 +43,7 @@ void CGameObject::Attach(CGameObject* AGameObject)
 	CEventManager::Instance()->TriggerEvent(AttachedEvent);
 }
 
-void CGameObject::Detach(CGameObject* AGameObject)
+void CGameObject::Detach(CGameObject *AGameObject)
 {
 	if (!AGameObject)
 	{
@@ -88,7 +88,7 @@ CGameObject* CGameObject::GetParent() const
 	return Parent;
 }
 
-void CGameObject::SetParent(CGameObject* AGameObject)
+void CGameObject::SetParent(CGameObject *AGameObject)
 {
 	if (AGameObject == this)
 	{
@@ -229,7 +229,7 @@ bool CGameObject::IsActive() const
 
 CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 {
-	SetName("CRenderableComponent");	
+	SetName("CPlaceableComponent");	
 }
 
 void CPlaceableComponent::SetAngle(float AAngle)
@@ -470,13 +470,12 @@ CRenderConfig& CRenderableComponent::GetConfiguration()
 
 CRenderableComponent::~CRenderableComponent()
 {
-// falls on exit
-// 	if (Model != NULL)
-// 	{
-// 		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
-// 		Model->SetDestroyed();
-// 		Model = NULL;
-// 	}
+	if (Model != NULL && !CEngine::Instance()->isFinalizing())
+	{
+		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
+		Model->SetDestroyed();
+		Model = NULL;
+	}
 
 	CRenderManager::Instance()->Remove(this);
 }
@@ -753,11 +752,7 @@ void CText::_UpdateSelfModel()
 //////////////////////////////////////////////////////////////////////////
 // CTimerComponent
 
-CTimerComponent::CTimerComponent() : Enabled(false), Interval(0.0f), Accumulated(0.0f)
-{
-}
-
-CTimerComponent::CTimerComponent(float AInterval) : Enabled(false), Interval(AInterval), Accumulated(0.0f)
+CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), Interval(AInterval), Accumulated(0.0f)
 {
 }
 

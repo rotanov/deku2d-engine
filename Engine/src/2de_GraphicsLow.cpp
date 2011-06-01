@@ -1336,7 +1336,7 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 				if (!Equal(Transformation.GetAngle(), 0.0f))
 					TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 				TempVector += Transformation.GetTranslation();
-				if (!CRenderManager::Instance()->Transformator.doConsiderCamera)
+				if (!CRenderManager::Instance()->Transformator.doConsiderCamera) // BUG: doConsiderCamera used unitialized
 					TempVector += CRenderManager::Instance()->Camera.GetTranslation();
 			}
 			VertexHolder->PushVertex(Vector3

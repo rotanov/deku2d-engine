@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Prototype Name="LuaPerfCounter" Script="LuaPerfCounterScript" ClassName="LuaPerfCounter">
+	<TimerComponent Enabled="true" Interval="3.0f" LocalName="timer" Name="LuaPerfCounterTimer" />
+	<PlaceableComponent Position="0 0" Layer="511">
+		<Text LocalName="text" Text="Lua Memory: N/A" />
+	</PlaceableComponent>
+</Prototype>

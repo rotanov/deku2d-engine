@@ -11,6 +11,9 @@ for i = 0, 3 do
 end
 --]]
 
+local lpc = Create("LuaPerfCounter", "")
+Attach(GetObject("RootGameObject"), lpc.object)
+
 local ninja = Create("BlackNinja", "")
 ninja.pos:SetPosition(320, 240)
 Attach(GetObject("RootGameObject"), ninja.object)
