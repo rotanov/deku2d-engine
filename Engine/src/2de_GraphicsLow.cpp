@@ -1441,7 +1441,9 @@ void CFFPRenderer::Render()
 
 CFFPRenderer::~CFFPRenderer()
 {
-
+	for (unsigned i = 0; i < 3; i++)
+		for ( map<CTexture*, CBetterTextureVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+			delete (*j).second;
 }
 
 void CFFPRenderer::Clear()

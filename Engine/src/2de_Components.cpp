@@ -12,6 +12,7 @@ CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true), Dead(false
 
 CGameObject::~CGameObject()
 {
+	CLuaVirtualMachine::Instance()->FreeComponent(*this);
 	Scene->Remove(this);
 	//	Note, that here we adding children to parent in reverse order, i think it's not that important for now.
 	//	That order is not important at all. Overall comment should be removed.
@@ -443,10 +444,13 @@ CModel* CRenderableComponent::GetModel() const
 
 void CRenderableComponent::SetModel(CModel *AModel)
 {
-	if (Model == NULL)
-		delete Model;
-	Model = AModel;
-	
+	if (Model != NULL)
+	{
+		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
+		Model->SetDestroyed();
+		Model = NULL;
+	}
+	Model = AModel;	
 }
 
 void CRenderableComponent::SetConfiguration(const CRenderConfig &AConfiguraton)
@@ -466,6 +470,14 @@ CRenderConfig& CRenderableComponent::GetConfiguration()
 
 CRenderableComponent::~CRenderableComponent()
 {
+// falls on exit
+// 	if (Model != NULL)
+// 	{
+// 		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
+// 		Model->SetDestroyed();
+// 		Model = NULL;
+// 	}
+
 	CRenderManager::Instance()->Remove(this);
 }
 

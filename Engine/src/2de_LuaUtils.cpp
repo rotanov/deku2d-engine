@@ -899,6 +899,12 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_setglobal(L, "PI");
 }
 
+void CLuaVirtualMachine::FreeComponent( const CGameObject &AObject )
+{
+	lua_pushnil(L);
+	lua_setglobal(L, AObject.GetName().c_str());
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CLuaFunctionCall
 
