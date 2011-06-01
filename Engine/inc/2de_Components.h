@@ -234,7 +234,7 @@ public:
 class CText : public CRenderableComponent
 {
 public:
-	// Treat as CRenderableComponent for now
+	// Treat as CRenderableComponent for now, if not uncomment the following and support visitors with one more branch
 	//D2D_DECLARE_VISITABLE()
 
 	CText();
@@ -248,10 +248,7 @@ public:
 	void SetText(const string &AText);
 	CText& operator =(const string &AText);
 	unsigned char operator [] (unsigned index) const;
-	// Such function could be there no more. Text has no info about box and world position now, But We can generate info 'bout box anytime instead
-	//float StringCoordToCursorPos(int x, int y) const;	// Тот кто это писал - объясни, зачем нам передавать "y"?
 	unsigned Length() const;
-
 	void Deserialize(CXMLNode *AXML);
 
 private:

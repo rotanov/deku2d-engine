@@ -678,13 +678,12 @@ void CText::SetFont(CFont *AFont)
 	}
 
 	Font = AFont;
-	SetText(Characters);	// Пересчитать BOX, шрифт же меняется.  ///<<<< OLOLOLO --------
-	_UpdateSelfModel();						///			|
-}									///			|
-									///			|
-void CText::SetText(const string &AText)				///			|
-{									///			|
-	if (Characters == AText)	///<<<<	OLOLOLO	----------------------------------------|
+	_UpdateSelfModel(); // Recalculate model and box with new font.
+}
+
+void CText::SetText(const string &AText)
+{
+	if (Characters == AText)
 		return;
 	Characters = AText;
 	//SetBox(CBox(GetPosition(), GetPosition() + Vector2(Font->GetStringWidth(Characters), Font->GetStringHeight(Characters))));
@@ -696,26 +695,6 @@ CText& CText::operator =(const string &AText)
 	SetText(AText);
 	return *this;
 }
-
-/*
-float CText::StringCoordToCursorPos(int x, int y) const
-{
-	if (Characters.length() == 0)
-		return -1;
-	Vector2 Local = Vector2(x, y) - GetPosition();
-	if (Local.x < 0)
-		return -1;
-
-	for (int i = 0; i < Characters.length(); i++)
-	{
-		float SubstrWidth = Font->GetStringWidthEx(0, i, Characters);
-		float SymbolCenterCoord = SubstrWidth - Font->GetDistance() - (Font->SymbolWidth((byte)Characters[i] - 32) / 2.0f);
-		if (Local.x < SymbolCenterCoord)
-			return (i - 1);
-	}
-	return (Characters.length() - 1.0f);
-}
-*/
 
 CText::~CText()
 {

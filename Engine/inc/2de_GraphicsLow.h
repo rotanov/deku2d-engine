@@ -162,7 +162,6 @@ enum EModelType
 	MODEL_TYPE_POINTS = 1,
 	MODEL_TYPE_LINES = 2,
 	MODEL_TYPE_TRIANGLES = 3,
-//	MODEL_TYPE_QUADS = 3,	// Keep commented 'cause may be there will be some possibility for optimization
 };
 
 class CModel : public CResource

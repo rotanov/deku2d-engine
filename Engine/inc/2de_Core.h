@@ -2,9 +2,10 @@
 #define _2DE_CORE_H_
 
 #ifdef _MSC_VER
-	// DAMNIT, move it somewhere and delete unnecessary ones, please..
 
-	//#pragma warning (disable	:	4312)   //
+// DAMNIT, move it somewhere and delete unnecessary ones, please.. // I have already commented it out, so some time will pass and I'll check most of warnings.
+
+//	#pragma warning (disable	:	4312)   //
 // 	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
 // 	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
 // 	#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
@@ -127,7 +128,7 @@ using std::cerr;
 	#define snprintf _snprintf
 #endif //_MSC_VER
 
-// #define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
+//	#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
 
 typedef unsigned char byte;
@@ -1111,8 +1112,8 @@ void CEvent::SetData(const string &AName, const T &AValue)
 
 
 /**
-*	Отлов утечек памяти.
-*	Немного пофикшен, однако все равно нуждается в тестировании и улучшении.
+*	Memory leaks catching.
+*	Some issues are fixed but there's still a room for improvement.
 *	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
 *	@todo: Implement new[] and delete []
 *	@todo: Remove inline from AddTrack and RemoveTrack and others.
