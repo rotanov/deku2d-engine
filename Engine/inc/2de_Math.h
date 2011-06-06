@@ -325,6 +325,7 @@ __INLINE Vector2 Clamp(const Vector2 &x, const Vector2 &min, const Vector2 &max)
 	Vector2 result;
 	result.x = Clamp(x.x, min.x, max.x);
 	result.y = Clamp(x.y, min.y, max.y);
+	return result;
 }
 
 template<typename T, size_t N>
@@ -502,6 +503,7 @@ __INLINE Vector3 Clamp(const Vector3 &x, const Vector3 &min, const Vector3 &max)
 	result.x = Clamp(x.x, min.x, max.x);
 	result.y = Clamp(x.y, min.y, max.y);
 	result.z = Clamp(x.z, min.z, max.z);
+	return result;
 }
 
 class Matrix2

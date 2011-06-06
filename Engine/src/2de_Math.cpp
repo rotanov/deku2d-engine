@@ -551,8 +551,7 @@ bool CBox::Inside(const Vector2 &Point, float &MTD, Vector2 &n) const
 
 bool CBox::Outside(const Vector2 &Point, float &MTD, Vector2 &n) const
 {
-	// FIXME: warning: suggest parentheses around && within || // i was too lazy to parse this logic expression..
-	if (Point.x < Max.x && Point.x > Min.x && Point.y < Max.y || Point.y > Min.y)
+	if (Inside(Point))
 		return false;
 
 	//DistanceToLine
