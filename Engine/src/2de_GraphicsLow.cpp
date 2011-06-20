@@ -342,18 +342,11 @@ void CGLWindow::GLInit()
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);
 
-// 	glEnable(GL_POINT_SMOOTH);
-// 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-// 	glEnable(GL_LINE_SMOOTH);
-// 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-// 	glEnable(GL_POLYGON_SMOOTH);
-// 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-
 	CRenderManager::Instance()->SetSwapInterval(0);
 
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
-//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+	//	glEnable(GL_BLEND);
+	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
+	//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0);
 }
@@ -1392,21 +1385,11 @@ void CFFPRenderer::Render()
 {
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_POINTS);
-	glEnable(GL_POINT_SMOOTH);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	PrimitiveHolders[MODEL_TYPE_POINTS - 1].RenderPrimitive(GL_POINTS);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINES);
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	PrimitiveHolders[MODEL_TYPE_LINES - 1].RenderPrimitive(GL_LINES);
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);	
 	PrimitiveHolders[MODEL_TYPE_TRIANGLES - 1].RenderPrimitive(GL_TRIANGLES);
-
-	glDisable(GL_POINT_SMOOTH);
-	glDisable(GL_LINE_SMOOTH);
-	glDisable(GL_POLYGON_SMOOTH);
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -1415,8 +1398,10 @@ void CFFPRenderer::Render()
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
-		i->second->Clear();
 	}
+
+	glDepthMask(GL_FALSE);
+	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// should disable depth test
@@ -1424,19 +1409,18 @@ void CFFPRenderer::Render()
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
-		i->second->Clear();
 	}
 	// and enable here
-	glDepthMask(GL_FALSE);
+	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
-		i->second->Clear();
 	}
-	Clear();
 	glDepthMask(GL_TRUE);
+	Clear();
+	
 }
 
 CFFPRenderer::~CFFPRenderer()
@@ -1450,6 +1434,9 @@ void CFFPRenderer::Clear()
 {
 	for(unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		PrimitiveHolders[i].Clear();
+	for (unsigned i = 0; i < 3; i++)
+		for ( map<CTexture*, CBetterTextureVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+			j->second->Clear();
 }
 
 CFFPRenderer::CFFPRenderer()

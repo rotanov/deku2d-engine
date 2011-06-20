@@ -3,22 +3,43 @@
     <PlaceableComponent LocalName = "pos" Position="0 0" Layer="1">
         <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 0.5" BlendingMode="Opaque" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
 		
-		<PlaceableComponent Position="32 32" Layer="2">
-			<RenderableComponent LocalName = "model" Model="Box" Color="0 1 1 0.5" BlendingMode="Opaque" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
-		</PlaceableComponent>
-		
-		<PlaceableComponent Position="80 80" Layer="3">
-			<RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 0.5" BlendingMode="Transparent" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
-		</PlaceableComponent>
-		
-		<PlaceableComponent Position="96 96" Layer="4">
-			<RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Additive" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
-		</PlaceableComponent>		
-		
-		<PlaceableComponent Position="123 123" Layer="5">
-			<RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Opaque" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
-		</PlaceableComponent>		
-		
+        <PlaceableComponent Position="32 32" Layer="2">
+          <RenderableComponent LocalName = "model" Model="Box" Color="0 1 1 0.5" BlendingMode="Opaque" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>
+        
+        <PlaceableComponent Position="80 80" Layer="3">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 0.5" BlendingMode="Transparent" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>
+        
+        <PlaceableComponent Position="96 96" Layer="4">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Additive" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>
+        
+        <PlaceableComponent Position="96 80" Layer="4">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Additive" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>
+
+        <PlaceableComponent Position="96 110" Layer="4">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Additive" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>
+
+        <PlaceableComponent Position="80 96" Layer="4">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Additive" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>
+
+        <PlaceableComponent Position="110 96" Layer="4">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Additive" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>        
+        
+        <PlaceableComponent Position="123 123" Layer="5">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Opaque" Width="128" Height="128" Texture="pakenemy" ModelType="Triangles" />
+        </PlaceableComponent>		
+        
+        <PlaceableComponent Position="100 123" Layer="5">
+          <RenderableComponent LocalName = "model" Model="Box" Color="1 1 1 1" BlendingMode="Transparent" Width="128" Height="128" Texture="wa_grad" ModelType="Triangles" />
+        </PlaceableComponent>		
+        
     </PlaceableComponent>
+    
 	
 </Prototype>
