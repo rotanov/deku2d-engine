@@ -304,6 +304,32 @@ public:
 	virtual void Clear() = 0;
 };
 
+class CVertexHolder
+{
+public:
+	CVertexHolder(bool AHasTexCoords);
+
+	~CVertexHolder();
+
+	void PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord);
+	void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
+	void RenderPrimitive(GLuint AType) const;
+	void Clear();
+	unsigned GetVertexCount() const;
+
+protected:
+	static const unsigned START_SIZE = 256;
+	bool HasTexCoords;
+	unsigned VertexCount;
+	unsigned ReservedCount;
+	RGBAf *Colors;
+	Vector3 *Vertices;
+	Vector2 *TexCoords;
+
+	void Grow();
+	CVertexHolder();
+};
+
 /**
 *	CFFPRenderer - Fixed Function Pipeline Renderer
 *	For compatibility with old machines with no Shaders v3.0
@@ -320,58 +346,10 @@ public:
 	void Clear();
 
 private:
-	/**
-	*	CPrmitiveVertexDataHolder was useful class to incorporate Colors and Vertices
-	*	for pushing and drawing them. Now modern version of that class included in
-	*	declaration of CFFPRender and that version is for @todo: get rid of it.
-	*/
 
-	class CBetterVertexHolder // For primitives for now
-	{
-	public:
-		CBetterVertexHolder();	// Desired model type;
-		virtual ~CBetterVertexHolder();
-		virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
-		virtual void RenderPrimitive(GLuint);
-		void Clear();
-		unsigned GetVertexCount();
-
-	protected:
-		static const unsigned StartSize = 256;
-		unsigned VertexCount;
-		unsigned ReservedCount;
-		RGBAf *Colors;
-		Vector3 *Vertices;
-
-		virtual void _Grow();
-	};
-
-	class CBetterTextureVertexHolder // For primitives for now
-	{
-	public:
-		CBetterTextureVertexHolder();	// Desired model type;
-		virtual ~CBetterTextureVertexHolder();
-		virtual void PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord);
-		virtual void RenderPrimitive(GLuint);
-		void Clear();
-		unsigned GetVertexCount();
-
-	protected:
-		static const unsigned START_SIZE = 256;
-		unsigned VertexCount;
-		unsigned ReservedCount;
-		RGBAf *Colors;
-		Vector3 *Vertices;
-		Vector2 *TexCoords;
-
-		virtual void _Grow();
-	};
-
-#define TOTAL_HOLDERS (MODEL_TYPE_TRIANGLES * (BLEND_MODE_ADDITIVE + 1))	// no
-	CBetterVertexHolder PrimitiveHolders[TOTAL_HOLDERS];	// 9 total
-	//vector<CBetterTextureVertexHolder*> TexturedGeometry; // per texture i.e. one texture => single DIP
-	//vector<GLuint> TexIDs;
-	map<CTexture*, CBetterTextureVertexHolder*> texturedGeometry[3];	// по количеству режимов смешивания
+#define TOTAL_HOLDERS (MODEL_TYPE_TRIANGLES * (BLEND_MODE_ADDITIVE + 1))	// no way that could be nice
+	CVertexHolder *PrimitiveHolders[TOTAL_HOLDERS];	// 9 total
+	map<CTexture*, CVertexHolder*> texturedGeometry[3];
 };
 
 /**

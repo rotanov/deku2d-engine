@@ -1286,6 +1286,9 @@ void CSceneManager::SetCurrentScene(CAbstractScene *AScene)
 //////////////////////////////////////////////////////////////////////////
 // CRenderer
 
+//////////////////////////////////////////////////////////////////////////
+// CFFPRenderer
+
 bool CFFPRenderer::Initialize()
 {
 	// do something
@@ -1303,7 +1306,7 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 	if (AModel == NULL)
 		return;
 	assert(Sender != NULL && AModel != NULL);
-	CBetterVertexHolder *VertexHolder = &PrimitiveHolders[AModel->GetModelType() - 1];
+	CVertexHolder *VertexHolder = PrimitiveHolders[AModel->GetModelType() - 1];
 
 	if (AModel->GetTexture() != NULL)
 	{
@@ -1312,10 +1315,10 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 
 		if (texturedGeometry[Sender->GetBlendingMode()].find(AModel->GetTexture()) == texturedGeometry[Sender->GetBlendingMode()].end())
 		{
-			texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()] = new CBetterTextureVertexHolder();
+			texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()] = new CVertexHolder(true);
 		}
 
-		CBetterTextureVertexHolder * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
+		CVertexHolder * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
 
 		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
 		CTransformation Transformation = ATransform; //CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
@@ -1385,16 +1388,16 @@ void CFFPRenderer::Render()
 {
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_POINTS);
-	PrimitiveHolders[MODEL_TYPE_POINTS - 1].RenderPrimitive(GL_POINTS);
+	PrimitiveHolders[MODEL_TYPE_POINTS - 1]->RenderPrimitive(GL_POINTS);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINES);
-	PrimitiveHolders[MODEL_TYPE_LINES - 1].RenderPrimitive(GL_LINES);
-	PrimitiveHolders[MODEL_TYPE_TRIANGLES - 1].RenderPrimitive(GL_TRIANGLES);
+	PrimitiveHolders[MODEL_TYPE_LINES - 1]->RenderPrimitive(GL_LINES);
+	PrimitiveHolders[MODEL_TYPE_TRIANGLES - 1]->RenderPrimitive(GL_TRIANGLES);
 
 	glEnable(GL_TEXTURE_2D);
 
 	glDisable(GL_BLEND);
-	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
+	for(map<CTexture*, CVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1405,7 +1408,7 @@ void CFFPRenderer::Render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// should disable depth test
-	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
+	for(map<CTexture*, CVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1413,7 +1416,7 @@ void CFFPRenderer::Render()
 	// and enable here
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	for(map<CTexture*, CBetterTextureVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
+	for(map<CTexture*, CVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1426,89 +1429,25 @@ void CFFPRenderer::Render()
 CFFPRenderer::~CFFPRenderer()
 {
 	for (unsigned i = 0; i < 3; i++)
-		for ( map<CTexture*, CBetterTextureVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+		for ( map<CTexture*, CVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
 			delete (*j).second;
+	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
+		SAFE_DELETE(PrimitiveHolders[i]);
 }
 
 void CFFPRenderer::Clear()
 {
 	for(unsigned i = 0; i < TOTAL_HOLDERS; i++)
-		PrimitiveHolders[i].Clear();
+		PrimitiveHolders[i]->Clear();
 	for (unsigned i = 0; i < 3; i++)
-		for ( map<CTexture*, CBetterTextureVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+		for ( map<CTexture*, CVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
 			j->second->Clear();
 }
 
 CFFPRenderer::CFFPRenderer()
 {
-
-}
-//////////////////////////////////////////////////////////////////////////
-// Better vertex holder
-
-
-CFFPRenderer::CBetterVertexHolder::CBetterVertexHolder() : VertexCount(0), ReservedCount(StartSize)
-{
-	Colors = new RGBAf [StartSize];
-	Vertices = new Vector3 [StartSize];	
-}
-
-CFFPRenderer::CBetterVertexHolder::~CBetterVertexHolder()
-{
-	delete [] Colors;
-	delete [] Vertices;
-}
-
-void CFFPRenderer::CBetterVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor)
-{
-	if (VertexCount == ReservedCount)
-		_Grow();
-	Vertices[VertexCount] = AVertex;
-	Colors[VertexCount] = AColor;
-	VertexCount++;
-}
-
-void CFFPRenderer::CBetterVertexHolder::RenderPrimitive(GLuint Type)
-{
-	if (VertexCount == 0)
-		return;
-	glColorPointer(4, GL_FLOAT, 0, Colors);
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glDrawArrays(Type, 0, VertexCount);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-}
-
-void CFFPRenderer::CBetterVertexHolder::Clear()
-{
-	VertexCount = 0;
-}
-
-unsigned CFFPRenderer::CBetterVertexHolder::GetVertexCount()
-{
-	return VertexCount;
-}
-
-void CFFPRenderer::CBetterVertexHolder::_Grow()
-{
-	ReservedCount = VertexCount * 2;
-	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewColors[i] = Colors[i];
-
-	delete[] Colors;
-
-	Colors = NewColors;
-
-	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewVertices[i] = Vertices[i];
-
-	delete[] Vertices;
-
-	Vertices = NewVertices;
+	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
+		PrimitiveHolders[i] = new CVertexHolder(false);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1637,91 +1576,6 @@ CTransformator::CTransformator() : CurrentTransformation()
 const CTransformation& CTransformator::GetCurrentTransfomation() const
 {
 	return CurrentTransformation;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CFFPRenderer
-
-CFFPRenderer::CBetterTextureVertexHolder::CBetterTextureVertexHolder() : VertexCount(0), ReservedCount(START_SIZE) 
-{
-	Colors = new RGBAf [START_SIZE];
-	Vertices = new Vector3 [START_SIZE];
-	TexCoords = new Vector2[START_SIZE];
-}
-
-CFFPRenderer::CBetterTextureVertexHolder::~CBetterTextureVertexHolder()
-{
-	delete [] Colors;
-	delete [] Vertices;
-	delete [] TexCoords;
-}
-
-void CFFPRenderer::CBetterTextureVertexHolder::PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord)
-{
-	if (VertexCount == ReservedCount)
-		_Grow();
-	Vertices[VertexCount] = AVertex;
-	Colors[VertexCount] = AColor;
-	TexCoords[VertexCount] = ATexCoord;
-	VertexCount++;
-}
-
-void CFFPRenderer::CBetterTextureVertexHolder::RenderPrimitive(GLuint Type)
-{
-	if (VertexCount == 0)
-		return;
-
-	glColorPointer(4, GL_FLOAT, 0, Colors);
-	glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glDrawArrays(Type, 0, VertexCount);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-}
-
-void CFFPRenderer::CBetterTextureVertexHolder::Clear()
-{
-	VertexCount = 0;
-}
-
-unsigned CFFPRenderer::CBetterTextureVertexHolder::GetVertexCount()
-{
-	return VertexCount;
-}
-
-void CFFPRenderer::CBetterTextureVertexHolder::_Grow()
-{
-	ReservedCount = VertexCount * 2;
-	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewColors[i] = Colors[i];
-
-	delete[] Colors;
-
-	Colors = NewColors;
-
-	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewVertices[i] = Vertices[i];
-
-	delete[] Vertices;
-
-	Vertices = NewVertices;
-
-	Vector2 *NewTexCoords = new Vector2[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewTexCoords[i] = TexCoords[i];
-
-	delete [] TexCoords;
-
-	TexCoords = NewTexCoords;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1900,3 +1754,111 @@ void CModel::__UpdateBox()
 		Box.Add(Vertices[i]);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// CVertexHolder
+
+CVertexHolder::CVertexHolder( bool AHasTexCoords ) : HasTexCoords(AHasTexCoords), VertexCount(0), ReservedCount(START_SIZE)
+{
+	Colors = new RGBAf [START_SIZE];
+	Vertices = new Vector3 [START_SIZE];	
+	if (HasTexCoords)
+		TexCoords = new Vector2[START_SIZE];
+}
+
+CVertexHolder::~CVertexHolder()
+{
+	delete [] Colors;
+	delete [] Vertices;
+	if (HasTexCoords)
+		delete [] TexCoords;
+}
+
+void CVertexHolder::PushVertex( const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord )
+{
+	assert(HasTexCoords);
+	if (VertexCount == ReservedCount)
+		Grow();
+	Vertices[VertexCount] = AVertex;
+	Colors[VertexCount] = AColor;
+	TexCoords[VertexCount] = ATexCoord;
+	VertexCount++;
+}
+
+void CVertexHolder::PushVertex( const Vector3 &AVertex, const RGBAf &AColor )
+{
+	assert(!HasTexCoords);
+	if (VertexCount == ReservedCount)
+		Grow();
+	Vertices[VertexCount] = AVertex;
+	Colors[VertexCount] = AColor;
+	VertexCount++;
+}
+
+void CVertexHolder::RenderPrimitive( GLuint AType ) const
+{
+	if (VertexCount == 0)
+		return;
+	switch (HasTexCoords)
+	{
+	case true:
+		glColorPointer(4, GL_FLOAT, 0, Colors);
+		glTexCoordPointer(2, GL_FLOAT, 0, TexCoords);
+		glVertexPointer(3, GL_FLOAT, 0, Vertices);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glDrawArrays(AType, 0, VertexCount);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		break;
+	case false:
+		glColorPointer(4, GL_FLOAT, 0, Colors);
+		glVertexPointer(3, GL_FLOAT, 0, Vertices);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glDrawArrays(AType, 0, VertexCount);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		break;
+	}
+}
+
+void CVertexHolder::Clear()
+{
+	VertexCount = 0;
+}
+
+unsigned CVertexHolder::GetVertexCount() const
+{
+	return VertexCount;
+}
+
+void CVertexHolder::Grow()
+{
+	ReservedCount = VertexCount * 2;
+
+	RGBAf *NewColors = new RGBAf[ReservedCount];
+	for (unsigned i = 0; i < VertexCount; i++)
+		NewColors[i] = Colors[i];
+	delete[] Colors;
+	Colors = NewColors;
+
+	Vector3 *NewVertices = new Vector3[ReservedCount];
+	for (unsigned i = 0; i < VertexCount; i++)
+		NewVertices[i] = Vertices[i];
+	delete[] Vertices;
+	Vertices = NewVertices;
+
+	if (HasTexCoords)
+	{
+		Vector2 *NewTexCoords = new Vector2[ReservedCount];
+		for (unsigned i = 0; i < VertexCount; i++)
+			NewTexCoords[i] = TexCoords[i];
+		delete [] TexCoords;
+		TexCoords = NewTexCoords;
+	}
+}
