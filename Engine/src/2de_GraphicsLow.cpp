@@ -1306,7 +1306,7 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 	if (AModel == NULL)
 		return;
 	assert(Sender != NULL && AModel != NULL);
-	CVertexHolder *VertexHolder = PrimitiveHolders[AModel->GetModelType() - 1];
+	CVertexHolder<Vector3> *VertexHolder = PrimitiveHolders[AModel->GetModelType() - 1];
 
 	if (AModel->GetTexture() != NULL)
 	{
@@ -1315,10 +1315,10 @@ void CFFPRenderer::PushModel(const CTransformation& ATransform, const CRenderCon
 
 		if (texturedGeometry[Sender->GetBlendingMode()].find(AModel->GetTexture()) == texturedGeometry[Sender->GetBlendingMode()].end())
 		{
-			texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()] = new CVertexHolder(true);
+			texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()] = new CVertexHolder<Vector3>(true);
 		}
 
-		CVertexHolder * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
+		CVertexHolder<Vector3> * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
 
 		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
 		CTransformation Transformation = ATransform; //CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
@@ -1397,7 +1397,7 @@ void CFFPRenderer::Render()
 	glEnable(GL_TEXTURE_2D);
 
 	glDisable(GL_BLEND);
-	for(map<CTexture*, CVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
+	for(map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1408,7 +1408,7 @@ void CFFPRenderer::Render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// should disable depth test
-	for(map<CTexture*, CVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
+	for(map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1416,7 +1416,7 @@ void CFFPRenderer::Render()
 	// and enable here
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	for(map<CTexture*, CVertexHolder*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
+	for(map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1429,7 +1429,7 @@ void CFFPRenderer::Render()
 CFFPRenderer::~CFFPRenderer()
 {
 	for (unsigned i = 0; i < 3; i++)
-		for ( map<CTexture*, CVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+		for ( map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
 			delete (*j).second;
 	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		SAFE_DELETE(PrimitiveHolders[i]);
@@ -1440,14 +1440,14 @@ void CFFPRenderer::Clear()
 	for(unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		PrimitiveHolders[i]->Clear();
 	for (unsigned i = 0; i < 3; i++)
-		for ( map<CTexture*, CVertexHolder*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+		for ( map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
 			j->second->Clear();
 }
 
 CFFPRenderer::CFFPRenderer()
 {
 	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
-		PrimitiveHolders[i] = new CVertexHolder(false);
+		PrimitiveHolders[i] = new CVertexHolder<Vector3>(false);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1584,30 +1584,33 @@ const CTransformation& CTransformator::GetCurrentTransfomation() const
 CModel::CModel(EModelType AModelType /*= MODEL_TYPE_NOT_A_MODEL*/, 
 			   CTexture * ATexture /*= NULL*/, unsigned AVerticesNumber /*= 0*/,
 			   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
-	Box(), Texture(ATexture), ModelType(AModelType), Vertices(NULL),
-	TexCoords(NULL), VerticesNumber(AVerticesNumber)
+	Box(), Texture(ATexture), ModelType(AModelType), Vertices(ATexture != NULL)
 {
-	if (VerticesNumber == 0)
+	if (AVerticesNumber == 0)
 		return;
-	Vertices = new Vector2[VerticesNumber];
-	std::copy(AVertices, AVertices + VerticesNumber, Vertices);
-	__UpdateBox();
-	if (ATexCoords == NULL)
-		return;
-	TexCoords = new Vector2[VerticesNumber];
-	std::copy(ATexCoords, ATexCoords + VerticesNumber, TexCoords);
+	Vertices.Reserve(AVerticesNumber);
+	for (unsigned i = 0; i < AVerticesNumber; i++)
+		switch(ATexture != NULL)
+		{
+		case true:
+			Vertices.PushVertex(AVertices[i], RGBAf(1.0f, 1.0f, 1.0f, 1.0f), ATexCoords[i]);
+			break;
+		case false:
+			Vertices.PushVertex(AVertices[i], RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
+			break;
+		}	
+	UpdateBox();
 }
 
 CModel::~CModel()
 {
 	Unload();
-	SAFE_DELETE_ARRAY(Vertices);
-	SAFE_DELETE_ARRAY(TexCoords);
 }
 
 void CModel::SetTexture(CTexture *ATexture)
 {
 	Texture = ATexture;
+	Vertices.ToggleTextureSupport(ATexture != NULL);
 }
 
 void CModel::SetModelType(EModelType AModelType)
@@ -1624,12 +1627,12 @@ CTexture* CModel::GetTexture() const
 
 const Vector2* CModel::GetVertices() const
 {
-	return Vertices;
+	return Vertices.GetVertices();
 }
 
 const Vector2* CModel::GetTexCoords() const
 {
-	return TexCoords;
+	return Vertices.GetTexCoords();
 }
 
 EModelType CModel::GetModelType() const
@@ -1639,15 +1642,14 @@ EModelType CModel::GetModelType() const
 
 int CModel::GetVertexNumber() const
 {
-	return VerticesNumber;
+	return Vertices.GetVertexCount();
 }
 
 void CModel::Unload()
 {
 	if (!Loaded)
 		return;
-	SAFE_DELETE_ARRAY(Vertices);
-	SAFE_DELETE_ARRAY(TexCoords);
+	// Clear Vertices somehow
 	ModelType = MODEL_TYPE_NOT_A_MODEL;
 	Texture = NULL;
 	Box = CBox();
@@ -1686,7 +1688,7 @@ bool CModel::Load()
 	}
 
 	if (XMLNode->HasAttribute("Texture"))
-		Texture = CFactory::Instance()->Get<CTexture>(XMLNode->GetAttribute("Texture"));
+		SetTexture( CFactory::Instance()->Get<CTexture>(XMLNode->GetAttribute("Texture")) );
 
 	string ModelTypeArgValue = XMLNode->GetAttribute("ModelType");
 	ModelType = CRenderManager::SelectModelTypeByStringIdentifier(ModelTypeArgValue);
@@ -1702,15 +1704,16 @@ bool CModel::Load()
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0))
 		{
-			Log("WARNING", "Model verticies count is uneven");
+			Log("WARNING", "Model vertices count is uneven");
 			return false;
 		}
 		Vertices = new Vector2[tokens.size() / 2];
-		VerticesNumber = tokens.size() / 2;
+		unsigned VerticesNumber = tokens.size() / 2;
+		Vertices.Reserve(VerticesNumber);
 		for(unsigned i = 0; i < tokens.size() / 2; i++)
 		{
-			Vertices[i].x = from_string<float>(tokens[i * 2 + 0]);
-			Vertices[i].y = from_string<float>(tokens[i * 2 + 1]);
+			Vertices.GetVertices()[i].x = from_string<float>(tokens[i * 2 + 0]);
+			Vertices.GetVertices()[i].y = from_string<float>(tokens[i * 2 + 1]);
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}
@@ -1724,22 +1727,21 @@ bool CModel::Load()
 		istringstream iss(texcoords_text);
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0) || tokens.size() != VerticesNumber)
+		if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0) || tokens.size() != Vertices.GetVertexCount())
 		{
-			Log("WARNING", "Model verticies count is uneven");
+			Log("WARNING", "Model vertices count is uneven");
 			return false;
 		}
-		TexCoords = new Vector2[tokens.size() / 2];
 		for(unsigned i = 0; i < tokens.size() / 2; i++)
 		{
-			TexCoords[i].x = from_string<float>(tokens[i * 2 + 0]);
-			TexCoords[i].y = from_string<float>(tokens[i * 2 + 1]);
+			Vertices.GetTexCoords()[i].x = from_string<float>(tokens[i * 2 + 0]);
+			Vertices.GetTexCoords()[i].y = from_string<float>(tokens[i * 2 + 1]);
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}
 
 	CResource::BasicLoad();
-	__UpdateBox();
+	UpdateBox();
 	return true;
 }
 
@@ -1748,53 +1750,14 @@ const CBox& CModel::GetBox() const
 	return Box;
 }
 
-void CModel::__UpdateBox()
+void CModel::UpdateBox()
 {
-	for(unsigned i = 0; i < VerticesNumber; i++)
-		Box.Add(Vertices[i]);
+	for(unsigned i = 0; i < Vertices.GetVertexCount(); i++)
+		Box.Add(Vertices.GetVertices()[i]);
 }
 
-//////////////////////////////////////////////////////////////////////////
-// CVertexHolder
-
-CVertexHolder::CVertexHolder( bool AHasTexCoords ) : HasTexCoords(AHasTexCoords), VertexCount(0), ReservedCount(START_SIZE)
-{
-	Colors = new RGBAf [START_SIZE];
-	Vertices = new Vector3 [START_SIZE];	
-	if (HasTexCoords)
-		TexCoords = new Vector2[START_SIZE];
-}
-
-CVertexHolder::~CVertexHolder()
-{
-	delete [] Colors;
-	delete [] Vertices;
-	if (HasTexCoords)
-		delete [] TexCoords;
-}
-
-void CVertexHolder::PushVertex( const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord )
-{
-	assert(HasTexCoords);
-	if (VertexCount == ReservedCount)
-		Grow();
-	Vertices[VertexCount] = AVertex;
-	Colors[VertexCount] = AColor;
-	TexCoords[VertexCount] = ATexCoord;
-	VertexCount++;
-}
-
-void CVertexHolder::PushVertex( const Vector3 &AVertex, const RGBAf &AColor )
-{
-	assert(!HasTexCoords);
-	if (VertexCount == ReservedCount)
-		Grow();
-	Vertices[VertexCount] = AVertex;
-	Colors[VertexCount] = AColor;
-	VertexCount++;
-}
-
-void CVertexHolder::RenderPrimitive( GLuint AType ) const
+template <typename TypeVertices>
+void CVertexHolder<TypeVertices>::RenderPrimitive( GLuint AType ) const
 {
 	if (VertexCount == 0)
 		return;
@@ -1824,41 +1787,5 @@ void CVertexHolder::RenderPrimitive( GLuint AType ) const
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 		break;
-	}
-}
-
-void CVertexHolder::Clear()
-{
-	VertexCount = 0;
-}
-
-unsigned CVertexHolder::GetVertexCount() const
-{
-	return VertexCount;
-}
-
-void CVertexHolder::Grow()
-{
-	ReservedCount = VertexCount * 2;
-
-	RGBAf *NewColors = new RGBAf[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewColors[i] = Colors[i];
-	delete[] Colors;
-	Colors = NewColors;
-
-	Vector3 *NewVertices = new Vector3[ReservedCount];
-	for (unsigned i = 0; i < VertexCount; i++)
-		NewVertices[i] = Vertices[i];
-	delete[] Vertices;
-	Vertices = NewVertices;
-
-	if (HasTexCoords)
-	{
-		Vector2 *NewTexCoords = new Vector2[ReservedCount];
-		for (unsigned i = 0; i < VertexCount; i++)
-			NewTexCoords[i] = TexCoords[i];
-		delete [] TexCoords;
-		TexCoords = NewTexCoords;
 	}
 }

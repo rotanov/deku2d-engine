@@ -151,6 +151,136 @@ public:
 };
 
 /**
+* CVertexHolder - incorporates the ability to hold vertices, colors, tc's and work with 'em.
+*/
+template <typename TypeVertices>
+class CVertexHolder
+{
+public:
+	CVertexHolder(bool AHasTexCoords) : HasTexCoords(AHasTexCoords), VertexCount(0), ReservedCount(START_SIZE), TexCoords(NULL)
+	{
+		Colors = new RGBAf [START_SIZE];
+		Vertices = new TypeVertices [START_SIZE];	
+		if (HasTexCoords)
+			TexCoords = new Vector2[START_SIZE];
+	}
+	~CVertexHolder()
+	{
+		delete [] Colors;
+		delete [] Vertices;
+		if (HasTexCoords)
+			delete [] TexCoords;
+	}
+	void ToggleTextureSupport(bool ASupportTexture)
+	{
+		if (ASupportTexture == HasTexCoords)
+			return;
+		HasTexCoords = ASupportTexture;
+		if (HasTexCoords)
+		{
+			TexCoords = new Vector2[ReservedCount];
+		}
+		else
+		{
+			SAFE_DELETE_ARRAY(TexCoords);
+			TexCoords = NULL;
+		}
+	}
+	void PushVertex(const TypeVertices &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord)
+	{
+		assert(HasTexCoords);
+		if (VertexCount == ReservedCount)
+		{
+			ReservedCount = VertexCount * 2;
+			Grow();
+		}
+		Vertices[VertexCount] = AVertex;
+		Colors[VertexCount] = AColor;
+		TexCoords[VertexCount] = ATexCoord;
+		VertexCount++;
+	}
+	void PushVertex(const TypeVertices &AVertex, const RGBAf &AColor)
+	{
+		assert(!HasTexCoords);
+		if (VertexCount == ReservedCount)
+		{
+			ReservedCount = VertexCount * 2;
+			Grow();
+		}
+		Vertices[VertexCount] = AVertex;
+		Colors[VertexCount] = AColor;
+		VertexCount++;
+	}
+	void RenderPrimitive(GLuint AType) const;
+	void Clear()
+	{
+		VertexCount = 0;
+	}
+	unsigned GetVertexCount() const
+	{
+		return VertexCount;
+	}
+	void Reserve(unsigned AVertexCount)
+	{
+		if (AVertexCount <= ReservedCount)
+			return;
+		ReservedCount = AVertexCount;
+		Grow();
+	}
+	const TypeVertices* GetVertices() const
+	{
+		return Vertices;
+	}
+	const Vector2* GetTexCoords() const
+	{
+		return TexCoords;
+	}
+	TypeVertices* GetVertices()
+	{
+		return Vertices;
+	}
+	Vector2* GetTexCoords()
+	{
+		return TexCoords;
+	}
+
+protected:
+	static const unsigned START_SIZE = 256;
+	bool HasTexCoords;
+	unsigned VertexCount;
+	unsigned ReservedCount;
+	RGBAf *Colors;
+	TypeVertices *Vertices;
+	Vector2 *TexCoords;
+
+	void Grow()
+	{
+		RGBAf *NewColors = new RGBAf[ReservedCount];
+		for (unsigned i = 0; i < VertexCount; i++)
+			NewColors[i] = Colors[i];
+		delete[] Colors;
+		Colors = NewColors;
+
+		TypeVertices *NewVertices = new TypeVertices[ReservedCount];
+		for (unsigned i = 0; i < VertexCount; i++)
+			NewVertices[i] = Vertices[i];
+		delete[] Vertices;
+		Vertices = NewVertices;
+
+		if (HasTexCoords)
+		{
+			Vector2 *NewTexCoords = new Vector2[ReservedCount];
+			for (unsigned i = 0; i < VertexCount; i++)
+				NewTexCoords[i] = TexCoords[i];
+			delete [] TexCoords;
+			TexCoords = NewTexCoords;
+		}
+
+	}
+	CVertexHolder();
+};
+
+/**
 *	CModel — represents object geometry, object type and if has - 
 *	texture and texture coordinates. 
 *	@todo: should be resource;
@@ -178,7 +308,7 @@ public:
 	const Vector2* GetTexCoords() const;
 	EModelType GetModelType() const;
 	virtual int GetVertexNumber() const;
-	//const RGBAf* GetColors() const;
+	const RGBAf* GetColors() const;
 	const CBox& GetBox() const;
 	bool Load();
 	void Unload();
@@ -187,14 +317,10 @@ private:
 	CBox Box;
 	CResourceRefCounter<CTexture> Texture;
 	EModelType ModelType;
-// KLUDGE
-public:
-	Vector2 *Vertices;
-//
+
 private:
-	Vector2 *TexCoords;
-	unsigned VerticesNumber;
-	void __UpdateBox();	// why not call it ___________________________UpdateBox() ? Enlarge your underscore!
+	CVertexHolder<Vector2> Vertices;
+	void UpdateBox();
 };
 
 /**
@@ -304,32 +430,6 @@ public:
 	virtual void Clear() = 0;
 };
 
-class CVertexHolder
-{
-public:
-	CVertexHolder(bool AHasTexCoords);
-
-	~CVertexHolder();
-
-	void PushVertex(const Vector3 &AVertex, const RGBAf &AColor, const Vector2 &ATexCoord);
-	void PushVertex(const Vector3 &AVertex, const RGBAf &AColor);
-	void RenderPrimitive(GLuint AType) const;
-	void Clear();
-	unsigned GetVertexCount() const;
-
-protected:
-	static const unsigned START_SIZE = 256;
-	bool HasTexCoords;
-	unsigned VertexCount;
-	unsigned ReservedCount;
-	RGBAf *Colors;
-	Vector3 *Vertices;
-	Vector2 *TexCoords;
-
-	void Grow();
-	CVertexHolder();
-};
-
 /**
 *	CFFPRenderer - Fixed Function Pipeline Renderer
 *	For compatibility with old machines with no Shaders v3.0
@@ -348,8 +448,8 @@ public:
 private:
 
 #define TOTAL_HOLDERS (MODEL_TYPE_TRIANGLES * (BLEND_MODE_ADDITIVE + 1))	// no way that could be nice
-	CVertexHolder *PrimitiveHolders[TOTAL_HOLDERS];	// 9 total
-	map<CTexture*, CVertexHolder*> texturedGeometry[3];
+	CVertexHolder<Vector3> *PrimitiveHolders[TOTAL_HOLDERS];	// 9 total
+	map<CTexture*, CVertexHolder<Vector3>*> texturedGeometry[3];
 };
 
 /**
