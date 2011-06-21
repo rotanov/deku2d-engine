@@ -1397,7 +1397,7 @@ void CFFPRenderer::Render()
 	glEnable(GL_TEXTURE_2D);
 
 	glDisable(GL_BLEND);
-	for(map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
+	for (map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1408,7 +1408,7 @@ void CFFPRenderer::Render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// should disable depth test
-	for(map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
+	for (map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1416,7 +1416,7 @@ void CFFPRenderer::Render()
 	// and enable here
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	for(map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
+	for (map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
 		i->second->RenderPrimitive(GL_TRIANGLES);
@@ -1429,7 +1429,7 @@ void CFFPRenderer::Render()
 CFFPRenderer::~CFFPRenderer()
 {
 	for (unsigned i = 0; i < 3; i++)
-		for ( map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+		for (map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
 			delete (*j).second;
 	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		SAFE_DELETE(PrimitiveHolders[i]);
@@ -1437,7 +1437,7 @@ CFFPRenderer::~CFFPRenderer()
 
 void CFFPRenderer::Clear()
 {
-	for(unsigned i = 0; i < TOTAL_HOLDERS; i++)
+	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		PrimitiveHolders[i]->Clear();
 	for (unsigned i = 0; i < 3; i++)
 		for ( map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)

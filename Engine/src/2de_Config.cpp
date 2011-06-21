@@ -175,6 +175,7 @@ CMainConfigDefaults::CMainConfigDefaults(const string &ARootNodeName) : CConfigD
 {
 	// fill Data with defaults
 	Set("Video", "Fullscreen", "false");
+	Set("Data", "LogLevel", "0");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -500,6 +501,7 @@ CArgumentsConfigMappingsManager::CArgumentsConfigMappingsManager()
 	Add(CArgumentsConfigMapping("window-width", 0, "Video", "WindowWidth", true));
 	Add(CArgumentsConfigMapping("window-height", 0, "Video", "WindowHeight", true));
 	Add(CArgumentsConfigMapping("clear-resources-cache", 0, "Data", "ForceReindex", false));
+	Add(CArgumentsConfigMapping("log-level", 0, "Data", "LogLevel", true));
 	// TODO: add more mappings
 }
 

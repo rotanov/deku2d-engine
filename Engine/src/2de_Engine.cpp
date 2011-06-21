@@ -45,15 +45,16 @@ CEngine* CEngine::Instance()
 
 bool CEngine::Initialize()
 {
+
 	CLog::Instance()->SetLogFilePath(CEnvironment::Paths::GetLogPath());
 	CLog::Instance()->SetLogName("System");
 	Log("INFO", "Working directory is '%s'", CEnvironment::Paths::GetWorkingDirectory().c_str());
 
 	CEnvironment::Variables::Set("SDL_VIDEO_CENTERED", "center");
-	
-	// config correctness check is not needed - it will just isuue a warning internally - this is not fatal as there's default values..
 
 	CConfig *Config = CConfig::Instance();
+
+	CLog::Instance()->SetLogLevel(Config->Section("Data")["LogLevel"]);
 
 	CConfig::CConfigSection VideoSection = Config->Section("Video");
 

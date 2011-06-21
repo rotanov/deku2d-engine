@@ -844,6 +844,9 @@ CLog::CLog()
 	Stream = NULL;
 	LogFilePath = "";
 	LogName = "System";
+	LogLevel = 0;
+
+	SetStandardEventsPriorities();
 }
 
 CLog::~CLog()
@@ -860,10 +863,14 @@ CLog::~CLog()
 	}
 }
 
-void CLog::WriteToLog(const char *Event, const char *Format, ...)
+void CLog::WriteToLog(const string &Event, const string &Format, ...)
 {
 	if (!Enabled)
 		return;
+
+	if (GetEventPriority(Event) < LogLevel) {
+		return;
+	}
 
 	if (Stream == NULL)
 	{
@@ -877,11 +884,11 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 	va_list args;
 	va_start(args, Format);
 
-	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+	int MessageLength = vsnprintf(NULL, 0, Format.c_str(), args) + 1;
 
 	char *buffer = new char[MessageLength + 1];
 
-	vsnprintf(buffer, MessageLength, Format, args);
+	vsnprintf(buffer, MessageLength, Format.c_str(), args);
 	buffer[MessageLength] = 0;
 
 	va_end(args);
@@ -990,14 +997,19 @@ void CLog::SetDatedLogFileNames(bool ADatedLogFileNames)
 	DatedLogFileNames = ADatedLogFileNames;
 }
 
+string CLog::GetLogFilePath() const
+{
+	return LogFilePath;
+}
+
 void CLog::SetLogFilePath(const string &ALogFilePath)
 {
 	LogFilePath = ALogFilePath;
 }
 
-string CLog::GetLogFilePath() const
+string CLog::GetLogName() const
 {
-	return LogFilePath;
+	return LogName;
 }
 
 void CLog::SetLogName(const string &ALogName)
@@ -1005,9 +1017,37 @@ void CLog::SetLogName(const string &ALogName)
 	LogName = ALogName;
 }
 
-string CLog::GetLogName() const
+int CLog::GetLogLevel() const
 {
-	return LogName;
+	return LogLevel;
+}
+
+void CLog::SetLogLevel(int ALogLevel)
+{
+	LogLevel = ALogLevel;
+}
+
+int CLog::GetEventPriority(const string &AEvent) const
+{
+	EventsPrioritiesIterator it = EventsPriorities.find(AEvent);
+	if (it == EventsPriorities.end()) {
+		return numeric_limits<int>::max();
+	}
+
+	return it->second;
+}
+
+void CLog::SetEventPriority(const string &AEvent, int APriority)
+{
+	EventsPriorities[AEvent] = APriority;
+}
+
+void CLog::SetStandardEventsPriorities()
+{
+	SetEventPriority("DEBUG", 0);
+	SetEventPriority("INFO", 1);
+	SetEventPriority("WARNING", 2);
+	SetEventPriority("ERROR", 3);
 }
 
 //////////////////////////////////////////////////////////////////////////

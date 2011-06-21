@@ -110,6 +110,7 @@ using std::min;
 using std::ofstream;
 using std::ios_base;
 using std::cerr;
+using std::numeric_limits;
 
 
 //#define USE_SDL_OPENGL
@@ -961,7 +962,7 @@ public:
 
 	~CLog();
 
-	void WriteToLog(const char *Event, const char *Format, ...);
+	void WriteToLog(const string &Event, const string &Format, ...);
 
 	bool isEnabled() const;
 	void Toggle(bool AEnabled);
@@ -975,17 +976,28 @@ public:
 	bool GetDatedLogFileNames() const;
 	void SetDatedLogFileNames(bool ADatedLogFileNames);
 
-	void SetLogFilePath(const string &ALogFilePath);
 	string GetLogFilePath() const;
+	void SetLogFilePath(const string &ALogFilePath);
 
-	void SetLogName(const string &ALogName);
 	string GetLogName() const;
+	void SetLogName(const string &ALogName);
+
+	int GetLogLevel() const;
+	void SetLogLevel(int ALogLevel);
+
+	int GetEventPriority(const string &AEvent) const;
+	void SetEventPriority(const string &AEvent, int APriority);
 
 protected:
 	CLog();
 	friend class CTSingleton<CLog>;
 
 private:
+	typedef map<string, int> EventsPrioritiesContainer;
+	typedef EventsPrioritiesContainer::const_iterator EventsPrioritiesIterator;
+
+	void SetStandardEventsPriorities();
+
 	bool Enabled;
 	ELogMode LogMode;
 	ELogFileWriteMode LogFileWriteMode;
@@ -993,6 +1005,8 @@ private:
 	ostream *Stream;
 	string LogFilePath;
 	string LogName;
+	map<string, int> EventsPriorities;
+	int LogLevel;
 };
 
 // define SIMPLIFIED_LOG to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
