@@ -18,49 +18,67 @@
 
 class CGameObject : public IVisitableObject<>
 {
-	friend class CFactory;
 public:	
-	typedef std::map< std::string, CGameObject* > LNOMType;	// ???
+	D2D_DECLARE_VISITABLE()
+
+	typedef map<string, CGameObject*> LNOMType;	// ???
 	LNOMType LocalNameObjectMapping; // ???
 
-	D2D_DECLARE_VISITABLE()
 	CGameObject();
 	virtual ~CGameObject();
-	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor); // Not here
-	void Attach(CGameObject* AGameObject);
-	void Detach(CGameObject* AGameObject);
+
+	void Attach(CGameObject *AGameObject);
+	void Detach(CGameObject *AGameObject);
 	void Detach(unsigned index);
-	void SetScript(CScript *AScript);
-	void FinalizeCreation();
-	void ProcessEvent(const CEvent &AEvent);
-	const string& GetClassName() const;
-	void SetClassName(const string & AClassName);
-	CGameObject* GetParent() const;
-	void SetParent(CGameObject* AGameObject);
-	void PutIntoScene(CAbstractScene *AScene);
-	CAbstractScene* GetScene() const;
-	virtual void JustDoIt();
-	virtual void Deserialize(CXMLNode *AXML);
+
 	void SetDestroyedSubtree();
+
+	const string& GetClassName() const;
+	void SetClassName(const string &AClassName);
+
+	CGameObject* GetParent() const;
+	void SetParent(CGameObject *AGameObject);
+
+	CAbstractScene* GetScene() const;
+	void PutIntoScene(CAbstractScene *AScene);
+
 	CGameObject* GetChild(unsigned index);
+	CGameObject* GetObjectByLocalName(const string &AName);
 	unsigned GetChildCount();
+
 	bool IsActive() const;
 	void SetActive(bool AActive);
+
+	bool IsPrototype() const;
+
+	virtual void Deserialize(CXMLNode *AXML);
+	void FinalizeCreation();
+	void ProcessEvent(const CEvent &AEvent);
+	void SetScript(CScript *AScript);
+
+	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor); // Not here
+
+	virtual void JustDoIt();
+
 // 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
 // 	void SetDead();
 //	virtual void Update(float dt) = 0;
 
 private:
+	static void _DestroySubtree(CGameObject *NextObject);
+
 	CGameObject *Parent;
 	CAbstractScene *Scene;
 	vector<CGameObject *> Children;
 	string ClassName;
+	bool Prototype;
+
 	// not used
 	bool Active;
 	bool Dead;	
 	bool Enabled;
 
-	static void _DestroySubtree(CGameObject *NextObject);
+	friend class CFactory;
 };
 
 /**
@@ -70,6 +88,7 @@ class CPlaceableComponent : public CGameObject
 {
 public:
 	D2D_DECLARE_VISITABLE()
+
 	CPlaceableComponent();
 
 	float GetAngle() const;
@@ -175,6 +194,7 @@ class CRenderableComponent : public CGameObject
 {
 public:
 	D2D_DECLARE_VISITABLE()
+
 	CTransformation WorldTransform;
 
 	CRenderableComponent(CModel *AModel = NULL);

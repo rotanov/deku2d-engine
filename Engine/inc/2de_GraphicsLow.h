@@ -283,7 +283,6 @@ protected:
 /**
 *	CModel — represents object geometry, object type and if has - 
 *	texture and texture coordinates. 
-*	@todo: should be resource;
 */
 
 enum EModelType

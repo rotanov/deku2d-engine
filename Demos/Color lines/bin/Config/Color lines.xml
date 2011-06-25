@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Configuration>
 	<Video>
-		<WindowWidth value="640" />
-		<WindowHeight value="480" />
+		<WindowWidth value="320" />
+		<WindowHeight value="340" />
 		<WindowBPP value="32" />
 		<WindowCaption value="Color lines" />
 		<DoCalcFps value="true" />

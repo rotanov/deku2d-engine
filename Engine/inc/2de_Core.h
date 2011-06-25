@@ -1005,7 +1005,7 @@ private:
 	ostream *Stream;
 	string LogFilePath;
 	string LogName;
-	map<string, int> EventsPriorities;
+	EventsPrioritiesContainer EventsPriorities;
 	int LogLevel;
 };
 

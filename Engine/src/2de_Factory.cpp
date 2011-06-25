@@ -40,6 +40,7 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	}
 
 	CGameObject *result = CFactory::Instance()->New<CGameObject>(AName);
+	result->Prototype = true;
 	result->Deserialize(xml);
 
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;

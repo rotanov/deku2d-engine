@@ -868,17 +868,14 @@ void CLog::WriteToLog(const string &Event, const string &Format, ...)
 	if (!Enabled)
 		return;
 
-	if (GetEventPriority(Event) < LogLevel) {
+	if (GetEventPriority(Event) < LogLevel)
 		return;
-	}
 
 	if (Stream == NULL)
 	{
 		SetLogMode(LogMode);
 		if (Stream == NULL)
-		{
 			return;
-		}
 	}
 
 	va_list args;
@@ -1030,9 +1027,8 @@ void CLog::SetLogLevel(int ALogLevel)
 int CLog::GetEventPriority(const string &AEvent) const
 {
 	EventsPrioritiesIterator it = EventsPriorities.find(AEvent);
-	if (it == EventsPriorities.end()) {
+	if (it == EventsPriorities.end())
 		return numeric_limits<int>::max();
-	}
 
 	return it->second;
 }

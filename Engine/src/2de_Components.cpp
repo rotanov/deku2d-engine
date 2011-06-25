@@ -4,7 +4,7 @@
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Active(true), Dead(false)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Prototype(false), Active(true), Dead(false), Enabled(true)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);
@@ -83,6 +83,21 @@ void CGameObject::Detach(unsigned index)
 	CEventManager::Instance()->TriggerEvent(DetachedEvent);
 }
 
+void CGameObject::SetDestroyedSubtree()
+{
+	CGameObject::_DestroySubtree(this);
+}
+
+const string& CGameObject::GetClassName() const
+{
+	return ClassName;
+}
+
+void CGameObject::SetClassName(const string & AClassName)
+{
+	ClassName = AClassName;
+}
+
 CGameObject* CGameObject::GetParent() const
 {
 	return Parent;
@@ -109,6 +124,9 @@ void CGameObject::SetParent(CGameObject *AGameObject)
 		Найдя его запоминаем. В его таблицу может что-то заполняем, но вряд ли.
 		А в луа таблицу объекта, которого парент меняем, если он прототипом явлется проставляем поле
 		парент с указанием на вышеобозначенного найдёныша.
+
+		идея хорошая, НО возникает коллизия понятий Parent в общем смысле иерархии и Parent в смысле "обхватывающий инстанс прототипа"..
+		надо как-то разрешить эту коллизию, иначе будет плохо
 	*/
 
 	if (Parent != NULL)
@@ -116,6 +134,12 @@ void CGameObject::SetParent(CGameObject *AGameObject)
 		if (find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
 			Parent->Children.push_back(this);
 	}
+}
+
+CAbstractScene* CGameObject::GetScene() const
+{
+	assert(Scene != NULL);
+	return Scene;
 }
 
 void CGameObject::PutIntoScene(CAbstractScene *AScene)
@@ -127,15 +151,39 @@ void CGameObject::PutIntoScene(CAbstractScene *AScene)
 	Scene->Add(this);
 }
 
-CAbstractScene* CGameObject::GetScene() const
+CGameObject* CGameObject::GetChild(unsigned index)
 {
-	assert(Scene != NULL);
-	return Scene;
+	return Children[index];
 }
 
-void CGameObject::JustDoIt()
+CGameObject* CGameObject::GetObjectByLocalName(const string &AName)
 {
+	LNOMType::const_iterator it = LocalNameObjectMapping.find(AName);
+	if (it == LocalNameObjectMapping.end()) {
+		return NULL;
+	}
 
+	return it->second;
+}
+
+unsigned CGameObject::GetChildCount()
+{
+	return Children.size();
+}
+
+bool CGameObject::IsActive() const
+{
+	return Active;
+}
+
+void CGameObject::SetActive(bool AActive)
+{
+	Active = AActive;
+}
+
+bool CGameObject::IsPrototype() const
+{
+	return Prototype;
 }
 
 void CGameObject::Deserialize(CXMLNode *AXML)
@@ -151,11 +199,9 @@ void CGameObject::Deserialize(CXMLNode *AXML)
 	}
 }
 
-void CGameObject::SetScript(CScript *AScript)
+void CGameObject::FinalizeCreation()
 {
-	CLuaVirtualMachine::Instance()->RunScript(AScript);
-	CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
-	CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
+	CLuaVirtualMachine::Instance()->SetProtoFields(ClassName.empty() ? Name : ClassName, Name, this);
 }
 
 void CGameObject::ProcessEvent(const CEvent &AEvent)
@@ -163,6 +209,13 @@ void CGameObject::ProcessEvent(const CEvent &AEvent)
 	CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
 	fc.PushArgument(const_cast<CEvent *>(&AEvent));
 	fc.Call();
+}
+
+void CGameObject::SetScript(CScript *AScript)
+{
+	CLuaVirtualMachine::Instance()->RunScript(AScript);
+	CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
+	CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
 }
 
 void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
@@ -175,14 +228,9 @@ void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 	Next->AcceptOnLeave(*Visitor);
 }
 
-void CGameObject::FinalizeCreation()
+void CGameObject::JustDoIt()
 {
-	CLuaVirtualMachine::Instance()->SetProtoFields(ClassName.empty() ? Name : ClassName, Name, this);
-}
 
-void CGameObject::SetDestroyedSubtree()
-{
-	CGameObject::_DestroySubtree(this);
 }
 
 void CGameObject::_DestroySubtree(CGameObject *NextObject)
@@ -192,36 +240,6 @@ void CGameObject::_DestroySubtree(CGameObject *NextObject)
 	for (vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
 		_DestroySubtree(*i);
 	NextObject->SetDestroyed();
-}
-
-const string& CGameObject::GetClassName() const
-{
-	return ClassName;
-}
-
-void CGameObject::SetClassName(const string & AClassName)
-{
-	ClassName = AClassName;
-}
-
-CGameObject* CGameObject::GetChild(unsigned index)
-{
-	return Children[index];
-}
-
-unsigned CGameObject::GetChildCount()
-{
-	return Children.size();
-}
-
-void CGameObject::SetActive(bool AActive)
-{
-	Active = AActive;
-}
-
-bool CGameObject::IsActive() const
-{
-	return Active;
 }
 
 //////////////////////////////////////////////////////////////////////////
