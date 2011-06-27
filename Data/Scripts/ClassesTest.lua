@@ -24,11 +24,16 @@ function A:OnEveryFrame()
 			self.lifesettled = true
 		end
 	end
+
+	if self.parentProto then
+		self.parentProto.model:SetColor(Random_Float(0, 1), Random_Float(0, 1), Random_Float(0, 1), 1)
+	end
+
 	self.pos:SetAngle( self.pos:GetAngle() + self.depth * 100.0 * GetDeltaTime())
 	self.life = self.life - GetDeltaTime()
-	if self.life <= 0 then
+	--[[if self.life <= 0 then
 		self:DestroyFull()
-	end	
+	end]]
 end
 
 --------------------------------------------------------------------------------

@@ -40,7 +40,8 @@ public:
 	bool CallFunction(const string &AFunctionName);
 	bool CallMethodFunction(const string &AObjectName, const string &AFunctionName);
 	void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
-	void SetProtoFields(const string &AClassName, const string &AName, CGameObject *AGameObject);
+	void SetLocalNamesFields(CGameObject *AGameObject);
+	void SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference);
 	void FreeComponent(const CGameObject &AObject);
 
 	int GetMemoryUsage() const;

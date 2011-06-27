@@ -4,7 +4,7 @@
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Prototype(false), Active(true), Dead(false), Enabled(true)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);
@@ -12,13 +12,15 @@ CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Prototype(false), Active
 
 CGameObject::~CGameObject()
 {
-	CLuaVirtualMachine::Instance()->FreeComponent(*this);
 	Scene->Remove(this);
 	//	Note, that here we adding children to parent in reverse order, i think it's not that important for now.
 	//	That order is not important at all. Overall comment should be removed.
-	while (Children.size() > 0)
+	while (!Children.empty())
 		Children.back()->SetParent(Parent);
+
 	SetParent(NULL);
+
+	CLuaVirtualMachine::Instance()->FreeComponent(*this);
 }
 
 void CGameObject::Attach(CGameObject *AGameObject)
@@ -29,18 +31,7 @@ void CGameObject::Attach(CGameObject *AGameObject)
 		return;
 	}
 
-	if (AGameObject == this)
-	{
-		Log("ERROR", "Can't attach object '%s' to itself", GetName().c_str());
-		return;
-	}
-
-	Children.push_back(AGameObject);
 	AGameObject->SetParent(this);
-
-	CEvent *AttachedEvent = new CEvent("Attached", this);
-	AttachedEvent->SetData("Name", AGameObject->GetName());
-	CEventManager::Instance()->TriggerEvent(AttachedEvent);
 }
 
 void CGameObject::Detach(CGameObject *AGameObject)
@@ -51,19 +42,7 @@ void CGameObject::Detach(CGameObject *AGameObject)
 		return;
 	}
 
-	vector<CGameObject *>::iterator it = find(Children.begin(), Children.end(), AGameObject);
-	if (it == Children.end())
-	{
-		Log("ERROR", "Can't detach: object '%s' is not attached to object '%s'", AGameObject->GetName().c_str(), GetName().c_str());
-		return;
-	}
-
-	Children.erase(it);
-	AGameObject->Parent = NULL;
-
-	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
-	DetachedEvent->SetData("Name", AGameObject->GetName());
-	CEventManager::Instance()->TriggerEvent(DetachedEvent);
+	AGameObject->SetParent(NULL);
 }
 
 void CGameObject::Detach(unsigned index)
@@ -75,12 +54,7 @@ void CGameObject::Detach(unsigned index)
 	}
 
 	CGameObject *AGameObject = *(Children.begin() + index);
-	Children.erase(Children.begin() + index);
-	AGameObject->Parent = NULL;
-
-	CEvent *DetachedEvent = new CEvent("Detached", this);	// Same as for attached
-	DetachedEvent->SetData("Name", AGameObject->GetName());
-	CEventManager::Instance()->TriggerEvent(DetachedEvent);
+	AGameObject->SetParent(NULL);
 }
 
 void CGameObject::SetDestroyedSubtree()
@@ -93,7 +67,7 @@ const string& CGameObject::GetClassName() const
 	return ClassName;
 }
 
-void CGameObject::SetClassName(const string & AClassName)
+void CGameObject::SetClassName(const string &AClassName)
 {
 	ClassName = AClassName;
 }
@@ -113,27 +87,34 @@ void CGameObject::SetParent(CGameObject *AGameObject)
 
 	if (Parent != NULL)
 	{
-		Parent->Detach(this);
+		ChildrenIterator it = find(Parent->Children.begin(), Parent->Children.end(), this);
+
+		if (it != Parent->Children.end())
+		{
+			Parent->Children.erase(it);
+
+			CEvent *DetachedEvent = new CEvent("Detached", this);
+			DetachedEvent->SetData("Name", GetName());
+			CEventManager::Instance()->TriggerEvent(DetachedEvent);
+		}
 	}
 
 	Parent = AGameObject;
 
-	/*
-		@todo: parent field
-		Бежим от парента вверх, пока не найдём объект, который обладает луа таблицей прототипа.
-		Найдя его запоминаем. В его таблицу может что-то заполняем, но вряд ли.
-		А в луа таблицу объекта, которого парент меняем, если он прототипом явлется проставляем поле
-		парент с указанием на вышеобозначенного найдёныша.
-
-		идея хорошая, НО возникает коллизия понятий Parent в общем смысле иерархии и Parent в смысле "обхватывающий инстанс прототипа"..
-		надо как-то разрешить эту коллизию, иначе будет плохо
-	*/
-
 	if (Parent != NULL)
 	{
-		if (find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end())
+		if (find(Parent->Children.begin(), Parent->Children.end(), this) == Parent->Children.end()) // probably remove this find..
+		{
 			Parent->Children.push_back(this);
+
+			CEvent *AttachedEvent = new CEvent("Attached", this);
+			AttachedEvent->SetData("Name", GetName());
+			CEventManager::Instance()->TriggerEvent(AttachedEvent);
+		}
 	}
+
+	if (Created)
+		UpdateParentAndProtoFields();
 }
 
 CAbstractScene* CGameObject::GetScene() const
@@ -201,7 +182,9 @@ void CGameObject::Deserialize(CXMLNode *AXML)
 
 void CGameObject::FinalizeCreation()
 {
-	CLuaVirtualMachine::Instance()->SetProtoFields(ClassName.empty() ? Name : ClassName, Name, this);
+	CLuaVirtualMachine::Instance()->SetLocalNamesFields(this);
+	UpdateParentAndProtoFields();
+	Created = true;
 }
 
 void CGameObject::ProcessEvent(const CEvent &AEvent)
@@ -240,6 +223,33 @@ void CGameObject::_DestroySubtree(CGameObject *NextObject)
 	for (vector<CGameObject *>::iterator i = NextObject->Children.begin(); i != NextObject->Children.end(); ++i)
 		_DestroySubtree(*i);
 	NextObject->SetDestroyed();
+}
+
+CGameObject* CGameObject::FindPrototype()
+{
+	CGameObject *result = Parent;
+
+	while (result && !result->Prototype)
+		result = result->Parent;
+
+	return result;
+}
+
+void CGameObject::UpdateParentAndProtoFields()
+{
+	// this recursive call may greatly affect performance, but it's needed because of creation order to make parentProto work
+	for (ChildrenIterator it = Children.begin(); it != Children.end(); ++it)
+		(*it)->UpdateParentAndProtoFields();
+
+	CLuaVirtualMachine::Instance()->SetReferenceField(this, "parent", Parent);
+
+	CGameObject *proto = FindPrototype();
+	CLuaVirtualMachine::Instance()->SetReferenceField(this, "proto", proto);
+
+	CGameObject *ParentProto = NULL;
+	if (proto)
+		ParentProto = proto->FindPrototype();
+	CLuaVirtualMachine::Instance()->SetReferenceField(this, "parentProto", ParentProto);
 }
 
 //////////////////////////////////////////////////////////////////////////

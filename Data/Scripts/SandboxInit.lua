@@ -1,4 +1,3 @@
---[[
 for i = 0, 3 do
 	local a = Create("A", "")
 	a.pos:SetPosition(0, 0)
@@ -9,7 +8,6 @@ for i = 0, 3 do
 	end	
 	GetObject("Mouse cursor").pos:Attach(a)
 end
---]]
 
 local lpc = Create("LuaPerfCounter", "")
 Attach(GetObject("RootGameObject"), lpc.object)
@@ -43,3 +41,4 @@ end]]
 --Attach(GetObject("RootGameObject"), Create("SandboxProto", "SandboxInst").object)
 --Attach(GetParent(GetObject("Mouse cursor")), GetObject("Magic square"))
 
+DebugPrintComponentTree()

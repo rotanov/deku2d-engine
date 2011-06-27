@@ -65,13 +65,19 @@ public:
 //	virtual void Update(float dt) = 0;
 
 private:
+	typedef vector<CGameObject *> ChildrenContainer;
+	typedef ChildrenContainer::iterator ChildrenIterator;
+
 	static void _DestroySubtree(CGameObject *NextObject);
+	CGameObject* FindPrototype();
+	void UpdateParentAndProtoFields();
 
 	CGameObject *Parent;
 	CAbstractScene *Scene;
-	vector<CGameObject *> Children;
+	ChildrenContainer Children;
 	string ClassName;
 	bool Prototype;
+	bool Created;
 
 	// not used
 	bool Active;

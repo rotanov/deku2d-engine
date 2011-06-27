@@ -1,5 +1,7 @@
 #include "2de_Event.h"
 
+#include "2de_Engine.h"
+
 //////////////////////////////////////////////////////////////////////////
 // CEventManager
 
@@ -48,6 +50,12 @@ void CEventManager::TriggerEvent(const string &AEventName, CObject *ASender)
 
 void CEventManager::TriggerEvent(CEvent *AEvent)
 {
+	if (CEngine::Instance()->isFinalizing())
+	{
+		delete AEvent;
+		return;
+	}
+
 	for (SubscribersContainer::iterator it = Subscribers.lower_bound(AEvent->GetName()); it != Subscribers.upper_bound(AEvent->GetName()); ++it)
 	{
 		it->second->ProcessEvent(*AEvent);

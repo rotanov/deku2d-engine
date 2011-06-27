@@ -755,8 +755,8 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 		lua_setglobal(L, AName.c_str());
 
 //		lua_pop(L, 1);
-
 	}
+
 	lua_getglobal(L, AName.c_str());
 	if (lua_isnil(L, -1))
 	{
@@ -766,47 +766,54 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 	}
 	lua_pushlightuserdata(L, AObject);
 	lua_setfield(L, -2, "object");
-
-	CGameObject *GameObject = dynamic_cast< CGameObject * >(AObject);
-	if (GameObject)
-	{
-		for (CGameObject::LNOMType::iterator i = GameObject->LocalNameObjectMapping.begin(); 
-			i != GameObject->LocalNameObjectMapping.end(); ++i)
-		{
-			lua_pushlightuserdata(L, i->second);
-			lua_setfield(L, -2, i->first.c_str());
-		}
-	}
 	lua_pop(L, 1);
+
 	Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
 }
 
-void CLuaVirtualMachine::SetProtoFields(const string &AClassName, const string &AName, CGameObject *AGameObject)
+void CLuaVirtualMachine::SetLocalNamesFields(CGameObject *AGameObject)
 {
-	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
-	lua_getglobal(L, AName.c_str());
-	if (lua_isnil(L, -1))
-	{
-		Log("ERROR", "An error occurred while creating '%s': object must be defined in Lua script first", AName.c_str());
-		lua_pop(L, 1);
-		return;
-	}
-	string className = "";
 	for (CGameObject::LNOMType::iterator i = AGameObject->LocalNameObjectMapping.begin(); 
 		i != AGameObject->LocalNameObjectMapping.end(); ++i)
 	{
-		className = i->second->GetName();//(i->second->GetClassName().empty() ? i->second->GetName() : i->second->GetClassName());
-		lua_getglobal(L, className.c_str());
+		SetReferenceField(AGameObject, i->first, i->second);
+	}
+}
+
+void CLuaVirtualMachine::SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference)
+{
+	lua_getglobal(L, AObject->GetName().c_str());
+	if (lua_isnil(L, -1))
+	{
+		Log("ERROR", "An error occurred while setting reference field '%s' for object '%s': object Lua table doesn't exist",
+			AFieldName.c_str(), AObject->GetName().c_str());
+		lua_pop(L, 1);
+		return;
+	}
+
+	if (AReference)
+	{
+		lua_getglobal(L, AReference->GetName().c_str());
 		if (lua_isnil(L, -1))
 		{
 			lua_pop(L, 1);
-			lua_pushlightuserdata(L, i->second);
+			lua_pushlightuserdata(L, AReference);
 		}
-		lua_setfield(L, -2, i->first.c_str());
 	}
+	else
+	{
+		lua_pushnil(L);
+	}
+
+	lua_setfield(L, -2, AFieldName.c_str());
 	lua_pop(L, 1);
 }
 
+void CLuaVirtualMachine::FreeComponent(const CGameObject &AObject)
+{
+	lua_pushnil(L);
+	lua_setglobal(L, AObject.GetName().c_str());
+}
 
 int CLuaVirtualMachine::GetMemoryUsage() const
 {
@@ -897,12 +904,6 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	// constants
 	lua_pushnumber(L, PI);
 	lua_setglobal(L, "PI");
-}
-
-void CLuaVirtualMachine::FreeComponent(const CGameObject &AObject)
-{
-	lua_pushnil(L);
-	lua_setglobal(L, AObject.GetName().c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////

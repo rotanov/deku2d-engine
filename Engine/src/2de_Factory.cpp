@@ -245,6 +245,7 @@ CObject* CFactory::CreateClassInstance(const string &AClassName, const string &A
 	{
 		go->SetClassName(AClassName);
 		go->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+		go->FinalizeCreation();
 	}
 
 	return result;
