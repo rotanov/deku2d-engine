@@ -408,6 +408,10 @@ bool CEngine::Run(int argc, char *argv[])
 		return false;
 	}
 
+	// KLUDGE: clear SDL event queue to prevent some strange behaviour of window resizing on platforms that use X11..
+	SDL_Event e;
+	while (SDL_PollEvent(&e));
+
 	while (ProcessEvents())
 	{
 		try

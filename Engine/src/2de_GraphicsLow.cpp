@@ -444,11 +444,8 @@ Vector2 CGLWindow::GetSize() const
 
 void CGLWindow::Resize(unsigned AWidth, unsigned AHeight)
 {
-	SDL_Event Event;
-	Event.type = SDL_VIDEORESIZE;
-	Event.resize.w = AWidth;
-	Event.resize.h = AHeight;
-	SDL_PushEvent(&Event);
+	SetSize(AWidth, AHeight);
+	Initialize();
 }
 
 //////////////////////////////////////////////////////////////////////////
