@@ -42,7 +42,10 @@ public:
 	void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
 	void SetLocalNamesFields(CGameObject *AGameObject);
 	void SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference);
-	void FreeComponent(const CGameObject &AObject);
+	void DestroyLuaObject(const CGameObject &AObject);
+
+	bool IsObjectExists(const string &AObjectName);
+	bool IsMethodFunctionExists(const string &AObjectName, const string &AFunctionName);
 
 	int GetMemoryUsage() const;
 	void RunGC();

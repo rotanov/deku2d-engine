@@ -344,6 +344,21 @@ namespace LuaAPI
 		return 2;
 	}
 
+	// void SetClassName(userdata Object, string ClassName)
+	int SetClassName(lua_State *L)
+	{
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetClassName API call");
+
+		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -2));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetClassName API call");
+
+		obj->SetClassName(lua_tostring(L, -1));
+
+		return 0;
+	}
+
 	// void SubscribeToEvent(userdata Object, string EventName)
 	int SubscribeToEvent(lua_State *L)
 	{
@@ -739,7 +754,6 @@ static void DeepCopy(lua_State *L)
 
 void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject)
 {
-	// Note: object must already exist on Lua side. 'ObjectName = ObjectName or { }' in any Lua file will suffice.
 	if (AClassName != AName)
 	{
 		lua_getglobal(L, AClassName.c_str());
@@ -767,6 +781,9 @@ void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string 
 	lua_pushlightuserdata(L, AObject);
 	lua_setfield(L, -2, "object");
 	lua_pop(L, 1);
+
+	if (IsMethodFunctionExists(AName, "OnCreate"))
+		CallMethodFunction(AName, "OnCreate");
 
 	Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
 }
@@ -809,10 +826,45 @@ void CLuaVirtualMachine::SetReferenceField(CObject *AObject, const string &AFiel
 	lua_pop(L, 1);
 }
 
-void CLuaVirtualMachine::FreeComponent(const CGameObject &AObject)
+void CLuaVirtualMachine::DestroyLuaObject(const CGameObject &AObject)
 {
+	lua_getglobal(L, AObject.GetName().c_str());
+	if (lua_isnil(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+	lua_pop(L, 1);
+
 	lua_pushnil(L);
 	lua_setglobal(L, AObject.GetName().c_str());
+
+	Log("INFO", "Lua object DESTROYED: '%s'", AObject.GetName().c_str());
+}
+
+bool CLuaVirtualMachine::IsObjectExists(const string &AObjectName)
+{
+	lua_getglobal(L, AObjectName.c_str());
+
+	bool result = !lua_isnil(L, -1) && lua_istable(L, -1);
+	lua_pop(L, 1);
+	return result;
+}
+
+bool CLuaVirtualMachine::IsMethodFunctionExists(const string &AObjectName, const string &AFunctionName)
+{
+	lua_getglobal(L, AObjectName.c_str());
+	if (lua_isnil(L, -1))
+	{
+		lua_pop(L, 1);
+		return false;
+	}
+
+	lua_getfield(L, -1, AFunctionName.c_str());
+
+	bool result = lua_isfunction(L, -1);
+	lua_pop(L, 2);
+	return result;
 }
 
 int CLuaVirtualMachine::GetMemoryUsage() const
@@ -879,6 +931,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(L, "GetWindowWidth", &LuaAPI::GetWindowWidth);
 	lua_register(L, "GetWindowHeight", &LuaAPI::GetWindowHeight);
 	lua_register(L, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
+	lua_register(L, "SetClassName", &LuaAPI::SetClassName);
 
 	// event management
 	lua_register(L, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
@@ -921,7 +974,7 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCoun
 
 	OldStackTop = lua_gettop(L);
 	lua_getglobal(L, FunctionName.c_str());
-	if (lua_isnil(L, -1))
+	if (!lua_isfunction(L, -1))
 	{
 		Log("ERROR", "An error occurred while trying to call function '%s': no such function", FunctionName.c_str());
 		lua_pop(L, 1);
@@ -951,7 +1004,7 @@ CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFun
 		return;
 	}
 	lua_getfield(L, -1, FunctionName.c_str());
-	if (lua_isnil(L, -1))
+	if (!lua_isfunction(L, -1))
 	{
 		Log("ERROR", "An error occurred while trying to call method function '%s:%s': no such function", ObjectName.c_str(), FunctionName.c_str());
 		lua_pop(L, 2);

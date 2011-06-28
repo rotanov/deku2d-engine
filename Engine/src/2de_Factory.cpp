@@ -43,6 +43,12 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	result->Prototype = true;
 	result->Deserialize(xml);
 
+	if (result->GetClassName().empty())
+	{
+		result->SetClassName("GameObject");
+		result->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+	}
+
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
 	if (!UsedPrototypes)
 		UsedPrototypes = FirstUsedPrototypes = new UsedPrototypesContainer;

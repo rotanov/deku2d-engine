@@ -47,6 +47,14 @@ function GameObject:TriggerEvent(eventName)
 	TriggerEvent(eventName, self.object)
 end
 
+function GameObject:SetScript(script)
+	SetScript(self.object, script)
+end
+
+function GameObject:SetClassName(className)
+	SetClassName(self.object, className)
+end
+
 --------------------------------------------------------------------------------
 
 RenderableComponent = GameObject:Derive()

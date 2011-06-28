@@ -10,6 +10,8 @@ public:
 	void Unsubscribe(const string &AEventName, CObject *Subscriber);
 	void UnsubscribeFromAll(CObject *Subscriber);
 
+	bool IsSubscribed(const string &AEventName, CObject *Subscriber) const;
+
 	void TriggerEvent(const string &AEventName, CObject *ASender);
 	void TriggerEvent(CEvent *AEvent);
 	

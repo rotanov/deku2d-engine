@@ -1,4 +1,4 @@
-for i = 0, 3 do
+--[[for i = 0, 3 do
 	local a = Create("A", "")
 	a.pos:SetPosition(0, 0)
 	local nextA = a
@@ -7,14 +7,14 @@ for i = 0, 3 do
 		nextA = nextA.A
 	end	
 	GetObject("Mouse cursor").pos:Attach(a)
-end
+end]]
 
 local lpc = Create("LuaPerfCounter", "")
 Attach(GetObject("RootGameObject"), lpc.object)
 
-local ninja = Create("BlackNinja", "")
+--[[local ninja = Create("BlackNinja", "")
 ninja.pos:SetPosition(320, 240)
-Attach(GetObject("RootGameObject"), ninja.object)
+Attach(GetObject("RootGameObject"), ninja.object)]]
 
 --[[for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
@@ -40,5 +40,7 @@ end]]
 
 --Attach(GetObject("RootGameObject"), Create("SandboxProto", "SandboxInst").object)
 --Attach(GetParent(GetObject("Mouse cursor")), GetObject("Magic square"))
+
+Attach(GetObject("RootGameObject"), Create("TestBox", "TestBoxInst").object)
 
 DebugPrintComponentTree()

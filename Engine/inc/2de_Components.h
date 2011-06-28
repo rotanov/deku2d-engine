@@ -71,6 +71,7 @@ private:
 	static void _DestroySubtree(CGameObject *NextObject);
 	CGameObject* FindPrototype();
 	void UpdateParentAndProtoFields();
+	void CreateLuaObject();
 
 	CGameObject *Parent;
 	CAbstractScene *Scene;

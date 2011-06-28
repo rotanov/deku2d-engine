@@ -58,7 +58,7 @@ TARGET_SHARED_FILE = libDeku2d.so
 TARGET_STATIC	=	lib/$(TARGET_STATIC_FILE)
 TARGET_SHARED	=	lib/$(TARGET_SHARED_FILE)
 
-STRICTFLAG	=	-Wno-write-strings
+STRICTFLAG	=	
 
 all: static
 

@@ -16,6 +16,9 @@ CEventManager::~CEventManager()
 
 void CEventManager::Subscribe(const string &AEventName, CObject *Subscriber)
 {
+	if (IsSubscribed(AEventName, Subscriber))
+		return;
+
 	Subscribers.insert(pair<string, CObject *>(AEventName, Subscriber));
 }
 
@@ -41,6 +44,19 @@ void CEventManager::UnsubscribeFromAll(CObject *Subscriber)
 	}
 	for(vector<SubscribersContainer::iterator>::iterator i = ToDelete.begin(); i != ToDelete.end(); ++i)
 		Subscribers.erase(*i);
+}
+
+bool CEventManager::IsSubscribed(const string &AEventName, CObject *Subscriber) const
+{
+	for (SubscribersContainer::const_iterator it = Subscribers.lower_bound(AEventName); it != Subscribers.upper_bound(AEventName); ++it)
+	{
+		if (it->second == Subscriber)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void CEventManager::TriggerEvent(const string &AEventName, CObject *ASender)

@@ -20,7 +20,7 @@ CGameObject::~CGameObject()
 
 	SetParent(NULL);
 
-	CLuaVirtualMachine::Instance()->FreeComponent(*this);
+	CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
 }
 
 void CGameObject::Attach(CGameObject *AGameObject)
@@ -196,9 +196,15 @@ void CGameObject::ProcessEvent(const CEvent &AEvent)
 
 void CGameObject::SetScript(CScript *AScript)
 {
+	CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
 	CLuaVirtualMachine::Instance()->RunScript(AScript);
-	CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
-	CLuaVirtualMachine::Instance()->CallMethodFunction(Name, "OnCreate");
+	CreateLuaObject();
+
+	if (Created)
+	{
+		CLuaVirtualMachine::Instance()->SetLocalNamesFields(this);
+		UpdateParentAndProtoFields();
+	}
 }
 
 void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
@@ -250,6 +256,12 @@ void CGameObject::UpdateParentAndProtoFields()
 	if (proto)
 		ParentProto = proto->FindPrototype();
 	CLuaVirtualMachine::Instance()->SetReferenceField(this, "parentProto", ParentProto);
+}
+
+void CGameObject::CreateLuaObject()
+{
+	if (!CLuaVirtualMachine::Instance()->IsObjectExists(Name))
+		CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
 }
 
 //////////////////////////////////////////////////////////////////////////
