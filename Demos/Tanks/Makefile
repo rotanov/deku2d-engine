@@ -16,9 +16,11 @@ LDFLAGS		:=	${LDFLAGS} ${SDL_LDFLAGS} ${LUA_LDFLAGS} -lGLU -lGLEW -lSDL_mixer -l
 
 all: ${TARGET}
 
+debug: MAKETARGET = debug
 debug: CFLAGS := -g3 -D_DEBUG ${CFLAGS}
 debug: all
 
+strict: MAKETARGET = strict
 strict: CFLAGS := -Wall ${CFLAGS}
 strict: all
 
@@ -31,4 +33,4 @@ ${TARGET}: ${ENGINE_LIB} ${SOURCES} ${HEADERS}
 	g++ -o ${TARGET} ${CFLAGS} ${SOURCES} ${LDFLAGS}
 
 ${ENGINE_LIB}:
-	$(MAKE) -C ../../Engine/
+	$(MAKE) -C ../../Engine/ $(MAKETARGET)

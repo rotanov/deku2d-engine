@@ -31,7 +31,7 @@ CLuaConsole::CLuaConsole()
 	//CommandLineEdit->SetBox(CBox(10, 30, CGLWindow::Instance()->GetWidth() - 20, 30));
 
 	CommandLineEdit = dynamic_cast<CGameObject *>(CFactory::Instance()->CreateByName("TempEdit", "CommandLineEdit"));
-	CUpdateManager::Instance()->RootGameObject->Attach(CommandLineEdit);
+	CEngine::Instance()->RootGameObject->Attach(CommandLineEdit);
 
 	CommandOutput = CFactory::Instance()->New<CText>("CommandOutput");
 
@@ -39,7 +39,7 @@ CLuaConsole::CLuaConsole()
 	CommandOutputPlace->SetPosition(Vector2(10, CGLWindow::Instance()->GetHeight() - 20));
 
 	CommandOutputPlace->Attach(CommandOutput);
-	CUpdateManager::Instance()->RootGameObject->Attach(CommandOutputPlace);
+	CEngine::Instance()->RootGameObject->Attach(CommandOutputPlace);
 
 	WriteLine("Welcome to Deku2D engine Lua console!");
 	WritePrompt();

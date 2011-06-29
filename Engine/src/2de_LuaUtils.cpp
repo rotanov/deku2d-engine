@@ -547,7 +547,7 @@ namespace LuaAPI
 	{
 		map<int, bool> *LastChild = new map<int, bool>;
 		(*LastChild)[0] = true;
-		DebugPrintNode(CUpdateManager::Instance()->RootGameObject, LastChild);
+		DebugPrintNode(CEngine::Instance()->RootGameObject, LastChild);
 		delete LastChild;
 		return 0;
 	}

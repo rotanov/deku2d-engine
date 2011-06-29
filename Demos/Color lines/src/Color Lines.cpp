@@ -30,7 +30,7 @@ CGridGame::CGridGame() : EventManager(NULL), Factory(NULL)
 
 	CGLWindow::Instance()->Resize(320, 340);
 	Grid = static_cast<CGameObject*>(Factory->CreateByName("GridProto", "LinesGrid"));
-	CUpdateManager::Instance()->RootGameObject->Attach(Grid);
+	CEngine::Instance()->RootGameObject->Attach(Grid);
 
 	static_cast<CRenderableComponent*>(Grid->GetChild(0)->GetChild(0))->SetColor(RGBAf(.6f, 0.6f, 0.8f, 1.0f));
 	static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetScaling(static_cast<float>(CELL_SIZE));

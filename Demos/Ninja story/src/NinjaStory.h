@@ -92,7 +92,7 @@ public:
 		t1 = Vector2(cos(temp) * 400.0f, sin(temp) * 400.0f) + t0;
 		delta = (t1 - t0) / Life;
 		Text->SetAngle(Random_Float(0.0f, 360.0f));
-		CUpdateManager::Instance()->RootGameObject->Attach(Text);
+		CEngine::Instance()->RootGameObject->Attach(Text);
 	}
 	~CBouncingText()
 	{

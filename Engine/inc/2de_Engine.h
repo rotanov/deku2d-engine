@@ -16,7 +16,6 @@
 #include "2de_Resource.h"
 #include "2de_Sound.h"
 #include "2de_SpatialManager.h"
-#include "2de_Update.h"
 #include "2de_Xml.h"
 
 const int ENGINE_VERSION = 0x001;	// it's a pity that it's not used.. i DO WANT some build counter, that increments automatically every build :)
@@ -75,6 +74,8 @@ public:
 	bool IsKeyDown(const SDLKey& AKey) const;
 	const Vector2& GetMousePosition() const;
 	unsigned long GetFPS() const;
+
+	CGameObject *RootGameObject;
 
 protected:
 	CEngine();

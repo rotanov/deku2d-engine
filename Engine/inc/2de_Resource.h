@@ -3,7 +3,6 @@
 
 #include "2de_Core.h"
 #include "2de_Factory.h"
-#include "2de_Update.h"
 #include "2de_Xml.h"
 
 /**

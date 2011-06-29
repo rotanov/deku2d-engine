@@ -5,7 +5,6 @@
 #include "2de_Components.h"
 #include "2de_GraphicsLow.h"
 #include "2de_Math.h"
-#include "2de_Update.h"
 
 /**
 *	CSprite	

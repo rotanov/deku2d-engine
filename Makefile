@@ -1,11 +1,4 @@
-all:
-	$(MAKE) -C Engine/ $(MAKETARGET)
-	SAVEIFS=$$IFS		# IFS hack to make for-loop work with filenames with spaces
-	IFS=$$(echo -en "\n\b")
-	for i in Demos/*; do \
-		$(MAKE) -C "$$i" $(MAKETARGET) ; \
-	done
-	IFS=$$SAVEIFS
+all: engine demos
 
 debug: MAKETARGET = debug
 debug: all
@@ -13,16 +6,22 @@ debug: all
 strict: MAKETARGET = strict
 strict: all
 
-docs:
-	$(MAKE) -C Engine/ docs
+docs: MAKETARGET = docs
+docs: engine
 
-tags:
-	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
-
-clean:
-	$(MAKE) -C Engine/ clean
+clean: MAKETARGET = clean
+clean: engine
 
 distclean: MAKETARGET = distclean
 distclean: all
+
+engine:
+	@$(MAKE) -C Engine/ $(MAKETARGET)
+
+demos:
+	@$(MAKE) -C Demos/ $(MAKETARGET)
+
+tags:
+	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
 
 .PHONY: clean distclean docs tags

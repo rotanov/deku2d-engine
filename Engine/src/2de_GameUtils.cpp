@@ -1,6 +1,7 @@
 #include "2de_GameUtils.h"
 
 #include "2de_GraphicsHigh.h"
+#include "2de_Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
 // CTileset
@@ -177,7 +178,7 @@ CDefaultTitleScreen::CDefaultTitleScreen()
 	int ScrWidth = CGLWindow::Instance()->GetWidth();
 	int ScrHeight = CGLWindow::Instance()->GetHeight();
 	tempPlacing->SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
-	CUpdateManager::Instance()->RootGameObject->Attach(tempPlacing);
+	CEngine::Instance()->RootGameObject->Attach(tempPlacing);
 	tempPlacing->Attach(this);
 	CPlaceableComponent *DekuTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
 	CPlaceableComponent *TeamTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();

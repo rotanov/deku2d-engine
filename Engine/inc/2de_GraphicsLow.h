@@ -2,8 +2,6 @@
 #define _2DE_GRAPHICS_LOW_H_
 
 #include "2de_Core.h"
-#include "2de_Update.h"
-
 #include "2de_ImageUtils.h"
 #include "2de_Math.h"
 #include "2de_Resource.h"

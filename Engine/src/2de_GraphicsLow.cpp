@@ -773,8 +773,8 @@ bool CRenderManager::DrawObjects()
 
 	CDrawVisitor DrawVisitor;
 	CUpdateVisitor UpdateVisitor;
-	CUpdateManager::Instance()->RootGameObject->DFSIterate(CUpdateManager::Instance()->RootGameObject, &UpdateVisitor);
-	CUpdateManager::Instance()->RootGameObject->DFSIterate(CUpdateManager::Instance()->RootGameObject, &DrawVisitor);
+	CEngine::Instance()->RootGameObject->DFSIterate(CEngine::Instance()->RootGameObject, &UpdateVisitor);
+	CEngine::Instance()->RootGameObject->DFSIterate(CEngine::Instance()->RootGameObject, &DrawVisitor);
 
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used

@@ -3,7 +3,6 @@
 
 #include "2de_Core.h"
 #include "2de_Math.h"
-#include "2de_Update.h"
 
 class CPhysicalObject /*: public CUpdatable*/
 {

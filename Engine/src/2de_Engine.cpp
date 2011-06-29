@@ -30,6 +30,8 @@ CEngine::CEngine()
 	CSingletonManager::Init();
 
 	SpatialManager = new CBruteForceSpatialManager();
+
+	RootGameObject = NULL;
 }
 
 CEngine::~CEngine()
@@ -121,9 +123,11 @@ bool CEngine::Initialize()
 	}
 	CLuaVirtualMachine::Instance()->RunScript(mainScript);	
 
+	RootGameObject = dynamic_cast<CPlaceableComponent *>(CFactory::Instance()->CreateByName("PlaceableComponent", "Root"));
+
 	CGameObject* Cursor = dynamic_cast<CGameObject*>(CFactory::Instance()->CreateByName("MouseProto", "Mouse cursor"));
 	if (Cursor != NULL)
-		CUpdateManager::Instance()->RootGameObject->Attach(Cursor);
+		RootGameObject->Attach(Cursor);
 	else
 		SDL_ShowCursor(1);
 
@@ -136,7 +140,7 @@ bool CEngine::Initialize()
 	FPSText = CFactory::Instance()->New<CText>("FPSText");
 	FPSText->SetText("FPS: 0");
 	FPSTextPlacing->SetLayer(512);
-	CUpdateManager::Instance()->RootGameObject->Attach(FPSTextPlacing);
+	RootGameObject->Attach(FPSTextPlacing);
 	FPSTextPlacing->Attach(FPSText);
 
 	//	Создание текстуры из памяти
@@ -423,7 +427,6 @@ bool CEngine::Run(int argc, char *argv[])
 				if (LimitFPS())
 				{
 					CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
-					CUpdateManager::Instance()->UpdateObjects();
 					SpatialManager->Update();
 					SpatialManager->Clear();
 					//CSceneManager::Instance()->Update(dt);

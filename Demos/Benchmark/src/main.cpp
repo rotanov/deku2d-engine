@@ -23,7 +23,7 @@ public:
 		Place->SetPosition(Vector2(x, y));
 		Place->SetLayer(-1);
 		Place->Attach(this);
-		CUpdateManager::Instance()->RootGameObject->Attach(Place);
+		CEngine::Instance()->RootGameObject->Attach(Place);
 		//SetAngle(Random_Float(0.0f, 360.0f));
 	}
 
@@ -54,7 +54,7 @@ public:
 			RectangleCount = stoi(CCommandLineArgumentsManager::Instance()->GetOption("rectangles"));
 			for (int i = 0; i < RectangleCount; i++)
 				CFactory::Instance()->New<CRotatingQuad>("");
-				//CUpdateManager::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CRotatingQuad>(""));
+				//CEngine::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CRotatingQuad>(""));
 		}
 		else
 		{
@@ -65,7 +65,7 @@ public:
 		CounterText->SetText("Rectangles count: " + itos(RectangleCount));
 		TextPlace->SetLayer(1);
 		TextPlace->SetPosition(Vector2(0.0f, 15.0f));
-		CUpdateManager::Instance()->RootGameObject->Attach(TextPlace);
+		CEngine::Instance()->RootGameObject->Attach(TextPlace);
 	}
 
 	void ProcessEvent(const CEvent &AEvent)
