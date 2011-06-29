@@ -10,37 +10,47 @@
 end]]
 
 local lpc = Create("LuaPerfCounter", "")
-Attach(GetObject("RootGameObject"), lpc.object)
+Root:Attach(lpc)
 
 --[[local ninja = Create("BlackNinja", "")
 ninja.pos:SetPosition(320, 240)
-Attach(GetObject("RootGameObject"), ninja.object)]]
+Root:Attach(ninja)
+]]
 
 --[[for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
 	ninja.pos:SetPosition(i * 50, 240)
-	Attach(GetObject("RootGameObject"), ninja.object)
+	Root:Attach(ninja)
 end
 
 for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
 	ninja.pos:SetPosition(i * 50, 100)
-	Attach(GetObject("RootGameObject"), ninja.object)
+	Root:Attach(ninja)
 end
 
 for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
 	ninja.pos:SetPosition(i * 50, 380)
-	Attach(GetObject("RootGameObject"), ninja.object)
+	Root:Attach(ninja)
 end]]
 
 --local another_ninja = Create("BlackNinja", "")
 --another_ninja.pos:SetPosition(350, 100)
---Attach(GetObject("RootGameObject"), another_ninja.object)
+--Root:Attach(another_ninja)
 
---Attach(GetObject("RootGameObject"), Create("SandboxProto", "SandboxInst").object)
+--Root:Attach(Create("SandboxProto", "SandboxInst"))
 --Attach(GetParent(GetObject("Mouse cursor")), GetObject("Magic square"))
 
-Attach(GetObject("RootGameObject"), Create("TestBox", "TestBoxInst").object)
+for i = 0, 10 do
+	local box = Create("TestBox", "")
+	box.pos:SetPosition(i * 40, 200)
+	box.model:SetColor(Random_Float(0, 1), Random_Float(0, 1), Random_Float(0, 1), 1) -- just to distinguish them
+	Root:Attach(box)
+	box.pos:Attach(Create("Draggable", ""))
+end
+
+--[[Root:Attach(Create("TestBox", "TestBoxInst"))
+TestBoxInst.pos:Attach(Create("Dragable", ""))]]
 
 DebugPrintComponentTree()

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<Prototype Name="TestBox" ClassName="TestBox1" Script="TestScript1">
+<Prototype Name="TestBox">
     <PlaceableComponent LocalName="pos" Position="200 200">
-        <RenderableComponent LocalName="model" Model="Box" Width="10" Height="10" Color="1 0 0 1" />
+        <RenderableComponent LocalName="model" Model="Box" Width="30" Height="30" Color="1 0 0 1" />
     </PlaceableComponent>
 </Prototype>

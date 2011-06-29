@@ -9,7 +9,7 @@ function LogHelper(...)
   for i = 1,#t do 
     tempString = tempString .. tostring(t[i]) .. "\t"
   end
-  Log( "LUA", tempString)
+  Log("LUA", tempString)
 end
 
 print = LogHelper

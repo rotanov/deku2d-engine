@@ -14,7 +14,7 @@ function PongGame:OnCreate()
 	SetPosition(self.MemUsageText.pos, 10, 30)
 	SetText(self.MemUsageText.text, "not updated yet")
 	Attach(self.MemUsageText.pos, self.MemUsageText.text);
-	Attach(GetObject("RootGameObject"), self.MemUsageText.pos);
+	Root:Attach(self.MemUsageText.pos)
 
 	SubscribeToEvent(self.object, "PlayerOneScored")
 	SubscribeToEvent(self.object, "PlayerTwoScored")

@@ -16,7 +16,10 @@ namespace LuaAPI
 		if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
 			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Create API call");
 		CGameObject* GameObject = dynamic_cast<CGameObject*>(CFactory::Instance()->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
-		lua_getglobal(L, GameObject->GetName().c_str());
+		if (GameObject)
+			lua_getglobal(L, GameObject->GetName().c_str());
+		else
+			lua_pushnil(L);
 		//lua_pushlightuserdata(L, );
 		return 1;
 	}

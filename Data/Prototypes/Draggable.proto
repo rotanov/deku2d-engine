@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<Prototype Name="Draggable" ClassName="DraggableComponent" Script="DraggableScript">
+</Prototype>

@@ -51,7 +51,8 @@
 CUpdateManager::CUpdateManager()
 {
 	SetName("CUpdateManager");
-	RootGameObject = CFactory::Instance()->New<CPlaceableComponent>("RootGameObject");
+	//RootGameObject = CFactory::Instance()->New<CPlaceableComponent>("RootGameObject");
+	RootGameObject = dynamic_cast<CPlaceableComponent *>(CFactory::Instance()->CreateByName("PlaceableComponent", "Root"));
 }
 
 bool CUpdateManager::UpdateObjects()

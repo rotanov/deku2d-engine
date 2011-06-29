@@ -90,6 +90,10 @@ function PlaceableComponent:GetAngle()
 	return GetAngle(self.object)
 end
 
+function PlaceableComponent:GetBox()
+	return GetBox(self.object)
+end
+
 --------------------------------------------------------------------------------
 
 GeometricComponent = GameObject:Derive()
