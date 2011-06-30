@@ -152,6 +152,31 @@ unsigned CGameObject::GetChildCount()
 	return Children.size();
 }
 
+CGameObject* CGameObject::FindFirstOfClass(const string &AClassName, bool ExceedPrototype /*= false*/)
+{
+	queue<CGameObject *> SearchQueue;
+	CGameObject *current = NULL;
+
+	SearchQueue.push(this);
+
+	while (!SearchQueue.empty())
+	{
+		current = SearchQueue.front();
+		SearchQueue.pop();
+
+		if (current->ClassName == AClassName && current != this)
+			return current;
+
+		for (CGameObject::ChildrenIterator it = current->Children.begin(); it != current->Children.end(); ++it)
+		{
+			if (ExceedPrototype || !(*it)->IsPrototype())
+				SearchQueue.push(*it);
+		}
+	}
+
+	return NULL;
+}
+
 bool CGameObject::IsActive() const
 {
 	return Active;

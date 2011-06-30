@@ -95,6 +95,20 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// userdata FindFirstOfClass(userdata Object, string ClassName, bool ExceedPrototype)
+	int FindFirstOfClass(lua_State *L)
+	{
+		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -3));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in FindFirstOfClass API call");
+	
+		if (!lua_isstring(L, -2))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to FindFirstOfClass API call");
+
+		lua_pushlightuserdata(L, obj->FindFirstOfClass(lua_tostring(L, -2), lua_toboolean(L, -1)));
+		return 1;
+	}
+
 	// void Attach(userdata Destination, userdata Object)
 	int Attach(lua_State *L)
 	{
@@ -111,7 +125,7 @@ namespace LuaAPI
 		return 0;
 	}
 
-	// void Detach(userdata Destination, Object)
+	// void Detach(userdata Destination, userdata Object)
 	int Detach(lua_State *L)
 	{
 		CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
@@ -184,17 +198,6 @@ namespace LuaAPI
 
 		text->SetFont(font);
 		return 0;
-	}
-
-	// userdata GetFont(string Name)
-	int GetFont(lua_State *L)
-	{
-		if (!lua_isstring(L, -1))
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetFont API call");
-
-		CFont *font = CFactory::Instance()->Get<CFont>(lua_tostring(L, -1));
-		lua_pushlightuserdata(L, font);
-		return 1;
 	}
 
 	// (number, number) GetPosition(userdata PlaceableComponent)
@@ -912,6 +915,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(L, "GetName", &LuaAPI::GetName);
 	lua_register(L, "GetParent", &LuaAPI::GetParent);
 	lua_register(L, "GetChild", &LuaAPI::GetChild);
+	lua_register(L, "FindFirstOfClass", &LuaAPI::FindFirstOfClass);
 	lua_register(L, "Attach", &LuaAPI::Attach);
 	lua_register(L, "Detach", &LuaAPI::Detach);
 
@@ -923,7 +927,6 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(L, "SetText", &LuaAPI::SetText);
 	lua_register(L, "GetText", &LuaAPI::GetText);
 	lua_register(L, "SetTextFont", &LuaAPI::SetTextFont);
-	lua_register(L, "GetFont", &LuaAPI::GetFont);
 	lua_register(L, "GetPosition", &LuaAPI::GetPosition);
 	lua_register(L, "SetPosition", &LuaAPI::SetPosition);
 	lua_register(L, "GetBox", &LuaAPI::GetBox);

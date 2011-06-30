@@ -8,14 +8,13 @@ function DraggableComponent:OnCreate()
 end
 
 function DraggableComponent:OnMouseDown(e)
-	if not self.parent then
+	local ControlledObject = self.proto:FindFirstOfClass("PlaceableComponent")
+
+	if not ControlledObject then
 		return
 	end
 
-	--Dump(self.parent)
-	--print(self.parent:GetName())
-
-	local box = self.parent:GetBox()
+	local box = ControlledObject:GetBox()
 
 	local x = tonumber(GetEventData(e, "X"))
 	local y = tonumber(GetEventData(e, "Y"))
@@ -30,12 +29,14 @@ function DraggableComponent:OnMouseUp()
 end
 
 function DraggableComponent:OnMouseMove(e)
-	if not self.parent or not self.Drag then
+	local ControlledObject = self.proto:FindFirstOfClass("PlaceableComponent")
+
+	if not ControlledObject or not self.Drag then
 		return
 	end
 
 	local x = tonumber(GetEventData(e, "X"))
 	local y = tonumber(GetEventData(e, "Y"))
 
-	self.parent:SetPosition(x, y);
+	ControlledObject:SetPosition(x, y);
 end

@@ -46,6 +46,8 @@ public:
 	CGameObject* GetObjectByLocalName(const string &AName);
 	unsigned GetChildCount();
 
+	CGameObject* FindFirstOfClass(const string &AClassName, bool ExceedPrototype = false);
+
 	bool IsActive() const;
 	void SetActive(bool AActive);
 

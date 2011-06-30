@@ -1068,7 +1068,7 @@ string CEnvironment::DateTime::GetFormattedTime(tm *TimeStruct, const char *Form
 		delete[] buffer;
 		buffer = new char[AllocSize];
 		if (!buffer)
-			return string("");
+			return string();
 
 		allocated = (strftime(buffer, AllocSize - 1, Format, TimeStruct) != 0);
 		AllocSize *= 2;

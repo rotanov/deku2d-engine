@@ -55,6 +55,10 @@ function GameObject:SetClassName(className)
 	SetClassName(self.object, className)
 end
 
+function GameObject:FindFirstOfClass(className, exceedPrototype)
+	return GetObjectTable(FindFirstOfClass(self.object, className, exceedPrototype))
+end
+
 --------------------------------------------------------------------------------
 
 RenderableComponent = GameObject:Derive()
