@@ -1731,12 +1731,10 @@ bool CModel::Load()
 			return false;
 		}
 
-		Vector2 v;
 		for (unsigned i = 0; i < tokens.size() / 2; i++)
 		{
-			v.x = from_string<float>(tokens[i * 2 + 0]);
-			v.y = from_string<float>(tokens[i * 2 + 1]);
-			Vertices.PushVertex(v, RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
+			Vertices.GetTexCoords()[i].x = from_string<float>(tokens[i * 2 + 0]);
+			Vertices.GetTexCoords()[i].y = from_string<float>(tokens[i * 2 + 1]);
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}
