@@ -1704,13 +1704,14 @@ bool CModel::Load()
 			Log("WARNING", "Model vertices count is uneven");
 			return false;
 		}
-		Vertices = new Vector2[tokens.size() / 2];
 		unsigned VerticesNumber = tokens.size() / 2;
 		Vertices.Reserve(VerticesNumber);
-		for(unsigned i = 0; i < tokens.size() / 2; i++)
+		Vector2 v;
+		for (unsigned i = 0; i < tokens.size() / 2; i++)
 		{
-			Vertices.GetVertices()[i].x = from_string<float>(tokens[i * 2 + 0]);
-			Vertices.GetVertices()[i].y = from_string<float>(tokens[i * 2 + 1]);
+			v.x = from_string<float>(tokens[i * 2 + 0]);
+			v.y = from_string<float>(tokens[i * 2 + 1]);
+			Vertices.PushVertex(v, RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}
@@ -1729,10 +1730,13 @@ bool CModel::Load()
 			Log("WARNING", "Model vertices count is uneven");
 			return false;
 		}
-		for(unsigned i = 0; i < tokens.size() / 2; i++)
+
+		Vector2 v;
+		for (unsigned i = 0; i < tokens.size() / 2; i++)
 		{
-			Vertices.GetTexCoords()[i].x = from_string<float>(tokens[i * 2 + 0]);
-			Vertices.GetTexCoords()[i].y = from_string<float>(tokens[i * 2 + 1]);
+			v.x = from_string<float>(tokens[i * 2 + 0]);
+			v.y = from_string<float>(tokens[i * 2 + 1]);
+			Vertices.PushVertex(v, RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 		XMLNode = XMLNode->GetParent()->GetParent();
 	}
