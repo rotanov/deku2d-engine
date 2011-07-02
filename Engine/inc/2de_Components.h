@@ -81,9 +81,9 @@ private:
 	string ClassName;
 	bool Prototype;
 	bool Created;
+	bool Active;
 
 	// not used
-	bool Active;
 	bool Dead;	
 	bool Enabled;
 

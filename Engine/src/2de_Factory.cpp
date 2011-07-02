@@ -39,14 +39,17 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 		return NULL;
 	}
 
-	CGameObject *result = CFactory::Instance()->New<CGameObject>(AName);
+	if (AName.empty())
+		AName = AClassName + itos(result->GetID());
+
+	CGameObject *result = New<CGameObject>(AName);
 	result->Prototype = true;
 	result->Deserialize(xml);
 
 	if (result->GetClassName().empty())
 	{
 		result->SetClassName("GameObject");
-		result->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+		result->SetScript(Get<CScript>("BaseComponents"));
 	}
 
 	UsedPrototypesContainer *FirstUsedPrototypes = NULL;
@@ -83,7 +86,7 @@ void CFactory::Rename(const string &AName, const string &ANewName)
 
 	CObject *Object = Objects[AName];
 	Objects.erase(AName);
-	Object->SetName(ANewName);
+	Object->Name = ANewName;
 	Objects[ANewName] = Object;
 }
 
@@ -221,7 +224,7 @@ void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, Used
 
 CXMLNode* CFactory::GetPrototypeXML(const string &AName)
 {
-	CPrototype *proto = CFactory::Instance()->Get<CPrototype>(AName);
+	CPrototype *proto = Get<CPrototype>(AName);
 	if (!proto)
 	{
 		Log("ERROR", "No such prototype: '%s'", AName.c_str());
@@ -250,7 +253,7 @@ CObject* CFactory::CreateClassInstance(const string &AClassName, const string &A
 	if (go)
 	{
 		go->SetClassName(AClassName);
-		go->SetScript(CFactory::Instance()->Get<CScript>("BaseComponents"));
+		go->SetScript(Get<CScript>("BaseComponents"));
 		go->FinalizeCreation();
 	}
 

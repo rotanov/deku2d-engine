@@ -53,4 +53,6 @@ end
 --[[Root:Attach(Create("TestBox", "TestBoxInst"))
 TestBoxInst.pos:Attach(Create("Dragable", ""))]]
 
+lpc:Attach(Create("Draggable", ""))
+
 DebugPrintComponentTree()
