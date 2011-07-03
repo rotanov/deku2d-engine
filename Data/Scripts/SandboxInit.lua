@@ -1,4 +1,5 @@
---[[for i = 0, 3 do
+--[[
+for i = 0, 3 do
 	local a = Create("A", "")
 	a.pos:SetPosition(0, 0)
 	local nextA = a
@@ -7,17 +8,20 @@
 		nextA = nextA.A
 	end	
 	GetObject("Mouse cursor").pos:Attach(a)
-end]]
+end
+--]]
 
 local lpc = Create("LuaPerfCounter", "")
 Root:Attach(lpc)
 
---[[local ninja = Create("BlackNinja", "")
+--[[
+local ninja = Create("BlackNinja", "")
 ninja.pos:SetPosition(320, 240)
 Root:Attach(ninja)
-]]
+--]]
 
---[[for i = 0, 10 do
+--[[
+for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
 	ninja.pos:SetPosition(i * 50, 240)
 	Root:Attach(ninja)
@@ -33,14 +37,17 @@ for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
 	ninja.pos:SetPosition(i * 50, 380)
 	Root:Attach(ninja)
-end]]
+end
+--]]
 
---local another_ninja = Create("BlackNinja", "")
---another_ninja.pos:SetPosition(350, 100)
---Root:Attach(another_ninja)
+--[[
+local another_ninja = Create("BlackNinja", "")
+another_ninja.pos:SetPosition(350, 100)
+Root:Attach(another_ninja)
 
---Root:Attach(Create("SandboxProto", "SandboxInst"))
---Attach(GetParent(GetObject("Mouse cursor")), GetObject("Magic square"))
+Root:Attach(Create("SandboxProto", "SandboxInst"))
+Attach(GetParent(GetObject("Mouse cursor")), GetObject("Magic square"))
+--]]
 
 for i = 0, 10 do
 	local box = Create("TestBox", "")
@@ -50,8 +57,10 @@ for i = 0, 10 do
 	box.pos:Attach(Create("Draggable", ""))
 end
 
---[[Root:Attach(Create("TestBox", "TestBoxInst"))
-TestBoxInst.pos:Attach(Create("Dragable", ""))]]
+--[[
+Root:Attach(Create("TestBox", "TestBoxInst"))
+TestBoxInst.pos:Attach(Create("Dragable", ""))
+--]]
 
 lpc:Attach(Create("Draggable", ""))
 

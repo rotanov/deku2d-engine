@@ -962,7 +962,7 @@ public:
 
 	~CLog();
 
-	void WriteToLog(const string &Event, const string &Format, ...);
+	void WriteToLog(const char *Event, const char *Format, ...);
 
 	bool isEnabled() const;
 	void Toggle(bool AEnabled);
@@ -1009,7 +1009,7 @@ private:
 	int LogLevel;
 };
 
-// define SIMPLIFIED_LOG to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
+// #define SIMPLIFIED_LOG // to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
 #ifdef SIMPLIFIED_LOG
 	#define Log CEnvironment::LogToStdOut
 #else

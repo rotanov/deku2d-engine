@@ -412,7 +412,7 @@ bool CEngine::Run(int argc, char *argv[])
 		return false;
 	}
 
-	// KLUDGE: clear SDL event queue to prevent some strange behaviour of window resizing on platforms that use X11..
+	// KLUDGE: clear SDL event queue to prevent some strange behavior of window resizing on platforms that use X11..
 	SDL_Event e;
 	while (SDL_PollEvent(&e));
 
@@ -420,7 +420,7 @@ bool CEngine::Run(int argc, char *argv[])
 	{
 		try
 		{
-			if (isHaveFocus) // not actually. See mainloop issue.
+			if (isHaveFocus) // not actually. See main loop issue.
 			{
 				CResourceManager::Instance()->PerformUnload();
 				CFactory::Instance()->CleanUp();

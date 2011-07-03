@@ -863,7 +863,7 @@ CLog::~CLog()
 	}
 }
 
-void CLog::WriteToLog(const string &Event, const string &Format, ...)
+void CLog::WriteToLog( const char *Event, const char *Format, ... )
 {
 	if (!Enabled)
 		return;
@@ -881,11 +881,11 @@ void CLog::WriteToLog(const string &Event, const string &Format, ...)
 	va_list args;
 	va_start(args, Format);
 
-	int MessageLength = vsnprintf(NULL, 0, Format.c_str(), args) + 1;
+	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
 
 	char *buffer = new char[MessageLength + 1];
 
-	vsnprintf(buffer, MessageLength, Format.c_str(), args);
+	vsnprintf(buffer, MessageLength, Format, args);
 	buffer[MessageLength] = 0;
 
 	va_end(args);

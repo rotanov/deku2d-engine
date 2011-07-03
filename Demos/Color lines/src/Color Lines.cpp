@@ -29,6 +29,7 @@ CGridGame::CGridGame() : EventManager(NULL), Factory(NULL)
 	}
 
 	CGLWindow::Instance()->Resize(320, 340);
+
 	Grid = static_cast<CGameObject*>(Factory->CreateByName("GridProto", "LinesGrid"));
 	CEngine::Instance()->RootGameObject->Attach(Grid);
 
