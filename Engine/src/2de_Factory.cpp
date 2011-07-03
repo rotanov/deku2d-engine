@@ -39,10 +39,10 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 		return NULL;
 	}
 
-	if (AName.empty())
-		AName = AClassName + itos(result->GetID());
-
 	CGameObject *result = New<CGameObject>(AName);
+	if (AName.empty())
+		Rename(result->GetName(), AClassName + itos(result->GetID()));
+
 	result->Prototype = true;
 	result->Deserialize(xml);
 
