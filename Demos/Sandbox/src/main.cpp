@@ -58,7 +58,6 @@ bool CCustomStateHandler::OnInitialize()
 {
 	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
 	CSceneManager::Instance()->SetCurrentScene(NewScene);
-
 	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
 	CEngine::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CTest>("SetSizeTest"));
 	//CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("Iggy"), 0, -1);

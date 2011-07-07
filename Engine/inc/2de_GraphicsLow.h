@@ -579,6 +579,7 @@ public:
 
 	static EModelType SelectModelTypeByStringIdentifier(const string &Identifier);
 	static EBlendingMode SelectBlendingModeByIdentifier(const string &Identifier);
+	static string StringIdentifierByModelType(EModelType AModelType);
 	
 	void SetSwapInterval(int interval = 1);
 };

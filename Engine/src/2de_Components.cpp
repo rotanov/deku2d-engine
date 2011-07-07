@@ -513,8 +513,8 @@ CRenderableComponent::~CRenderableComponent()
 {
 	if (Model != NULL && !CEngine::Instance()->isFinalizing())
 	{
-		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
-		Model->SetDestroyed();
+		//Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
+		//Model->SetDestroyed();
 		Model = NULL;
 	}
 
