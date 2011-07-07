@@ -27,6 +27,8 @@ public:
 	CGameObject();
 	virtual ~CGameObject();
 
+	virtual CGameObject* Clone() const;
+
 	void Attach(CGameObject *AGameObject);
 	void Detach(CGameObject *AGameObject);
 	void Detach(unsigned index);
@@ -56,6 +58,7 @@ public:
 	virtual void Deserialize(CXMLNode *AXML);
 	void FinalizeCreation();
 	void ProcessEvent(const CEvent &AEvent);
+	CScript* GetScript() const;
 	void SetScript(CScript *AScript);
 
 	void DFSIterate(CGameObject *Next, IVisitorBase *Visitor); // Not here
@@ -65,6 +68,9 @@ public:
 // 	bool isDead() const;	// @todo: Think about applyng this part of CUpdatable interface into CGameObject
 // 	void SetDead();
 //	virtual void Update(float dt) = 0;
+
+protected:
+	CGameObject(const CGameObject &AGameObject);
 
 private:
 	typedef vector<CGameObject *> ChildrenContainer;
@@ -77,6 +83,7 @@ private:
 
 	CGameObject *Parent;
 	CAbstractScene *Scene;
+	CScript *Script;
 	ChildrenContainer Children;
 	string ClassName;
 	bool Prototype;
@@ -99,6 +106,8 @@ public:
 	D2D_DECLARE_VISITABLE()
 
 	CPlaceableComponent();
+
+	CPlaceableComponent* Clone() const;
 
 	float GetAngle() const;
 	const CBox& GetBox() const;
@@ -209,6 +218,8 @@ public:
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
 
+	CRenderableComponent* Clone() const;
+
 	const CBox& GetBox() const;
 	void SetBox(const CBox& ABox);
 	bool GetVisibility() const;
@@ -228,6 +239,8 @@ public:
 	CBox Box;
 	void UpdateBox(const CBox& ABox);
 
+protected:
+	CRenderableComponent(const CRenderableComponent &ARenderableComponent);
 
 //protected:
 	//KLUDGE!!!
@@ -270,6 +283,8 @@ public:
 	CText(const string &AText);
 	~CText();
 
+	CText* Clone() const;
+
 	CFont* GetFont() const;
 	string& GetText();
 	const string& GetText() const;
@@ -279,6 +294,9 @@ public:
 	unsigned char operator [] (unsigned index) const;
 	unsigned Length() const;
 	void Deserialize(CXMLNode *AXML);
+
+protected:
+	CText(const CText &AText);
 
 private:
 	string Characters;
@@ -297,6 +315,8 @@ public:
 	D2D_DECLARE_VISITABLE()
 
 	CTimerComponent(float AInterval = 0.0f);
+
+	CTimerComponent* Clone() const;
 
 	void ProcessEvent(const CEvent &AEvent);
 

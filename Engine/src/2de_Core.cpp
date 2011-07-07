@@ -38,24 +38,24 @@ void CEvent::SetSender(CObject *ASender)
 
 unsigned CObject::CObjectCount = 0;
 
-CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)) /*, RefCount(0) */
+CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name("CObject" + itos(ID))
 {
-
 }
 
-CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name(" CObject " + itos(ID)) /*, RefCount(0) */
+CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name("CObject" + itos(ID))
 {
 }
 
 CObject& CObject::operator=(const CObject &AObject)
 {
+	throw std::logic_error("Forbidden");
+
 	if (this == &AObject)
 		return *this;
 
 	Destroyed = AObject.Destroyed;
 	ID = ++CObjectCount;
 	Name = AObject.GetName() + " copy";
-	/* RefCount = 0; */
 
 	return *this;
 }
@@ -64,22 +64,6 @@ CObject::~CObject()
 {
 	if (!CEngine::Instance()->isFinalizing())
 		CEventManager::Instance()->UnsubscribeFromAll(this);
-}
-
-void CObject::IncRefCount()
-{
-	/*RefCount++;*/
-}
-
-void CObject::DecRefCount(CObject* AObject)
-{
-	/*assert(AObject != NULL);
-	AObject->RefCount--;
-	if (AObject->RefCount <= 0 && AObject->Managed)
-	{
-		Log("INFO", "Destroying: %s, with id: %d", AObject->GetName().c_str(), AObject->GetID());
-		delete AObject;
-	}*/
 }
 
 string CObject::GetName() const
@@ -150,7 +134,6 @@ void CSingletonManager::Init()
 
 void CSingletonManager::Add(CObject *AObject)
 {
-	/*AObject->IncRefCount(); // is not necessary i think. it it is?*/
 	Singletones.push(AObject);
 	//Log("NOTE", "ADDED TO SINGLETONE KILLER: %s", AObject->GetName().c_str());
 }

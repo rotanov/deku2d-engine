@@ -549,7 +549,7 @@ private:
 class CText;
 class CRenderableComponent;
 
-class CRenderManager : public CCommonManager <std::vector <CRenderableComponent*> >, public CTSingleton <CRenderManager>
+class CRenderManager : /*public CCommonManager <std::vector <CRenderableComponent*> >,*/ public CTSingleton <CRenderManager>
 {
 protected:
 	CRenderManager();
@@ -584,10 +584,7 @@ public:
 };
 
 /**
-*	CGLWindow Provides functionality for creating window and holding info about window.
-*	Why we have this class if we can't create multiple windows, can't change some meaningful
-*	window properties in runtime? I think only to have access to window Width() and Height()
-*	if so, then this class can easily can be eliminated.
+* CGLWindow - a class that represents a GL window, is mostly used to create and resize it, and also holds video-mode-related things.
 */
 
 class CGLWindow : public CTSingleton<CGLWindow>

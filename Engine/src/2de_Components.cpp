@@ -4,7 +4,7 @@
 //////////////////////////////////////////////////////////////////////////
 // CGameObject
 
-CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
+CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 {
 	PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
 	CEventManager::Instance()->Subscribe("Create", this);
@@ -21,6 +21,15 @@ CGameObject::~CGameObject()
 	SetParent(NULL);
 
 	CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
+}
+
+CGameObject* CGameObject::Clone() const
+{
+	CGameObject *result = new CGameObject(*this);
+	CFactory::Instance()->Add(result);
+	result->SetScript(GetScript());
+	result->FinalizeCreation();
+	return result;
 }
 
 void CGameObject::Attach(CGameObject *AGameObject)
@@ -219,8 +228,15 @@ void CGameObject::ProcessEvent(const CEvent &AEvent)
 	fc.Call();
 }
 
+CScript* CGameObject::GetScript() const
+{
+	return Script;
+}
+
 void CGameObject::SetScript(CScript *AScript)
 {
+	Script = AScript;
+
 	CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
 	CLuaVirtualMachine::Instance()->RunScript(AScript);
 	CreateLuaObject();
@@ -245,6 +261,23 @@ void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 void CGameObject::JustDoIt()
 {
 
+}
+
+CGameObject::CGameObject(const CGameObject &AGameObject)
+{
+	Parent = NULL;
+	Scene = AGameObject.Scene;
+	ClassName = AGameObject.ClassName;
+	Prototype = AGameObject.Prototype;
+	Created = false;
+	Active = AGameObject.Active;
+
+	Dead = false;
+	Enabled = true;
+
+	PutIntoScene(Scene);
+	CEventManager::Instance()->Subscribe("Create", this);
+	Script = AGameObject.Script;
 }
 
 void CGameObject::_DestroySubtree(CGameObject *NextObject)
@@ -295,6 +328,15 @@ void CGameObject::CreateLuaObject()
 CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 {
 	SetName("CPlaceableComponent");	
+}
+
+CPlaceableComponent* CPlaceableComponent::Clone() const
+{
+	CPlaceableComponent *result = new CPlaceableComponent(*this);
+	CFactory::Instance()->Add(result);
+	result->SetScript(GetScript());
+	result->FinalizeCreation();
+	return result;
 }
 
 void CPlaceableComponent::SetAngle(float AAngle)
@@ -475,6 +517,27 @@ CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AM
 	SetName("CRenderableComponent");	
 }
 
+CRenderableComponent::~CRenderableComponent()
+{
+	if (Model != NULL && !CEngine::Instance()->isFinalizing())
+	{
+		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
+		Model->SetDestroyed();
+		Model = NULL;
+	}
+
+	//CRenderManager::Instance()->Remove(this);
+}
+
+CRenderableComponent* CRenderableComponent::Clone() const
+{
+	CRenderableComponent *result = new CRenderableComponent(*this);
+	CFactory::Instance()->Add(result);
+	result->SetScript(GetScript());
+	result->FinalizeCreation();
+	return result;
+}
+
 const RGBAf& CRenderableComponent::GetColor() const
 {
 	return Configuration.Color;
@@ -531,18 +594,6 @@ const CRenderConfig& CRenderableComponent::GetConfiguration() const
 CRenderConfig& CRenderableComponent::GetConfiguration()
 {
 	return Configuration;
-}
-
-CRenderableComponent::~CRenderableComponent()
-{
-	if (Model != NULL && !CEngine::Instance()->isFinalizing())
-	{
-		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
-		Model->SetDestroyed();
-		Model = NULL;
-	}
-
-	CRenderManager::Instance()->Remove(this);
 }
 
 bool CRenderableComponent::GetVisibility() const
@@ -679,6 +730,11 @@ const CBox& CRenderableComponent::GetBox() const
 	return Model->GetBox();
 }
 
+void CRenderableComponent::SetBox(const CBox& ABox)
+{
+	Box = ABox;
+}
+
 void CRenderableComponent::UpdateBox(const CBox& ABox)
 {
 	Box.Union(ABox);
@@ -708,11 +764,16 @@ void CRenderableComponent::UpdateBox(const CBox& ABox)
 #endif
 }
 
-void CRenderableComponent::SetBox(const CBox& ABox)
+CRenderableComponent::CRenderableComponent(const CRenderableComponent &ARenderableComponent) : CGameObject(ARenderableComponent)
 {
-	Box = ABox;
-}
+	WorldTransform = ARenderableComponent.WorldTransform;
+	Box = ARenderableComponent.Box;
+	Model = ARenderableComponent.Model;
+	Configuration = ARenderableComponent.Configuration;
+	Visible = ARenderableComponent.Visible;
 
+	//*this = ARenderableComponent;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // CText
@@ -727,6 +788,19 @@ CText::CText(const string &AText) : Font(CFontManager::Instance()->GetDefaultFon
 {
 	assert(Font != NULL);
 	SetText(Characters);
+}
+
+CText::~CText()
+{
+}
+
+CText* CText::Clone() const
+{
+	CText *result = new CText(*this);
+	CFactory::Instance()->Add(result);
+	result->SetScript(GetScript());
+	result->FinalizeCreation();
+	return result;
 }
 
 CFont* CText::GetFont() const
@@ -772,11 +846,6 @@ CText& CText::operator =(const string &AText)
 	return *this;
 }
 
-CText::~CText()
-{
-	
-}
-
 unsigned char CText::operator[](unsigned index) const
 {
 	return Characters[index];
@@ -801,6 +870,12 @@ void CText::Deserialize(CXMLNode *AXML)
 	}
 }
 
+CText::CText(const CText &AText) : CRenderableComponent(AText)
+{
+	Font = AText.Font;
+	SetText(AText.GetText());
+}
+
 void CText::_UpdateSelfModel()
 {
 	if (Model != NULL)
@@ -819,6 +894,15 @@ void CText::_UpdateSelfModel()
 
 CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), Interval(AInterval), Accumulated(0.0f)
 {
+}
+
+CTimerComponent* CTimerComponent::Clone() const
+{
+	CTimerComponent *result = new CTimerComponent(*this);
+	CFactory::Instance()->Add(result);
+	result->SetScript(GetScript());
+	result->FinalizeCreation();
+	return result;
 }
 
 void CTimerComponent::ProcessEvent(const CEvent &AEvent)

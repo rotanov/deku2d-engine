@@ -102,6 +102,7 @@ public:
 			Graphics.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 		}
 		Graphics.SetActive(true);
+		// if (/*!Graphics.GetVisibility() ||*/ Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
 		if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
 			Graphics.SetActive(false);
 	}
@@ -467,11 +468,11 @@ bool CFont::Load()
 	if (Loaded)
 		return true;
 
-	CStorage *storage;
+	std::auto_ptr<CStorage> storage;
 
 	if (Source == LOAD_SOURCE_FILE)
 	{
-		storage = new CFile(Filename, CFile::OPEN_MODE_READ);
+		storage.reset(new CFile(Filename, CFile::OPEN_MODE_READ));
 		if (!storage->Good())
 		{
 			Log("ERROR", "Can't open font file '%s'", Filename.c_str());
@@ -481,7 +482,7 @@ bool CFont::Load()
 	}
 	else if (Source == LOAD_SOURCE_MEMORY)
 	{
-		storage = new CMemory(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ);
+		storage.reset(new CMemory(MemoryLoadData, MemoryLoadLength, CStorage::OPEN_MODE_READ));
 		if (!storage->Good())
 		{
 			Log("ERROR", "Can't open font from memory storage");
@@ -519,7 +520,6 @@ bool CFont::Load()
 	storage->Read(Boxes, sizeof(Boxes));
 
 	storage->Close();
-	delete storage;
 
 	for (int i = 0; i < 256; i++)
 	{

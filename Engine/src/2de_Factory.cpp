@@ -114,8 +114,6 @@ void CFactory::Destroy(CObject *AObject)
 
 	Objects.erase(i);
 	Deletion.push(AObject);
-
-	//CObject::DecRefCount(AObject);
 }
 
 /**

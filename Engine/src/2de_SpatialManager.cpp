@@ -2,6 +2,10 @@
 #include "2de_Components.h"
 #include "2de_Engine.h"
 
+CAbstractSpatialManager::~CAbstractSpatialManager()
+{
+}
+
 void CBruteForceSpatialManager::PushBox(CObject *Host, const CBox &Box)
 {
 	Data.push_back(std::pair<CObject *, CBox>(Host, Box));

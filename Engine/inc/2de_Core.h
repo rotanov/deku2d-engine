@@ -59,6 +59,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <memory>
 #include <memory.h>
 #include <queue>
 #include <set>
@@ -370,9 +371,6 @@ public:
 	CObject();
 	virtual ~CObject();
 
-	void IncRefCount();
-	static void DecRefCount(CObject* AObject);
-
 	string GetName() const;
 	virtual void SetName(const string &AObjectName);
 
@@ -386,16 +384,15 @@ public:
 	virtual void ProcessEvent(const CEvent &AEvent);
 
 protected:
+	CObject(const CObject &AObject);
+	CObject& operator=(const CObject &AObject);
+
 	bool Managed;
 	bool Destroyed;
 	unsigned ID;
 	string Name;
 
 private:
-	CObject(const CObject &AObject);
-	CObject& operator=(const CObject &AObject);
-	//size_t RefCount;
-
 	static unsigned CObjectCount;
 
 	friend class CFactory;
@@ -436,7 +433,6 @@ public:
 
 	virtual void Add(const T &AObject)
 	{
-		//AObject->IncRefCount();
 		Objects.push_back(AObject);
 	}
 
@@ -464,7 +460,6 @@ public:
 		if (temp == NULL)
 			return;
 		Objects.remove(temp);
-		//CObject::DecRefCount(temp);
 	}
 
 	void Remove(const string &AName)
@@ -479,13 +474,10 @@ public:
 		if (temp == NULL)
 			return;
 		Objects.remove(temp);
-		//CObject::DecRefCount(temp);
 	}
 
 	virtual ~CCommonManager()
 	{
-		/*for (ManagerIterator i = Objects.begin(); i != Objects.end(); ++i)
-			CObject::DecRefCount(*i);*/
 		Objects.clear();
 	}
 };

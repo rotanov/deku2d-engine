@@ -96,7 +96,7 @@ function BlackNinja:OnEveryFrame()
 	
 	if self.shooting then
 		local projectile = Create('ProjectileProto', '')
-		Attach(self:GetParent(), projectile.object)
+		self.parent:Attach(projectile)
 		projectile.pos:SetPosition(self.pos:GetPosition())
 		--self.pos:Attach(projectile)
 		local mc = GetObject('Mouse cursor')

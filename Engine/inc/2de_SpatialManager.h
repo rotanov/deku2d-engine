@@ -16,6 +16,8 @@
 class CAbstractSpatialManager
 {
 public:
+	virtual ~CAbstractSpatialManager();
+
 	virtual void PushBox(CObject *Host, const CBox &Box) = 0;
 	virtual void GetObjectsInRegion(const CBox &Region, vector<CObject *> &Destination) = 0;
 

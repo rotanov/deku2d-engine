@@ -145,7 +145,6 @@ void CFactory::Add(T *AObject, const string &AName /*= ""*/)
 	}
 
 	Objects[ObjectName] = AObject;
-	//AObject->IncRefCount();
 	AObject->Managed = true;
 }
 
@@ -195,7 +194,6 @@ T* CFactory::Remove(const string &AName)
 
 	result->Managed = false;
 	Objects.erase(AName);
-	//CObject::DecRefCount(result);
 
 	return result;
 }

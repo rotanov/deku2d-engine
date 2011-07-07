@@ -27,6 +27,10 @@ function GameObject:DestroyFull()
 	DestroySubtree(self.object)
 end
 
+function GameObject:Clone()
+	return GetObjectTable(Clone(self.object))
+end
+
 function GameObject:GetName()
 	return GetName(self.object)
 end
