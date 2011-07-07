@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Prototype Name="ProjectileProto" Script="ClassesTest" ClassName="Projectile">
     <PlaceableComponent LocalName = "pos" Position="0 0">
-        <RenderableComponent LocalName = "model" Model="Box" Width="10" Height="10">
+        <RenderableComponent LocalName = "model" Model="Box" Width="15" Height="15">
         </RenderableComponent>
     </PlaceableComponent>
 </Prototype>

@@ -77,7 +77,7 @@ protected:
 	{
 		CFactory::Instance()->Add(AObject);
 		AObject->SetScript(AObject->GetScript());
-		AObject->FinalizeCreation();
+		AObject->FinalizeCreation();	// i'm not sure about this.. this is wrong for prototypes, i think..
 		return AObject;
 	}
 

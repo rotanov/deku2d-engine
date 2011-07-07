@@ -32,13 +32,13 @@ for i = 0, 10 do
 	ninja.pos:SetPosition(i * 50, 100)
 	Root:Attach(ninja)
 end
---]]
 
 for i = 0, 10 do
 	local ninja = Create("BlackNinja", "")
 	ninja.pos:SetPosition(i * 50, 380)
 	Root:Attach(ninja)
 end
+--]]
 
 
 -- Another Ninja

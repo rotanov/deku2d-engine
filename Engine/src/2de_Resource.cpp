@@ -288,7 +288,10 @@ void CResourceManager::PerformUnload()
 
 	for (set<CResource *>::iterator it = UnloadQueue.begin(); it != UnloadQueue.end(); ++it)
 	{
-		(*it)->Unload(); 
+		if ((*it)->GetLoadSource() == CResource::LOAD_SOURCE_DISABLED)
+			CFactory::Instance()->Destroy(*it);
+		else
+			(*it)->Unload(); 
 	}
 
 	UnloadQueue.clear();

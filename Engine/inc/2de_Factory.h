@@ -38,7 +38,7 @@ public:
 	void Add(T *AObject, const string &AName = "");
 
 	template<typename T>
-	T* Get(const string &AName);
+	T* Get(const string &AName, bool AMustExist = true);
 
 	template<typename T>
 	T* Remove(const string &AName);
@@ -51,6 +51,9 @@ public:
 	bool IsClassExists(const string &AName);
 
 protected:
+	typedef map<string, CObject *> ObjectsContainer;
+	typedef ObjectsContainer::iterator ObjectsIterator;
+
 	CFactory();
 	~CFactory();
 	friend class CTSingleton<CFactory>;
@@ -67,12 +70,10 @@ protected:
 #endif
 
 	template<typename T>
-	CObject *InternalNew(const string &AName);
+	CObject* InternalNew(const string &AName);
 
 	ClassesContainer Classes;
-
-	map<string, CObject*> Objects;
-
+	ObjectsContainer Objects;
 	queue<CObject *> Deletion;
 
 };
@@ -103,7 +104,7 @@ CObject* CFactory::InternalNew(const string &AName)
 		//throw std::logic_error("Object with name '" + AName + "' already exists.");
 	}
 
-	T* result = new T;
+	T *result = new T;
 
 	Add(result, AName);
 
@@ -137,14 +138,13 @@ void CFactory::Add(T *AObject, const string &AName /*= ""*/)
 
 	string ObjectName = AObject->GetName();
 
-	if (Objects.count(ObjectName) != 0)
+	if (!Objects.insert(make_pair(ObjectName, AObject)).second)
 	{
 		Log("ERROR", "Object with name '%s' already exists", ObjectName.c_str());
 		throw std::logic_error("Object with name '" + ObjectName + "' already exists.");
 		return;
 	}
 
-	Objects[ObjectName] = AObject;
 	AObject->Managed = true;
 }
 
@@ -154,16 +154,18 @@ void CFactory::Add(T *AObject, const string &AName /*= ""*/)
 */
 
 template<typename T>
-T* CFactory::Get(const string &AName)
+T* CFactory::Get(const string &AName, bool AMustExist /*= true*/)
 {
-	if (Objects.count(AName) == 0)
+	ObjectsIterator it = Objects.find(AName);
+	if (it == Objects.end())
 	{
-		Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
+		if (AMustExist)
+			Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
 		return NULL;
 	}
 
-	T* result = dynamic_cast<T*>(Objects[AName]);
-	if (result == NULL)
+	T *result = dynamic_cast<T *>(it->second);
+	if (!result)
 	{
 		Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
 	}
@@ -179,21 +181,22 @@ T* CFactory::Get(const string &AName)
 template<typename T>
 T* CFactory::Remove(const string &AName)
 {
-	if (Objects.count(AName) == 0)
+	ObjectsIterator it = Objects.find(AName);
+	if (it == Objects.end())
 	{
-		Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
+		Log("ERROR", "Can't remove object named '%s' from factory: factory can't find this object", AName.c_str());
 		return NULL;
 	}
 
-	T* result = dynamic_cast<T *>(Objects[AName]);
+	T *result = dynamic_cast<T *>(it->second);
 	if (!result)
 	{
 		Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
 		return NULL;
 	}
 
-	result->Managed = false;
-	Objects.erase(AName);
+	it->second->Managed = false;
+	Objects.erase(it);
 
 	return result;
 }

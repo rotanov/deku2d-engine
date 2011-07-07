@@ -96,7 +96,7 @@ void CFactory::Rename(const string &AName, const string &ANewName)
 
 void CFactory::Destroy(CObject *AObject)
 {
-	map<string, CObject*>::iterator i;
+	ObjectsIterator i;
 	
 	for (i = Objects.begin(); i != Objects.end(); ++i)
 	{
@@ -140,7 +140,7 @@ void CFactory::CleanUp()
 // well, maybe there is better way to do final all-destroy clean-up..
 void CFactory::DestroyAll()
 {
-	for (map<string, CObject*>::iterator i = Objects.begin(); i != Objects.end(); ++i)
+	for (ObjectsIterator i = Objects.begin(); i != Objects.end(); ++i)
 		Deletion.push(i->second);
 
 	Objects.clear();
@@ -272,5 +272,4 @@ void CFactory::InsertDebugInfo( CObject* Source )
 }
 
 #endif
-
 

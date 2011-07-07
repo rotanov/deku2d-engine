@@ -874,11 +874,12 @@ void CRenderManager::SetSwapInterval(int interval /*= 1*/)
 
 CModel* CRenderManager::CreateModelCircle(float Radius, EModelType AModelType /*= MODEL_TYPE_LINES*/, int Precision /*= 16*/)
 {
-	
 	string identString = "Circle" + CRenderManager::StringIdentifierByModelType(AModelType) + "R" + to_string(Radius) + "P" + to_string(Precision);
-	CModel *Result = CFactory::Instance()->Get<CModel>(identString);
+
+	CModel *Result = CFactory::Instance()->Get<CModel>(identString, false);
 	if (Result != NULL)
 		return Result;
+
 	Vector2 *Vertices = NULL;
 	unsigned NumberOfVertices = 0;
 	switch (AModelType)
@@ -949,10 +950,11 @@ CModel* CRenderManager::CreateModelBox(float Width, float Height, EModelType AMo
 	for (unsigned i = 0; i < 4; i++)
 		tcIdent += "x" + to_string(ATexCoords[i].x) + "y" + to_string(ATexCoords[i].y);
 	string identString = "Box" + CRenderManager::StringIdentifierByModelType(AModelType) + (ATexture != NULL ? ATexture->GetName() : "NA") + "w" + to_string(Width) + "h" + to_string(Height) + tcIdent;
-	CModel *Result = NULL;
-	Result = CFactory::Instance()->Get<CModel>(identString);
+
+	CModel *Result = CFactory::Instance()->Get<CModel>(identString, false);
 	if (Result != NULL)
 		return Result;
+
 	float wd2 = Width * 0.5f, hd2 = Height * 0.5f;
 	switch(AModelType)
 	{
@@ -1009,9 +1011,11 @@ CModel* CRenderManager::CreateModelBox(float Width, float Height, EModelType AMo
 CModel* CRenderManager::CreateModelLine(const Vector2 &v0, const Vector2 &v1)
 {
 	string identString = "Line" + ( "x" + to_string(v0.x) ) + "y" + to_string(v0.y) + "x" + to_string(v1.x) + "y" + to_string(v1.y);
-	CModel *Result = CFactory::Instance()->Get<CModel>(identString);
+
+	CModel *Result = CFactory::Instance()->Get<CModel>(identString, false);
 	if (Result != NULL)
 		return Result;
+
 	Vector2 Vertices[2];
 	Vertices[0] = v0;
 	Vertices[1] = v1;
