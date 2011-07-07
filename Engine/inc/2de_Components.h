@@ -72,6 +72,15 @@ public:
 protected:
 	CGameObject(const CGameObject &AGameObject);
 
+	template<typename T>
+	T CloneHelper(T AObject) const
+	{
+		CFactory::Instance()->Add(AObject);
+		AObject->SetScript(AObject->GetScript());
+		AObject->FinalizeCreation();
+		return AObject;
+	}
+
 private:
 	typedef vector<CGameObject *> ChildrenContainer;
 	typedef ChildrenContainer::iterator ChildrenIterator;

@@ -25,11 +25,7 @@ CGameObject::~CGameObject()
 
 CGameObject* CGameObject::Clone() const
 {
-	CGameObject *result = new CGameObject(*this);
-	CFactory::Instance()->Add(result);
-	result->SetScript(GetScript());
-	result->FinalizeCreation();
-	return result;
+	return CloneHelper(new CGameObject(*this));
 }
 
 void CGameObject::Attach(CGameObject *AGameObject)
@@ -332,11 +328,7 @@ CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMir
 
 CPlaceableComponent* CPlaceableComponent::Clone() const
 {
-	CPlaceableComponent *result = new CPlaceableComponent(*this);
-	CFactory::Instance()->Add(result);
-	result->SetScript(GetScript());
-	result->FinalizeCreation();
-	return result;
+	return CloneHelper(new CPlaceableComponent(*this));
 }
 
 void CPlaceableComponent::SetAngle(float AAngle)
@@ -531,11 +523,7 @@ CRenderableComponent::~CRenderableComponent()
 
 CRenderableComponent* CRenderableComponent::Clone() const
 {
-	CRenderableComponent *result = new CRenderableComponent(*this);
-	CFactory::Instance()->Add(result);
-	result->SetScript(GetScript());
-	result->FinalizeCreation();
-	return result;
+	return CloneHelper(new CRenderableComponent(*this));
 }
 
 const RGBAf& CRenderableComponent::GetColor() const
@@ -796,11 +784,7 @@ CText::~CText()
 
 CText* CText::Clone() const
 {
-	CText *result = new CText(*this);
-	CFactory::Instance()->Add(result);
-	result->SetScript(GetScript());
-	result->FinalizeCreation();
-	return result;
+	return CloneHelper(new CText(*this));
 }
 
 CFont* CText::GetFont() const
@@ -898,11 +882,7 @@ CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), I
 
 CTimerComponent* CTimerComponent::Clone() const
 {
-	CTimerComponent *result = new CTimerComponent(*this);
-	CFactory::Instance()->Add(result);
-	result->SetScript(GetScript());
-	result->FinalizeCreation();
-	return result;
+	return CloneHelper(new CTimerComponent(*this));
 }
 
 void CTimerComponent::ProcessEvent(const CEvent &AEvent)
