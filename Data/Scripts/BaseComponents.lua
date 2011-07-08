@@ -31,6 +31,10 @@ function GameObject:Clone()
 	return GetObjectTable(Clone(self.object))
 end
 
+function GameObject:CloneTree()
+	return GetObjectTable(CloneTree(self.object))
+end
+
 function GameObject:GetName()
 	return GetName(self.object)
 end

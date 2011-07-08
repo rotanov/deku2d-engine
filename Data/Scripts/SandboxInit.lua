@@ -48,6 +48,12 @@ another_ninja.pos:SetPosition(350, 100)
 Root:Attach(another_ninja)
 --]]
 
+-- Cloned Ninja
+
+local cloned_ninja = another_ninja:CloneTree()
+cloned_ninja:FindFirstOfClass("PlaceableComponent"):SetPosition(250, 100)
+Root:Attach(cloned_ninja)
+
 -- Some shit, I don't recall what is it
 --[[
 Root:Attach(Create("SandboxProto", "SandboxInst")
@@ -72,6 +78,7 @@ TestBoxInst.pos:Attach(Create("Dragable", ""))
 --]]
 
 -- Clone test
+--[[
 local text1 = Create("Text", "")
 local text2 = text1:Clone()
 
@@ -90,6 +97,7 @@ place2:SetPosition(200, 200)
 
 Root:Attach(Place1)
 Root:Attach(place2)
+--]]
 
 -- LuaPerfCounter - a text that shows how much memory lua is using
 local lpc = Create("LuaPerfCounter", "")

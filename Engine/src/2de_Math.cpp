@@ -6,6 +6,8 @@
 #include <algorithm>
 
 unsigned g_seed = 152406923;
+//unsigned g_seed = time(NULL);
+
 static float SineTable[SINE_COSINE_TABLE_DIM], CosineTable[SINE_COSINE_TABLE_DIM];
 
 Vector2 Vector2::operator *(const Matrix2& M) const

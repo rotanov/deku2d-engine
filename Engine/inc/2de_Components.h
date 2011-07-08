@@ -24,10 +24,13 @@ public:
 	typedef map<string, CGameObject*> LNOMType;	// ???
 	LNOMType LocalNameObjectMapping; // ???
 
+	typedef map<CGameObject *, CGameObject *> AlreadyClonedContainer;
+
 	CGameObject();
 	virtual ~CGameObject();
 
 	virtual CGameObject* Clone() const;
+	CGameObject* CloneTree(AlreadyClonedContainer *AlreadyCloned = NULL) const;
 
 	void Attach(CGameObject *AGameObject);
 	void Detach(CGameObject *AGameObject);
@@ -75,15 +78,16 @@ protected:
 	template<typename T>
 	T CloneHelper(T AObject) const
 	{
-		CFactory::Instance()->Add(AObject);
+		CFactory::Instance()->Add(AObject, GetName() + "copy" + itos(AObject->GetID()));	// may be names will be too long..
 		AObject->SetScript(AObject->GetScript());
-		AObject->FinalizeCreation();	// i'm not sure about this.. this is wrong for prototypes, i think..
+		AObject->FinalizeCreation();	// i'm not sure about this.. this is wrong for prototypes, i think.. // but it works..
 		return AObject;
 	}
 
 private:
 	typedef vector<CGameObject *> ChildrenContainer;
 	typedef ChildrenContainer::iterator ChildrenIterator;
+	typedef ChildrenContainer::const_iterator ChildrenConstIterator;
 
 	static void _DestroySubtree(CGameObject *NextObject);
 	CGameObject* FindPrototype();

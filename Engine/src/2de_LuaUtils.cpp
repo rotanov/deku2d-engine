@@ -65,6 +65,18 @@ namespace LuaAPI
 		return 1;
 	}
 
+	// userdata CloneTree(userdata GameObject)
+	int CloneTree(lua_State *L)
+	{
+		CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
+		if (!obj)
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in CloneTree API call");
+
+
+		lua_pushlightuserdata(L, obj->CloneTree());
+		return 1;
+	}
+
 	// string GetName(userdata Object)
 	int GetName(lua_State *L)
 	{
@@ -924,6 +936,7 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	lua_register(L, "Destroy", &LuaAPI::Destroy);
 	lua_register(L, "DestroySubtree", &LuaAPI::DestroySubtree);
 	lua_register(L, "Clone", &LuaAPI::Clone);
+	lua_register(L, "CloneTree", &LuaAPI::CloneTree);
 	lua_register(L, "GetName", &LuaAPI::GetName);
 	lua_register(L, "GetParent", &LuaAPI::GetParent);
 	lua_register(L, "GetChild", &LuaAPI::GetChild);

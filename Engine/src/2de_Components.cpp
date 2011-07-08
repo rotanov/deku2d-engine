@@ -28,6 +28,43 @@ CGameObject* CGameObject::Clone() const
 	return CloneHelper(new CGameObject(*this));
 }
 
+CGameObject* CGameObject::CloneTree(AlreadyClonedContainer *AlreadyCloned /*= NULL*/) const
+{
+	CGameObject *result = Clone();
+
+	map<CGameObject *, CGameObject *> *FirstAlreadyCloned = NULL;
+	if (!AlreadyCloned)
+			AlreadyCloned = FirstAlreadyCloned = new AlreadyClonedContainer;
+
+	CGameObject *obj = NULL;
+
+	for (LNOMType::const_iterator it = LocalNameObjectMapping.begin(); it != LocalNameObjectMapping.end(); ++it)
+	{
+		obj = it->second->CloneTree(AlreadyCloned);
+		result->LocalNameObjectMapping[it->first] = obj;
+		(*AlreadyCloned)[it->second] = obj;
+	}
+
+
+	for (ChildrenConstIterator it = Children.begin(); it != Children.end(); ++it)
+	{
+		if (AlreadyCloned->count(*it))
+			obj = (*AlreadyCloned)[*it];
+		else
+			obj = (*it)->CloneTree(AlreadyCloned);
+
+		result->Attach(obj);
+	}
+
+	if (IsPrototype())
+		result->FinalizeCreation();
+
+	if (FirstAlreadyCloned)
+		delete FirstAlreadyCloned;
+
+	return result;
+}
+
 void CGameObject::Attach(CGameObject *AGameObject)
 {
 	if (!AGameObject)
@@ -511,14 +548,6 @@ CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AM
 
 CRenderableComponent::~CRenderableComponent()
 {
-	if (Model != NULL && !CEngine::Instance()->isFinalizing())
-	{
-		//Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
-		//Model->SetDestroyed();
-		Model = NULL;
-	}
-
-	//CRenderManager::Instance()->Remove(this);
 }
 
 CRenderableComponent* CRenderableComponent::Clone() const
@@ -560,12 +589,6 @@ CModel* CRenderableComponent::GetModel() const
 
 void CRenderableComponent::SetModel(CModel *AModel)
 {
-	if (Model != NULL)
-	{
-		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
-		Model->SetDestroyed();
-		Model = NULL;
-	}
 	Model = AModel;	
 }
 
