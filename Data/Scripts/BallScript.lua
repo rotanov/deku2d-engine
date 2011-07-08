@@ -6,14 +6,9 @@ function BallScriptable:OnCreate()
 	self.BallSpeed = 250
 	SubscribeToEvent(self.object, "EveryFrame")
 	SubscribeToEvent(self.object, "Reset")
-	SubscribeToEvent(self.object, "Attached")
 end
 
-function BallScriptable:OnAttached(event)
-	if GetEventData(event, "Name") ~= GetName(self.object) then
-		return
-	end
-
+function BallScriptable:OnAttached()
 	self.Place = GetParent(GetParent(self.object))
 	self:Initialize()
 end

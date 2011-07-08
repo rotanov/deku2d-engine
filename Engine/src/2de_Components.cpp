@@ -135,9 +135,10 @@ void CGameObject::SetParent(CGameObject *AGameObject)
 		{
 			Parent->Children.erase(it);
 
-			CEvent *DetachedEvent = new CEvent("Detached", this);
-			DetachedEvent->SetData("Name", GetName());
-			CEventManager::Instance()->TriggerEvent(DetachedEvent);
+			// i already hate this isFinalizing kludge, but the following call segfaults at finalizing time without it..
+			// may be we will get rid of it when we have some cool memory managers, etc., but now i leave it as is..
+			if (!CEngine::Instance()->isFinalizing() && CLuaVirtualMachine::Instance()->IsMethodFunctionExists(GetName(), "OnDetached"))
+				CLuaVirtualMachine::Instance()->CallMethodFunction(GetName(), "OnDetached");
 		}
 	}
 
@@ -149,9 +150,8 @@ void CGameObject::SetParent(CGameObject *AGameObject)
 		{
 			Parent->Children.push_back(this);
 
-			CEvent *AttachedEvent = new CEvent("Attached", this);
-			AttachedEvent->SetData("Name", GetName());
-			CEventManager::Instance()->TriggerEvent(AttachedEvent);
+			if (!CEngine::Instance()->isFinalizing() && CLuaVirtualMachine::Instance()->IsMethodFunctionExists(GetName(), "OnAttached"))
+				CLuaVirtualMachine::Instance()->CallMethodFunction(GetName(), "OnAttached");
 		}
 	}
 

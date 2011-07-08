@@ -1,5 +1,5 @@
 -- Rotating squares, with relative positioning
---[[
+---[[
 for i = 0, 3 do
 	local a = Create("A", "")
 	a.pos:SetPosition(0, 0)

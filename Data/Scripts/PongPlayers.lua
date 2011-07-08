@@ -11,13 +11,8 @@ function PongPlayer()
 		MovingDown = false,
 		OnCreate = function(self)
 			SubscribeToEvent(self.object, "EveryFrame")
-			SubscribeToEvent(self.object, "Attached")
 		end,
-		OnAttached = function(self, event)
-			if GetEventData(event, "Name") ~= GetName(self.object) then
-				return
-			end
-
+		OnAttached = function(self)
 			self.Place = GetParent(GetParent(self.object))
 		end,
 		MoveUp = function(self)

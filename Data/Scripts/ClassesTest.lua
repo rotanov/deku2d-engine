@@ -4,14 +4,10 @@ function A:OnCreate()
 	self.depth = 1
 	self.life = 5
 	self.lifesettled = false
-	self:Subscribe("Attached")
 	self:Subscribe("EveryFrame")
 end
 
-function A:OnAttached(event)
-	if GetEventData(event, "Name") ~= self:GetName() then
-		return
-	end
+function A:OnAttached()
 	self.model:SetColor(1, 0, 0, 1)
 end
 
