@@ -175,6 +175,7 @@ CMainConfigDefaults::CMainConfigDefaults(const string &ARootNodeName) : CConfigD
 {
 	// fill Data with defaults
 	Set("Video", "Fullscreen", "false");
+	Set("Video", "FpsLimit", "60");
 	Set("Data", "LogLevel", "0");
 }
 

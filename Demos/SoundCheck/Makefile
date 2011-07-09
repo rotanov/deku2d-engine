@@ -3,7 +3,7 @@ SOURCES		=	src/main.cpp
 HEADERS		=	inc/SoundCheck.h
 
 TARGET		=	bin/SoundCheck
-ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
+ENGINE_LIB	=	../../Engine/lib/libDeku2D.a
 
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 

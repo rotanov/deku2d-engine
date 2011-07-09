@@ -136,7 +136,7 @@ using std::numeric_limits;
 typedef unsigned char byte;
 
 //	"Forever" instead of "for(;;)", anyway, just kidding.
-#define forever for(;;)
+//#define forever for(;;)
 
 template<typename T>
 __INLINE void SAFE_DELETE(T*& a)

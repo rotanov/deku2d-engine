@@ -4,7 +4,7 @@ SOURCES		=	src/main.cpp \
 HEADERS		=	src/Color\ Lines.h
 
 TARGET		=	bin/Color\ lines
-ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
+ENGINE_LIB	=	../../Engine/lib/libDeku2D.a
 
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 

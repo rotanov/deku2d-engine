@@ -29,8 +29,8 @@ public:
 	CGameObject();
 	virtual ~CGameObject();
 
-	virtual CGameObject* Clone() const;
-	CGameObject* CloneTree(AlreadyClonedContainer *AlreadyCloned = NULL) const;
+	virtual CGameObject* Clone(const string &ACloneName = "") const;
+	CGameObject* CloneTree(const string &ACloneName = "", AlreadyClonedContainer *AlreadyCloned = NULL) const;
 
 	void Attach(CGameObject *AGameObject);
 	void Detach(CGameObject *AGameObject);
@@ -76,9 +76,9 @@ protected:
 	CGameObject(const CGameObject &AGameObject);
 
 	template<typename T>
-	T CloneHelper(T AObject) const
+	T CloneHelper(T AObject, const string &ACloneName = "") const
 	{
-		CFactory::Instance()->Add(AObject, GetName() + "copy" + itos(AObject->GetID()));	// may be names will be too long..
+		CFactory::Instance()->Add(AObject, ACloneName.empty() ? GetName() + "copy" + itos(AObject->GetID()) : ACloneName);	// may be names will be too long..
 		AObject->SetScript(AObject->GetScript());
 		AObject->FinalizeCreation();	// i'm not sure about this.. this is wrong for prototypes, i think.. // but it works..
 		return AObject;
@@ -120,7 +120,7 @@ public:
 
 	CPlaceableComponent();
 
-	CPlaceableComponent* Clone() const;
+	CPlaceableComponent* Clone(const string &ACloneName = "") const;
 
 	float GetAngle() const;
 	const CBox& GetBox() const;
@@ -231,7 +231,7 @@ public:
 	CRenderableComponent(CModel *AModel = NULL);
 	virtual ~CRenderableComponent();
 
-	CRenderableComponent* Clone() const;
+	CRenderableComponent* Clone(const string &ACloneName = "") const;
 
 	const CBox& GetBox() const;
 	void SetBox(const CBox& ABox);
@@ -296,7 +296,7 @@ public:
 	CText(const string &AText);
 	~CText();
 
-	CText* Clone() const;
+	CText* Clone(const string &ACloneName = "") const;
 
 	CFont* GetFont() const;
 	string& GetText();
@@ -329,7 +329,7 @@ public:
 
 	CTimerComponent(float AInterval = 0.0f);
 
-	CTimerComponent* Clone() const;
+	CTimerComponent* Clone(const string &ACloneName = "") const;
 
 	void ProcessEvent(const CEvent &AEvent);
 

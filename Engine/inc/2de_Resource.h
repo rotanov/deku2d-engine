@@ -36,18 +36,13 @@ public:
 };
 
 /**
-* CResourceRefCounterState - class that stores state of reference counting in its static members.
+* CResourceRefCounterBase - class that contains static function that returns true if the engine is finalizing.
 */
 
-class CResourceRefCounterState
+class CResourceRefCounterBase
 {
 public:
-	static void DisableRC();
 	static bool IsRCDisabled();
-
-private:
-	static bool RCDisabled;
-
 };
 
 /**
@@ -55,7 +50,7 @@ private:
 */
 
 template<typename T>
-class CResourceRefCounter
+class CResourceRefCounter : public CResourceRefCounterBase
 {
 public:
 	CResourceRefCounter(T *Source = NULL);
@@ -302,7 +297,7 @@ CResourceRefCounter<T>::~CResourceRefCounter()
 template<typename T>
 void CResourceRefCounter<T>::Assign(T *Source)
 {
-	if (CResourceRefCounterState::IsRCDisabled())
+	if (IsRCDisabled())
 		return;
 
 	if (Pointer != NULL)

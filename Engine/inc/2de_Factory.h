@@ -64,6 +64,7 @@ protected:
 
 	CXMLNode* GetPrototypeXML(const string &AName);
 	CObject* CreateClassInstance(const string &AClassName, const string &AName);
+	CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
 
 #if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 	void InsertDebugInfo( CObject* Source );
@@ -75,6 +76,7 @@ protected:
 	ClassesContainer Classes;
 	ObjectsContainer Objects;
 	queue<CObject *> Deletion;
+	map<string, CGameObject *> CachedProtos;
 
 };
 

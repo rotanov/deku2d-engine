@@ -7,20 +7,9 @@ CEngine CEngine::EngineInstance;
 
 CEngine::CEngine()
 {
-	memset(Keys, 0, sizeof(Keys));
-
-	Initialized = false;
-	Finalizing = false;
-	isHaveFocus = true;
-	userReInit = false;
-
-	doExitOnEscape = true;
-	doLimitFPS = false;
-	doCalcFPS = true;
+	SetInitialValues();
 
 	ProgramName = "Some Deku2D-using program";
-
-	FPSText = NULL;
 
 	StateHandler = NULL;
 	SetStateHandler<CAbstractStateHandler>();
@@ -30,14 +19,13 @@ CEngine::CEngine()
 	CSingletonManager::Init();
 
 	SpatialManager = new CBruteForceSpatialManager();
-
-	RootGameObject = NULL;
 }
 
 CEngine::~CEngine()
 {
 	delete StateHandler;
 	delete SpatialManager;
+	CSingletonManager::Finalize();
 }
 
 CEngine* CEngine::Instance()
@@ -47,7 +35,6 @@ CEngine* CEngine::Instance()
 
 bool CEngine::Initialize()
 {
-
 	CLog::Instance()->SetLogFilePath(CEnvironment::Paths::GetLogPath());
 	CLog::Instance()->SetLogName("System");
 	Log("INFO", "Working directory is '%s'", CEnvironment::Paths::GetWorkingDirectory().c_str());
@@ -172,10 +159,8 @@ void CEngine::Finalize()
 {
 	Log("INFO", "Finalization started");
 	Finalizing = true;
-	CResourceRefCounterState::DisableRC();
 	CFactory::Instance()->DestroyAll();
 	CSingletonManager::Instance()->Clear();
-	CSingletonManager::Finalize();
 
 #if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 	DumpUnfreed();
@@ -185,6 +170,8 @@ void CEngine::Finalize()
 	SDL_Quit();
 
 	StateHandler->OnFinalize();
+
+	Finalizing = false;
 }
 
 bool CEngine::ProcessArguments(int argc, char *argv[])
@@ -395,6 +382,8 @@ bool CEngine::ProcessEvents()
 
 bool CEngine::Run(int argc, char *argv[])
 {
+	SetInitialValues();
+
 	StateHandler->OnBeforeInitialize();
 
 	if (!ProcessArguments(argc, argv))
@@ -575,4 +564,20 @@ bool CEngine::IsKeyRepeatEnabled() const
 bool CEngine::IsShowFPSEnabled(bool AdoShowFPS) const
 {
 	return FPSText->GetVisibility();
+}
+
+void CEngine::SetInitialValues()
+{
+	memset(Keys, 0, sizeof(Keys));
+
+	Initialized = false;
+	Finalizing = false;
+	isHaveFocus = true;
+
+	doExitOnEscape = true;
+	doLimitFPS = false;
+	doCalcFPS = true;
+
+	FPSText = NULL;
+	RootGameObject = NULL;
 }

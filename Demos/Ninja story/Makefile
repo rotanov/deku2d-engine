@@ -3,7 +3,7 @@ SOURCES		=	src/main.cpp
 HEADERS		=	
 
 TARGET		=	bin/Ninja\ story
-ENGINE_LIB	=	../../Engine/lib/libDeku2d.a
+ENGINE_LIB	=	../../Engine/lib/libDeku2D.a
 
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 

@@ -949,6 +949,8 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 		if (Stream == NULL || !dynamic_cast<ofstream*>(Stream)->is_open())
 		{
 			cerr << "Can't open log file '" << NewLogFileName << "'." << endl;
+			cerr << "Falling back to log to stdout..." << endl;
+			SetLogMode(LOG_MODE_STDOUT);
 			return;
 		}
 		Log("INFO", "Log to file '%s' started", NewLogFileName.c_str());

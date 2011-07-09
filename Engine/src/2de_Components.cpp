@@ -23,14 +23,14 @@ CGameObject::~CGameObject()
 	CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
 }
 
-CGameObject* CGameObject::Clone() const
+CGameObject* CGameObject::Clone(const string &ACloneName /*= ""*/) const
 {
-	return CloneHelper(new CGameObject(*this));
+	return CloneHelper(new CGameObject(*this), ACloneName);
 }
 
-CGameObject* CGameObject::CloneTree(AlreadyClonedContainer *AlreadyCloned /*= NULL*/) const
+CGameObject* CGameObject::CloneTree(const string &ACloneName /*= ""*/, AlreadyClonedContainer *AlreadyCloned /*= NULL*/) const
 {
-	CGameObject *result = Clone();
+	CGameObject *result = Clone(ACloneName);
 
 	map<CGameObject *, CGameObject *> *FirstAlreadyCloned = NULL;
 	if (!AlreadyCloned)
@@ -40,7 +40,7 @@ CGameObject* CGameObject::CloneTree(AlreadyClonedContainer *AlreadyCloned /*= NU
 
 	for (LNOMType::const_iterator it = LocalNameObjectMapping.begin(); it != LocalNameObjectMapping.end(); ++it)
 	{
-		obj = it->second->CloneTree(AlreadyCloned);
+		obj = it->second->CloneTree("", AlreadyCloned);
 		result->LocalNameObjectMapping[it->first] = obj;
 		(*AlreadyCloned)[it->second] = obj;
 	}
@@ -51,7 +51,7 @@ CGameObject* CGameObject::CloneTree(AlreadyClonedContainer *AlreadyCloned /*= NU
 		if (AlreadyCloned->count(*it))
 			obj = (*AlreadyCloned)[*it];
 		else
-			obj = (*it)->CloneTree(AlreadyCloned);
+			obj = (*it)->CloneTree("", AlreadyCloned);
 
 		result->Attach(obj);
 	}
@@ -363,9 +363,9 @@ CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMir
 	SetName("CPlaceableComponent");	
 }
 
-CPlaceableComponent* CPlaceableComponent::Clone() const
+CPlaceableComponent* CPlaceableComponent::Clone(const string &ACloneName /*= ""*/) const
 {
-	return CloneHelper(new CPlaceableComponent(*this));
+	return CloneHelper(new CPlaceableComponent(*this), ACloneName);
 }
 
 void CPlaceableComponent::SetAngle(float AAngle)
@@ -550,9 +550,9 @@ CRenderableComponent::~CRenderableComponent()
 {
 }
 
-CRenderableComponent* CRenderableComponent::Clone() const
+CRenderableComponent* CRenderableComponent::Clone(const string &ACloneName /*= ""*/) const
 {
-	return CloneHelper(new CRenderableComponent(*this));
+	return CloneHelper(new CRenderableComponent(*this), ACloneName);
 }
 
 const RGBAf& CRenderableComponent::GetColor() const
@@ -805,9 +805,9 @@ CText::~CText()
 {
 }
 
-CText* CText::Clone() const
+CText* CText::Clone(const string &ACloneName /*= ""*/) const
 {
-	return CloneHelper(new CText(*this));
+	return CloneHelper(new CText(*this), ACloneName);
 }
 
 CFont* CText::GetFont() const
@@ -885,12 +885,12 @@ CText::CText(const CText &AText) : CRenderableComponent(AText)
 
 void CText::_UpdateSelfModel()
 {
-	if (Model != NULL)
+	/*if (Model != NULL)
 	{
 		Model->SetPersistent(true);	// to prevent auto-unloading of destroyed object..
 		Model->SetDestroyed();
 		Model = NULL;
-	}
+	}*/
 
 	SetModel(CRenderManager::CreateModelText(this));
 }
@@ -903,9 +903,9 @@ CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), I
 {
 }
 
-CTimerComponent* CTimerComponent::Clone() const
+CTimerComponent* CTimerComponent::Clone(const string &ACloneName /*= ""*/) const
 {
-	return CloneHelper(new CTimerComponent(*this));
+	return CloneHelper(new CTimerComponent(*this), ACloneName);
 }
 
 void CTimerComponent::ProcessEvent(const CEvent &AEvent)

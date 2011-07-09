@@ -90,7 +90,6 @@ private:
 	bool Finalizing;
 	
 	bool isHaveFocus;
-	bool userReInit;
 
 	bool doExitOnEscape;
 	bool doLoadDefaultResourceList;
@@ -113,6 +112,8 @@ private:
 	// possibly incapsulate into something.. too many things in this class are dedicated to fps...
 	void CalcFPS();
 	bool LimitFPS();
+
+	void SetInitialValues();
 };
 
 template<typename T>

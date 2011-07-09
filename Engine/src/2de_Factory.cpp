@@ -32,6 +32,9 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	if (CObject *result = CreateClassInstance(AClassName, AName))
 		return result;
 
+	if (CGameObject *cached = TryUseCachedPrototype(AClassName, AName))
+		return cached;
+
 	CXMLNode *xml = GetPrototypeXML(AClassName);
 	if (!xml)
 	{
@@ -65,10 +68,15 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 
 	TraversePrototypeNode(xml, result, UsedPrototypes, result);
 
+	result->FinalizeCreation();
+
 	if (FirstUsedPrototypes)
+	{
 		delete FirstUsedPrototypes;
 
-	result->FinalizeCreation();
+		CachedProtos[AClassName] = result->CloneTree("proto" + AClassName);
+	}
+
 	return result;
 }
 
@@ -256,6 +264,16 @@ CObject* CFactory::CreateClassInstance(const string &AClassName, const string &A
 	}
 
 	return result;
+}
+
+CGameObject* CFactory::TryUseCachedPrototype(const string &AClassName, const string &AName)
+{
+	map<string, CGameObject *>::iterator it = CachedProtos.find(AClassName);
+
+	if (it == CachedProtos.end())
+		return NULL;
+
+	return it->second->CloneTree(AName);
 }
 
 

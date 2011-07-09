@@ -20,19 +20,12 @@ string CResourceSectionLoaderBase::GetName() const
 }
 
 //////////////////////////////////////////////////////////////////////////
-// CResourceRefCounterState
+// CResourceRefCounterBase
 
-void CResourceRefCounterState::DisableRC()
+bool CResourceRefCounterBase::IsRCDisabled()
 {
-	RCDisabled = true;
+	return CEngine::Instance()->isFinalizing();
 }
-
-bool CResourceRefCounterState::IsRCDisabled()
-{
-	return RCDisabled;
-}
-
-bool CResourceRefCounterState::RCDisabled = false;
 
 //////////////////////////////////////////////////////////////////////////
 // CResource

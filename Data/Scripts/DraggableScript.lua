@@ -1,9 +1,19 @@
 DraggableComponent = GameObject:Derive()
 
 function DraggableComponent:OnCreate()
+	self.Drag = false
+end
+
+function DraggableComponent:OnAttached()
 	self:Subscribe("MouseDown")
 	self:Subscribe("MouseUp")
 	self:Subscribe("MouseMove")
+end
+
+function DraggableComponent:OnDetached()
+	self:Unsubscribe("MouseDown")
+	self:Unsubscribe("MouseUp")
+	self:Unsubscribe("MouseMove")
 	self.Drag = false
 end
 
