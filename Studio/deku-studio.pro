@@ -14,19 +14,23 @@ INCLUDEPATH += . \
 OBJECTS_DIR = tmp
 MOC_DIR = tmp
 UI_DIR = tmp
-
-unix {
-	LIBS += $$system(sdl-config --libs)
-	LIBS += $$system(pkg-config --libs lua5.1)
+unix { 
+    LIBS += $$system(sdl-config --libs)
+    LIBS += $$system(pkg-config --libs lua5.1)
 }
-
-LIBS += -lGLU -lGLEW -lSDL_mixer -lIL -L../Engine/lib -lDeku2D
-
+LIBS += -lGLU \
+    -lGLEW \
+    -lSDL_mixer \
+    -lIL \
+    -L../Engine/lib \
+    -lDeku2D
 QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1)
 
 # Input
-HEADERS += inc/cmainwindow.h
+HEADERS += inc/cmainwindow.h \
+    inc/cluasyntaxhighlighter.h
 FORMS += ui/cmainwindow.ui
 SOURCES += src/cmainwindow.cpp \
-    src/main.cpp
+    src/main.cpp \
+    src/cluasyntaxhighlighter.cpp
 RESOURCES += ui/resources.qrc

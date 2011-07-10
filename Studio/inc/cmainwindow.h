@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QThread>
 
+#include <2de_Engine.h>
+
 namespace Ui
 {
 	class CMainWindow;
@@ -14,6 +16,8 @@ class CEngineThread : public QThread
 public:
 	void run();
 };
+
+class CLuaSyntaxHighlighter;
 
 class CMainWindow : public QMainWindow
 {
@@ -28,10 +32,14 @@ protected:
 private:
 	Ui::CMainWindow *ui;
 	CEngineThread EngineThread;
+	CLuaSyntaxHighlighter *LuaSyntaxHL;
 
 private slots:
 	void on_actionStart_engine_triggered();
 	void on_actionStop_engine_triggered();
+	void on_menuFile_aboutToShow();
+	void on_executeButton_clicked();
+	void on_clearButton_clicked();
 };
 
 #endif // CMAINWINDOW_H

@@ -27,13 +27,17 @@ CFactory::~CFactory()
 * AClassName could be an internal class or a prototype resource name.
 */
 
+//#define USE_PROTOTYPE_CACHING
+
 CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes /*= NULL*/)
 {
 	if (CObject *result = CreateClassInstance(AClassName, AName))
 		return result;
 
+#ifdef USE_PROTOTYPE_CACHING
 	if (CGameObject *cached = TryUseCachedPrototype(AClassName, AName))
 		return cached;
+#endif
 
 	CXMLNode *xml = GetPrototypeXML(AClassName);
 	if (!xml)
@@ -74,7 +78,9 @@ CObject* CFactory::CreateByName(const string &AClassName, const string &AName, U
 	{
 		delete FirstUsedPrototypes;
 
+#ifdef USE_PROTOTYPE_CACHING
 		CachedProtos[AClassName] = result->CloneTree("proto" + AClassName);
+#endif
 	}
 
 	return result;

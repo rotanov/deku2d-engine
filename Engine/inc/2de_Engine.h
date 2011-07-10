@@ -56,10 +56,12 @@ public:
 	bool IsLimitFPSEnabled() const;
 	bool IsCalcFPSEnabled() const;
 	bool IsKeyRepeatEnabled() const;
-	bool IsShowFPSEnabled(bool AdoShowFPS) const;
+	bool IsShowFPSEnabled() const;
+	bool IsIdleWhenInBackground() const;
 	void SetExitOnEscape(bool AdoExitOnEscape);
 	void SetDoLimitFPS(bool AdoLimitFPS);
 	void SetDoCalcFPS(bool AdoCalcFPS);
+	void SetIdleWhenInBackground(bool AIdleWhenInBackground);
 
 	// temporarily here.. basically, we need key repeat in GUI only, so in 
 	// future it'll be handled by focusable GUI widget-groups (forms, panels, whatever..)
@@ -77,6 +79,9 @@ public:
 
 	CGameObject *RootGameObject;
 
+	// TODO: add something like Lock() and Unlock(), and make the mutex private...
+	SDL_mutex *BigEngineLock;
+
 protected:
 	CEngine();
 	~CEngine();
@@ -90,6 +95,7 @@ private:
 	bool Finalizing;
 	
 	bool isHaveFocus;
+	bool IdleWhenInBackground;
 
 	bool doExitOnEscape;
 	bool doLoadDefaultResourceList;

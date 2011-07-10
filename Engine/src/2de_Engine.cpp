@@ -7,7 +7,11 @@ CEngine CEngine::EngineInstance;
 
 CEngine::CEngine()
 {
+	BigEngineLock = SDL_CreateMutex();
+
 	SetInitialValues();
+
+	IdleWhenInBackground = true;
 
 	ProgramName = "Some Deku2D-using program";
 
@@ -26,6 +30,8 @@ CEngine::~CEngine()
 	delete StateHandler;
 	delete SpatialManager;
 	CSingletonManager::Finalize();
+
+	SDL_DestroyMutex(BigEngineLock);
 }
 
 CEngine* CEngine::Instance()
@@ -342,7 +348,7 @@ bool CEngine::ProcessEvents()
 			}
 			case SDL_ACTIVEEVENT:
 			{
-				if (event.active.state != SDL_APPMOUSEFOCUS)
+				if (event.active.state != SDL_APPMOUSEFOCUS && IdleWhenInBackground)
 				{
 					if (isHaveFocus != static_cast<bool>(event.active.gain))
 					{
@@ -407,6 +413,7 @@ bool CEngine::Run(int argc, char *argv[])
 
 	while (ProcessEvents())
 	{
+		SDL_mutexP(BigEngineLock);
 		try
 		{
 			if (isHaveFocus) // not actually. See main loop issue.
@@ -443,7 +450,8 @@ bool CEngine::Run(int argc, char *argv[])
 			Log("ERROR", "An unhandled exception occured in main loop. Exiting");
 			throw;
 		}
-	}	
+		SDL_mutexV(BigEngineLock);
+	}
 
 	StateHandler->OnBeforeFinalize();
 	Finalize();
@@ -561,9 +569,19 @@ bool CEngine::IsKeyRepeatEnabled() const
 	return false;
 }
 
-bool CEngine::IsShowFPSEnabled(bool AdoShowFPS) const
+bool CEngine::IsShowFPSEnabled() const
 {
-	return FPSText->GetVisibility();
+	return FPSText ? FPSText->GetVisibility() : false;
+}
+
+bool CEngine::IsIdleWhenInBackground() const
+{
+	return IdleWhenInBackground;
+}
+
+void CEngine::SetIdleWhenInBackground(bool AIdleWhenInBackground)
+{
+	IdleWhenInBackground = AIdleWhenInBackground;
 }
 
 void CEngine::SetInitialValues()
