@@ -559,6 +559,10 @@ namespace LuaAPI
 
 		Log("INFO", out.c_str());
 
+		CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
+		consoleOutputEvent->SetData("Text", out.c_str());
+		CEventManager::Instance()->TriggerEvent(consoleOutputEvent);
+
 		nesting++;
 		for (unsigned i = 0; i < GO->GetChildCount(); i++)
 		{
@@ -575,6 +579,18 @@ namespace LuaAPI
 		(*LastChild)[0] = true;
 		DebugPrintNode(CEngine::Instance()->RootGameObject, LastChild);
 		delete LastChild;
+		return 0;
+	}
+
+	int ConsoleOutput(lua_State *L)
+	{
+		if (!lua_isstring(L, -1))
+			CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to ConsoleOutput API call");
+
+		CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
+		consoleOutputEvent->SetData("Text", lua_tostring(L, -1));
+		CEventManager::Instance()->TriggerEvent(consoleOutputEvent);
+
 		return 0;
 	}
 
@@ -676,8 +692,7 @@ bool CLuaVirtualMachine::RunFile(const string &AFilename)
 
 	if (luaL_dofile(L, AFilename.c_str()) != 0)
 	{
-		LastError = lua_tostring(L, -1);
-		Log("ERROR", "Lua: %s", LastError.c_str());
+		OutputError(lua_tostring(L, -1));
 		return false;
 	}
 
@@ -691,8 +706,7 @@ bool CLuaVirtualMachine::RunString(const string &AString)
 	
 	if (luaL_dostring(L, AString.c_str()) != 0)
 	{
-		LastError = lua_tostring(L, -1);
-		Log("ERROR", "Lua: %s", LastError.c_str());
+		OutputError(lua_tostring(L, -1));
 		return false;
 	}
 
@@ -984,10 +998,22 @@ void CLuaVirtualMachine::RegisterStandardAPI()
 	// lua & debug
 	lua_register(L, "GetMemoryUsage", &LuaAPI::GetMemoryUsage);
 	lua_register(L, "DebugPrintComponentTree", &LuaAPI::DebugPrintComponentTree);
+	lua_register(L, "ConsoleOutput", &LuaAPI::ConsoleOutput);
 
 	// constants
 	lua_pushnumber(L, PI);
 	lua_setglobal(L, "PI");
+}
+
+void CLuaVirtualMachine::OutputError(const string &AError)
+{
+	LastError = AError;
+	Log("ERROR", "Lua: %s", AError.c_str());
+
+	CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
+	consoleOutputEvent->SetData("Text", AError);
+	consoleOutputEvent->SetData("Type", "Error");
+	CEventManager::Instance()->TriggerEvent(consoleOutputEvent);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1064,8 +1090,7 @@ bool CLuaFunctionCall::Call()
 	Called = true;
 	if (lua_pcall(L, ArgumentsCount, ResultsCount, 0) != 0)
 	{
-		CLuaVirtualMachine::Instance()->LastError = lua_tostring(L, -1);
-		Log("ERROR", "Lua: %s", CLuaVirtualMachine::Instance()->LastError.c_str());
+		CLuaVirtualMachine::Instance()->OutputError(lua_tostring(L, -1));
 		return false;
 	}
 	return true;

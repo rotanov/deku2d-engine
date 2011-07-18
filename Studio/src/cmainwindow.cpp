@@ -1,7 +1,21 @@
 #include "cmainwindow.h"
 #include "ui_cmainwindow.h"
 
+#include <QTabWidget>
+#include <QPlainTextEdit>
+#include <QDockWidget>
+#include <Qsci/qsciscintilla.h>
+#include <Qsci/qscilexerlua.h>
+
+#include <QTreeWidget>
+#include <QTableWidget>
+
+#include <QWindowsStyle>
+
 #include "cluasyntaxhighlighter.h"
+#include "CCodeEditorWidget.h"
+#include "CEngineLuaConsole.h"
+#include "CLogViewer.h"
 
 void CEngineThread::run()
 {
@@ -17,13 +31,70 @@ CMainWindow::CMainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
-	LuaSyntaxHL = new CLuaSyntaxHighlighter(ui->scriptText->document());
+
+	Tabs = new QTabWidget;
+	setCentralWidget(Tabs);
+	Tabs->setTabsClosable(true);
+	Tabs->setMovable(true);
+	Tabs->setContextMenuPolicy(Qt::DefaultContextMenu);
+	//Tabs->addTab(new CCodeEditorWidget, QIcon(), "Code Editor");
+
+	QsciScintilla *sci = new QsciScintilla;
+	sci->setIndentationsUseTabs(true);
+	sci->setIndentationGuides(true);
+	sci->setAutoIndent(true);
+	sci->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+	sci->setMarginType(1, QsciScintilla::NumberMargin);
+	sci->setLexer(new QsciLexerLua);
+	//sci->setAnnotationDisplay(QsciScintilla::AnnotationBoxed);
+	sci->setAutoCompletionSource(QsciScintilla::AcsAll);
+	sci->setAutoCompletionThreshold(2);
+	sci->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+	//connect(sci, SIGNAL(textChanged()), sci, SLOT(autoCompleteFromAll()));
+	//connect(sci, SIGNAL(textChanged()), sci, SLOT(callTip()));
+	Tabs->addTab(sci, QIcon(), "Code Editor");
+
+	QDockWidget *EngineConsoleDock = new QDockWidget("Engine Console");
+	EngineConsole = new CEngineLuaConsole;
+	EngineConsoleDock->setWidget(EngineConsole);
+	addDockWidget(Qt::BottomDockWidgetArea, EngineConsoleDock);
+
+	QDockWidget *LogViewerDock = new QDockWidget("Log Viewer");
+	LogViewer = new CLogViewer;
+	LogViewerDock->setWidget(LogViewer);
+	addDockWidget(Qt::BottomDockWidgetArea, LogViewerDock);
+
+	QDockWidget *ComponentTreeDock = new QDockWidget("Component Tree");
+	ComponentTree = new QTreeWidget;
+	connect(ComponentTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+		this, SLOT(ComponentTreeItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
+	ComponentTree->setColumnCount(1);
+	//ComponentTree->setHeaderLabel("");
+	ComponentTree->setHeaderHidden(true);
+	ComponentTree->setStyle(new QWindowsStyle);
+	ComponentTreeDock->setWidget(ComponentTree);
+	addDockWidget(Qt::LeftDockWidgetArea, ComponentTreeDock);
+
+	PropertyEdit = new QTableWidget(0, 2);
+	PropertyEdit->setHorizontalHeaderLabels(QStringList() << "Property" << "Value");
+	PropertyEdit->verticalHeader()->setHidden(true);
+	QDockWidget *PropertyEditDock = new QDockWidget("Property Edit");
+	PropertyEditDock->setWidget(PropertyEdit);
+	addDockWidget(Qt::RightDockWidgetArea, PropertyEditDock);
+
+	ui->mainToolBar->setWindowTitle("Toolbar");
+
+	QMenu *toolWindowsMenu = createPopupMenu();
+	toolWindowsMenu->setTitle("Tool windows");
+	ui->menuView->addMenu(toolWindowsMenu);
+
+	//LuaSyntaxHL = new CLuaSyntaxHighlighter(ui->scriptText->document());
 }
 
 CMainWindow::~CMainWindow()
 {
 	delete ui;
-	delete LuaSyntaxHL;
+	//delete LuaSyntaxHL;
 	CEngine::Instance()->ShutDown();
 	EngineThread.wait();
 }
@@ -41,15 +112,48 @@ void CMainWindow::changeEvent(QEvent *e)
 	}
 }
 
+void BuildTree(CGameObject *go, QTreeWidgetItem *item)
+{
+	QTreeWidgetItem *cur = new QTreeWidgetItem((QTreeWidget *)NULL, QStringList(QString::fromStdString(go->GetName())));
+	cur->setToolTip(0, QString::fromStdString(go->GetClassName()));
+	if (go->IsPrototype())
+	{
+		QFont f(cur->font(1));
+		f.setWeight(QFont::Bold);
+		cur->setFont(0, f);
+	}
+	cur->setData(0, Qt::UserRole, QVariant::fromValue((void *)go));
+	item->addChild(cur);
+
+	for (int i = 0; i < go->GetChildCount(); ++i)
+	{
+		BuildTree(go->GetChild(i), cur);
+	}
+}
+
 void CMainWindow::on_actionStart_engine_triggered()
 {
 	if (!EngineThread.isRunning())
+	{
 		EngineThread.start();
+		SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
+		SDL_mutexP(mutex);
+		CEventManager::Instance()->Subscribe("LogOutput", LogViewer);
+		CEventManager::Instance()->Subscribe("ConsoleOutput", EngineConsole);
+		SDL_mutexV(mutex);
+	}
 }
 
 void CMainWindow::on_actionStop_engine_triggered()
 {
 	CEngine::Instance()->ShutDown();
+	SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
+	SDL_mutexP(mutex);
+	CEventManager::Instance()->Unsubscribe("LogOutput", LogViewer);
+	CEventManager::Instance()->Unsubscribe("ConsoleOutput", EngineConsole);
+	SDL_mutexV(mutex);
+
+	ComponentTree->clear();
 }
 
 void CMainWindow::on_menuFile_aboutToShow()
@@ -59,18 +163,34 @@ void CMainWindow::on_menuFile_aboutToShow()
 	ui->actionStop_engine->setDisabled(!engineRunning);
 }
 
-void CMainWindow::on_executeButton_clicked()
+void CMainWindow::on_actionBuild_tree_triggered()
 {
-	if (EngineThread.isRunning())
+	if (CEngine::Instance()->isRunning())
 	{
+		ComponentTree->clear();
 		SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
 		SDL_mutexP(mutex);
-		CLuaVirtualMachine::Instance()->RunString(ui->scriptText->toPlainText().toStdString());
+		BuildTree(CEngine::Instance()->RootGameObject, ComponentTree->invisibleRootItem());
 		SDL_mutexV(mutex);
 	}
 }
 
-void CMainWindow::on_clearButton_clicked()
+#include <QMessageBox>
+
+void CMainWindow::ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious)
 {
-	ui->scriptText->clear();
+	if (!ACurrent)
+		return;
+
+	CGameObject *go = NULL;
+	go = (CGameObject *) ACurrent->data(0, Qt::UserRole).value<void *>();
+
+	PropertyEdit->setRowCount(3);
+	PropertyEdit->setItem(0, 0, new QTableWidgetItem("Name"));
+	PropertyEdit->setItem(0, 1, new QTableWidgetItem(QString::fromStdString(go->GetName())));
+	PropertyEdit->setItem(1, 0, new QTableWidgetItem("Class"));
+	PropertyEdit->setItem(1, 1, new QTableWidgetItem(QString::fromStdString(go->GetClassName())));
+	PropertyEdit->setItem(2, 0, new QTableWidgetItem("Is Prototype"));
+	PropertyEdit->setItem(2, 1, new QTableWidgetItem(go->IsPrototype() ? "true" : "false"));
+
 }

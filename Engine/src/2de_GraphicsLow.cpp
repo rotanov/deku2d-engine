@@ -1427,8 +1427,11 @@ void CFFPRenderer::Render()
 	glDisable(GL_BLEND);
 	for (map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_OPAQUE].begin(); i != texturedGeometry[BLEND_MODE_OPAQUE].end(); ++i)
 	{
-		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
-		i->second->RenderPrimitive(GL_TRIANGLES);
+		if (i->second->GetVertexCount() > 0)
+		{
+			glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
+			i->second->RenderPrimitive(GL_TRIANGLES);
+		}
 	}
 
 	glDepthMask(GL_FALSE);
@@ -1438,16 +1441,22 @@ void CFFPRenderer::Render()
 	// should disable depth test
 	for (map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_TRANSPARENT].begin(); i != texturedGeometry[BLEND_MODE_TRANSPARENT].end(); ++i)
 	{
-		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
-		i->second->RenderPrimitive(GL_TRIANGLES);
+		if (i->second->GetVertexCount() > 0)
+		{
+			glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
+			i->second->RenderPrimitive(GL_TRIANGLES);
+		}
 	}
 	// and enable here
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	for (map<CTexture*, CVertexHolder<Vector3>*>::iterator i = texturedGeometry[BLEND_MODE_ADDITIVE].begin(); i != texturedGeometry[BLEND_MODE_ADDITIVE].end(); ++i)
 	{
-		glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
-		i->second->RenderPrimitive(GL_TRIANGLES);
+		if (i->second->GetVertexCount() > 0)
+		{
+			glBindTexture(GL_TEXTURE_2D, i->first->GetTexID());
+			i->second->RenderPrimitive(GL_TRIANGLES);
+		}
 	}
 	glDepthMask(GL_TRUE);
 	Clear();
@@ -1468,7 +1477,7 @@ void CFFPRenderer::Clear()
 	for (unsigned i = 0; i < TOTAL_HOLDERS; i++)
 		PrimitiveHolders[i]->Clear();
 	for (unsigned i = 0; i < 3; i++)
-		for ( map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
+		for (map<CTexture*, CVertexHolder<Vector3>*>::iterator j = texturedGeometry[i].begin(); j != texturedGeometry[i].end(); ++j)
 			j->second->Clear();
 }
 

@@ -45,7 +45,6 @@
 
 #define _SECURE_SCL 0
 
-#include <IL/il.h>
 #include <SDL/SDL.h>
 
 #include <algorithm>
@@ -348,6 +347,8 @@ public:
 
 	template<typename T>
 	void SetData(const string &AName, const T &AValue);
+
+	bool IsDataExists(const string &AName) const;
 
 	string GetName() const;
 	void SetName(const string &AName);

@@ -14,47 +14,13 @@
    <string>Deku Studio</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/DekuLogo</normaloff>:/DekuLogo</iconset>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <widget class="QPlainTextEdit" name="scriptText">
-    <property name="geometry">
-     <rect>
-      <x>15</x>
-      <y>11</y>
-      <width>561</width>
-      <height>281</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="executeButton">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>300</y>
-      <width>92</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Execute</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="clearButton">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>300</y>
-      <width>92</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Clear</string>
-    </property>
-   </widget>
-  </widget>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -70,10 +36,17 @@
     </property>
     <addaction name="actionStart_engine"/>
     <addaction name="actionStop_engine"/>
+    <addaction name="actionBuild_tree"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -99,10 +72,18 @@
     <string>Exit</string>
    </property>
   </action>
+  <action name="actionTool_windows">
+   <property name="text">
+    <string>Tool windows</string>
+   </property>
+  </action>
+  <action name="actionBuild_tree">
+   <property name="text">
+    <string>Build tree</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

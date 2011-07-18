@@ -10,6 +10,7 @@ function LogHelper(...)
     tempString = tempString .. tostring(t[i]) .. "\t"
   end
   Log("LUA", tempString)
+  ConsoleOutput(tempString)
 end
 
 print = LogHelper

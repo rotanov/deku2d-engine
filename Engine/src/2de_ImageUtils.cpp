@@ -1,5 +1,7 @@
 #include "2de_ImageUtils.h"
 
+#include <IL/il.h>
+
 #ifndef _2DE_IMAGE_UTILS_SEPARATED_
 	#include "2de_Core.h"
 #endif

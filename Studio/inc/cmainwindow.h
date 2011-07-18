@@ -18,6 +18,12 @@ public:
 };
 
 class CLuaSyntaxHighlighter;
+class CLogViewer;
+class CEngineLuaConsole;
+class QTabWidget;
+class QTreeWidget;
+class QTreeWidgetItem;
+class QTableWidget;
 
 class CMainWindow : public QMainWindow
 {
@@ -34,12 +40,18 @@ private:
 	CEngineThread EngineThread;
 	CLuaSyntaxHighlighter *LuaSyntaxHL;
 
+	QTabWidget *Tabs;
+	CLogViewer *LogViewer;
+	CEngineLuaConsole *EngineConsole;
+	QTreeWidget *ComponentTree;
+	QTableWidget *PropertyEdit;
+
 private slots:
 	void on_actionStart_engine_triggered();
 	void on_actionStop_engine_triggered();
 	void on_menuFile_aboutToShow();
-	void on_executeButton_clicked();
-	void on_clearButton_clicked();
+	void on_actionBuild_tree_triggered();
+	void ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious);
 };
 
 #endif // CMAINWINDOW_H

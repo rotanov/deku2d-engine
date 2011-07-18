@@ -13,6 +13,11 @@ CEvent::CEvent(const string &AName, CObject *ASender) : Name(AName), Sender(ASen
 {
 }
 
+bool CEvent::IsDataExists(const string &AName) const
+{
+	return Data.count(AName);
+}
+
 string CEvent::GetName() const
 {
 	return Name;
@@ -846,7 +851,7 @@ CLog::~CLog()
 	}
 }
 
-void CLog::WriteToLog( const char *Event, const char *Format, ... )
+void CLog::WriteToLog(const char *Event, const char *Format, ...)
 {
 	if (!Enabled)
 		return;
@@ -873,14 +878,31 @@ void CLog::WriteToLog( const char *Event, const char *Format, ... )
 
 	va_end(args);
 
-	*Stream << "[";
+	string message = "[";
+#ifdef LOG_TIME_TICK
+	message += to_string(SDL_GetTicks()) + "]\t\t[";
+#else
+	message += CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") + "] [";
+#endif // LOG_TIME_TICK
+	message += string(Event) + "] " + buffer;
+
+	/**Stream << "[";
 #ifdef LOG_TIME_TICK
 	*Stream << SDL_GetTicks() << "]\t\t[";
 #else
 	*Stream << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] [";
 #endif // LOG_TIME_TICK
 
-	*Stream << Event << "] " << buffer << endl;
+	*Stream << Event << "] " << buffer << endl;*/
+
+	*Stream << message << endl;
+
+	if (CEngine::Instance()->isRunning())
+	{
+		CEvent *logOutputEvent = new CEvent("LogOutput", this);
+		logOutputEvent->SetData("Text", message);
+		CEventManager::Instance()->TriggerEvent(logOutputEvent);
+	}
 
 	delete[] buffer;
 }

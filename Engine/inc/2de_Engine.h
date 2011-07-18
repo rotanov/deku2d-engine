@@ -47,6 +47,7 @@ public:
 	void Pause();
 	void ShutDown();
 
+	bool isRunning() const;
 	bool isFinalizing() const;
 
 	template<typename T>
@@ -92,6 +93,7 @@ private:
 	float dt;
 
 	bool Initialized;
+	bool Running;
 	bool Finalizing;
 	
 	bool isHaveFocus;

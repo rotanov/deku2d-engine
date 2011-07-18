@@ -163,9 +163,7 @@ private:
 	bool doMirrorHorizontal;
 	bool doMirrorVertical;
 
-public: // TODO: TEMPORARILITYTRIORUOYTORT I was need to make transform between origins
 	CTransformation Transformation;
-
 };
 
 /**
@@ -255,9 +253,6 @@ public:
 protected:
 	CRenderableComponent(const CRenderableComponent &ARenderableComponent);
 
-//protected:
-	//KLUDGE!!!
-public:
 	CResourceRefCounter<CModel> Model;
 
 private:

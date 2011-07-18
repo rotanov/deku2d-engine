@@ -59,6 +59,7 @@ protected:
 
 private:
 	void RegisterStandardAPI();
+	void OutputError(const string &AError);
 
 	lua_State *L;
 

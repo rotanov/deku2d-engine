@@ -2,7 +2,8 @@
 #define _2DE_IMAGE_UTILS_H_
 
 #include "2de_Math.h"
-#include <IL/il.h>
+
+typedef unsigned int ILuint;
 
 /**
 *	Since I found it useful to use this module separated from Deku2d I did that:

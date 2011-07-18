@@ -1,5 +1,7 @@
 #include "2de_Engine.h"
 
+#include <IL/il.h>
+
 //////////////////////////////////////////////////////////////////////////
 // CEngine
 
@@ -411,6 +413,8 @@ bool CEngine::Run(int argc, char *argv[])
 	SDL_Event e;
 	while (SDL_PollEvent(&e));
 
+	Running = true;
+
 	while (ProcessEvents())
 	{
 		SDL_mutexP(BigEngineLock);
@@ -453,6 +457,8 @@ bool CEngine::Run(int argc, char *argv[])
 		SDL_mutexV(BigEngineLock);
 	}
 
+	Running = false;
+
 	StateHandler->OnBeforeFinalize();
 	Finalize();
 
@@ -474,6 +480,11 @@ void CEngine::ShutDown()
 	SDL_Event Event;
 	Event.type = SDL_QUIT;
 	SDL_PushEvent(&Event);
+}
+
+bool CEngine::isRunning() const
+{
+	return Running;
 }
 
 bool CEngine::isFinalizing() const
@@ -589,6 +600,7 @@ void CEngine::SetInitialValues()
 	memset(Keys, 0, sizeof(Keys));
 
 	Initialized = false;
+	Running = false;
 	Finalizing = false;
 	isHaveFocus = true;
 
