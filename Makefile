@@ -1,4 +1,4 @@
-all: engine demos
+all: engine demos studio
 
 debug: MAKETARGET = debug
 debug: all
@@ -21,7 +21,13 @@ engine:
 demos:
 	@$(MAKE) -C Demos/ $(MAKETARGET)
 
+studio: Studio/Makefile
+	@$(MAKE) -C Studio/ $(MAKETARGET)
+
 tags:
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
+
+Studio/Makefile:
+	cd Studio && qmake deku-studio.pro
 
 .PHONY: clean distclean docs tags

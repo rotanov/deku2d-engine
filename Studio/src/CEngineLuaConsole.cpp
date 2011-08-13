@@ -80,10 +80,9 @@ void CEngineLuaConsole::SendInput(const QString &AInput)
 
 	if (CEngine::Instance()->isRunning())
 	{
-		SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
-		SDL_mutexP(mutex);
+		CEngine::Instance()->Lock();
 		CLuaVirtualMachine::Instance()->RunString(AInput.toStdString());
-		SDL_mutexV(mutex);
+		CEngine::Instance()->Unlock();
 	}
 	else
 	{

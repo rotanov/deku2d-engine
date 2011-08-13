@@ -24,6 +24,7 @@ class QTabWidget;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QTableWidget;
+class QTableWidgetItem;
 
 class CMainWindow : public QMainWindow
 {
@@ -52,6 +53,7 @@ private slots:
 	void on_menuFile_aboutToShow();
 	void on_actionBuild_tree_triggered();
 	void ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious);
+	void PropertyEditItemChanged(QTableWidgetItem *AItem);
 };
 
 #endif // CMAINWINDOW_H

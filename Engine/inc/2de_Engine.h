@@ -53,35 +53,37 @@ public:
 	template<typename T>
 	void SetStateHandler();
 
+	void Lock();
+	void Unlock();
+
 	bool IsExitOnEscapeEnabled() const;
 	bool IsLimitFPSEnabled() const;
 	bool IsCalcFPSEnabled() const;
 	bool IsKeyRepeatEnabled() const;
 	bool IsShowFPSEnabled() const;
 	bool IsIdleWhenInBackground() const;
+
 	void SetExitOnEscape(bool AdoExitOnEscape);
 	void SetDoLimitFPS(bool AdoLimitFPS);
 	void SetDoCalcFPS(bool AdoCalcFPS);
-	void SetIdleWhenInBackground(bool AIdleWhenInBackground);
-
 	// temporarily here.. basically, we need key repeat in GUI only, so in 
 	// future it'll be handled by focusable GUI widget-groups (forms, panels, whatever..)
 	void SetDoKeyRepeat(bool AdoKeyRepeat); 
 	void SetDoShowFPS(bool AdoShowFPS);
+	void SetIdleWhenInBackground(bool AIdleWhenInBackground);
 
-	float GetDeltaTime() const;
 	string GetProgramName() const;
 	void SetProgramName(const string &AProgramName);
+
+	float GetDeltaTime() const;
+	unsigned long GetFPS() const;
 	unsigned long GetFPSLimit() const;
 	void SetFPSLimit(unsigned long AFPSLimit);
+
 	bool IsKeyDown(const SDLKey& AKey) const;
 	const Vector2& GetMousePosition() const;
-	unsigned long GetFPS() const;
 
 	CGameObject *RootGameObject;
-
-	// TODO: add something like Lock() and Unlock(), and make the mutex private...
-	SDL_mutex *BigEngineLock;
 
 protected:
 	CEngine();
@@ -108,6 +110,8 @@ private:
 
 	string ProgramName;
 	CText *FPSText;
+
+	SDL_mutex *BigEngineLock;
 
 	CAbstractStateHandler *StateHandler;
 	static CEngine EngineInstance;

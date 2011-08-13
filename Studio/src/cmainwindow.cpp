@@ -81,6 +81,8 @@ CMainWindow::CMainWindow(QWidget *parent) :
 	QDockWidget *PropertyEditDock = new QDockWidget("Property Edit");
 	PropertyEditDock->setWidget(PropertyEdit);
 	addDockWidget(Qt::RightDockWidgetArea, PropertyEditDock);
+	connect(PropertyEdit, SIGNAL(itemChanged(QTableWidgetItem*)), this,
+		SLOT(PropertyEditItemChanged(QTableWidgetItem*)));
 
 	ui->mainToolBar->setWindowTitle("Toolbar");
 
@@ -136,22 +138,20 @@ void CMainWindow::on_actionStart_engine_triggered()
 	if (!EngineThread.isRunning())
 	{
 		EngineThread.start();
-		SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
-		SDL_mutexP(mutex);
+		CEngine::Instance()->Lock();
 		CEventManager::Instance()->Subscribe("LogOutput", LogViewer);
 		CEventManager::Instance()->Subscribe("ConsoleOutput", EngineConsole);
-		SDL_mutexV(mutex);
+		CEngine::Instance()->Unlock();
 	}
 }
 
 void CMainWindow::on_actionStop_engine_triggered()
 {
+	CEngine::Instance()->Lock();
 	CEngine::Instance()->ShutDown();
-	SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
-	SDL_mutexP(mutex);
 	CEventManager::Instance()->Unsubscribe("LogOutput", LogViewer);
 	CEventManager::Instance()->Unsubscribe("ConsoleOutput", EngineConsole);
-	SDL_mutexV(mutex);
+	CEngine::Instance()->Unlock();
 
 	ComponentTree->clear();
 }
@@ -168,14 +168,11 @@ void CMainWindow::on_actionBuild_tree_triggered()
 	if (CEngine::Instance()->isRunning())
 	{
 		ComponentTree->clear();
-		SDL_mutex *mutex = CEngine::Instance()->BigEngineLock;
-		SDL_mutexP(mutex);
+		CEngine::Instance()->Lock();
 		BuildTree(CEngine::Instance()->RootGameObject, ComponentTree->invisibleRootItem());
-		SDL_mutexV(mutex);
+		CEngine::Instance()->Unlock();
 	}
 }
-
-#include <QMessageBox>
 
 void CMainWindow::ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious)
 {
@@ -193,4 +190,27 @@ void CMainWindow::ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidge
 	PropertyEdit->setItem(2, 0, new QTableWidgetItem("Is Prototype"));
 	PropertyEdit->setItem(2, 1, new QTableWidgetItem(go->IsPrototype() ? "true" : "false"));
 
+}
+
+#include <QMessageBox>
+
+void CMainWindow::PropertyEditItemChanged(QTableWidgetItem *AItem)
+{
+	if (AItem->column() < 1)
+		return;
+
+	QString property = PropertyEdit->item(AItem->row(), 0)->text();
+	CEngine::Instance()->Lock();
+	if (property == "Name" && ComponentTree->currentItem())
+	{
+//		QMessageBox::information(this, "0", "Current: " + ComponentTree->currentItem()->text(0));
+		string oldName = ComponentTree->currentItem()->text(0).toStdString();
+		string newName = AItem->text().toStdString();
+		if (oldName != newName)
+		{
+			CFactory::Instance()->Rename(oldName, newName);
+			ComponentTree->currentItem()->setText(0, QString::fromStdString(newName));
+		}
+	}
+	CEngine::Instance()->Unlock();
 }

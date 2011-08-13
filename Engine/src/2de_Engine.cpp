@@ -41,6 +41,245 @@ CEngine* CEngine::Instance()
 	return &EngineInstance;
 }
 
+// possibly move to CEnvironment
+char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
+{
+	char TempChar = '\0';
+#ifdef _WIN32
+	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
+	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
+
+#elif HAVE_ICONV
+	// вообще говоря, наверное даже кроссплатформенно, если хотите - уберите WinAPI и #ifdef
+	// хорошо, как-нибудь уберём.
+	char *iconv_str_out = SDL_iconv_string("CP1251", "UTF-16", (char *) &event.key.keysym.unicode, 2);
+	TempChar = iconv_str_out[0];
+	SDL_free(iconv_str_out);
+#else
+	if ((event.key.keysym.unicode & 0xFF80) == 0)
+		TempChar = event.key.keysym.unicode & 0x7F;
+#endif //_WIN32
+	return TempChar;
+}
+
+bool CEngine::Run(int argc, char *argv[])
+{
+	SetInitialValues();
+
+	StateHandler->OnBeforeInitialize();
+
+	if (!ProcessArguments(argc, argv))
+	{
+		if (CCommandLineArgumentsManager::Instance()->GetErrorState())
+			cout << CCommandLineArgumentsManager::Instance()->GetError() << endl << endl;	// maybe incapsulate in something like CEnvironment::Console::Print..
+
+		return false;
+	}
+
+	if (!(Initialized = Initialize()))
+	{
+		Log("ERROR", "Initialization failed");
+		SDL_Quit();	// maybe Finalize() to clean-up already initialized systems?
+		return false;
+	}
+
+	// KLUDGE: clear SDL event queue to prevent some strange behavior of window resizing on platforms that use X11..
+	SDL_Event e;
+	while (SDL_PollEvent(&e));
+
+	Running = true;
+
+	while (ProcessEvents())
+	{
+		Lock();
+		try
+		{
+			if (isHaveFocus) // not actually. See main loop issue.
+			{
+				CResourceManager::Instance()->PerformUnload();
+				CFactory::Instance()->CleanUp();
+				if (LimitFPS())
+				{
+					CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
+					SpatialManager->Update();
+					SpatialManager->Clear();
+					//CSceneManager::Instance()->Update(dt);
+					if (doCalcFPS)
+						CalcFPS();
+					CRenderManager::Instance()->BeginFrame();
+					CRenderManager::Instance()->DrawObjects();
+					//CSceneManager::Instance()->Render();
+					
+					// @todo: And look here:(yet it's about mainloopissue) http://gafferongames.com/game-physics/fix-your-timestep/
+				}
+				CRenderManager::Instance()->EndFrame();
+			}
+			else
+			{
+	#ifdef _WIN32			
+				WaitMessage(); // SDL_WaitEvent(NULL);
+	#else
+				SDL_WaitEvent(NULL); // sleep(1);
+	#endif //_WIN32
+			}
+		}
+		catch (...)
+		{
+			Log("ERROR", "An unhandled exception occured in main loop. Exiting");
+			throw;
+		}
+		Unlock();
+	}
+
+	Running = false;
+
+	StateHandler->OnBeforeFinalize();
+	Finalize();
+
+	return true;
+}
+
+void CEngine::Pause()
+{
+	// PAUSE; lol i dunno wich level to pause here
+	// i mean full engine level pause or something else
+	// i think more about first
+	// 	i suppose that it may be pause of events processing
+	// Well, then it's decided, CEngine::pause() should pause the engine,
+	// whereas CScene::Pause() should pause the scene.
+}
+
+void CEngine::ShutDown()
+{
+	SDL_Event Event;
+	Event.type = SDL_QUIT;
+	SDL_PushEvent(&Event);
+}
+
+bool CEngine::isRunning() const
+{
+	return Running;
+}
+
+bool CEngine::isFinalizing() const
+{
+	return Finalizing;
+}
+
+void CEngine::Lock()
+{
+	SDL_mutexP(BigEngineLock);
+}
+
+void CEngine::Unlock()
+{
+	SDL_mutexV(BigEngineLock);
+}
+
+bool CEngine::IsExitOnEscapeEnabled() const
+{
+	return doExitOnEscape;
+}
+
+bool CEngine::IsLimitFPSEnabled() const
+{
+	return doLimitFPS;
+}
+
+bool CEngine::IsCalcFPSEnabled() const
+{
+	return doCalcFPS;
+}
+
+bool CEngine::IsKeyRepeatEnabled() const
+{
+	// Don't know how to extract that information from SDL
+	// TODO: store the state of key repeating in the engine itself (i don't know, though, is there any default state?)
+	return false;
+}
+
+bool CEngine::IsShowFPSEnabled() const
+{
+	return FPSText ? FPSText->GetVisibility() : false;
+}
+
+bool CEngine::IsIdleWhenInBackground() const
+{
+	return IdleWhenInBackground;
+}
+
+void CEngine::SetExitOnEscape(bool AdoExitOnEscape)
+{
+	doExitOnEscape = AdoExitOnEscape;
+}
+
+void CEngine::SetDoLimitFPS(bool AdoLimitFPS)
+{
+	doLimitFPS = AdoLimitFPS;
+}
+
+void CEngine::SetDoCalcFPS(bool AdoCalcFPS)
+{
+	doCalcFPS = AdoCalcFPS;
+}
+
+void CEngine::SetDoKeyRepeat(bool AdoKeyRepeat)
+{
+	int RepeatDelay = AdoKeyRepeat ? SDL_DEFAULT_REPEAT_DELAY : 0;
+	SDL_EnableKeyRepeat(RepeatDelay, SDL_DEFAULT_REPEAT_INTERVAL);
+}
+
+void CEngine::SetDoShowFPS(bool AdoShowFPS)
+{
+	if (FPSText != NULL)
+		FPSText->SetVisibility(AdoShowFPS);
+}
+
+void CEngine::SetIdleWhenInBackground(bool AIdleWhenInBackground)
+{
+	IdleWhenInBackground = AIdleWhenInBackground;
+}
+
+string CEngine::GetProgramName() const
+{
+	return ProgramName;
+}
+
+void CEngine::SetProgramName(const string &AProgramName)
+{
+	ProgramName = AProgramName;
+}
+
+float CEngine::GetDeltaTime() const
+{
+	return dt;
+}
+
+unsigned long CEngine::GetFPS() const
+{
+	return FPSCount;
+}
+
+unsigned long CEngine::GetFPSLimit() const
+{
+	return 1000 / FPSLimit;
+}
+
+void CEngine::SetFPSLimit(unsigned long AFPSLimit)
+{
+	FPSLimit = 1000 / AFPSLimit;
+}
+
+bool CEngine::IsKeyDown(const SDLKey& AKey) const
+{
+	return Keys[AKey];
+}
+
+const Vector2& CEngine::GetMousePosition() const
+{
+	return MousePosition;
+}
+
 bool CEngine::Initialize()
 {
 	CLog::Instance()->SetLogFilePath(CEnvironment::Paths::GetLogPath());
@@ -182,91 +421,6 @@ void CEngine::Finalize()
 	Finalizing = false;
 }
 
-bool CEngine::ProcessArguments(int argc, char *argv[])
-{
-	// return false if you want to stop engine
-
-	CCommandLineArgumentsManager *ArgMan = CCommandLineArgumentsManager::Instance();
-
-	if (!ArgMan->Initialize(argc, argv))
-		return false;
-
-	if (ArgMan->GetFlag("version", 'v'))
-	{
-		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2009-2011  Deku Team" << endl << endl;
-		return false;
-	}
-
-	CArgumentsConfigMappingsManager *ArgConfigMap = CArgumentsConfigMappingsManager::Instance();
-
-	for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
-	{
-		if (it->Option) 
-		{
-			if (!ArgMan->RegisterOption(it->ArgumentLongName, it->ArgumentShortName))
-				return false;
-		}
-	}
-
-	if (!StateHandler->OnArgumentsProcessing())
-		return false;
-
-	return true;
-}
-
-void CEngine::CalcFPS()
-{
-	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
-	
-	unsigned long ct = SDL_GetTicks();
-	DTime = ct - _llt;
-	dt = static_cast<float>(DTime) * 0.001f;
-	_llt = ct;
-	if (ct - lt >= 1000)
-	{
-		FPSCount = fr * 1000 / (ct - lt);
-		lt = ct;
-		fr = 0;
-	}		
-	fr++;
-	FPSText->SetText("FPS: " + itos(FPSCount));
-}
-
-bool CEngine::LimitFPS()
-{
-	if (!doLimitFPS)
-		return true;
-	static unsigned long _lt = 0, _llt = 0;
-	_lt = SDL_GetTicks();
-	if (_lt - _llt >= FPSLimit)
-	{				
-		_llt = _lt;
-		return true;
-	}
-	return false;
-}
-
-// possibly move to CEnvironment
-char TranslateKeyFromUnicodeToChar(const SDL_Event& event)
-{
-	char TempChar = '\0';
-#ifdef _WIN32
-	wchar_t  tmp = (event.key.keysym.unicode);							// +русский
-	WideCharToMultiByte(CP_ACP, 0, &tmp , 1, &TempChar, 1, NULL, NULL);
-
-#elif HAVE_ICONV
-	// вообще говоря, наверное даже кроссплатформенно, если хотите - уберите WinAPI и #ifdef
-	// хорошо, как-нибудь уберём.
-	char *iconv_str_out = SDL_iconv_string("CP1251", "UTF-16", (char *) &event.key.keysym.unicode, 2);
-	TempChar = iconv_str_out[0];
-	SDL_free(iconv_str_out);
-#else
-	if ((event.key.keysym.unicode & 0xFF80) == 0)
-		TempChar = event.key.keysym.unicode & 0x7F;
-#endif //_WIN32
-	return TempChar;
-}
-
 bool CEngine::ProcessEvents()
 {
 	SDL_Event event;
@@ -388,211 +542,68 @@ bool CEngine::ProcessEvents()
 	return true;
 }
 
-bool CEngine::Run(int argc, char *argv[])
+bool CEngine::ProcessArguments(int argc, char *argv[])
 {
-	SetInitialValues();
+	// return false if you want to stop engine
 
-	StateHandler->OnBeforeInitialize();
+	CCommandLineArgumentsManager *ArgMan = CCommandLineArgumentsManager::Instance();
 
-	if (!ProcessArguments(argc, argv))
+	if (!ArgMan->Initialize(argc, argv))
+		return false;
+
+	if (ArgMan->GetFlag("version", 'v'))
 	{
-		if (CCommandLineArgumentsManager::Instance()->GetErrorState())
-			cout << CCommandLineArgumentsManager::Instance()->GetError() << endl << endl;	// maybe incapsulate in something like CEnvironment::Console::Print..
-
+		cout << "Deku2D, version 0.0.1" << endl << "Copyright 2009-2011  Deku Team" << endl << endl;
 		return false;
 	}
 
-	if (!(Initialized = Initialize()))
+	CArgumentsConfigMappingsManager *ArgConfigMap = CArgumentsConfigMappingsManager::Instance();
+
+	for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
 	{
-		Log("ERROR", "Initialization failed");
-		SDL_Quit();	// maybe Finalize() to clean-up already initialized systems?
+		if (it->Option) 
+		{
+			if (!ArgMan->RegisterOption(it->ArgumentLongName, it->ArgumentShortName))
+				return false;
+		}
+	}
+
+	if (!StateHandler->OnArgumentsProcessing())
 		return false;
-	}
-
-	// KLUDGE: clear SDL event queue to prevent some strange behavior of window resizing on platforms that use X11..
-	SDL_Event e;
-	while (SDL_PollEvent(&e));
-
-	Running = true;
-
-	while (ProcessEvents())
-	{
-		SDL_mutexP(BigEngineLock);
-		try
-		{
-			if (isHaveFocus) // not actually. See main loop issue.
-			{
-				CResourceManager::Instance()->PerformUnload();
-				CFactory::Instance()->CleanUp();
-				if (LimitFPS())
-				{
-					CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
-					SpatialManager->Update();
-					SpatialManager->Clear();
-					//CSceneManager::Instance()->Update(dt);
-					if (doCalcFPS)
-						CalcFPS();
-					CRenderManager::Instance()->BeginFrame();
-					CRenderManager::Instance()->DrawObjects();
-					//CSceneManager::Instance()->Render();
-					
-					// @todo: And look here:(yet it's about mainloopissue) http://gafferongames.com/game-physics/fix-your-timestep/
-				}
-				CRenderManager::Instance()->EndFrame();
-			}
-			else
-			{
-	#ifdef _WIN32			
-				WaitMessage(); // SDL_WaitEvent(NULL);
-	#else
-				SDL_WaitEvent(NULL); // sleep(1);
-	#endif //_WIN32
-			}
-		}
-		catch (...)
-		{
-			Log("ERROR", "An unhandled exception occured in main loop. Exiting");
-			throw;
-		}
-		SDL_mutexV(BigEngineLock);
-	}
-
-	Running = false;
-
-	StateHandler->OnBeforeFinalize();
-	Finalize();
 
 	return true;
 }
 
-void CEngine::Pause()
+void CEngine::CalcFPS()
 {
-	// PAUSE; lol i dunno wich level to pause here
-	// i mean full engine level pause or something else
-	// i think more about first
-	// 	i suppose that it may be pause of events processing
-	// Well, then it's decided, CEngine::pause() should pause the engine,
-	// whereas CScene::Pause() should pause the scene.
+	static unsigned long DTime = 0, _llt = SDL_GetTicks(), lt = SDL_GetTicks(), fr = 0;
+	
+	unsigned long ct = SDL_GetTicks();
+	DTime = ct - _llt;
+	dt = static_cast<float>(DTime) * 0.001f;
+	_llt = ct;
+	if (ct - lt >= 1000)
+	{
+		FPSCount = fr * 1000 / (ct - lt);
+		lt = ct;
+		fr = 0;
+	}		
+	fr++;
+	FPSText->SetText("FPS: " + itos(FPSCount));
 }
 
-void CEngine::ShutDown()
+bool CEngine::LimitFPS()
 {
-	SDL_Event Event;
-	Event.type = SDL_QUIT;
-	SDL_PushEvent(&Event);
-}
-
-bool CEngine::isRunning() const
-{
-	return Running;
-}
-
-bool CEngine::isFinalizing() const
-{
-	return Finalizing;
-}
-
-void CEngine::SetExitOnEscape(bool AdoExitOnEscape)
-{
-	doExitOnEscape = AdoExitOnEscape;
-}
-
-void CEngine::SetDoLimitFPS(bool AdoLimitFPS)
-{
-	doLimitFPS = AdoLimitFPS;
-}
-
-void CEngine::SetDoCalcFPS(bool AdoCalcFPS)
-{
-	doCalcFPS = AdoCalcFPS;
-}
-
-void CEngine::SetDoKeyRepeat(bool AdoKeyRepeat)
-{
-	int RepeatDelay = AdoKeyRepeat ? SDL_DEFAULT_REPEAT_DELAY : 0;
-	SDL_EnableKeyRepeat(RepeatDelay, SDL_DEFAULT_REPEAT_INTERVAL);
-}
-
-float CEngine::GetDeltaTime() const
-{
-	return dt;
-}
-
-string CEngine::GetProgramName() const
-{
-	return ProgramName;
-}
-
-void CEngine::SetProgramName(const string &AProgramName)
-{
-	ProgramName = AProgramName;
-}
-
-unsigned long CEngine::GetFPSLimit() const
-{
-	return 1000 / FPSLimit;
-}
-
-void CEngine::SetFPSLimit(unsigned long AFPSLimit)
-{
-	FPSLimit = 1000 / AFPSLimit;
-}
-
-unsigned long CEngine::GetFPS() const
-{
-	return FPSCount;
-}
-
-void CEngine::SetDoShowFPS(bool AdoShowFPS)
-{
-	if (FPSText != NULL)
-		FPSText->SetVisibility(AdoShowFPS);
-}
-
-const Vector2& CEngine::GetMousePosition() const
-{
-	return MousePosition;
-}
-
-bool CEngine::IsKeyDown(const SDLKey& AKey) const
-{
-	return Keys[AKey];
-}
-
-bool CEngine::IsExitOnEscapeEnabled() const
-{
-	return doExitOnEscape;
-}
-
-bool CEngine::IsLimitFPSEnabled() const
-{
-	return doLimitFPS;
-}
-
-bool CEngine::IsCalcFPSEnabled() const
-{
-	return doCalcFPS;
-}
-
-bool CEngine::IsKeyRepeatEnabled() const
-{
-	// Don't know how to extract that information from SDL
+	if (!doLimitFPS)
+		return true;
+	static unsigned long _lt = 0, _llt = 0;
+	_lt = SDL_GetTicks();
+	if (_lt - _llt >= FPSLimit)
+	{				
+		_llt = _lt;
+		return true;
+	}
 	return false;
-}
-
-bool CEngine::IsShowFPSEnabled() const
-{
-	return FPSText ? FPSText->GetVisibility() : false;
-}
-
-bool CEngine::IsIdleWhenInBackground() const
-{
-	return IdleWhenInBackground;
-}
-
-void CEngine::SetIdleWhenInBackground(bool AIdleWhenInBackground)
-{
-	IdleWhenInBackground = AIdleWhenInBackground;
 }
 
 void CEngine::SetInitialValues()
