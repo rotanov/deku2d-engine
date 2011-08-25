@@ -7,59 +7,13 @@
 #include "2de_Math.h"
 
 /**
-*	CSprite	
+*	CSprite	was here. Approach to make animated sprite before is incorrect.
+*	Animation should be general case.
+*	But we should save: mirror_h, mirror_v as flags
 */
-struct SAnimationInfo				// структура определяющая параметры анимации // хуита
-{
-	bool	isAnimated;				// анимирован ли спрайт
-	bool	isLoop;					// залуплена ли анимация
-	float	m_fFrameDelay;			// задержка между кадрами в мс
-	float	m_fwidth, m_fheight;	// реальная ширина и высота спрайта для отображения на экране
-
-	int	m_nNumFrameColumns,			// кол-во колонок в анимации
-		m_nNumFrameRows,			// кол-во строк в анимации
-		m_nTotalFrames,				// кол-во кадров в анимации
-		m_nFrameWidth,				// ширина кадра в пикселях
-		m_nFrameHeight,				// высота кадра в пикселях
-		m_nOffsetX,					// расстояние от левого края до первого кадра в пикселях по Х
-		m_nOffsetY;					// расстояние от левого края до первого кадра в пикселях по У
-	int AnimationIndex;				// индекс анимации
-};
-
-class CSprite : public CRenderableComponent	// говно
-{
-public:
-	CSprite();
-	~CSprite();
-	bool SetTexture(const string &TextureName);
-	bool AddAnimation(bool _isAnimated, float _m_fFrameDelay, float _m_fwidth,
-		float _m_fheight, int _m_nNumFrameColumns, int _m_nNumFrameRows,
-		int _m_nTotalFrames, int _m_nFrameWidth, int _m_nFrameHeight,
-		int _m_nOffsetX, int _m_nOffsetY, int _AnimationIndex, bool _isLoop);
-	void Render();
-	void SetAnimation(int index);
-	SAnimationInfo* FindAnimation(int index);
-	bool LoadFromFile(const string &Filename);
-	bool SaveToFile(const string &Filename);
-
-	RGBAf Color;
-	bool mirror_h;
-
-private:
-	CResourceRefCounter<CTexture> Texture;
-	unsigned long EllapsedTime;
-	unsigned long LastTime;
-	unsigned CurrentFrame;
-	unsigned CurrentRow;
-	unsigned CurrentColumn;
-	bool isFirstTimeRendering;
-	size_t AnimationsCount;
-	SAnimationInfo *animations;
-	SAnimationInfo *anim;
-};
 
 /**
-*	New particle system	
+*	New particle system	- Unlikely to sprite this one is ok. But not working.
 *	note:
 *		> different interpolation schemes from start point to endpoint
 *		> attractors

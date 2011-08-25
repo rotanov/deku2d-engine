@@ -249,7 +249,7 @@ CConfig::~CConfig()
 
 void CConfig::Initialize()
 {
-	FileConfig = new CConfigFileStorage(CEnvironment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml", MAIN_CONFIG_ROOT_NODE_NAME);
+	FileConfig = new CConfigFileStorage(Environment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml", MAIN_CONFIG_ROOT_NODE_NAME);
 	CommandLineConfig = new CConfigCommandLineStorage(MAIN_CONFIG_ROOT_NODE_NAME);
 
 	Initialized = true;

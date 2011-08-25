@@ -20,7 +20,7 @@ CEngine::CEngine()
 	StateHandler = NULL;
 	SetStateHandler<CAbstractStateHandler>();
 
-	CEnvironment::Paths::SetWorkingDirectory(CEnvironment::Paths::GetExecutablePath());
+	Environment::Paths::SetWorkingDirectory(Environment::Paths::GetExecutablePath());
 
 	CSingletonManager::Init();
 
@@ -282,11 +282,11 @@ const Vector2& CEngine::GetMousePosition() const
 
 bool CEngine::Initialize()
 {
-	CLog::Instance()->SetLogFilePath(CEnvironment::Paths::GetLogPath());
+	CLog::Instance()->SetLogFilePath(Environment::Paths::GetLogPath());
 	CLog::Instance()->SetLogName("System");
-	Log("INFO", "Working directory is '%s'", CEnvironment::Paths::GetWorkingDirectory().c_str());
+	Log("INFO", "Working directory is '%s'", Environment::Paths::GetWorkingDirectory().c_str());
 
-	CEnvironment::Variables::Set("SDL_VIDEO_CENTERED", "center");
+	Environment::Variables::Set("SDL_VIDEO_CENTERED", "center");
 
 	CConfig *Config = CConfig::Instance();
 

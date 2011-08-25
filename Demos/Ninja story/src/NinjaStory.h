@@ -68,8 +68,6 @@ class CNinjaStoryGame/* : public CUpdatable*/
 public: 
 	CNinjaStoryGame()
 	{
-		CSprite *Sprite = CFactory::Instance()->New<CSprite>("BlackmanSprite");
-		Sprite->LoadFromFile("");
 	}
 	void Update(float dt)
 	{

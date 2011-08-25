@@ -18,14 +18,25 @@ RCC_DIR = tmp
 unix { 
     LIBS += $$system(sdl-config --libs)
     LIBS += $$system(pkg-config --libs lua5.1)
+
+    LIBS += -lGLU \
+        -lGLEW \
+        -lSDL_mixer \
+        -lIL \
+        -lqscintilla2 \
+        -L../Engine/lib \
+        -lDeku2D
 }
-LIBS += -lGLU \
-    -lGLEW \
-    -lSDL_mixer \
-    -lIL \
-    -lqscintilla2 \
-    -L../Engine/lib \
-    -lDeku2D
+
+win32 {
+    LIBS += -lGLU32 \
+        -lGLEW32s \
+        -lSDL \
+        -lSDLmain \
+        -lSDL_mixer \
+        -lDeku2D \
+}
+
 QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1)
 
 # Input

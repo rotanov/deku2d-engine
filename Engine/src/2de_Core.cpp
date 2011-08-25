@@ -368,7 +368,7 @@ bool CStorage::WriteLine(const char *Data, size_t Size)
 		return false;
 
 	Write(Data, Size);
-	WriteText(CEnvironment::GetLineTerminator());
+	WriteText(Environment::GetLineTerminator());
 
 	return true;
 }
@@ -882,7 +882,7 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 #ifdef LOG_TIME_TICK
 	message += to_string(SDL_GetTicks()) + "]\t\t[";
 #else
-	message += CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") + "] [";
+	message += Environment::DateTime::GetFormattedTime(Environment::DateTime::GetLocalTimeAndDate(), "%c") + "] [";
 #endif // LOG_TIME_TICK
 	message += string(Event) + "] " + buffer;
 
@@ -962,8 +962,8 @@ void CLog::SetLogMode(CLog::ELogMode ALogMode)
 
 		if (DatedLogFileNames)
 		{
-			tm* TimeStruct = CEnvironment::DateTime::GetLocalTimeAndDate();
-			NewLogFileName += "-" + CEnvironment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
+			tm* TimeStruct = Environment::DateTime::GetLocalTimeAndDate();
+			NewLogFileName += "-" + Environment::DateTime::GetFormattedTime(TimeStruct, "%y%m%d-%H%M%S");
 		}
 		NewLogFileName += ".log";
 
@@ -1056,185 +1056,206 @@ void CLog::SetStandardEventsPriorities()
 //////////////////////////////////////////////////////////////////////////
 // CEnvironment
 
-tm* CEnvironment::DateTime::GetLocalTimeAndDate()
+namespace Environment
 {
-	time_t RawTime;
-	time(&RawTime);
-	return localtime(&RawTime);
-}
 
-string CEnvironment::DateTime::GetFormattedTime(tm *TimeStruct, const char *Format)
-{
-	int AllocSize = 128;
-	bool allocated = false;
-
-	char *buffer = NULL;
-
-	while (!allocated)
+	namespace DateTime
 	{
+
+		tm* GetLocalTimeAndDate()
+		{
+			time_t RawTime;
+			time(&RawTime);
+			return localtime(&RawTime);
+		}
+
+		string GetFormattedTime(tm *TimeStruct, const char *Format)
+		{
+			int AllocSize = 128;
+			bool allocated = false;
+
+			char *buffer = NULL;
+
+			while (!allocated)
+			{
+				delete[] buffer;
+				buffer = new char[AllocSize];
+				if (!buffer)
+					return string();
+
+				allocated = (strftime(buffer, AllocSize - 1, Format, TimeStruct) != 0);
+				AllocSize *= 2;
+			}
+			
+			string result = buffer;
+			SAFE_DELETE_ARRAY(buffer);
+			return result;
+		}
+
+	}
+
+	namespace Paths
+	{
+
+		namespace
+		{
+			string ConfigPath = "Config/";
+			string LogPath = "Logs/";
+		};
+
+
+		string GetExecutablePath()
+		{
+			string result;
+
+		#ifdef _WIN32
+			char *MainDir = new char[MAX_PATH];
+			GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
+			DelFNameFromFPath(MainDir);
+
+			result = MainDir;
+
+			delete [] MainDir;
+		#else
+			// executable path is useless on *nix-like systems, so return empty string
+		#endif // _WIN32
+
+			return result;
+		}
+
+		string GetWorkingDirectory()
+		{
+			char dir[MAX_PATH];
+
+		#ifdef _WIN32
+			GetCurrentDirectory(MAX_PATH, dir);
+		#else
+			getcwd(dir, MAX_PATH);
+		#endif //_WIN32
+
+			return string(dir);
+		}
+
+		void SetWorkingDirectory(const string &AWorkingDirectory)
+		{
+		#ifdef _WIN32
+			SetCurrentDirectory(AWorkingDirectory.c_str());
+		#else
+			chdir(AWorkingDirectory.c_str());
+		#endif // _WIN32
+		}
+
+		string GetConfigPath()
+		{
+			return ConfigPath;
+		}
+
+		void SetConfigPath(const string &AConfigPath)
+		{
+			ConfigPath = AConfigPath;
+		}
+
+		string GetLogPath()
+		{
+			return LogPath;
+		}
+
+		void SetLogPath(const string &ALogPath)
+		{
+			LogPath = ALogPath;
+		}
+
+		/**
+		* CEnvironment::Paths::GetUniversalDirectory - возвращает стандартную для системы директорию для помещения всех изменяемых файлов программы, таких как конфиг, лог, возможно сэйвы и т. п.
+		*
+		* Название Universal здесь не очень удачное, но ничего лучше я придумать не смог...
+		*/
+
+		string GetUniversalDirectory()
+		{
+			string result;
+		#ifdef _WIN32
+			result = Environment::Variables::Get("APPDATA");
+			if (!result.empty())
+				result += "\\" + CEngine::Instance()->GetProgramName() + "\\";
+		#else
+			string HomeDir = Environment::Variables::Get("HOME");
+			if (HomeDir.empty())
+			{
+				string UserName = Environment::Variables::Get("USER");
+				if (UserName.empty())
+					UserName = Environment::Variables::Get("USERNAME");
+
+				if (!UserName.empty())
+					HomeDir = "/home/" + UserName;
+			}
+
+			if (!HomeDir.empty())
+				result = HomeDir + "/" + CEngine::Instance()->GetProgramName() + "/";
+		#endif // _WIN32
+
+			return result;
+		}
+
+	}
+
+	namespace Variables
+	{
+
+		string Get(const string &AName)
+		{
+			char *var = getenv(AName.c_str());
+			return ((var == NULL) ? "" : string(var));
+		}
+
+		void Set(const string &AName, const string &AValue)
+		{
+			static string PutEnvString;
+			PutEnvString = AName + "=" + AValue;
+			SDL_putenv(const_cast<char *>(PutEnvString.c_str()));
+		}
+
+	}
+
+	/**
+	* CEnvironment::LogToStdOut - simplified log to the standard output, the way around singleton hell of CLog.
+	*
+	* This function is used by Log macro if SIMPLIFIED_LOG is defined (this is false by default). Also can be used manually.
+	* Generally, it's useful in cases of debugging, and when the engine is not started, but you want to log something.
+	*/
+
+	void LogToStdOut(const char *Event, const char *Format, ...)
+	{
+		va_list args;
+		va_start(args, Format);
+
+		int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+
+		char *buffer = new char[MessageLength + 1];
+
+		vsnprintf(buffer, MessageLength, Format, args);
+		buffer[MessageLength] = 0;
+
+		va_end(args);
+
+		cout << "[" << Environment::DateTime::GetFormattedTime(Environment::DateTime::GetLocalTimeAndDate(), "%c") << "] ["
+			<< Event << "] " << buffer << endl;
+		
 		delete[] buffer;
-		buffer = new char[AllocSize];
-		if (!buffer)
-			return string();
-
-		allocated = (strftime(buffer, AllocSize - 1, Format, TimeStruct) != 0);
-		AllocSize *= 2;
 	}
-	
-	string result = buffer;
-	SAFE_DELETE_ARRAY(buffer);
-	return result;
-}
 
-string CEnvironment::Paths::GetExecutablePath()
-{
-	string result;
-
-#ifdef _WIN32
-	char *MainDir = new char[MAX_PATH];
-	GetModuleFileName(GetModuleHandle(0), MainDir, MAX_PATH);
-	DelFNameFromFPath(MainDir);
-
-	result = MainDir;
-
-	delete [] MainDir;
-#else
-	// executable path is useless on *nix-like systems, so return empty string
-#endif // _WIN32
-
-	return result;
-}
-
-string CEnvironment::Paths::GetWorkingDirectory()
-{
-	char dir[MAX_PATH];
-
-#ifdef _WIN32
-	GetCurrentDirectory(MAX_PATH, dir);
-#else
-	getcwd(dir, MAX_PATH);
-#endif //_WIN32
-
-	return string(dir);
-}
-
-void CEnvironment::Paths::SetWorkingDirectory(const string &AWorkingDirectory)
-{
-#ifdef _WIN32
-	SetCurrentDirectory(AWorkingDirectory.c_str());
-#else
-	chdir(AWorkingDirectory.c_str());
-#endif // _WIN32
-}
-
-string CEnvironment::Paths::GetConfigPath()
-{
-	return ConfigPath;
-
-}
-
-void CEnvironment::Paths::SetConfigPath(const string &AConfigPath)
-{
-	ConfigPath = AConfigPath;
-}
-
-string CEnvironment::Paths::GetLogPath()
-{
-	return LogPath;
-
-}
-
-void CEnvironment::Paths::SetLogPath(const string &ALogPath)
-{
-	LogPath = ALogPath;
-}
-
-/**
-* CEnvironment::Paths::GetUniversalDirectory - возвращает стандартную для системы директорию для помещения всех изменяемых файлов программы, таких как конфиг, лог, возможно сэйвы и т. п.
-*
-* Название Universal здесь не очень удачное, но ничего лучше я придумать не смог...
-*/
-
-string CEnvironment::Paths::GetUniversalDirectory()
-{
-	string result;
-#ifdef _WIN32
-	result = CEnvironment::Variables::Get("APPDATA");
-	if (!result.empty())
-		result += "\\" + CEngine::Instance()->GetProgramName() + "\\";
-#else
-	string HomeDir = CEnvironment::Variables::Get("HOME");
-	if (HomeDir.empty())
+	string GetLineTerminator()
 	{
-		string UserName = CEnvironment::Variables::Get("USER");
-		if (UserName.empty())
-			UserName = CEnvironment::Variables::Get("USERNAME");
+	#ifdef _WIN32
+		static string LineTerminator = "\r\n";
+	#else
+		static string LineTerminator = "\n";
+	#endif // _WIN32
 
-		if (!UserName.empty())
-			HomeDir = "/home/" + UserName;
+		return LineTerminator;
 	}
 
-	if (!HomeDir.empty())
-		result = HomeDir + "/" + CEngine::Instance()->GetProgramName() + "/";
-#endif // _WIN32
-
-	return result;
 }
-
-string CEnvironment::Paths::ConfigPath = "Config/";
-string CEnvironment::Paths::LogPath = "Logs/";
-
-string CEnvironment::Variables::Get(const string &AName)
-{
-	char *var = getenv(AName.c_str());
-	return ((var == NULL) ? "" : string(var));
-}
-
-void CEnvironment::Variables::Set(const string &AName, const string &AValue)
-{
-	static string PutEnvString;
-	PutEnvString = AName + "=" + AValue;
-	SDL_putenv(const_cast<char *>(PutEnvString.c_str()));
-}
-
-/**
-* CEnvironment::LogToStdOut - simplified log to the standard output, the way around singleton hell of CLog.
-*
-* This function is used by Log macro if SIMPLIFIED_LOG is defined (this is false by default). Also can be used manually.
-* Generally, it's useful in cases of debugging, and when the engine is not started, but you want to log something.
-*/
-
-void CEnvironment::LogToStdOut(const char *Event, const char *Format, ...)
-{
-	va_list args;
-	va_start(args, Format);
-
-	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
-
-	char *buffer = new char[MessageLength + 1];
-
-	vsnprintf(buffer, MessageLength, Format, args);
-	buffer[MessageLength] = 0;
-
-	va_end(args);
-
-	cout << "[" << CEnvironment::DateTime::GetFormattedTime(CEnvironment::DateTime::GetLocalTimeAndDate(), "%c") << "] ["
-		<< Event << "] " << buffer << endl;
-	
-	delete[] buffer;
-}
-
-string CEnvironment::GetLineTerminator()
-{
-#ifdef _WIN32
-	static string LineTerminator = "\r\n";
-#else
-	static string LineTerminator = "\n";
-#endif // _WIN32
-
-	return LineTerminator;
-}
-
 
 void DelFNameFromFPath(char *src)
 {

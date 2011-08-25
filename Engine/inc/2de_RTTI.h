@@ -4,6 +4,11 @@
 #include <typeinfo>
 #include <string>
 
+class CObject;
+
+// I hope we won't ever use this sand-witch approach.
+// Hope clReflect soon will be usable
+
 class CRTTI
 {
 public:
@@ -12,6 +17,17 @@ public:
 private:
 	std::string ClassName;
 	CRTTI *BaseRTTI;
+};
+
+class CNullRTTIClass
+{
+public:
+	static inline CRTTI* GetClassRTTI() { return &RTTI; }
+	virtual CRTTI* GetRTTI() { return &RTTI; }
+
+protected:
+	static CRTTI RTTI;
+
 };
 
 template <typename Heir, typename BaseClass>
@@ -82,7 +98,7 @@ template<> EPropertyType::E CPropertyType<int>::Type = EPropertyType::FLOAT;
 class CAbstractProperty
 {
 public:
-	virtual EPropertyType.E GetType() const = 0;
+	virtual EPropertyType::E GetType() const = 0;
 
 protected:
 	const char *name;
@@ -92,7 +108,7 @@ template<typename T>
 class CTypedProperty : public CAbstractProperty
 {
 public:
-	virtual EPropertyType.E GetType() const;
+	virtual EPropertyType::E GetType() const;
 	virtual T GetValue( CObject* pObject ) = 0;
 	virtual void SetValue( CObject* pObject, T value ) = 0;
 };

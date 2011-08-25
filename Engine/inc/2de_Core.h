@@ -1004,7 +1004,7 @@ private:
 
 // #define SIMPLIFIED_LOG // to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
 #ifdef SIMPLIFIED_LOG
-	#define Log CEnvironment::LogToStdOut
+	#define Log Environment::LogToStdOut
 #else
 	#define Log CLog::Instance()->WriteToLog
 #endif // SIMPLIFIED_LOG
@@ -1015,47 +1015,38 @@ private:
 * Ideally in future all (or not all) platform-dependent code should be here.
 */
 
-class CEnvironment
+namespace Environment
 {
-public:
-	class DateTime
+	namespace DateTime
 	{
-	public:
-		static tm* GetLocalTimeAndDate();
-		static string GetFormattedTime(tm *TimeStruct, const char *Format);
+		tm* GetLocalTimeAndDate();
+		string GetFormattedTime(tm *TimeStruct, const char *Format);
 	};
 
-	class Paths
+	namespace Paths
 	{
-	public:
-		static string GetExecutablePath();
+		string GetExecutablePath();
 
-		static string GetWorkingDirectory();
-		static void SetWorkingDirectory(const string &AWorkingDirectory);
+		string GetWorkingDirectory();
+		void SetWorkingDirectory(const string &AWorkingDirectory);
 
-		static string GetConfigPath();
-		static void SetConfigPath(const string &AConfigPath);
+		string GetConfigPath();
+		void SetConfigPath(const string &AConfigPath);
 
-		static string GetLogPath();
-		static void SetLogPath(const string &ALogPath);
+		string GetLogPath();
+		void SetLogPath(const string &ALogPath);
 
-		static string GetUniversalDirectory();
-
-	private:
-		static string ConfigPath;
-		static string LogPath;
+		string GetUniversalDirectory();
 	};
 
-	class Variables
+	namespace Variables
 	{
-	public:
-		static string Get(const string &AName);
-		static void Set(const string &AName, const string &AValue);
+		string Get(const string &AName);
+		void Set(const string &AName, const string &AValue);
 	};
 
-	static void LogToStdOut(const char *Event, const char *Format, ...);
-	static string GetLineTerminator();
-
+	void LogToStdOut(const char *Event, const char *Format, ...);
+	string GetLineTerminator();
 };
 
 // TODO: move this function somewhere.. btw, it's used only in one place: CEnvironment::Paths::GetExecutablePath()

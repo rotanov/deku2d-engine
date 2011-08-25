@@ -670,7 +670,7 @@ CLuaVirtualMachine::CLuaVirtualMachine()
 		return;
 	}
 
-	string scriptsPath = CEnvironment::Paths::GetWorkingDirectory() + "/" + CResourceManager::Instance()->GetDataPath() + "/Scripts/";
+	string scriptsPath = Environment::Paths::GetWorkingDirectory() + "/" + CResourceManager::Instance()->GetDataPath() + "/Scripts/";
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	lua_pushstring(L, (";" + scriptsPath + "?.lua").c_str() );

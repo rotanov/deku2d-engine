@@ -128,7 +128,7 @@ CDataLister::CDataLister() : DEFAULT_RESOURCE_LIST_FILE_NAME("Resources.xml")
 
 CXML* CDataLister::List(string DataRoot, bool ForceReindex /*= false*/)
 {
-	string ResourcesListFile = CEnvironment::Paths::GetConfigPath() + DEFAULT_RESOURCE_LIST_FILE_NAME;
+	string ResourcesListFile = Environment::Paths::GetConfigPath() + DEFAULT_RESOURCE_LIST_FILE_NAME;
 
 	if (!ForceReindex && CFileSystem::Exists(ResourcesListFile))
 	{
