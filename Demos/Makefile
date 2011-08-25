@@ -1,8 +1,5 @@
-DISABLED_DEMOS	=	Font\ editor \
-			Level\ editor \
-			Pac\ man \
+DISABLED_DEMOS	=	Pac\ man \
 			Tanks \
-			Tileset\ editor
 
 DEMOS		=	Benchmark \
 			Color\ lines \

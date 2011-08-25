@@ -11,16 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tanks", "Demos\Tanks\Tanks.
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Font editor", "Demos\Font editor\Font editor.vcproj", "{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Level editor", "Demos\Level editor\Level editor.vcproj", "{B18211B0-4D50-4F93-A351-4530E915E979}"
-	ProjectSection(ProjectDependencies) = postProject
-		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pong", "Demos\Pong\Pong.vcproj", "{D18B515C-FBC6-4BD4-8299-735BA342BEC4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
@@ -39,11 +29,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo template", "Demos\Demo
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pac man", "Demos\Pac man\Pac man.vcproj", "{F62FF54C-88A4-47DE-9B48-6CCFAD444FE8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tileset editor", "Demos\Tileset editor\Tileset editor.vcproj", "{1E3D45B4-4AD1-4C7B-A8D2-826096479771}"
 	ProjectSection(ProjectDependencies) = postProject
 		{35F1F297-4147-41B6-9B7D-09F5670F3E54} = {35F1F297-4147-41B6-9B7D-09F5670F3E54}
 	EndProjectSection
@@ -82,14 +67,6 @@ Global
 		{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}.Debug|Win32.Build.0 = Debug|Win32
 		{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}.Release|Win32.ActiveCfg = Release|Win32
 		{DED94CCD-EEBE-43B8-9AA9-AE27147AFC06}.Release|Win32.Build.0 = Release|Win32
-		{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}.Debug|Win32.Build.0 = Debug|Win32
-		{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}.Release|Win32.ActiveCfg = Release|Win32
-		{F22E762F-BD20-4A96-9DF4-5A8B05D10B0D}.Release|Win32.Build.0 = Release|Win32
-		{B18211B0-4D50-4F93-A351-4530E915E979}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B18211B0-4D50-4F93-A351-4530E915E979}.Debug|Win32.Build.0 = Debug|Win32
-		{B18211B0-4D50-4F93-A351-4530E915E979}.Release|Win32.ActiveCfg = Release|Win32
-		{B18211B0-4D50-4F93-A351-4530E915E979}.Release|Win32.Build.0 = Release|Win32
 		{D18B515C-FBC6-4BD4-8299-735BA342BEC4}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D18B515C-FBC6-4BD4-8299-735BA342BEC4}.Debug|Win32.Build.0 = Debug|Win32
 		{D18B515C-FBC6-4BD4-8299-735BA342BEC4}.Release|Win32.ActiveCfg = Release|Win32
@@ -110,10 +87,6 @@ Global
 		{F62FF54C-88A4-47DE-9B48-6CCFAD444FE8}.Debug|Win32.Build.0 = Debug|Win32
 		{F62FF54C-88A4-47DE-9B48-6CCFAD444FE8}.Release|Win32.ActiveCfg = Release|Win32
 		{F62FF54C-88A4-47DE-9B48-6CCFAD444FE8}.Release|Win32.Build.0 = Release|Win32
-		{1E3D45B4-4AD1-4C7B-A8D2-826096479771}.Debug|Win32.ActiveCfg = Debug|Win32
-		{1E3D45B4-4AD1-4C7B-A8D2-826096479771}.Debug|Win32.Build.0 = Debug|Win32
-		{1E3D45B4-4AD1-4C7B-A8D2-826096479771}.Release|Win32.ActiveCfg = Release|Win32
-		{1E3D45B4-4AD1-4C7B-A8D2-826096479771}.Release|Win32.Build.0 = Release|Win32
 		{F964DF4C-3A74-41B4-B281-EDB04636E5F8}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F964DF4C-3A74-41B4-B281-EDB04636E5F8}.Debug|Win32.Build.0 = Debug|Win32
 		{F964DF4C-3A74-41B4-B281-EDB04636E5F8}.Release|Win32.ActiveCfg = Release|Win32
