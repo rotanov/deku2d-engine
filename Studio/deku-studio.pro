@@ -29,13 +29,18 @@ unix {
 }
 
 win32 {
-    LIBS += -lGLU32 \
-        -lGLEW32s \
-        -lSDL \
-        -lSDLmain \
-        -lSDL_mixer \
-        -lDeku2D \
+    # win32-msvc:LIBS += /path/to/your/libMyLib.lib
+    # INCLUDEPATH += D:\Devel\inc
+    # INCLUDEPATH += D:\Devel\Lua\5.1\include
+    # LIBS += -LD:\Devel\lib
+    # LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.0A\Lib"
+    # LIBS += -lGLU32 -lSDL_mixer -lDevIL -L../Engine/lib -lDeku2d.Release -lSDL -lSDLmain -llua5.1 -lopengl32 -lGLEW32s -lUser32
+    LIBS += -lOpenGl32 -lGlu32 -lSdl -lSDLMain -lLua5.1 -lDeku2d.Release -lSDL_mixer -lDevIL -lGLEW32s -lUser32
+
+
 }
+
+
 
 QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1)
 
