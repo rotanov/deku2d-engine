@@ -869,12 +869,8 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 	va_list args;
 	va_start(args, Format);
 
-	int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
-
-	char *buffer = new char[MessageLength + 1];
-
-	vsnprintf(buffer, MessageLength, Format, args);
-	buffer[MessageLength] = 0;
+	vsnprintf(LogStr, MAX_LOG_STR_LENGTH, Format, args);
+	LogStr[MAX_LOG_STR_LENGTH - 1] = 0;
 
 	va_end(args);
 
@@ -884,7 +880,7 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 #else
 	message += Environment::DateTime::GetFormattedTime(Environment::DateTime::GetLocalTimeAndDate(), "%c") + "] [";
 #endif // LOG_TIME_TICK
-	message += string(Event) + "] " + buffer;
+	message += string(Event) + "] " + LogStr;
 
 	/**Stream << "[";
 #ifdef LOG_TIME_TICK
@@ -903,8 +899,6 @@ void CLog::WriteToLog(const char *Event, const char *Format, ...)
 		logOutputEvent->SetData("Text", message);
 		CEventManager::Instance()->TriggerEvent(logOutputEvent);
 	}
-
-	delete[] buffer;
 }
 
 bool CLog::isEnabled() const
@@ -1229,19 +1223,15 @@ namespace Environment
 		va_list args;
 		va_start(args, Format);
 
-		int MessageLength = vsnprintf(NULL, 0, Format, args) + 1;
+		static char logStr[CLog::MAX_LOG_STR_LENGTH];
 
-		char *buffer = new char[MessageLength + 1];
-
-		vsnprintf(buffer, MessageLength, Format, args);
-		buffer[MessageLength] = 0;
+		vsnprintf(logStr, CLog::MAX_LOG_STR_LENGTH, Format, args);
+		logStr[CLog::MAX_LOG_STR_LENGTH - 1] = 0;
 
 		va_end(args);
 
 		cout << "[" << Environment::DateTime::GetFormattedTime(Environment::DateTime::GetLocalTimeAndDate(), "%c") << "] ["
-			<< Event << "] " << buffer << endl;
-		
-		delete[] buffer;
+			<< Event << "] " << logStr << endl;
 	}
 
 	string GetLineTerminator()

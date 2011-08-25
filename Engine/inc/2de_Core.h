@@ -981,6 +981,8 @@ public:
 	int GetEventPriority(const string &AEvent) const;
 	void SetEventPriority(const string &AEvent, int APriority);
 
+	static const int MAX_LOG_STR_LENGTH = 1024;
+
 protected:
 	CLog();
 	friend class CTSingleton<CLog>;
@@ -1000,6 +1002,8 @@ private:
 	string LogName;
 	EventsPrioritiesContainer EventsPriorities;
 	int LogLevel;
+
+	char LogStr[MAX_LOG_STR_LENGTH];
 };
 
 // #define SIMPLIFIED_LOG // to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
