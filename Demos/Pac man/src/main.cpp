@@ -2,6 +2,7 @@
 #include "2de_GameUtils.h"
 #include "Pacman.h"
 #include "2de_Gui.h"
+using namespace Deku2d;
 
 class CCustomStateHandler : public CAbstractStateHandler
 {

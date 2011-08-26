@@ -199,11 +199,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\2de_Gui.cpp"
+				RelativePath=".\src\2de_ImageUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\2de_ImageUtils.cpp"
+				RelativePath=".\src\2de_Log.cpp"
 				>
 			</File>
 			<File
@@ -285,11 +285,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\2de_Gui.h"
+				RelativePath=".\inc\2de_ImageUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\2de_ImageUtils.h"
+				RelativePath=".\inc\2de_Log.h"
 				>
 			</File>
 			<File

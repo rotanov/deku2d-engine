@@ -1,5 +1,6 @@
 #include "2de_Engine.h"
 #include "NinjaStory.h"
+using namespace Deku2d;
 
 CEngine *Ninja = CEngine::Instance();
 

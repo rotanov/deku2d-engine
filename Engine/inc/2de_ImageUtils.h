@@ -3,31 +3,35 @@
 
 #include "2de_Math.h"
 
-typedef unsigned int ILuint;
-
-/**
-*	Since I found it useful to use this module separated from Deku2d I did that:
-*	#define _2DE_IMAGE_UTILS_SEPARATED_ - you can define it somewhere before header appers
-*	and it should work fine.
-*/
-
-class CImageData
+namespace Deku2d
 {
-public:
-	unsigned char *Data;
-	unsigned Height;
-	unsigned Width;
-	unsigned char BPP;
+	typedef unsigned int ILuint;
 
-	CImageData();
-	~CImageData();
-	bool LoadFromFile(const std::string &Filename);
-	bool LoadFromMemory(void *Ptr, ILuint Size);
-	RGBAub& operator [](unsigned Index);
-	RGBAub& operator ()(unsigned col, unsigned row);
+	/**
+	*	Since I found it useful to use this module separated from Deku2d I did that:
+	*	#define _2DE_IMAGE_UTILS_SEPARATED_ - you can define it somewhere before header appers
+	*	and it should work fine.
+	*/
 
-private:
-	void InitImageData();
-};
+	class CImageData
+	{
+	public:
+		unsigned char *Data;
+		unsigned Height;
+		unsigned Width;
+		unsigned char BPP;
+
+		CImageData();
+		~CImageData();
+		bool LoadFromFile(const std::string &Filename);
+		bool LoadFromMemory(void *Ptr, ILuint Size);
+		RGBAub& operator [](unsigned Index);
+		RGBAub& operator ()(unsigned col, unsigned row);
+
+	private:
+		void InitImageData();
+	};
+
+}	//	namespace Deku2d
 
 #endif // _2DE_IMAGE_UTILS_H_

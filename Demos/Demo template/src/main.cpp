@@ -1,4 +1,5 @@
 #include "2de_Engine.h"
+using namespace Deku2d;
 
 CEngine *Engine = CEngine::Instance();
 

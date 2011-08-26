@@ -1,4 +1,5 @@
 #include "Pacman.h"
+using namespace Deku2d;
 
 #define NewObject(A) CFactory::Instance()->New<A>("")
 

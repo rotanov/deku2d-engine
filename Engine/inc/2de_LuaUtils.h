@@ -5,197 +5,202 @@
 
 #include "2de_Core.h"
 #include "2de_Resource.h"
+#include "2de_Log.h"
 
-/**
-* CScript - represents script resource type.
-*/
-class CScript : public CResource
+namespace Deku2d
 {
-public:
-	CScript();
-	bool Load();
-	void Unload();
-	string GetScriptText() const;
-	void SetRunned();
-	bool IsRunned();
-
-private:
-	string ScriptText;
-	bool Runned;
-};
-
-/** 
-* CLuaVirtualMachine - singleton, that allows access to common Lua virtual machine.
-*
-* Registers engine Lua API functions, and allows running Lua-scripts by filename, resource pointer or from string.
-*/
-class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
-{
-public:
-	bool RunFile(const string &AFilename);
-	bool RunString(const string &AString);
-	bool RunScript(CScript *AScript);
-	void RegisterAPIFunction(const string &AName, lua_CFunction AFunc);
-
-	bool CallFunction(const string &AFunctionName);
-	bool CallMethodFunction(const string &AObjectName, const string &AFunctionName);
-	void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
-	void SetLocalNamesFields(CGameObject *AGameObject);
-	void SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference);
-	void DestroyLuaObject(const CGameObject &AObject);
-
-	bool IsObjectExists(const string &AObjectName);
-	bool IsMethodFunctionExists(const string &AObjectName, const string &AFunctionName);
-
-	int GetMemoryUsage() const;
-	void RunGC();
-
-	string GetLastError() const;
-	void TriggerError(const string &AMessage, ...);
-
-protected:
-	CLuaVirtualMachine();
-	~CLuaVirtualMachine();
-
-private:
-	void RegisterStandardAPI();
-	void OutputError(const string &AError);
-
-	lua_State *L;
-
-	string LastError;
-
-	friend class CTSingleton<CLuaVirtualMachine>;
-	friend class CLuaFunctionCall;
-};
-
-class CLuaFunctionCall
-{
-public:
-	CLuaFunctionCall(const string &AFunctionName, int AResultsCount = 0);
-	CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount = 0);
-	~CLuaFunctionCall();
-
-	bool Call();
-
-	void PushArgument(lua_Number Argument);
-	void PushArgument(const string &Argument);
-	void PushArgument(void *Argument);
-
-	void SetArgumentsCount(int AArgumentsCount);
-
-	template<typename T>
-	T PopResult()
+	/**
+	* CScript - represents script resource type.
+	*/
+	class CScript : public CResource
 	{
-		return PopResultImpl(identity<T>());
-	}
+	public:
+		CScript();
+		bool Load();
+		void Unload();
+		string GetScriptText() const;
+		void SetRunned();
+		bool IsRunned();
 
-private:
-	template<typename T>
-	T PopResultImpl(identity<T>)
+	private:
+		string ScriptText;
+		bool Runned;
+	};
+
+	/** 
+	* CLuaVirtualMachine - singleton, that allows access to common Lua virtual machine.
+	*
+	* Registers engine Lua API functions, and allows running Lua-scripts by filename, resource pointer or from string.
+	*/
+	class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
 	{
-		if (Broken)
-			return NULL;
-		if (!Called)
-		{
-			Log("ERROR", "Can't pop a result from Lua function call: function has not been called yet");
-			return NULL;
-		}
+	public:
+		bool RunFile(const string &AFilename);
+		bool RunString(const string &AString);
+		bool RunScript(CScript *AScript);
+		void RegisterAPIFunction(const string &AName, lua_CFunction AFunc);
 
-		if (!ResultsCount)
-		{
-			Log("ERROR", "Can't pop a result from Lua function call: no more results");
-			return NULL;
-		}
+		bool CallFunction(const string &AFunctionName);
+		bool CallMethodFunction(const string &AObjectName, const string &AFunctionName);
+		void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
+		void SetLocalNamesFields(CGameObject *AGameObject);
+		void SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference);
+		void DestroyLuaObject(const CGameObject &AObject);
 
-		if (!lua_islightuserdata(L, -1))
-		{
-			Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
-			return NULL;
-		}
+		bool IsObjectExists(const string &AObjectName);
+		bool IsMethodFunctionExists(const string &AObjectName, const string &AFunctionName);
 
-		T res = static_cast<T>(lua_touserdata(L, -1));
-		lua_pop(L, 1);
-		ResultsCount--;
-		return res;
-	}
+		int GetMemoryUsage() const;
+		void RunGC();
 
-	string PopResultImpl(identity<string>)
+		string GetLastError() const;
+		void TriggerError(const string &AMessage, ...);
+
+	protected:
+		CLuaVirtualMachine();
+		~CLuaVirtualMachine();
+
+	private:
+		void RegisterStandardAPI();
+		void OutputError(const string &AError);
+
+		lua_State *L;
+
+		string LastError;
+
+		friend class CTSingleton<CLuaVirtualMachine>;
+		friend class CLuaFunctionCall;
+	};
+
+	class CLuaFunctionCall
 	{
-		if (Broken)
-			return "";
-		if (!Called)
+	public:
+		CLuaFunctionCall(const string &AFunctionName, int AResultsCount = 0);
+		CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount = 0);
+		~CLuaFunctionCall();
+
+		bool Call();
+
+		void PushArgument(lua_Number Argument);
+		void PushArgument(const string &Argument);
+		void PushArgument(void *Argument);
+
+		void SetArgumentsCount(int AArgumentsCount);
+
+		template<typename T>
+		T PopResult()
 		{
-			Log("ERROR", "Can't pop a result from Lua function call: function has not been called yet");
-			return "";
+			return PopResultImpl(identity<T>());
 		}
 
-		if (!ResultsCount)
+	private:
+		template<typename T>
+		T PopResultImpl(identity<T>)
 		{
-			Log("ERROR", "Can't pop a result from Lua function call: no more results");
-			return "";
+			if (Broken)
+				return NULL;
+			if (!Called)
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: function has not been called yet");
+				return NULL;
+			}
+
+			if (!ResultsCount)
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: no more results");
+				return NULL;
+			}
+
+			if (!lua_islightuserdata(L, -1))
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
+				return NULL;
+			}
+
+			T res = static_cast<T>(lua_touserdata(L, -1));
+			lua_pop(L, 1);
+			ResultsCount--;
+			return res;
 		}
 
-		if (!lua_isstring(L, -1))
+		string PopResultImpl(identity<string>)
 		{
-			Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
-			return "";
+			if (Broken)
+				return "";
+			if (!Called)
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: function has not been called yet");
+				return "";
+			}
+
+			if (!ResultsCount)
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: no more results");
+				return "";
+			}
+
+			if (!lua_isstring(L, -1))
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
+				return "";
+			}
+
+			string res = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			ResultsCount--;
+			return res;
 		}
 
-		string res = lua_tostring(L, -1);
-		lua_pop(L, 1);
-		ResultsCount--;
-		return res;
-	}
+		lua_Number PopResultImpl(identity<lua_Number>)
+		{
+			if (Broken)
+				return 0;
+			if (!Called)
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: function has not been called yet");
+				return 0;
+			}
 
-	lua_Number PopResultImpl(identity<lua_Number>)
+			if (!ResultsCount)
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: no more results");
+				return 0;
+			}
+
+			if (!lua_isnumber(L, -1))
+			{
+				Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
+				return 0;
+			}
+
+			lua_Number res = lua_tonumber(L, -1);
+			lua_pop(L, 1);
+			ResultsCount--;
+			return res;
+		}
+
+		string ObjectName;
+		string FunctionName;
+
+		int ArgumentsCount;
+		int ResultsCount;
+		bool Called;
+		bool Broken;
+		int OldStackTop;
+		lua_State *L;
+	};
+
+	namespace LuaAPI
 	{
-		if (Broken)
-			return 0;
-		if (!Called)
+
+		template<typename T>
+		bool CheckType(T *obj)
 		{
-			Log("ERROR", "Can't pop a result from Lua function call: function has not been called yet");
-			return 0;
+			return (obj != NULL) && (typeid(*obj) == typeid(T));
 		}
 
-		if (!ResultsCount)
-		{
-			Log("ERROR", "Can't pop a result from Lua function call: no more results");
-			return 0;
-		}
+	}	//	namespace LuaAPI
 
-		if (!lua_isnumber(L, -1))
-		{
-			Log("ERROR", "Can't pop a result from Lua function call: incorrect type");
-			return 0;
-		}
-
-		lua_Number res = lua_tonumber(L, -1);
-		lua_pop(L, 1);
-		ResultsCount--;
-		return res;
-	}
-
-	string ObjectName;
-	string FunctionName;
-
-	int ArgumentsCount;
-	int ResultsCount;
-	bool Called;
-	bool Broken;
-	int OldStackTop;
-	lua_State *L;
-};
-
-namespace LuaAPI
-{
-
-template<typename T>
-bool CheckType(T *obj)
-{
-	return (obj != NULL) && (typeid(*obj) == typeid(T));
-}
-
-};
+}	//	namespace Deku2d
 
 #endif // _2DE_LUA_UTILS_H_

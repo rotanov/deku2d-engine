@@ -1,4 +1,5 @@
 #include "Color Lines.h"
+using namespace Deku2d;
 
 enum EPossibleDirections	// Constants for filled lines processing
 {

@@ -8,8 +8,8 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_GameUtils.cpp \
 			src/2de_GraphicsHigh.cpp \
 			src/2de_GraphicsLow.cpp \
-			src/2de_Gui.cpp \
 			src/2de_ImageUtils.cpp \
+      src/2de_Log.cpp \
 			src/2de_LuaUtils.cpp \
 			src/2de_Math.cpp \
 			src/2de_Physics.cpp \
@@ -29,8 +29,8 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_GameUtils.o \
 			obj/2de_GraphicsHigh.o \
 			obj/2de_GraphicsLow.o \
-			obj/2de_Gui.o \
 			obj/2de_ImageUtils.o \
+      obj/2de_Log.o \
 			obj/2de_LuaUtils.o \
 			obj/2de_Math.o \
 			obj/2de_Physics.o \

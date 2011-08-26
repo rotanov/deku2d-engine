@@ -5,813 +5,816 @@
 #include <limits>
 #include <algorithm>
 
-unsigned g_seed = 152406923;
-//unsigned g_seed = time(NULL);
-
-static float SineTable[SINE_COSINE_TABLE_DIM], CosineTable[SINE_COSINE_TABLE_DIM];
-
-Vector2 Vector2::operator *(const Matrix2& M) const
+namespace Deku2d
 {
-	Vector2 T;
-	T.x = x * M.e11 + y * M.e12;
-	T.y = x * M.e21 + y * M.e22;
-	return T;
-}
+	unsigned g_seed = 152406923;
+	//unsigned g_seed = time(NULL);
 
-Vector2 Vector2::operator ^(const Matrix2& M) const
-{
-	Vector2 T;
-	T.x = x * M.e11 + y * M.e21;
-	T.y = x * M.e12 + y * M.e22;
-	return T;
-}
+	static float SineTable[SINE_COSINE_TABLE_DIM], CosineTable[SINE_COSINE_TABLE_DIM];
 
-Vector2& Vector2::operator *=(const Matrix2& M)
-{
-	Vector2 T = *this;
-	x = T.x * M.e11 + T.y * M.e12;
-	y = T.x * M.e21 + T.y * M.e22;
-	return *this;
-}
-
-Vector2& Vector2::operator ^=(const Matrix2& M)
-{
-	Vector2 T = *this;
-	x = T.x * M.e11 + T.y * M.e21;
-	y = T.x * M.e12 + T.y * M.e22;
-	return *this;
-}
-
-bool SqareEq(float a, float b, float c, float &t0, float &t1)
-{
-	float d = b * b - 4.0f * a * c;
-	if (d < 0.0f)
-		return false;
-	d = static_cast<float>(sqrt(d));
-	float oo2a = 1.0f / (2.0f * a);
-	t0 = (- b + d) * oo2a;
-	t1 = (- b - d) * oo2a;
-	if (t1 > t0)
-		std::swap(t0, t1);
-	return true;
-}
-
-void GenSinTable()
-{
-	float a = 0, add = static_cast<float>(PI) * 2 / static_cast<float>(SINE_COSINE_TABLE_DIM);
-	for (int i = 0; i < SINE_COSINE_TABLE_DIM; ++i)
+	Vector2 Vector2::operator *(const Matrix2& M) const
 	{
-		SineTable[i] = static_cast<float>(sin(a));
-		CosineTable[i] = static_cast<float>(cos(a));
-		a += add;
+		Vector2 T;
+		T.x = x * M.e11 + y * M.e12;
+		T.y = x * M.e21 + y * M.e22;
+		return T;
 	}
-}
 
-float fSinr(float angle){return SineTable[static_cast<int>(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
-float fSind(float angle){return SineTable[static_cast<int>(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
-float fSini(int index){return SineTable[index % SINE_COSINE_TABLE_DIM];}
-float fCosr(float angle){return CosineTable[static_cast<int>(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
-float fCosd(float angle){return CosineTable[static_cast<int>(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
-float fCosi(int index){return CosineTable[index % SINE_COSINE_TABLE_DIM];}
-
-
-// Polygons collision stuff will be here
-
-void GetInterval(const CPolygon &Polygon, const Vector2 &xAxis, float &min, float &max);
-bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t);
-
-bool IntervalIntersect(const CPolygon &A,
-					   const CPolygon &B,
-					   const Vector2 &xAxis, 
-					   const Vector2 &xOffset,
-					   const Vector2 &xVel,
-					   const Matrix2 &xOrient,
-					   float &taxis,
-					   float tmax);
-
-bool CPolygon::Collide(const CPolygon &A,
-					   const Vector2 &Apos,
-					   const Vector2 &Avel,
-					   const Matrix2 &Aorient,
-					   const CPolygon &B,
-					   const Vector2 &Bpos,
-					   const Vector2 &Bvel,
-					   const Matrix2 &Borient,
-					   Vector2 &n,
-					   float &depth)
-{
-	Matrix2 xOrient = Aorient ^ Borient;
-	Vector2 xOffset = (Apos - Bpos) ^ Borient;
-	Vector2 xVel    = (Avel - Bvel) ^ Borient;
-
-	Vector2 xAxis[64]; // note : a maximum of 32 vertices per poly is supported
-	float  taxis[64];
-	int    iNumAxes=0;
-
-	float fVel2 = xVel * xVel;
-
-	if (fVel2 > 0.00001f)
+	Vector2 Vector2::operator ^(const Matrix2& M) const
 	{
-		xAxis[iNumAxes] = Vector2(-xVel.y, xVel.x);
+		Vector2 T;
+		T.x = x * M.e11 + y * M.e21;
+		T.y = x * M.e12 + y * M.e22;
+		return T;
+	}
 
-		if (!IntervalIntersect(	A, 
-			B, 
-			xAxis[iNumAxes], 
-			xOffset, xVel, xOrient,
-			taxis[iNumAxes], depth))
-		{
+	Vector2& Vector2::operator *=(const Matrix2& M)
+	{
+		Vector2 T = *this;
+		x = T.x * M.e11 + T.y * M.e12;
+		y = T.x * M.e21 + T.y * M.e22;
+		return *this;
+	}
+
+	Vector2& Vector2::operator ^=(const Matrix2& M)
+	{
+		Vector2 T = *this;
+		x = T.x * M.e11 + T.y * M.e21;
+		y = T.x * M.e12 + T.y * M.e22;
+		return *this;
+	}
+
+	bool SqareEq(float a, float b, float c, float &t0, float &t1)
+	{
+		float d = b * b - 4.0f * a * c;
+		if (d < 0.0f)
 			return false;
+		d = static_cast<float>(sqrt(d));
+		float oo2a = 1.0f / (2.0f * a);
+		t0 = (- b + d) * oo2a;
+		t1 = (- b - d) * oo2a;
+		if (t1 > t0)
+			std::swap(t0, t1);
+		return true;
+	}
+
+	void GenSinTable()
+	{
+		float a = 0, add = static_cast<float>(PI) * 2 / static_cast<float>(SINE_COSINE_TABLE_DIM);
+		for (int i = 0; i < SINE_COSINE_TABLE_DIM; ++i)
+		{
+			SineTable[i] = static_cast<float>(sin(a));
+			CosineTable[i] = static_cast<float>(cos(a));
+			a += add;
 		}
-		iNumAxes++;
 	}
 
-	for (unsigned j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
-	{
-		Vector2 E0 = A[j];
-		Vector2 E1 = A[i];
-		Vector2 E  = E1 - E0;
-		xAxis[iNumAxes] = Vector2(-E.y, E.x) * xOrient;
+	float fSinr(float angle){return SineTable[static_cast<int>(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
+	float fSind(float angle){return SineTable[static_cast<int>(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
+	float fSini(int index){return SineTable[index % SINE_COSINE_TABLE_DIM];}
+	float fCosr(float angle){return CosineTable[static_cast<int>(angle * radanglem) % SINE_COSINE_TABLE_DIM];}
+	float fCosd(float angle){return CosineTable[static_cast<int>(angle * deganglem) % SINE_COSINE_TABLE_DIM];}
+	float fCosi(int index){return CosineTable[index % SINE_COSINE_TABLE_DIM];}
 
-		if (!IntervalIntersect(A, B, xAxis[iNumAxes], xOffset, xVel,
-			xOrient, taxis[iNumAxes], depth))
+
+	// Polygons collision stuff will be here
+
+	void GetInterval(const CPolygon &Polygon, const Vector2 &xAxis, float &min, float &max);
+	bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t);
+
+	bool IntervalIntersect(const CPolygon &A,
+						   const CPolygon &B,
+						   const Vector2 &xAxis, 
+						   const Vector2 &xOffset,
+						   const Vector2 &xVel,
+						   const Matrix2 &xOrient,
+						   float &taxis,
+						   float tmax);
+
+	bool CPolygon::Collide(const CPolygon &A,
+						   const Vector2 &Apos,
+						   const Vector2 &Avel,
+						   const Matrix2 &Aorient,
+						   const CPolygon &B,
+						   const Vector2 &Bpos,
+						   const Vector2 &Bvel,
+						   const Matrix2 &Borient,
+						   Vector2 &n,
+						   float &depth)
+	{
+		Matrix2 xOrient = Aorient ^ Borient;
+		Vector2 xOffset = (Apos - Bpos) ^ Borient;
+		Vector2 xVel    = (Avel - Bvel) ^ Borient;
+
+		Vector2 xAxis[64]; // note : a maximum of 32 vertices per poly is supported
+		float  taxis[64];
+		int    iNumAxes=0;
+
+		float fVel2 = xVel * xVel;
+
+		if (fVel2 > 0.00001f)
 		{
-			return false;
+			xAxis[iNumAxes] = Vector2(-xVel.y, xVel.x);
+
+			if (!IntervalIntersect(	A, 
+				B, 
+				xAxis[iNumAxes], 
+				xOffset, xVel, xOrient,
+				taxis[iNumAxes], depth))
+			{
+				return false;
+			}
+			iNumAxes++;
 		}
 
-		iNumAxes++;
-	}
-
-	for (unsigned j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
-	{
-		Vector2 E0 = B[j];
-		Vector2 E1 = B[i];
-		Vector2 E  = E1 - E0;
-		xAxis[iNumAxes] = Vector2(-E.y, E.x);
-
-		if (!IntervalIntersect(A, B, xAxis[iNumAxes], xOffset, xVel, xOrient,
-			taxis[iNumAxes], depth))
+		for (unsigned j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
 		{
-			return false;
+			Vector2 E0 = A[j];
+			Vector2 E1 = A[i];
+			Vector2 E  = E1 - E0;
+			xAxis[iNumAxes] = Vector2(-E.y, E.x) * xOrient;
+
+			if (!IntervalIntersect(A, B, xAxis[iNumAxes], xOffset, xVel,
+				xOrient, taxis[iNumAxes], depth))
+			{
+				return false;
+			}
+
+			iNumAxes++;
 		}
 
-		iNumAxes++;	
-	}
-
-
-	if (B.GetVertexCount() == 2)
-	{
-		Vector2 E  = B[1] - B[0];
-		xAxis[iNumAxes] = E;
-
-		if (!IntervalIntersect(A, B, xAxis[iNumAxes], xOffset, xVel, xOrient,
-			taxis[iNumAxes], depth))
+		for (unsigned j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
 		{
-			return false;
+			Vector2 E0 = B[j];
+			Vector2 E1 = B[i];
+			Vector2 E  = E1 - E0;
+			xAxis[iNumAxes] = Vector2(-E.y, E.x);
+
+			if (!IntervalIntersect(A, B, xAxis[iNumAxes], xOffset, xVel, xOrient,
+				taxis[iNumAxes], depth))
+			{
+				return false;
+			}
+
+			iNumAxes++;	
 		}
 
-		iNumAxes++;
-	}
 
-	if (A.GetVertexCount() == 2)
-	{
-		Vector2 E  = A[1] - A[0];
-		xAxis[iNumAxes] = E * xOrient;
-
-		if (!IntervalIntersect(	A, B, xAxis[iNumAxes], xOffset, xVel, xOrient,
-			taxis[iNumAxes], depth))
+		if (B.GetVertexCount() == 2)
 		{
-			return false;
+			Vector2 E  = B[1] - B[0];
+			xAxis[iNumAxes] = E;
+
+			if (!IntervalIntersect(A, B, xAxis[iNumAxes], xOffset, xVel, xOrient,
+				taxis[iNumAxes], depth))
+			{
+				return false;
+			}
+
+			iNumAxes++;
 		}
 
-		iNumAxes++;
-	}
+		if (A.GetVertexCount() == 2)
+		{
+			Vector2 E  = A[1] - A[0];
+			xAxis[iNumAxes] = E * xOrient;
 
-	if (!FindMTD(xAxis, taxis, iNumAxes, n, depth))
-		return false;
+			if (!IntervalIntersect(	A, B, xAxis[iNumAxes], xOffset, xVel, xOrient,
+				taxis[iNumAxes], depth))
+			{
+				return false;
+			}
 
-	if (n * xOffset < 0.0f)
-		n = -n;
+			iNumAxes++;
+		}
 
-	n *= Borient;
-
-	return true;
-}
-
-
-void GetInterval(const CPolygon &Polygon, const Vector2& xAxis, float& min, float& max)
-{
-	min = max = (Polygon[0] * xAxis);
-
-	for (unsigned i = 1; i < Polygon.GetVertexCount(); i ++)
-	{
-		float d = (Polygon[i] * xAxis);
-		if (d < min) min = d; else if (d > max) max = d;
-	}
-}
-
-bool IntervalIntersect(const CPolygon &A,
-					   const CPolygon &B,
-					   const Vector2 &xAxis, 
-					   const Vector2 &xOffset,
-					   const Vector2 &xVel,
-					   const Matrix2 &xOrient,
-					   float &taxis,
-					   float tmax)
-{
-	float min0, max0;
-	float min1, max1;
-	GetInterval(A, xAxis ^ xOrient, min0, max0);
-	GetInterval(B, xAxis, min1, max1);
-
-	float h = xOffset * xAxis;
-	min0 += h;
-	max0 += h;
-
-	float d0 = min0 - max1;
-	float d1 = min1 - max0;
-
-	if (d0 > 0.0f || d1 > 0.0f)
-	{
-		float v = xVel * xAxis;
-
-		if (fabs(v) < 0.0000001f)
+		if (!FindMTD(xAxis, taxis, iNumAxes, n, depth))
 			return false;
 
-		float t0 =-d0 / v;
-		float t1 = d1 / v;
+		if (n * xOffset < 0.0f)
+			n = -n;
 
-		if (t0 > t1) { float temp = t0; t0 = t1; t1 = temp; }
-		taxis  = (t0 > 0.0f)? t0 : t1;
-
-		if (taxis < 0.0f || taxis > tmax)
-			return false;
+		n *= Borient;
 
 		return true;
 	}
-	else
+
+
+	void GetInterval(const CPolygon &Polygon, const Vector2& xAxis, float& min, float& max)
 	{
-		taxis = (d0 > d1)? d0 : d1;
-		return true;
-	}
-}
-bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
-{
-	int mini = -1;
-	t = 0.0f;
-	for (int i = 0; i < iNumAxes; i ++)
-	{	
-		if (taxis[i] > 0)
+		min = max = (Polygon[0] * xAxis);
+
+		for (unsigned i = 1; i < Polygon.GetVertexCount(); i ++)
 		{
-			if (taxis[i] > t)
+			float d = (Polygon[i] * xAxis);
+			if (d < min) min = d; else if (d > max) max = d;
+		}
+	}
+
+	bool IntervalIntersect(const CPolygon &A,
+						   const CPolygon &B,
+						   const Vector2 &xAxis, 
+						   const Vector2 &xOffset,
+						   const Vector2 &xVel,
+						   const Matrix2 &xOrient,
+						   float &taxis,
+						   float tmax)
+	{
+		float min0, max0;
+		float min1, max1;
+		GetInterval(A, xAxis ^ xOrient, min0, max0);
+		GetInterval(B, xAxis, min1, max1);
+
+		float h = xOffset * xAxis;
+		min0 += h;
+		max0 += h;
+
+		float d0 = min0 - max1;
+		float d1 = min1 - max0;
+
+		if (d0 > 0.0f || d1 > 0.0f)
+		{
+			float v = xVel * xAxis;
+
+			if (fabs(v) < 0.0000001f)
+				return false;
+
+			float t0 =-d0 / v;
+			float t1 = d1 / v;
+
+			if (t0 > t1) { float temp = t0; t0 = t1; t1 = temp; }
+			taxis  = (t0 > 0.0f)? t0 : t1;
+
+			if (taxis < 0.0f || taxis > tmax)
+				return false;
+
+			return true;
+		}
+		else
+		{
+			taxis = (d0 > d1)? d0 : d1;
+			return true;
+		}
+	}
+	bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
+	{
+		int mini = -1;
+		t = 0.0f;
+		for (int i = 0; i < iNumAxes; i ++)
+		{	
+			if (taxis[i] > 0)
+			{
+				if (taxis[i] > t)
+				{
+					mini = i;
+					t = taxis[i];
+					N = xAxis[i];
+					N.Normalize();
+				}
+			}
+		}
+
+		if (mini != -1)
+			return true;
+
+		mini = -1;
+		for (int i = 0; i < iNumAxes; i ++)
+		{
+			float n = xAxis[i].Normalize();
+			taxis[i] /= n;
+
+			if (taxis[i] > t || mini == -1)
 			{
 				mini = i;
 				t = taxis[i];
 				N = xAxis[i];
-				N.Normalize();
 			}
 		}
+
+		if (mini == -1)
+			printf("Error\n");
+
+		return (mini != -1);
 	}
 
-	if (mini != -1)
+	float HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Кстати, это площадь тругольника на этих трёх точках. // Или параллелограма.
+	{
+		return	(u0.x - p.x) * (u1.y - p.y) - 
+				(u0.y - p.y) * (u1.x - p.x);
+	}
+
+	bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
+	{
+		float a1 = u1.y - u0.y;
+		float b1 = u0.x - u1.x;
+		float a2 = v1.y - v0.y;
+		float b2 = v0.x - v1.x;
+		Matrix2 deltaMatrix(a1, b1, a2, b2);
+		float deltaDet = deltaMatrix.Determinant();
+		if (Equal(deltaDet, 0.0f))
+			return false;	// Прямые параллельны, т.е. a1b2 - a2b1 == 0; Кстати, условие перпендикулярности: a1a2 == -b1b2;
+							// @todo А что, если прямые совпадают?
+		float c1 = u1.y * u0.x - u1.x * u0.y;	//a1 * u0.x + b1 * u0.y;
+		float c2 = v1.y * v0.x - v1.x * v0.y;	//a2 * v0.x + b2 * v0.y;
+		Result = Vector2(Matrix2(c1, b1, c2, b2).Determinant() / deltaDet,
+						 Matrix2(a1, c1, a2, c2).Determinant() / deltaDet);
 		return true;
-
-	mini = -1;
-	for (int i = 0; i < iNumAxes; i ++)
-	{
-		float n = xAxis[i].Normalize();
-		taxis[i] /= n;
-
-		if (taxis[i] > t || mini == -1)
-		{
-			mini = i;
-			t = taxis[i];
-			N = xAxis[i];
-		}
 	}
 
-	if (mini == -1)
-		printf("Error\n");
-
-	return (mini != -1);
-}
-
-float HalfPlaneSign(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)	// Кстати, это площадь тругольника на этих трёх точках. // Или параллелограма.
-{
-	return	(u0.x - p.x) * (u1.y - p.y) - 
-			(u0.y - p.y) * (u1.x - p.x);
-}
-
-bool IntersectLines(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
-{
-	float a1 = u1.y - u0.y;
-	float b1 = u0.x - u1.x;
-	float a2 = v1.y - v0.y;
-	float b2 = v0.x - v1.x;
-	Matrix2 deltaMatrix(a1, b1, a2, b2);
-	float deltaDet = deltaMatrix.Determinant();
-	if (Equal(deltaDet, 0.0f))
-		return false;	// Прямые параллельны, т.е. a1b2 - a2b1 == 0; Кстати, условие перпендикулярности: a1a2 == -b1b2;
-						// @todo А что, если прямые совпадают?
-	float c1 = u1.y * u0.x - u1.x * u0.y;	//a1 * u0.x + b1 * u0.y;
-	float c2 = v1.y * v0.x - v1.x * v0.y;	//a2 * v0.x + b2 * v0.y;
-	Result = Vector2(Matrix2(c1, b1, c2, b2).Determinant() / deltaDet,
-					 Matrix2(a1, c1, a2, c2).Determinant() / deltaDet);
-	return true;
-}
-
-bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
-{
-	if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
-		return false;
-	if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
-		return false;
-	// In the "IntersectLines" lies check if lines are parallel, but at that point we're already know that they're not
-	if (!IntersectLines(u0, u1, v0, v1, Result))
-		return false;
-	return true;
-}
-
-bool AreSegmentsIntersect( const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1 )
-{
-	if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
-		return false;
-	if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
-		return false;
-	return true;
-}
-
-bool IntersectCircles(const Vector2 &p0, const float r0, const Vector2 &p1, const float r1, Vector2 &Normal, float &Depth)
-{
-	Vector2 p0p1 = p1 - p0;
-	if ((Sqr(p0p1.x) + Sqr(p0p1.y)) >= Sqr(r0 + r1))
-		return false;
-	Normal = p0p1.Normalized();
-	Depth = std::fabs(r1 - r0);
-	return true;
-}
-
-bool PointInsidePolygon();
-
-float DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
-{
-	return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
-}
-
-float DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
-{
-	Vector2 v = u1 - u0;
-	Vector2 w = p - u0;
-
-	float c1 = w * v;
-	if (c1 <= 0)
-		return (p - u0).Length() * Sign(HalfPlaneSign(u0, u1, p)); // Мы же хотим получить расстояние со знаком даже если это расстояние до концов отрезка.
-
-	float c2 = v * v;
-	if (c2 <= c1)
-		return (p - u1).Length() * Sign(HalfPlaneSign(u0, u1, p));
-
-	return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
-}
-
-__INLINE void CalcConvexHull(std::vector<Vector2> &a )
-{
-	class CalcConvexHullHelper
+	bool IntersectSegments(const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1, Vector2 &Result)
 	{
-	public:
-		static __INLINE bool cmp (Vector2 a, Vector2 b)
-		{
-			return a.x < b.x || a.x == b.x && a.y < b.y;
-		}
-
-		/**
-		* cw and cww is some strange way to Implement HalfPlaneSign() with
-		* devilish copy-paste and having 3 instead of 2 multiplications
-		* @todo: replace by HalfPlaneSign
-		*/
-		static __INLINE bool cw (Vector2 a, Vector2 b, Vector2 c)
-		{
-			return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y) < 0;
-		}
-
-		static __INLINE bool ccw (Vector2 a, Vector2 b, Vector2 c)
-		{
-			return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y) > 0;
-		}
-	};
-
-	if (a.size() == 1)  return;
-	sort (a.begin(), a.end(), &CalcConvexHullHelper::cmp);
-	Vector2 p1 = a[0],  p2 = a.back();
-	std::vector<Vector2> up, down;
-	up.push_back (p1);
-	down.push_back (p1);
-	for (size_t i=1; i<a.size(); ++i)
-	{
-		if (i==a.size()-1 || CalcConvexHullHelper::cw (p1, a[i], p2))
-		{
-			while (up.size()>=2 && !CalcConvexHullHelper::cw (up[up.size()-2], up[up.size()-1], a[i]))
-				up.pop_back();
-			up.push_back (a[i]);
-		}
-		if (i==a.size()-1 || CalcConvexHullHelper::ccw (p1, a[i], p2))
-		{
-			while (down.size()>=2 && !CalcConvexHullHelper::ccw (down[down.size()-2], down[down.size()-1], a[i]))
-				down.pop_back();
-			down.push_back (a[i]);
-		}
-	}
-	a.clear();
-	for (size_t i=0; i<up.size(); ++i)
-		a.push_back (up[i]);
-	for (size_t i=down.size()-2; i>0; --i)
-		a.push_back (down[i]);
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CAABB
-CBox::CBox() : Min(V2_ZERO), Max(V2_ZERO) {}
-
-CBox::CBox(const Vector2 &AMin, const Vector2 &AMax) : Min(AMin), Max(AMax)
-{
-	//assert(Min.x <= Max.x && Min.y <= Max.y);
-}
-
-CBox::CBox(float xmin, float ymin, float xmax, float ymax) : Min(xmin, ymin), Max(xmax, ymax)
-{
-	//assert(xmin <= xmax && ymin <= ymax);
-}
-
-CBox::CBox(int x, int y, unsigned width, unsigned height) : 
-	Min(static_cast<float>(x), static_cast<float>(y)),
-	Max(static_cast<float>(x + width), static_cast<float>(y + height)) {}
-
-CBox::CBox(const Vector2 &Center, float Width, float Height) : Min(Center), Max(Center)
-{
-	assert(Width >= 0.0f && Height >= 0.0f);
-	Vector2 tempWHd2 = Vector2(Width, Height) * 0.5f;
-	Min -= tempWHd2, Max += tempWHd2;
-}
-
-CBox::CBox(const Vector2 &Center, float Radius) : Min(Center), Max(Center)
-{
-	assert(Radius >= 0.0f);
-	Vector2 tempRRd2 = Vector2(Radius, Radius) * 0.5f;
-	Min -= tempRRd2, Max += tempRRd2;
-}
-
-CBox::CBox(const Vector2Array<4> &Vertices) : Min(Vertices[0]), Max(Vertices[2])
-{
-	assert(Min.x <= Max.x && Min.y <= Max.y);
-}
-
-void CBox::Add(const Vector2 &Point)
-{
-	if (Point.x > Max.x)
-		Max.x = Point.x;
-	if (Point.x < Min.x)
-		Min.x = Point.x;
-	if (Point.y > Max.y)
-		Max.y = Point.y;
-	if (Point.y < Min.y)
-		Min.y = Point.y;
-}
-
-void CBox::Offset(float dx, float dy)
-{
-	Offset(Vector2(dx, dy));	
-}
-
-void CBox::Offset(const Vector2 &Delta)
-{
-	Min += Delta, Max += Delta;
-}
-CBox CBox::Offsetted(float dx, float dy) const
-{
-	return Offsetted(Vector2(dx, dy));
-}
-
-CBox CBox::Offsetted(const Vector2 &Delta) const
-{
-	return CBox(Min + Delta, Max + Delta);	
-}
-void CBox::Inflate(float dx, float dy)
-{
-	Vector2 Delta(dx, dy);
-	Min -= Delta, Max += Delta;
-}
-
-CBox CBox::Inflated(float dx, float dy) const
-{
-	Vector2 Delta(dx, dy);
-	return CBox(Min - Delta, Max + Delta);	
-}
-
-bool CBox::Inside(const Vector2 &Point) const
-{
-	if (Point.x >= Max.x || Point.x <= Min.x || Point.y >= Max.y || Point.y <= Min.y)
-		return false;
-	return true;
-}
-
-bool CBox::Inside(const Vector2 &Point, float &MTD) const
-{
-	if (Point.x >= Max.x || Point.x <= Min.x || Point.y >= Max.y || Point.y <= Min.y)
-		return false;
-	float d1, d2, d3, d4;
-	d1 =  Max.x - Point.x;
-	d2 =  Max.y - Point.y;
-	d3 = -Min.x + Point.x;
-	d4 = -Min.y + Point.y;
-	MTD = std::min(std::min(d1, d2), std::min(d3, d4));
-	return true;
-}
-
-bool CBox::Inside(const Vector2 &Point, float &MTD, Vector2 &n) const
-{
-	if (Point.x >= Max.x || Point.x <= Min.x || Point.y >= Max.y || Point.y <= Min.y)
-		return false;
-
-	//DistanceToLine
-	float d1, d2, d3, d4;
-	d1 =  Max.x - Point.x;
-	d2 =  Max.y - Point.y;
-	d3 = -Min.x + Point.x;
-	d4 = -Min.y + Point.y;
-	MTD = std::min(std::min(d1, d2), std::min(d3, d4));
-
-	if (MTD == d1)
-		n = Vector2(1.0f, 0.0f);
-	if (MTD == d2)
-		n = Vector2(0.0f, 1.0f);
-	if (MTD == d3)
-		n = Vector2(-1.0f, 0.0f);
-	if (MTD == d4)
-		n = Vector2(0.0f, -1.0f);
-
-	return true;
-}
-
-bool CBox::Outside(const Vector2 &Point, float &MTD, Vector2 &n) const
-{
-	if (Inside(Point))
-		return false;
-
-	//DistanceToLine
-	float d1, d2, d3, d4;
-	d1 = -Max.x + Point.x;
-	d2 = -Max.y + Point.y;
-	d3 =  Min.x - Point.x;
-	d4 =  Min.y - Point.y;
-	MTD = std::min(std::min(d1, d2), std::min(d3, d4));
-
-	if (MTD == d1)
-		n = Vector2(1.0f, 0.0f);
-	if (MTD == d2)
-		n = Vector2(0.0f, 1.0f);
-	if (MTD == d3)
-		n = Vector2(-1.0f, 0.0f);
-	if (MTD == d4)
-		n = Vector2(0.0f, -1.0f);
-
-	return true;
-}
-
-bool CBox::Intersect(const CBox &box) const
-{
-	if (box.Min.x >= Max.x)
-		return false;
-	if (box.Min.y >= Max.y)
-		return false;
-	if (box.Max.x <= Min.x)
-		return false;
-	if (box.Max.y <= Min.y)
-		return false;
-
-	return true;
-}
-
-void CBox::Union(const CBox &other)
-{
-	Add(other.Max);
-	Add(other.Min);
-}
-
-float CBox::Width() const
-{
-	return Max.x - Min.x;
-}
-
-float CBox::Height() const
-{
-	return Max.y - Min.y;
-}
-
-Vector2Array<4> CBox::GetVertices() const
-{
-	Vector2Array<4> Result;
-	Result[0] = Min;
-	Result[1] = Vector2(Max.x, Min.y);
-	Result[2] = Max;
-	Result[3] = Vector2(Min.x, Max.y);;
-	return Result;
-}
-
-Vector2 CBox::Center()
-{
-	return (Min + Max) * 0.5f;
-}
-//////////////////////////////////////////////////////////////////////////
-// CGeometry
-
-CGeometry::CGeometry() : Box() {}
-
-Vector2 CGeometry::SupportMapping(const Vector2 &Direction)
-{
-	return Box.Center() + Vector2(	Sign(Direction.x) * Box.Width() * 0.5f,
-									Sign(Direction.y) * Box.Height() * 0.5f);
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CCircle
-
-CCircle::CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius(ARadius)
-{
-	CalcBox();
-}
-
-float CCircle::GetRadius() const
-{
-	return Radius;
-}
-
-void CCircle::CalcBox()
-{
-	Box.Min = Vector2(Position.x - Radius, Position.y - Radius);
-	Box.Min = Vector2(Position.x + Radius, Position.y + Radius);
-}
-
-//////////////////////////////////////////////////////////////////////////
-// CPolygon
-
-void CPolygon::Reset(unsigned AVerticesCount)
-{
-	delete [] Vertices;
-	VerticesCount = AVerticesCount;
-	Vertices = new Vector2[AVerticesCount];
-}
-
-void CPolygon::CalcBox()
-{
-	assert(VerticesCount != 0 && Vertices != NULL);
-	
-	Box.Min.x = std::numeric_limits<float>::max();
-	Box.Min.y = std::numeric_limits<float>::max();
-	Box.Max.x = std::numeric_limits<float>::min();
-	Box.Max.y = std::numeric_limits<float>::min();
-
-	for (unsigned i = 0; i < VerticesCount; i++)
-	{
-		Box.Add(Vertices[i]);
-	}
-}
-
-CPolygon::CPolygon(unsigned AVerticesCount /* = 0 */) : VerticesCount(AVerticesCount), Vertices(NULL)
-{
-	if (AVerticesCount == 0)
-		return;
-	Vertices = new Vector2 [VerticesCount];
-	memset(Vertices, 0, sizeof(Vertices));
-}
-
-CPolygon::~CPolygon()
-{
-	delete [] Vertices;
-}
-
-void CPolygon::AddVertex(const Vector2 &Vertex)
-{
-	Vector2 *TempVertices = new Vector2 [VerticesCount + 1];
-	for (unsigned i = 0; i < VerticesCount; i++)
-		TempVertices[i] = Vertices[i];
-	TempVertices[VerticesCount++] = Vertex;
-	delete [] Vertices;
-	Vertices = TempVertices;
-}
-
-Vector2& CPolygon::operator[](unsigned Index)
-{
-	assert(Index >= 0 && Index < VerticesCount);
-	return Vertices[Index];
-}
-
-const Vector2& CPolygon::operator[](unsigned Index) const
-{
-	assert(Index >= 0 && Index < VerticesCount);
-	return Vertices[Index];
-}
-
-void CPolygon::RemoveVertex(unsigned Index)
-{
-	assert(Index >= 0 && Index < VerticesCount);
-	Vector2 *TempVertices = new Vector2 [VerticesCount - 1];
-	for (unsigned i = 0; i < VerticesCount; i++)
-	{
-		if (i > Index)
-			TempVertices[i - 1] = Vertices[i];
-		if (i < Index)
-			TempVertices[i] = Vertices[i];
-	}
-	delete [] Vertices;
-	Vertices = TempVertices;
-}
-
-unsigned CPolygon::GetVertexCount() const
-{
-	return VerticesCount;
-}
-
-float CPolygon::CalcArea() const
-{
-	float result = 0.0f;
-	Vector2 p0;
-	Vector2 p1;
-	for(unsigned i = 0; i < VerticesCount; i++)
-	{
-		p0 = Vertices[i % VerticesCount];
-		p1 = Vertices[(i + 1) % VerticesCount];
-		result += (p1.x - p0.x) * 0.5f * (p1.y + p0.y);
-	}
-	return result;
-}
-
-void CPolygon::OffsetToCenter() const
-{
-	Vector2 p;
-	for(unsigned i = 0; i < VerticesCount; i++)
-		p += Vertices[i];
-	p = p / static_cast<float>(VerticesCount);
-	for(unsigned i = 0; i < VerticesCount; i++)
-		Vertices[i] -= p;
-}
-
-CPolygon CPolygon::MakeCircle( float Radius /*= 1.0f*/, unsigned Precision /*= 16*/ )
-{
-	CPolygon NewPolygon(Precision);
-	float angle = 0.0f;
-	float _1dstuff = 1.0f / (static_cast<float>(Precision) * 0.5f);
-	for (unsigned i = 0; i < Precision; i++)
-	{
-		angle = PI * static_cast<float>(i) * _1dstuff;
-		NewPolygon[i] = Vector2(cos(angle), sin(angle)) * Radius;
-	}
-	return NewPolygon;
-}
-
-CPolygon CPolygon::MakeBox( float Width /*= 1.0f*/, float Height /*= 1.0f*/ )
-{
-	float Width_d2 = Width * 0.5f;
-	float Height_d2 = Height * 0.5f;
-	CPolygon NewPolygon(4);
-	NewPolygon.Reset(4);
-	NewPolygon[0] = Vector2(-Width_d2, -Height_d2);
-	NewPolygon[1] = Vector2(+Width_d2, -Height_d2);
-	NewPolygon[2] = Vector2(+Width_d2, +Height_d2);
-	NewPolygon[3] = Vector2(-Width_d2, +Height_d2);
-	return NewPolygon;
-}
-
-bool CPolygon::IsSelfIntersects() const
-{
-	for (unsigned i = 0; i < VerticesCount; i++)
-	{
-		unsigned j = (i + 1) % VerticesCount;
-		for( unsigned k = i + 1; k < VerticesCount; k++)
-		{
-			unsigned l = (k + 1) % VerticesCount;
-			if (AreSegmentsIntersect(Vertices[i], Vertices[j], Vertices[k], Vertices[l]))
-				return true;
-		}
-	}
-	return false;
-}
-
-bool CPolygon::IsConvex() const
-{
-	if (VerticesCount < 4)
-		return true;
-	unsigned positiveCount = 0;
-	unsigned negativeCount = 0;
-	unsigned j, k;
-	for (unsigned i = 0; i < VerticesCount; i++)
-	{
-		j = (i + 1) % VerticesCount;
-		k = (i + 2) % VerticesCount;
-		if (HalfPlaneSign(Vertices[i], Vertices[j], Vertices[k]) > 0)
-			positiveCount++;
-		else
-			negativeCount++;
-		if (positiveCount * negativeCount != 0)
+		if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
 			return false;
+		if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
+			return false;
+		// In the "IntersectLines" lies check if lines are parallel, but at that point we're already know that they're not
+		if (!IntersectLines(u0, u1, v0, v1, Result))
+			return false;
+		return true;
 	}
-	return true;
-}
+
+	bool AreSegmentsIntersect( const Vector2 &u0, const Vector2 &u1, const Vector2 &v0, const Vector2 &v1 )
+	{
+		if (HalfPlaneSign(u0, u1, v0) * HalfPlaneSign(u0, u1, v1) > 0)
+			return false;
+		if (HalfPlaneSign(v0, v1, u0) * HalfPlaneSign(v0, v1, u1) > 0)
+			return false;
+		return true;
+	}
+
+	bool IntersectCircles(const Vector2 &p0, const float r0, const Vector2 &p1, const float r1, Vector2 &Normal, float &Depth)
+	{
+		Vector2 p0p1 = p1 - p0;
+		if ((Sqr(p0p1.x) + Sqr(p0p1.y)) >= Sqr(r0 + r1))
+			return false;
+		Normal = p0p1.Normalized();
+		Depth = std::fabs(r1 - r0);
+		return true;
+	}
+
+	bool PointInsidePolygon();
+
+	float DistanceToLine(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
+	{
+		return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
+	}
+
+	float DistanceToSegment(const Vector2 &u0, const Vector2 &u1, const Vector2 &p)
+	{
+		Vector2 v = u1 - u0;
+		Vector2 w = p - u0;
+
+		float c1 = w * v;
+		if (c1 <= 0)
+			return (p - u0).Length() * Sign(HalfPlaneSign(u0, u1, p)); // Мы же хотим получить расстояние со знаком даже если это расстояние до концов отрезка.
+
+		float c2 = v * v;
+		if (c2 <= c1)
+			return (p - u1).Length() * Sign(HalfPlaneSign(u0, u1, p));
+
+		return HalfPlaneSign(u0, u1, p) / (u0 - u1).Length();
+	}
+
+	__INLINE void CalcConvexHull(std::vector<Vector2> &a )
+	{
+		class CalcConvexHullHelper
+		{
+		public:
+			static __INLINE bool cmp (Vector2 a, Vector2 b)
+			{
+				return a.x < b.x || a.x == b.x && a.y < b.y;
+			}
+
+			/**
+			* cw and cww is some strange way to Implement HalfPlaneSign() with
+			* devilish copy-paste and having 3 instead of 2 multiplications
+			* @todo: replace by HalfPlaneSign
+			*/
+			static __INLINE bool cw (Vector2 a, Vector2 b, Vector2 c)
+			{
+				return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y) < 0;
+			}
+
+			static __INLINE bool ccw (Vector2 a, Vector2 b, Vector2 c)
+			{
+				return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y) > 0;
+			}
+		};
+
+		if (a.size() == 1)  return;
+		sort (a.begin(), a.end(), &CalcConvexHullHelper::cmp);
+		Vector2 p1 = a[0],  p2 = a.back();
+		std::vector<Vector2> up, down;
+		up.push_back (p1);
+		down.push_back (p1);
+		for (size_t i=1; i<a.size(); ++i)
+		{
+			if (i==a.size()-1 || CalcConvexHullHelper::cw (p1, a[i], p2))
+			{
+				while (up.size()>=2 && !CalcConvexHullHelper::cw (up[up.size()-2], up[up.size()-1], a[i]))
+					up.pop_back();
+				up.push_back (a[i]);
+			}
+			if (i==a.size()-1 || CalcConvexHullHelper::ccw (p1, a[i], p2))
+			{
+				while (down.size()>=2 && !CalcConvexHullHelper::ccw (down[down.size()-2], down[down.size()-1], a[i]))
+					down.pop_back();
+				down.push_back (a[i]);
+			}
+		}
+		a.clear();
+		for (size_t i=0; i<up.size(); ++i)
+			a.push_back (up[i]);
+		for (size_t i=down.size()-2; i>0; --i)
+			a.push_back (down[i]);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// CAABB
+	CBox::CBox() : Min(V2_ZERO), Max(V2_ZERO) {}
+
+	CBox::CBox(const Vector2 &AMin, const Vector2 &AMax) : Min(AMin), Max(AMax)
+	{
+		//assert(Min.x <= Max.x && Min.y <= Max.y);
+	}
+
+	CBox::CBox(float xmin, float ymin, float xmax, float ymax) : Min(xmin, ymin), Max(xmax, ymax)
+	{
+		//assert(xmin <= xmax && ymin <= ymax);
+	}
+
+	CBox::CBox(int x, int y, unsigned width, unsigned height) : 
+		Min(static_cast<float>(x), static_cast<float>(y)),
+		Max(static_cast<float>(x + width), static_cast<float>(y + height)) {}
+
+	CBox::CBox(const Vector2 &Center, float Width, float Height) : Min(Center), Max(Center)
+	{
+		assert(Width >= 0.0f && Height >= 0.0f);
+		Vector2 tempWHd2 = Vector2(Width, Height) * 0.5f;
+		Min -= tempWHd2, Max += tempWHd2;
+	}
+
+	CBox::CBox(const Vector2 &Center, float Radius) : Min(Center), Max(Center)
+	{
+		assert(Radius >= 0.0f);
+		Vector2 tempRRd2 = Vector2(Radius, Radius) * 0.5f;
+		Min -= tempRRd2, Max += tempRRd2;
+	}
+
+	CBox::CBox(const Vector2Array<4> &Vertices) : Min(Vertices[0]), Max(Vertices[2])
+	{
+		assert(Min.x <= Max.x && Min.y <= Max.y);
+	}
+
+	void CBox::Add(const Vector2 &Point)
+	{
+		if (Point.x > Max.x)
+			Max.x = Point.x;
+		if (Point.x < Min.x)
+			Min.x = Point.x;
+		if (Point.y > Max.y)
+			Max.y = Point.y;
+		if (Point.y < Min.y)
+			Min.y = Point.y;
+	}
+
+	void CBox::Offset(float dx, float dy)
+	{
+		Offset(Vector2(dx, dy));	
+	}
+
+	void CBox::Offset(const Vector2 &Delta)
+	{
+		Min += Delta, Max += Delta;
+	}
+	CBox CBox::Offsetted(float dx, float dy) const
+	{
+		return Offsetted(Vector2(dx, dy));
+	}
+
+	CBox CBox::Offsetted(const Vector2 &Delta) const
+	{
+		return CBox(Min + Delta, Max + Delta);	
+	}
+	void CBox::Inflate(float dx, float dy)
+	{
+		Vector2 Delta(dx, dy);
+		Min -= Delta, Max += Delta;
+	}
+
+	CBox CBox::Inflated(float dx, float dy) const
+	{
+		Vector2 Delta(dx, dy);
+		return CBox(Min - Delta, Max + Delta);	
+	}
+
+	bool CBox::Inside(const Vector2 &Point) const
+	{
+		if (Point.x >= Max.x || Point.x <= Min.x || Point.y >= Max.y || Point.y <= Min.y)
+			return false;
+		return true;
+	}
+
+	bool CBox::Inside(const Vector2 &Point, float &MTD) const
+	{
+		if (Point.x >= Max.x || Point.x <= Min.x || Point.y >= Max.y || Point.y <= Min.y)
+			return false;
+		float d1, d2, d3, d4;
+		d1 =  Max.x - Point.x;
+		d2 =  Max.y - Point.y;
+		d3 = -Min.x + Point.x;
+		d4 = -Min.y + Point.y;
+		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
+		return true;
+	}
+
+	bool CBox::Inside(const Vector2 &Point, float &MTD, Vector2 &n) const
+	{
+		if (Point.x >= Max.x || Point.x <= Min.x || Point.y >= Max.y || Point.y <= Min.y)
+			return false;
+
+		//DistanceToLine
+		float d1, d2, d3, d4;
+		d1 =  Max.x - Point.x;
+		d2 =  Max.y - Point.y;
+		d3 = -Min.x + Point.x;
+		d4 = -Min.y + Point.y;
+		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
+
+		if (MTD == d1)
+			n = Vector2(1.0f, 0.0f);
+		if (MTD == d2)
+			n = Vector2(0.0f, 1.0f);
+		if (MTD == d3)
+			n = Vector2(-1.0f, 0.0f);
+		if (MTD == d4)
+			n = Vector2(0.0f, -1.0f);
+
+		return true;
+	}
+
+	bool CBox::Outside(const Vector2 &Point, float &MTD, Vector2 &n) const
+	{
+		if (Inside(Point))
+			return false;
+
+		//DistanceToLine
+		float d1, d2, d3, d4;
+		d1 = -Max.x + Point.x;
+		d2 = -Max.y + Point.y;
+		d3 =  Min.x - Point.x;
+		d4 =  Min.y - Point.y;
+		MTD = std::min(std::min(d1, d2), std::min(d3, d4));
+
+		if (MTD == d1)
+			n = Vector2(1.0f, 0.0f);
+		if (MTD == d2)
+			n = Vector2(0.0f, 1.0f);
+		if (MTD == d3)
+			n = Vector2(-1.0f, 0.0f);
+		if (MTD == d4)
+			n = Vector2(0.0f, -1.0f);
+
+		return true;
+	}
+
+	bool CBox::Intersect(const CBox &box) const
+	{
+		if (box.Min.x >= Max.x)
+			return false;
+		if (box.Min.y >= Max.y)
+			return false;
+		if (box.Max.x <= Min.x)
+			return false;
+		if (box.Max.y <= Min.y)
+			return false;
+
+		return true;
+	}
+
+	void CBox::Union(const CBox &other)
+	{
+		Add(other.Max);
+		Add(other.Min);
+	}
+
+	float CBox::Width() const
+	{
+		return Max.x - Min.x;
+	}
+
+	float CBox::Height() const
+	{
+		return Max.y - Min.y;
+	}
+
+	Vector2Array<4> CBox::GetVertices() const
+	{
+		Vector2Array<4> Result;
+		Result[0] = Min;
+		Result[1] = Vector2(Max.x, Min.y);
+		Result[2] = Max;
+		Result[3] = Vector2(Min.x, Max.y);;
+		return Result;
+	}
+
+	Vector2 CBox::Center()
+	{
+		return (Min + Max) * 0.5f;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	// CGeometry
+
+	CGeometry::CGeometry() : Box() {}
+
+	Vector2 CGeometry::SupportMapping(const Vector2 &Direction)
+	{
+		return Box.Center() + Vector2(	Sign(Direction.x) * Box.Width() * 0.5f,
+										Sign(Direction.y) * Box.Height() * 0.5f);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// CCircle
+
+	CCircle::CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius(ARadius)
+	{
+		CalcBox();
+	}
+
+	float CCircle::GetRadius() const
+	{
+		return Radius;
+	}
+
+	void CCircle::CalcBox()
+	{
+		Box.Min = Vector2(Position.x - Radius, Position.y - Radius);
+		Box.Min = Vector2(Position.x + Radius, Position.y + Radius);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// CPolygon
+
+	void CPolygon::Reset(unsigned AVerticesCount)
+	{
+		delete [] Vertices;
+		VerticesCount = AVerticesCount;
+		Vertices = new Vector2[AVerticesCount];
+	}
+
+	void CPolygon::CalcBox()
+	{
+		assert(VerticesCount != 0 && Vertices != NULL);
+		
+		Box.Min.x = std::numeric_limits<float>::max();
+		Box.Min.y = std::numeric_limits<float>::max();
+		Box.Max.x = std::numeric_limits<float>::min();
+		Box.Max.y = std::numeric_limits<float>::min();
+
+		for (unsigned i = 0; i < VerticesCount; i++)
+		{
+			Box.Add(Vertices[i]);
+		}
+	}
+
+	CPolygon::CPolygon(unsigned AVerticesCount /* = 0 */) : VerticesCount(AVerticesCount), Vertices(NULL)
+	{
+		if (AVerticesCount == 0)
+			return;
+		Vertices = new Vector2 [VerticesCount];
+		memset(Vertices, 0, sizeof(Vertices));
+	}
+
+	CPolygon::~CPolygon()
+	{
+		delete [] Vertices;
+	}
+
+	void CPolygon::AddVertex(const Vector2 &Vertex)
+	{
+		Vector2 *TempVertices = new Vector2 [VerticesCount + 1];
+		for (unsigned i = 0; i < VerticesCount; i++)
+			TempVertices[i] = Vertices[i];
+		TempVertices[VerticesCount++] = Vertex;
+		delete [] Vertices;
+		Vertices = TempVertices;
+	}
+
+	Vector2& CPolygon::operator[](unsigned Index)
+	{
+		assert(Index >= 0 && Index < VerticesCount);
+		return Vertices[Index];
+	}
+
+	const Vector2& CPolygon::operator[](unsigned Index) const
+	{
+		assert(Index >= 0 && Index < VerticesCount);
+		return Vertices[Index];
+	}
+
+	void CPolygon::RemoveVertex(unsigned Index)
+	{
+		assert(Index >= 0 && Index < VerticesCount);
+		Vector2 *TempVertices = new Vector2 [VerticesCount - 1];
+		for (unsigned i = 0; i < VerticesCount; i++)
+		{
+			if (i > Index)
+				TempVertices[i - 1] = Vertices[i];
+			if (i < Index)
+				TempVertices[i] = Vertices[i];
+		}
+		delete [] Vertices;
+		Vertices = TempVertices;
+	}
+
+	unsigned CPolygon::GetVertexCount() const
+	{
+		return VerticesCount;
+	}
+
+	float CPolygon::CalcArea() const
+	{
+		float result = 0.0f;
+		Vector2 p0;
+		Vector2 p1;
+		for(unsigned i = 0; i < VerticesCount; i++)
+		{
+			p0 = Vertices[i % VerticesCount];
+			p1 = Vertices[(i + 1) % VerticesCount];
+			result += (p1.x - p0.x) * 0.5f * (p1.y + p0.y);
+		}
+		return result;
+	}
+
+	void CPolygon::OffsetToCenter() const
+	{
+		Vector2 p;
+		for(unsigned i = 0; i < VerticesCount; i++)
+			p += Vertices[i];
+		p = p / static_cast<float>(VerticesCount);
+		for(unsigned i = 0; i < VerticesCount; i++)
+			Vertices[i] -= p;
+	}
+
+	CPolygon CPolygon::MakeCircle( float Radius /*= 1.0f*/, unsigned Precision /*= 16*/ )
+	{
+		CPolygon NewPolygon(Precision);
+		float angle = 0.0f;
+		float _1dstuff = 1.0f / (static_cast<float>(Precision) * 0.5f);
+		for (unsigned i = 0; i < Precision; i++)
+		{
+			angle = PI * static_cast<float>(i) * _1dstuff;
+			NewPolygon[i] = Vector2(cos(angle), sin(angle)) * Radius;
+		}
+		return NewPolygon;
+	}
+
+	CPolygon CPolygon::MakeBox( float Width /*= 1.0f*/, float Height /*= 1.0f*/ )
+	{
+		float Width_d2 = Width * 0.5f;
+		float Height_d2 = Height * 0.5f;
+		CPolygon NewPolygon(4);
+		NewPolygon.Reset(4);
+		NewPolygon[0] = Vector2(-Width_d2, -Height_d2);
+		NewPolygon[1] = Vector2(+Width_d2, -Height_d2);
+		NewPolygon[2] = Vector2(+Width_d2, +Height_d2);
+		NewPolygon[3] = Vector2(-Width_d2, +Height_d2);
+		return NewPolygon;
+	}
+
+	bool CPolygon::IsSelfIntersects() const
+	{
+		for (unsigned i = 0; i < VerticesCount; i++)
+		{
+			unsigned j = (i + 1) % VerticesCount;
+			for( unsigned k = i + 1; k < VerticesCount; k++)
+			{
+				unsigned l = (k + 1) % VerticesCount;
+				if (AreSegmentsIntersect(Vertices[i], Vertices[j], Vertices[k], Vertices[l]))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	bool CPolygon::IsConvex() const
+	{
+		if (VerticesCount < 4)
+			return true;
+		unsigned positiveCount = 0;
+		unsigned negativeCount = 0;
+		unsigned j, k;
+		for (unsigned i = 0; i < VerticesCount; i++)
+		{
+			j = (i + 1) % VerticesCount;
+			k = (i + 2) % VerticesCount;
+			if (HalfPlaneSign(Vertices[i], Vertices[j], Vertices[k]) > 0)
+				positiveCount++;
+			else
+				negativeCount++;
+			if (positiveCount * negativeCount != 0)
+				return false;
+		}
+		return true;
+	}
+}	//	namespace Deku2d

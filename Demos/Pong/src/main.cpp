@@ -1,5 +1,6 @@
 #include "2de_Engine.h"
 #include "Pong.h"
+using namespace Deku2d;
 
 class CTempKeyBindMan : public CObject
 {

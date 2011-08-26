@@ -3,6 +3,7 @@
 
 #include "2de_Engine.h"
 #include "2de_Gui.h"
+using namespace Deku2d;
 
 class CSoundObject : public CObject
 {

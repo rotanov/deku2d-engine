@@ -1,5 +1,6 @@
 #include "2de_Engine.h"
 #include "SoundCheck.h"
+using namespace Deku2d;
 
 CEngine *Engine = CEngine::Instance();
 

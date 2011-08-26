@@ -1,5 +1,7 @@
 #include "2de_Engine.h"
 
+using namespace Deku2d;
+
 #define ENGINE CEngine::Instance()
 #define RENDER CRenderManager::Instance()
 CEngine* Ninja = ENGINE;

@@ -2,81 +2,85 @@
 
 #include "2de_Engine.h"
 
-//////////////////////////////////////////////////////////////////////////
-// CEventManager
-
-CEventManager::CEventManager()
+namespace Deku2d
 {
-	SetName("CEventManager");
-}
+	//////////////////////////////////////////////////////////////////////////
+	// CEventManager
 
-CEventManager::~CEventManager()
-{
-}
-
-void CEventManager::Subscribe(const string &AEventName, CObject *Subscriber)
-{
-	if (IsSubscribed(AEventName, Subscriber))
-		return;
-
-	Subscribers.insert(pair<string, CObject *>(AEventName, Subscriber));
-}
-
-void CEventManager::Unsubscribe(const string &AEventName, CObject *Subscriber)
-{
-	for (SubscribersContainer::iterator it = Subscribers.lower_bound(AEventName); it != Subscribers.upper_bound(AEventName); ++it)
+	CEventManager::CEventManager()
 	{
-		if (it->second == Subscriber)
+		SetName("CEventManager");
+	}
+
+	CEventManager::~CEventManager()
+	{
+	}
+
+	void CEventManager::Subscribe(const string &AEventName, CObject *Subscriber)
+	{
+		if (IsSubscribed(AEventName, Subscriber))
+			return;
+
+		Subscribers.insert(pair<string, CObject *>(AEventName, Subscriber));
+	}
+
+	void CEventManager::Unsubscribe(const string &AEventName, CObject *Subscriber)
+	{
+		for (SubscribersContainer::iterator it = Subscribers.lower_bound(AEventName); it != Subscribers.upper_bound(AEventName); ++it)
 		{
-			Subscribers.erase(it);
+			if (it->second == Subscriber)
+			{
+				Subscribers.erase(it);
+				return;
+			}
+		}
+	}
+
+	void CEventManager::UnsubscribeFromAll(CObject *Subscriber)
+	{
+		vector<SubscribersContainer::iterator> ToDelete;
+		for (SubscribersContainer::iterator it = Subscribers.begin(); it != Subscribers.end(); ++it)
+		{
+			if (it->second == Subscriber)
+				ToDelete.push_back(it);
+		}
+		for(vector<SubscribersContainer::iterator>::iterator i = ToDelete.begin(); i != ToDelete.end(); ++i)
+			Subscribers.erase(*i);
+	}
+
+	bool CEventManager::IsSubscribed(const string &AEventName, CObject *Subscriber) const
+	{
+		for (SubscribersContainer::const_iterator it = Subscribers.lower_bound(AEventName); it != Subscribers.upper_bound(AEventName); ++it)
+		{
+			if (it->second == Subscriber)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void CEventManager::TriggerEvent(const string &AEventName, CObject *ASender)
+	{
+		TriggerEvent(new CEvent(AEventName, ASender));	// Why the fuck the "new" is here and "delete" is below
+	}
+
+	void CEventManager::TriggerEvent(CEvent *AEvent)
+	{
+		if (CEngine::Instance()->isFinalizing())
+		{
+			delete AEvent;
 			return;
 		}
-	}
-}
 
-void CEventManager::UnsubscribeFromAll(CObject *Subscriber)
-{
-	vector<SubscribersContainer::iterator> ToDelete;
-	for (SubscribersContainer::iterator it = Subscribers.begin(); it != Subscribers.end(); ++it)
-	{
-		if (it->second == Subscriber)
-			ToDelete.push_back(it);
-	}
-	for(vector<SubscribersContainer::iterator>::iterator i = ToDelete.begin(); i != ToDelete.end(); ++i)
-		Subscribers.erase(*i);
-}
-
-bool CEventManager::IsSubscribed(const string &AEventName, CObject *Subscriber) const
-{
-	for (SubscribersContainer::const_iterator it = Subscribers.lower_bound(AEventName); it != Subscribers.upper_bound(AEventName); ++it)
-	{
-		if (it->second == Subscriber)
+		for (SubscribersContainer::iterator it = Subscribers.lower_bound(AEvent->GetName()); it != Subscribers.upper_bound(AEvent->GetName()); ++it)
 		{
-			return true;
+			it->second->ProcessEvent(*AEvent);
 		}
+
+		delete AEvent;	// I mean why delete is here? Dis is bad bad bad bad bad i think. What sort of convention is it?
+						// Such convention if fine if it lies within a private methods of class, but these are public.
 	}
 
-	return false;
-}
-
-void CEventManager::TriggerEvent(const string &AEventName, CObject *ASender)
-{
-	TriggerEvent(new CEvent(AEventName, ASender));	// Why the fuck the "new" is here and "delete" is below
-}
-
-void CEventManager::TriggerEvent(CEvent *AEvent)
-{
-	if (CEngine::Instance()->isFinalizing())
-	{
-		delete AEvent;
-		return;
-	}
-
-	for (SubscribersContainer::iterator it = Subscribers.lower_bound(AEvent->GetName()); it != Subscribers.upper_bound(AEvent->GetName()); ++it)
-	{
-		it->second->ProcessEvent(*AEvent);
-	}
-
-	delete AEvent;	// I mean why delete is here? Dis is bad bad bad bad bad i think. What sort of convention is it?
-					// Such convention if fine if it lies within a private methods of class, but these are public.
-}
+}	//	namespace Deku2d

@@ -1,19 +1,24 @@
 #include "LuaConsole.h"
+using namespace Deku2d;
 
-namespace LuaAPI
+namespace Deku2d
 {
-
-	// void ConsoleWrite(string Text)
-	int ConsoleWrite(lua_State *L)
+	namespace LuaAPI
 	{
-		if (!lua_isstring(L, -1))
-			CLuaVirtualMachine::Instance()->TriggerError("incorrect argument given to ConsoleWrite API call");
 
-		CFactory::Instance()->Get<CLuaConsole>("Lua Console")->WriteLine(lua_tostring(L, -1));
-		return 0;
-	}
+		// void ConsoleWrite(string Text)
+		int ConsoleWrite(lua_State *L)
+		{
+			if (!lua_isstring(L, -1))
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect argument given to ConsoleWrite API call");
 
-};
+			CFactory::Instance()->Get<CLuaConsole>("Lua Console")->WriteLine(lua_tostring(L, -1));
+			return 0;
+		}
+
+	}	//	namespace LuaAPI
+
+}	//	namespace Deku2d
 
 CLuaConsole::CLuaConsole()
 {

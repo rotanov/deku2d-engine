@@ -3,205 +3,208 @@
 
 #include "2de_Core.h"
 #include "2de_Xml.h"
+#include "2de_Log.h"
 
-class CGameObject;
-
-/**
-* CFactory - oversees creation of any objects. The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
-*/
-
-class CFactory : public CTSingleton<CFactory>
+namespace Deku2d
 {
-public:
-	typedef CObject* (CFactory::*TNewFunction)(const string &);
-	struct CClassDescription
+	class CGameObject;
+
+	/**
+	* CFactory - oversees creation of any objects. The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
+	*/
+
+	class CFactory : public CTSingleton<CFactory>
 	{
-		CClassDescription(TNewFunction ANewFunction = NULL, bool AIsComponent = false) : NewFunction(ANewFunction), IsComponent(AIsComponent)
+	public:
+		typedef CObject* (CFactory::*TNewFunction)(const string &);
+		struct CClassDescription
 		{
-		}
-		TNewFunction NewFunction;
-		bool IsComponent;
+			CClassDescription(TNewFunction ANewFunction = NULL, bool AIsComponent = false) : NewFunction(ANewFunction), IsComponent(AIsComponent)
+			{
+			}
+			TNewFunction NewFunction;
+			bool IsComponent;
+		};
+		typedef map<string, CClassDescription> ClassesContainer;
+		typedef map<string, int> UsedPrototypesContainer;
+
+		template<typename T>
+		T* New(const string &AName);
+
+		template<typename T>
+		T* New();
+
+		CObject* CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes = NULL);
+
+		template<typename T>
+		void Add(T *AObject, const string &AName = "");
+
+		template<typename T>
+		T* Get(const string &AName, bool AMustExist = true);
+
+		template<typename T>
+		T* Remove(const string &AName);
+
+		void Rename(const string &AName, const string &ANewName);
+		void Destroy(CObject *AObject);
+		void CleanUp();
+		void DestroyAll();
+
+		bool IsClassExists(const string &AName);
+
+	protected:
+		typedef map<string, CObject *> ObjectsContainer;
+		typedef ObjectsContainer::iterator ObjectsIterator;
+
+		CFactory();
+		~CFactory();
+		friend class CTSingleton<CFactory>;
+
+		void AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent = true);
+
+		void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
+
+		CXMLNode* GetPrototypeXML(const string &AName);
+		CObject* CreateClassInstance(const string &AClassName, const string &AName);
+		CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
+
+	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
+		void InsertDebugInfo( CObject* Source );
+	#endif
+
+		template<typename T>
+		CObject* InternalNew(const string &AName);
+
+		ClassesContainer Classes;
+		ObjectsContainer Objects;
+		queue<CObject *> Deletion;
+		map<string, CGameObject *> CachedProtos;
+
 	};
-	typedef map<string, CClassDescription> ClassesContainer;
-	typedef map<string, int> UsedPrototypesContainer;
+
+	/**
+	* CFactory::New - creates managed object of specified class and returns pointer to it.
+	*/
 
 	template<typename T>
-	T* New(const string &AName);
+	T* CFactory::New(const string &AName)
+	{
+		return dynamic_cast<T*>(InternalNew<T>(AName));
+	}
+
+	template <typename T>
+	T* CFactory::New()
+	{
+		return New<T>("");
+	}
 
 	template<typename T>
-	T* New();
+	CObject* CFactory::InternalNew(const string &AName)
+	{
+		if (Objects.count(AName) != 0)
+		{
+			Log("ERROR", "Object with name '%s' already exists", AName.c_str());
+			return NULL;
+			//throw std::logic_error("Object with name '" + AName + "' already exists.");
+		}
 
-	CObject* CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes = NULL);
+		T *result = new T;
+
+		Add(result, AName);
+
+	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
+
+		InsertDebugInfo(result);
+
+	#endif
+
+		return result;
+	}
+
+	/**
+	* CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified.
+	*/
 
 	template<typename T>
-	void Add(T *AObject, const string &AName = "");
+	void CFactory::Add(T *AObject, const string &AName /*= ""*/)
+	{
+		if (AObject == NULL)
+		{
+			Log("ERROR", "NULL pointer passed to CFactory::Add");
+			return;
+		}
+
+		// we generate name for object if it isn't specified..
+		if (AName.empty())
+			AObject->SetName(typeid(T).name() + itos(AObject->GetID()));
+		else
+			AObject->SetName(AName);
+
+		string ObjectName = AObject->GetName();
+
+		if (!Objects.insert(make_pair(ObjectName, AObject)).second)
+		{
+			Log("ERROR", "Object with name '%s' already exists", ObjectName.c_str());
+			throw std::logic_error("Object with name '" + ObjectName + "' already exists.");
+			return;
+		}
+
+		AObject->Managed = true;
+	}
+
+	/**
+	* CFactory::Get - returns pointer to object by its unique name.
+	* Swears in log and returns NULL in case of failure.
+	*/
 
 	template<typename T>
-	T* Get(const string &AName, bool AMustExist = true);
+	T* CFactory::Get(const string &AName, bool AMustExist /*= true*/)
+	{
+		ObjectsIterator it = Objects.find(AName);
+		if (it == Objects.end())
+		{
+			if (AMustExist)
+				Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
+			return NULL;
+		}
+
+		T *result = dynamic_cast<T *>(it->second);
+		if (!result)
+		{
+			Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
+		}
+
+		return result;
+	}
+
+	/**
+	* CFactory::Remove - removes object from the list of managed objects and returns pointer to it.
+	* Swears in log and returns NULL in case of failure.
+	*/
 
 	template<typename T>
-	T* Remove(const string &AName);
-
-	void Rename(const string &AName, const string &ANewName);
-	void Destroy(CObject *AObject);
-	void CleanUp();
-	void DestroyAll();
-
-	bool IsClassExists(const string &AName);
-
-protected:
-	typedef map<string, CObject *> ObjectsContainer;
-	typedef ObjectsContainer::iterator ObjectsIterator;
-
-	CFactory();
-	~CFactory();
-	friend class CTSingleton<CFactory>;
-
-	void AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent = true);
-
-	void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
-
-	CXMLNode* GetPrototypeXML(const string &AName);
-	CObject* CreateClassInstance(const string &AClassName, const string &AName);
-	CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
-
-#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
-	void InsertDebugInfo( CObject* Source );
-#endif
-
-	template<typename T>
-	CObject* InternalNew(const string &AName);
-
-	ClassesContainer Classes;
-	ObjectsContainer Objects;
-	queue<CObject *> Deletion;
-	map<string, CGameObject *> CachedProtos;
-
-};
-
-/**
-* CFactory::New - creates managed object of specified class and returns pointer to it.
-*/
-
-template<typename T>
-T* CFactory::New(const string &AName)
-{
-	return dynamic_cast<T*>(InternalNew<T>(AName));
-}
-
-template <typename T>
-T* CFactory::New()
-{
-	return New<T>("");
-}
-
-template<typename T>
-CObject* CFactory::InternalNew(const string &AName)
-{
-	if (Objects.count(AName) != 0)
+	T* CFactory::Remove(const string &AName)
 	{
-		Log("ERROR", "Object with name '%s' already exists", AName.c_str());
-		return NULL;
-		//throw std::logic_error("Object with name '" + AName + "' already exists.");
+		ObjectsIterator it = Objects.find(AName);
+		if (it == Objects.end())
+		{
+			Log("ERROR", "Can't remove object named '%s' from factory: factory can't find this object", AName.c_str());
+			return NULL;
+		}
+
+		T *result = dynamic_cast<T *>(it->second);
+		if (!result)
+		{
+			Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
+			return NULL;
+		}
+
+		it->second->Managed = false;
+		Objects.erase(it);
+
+		return result;
 	}
 
-	T *result = new T;
-
-	Add(result, AName);
-
-#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
-
-	InsertDebugInfo(result);
-
-#endif
-
-	return result;
-}
-
-/**
-* CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified.
-*/
-
-template<typename T>
-void CFactory::Add(T *AObject, const string &AName /*= ""*/)
-{
-	if (AObject == NULL)
-	{
-		Log("ERROR", "NULL pointer passed to CFactory::Add");
-		return;
-	}
-
-	// we generate name for object if it isn't specified..
-	if (AName.empty())
-		AObject->SetName(typeid(T).name() + itos(AObject->GetID()));
-	else
-		AObject->SetName(AName);
-
-	string ObjectName = AObject->GetName();
-
-	if (!Objects.insert(make_pair(ObjectName, AObject)).second)
-	{
-		Log("ERROR", "Object with name '%s' already exists", ObjectName.c_str());
-		throw std::logic_error("Object with name '" + ObjectName + "' already exists.");
-		return;
-	}
-
-	AObject->Managed = true;
-}
-
-/**
-* CFactory::Get - returns pointer to object by its unique name.
-* Swears in log and returns NULL in case of failure.
-*/
-
-template<typename T>
-T* CFactory::Get(const string &AName, bool AMustExist /*= true*/)
-{
-	ObjectsIterator it = Objects.find(AName);
-	if (it == Objects.end())
-	{
-		if (AMustExist)
-			Log("ERROR", "Factory can't find object named '%s'", AName.c_str());
-		return NULL;
-	}
-
-	T *result = dynamic_cast<T *>(it->second);
-	if (!result)
-	{
-		Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
-	}
-
-	return result;
-}
-
-/**
-* CFactory::Remove - removes object from the list of managed objects and returns pointer to it.
-* Swears in log and returns NULL in case of failure.
-*/
-
-template<typename T>
-T* CFactory::Remove(const string &AName)
-{
-	ObjectsIterator it = Objects.find(AName);
-	if (it == Objects.end())
-	{
-		Log("ERROR", "Can't remove object named '%s' from factory: factory can't find this object", AName.c_str());
-		return NULL;
-	}
-
-	T *result = dynamic_cast<T *>(it->second);
-	if (!result)
-	{
-		Log("ERROR", "Dynamic cast to '%s' failed for object '%s'", typeid(T).name(), AName.c_str());
-		return NULL;
-	}
-
-	it->second->Managed = false;
-	Objects.erase(it);
-
-	return result;
-}
-
-
+}	//	namespace Deku2d
 
 #endif // _2DE_FACTORY_H_

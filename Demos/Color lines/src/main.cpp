@@ -1,5 +1,6 @@
 #include "2de_Engine.h"
 #include "Color Lines.h"
+using namespace Deku2d;
 
 class CCustomStateHandler : public CAbstractStateHandler
 {
