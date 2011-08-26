@@ -819,7 +819,7 @@ namespace Deku2d
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// CEnvironment
+	// Environment
 
 	namespace Environment
 	{
@@ -931,7 +931,7 @@ namespace Deku2d
 			}
 
 			/**
-			* CEnvironment::Paths::GetUniversalDirectory - возвращает стандартную для системы директорию для помещения всех изменяемых файлов программы, таких как конфиг, лог, возможно сэйвы и т. п.
+			* Environment::Paths::GetUniversalDirectory - возвращает стандартную для системы директорию для помещения всех изменяемых файлов программы, таких как конфиг, лог, возможно сэйвы и т. п.
 			*
 			* Название Universal здесь не очень удачное, но ничего лучше я придумать не смог...
 			*/
@@ -956,7 +956,7 @@ namespace Deku2d
 				}
 
 				if (!HomeDir.empty())
-					result = HomeDir + "/" + CEngine::Instance()->GetProgramName() + "/";
+					result = HomeDir + "/." + CEngine::Instance()->GetProgramName() + "/";
 			#endif // _WIN32
 
 				return result;
@@ -983,7 +983,7 @@ namespace Deku2d
 		}
 
 		/**
-		* CEnvironment::LogToStdOut - simplified log to the standard output, the way around singleton hell of CLog.
+		* Environment::LogToStdOut - simplified log to the standard output, the way around singleton hell of CLog.
 		*
 		* This function is used by Log macro if SIMPLIFIED_LOG is defined (this is false by default). Also can be used manually.
 		* Generally, it's useful in cases of debugging, and when the engine is not started, but you want to log something.

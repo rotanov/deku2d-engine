@@ -935,7 +935,7 @@ namespace Deku2d
 
 
 	/**
-	* CEnvironment - contains static functions and probably some constants that related to environment.
+	* Environment - contains static functions and probably some constants that related to environment.
 	*
 	* Ideally in future all (or not all) platform-dependent code should be here.
 	*/

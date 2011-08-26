@@ -1,6 +1,8 @@
 #include "2de_Geometry.h"
 #include <limits>
 
+#include "2de_Core.h"
+
 namespace Deku2d
 {
 	//////////////////////////////////////////////////////////////////////////

@@ -133,6 +133,21 @@ namespace Deku2d
 		}
 	};
 
+	namespace Const
+	{
+		namespace Math
+		{
+			const Vector2 V2_ZERO = Vector2(0.0f, 0.0f);
+			const Vector2 LEFT = Vector2(-1.0f, 0.0f);
+			const Vector2 RIGHT	= (-LEFT);
+			const Vector2 UP = Vector2(0.0f, 1.0f);
+			const Vector2 DOWN = (-UP);
+			const Vector2 V2_DIRECTIONS[4] = {LEFT, DOWN, RIGHT, UP,};
+		}	//	namespace Math
+
+	}	//	namespace Const
+
+
 	template<>
 	__INLINE Vector2 RandomRange<Vector2>(const Vector2 &AMin, const Vector2 &AMax)
 	{
@@ -181,20 +196,6 @@ namespace Deku2d
 			return Elements[Index];
 		}
 	};
-
-	namespace Const
-	{
-		namespace Math
-		{
-			const Vector2 V2_ZERO = Vector2(0.0f, 0.0f);
-			const Vector2 LEFT = Vector2(-1.0f, 0.0f);
-			const Vector2 RIGHT	= (-LEFT);
-			const Vector2 UP = Vector2(0.0f, 1.0f);
-			const Vector2 DOWN = (-UP);
-			const Vector2 V2_DIRECTIONS[4] = {LEFT, DOWN, RIGHT, UP,};
-		}	//	namespace Math
-
-	}	//	namespace Const
 
 }	//	namespace Deku2d
 

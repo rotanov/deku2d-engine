@@ -1,5 +1,6 @@
 DISABLED_DEMOS	=	Pac\ man \
-			Tanks \
+			SoundCheck \
+			Tanks
 
 DEMOS		=	Benchmark \
 			Color\ lines \
@@ -7,8 +8,7 @@ DEMOS		=	Benchmark \
 			LuaConsole \
 			Ninja\ story \
 			Pong \
-			Sandbox \
-			SoundCheck
+			Sandbox
 
 all: $(DEMOS)
 
