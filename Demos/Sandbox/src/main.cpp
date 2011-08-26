@@ -1,10 +1,8 @@
 #include "2de_Engine.h"
 
-using namespace Deku2d;
-
-#define ENGINE CEngine::Instance()
-#define RENDER CRenderManager::Instance()
-CEngine* Ninja = ENGINE;
+#define ENGINE Deku2d::CEngine::Instance()
+#define RENDER Deku2d::CRenderManager::Instance()
+Deku2d::CEngine* Ninja = ENGINE;
 
 /*
 Вот например у нас есть некий DraggeablePrototype;
@@ -20,36 +18,36 @@ CEngine* Ninja = ENGINE;
 
 */
 
-class CTest : public CGameObject
+class CTest : public Deku2d::CGameObject
 {
 public:
 	CTest()
 	{
-		CEventManager::Instance()->Subscribe("KeyDown", this);
+		Deku2d::CEventManager::Instance()->Subscribe("KeyDown", this);
 	}
 
-	void ProcessEvent(const CEvent &AEvent)
+	void ProcessEvent(const Deku2d::CEvent &AEvent)
 	{
 		if (AEvent.GetName() == "KeyDown" && AEvent.GetData<Uint16>("Sym") == SDLK_SPACE)
 		{
-			if (CGLWindow::Instance()->GetFullscreen())
+			if (Deku2d::CGLWindow::Instance()->GetFullscreen())
 			{
-				CGLWindow::Instance()->SetFullscreen(false);
-				CGLWindow::Instance()->SetSize(640, 480);
-				CGLWindow::Instance()->Initialize();
+				Deku2d::CGLWindow::Instance()->SetFullscreen(false);
+				Deku2d::CGLWindow::Instance()->SetSize(640, 480);
+				Deku2d::CGLWindow::Instance()->Initialize();
 			}
 			else
 			{
 				/*CGLWindow::Instance()->SetSize(2048, 1152);
 				CGLWindow::Instance()->SetFullscreen(true);*/
- 				CGLWindow::Instance()->SetVideoMode(CGLWindow::Instance()->GetDesktopVideoMode());
+ 				Deku2d::CGLWindow::Instance()->SetVideoMode(Deku2d::CGLWindow::Instance()->GetDesktopVideoMode());
 			}
 		}
 	}
 
 };
 
-class CCustomStateHandler : public CAbstractStateHandler
+class CCustomStateHandler : public Deku2d::CAbstractStateHandler
 {
 public:
 	bool OnInitialize();
@@ -58,12 +56,12 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
-	CSceneManager::Instance()->SetCurrentScene(NewScene);
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
-	CEngine::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CTest>("SetSizeTest"));
+	Deku2d::CAbstractScene *NewScene = Deku2d::CSceneManager::Instance()->CreateScene();
+	Deku2d::CSceneManager::Instance()->SetCurrentScene(NewScene);
+	Deku2d::CLuaVirtualMachine::Instance()->RunScript(Deku2d::CFactory::Instance()->Get<Deku2d::CScript>(Deku2d::CConfig::Instance()->Section("Data")["InitScript"]));
+	Deku2d::CEngine::Instance()->RootGameObject->Attach(Deku2d::CFactory::Instance()->New<CTest>("SetSizeTest"));
 	//CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("Iggy"), 0, -1);
-	CSoundMixer::Instance()->SetMusicVolume(128);
+	Deku2d::CSoundMixer::Instance()->SetMusicVolume(128);
 	return true;
 }
 

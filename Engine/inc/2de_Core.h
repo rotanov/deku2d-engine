@@ -288,14 +288,13 @@ namespace Deku2d
 	};
 
 	/**
-	* CVariantConvert - contains implementations of functions which convert strings to arbitrary plain type, supported by stringstream.
+	* VariantConvert - contains implementations of functions which convert strings to arbitrary plain type, supported by stringstream.
 	*/
 
-	class CVariantConvert	// Looks more like a namespace
+	namespace VariantConvert
 	{
-	public:
 		template<typename T>
-		static T from_string_impl(const string &s, identity<T>)
+		__INLINE T from_string_impl(const string &s, identity<T>)
 		{
 			T result;
 			stringstream ss;
@@ -305,7 +304,7 @@ namespace Deku2d
 			return result;
 		}
 
-		static bool from_string_impl(const string &s, identity<bool>)
+		__INLINE bool from_string_impl(const string &s, identity<bool>)
 		{
 			// ios::boolalpha - have you looked for it, while trying to reinvent the wheel? // it doesn't suit our needs.. i don't remember why, though..
 			if (s == "false" || s.empty())
@@ -322,16 +321,17 @@ namespace Deku2d
 			return ((int) result != 0);
 		}
 
-		static string from_string_impl(const string &s, identity<string>)
+		__INLINE string from_string_impl(const string &s, identity<string>)
 		{
 			return s;
 		}
-	};
+
+	}	//	namespace VariantConvert
 
 	template<typename T>
 	T from_string(const string &s)
 	{
-		return CVariantConvert::from_string_impl(s, identity<T>());
+		return VariantConvert::from_string_impl(s, identity<T>());
 	}
 
 	class CObject; // forward declaration
@@ -946,7 +946,7 @@ namespace Deku2d
 		{
 			tm* GetLocalTimeAndDate();
 			string GetFormattedTime(tm *TimeStruct, const char *Format);
-		};
+		}	//	namespace DateTime
 
 		namespace Paths
 		{
@@ -962,17 +962,17 @@ namespace Deku2d
 			void SetLogPath(const string &ALogPath);
 
 			string GetUniversalDirectory();
-		};
+		}	//	namespace Paths
 
 		namespace Variables
 		{
 			string Get(const string &AName);
 			void Set(const string &AName, const string &AValue);
-		};
+		}	//	namespace Variables
 
 		void LogToStdOut(const char *Event, const char *Format, ...);
 		string GetLineTerminator();
-	};
+	}	//	namespace Environment
 
 	// TODO: move this function somewhere.. btw, it's used only in one place: CEnvironment::Paths::GetExecutablePath()
 	void DelFNameFromFPath(char *src); // POSIXes have dirname, that does exactly the same, but windows doesn't have it..

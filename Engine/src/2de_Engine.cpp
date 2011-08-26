@@ -382,7 +382,7 @@ namespace Deku2d
 		//	Создание текстуры из памяти
 		CTexture *TitleScreenShroomTexture;
  		TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
- 		TitleScreenShroomTexture->SetLoadSource(reinterpret_cast<unsigned char*>(IMAGE_SHROOM_TITLE_DATA), IMAGE_SHROOM_TITLE_SIZE);
+		TitleScreenShroomTexture->SetLoadSource(reinterpret_cast<unsigned char*>(Const::Graphics::IMAGE_SHROOM_TITLE_DATA), Const::Graphics::IMAGE_SHROOM_TITLE_SIZE);
 		TitleScreenShroomTexture->Load();
 
 		// Создание и установка текущей сцены

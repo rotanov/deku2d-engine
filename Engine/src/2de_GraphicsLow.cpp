@@ -2,6 +2,7 @@
 
 #include "2de_Math.h"
 #include "2de_Engine.h"
+#include "2de_Matrix2.h"
 #include <limits>
 
 #if defined(USE_SDL_OPENGL)
@@ -141,7 +142,7 @@ namespace Deku2d
 	//////////////////////////////////////////////////////////////////////////
 	// CRenderConfig
 
-	CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(color::WHITE), doIgnoreTransform(false)
+	CRenderConfig::CRenderConfig() : BlendingMode(BLEND_MODE_OPAQUE), Color(Const::Color::WHITE), doIgnoreTransform(false)
 	{
 	}
 
@@ -710,7 +711,7 @@ namespace Deku2d
 		*/
 		v = Vector2(*Atx, *Aty) - Point;
 		if (std::fabs(v.x) < 0.001f && std::fabs(v.y) < 0.001f)
-			v = V2_ZERO;
+			v = Const::Math::V2_ZERO;
 		Point += v*0.05f;
 
 		dx = *Atx;
@@ -740,7 +741,7 @@ namespace Deku2d
 		SetName("CCamera");
 		//view = world = CBox(100, 100, 540, 380);
 		//outer = CBox(-1024, 0, 2048, 512);
-		Point = p = v = V2_ZERO;
+		Point = p = v = Const::Math::V2_ZERO;
 		Atx = Aty = NULL;
 		Assigned = false;
 		SetWidthAndHeight(CGLWindow::Instance()->GetWidth(), CGLWindow::Instance()->GetHeight());
@@ -770,7 +771,7 @@ namespace Deku2d
 	bool CRenderManager::DrawObjects()
 	{
 		glLoadIdentity();	
-		glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z);
+		glTranslatef(0.0f, 0.0f, Const::Graphics::ROTATIONAL_AXIS_Z);
 		Camera.Update(); // @todo: review camera
 
 		CDrawVisitor DrawVisitor;
@@ -779,7 +780,7 @@ namespace Deku2d
 		CEngine::Instance()->RootGameObject->DFSIterate(CEngine::Instance()->RootGameObject, &DrawVisitor);
 
 		glLoadIdentity();
-		glTranslatef(0.0f, 0.0f, ROTATIONAL_AXIS_Z); //accuracy tip used
+		glTranslatef(0.0f, 0.0f, Const::Graphics::ROTATIONAL_AXIS_Z); //accuracy tip used
 		glTranslatef(0.375, 0.375, 0);
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Comment left here for debug purposes
 		Renderer->Render();
@@ -893,8 +894,8 @@ namespace Deku2d
 			{
 				Vector2 P
 					(	
-						cos(PI * (float)i / ((float)Precision / 2.0f)),
-						sin(PI * (float)i / ((float)Precision / 2.0f))
+						cos(Const::Math::PI * static_cast<float>(i) / (static_cast<float>(Precision) / 2.0f)),
+						sin(Const::Math::PI * static_cast<float>(i) / (static_cast<float>(Precision) / 2.0f))
 					);
 				Vertices[i * 2] = P * Radius;
 			}
@@ -909,15 +910,15 @@ namespace Deku2d
 			{
 				Vector2 P
 					(	
-					cos(PI * (float)i / ((float)Precision / 2.0f)),
-					sin(PI * (float)i / ((float)Precision / 2.0f))
+					cos(Const::Math::PI * static_cast<float>(i) / (static_cast<float>(Precision) / 2.0f)),
+					sin(Const::Math::PI * static_cast<float>(i) / (static_cast<float>(Precision) / 2.0f))
 					);
 				Vertices[i * 3] = P * Radius;
 			}
 
 			for (int i = 0; i < Precision; i ++)
 			{
-				Vertices[i * 3 + 2] = V2_ZERO;
+				Vertices[i * 3 + 2] = Const::Math::V2_ZERO;
 				Vertices[i * 3 + 1] = Vertices[(i + 1) % Precision * 3];
 			}
 			break;
@@ -928,8 +929,8 @@ namespace Deku2d
 			{
 				Vector2 P
 					(	
-					cos(PI * (float)i / ((float)Precision / 2.0f)),
-					sin(PI * (float)i / ((float)Precision / 2.0f))
+					cos(Const::Math::PI * static_cast<float>(i) / (static_cast<float>(Precision) / 2.0f)),
+					sin(Const::Math::PI * static_cast<float>(i) / (static_cast<float>(Precision) / 2.0f))
 					);
 				Vertices[i] = P * Radius;
 			}
@@ -1072,14 +1073,16 @@ namespace Deku2d
 	void CFontManager::Init()
 	{
 		CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
-		DefaultFontTexture->SetLoadSource(reinterpret_cast<unsigned char*>(BINARY_DATA_DEFAULT_FONT_TEXTURE), BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE);
+		DefaultFontTexture->SetLoadSource(reinterpret_cast<unsigned char*>(Const::Graphics::BINARY_DATA_DEFAULT_FONT_TEXTURE),
+			Const::Graphics::BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE);
 		DefaultFontTexture->SetPersistent(true);
 		DefaultFontTexture->Load();
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// wtf is it? incapsulate it please or whatever...
 		
 		DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
-		DefaultFont->SetLoadSource(reinterpret_cast<unsigned char*>(BINARY_DATA_DEFAULT_FONT), BINARY_DATA_DEFAULT_FONT_SIZE);
+		DefaultFont->SetLoadSource(reinterpret_cast<unsigned char*>(Const::Graphics::BINARY_DATA_DEFAULT_FONT),
+			Const::Graphics::BINARY_DATA_DEFAULT_FONT_SIZE);
 		DefaultFont->SetPersistent(true);
 		DefaultFont->Load();
 
@@ -1350,7 +1353,7 @@ namespace Deku2d
 
 			CVertexHolder<Vector3> * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
 
-			Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
+			Vector2 TempVector = Const::Math::V2_ZERO, Vertex = Const::Math::V2_ZERO;
 			CTransformation Transformation = ATransform; //CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 			for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 			{
@@ -1394,7 +1397,7 @@ namespace Deku2d
 			break;
 		}
 
-		Vector2 TempVector = V2_ZERO, Vertex = V2_ZERO;
+		Vector2 TempVector = Const::Math::V2_ZERO, Vertex = Const::Math::V2_ZERO;
 		CTransformation Transformation = ATransform;//CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
 		for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 		{
@@ -1556,7 +1559,7 @@ namespace Deku2d
 	void CTransformation::Clear()
 	{
 		DepthOffset = 0.0f;
-		Translation = V2_ZERO;
+		Translation = Const::Math::V2_ZERO;
 		Scaling = 1.0f;
 		Rotation = 0.0f;
 	}

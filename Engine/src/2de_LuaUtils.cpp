@@ -1003,7 +1003,7 @@ namespace Deku2d
 		lua_register(L, "ConsoleOutput", &LuaAPI::ConsoleOutput);
 
 		// constants
-		lua_pushnumber(L, PI);
+		lua_pushnumber(L, Const::Math::PI);
 		lua_setglobal(L, "PI");
 	}
 

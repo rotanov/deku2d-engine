@@ -1,7 +1,7 @@
 #ifndef _2DE_IMAGE_UTILS_H_
 #define _2DE_IMAGE_UTILS_H_
 
-#include "2de_Math.h"
+#include "2de_RGBA.h"
 
 namespace Deku2d
 {

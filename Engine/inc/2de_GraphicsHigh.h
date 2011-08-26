@@ -44,9 +44,9 @@ namespace Deku2d
 		float				Age;
 
 		CNewSuperParticleSystem(int AMaxParticles = 100, int AEmission = 100, float ASystemLife = -1, 
-			float AParticleLife = 1, const RGBAf &AColorStart = color::WHITE, const RGBAf &AColorEnd = color::WHITE,
+			float AParticleLife = 1, const RGBAf &AColorStart = Const::Color::WHITE, const RGBAf &AColorEnd = Const::Color::WHITE,
 			float ASizeStart = 1, float ASizeEnd = 1, int AParticleLifeVariability = 1, 
-			const RGBAf &AColorVariability = color::BLACK, float ASizeVariability = 1);
+			const RGBAf &AColorVariability = Const::Color::BLACK, float ASizeVariability = 1);
 		~CNewSuperParticleSystem();
 		void Update(float dt);
 		void CreateParticle();

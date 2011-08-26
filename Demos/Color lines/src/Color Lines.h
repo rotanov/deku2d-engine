@@ -46,7 +46,7 @@ public:
 		if (AEvent.GetName() != "EveryFrame")
 			return;
 		Accumulated += CEngine::Instance()->GetDeltaTime();
-		Visual->SetColor(color::WHITE * (TTL - Accumulated) / TTL);
+		Visual->SetColor(Const::Color::WHITE * (TTL - Accumulated) / TTL);
 		if (Accumulated >= TTL)
 			this->SetDestroyedSubtree();
 	}

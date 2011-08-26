@@ -3,6 +3,7 @@
 
 #include "2de_Core.h"
 #include "2de_Math.h"
+#include "2de_Box.h"
 
 namespace Deku2d
 {

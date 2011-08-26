@@ -132,7 +132,7 @@ namespace Deku2d
 		t.y = CellIndex / HorNumTiles;
 		for (int i = 0; i < 4; i++)
 		{
-			tc[i] = (t + V2_QuadBin[i]);
+			tc[i] = (t + Const::Graphics::V2_QuadBin[i]);
 			tc[i].x *= (float)TileWidth/Texture->Width;
 			tc[i].y *= (float)TileHeight/Texture->Height;
 		}

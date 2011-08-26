@@ -1,4 +1,5 @@
 #include "2de_Physics.h"
+#include "2de_Matrix2.h"
 
 namespace Deku2d
 {
@@ -12,7 +13,7 @@ namespace Deku2d
 	{
 		p += lv * dt;
 		a += av * dt;
-		a = Clamp(a, 0.0f, PI*2);
+		a = Clamp(a, 0.0f, Const::Math::PI*2);
 		o = Matrix2(a);
 	}
 }	//	namespace Deku2d

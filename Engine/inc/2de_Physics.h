@@ -2,7 +2,10 @@
 #define _2DE_PHYSICS_H_
 
 #include "2de_Core.h"
-#include "2de_Math.h"
+#include "2de_Vector2.h"
+#include "2de_Box.h"
+#include "2de_Matrix2.h"
+#include "2de_Geometry.h"
 
 namespace Deku2d
 {

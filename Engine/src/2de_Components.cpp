@@ -479,7 +479,7 @@ namespace Deku2d
 
 		if (AXML->HasAttribute("Position"))
 		{
-			Vector2 APosition = V2_ZERO;
+			Vector2 APosition = Const::Math::V2_ZERO;
 			istringstream iss(AXML->GetAttribute("Position"));
 			vector<string> tokens;
 			copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
@@ -662,7 +662,7 @@ namespace Deku2d
 						Log("WARNING", "Attribute 'TexCoords' has improper format");
 				}
 				if (Texture != NULL && !AXML->HasAttribute("TexCoords"))
-					TexCoords = V2_QUAD_BIN;
+					TexCoords = Const::Graphics::V2_QUAD_BIN;
 
 				EModelType ModelType = MODEL_TYPE_LINES;
 				if (AXML->HasAttribute("ModelType"))
@@ -673,7 +673,7 @@ namespace Deku2d
 			}
 			else if (ModelName == "Line")
 			{
-				Vector2 p0 = V2_ZERO, p1 = V2_ZERO;
+				Vector2 p0 = Const::Math::V2_ZERO, p1 = Const::Math::V2_ZERO;
 				if (AXML->HasAttribute("Points"))
 				{
 					istringstream iss(AXML->GetAttribute("Points"));
@@ -717,7 +717,7 @@ namespace Deku2d
 
 		if (AXML->HasAttribute("Color"))
 		{
-			RGBAf AColor = color::WHITE;
+			RGBAf AColor = Const::Color::WHITE;
 			istringstream iss(AXML->GetAttribute("Color"));
 			vector<string> tokens;
 			copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));

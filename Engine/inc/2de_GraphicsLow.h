@@ -3,8 +3,12 @@
 
 #include "2de_Core.h"
 #include "2de_ImageUtils.h"
-#include "2de_Math.h"
+//#include "2de_Math.h"
 #include "2de_Resource.h"
+#include "2de_Vector2.h"
+#include "2de_Vector3.h"
+#include "2de_Box.h"
+#include "2de_RGBA.h"
 
 namespace Deku2d
 {
@@ -18,45 +22,53 @@ namespace Deku2d
 	//////////////////////////////////////////////////////////////////////////
 	// Various constants
 
-	const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertices (0 0) (1 0) (1 1) (0 1)
+	namespace Const
 	{
-		V2_ZERO,
-		V2_DIR_RIGHT,
-		V2_DIR_RIGHT + V2_DIR_UP,
-		V2_DIR_UP,
-	};
+		namespace Color
+		{
+			const RGBAf WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
+			const RGBAf BLACK = RGBAf(0.00f, 0.00f, 0.00f, 0.00f);
+			const RGBAf RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
+			const RGBAf GREEN = RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
+			const RGBAf BLUE = RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
 
-	const Vector2Array<4> V2_QUAD_BIN =  Vector2Array<4>(V2_QuadBin);
+		}	//	namespace Color
+		
+		namespace Graphics
+		{
+			const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertices (0 0) (1 0) (1 1) (0 1)
+			{
+				Math::V2_ZERO,
+				Math::RIGHT,
+				Math::RIGHT + Math::UP,
+				Math::UP,
+			};
 
-	const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with vertices (-1 -1) (1 -1) (1 1) (-1 1)
-	{
-		V2_DIR_LEFT + V2_DIR_DOWN,
-		V2_DIR_RIGHT + V2_DIR_DOWN,
-		V2_DIR_RIGHT + V2_DIR_UP,
-		V2_DIR_LEFT + V2_DIR_UP,
-	};
+			const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with vertices (-1 -1) (1 -1) (1 1) (-1 1)
+			{
+				Math::LEFT + Math::DOWN,
+				Math::RIGHT + Math::DOWN,
+				Math::RIGHT + Math::UP,
+				Math::LEFT + Math::UP,
+			};
 
-	const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
+			const Vector2Array<4> V2_QUAD_BIN =  Vector2Array<4>(V2_QuadBin);
+			const Vector2Array<4> V2_QUAD_BIN_CENTER = Vector2Array<4>(V2_QuadBinCenter);
 
-	const float ROTATIONAL_AXIS_Z = 1.0f;
+			const float ROTATIONAL_AXIS_Z = 1.0f;
 
-	namespace color
-	{
-		const RGBAf WHITE = RGBAf(1.00f, 1.00f, 1.00f, 1.00f);
-		const RGBAf BLACK = RGBAf(0.00f, 0.00f, 0.00f, 0.00f);
-		const RGBAf RED	= RGBAf(0.98f, 0.05f, 0.01f, 1.00f);
-		const RGBAf GREEN = RGBAf(0.10f, 0.90f, 0.05f, 1.00f);
-		const RGBAf BLUE = RGBAf(0.01f, 0.15f, 0.85f, 1.00f);
-	}
+			extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
+			extern char IMAGE_SHROOM_TITLE_DATA[];
 
-	extern unsigned  IMAGE_SHROOM_TITLE_SIZE;
-	extern char IMAGE_SHROOM_TITLE_DATA[];
+			extern const unsigned BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
+			extern char BINARY_DATA_DEFAULT_FONT_TEXTURE[];
 
-	extern const unsigned BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE;
-	extern char BINARY_DATA_DEFAULT_FONT_TEXTURE[];
+			extern const unsigned BINARY_DATA_DEFAULT_FONT_SIZE;
+			extern char BINARY_DATA_DEFAULT_FONT[];
 
-	extern const unsigned BINARY_DATA_DEFAULT_FONT_SIZE;
-	extern char BINARY_DATA_DEFAULT_FONT[];
+		}	//	namespace Graphics
+
+	}	//	namespace Const
 
 	class CAbstractScene;
 
@@ -125,7 +137,7 @@ namespace Deku2d
 		float Scaling;
 
 	public:
-		CTransformation(float ADepthOffset = 0.0f, const Vector2 &ATranslation = V2_ZERO,
+		CTransformation(float ADepthOffset = 0.0f, const Vector2 &ATranslation = Const::Math::V2_ZERO,
 			float ARotation = 0.0f, float AScaling = 1.0f);
 		/**
 		*	Don't be confused here: Look to implementation - it applies one transformation
@@ -371,7 +383,7 @@ namespace Deku2d
 	class CFrameInfo
 	{
 		CBox Reactangle;
-		vector<CGeometry> Primitives;
+		// vector<CGeometry> Primitives; in order to not include one more header for draft not used class
 		vector<string> Tags;
 	};
 
@@ -575,7 +587,7 @@ namespace Deku2d
 		static CModel* CreateModelCircle(float Radius, EModelType AModelType = MODEL_TYPE_LINES, int Precision = 16);
 		static CModel* CreateModelBox(float Width, float Height, 
 			EModelType AModelType = MODEL_TYPE_LINES, CTexture * ATexture = NULL,
-			const Vector2Array<4> &ATexCoords = V2_QUAD_BIN);
+			const Vector2Array<4> &ATexCoords = Const::Graphics::V2_QUAD_BIN);
 		static CModel* CreateModelLine(const Vector2 &v0, const Vector2 &v1);
 		static CModel* CreateModelText(const CText *AText);
 

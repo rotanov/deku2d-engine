@@ -159,87 +159,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\2de_Components.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Config.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Core.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_DefaultFont.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Engine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Event.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Factory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_GameUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_GraphicsHigh.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_GraphicsLow.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_ImageUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Log.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_LuaUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Math.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Physics.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Resource.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_RTTI.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_ShroomTitle.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Sound.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_SpatialManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\2de_Xml.cpp"
+				RelativePath=".\src\2de_IncludeAllTU.cpp"
 				>
 			</File>
 		</Filter>
@@ -248,6 +168,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\inc\2de_Box.h"
+				>
+			</File>
 			<File
 				RelativePath=".\inc\2de_Components.h"
 				>
@@ -277,6 +201,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Geometry.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_GraphicsHigh.h"
 				>
 			</File>
@@ -301,11 +229,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Matrix2.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Physics.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\2de_Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_RGBA.h"
 				>
 			</File>
 			<File
@@ -321,10 +257,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Vector2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Vector3.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Xml.h"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\ClassDiagram1.cd"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
