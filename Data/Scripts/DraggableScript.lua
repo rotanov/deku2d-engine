@@ -26,8 +26,8 @@ function DraggableComponent:OnMouseDown(e)
 
 	local box = ControlledObject:GetBox()
 
-	local x = tonumber(GetEventData(e, "X"))
-	local y = tonumber(GetEventData(e, "Y"))
+	local x = e.X
+	local y = e.Y
 
 	if x > box.Min.x and x < box.Max.x and y > box.Min.y and y < box.Max.y then
 		self.Drag = true
@@ -45,8 +45,8 @@ function DraggableComponent:OnMouseMove(e)
 		return
 	end
 
-	local x = tonumber(GetEventData(e, "X"))
-	local y = tonumber(GetEventData(e, "Y"))
+	local x = e.X
+	local y = e.Y
 
 	ControlledObject:SetPosition(x, y);
 end

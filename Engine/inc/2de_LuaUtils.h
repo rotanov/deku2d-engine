@@ -46,6 +46,7 @@ namespace Deku2d
 		void SetLocalNamesFields(CGameObject *AGameObject);
 		void SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference);
 		void DestroyLuaObject(const CGameObject &AObject);
+		void PushEventTable(const CEvent &AEvent);
 
 		bool IsObjectExists(const string &AObjectName);
 		bool IsMethodFunctionExists(const string &AObjectName, const string &AFunctionName);
@@ -186,6 +187,7 @@ namespace Deku2d
 		int ResultsCount;
 		bool Called;
 		bool Broken;
+		bool MethodCall;
 		int OldStackTop;
 		lua_State *L;
 	};

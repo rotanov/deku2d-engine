@@ -5,6 +5,52 @@
 namespace Deku2d
 {
 	//////////////////////////////////////////////////////////////////////////
+	// CEvent
+
+	CEvent::CEvent() : Sender(NULL)
+	{
+	}
+
+	CEvent::CEvent(const string &AName, CObject *ASender) : Name(AName), Sender(ASender)
+	{
+	}
+
+	bool CEvent::IsDataExists(const string &AName) const
+	{
+		return Data.count(AName);
+	}
+
+	CEvent::DataIterator CEvent::Begin() const
+	{
+		return Data.begin();
+	}
+
+	CEvent::DataIterator CEvent::End() const
+	{
+		return Data.end();
+	}
+
+	string CEvent::GetName() const
+	{
+		return Name;
+	}
+
+	void CEvent::SetName(const string &AName)
+	{
+		Name = AName;
+	}
+
+	CObject* CEvent::GetSender() const
+	{
+		return Sender;
+	}
+
+	void CEvent::SetSender(CObject *ASender)
+	{
+		Sender = ASender;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	// CEventManager
 
 	CEventManager::CEventManager()

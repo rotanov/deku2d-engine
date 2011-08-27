@@ -52,8 +52,8 @@ function BlackNinja:OnCreate()
 end
 
 function BlackNinja:OnKeyDown(event)
-	local sym = tonumber(GetEventData(event, 'Sym'))
-	local char = GetEventData(event, 'Char')
+	local sym = tonumber(event.Sym)
+	local char = event.Char
 	local inc = self.v_c[sym]
 	if inc then
 		self.v = self.v + inc
@@ -63,11 +63,19 @@ function BlackNinja:OnKeyDown(event)
 	if sym == SDLK._z then
 		self.shooting = true
 	end
+
+	if sym == SDLK._RETURN then
+		ev = {
+			Char = '',
+			Sym = SDLK._SPACE,
+		}
+		TriggerEvent("KeyDown", nil, ev)
+	end
 end
 
 function BlackNinja:OnKeyUp(event)
-	local sym = tonumber(GetEventData(event, 'Sym'))
-	local char = GetEventData(event, 'Char')
+	local sym = tonumber(event.Sym)
+	local char = event.Char
 	local inc = self.v_c[sym]
 	if inc then
 		self.v = self.v - inc
@@ -137,8 +145,8 @@ function TempEditScript:OnAttached()
 end
 
 function TempEditScript:OnKeyDown(event)
-	local sym = GetEventData(event, "Sym")
-	local char = GetEventData(event, "Char")
+	local sym = event.Sym
+	local char = event.Char
 	local old_text = GetText(self.edit)
 
 	if sym == "8" then

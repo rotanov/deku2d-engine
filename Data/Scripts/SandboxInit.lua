@@ -99,6 +99,13 @@ Root:Attach(Place1)
 Root:Attach(place2)
 --]]
 
+-- Lua-sent events test
+
+local es = Create("EventSender", "")
+local er = Create("EventReceiver", "")
+Root:Attach(es)
+Root:Attach(er)
+
 -- LuaPerfCounter - a text that shows how much memory lua is using
 local lpc = Create("LuaPerfCounter", "")
 Root:Attach(lpc)

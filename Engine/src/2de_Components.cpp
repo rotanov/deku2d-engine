@@ -259,7 +259,8 @@ namespace Deku2d
 	void CGameObject::ProcessEvent(const CEvent &AEvent)
 	{
 		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
-		fc.PushArgument(const_cast<CEvent *>(&AEvent));
+		CLuaVirtualMachine::Instance()->PushEventTable(AEvent);
+		fc.SetArgumentsCount(1);
 		fc.Call();
 	}
 

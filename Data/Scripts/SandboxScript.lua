@@ -24,7 +24,7 @@ function TextMovementScriptable:OnEveryFrame()
 end
 
 function TextMovementScriptable:OnTimerTick(event)
-	if GetEventData(event, "Name") ~= "TextChangeTimer" then
+	if event.Name ~= "TextChangeTimer" then
 		return
 	end
 
@@ -45,7 +45,7 @@ function SandboxInst:OnEveryFrame()
 end
 
 function SandboxInst:OnTimerTick(event)
-	if GetEventData(event, "Name") ~= "TextChangeTimer" then
+	if event.Name ~= "TextChangeTimer" then
 		return
 	end
 	self.TestText:SetText(self.TestText:GetText() .. "?")

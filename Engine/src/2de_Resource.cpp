@@ -132,7 +132,7 @@ namespace Deku2d
 	{
 		string ResourcesListFile = Environment::Paths::GetConfigPath() + DEFAULT_RESOURCE_LIST_FILE_NAME;
 
-		if (!ForceReindex && CFileSystem::Exists(ResourcesListFile))
+		if (!ForceReindex && FileSystem::Exists(ResourcesListFile))
 		{
 			XML.LoadFromFile(ResourcesListFile);
 			if (!XML.Root.First("Resources")->IsErroneous())

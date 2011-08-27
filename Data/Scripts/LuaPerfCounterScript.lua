@@ -5,7 +5,7 @@ function LuaPerfCounter:OnCreate()
 end
 
 function LuaPerfCounter:OnTimerTick(event)
-	if GetEventData(event, "Name") ~= "LuaPerfCounterTimer" then
+	if event.Name ~= "LuaPerfCounterTimer" then
 		return
 	end
 

@@ -334,33 +334,7 @@ namespace Deku2d
 		return VariantConvert::from_string_impl(s, identity<T>());
 	}
 
-	class CObject; // forward declaration
-
-	class CEvent
-	{
-	public:
-		CEvent();
-		CEvent(const string &AName, CObject *ASender);
-
-		template<typename T>
-		T GetData(const string &AName) const;
-
-		template<typename T>
-		void SetData(const string &AName, const T &AValue);
-
-		bool IsDataExists(const string &AName) const;
-
-		string GetName() const;
-		void SetName(const string &AName);
-
-		CObject* GetSender() const;
-		void SetSender(CObject *ASender);
-
-	private:
-		string Name;
-		CObject *Sender;
-		map<string, string> Data;
-	};
+	class CEvent; // forward declaration
 
 	/**
 	* CObject - base class for many classes.
@@ -483,6 +457,52 @@ namespace Deku2d
 		}
 	};
 
+
+	/**
+	* Environment - contains functions and probably some constants that are related to environment.
+	*
+	* Ideally in future all (or not all) platform-dependent code should be here.
+	*/
+
+	namespace Environment
+	{
+		namespace DateTime
+		{
+			tm* GetLocalTimeAndDate();
+			string GetFormattedTime(tm *TimeStruct, const char *Format);
+		}	//	namespace DateTime
+
+		namespace Paths
+		{
+			string GetExecutablePath();
+
+			string GetWorkingDirectory();
+			void SetWorkingDirectory(const string &AWorkingDirectory);
+
+			string GetConfigPath();
+			void SetConfigPath(const string &AConfigPath);
+
+			string GetLogPath();
+			void SetLogPath(const string &ALogPath);
+
+			string GetUniversalDirectory();
+		}	//	namespace Paths
+
+		namespace Variables
+		{
+			string Get(const string &AName);
+			void Set(const string &AName, const string &AValue);
+		}	//	namespace Variables
+
+		void LogToStdOut(const char *Event, const char *Format, ...);
+		string GetLineTerminator();
+	}	//	namespace Environment
+
+
+	/**
+	 * CSingletonManager - a class that is responsible for destroying singletones.
+	 */
+
 	class CSingletonManager
 	{
 	public:
@@ -499,103 +519,6 @@ namespace Deku2d
 		static CSingletonManager *_instance;
 		stack<CObject*> Singletones;
 	};
-
-	// SingletonHolder по Александреску
-	// начал, но пока не осилил.. // а вообще нахер он нам нужен?... он же громоздкий, блядь..
-	/*template<class T>
-	class CreateUsingNew
-	{
-	public:
-		T* Create()
-		{
-			return new T;
-		}
-	};
-
-	template<class T>
-	class CreateUsingMalloc
-	{
-	public:
-		T* Create()
-		{
-			T *result = (T *) malloc(sizeof(T));
-			new(result) T();
-			return result;
-		}
-	};
-
-	template<class T>
-	class CreateStatic
-	{
-	public:
-		T* Create()
-		{
-			static T instance;
-			return &instance;
-		}
-	};
-
-	template<class T>
-	class DefaultLifetime
-	{
-
-	};
-
-
-	template<class T>
-	class SingleThreaded
-	{
-	public:
-		typedef T VolatileType;
-
-	};
-
-	template<class T,
-		template<class> class CreationPolicy = CreateUsingNew,
-		template<class> class LifetimePolicy = DefaultLifetime,
-		template<class> class ThreadingModel = SingleThreaded>
-	class CSingletonHolder
-	{
-	public:
-		static T& Instance();
-
-	private:
-		static void DestroySingleton();
-
-		CSingletonHolder();
-
-		typedef ThreadingModel<T>::VolatileType InstanceType;
-
-		static InstanceType* _instance;
-		static bool Destroyed;
-
-	};
-
-	template<...>
-	T& CSingletonHolder<...>::Instance()
-	{
-		if (!_instance)
-		{
-			if (Destroyed)
-			{
-				LifetimePolicy<T>::OnDeadReference();
-				Destroyed = false;
-			}
-			_instance = CreationPolicy<T>::Create();
-			LifetimePolicy<T>::SheduleCall(&DestroySingleton);
-		}
-
-		return *_instance;
-	}
-
-	template<...>
-	void CSingletonHolder<...>::DestroySingleton()
-	{
-		assert(!Destroyed);
-		CreationPolicy<T>::Destroy(_instance);
-		_instance = 0;
-		Destroyed = true;
-	}*/
 
 
 	/**
@@ -647,8 +570,8 @@ namespace Deku2d
 	#ifdef _DEBUG
 		if (UnderConstruction.count(&typeid(T)) == 1)
 		{
-			// well, we can't log it....
-			//Log("ERROR", "Recursive singleton constructor call has been discovered, typeid: '%s'", typeid(T).name());
+			// we can't use CLog here (because it's singleton too), but still able to log to stdout
+			Environment::LogToStdOut("ERROR", "Recursive singleton constructor call has been discovered, typeid: '%s'", typeid(T).name());
 
 			throw std::logic_error(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name());
 		}
@@ -921,58 +844,17 @@ namespace Deku2d
 	};
 
 	/**
-	* CFileSystem - a class that contains static functions for working with file system in a cross-platform way.
+	* FileSystem - a namespace that contains functions for working with file system in a cross-platform way.
 	*/
 
-	class CFileSystem
+	namespace FileSystem
 	{
-	public:
-		static bool Exists(const string &APath);
+		bool Exists(const string &APath);
 		
 		// TODO: extend, add more functions..
 
-	};
+	}	//	namespace FileSystem
 
-
-	/**
-	* Environment - contains static functions and probably some constants that related to environment.
-	*
-	* Ideally in future all (or not all) platform-dependent code should be here.
-	*/
-
-	namespace Environment
-	{
-		namespace DateTime
-		{
-			tm* GetLocalTimeAndDate();
-			string GetFormattedTime(tm *TimeStruct, const char *Format);
-		}	//	namespace DateTime
-
-		namespace Paths
-		{
-			string GetExecutablePath();
-
-			string GetWorkingDirectory();
-			void SetWorkingDirectory(const string &AWorkingDirectory);
-
-			string GetConfigPath();
-			void SetConfigPath(const string &AConfigPath);
-
-			string GetLogPath();
-			void SetLogPath(const string &ALogPath);
-
-			string GetUniversalDirectory();
-		}	//	namespace Paths
-
-		namespace Variables
-		{
-			string Get(const string &AName);
-			void Set(const string &AName, const string &AValue);
-		}	//	namespace Variables
-
-		void LogToStdOut(const char *Event, const char *Format, ...);
-		string GetLineTerminator();
-	}	//	namespace Environment
 
 	// TODO: move this function somewhere.. btw, it's used only in one place: CEnvironment::Paths::GetExecutablePath()
 	void DelFNameFromFPath(char *src); // POSIXes have dirname, that does exactly the same, but windows doesn't have it..
@@ -1013,26 +895,6 @@ namespace Deku2d
 			return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
 		}
 	};
-
-	template<typename T>
-	T CEvent::GetData(const string &AName) const
-	{
-		map<string, string>::const_iterator it = Data.find(AName);
-		if (it == Data.end())
-		{
-			// loggging here temporary commented out because I'm too lazy for solving this dependency now, when I put log into separated tu
-			//	Log("ERROR", "Event '%s' doesn't have data field named '%s'", Name.c_str(), AName.c_str());
-			return from_string<T>("");
-		}
-
-		return from_string<T>(it->second);
-	}
-
-	template<typename T>
-	void CEvent::SetData(const string &AName, const T &AValue)
-	{
-		Data[AName] = to_string(AValue);
-	}
 
 
 	/**

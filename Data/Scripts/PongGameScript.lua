@@ -37,7 +37,7 @@ function PongGame:OnEveryFrame()
 end
 
 function PongGame:OnTimerTick(event)
-	if GetEventSender(event) ~= GetObject("MemoryUsageUpdateTimer") then
+	if event.sender ~= GetObject("MemoryUsageUpdateTimer") then
 		return
 	end
 

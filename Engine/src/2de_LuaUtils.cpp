@@ -390,6 +390,32 @@ namespace Deku2d
 			return 0;
 		}
 
+		// void SetInterval(userdata Timer, number Interval)
+		int SetInterval(lua_State *L)
+		{
+			if (!lua_isnumber(L, -1))
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetInterval API call");
+
+			CTimerComponent *obj = static_cast<CTimerComponent *>(lua_touserdata(L, -2));
+			if (!CheckType(obj))
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetInterval API call");
+
+			obj->SetInterval(lua_tonumber(L, -1));
+		}
+
+		// void SetTimerEnabled(userdata Timer, bool Enabled)
+		int SetTimerEnabled(lua_State *L)
+		{
+			if (!lua_isboolean(L, -1))
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetTimerEnabled API call");
+
+			CTimerComponent *obj = static_cast<CTimerComponent *>(lua_touserdata(L, -2));
+			if (!CheckType(obj))
+				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTimerEnabled API call");
+
+			obj->SetEnabled(lua_toboolean(L, -1));
+		}
+
 		// void SubscribeToEvent(userdata Object, string EventName)
 		int SubscribeToEvent(lua_State *L)
 		{
@@ -420,44 +446,30 @@ namespace Deku2d
 			return 0;
 		}
 
-		// void TriggerEvent(string EventName, userdata Sender) // the first implementation, without parameters support...
+		// void TriggerEvent(string EventName, userdata Sender, table EventData = nil)
 		int TriggerEvent(lua_State *L)
 		{
-			if (!lua_isstring(L, -2))
+			bool gotEventData = lua_istable(L, -1);
+
+			if (!lua_isstring(L, -2 - gotEventData))
 				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to TriggerEvent API call");
 
-			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
-			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in TriggerEvent API call");
+			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1 - gotEventData));
 
-			CEventManager::Instance()->TriggerEvent(lua_tostring(L, -2), obj);
+			CEvent *e = new CEvent(lua_tostring(L, -2 - gotEventData), obj);
+			if (gotEventData)
+			{
+				lua_pushnil(L);
+				while (lua_next(L, -2) != 0)
+				{
+					e->SetData(lua_tostring(L, -2), lua_tostring(L, -1));
+					lua_pop(L, 1);
+				}
+
+			}
+			CEventManager::Instance()->TriggerEvent(e);
 
 			return 0;
-		}
-
-		// userdata GetEventSender(userdata Event)
-		int GetEventSender(lua_State *L)
-		{
-			CEvent *obj = static_cast<CEvent *>(lua_touserdata(L, -1));
-			if (!CheckType(obj))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetEventSender API call");
-
-			lua_pushlightuserdata(L, obj->GetSender());
-			return 1;
-		}
-
-		// string GetEventData(userdata Event, string DataName)
-		int GetEventData(lua_State *L)
-		{
-			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetEventData API call");
-
-			CEvent *obj = static_cast<CEvent *>(lua_touserdata(L, -2));
-			if (!CheckType(obj))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetEventData API call");
-
-			lua_pushstring(L, obj->GetData<string>(lua_tostring(L, -1)).c_str());
-			return 1;
 		}
 
 		// number sin(number n)
@@ -608,7 +620,7 @@ namespace Deku2d
 
 		if (Source == LOAD_SOURCE_FILE)
 		{
-			if (!CFileSystem::Exists(Filename))
+			if (!FileSystem::Exists(Filename))
 			{
 				Log("ERROR", "Can't load script from a file named '%s': file doesn't exist", Filename.c_str());
 				return false;
@@ -887,6 +899,23 @@ namespace Deku2d
 		Log("INFO", "Lua object DESTROYED: '%s'", AObject.GetName().c_str());
 	}
 
+	void CLuaVirtualMachine::PushEventTable(const CEvent &AEvent)
+	{
+		lua_newtable(L);
+
+		lua_pushlightuserdata(L, AEvent.GetSender());
+		lua_setfield(L, -2, "sender");
+
+		lua_pushstring(L, AEvent.GetName().c_str());
+		lua_setfield(L, -2, "name");
+
+		for (CEvent::DataIterator it = AEvent.Begin(); it != AEvent.End(); ++it)
+		{
+			lua_pushstring(L, it->second.c_str());
+			lua_setfield(L, -2, it->first.c_str());
+		}
+	}
+
 	bool CLuaVirtualMachine::IsObjectExists(const string &AObjectName)
 	{
 		lua_getglobal(L, AObjectName.c_str());
@@ -979,13 +1008,13 @@ namespace Deku2d
 		lua_register(L, "GetWindowHeight", &LuaAPI::GetWindowHeight);
 		lua_register(L, "GetWindowDimensions", &LuaAPI::GetWindowDimensions);
 		lua_register(L, "SetClassName", &LuaAPI::SetClassName);
+		lua_register(L, "SetInterval", &LuaAPI::SetInterval);
+		lua_register(L, "SetTimerEnabled", &LuaAPI::SetTimerEnabled);
 
 		// event management
 		lua_register(L, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
 		lua_register(L, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
 		lua_register(L, "TriggerEvent", &LuaAPI::TriggerEvent);
-		lua_register(L, "GetEventSender", &LuaAPI::GetEventSender);
-		lua_register(L, "GetEventData", &LuaAPI::GetEventData);
 
 		// math
 		lua_register(L, "sin", &LuaAPI::sin);
@@ -1022,7 +1051,7 @@ namespace Deku2d
 	// CLuaFunctionCall
 
 	CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCount /*= 0*/) : FunctionName(AFunctionName), ArgumentsCount(0),
-		ResultsCount(AResultsCount), Called(false), Broken(false)
+		ResultsCount(AResultsCount), Called(false), Broken(false), MethodCall(false)
 	{
 		L = CLuaVirtualMachine::Instance()->L;
 		if (!L)
@@ -1043,7 +1072,7 @@ namespace Deku2d
 	}
 
 	CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount /*= 0*/) : ObjectName(AObjectName),
-		FunctionName(AFunctionName), ResultsCount(AResultsCount), ArgumentsCount(1), Called(false), Broken(false)
+		FunctionName(AFunctionName), ResultsCount(AResultsCount), ArgumentsCount(0), Called(false), Broken(false), MethodCall(true)
 	{
 		L = CLuaVirtualMachine::Instance()->L;
 		if (!L)
@@ -1090,7 +1119,7 @@ namespace Deku2d
 		}
 
 		Called = true;
-		if (lua_pcall(L, ArgumentsCount, ResultsCount, 0) != 0)
+		if (lua_pcall(L, MethodCall ? ArgumentsCount + 1 : ArgumentsCount, ResultsCount, 0) != 0)
 		{
 			CLuaVirtualMachine::Instance()->OutputError(lua_tostring(L, -1));
 			return false;
@@ -1145,6 +1174,12 @@ namespace Deku2d
 
 	void CLuaFunctionCall::SetArgumentsCount(int AArgumentsCount)
 	{
+		if (Called)
+		{
+			Log("ERROR", "Can't set arguments count after function call");
+			return;
+		}
+
 		ArgumentsCount = AArgumentsCount;
 	}
 

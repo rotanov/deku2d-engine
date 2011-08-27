@@ -134,4 +134,12 @@ end
 
 TimerComponent = GameObject:Derive()
 
+function TimerComponent:SetInterval(interval)
+	SetInterval(self.object, interval)
+end
+
+function TimerComponent:SetEnabled(enabled)
+	SetTimerEnabled(self.object, enabled)
+end
+
 --------------------------------------------------------------------------------
