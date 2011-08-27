@@ -72,8 +72,8 @@ namespace Deku2d
 
 		if (!ProcessArguments(argc, argv))
 		{
-			if (CCommandLineArgumentsManager::Instance()->GetErrorState())
-				cout << CCommandLineArgumentsManager::Instance()->GetError() << endl << endl;	// maybe incapsulate in something like CEnvironment::Console::Print..
+			if (CommandLineArgumentsManager->GetErrorState())
+				cout << CommandLineArgumentsManager->GetError() << endl << endl;	// maybe incapsulate in something like CEnvironment::Console::Print..
 
 			return false;
 		}
@@ -98,23 +98,23 @@ namespace Deku2d
 			{
 				if (isHaveFocus) // not actually. See main loop issue.
 				{
-					CResourceManager::Instance()->PerformUnload();
-					CFactory::Instance()->CleanUp();
+					ResourceManager->PerformUnload();
+					Factory->CleanUp();
 					if (LimitFPS())
 					{
-						CEventManager::Instance()->TriggerEvent("EveryFrame", NULL);
+						EventManager->TriggerEvent("EveryFrame", NULL);
 						SpatialManager->Update();
 						SpatialManager->Clear();
-						//CSceneManager::Instance()->Update(dt);
+						//SceneManager->Update(dt);
 						if (doCalcFPS)
 							CalcFPS();
-						CRenderManager::Instance()->BeginFrame();
-						CRenderManager::Instance()->DrawObjects();
-						//CSceneManager::Instance()->Render();
+						RenderManager->BeginFrame();
+						RenderManager->DrawObjects();
+						//SceneManager->Render();
 						
 						// @todo: And look here:(yet it's about mainloopissue) http://gafferongames.com/game-physics/fix-your-timestep/
 					}
-					CRenderManager::Instance()->EndFrame();
+					RenderManager->EndFrame();
 				}
 				else
 				{
@@ -284,19 +284,17 @@ namespace Deku2d
 
 	bool CEngine::Initialize()
 	{
-		CLog::Instance()->SetLogFilePath(Environment::Paths::GetLogPath());
-		CLog::Instance()->SetLogName("System");
+		SLog->SetLogFilePath(Environment::Paths::GetLogPath());
+		SLog->SetLogName("System");
 		Log("INFO", "Working directory is '%s'", Environment::Paths::GetWorkingDirectory().c_str());
 
 		Environment::Variables::Set("SDL_VIDEO_CENTERED", "center");
 
-		CConfig *Config = CConfig::Instance();
-
-		CLog::Instance()->SetLogLevel(Config->Section("Data")["LogLevel"]);
+		SLog->SetLogLevel(Config->Section("Data")["LogLevel"]);
 
 		CConfig::CConfigSection VideoSection = Config->Section("Video");
 
-		CGLWindow *Window = CGLWindow::Instance();
+		CGLWindow *Window = GLWindow.Instance();
 		Window->SetWidth(VideoSection["WindowWidth"]);
 		Window->SetHeight(VideoSection["WindowHeight"]);
 		//Window->BPP = VideoSection["WindowBPP"]; // 32
@@ -306,22 +304,21 @@ namespace Deku2d
 		doLimitFPS = VideoSection["DoLimitFps"];
 		SetFPSLimit(VideoSection["FpsLimit"]);
 
-		CResourceManager *ResourceManager = CResourceManager::Instance();
 		ResourceManager->SetDataPath(Config->Section("Data")["DataPath"]);
 		doLoadDefaultResourceList = Config->Section("Data")["doLoadDefaultResourceList"];
 
-		CRenderManager::Instance()->Camera.SetWidthAndHeight(CGLWindow::Instance()->GetWidth(),
-			CGLWindow::Instance()->GetHeight()); // Update camera due to update of wh from config
+		// Update camera due to update of wh from config
+		RenderManager->Camera.SetWidthAndHeight(GLWindow->GetWidth(), GLWindow->GetHeight());
 
 
-		if (!CGLWindow::Instance()->Create())
+		if (!GLWindow->Create())
 		{
 			Log("ERROR", "Window creation failed");
 			return false;
 		}
 
 		ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious.. // If function was called DevILInit() I shall agree with you. But it's fucking "ilInit()" // You think "il" doesn't clearly denote "Image Library"?
-		CSoundMixer::Instance()->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
+		SoundMixer->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 		SDL_EnableUNICODE(1);
 		SDL_ShowCursor(0);
@@ -344,24 +341,24 @@ namespace Deku2d
 				return false;
 		}
 
-		//CFontManager::Instance()->SetCurrentFont("Font");
-		CFontManager::Instance()->Init();	// Initialize default font;
+		//FontManager->SetCurrentFont("Font");
+		FontManager->Init();	// Initialize default font;
 
-		CFactory::Instance(); // Factory should be initialized after all other managers
+		Factory.Instance(); // Factory should be initialized after all other managers
 
-		CScript *mainScript = CFactory::Instance()->Get<CScript>("Main");
+		CScript *mainScript = Factory->Get<CScript>("Main");
 		if (mainScript == NULL)
-			mainScript = CFactory::Instance()->Get<CScript>("main");
+			mainScript = Factory->Get<CScript>("main");
 		if (mainScript == NULL)
 		{
 			Log("ERROR", "Unable to load Main.lua");
 			return false;
 		}
-		CLuaVirtualMachine::Instance()->RunScript(mainScript);	
+		LuaVirtualMachine->RunScript(mainScript);	
 
-		RootGameObject = dynamic_cast<CPlaceableComponent *>(CFactory::Instance()->CreateByName("PlaceableComponent", "Root"));
+		RootGameObject = dynamic_cast<CPlaceableComponent *>(Factory->CreateByName("PlaceableComponent", "Root"));
 
-		CGameObject* Cursor = dynamic_cast<CGameObject*>(CFactory::Instance()->CreateByName("MouseProto", "Mouse cursor"));
+		CGameObject* Cursor = dynamic_cast<CGameObject*>(Factory->CreateByName("MouseProto", "Mouse cursor"));
 		if (Cursor != NULL)
 			RootGameObject->Attach(Cursor);
 		else
@@ -371,9 +368,9 @@ namespace Deku2d
 		//Here goes high level initializations, like default scene as title screen
 		//and FPSText
 		// TODO: hide it somewhere..
-		CPlaceableComponent *FPSTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
+		CPlaceableComponent *FPSTextPlacing = Factory->New<CPlaceableComponent>();
 		FPSTextPlacing->GetTransformation().SetTranslation(Vector2(200.0f, 300.0f));
-		FPSText = CFactory::Instance()->New<CText>("FPSText");
+		FPSText = Factory->New<CText>("FPSText");
 		FPSText->SetText("FPS: 0");
 		FPSTextPlacing->SetLayer(512);
 		RootGameObject->Attach(FPSTextPlacing);
@@ -381,16 +378,16 @@ namespace Deku2d
 
 		//	Создание текстуры из памяти
 		CTexture *TitleScreenShroomTexture;
- 		TitleScreenShroomTexture = CFactory::Instance()->New<CTexture>("TitleScreenShroomTexture");
+ 		TitleScreenShroomTexture = Factory->New<CTexture>("TitleScreenShroomTexture");
 		TitleScreenShroomTexture->SetLoadSource(reinterpret_cast<unsigned char*>(Const::Graphics::IMAGE_SHROOM_TITLE_DATA), Const::Graphics::IMAGE_SHROOM_TITLE_SIZE);
 		TitleScreenShroomTexture->Load();
 
 		// Создание и установка текущей сцены
-		CAbstractScene *TitleScreen = CSceneManager::Instance()->CreateScene();
-		CSceneManager::Instance()->SetCurrentScene(TitleScreen);
+		CAbstractScene *TitleScreen = SceneManager->CreateScene();
+		SceneManager->SetCurrentScene(TitleScreen);
 
 		// Создание класса CDefaultTutleScreen (в текущей сцене)
-		CDefaultTitleScreen *Tscn = CFactory::Instance()->New<CDefaultTitleScreen>("TitleScreenClassForInst");
+		CDefaultTitleScreen *Tscn = Factory->New<CDefaultTitleScreen>("TitleScreenClassForInst");
 		Tscn->SetTexture(TitleScreenShroomTexture);
 		
 		if (!StateHandler->OnInitialize())
@@ -408,7 +405,7 @@ namespace Deku2d
 	{
 		Log("INFO", "Finalization started");
 		Finalizing = true;
-		CFactory::Instance()->DestroyAll();
+		Factory->DestroyAll();
 		CSingletonManager::Instance()->Clear();
 
 	#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
@@ -443,7 +440,7 @@ namespace Deku2d
 						e->SetData("Char", TempChar);
 						e->SetData("Sym", keysym.sym);
 						e->SetData("Modifiers", keysym.mod);
-						CEventManager::Instance()->TriggerEvent(e);
+						EventManager->TriggerEvent(e);
 					}
 
 					CEvent *e = new CEvent;
@@ -451,7 +448,7 @@ namespace Deku2d
 					e->SetData("Char", TempChar);
 					e->SetData("Sym", keysym.sym);
 					e->SetData("Modifiers", keysym.mod);
-					CEventManager::Instance()->TriggerEvent(e);
+					EventManager->TriggerEvent(e);
 
 					Keys[keysym.sym] = true;
 					break;
@@ -469,7 +466,7 @@ namespace Deku2d
 					e->SetData("Char", TempChar);
 					e->SetData("Sym", keysym.sym);
 					e->SetData("Modifiers", keysym.mod);
-					CEventManager::Instance()->TriggerEvent(e);
+					EventManager->TriggerEvent(e);
 
 					Keys[keysym.sym] = 0;
 					break;
@@ -481,7 +478,7 @@ namespace Deku2d
 					e->SetData("Y", MousePosition.y);
 					e->SetData("Button", event.button.button);
 					e->SetData("Modifiers", SDL_GetModState());
-					CEventManager::Instance()->TriggerEvent(e);
+					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_MOUSEBUTTONUP:
@@ -491,17 +488,17 @@ namespace Deku2d
 					e->SetData("Y", MousePosition.y);
 					e->SetData("Button", event.button.button);
 					e->SetData("Modifiers", SDL_GetModState());
-					CEventManager::Instance()->TriggerEvent(e);
+					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_MOUSEMOTION:
 				{
-					MousePosition = Vector2(event.motion.x, CGLWindow::Instance()->GetHeight() - event.motion.y);
+					MousePosition = Vector2(event.motion.x, GLWindow->GetHeight() - event.motion.y);
 					CEvent *e = new CEvent("MouseMove", NULL);
 					e->SetData("X", MousePosition.x);
 					e->SetData("Y", MousePosition.y);
 					e->SetData("Modifiers", SDL_GetModState());
-					CEventManager::Instance()->TriggerEvent(e);
+					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_ACTIVEEVENT:
@@ -512,13 +509,13 @@ namespace Deku2d
 						{
 							if (isHaveFocus)
 							{
-								CSoundMixer::Instance()->PauseMusic(); // TODO: add option to play music in background..
-								// CSoundMixer::Instance()->StopAllSound(); // i'm not sure about this..
+								SoundMixer->PauseMusic(); // TODO: add option to play music in background..
+								// SoundMixer->StopAllSound(); // i'm not sure about this..
 								StateHandler->OnFocusGain();
 							}
 							else
 							{
-								CSoundMixer::Instance()->ResumeMusic();
+								SoundMixer->ResumeMusic();
 								StateHandler->OnFocusLost();
 							}
 						}
@@ -528,8 +525,8 @@ namespace Deku2d
 				}
 				case SDL_VIDEORESIZE:
 				{
-					CGLWindow::Instance()->SetSize(event.resize.w, event.resize.h);
-					CGLWindow::Instance()->Initialize();
+					GLWindow->SetSize(event.resize.w, event.resize.h);
+					GLWindow->Initialize();
 					break;
 				}
 				case SDL_QUIT:
@@ -548,7 +545,7 @@ namespace Deku2d
 	{
 		// return false if you want to stop engine
 
-		CCommandLineArgumentsManager *ArgMan = CCommandLineArgumentsManager::Instance();
+		CCommandLineArgumentsManager *ArgMan = CommandLineArgumentsManager.Instance();
 
 		if (!ArgMan->Initialize(argc, argv))
 			return false;
@@ -559,7 +556,7 @@ namespace Deku2d
 			return false;
 		}
 
-		CArgumentsConfigMappingsManager *ArgConfigMap = CArgumentsConfigMappingsManager::Instance();
+		CArgumentsConfigMappingsManager *ArgConfigMap = ArgumentsConfigMappingsManager.Instance();
 
 		for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
 		{

@@ -80,7 +80,7 @@ namespace Deku2d
 		template<typename T>
 		T CloneHelper(T AObject, const string &ACloneName = "") const
 		{
-			CFactory::Instance()->Add(AObject, ACloneName.empty() ? GetName() + "copy" + itos(AObject->GetID()) : ACloneName);	// may be names will be too long..
+			Factory->Add(AObject, ACloneName.empty() ? GetName() + "copy" + itos(AObject->GetID()) : ACloneName);	// may be names will be too long..
 			AObject->SetScript(AObject->GetScript());
 			AObject->FinalizeCreation();	// i'm not sure about this.. this is wrong for prototypes, i think.. // but it works..
 			return AObject;

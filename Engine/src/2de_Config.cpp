@@ -117,8 +117,8 @@ namespace Deku2d
 	CConfigCommandLineStorage::CConfigCommandLineStorage(const string &ARootNodeName) : CConfigStorage(ARootNodeName)
 	{
 		CreateInitialStructure();
-		CArgumentsConfigMappingsManager *ArgConfigMap = CArgumentsConfigMappingsManager::Instance();
-		CCommandLineArgumentsManager *ArgMan = CCommandLineArgumentsManager::Instance();
+		CArgumentsConfigMappingsManager *ArgConfigMap = ArgumentsConfigMappingsManager.Instance();
+		CCommandLineArgumentsManager *ArgMan = CommandLineArgumentsManager.Instance();
 
 		for (CArgumentsConfigMappingsManager::MappingsIterator it = ArgConfigMap->Begin(); it != ArgConfigMap->End(); ++it)
 		{

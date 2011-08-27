@@ -1,13 +1,13 @@
 #include "Pacman.h"
 using namespace Deku2d;
 
-#define NewObject(A) CFactory::Instance()->New<A>("")
+#define NewObject(A) Factory->New<A>("")
 
 CPacmanBonus::CPacmanBonus(Vector2 APosition, CSprite *ASprite) : Position(APosition),
 	Angle(rand() % 360), RenderProxy(NULL), Sprite(ASprite)
 {
 	RenderProxy = new CRenderProxy(Sprite);
-	//CFactory::Instance()->Add(RenderProxy);
+	//Factory->Add(RenderProxy);
 	RenderProxy->SetPosition(Position);
 	RenderProxy->SetLayer(1);
 	SetName("Pacman bonus (mushroom)");
@@ -34,24 +34,24 @@ void CPacmanBonus::Update(float dt)
 		Ps->SizeOver = 32;
 		Ps->Emission = 10;
 		Ps->Life = 0.5;
-		Ps->Texture = CFactory::Instance()->Get<CTexture>("shroomlittle");
+		Ps->Texture = Factory->Get<CTexture>("shroomlittle");
 		Ps->Position = Position;
-		CFactory::Instance()->Destroy(this);
+		Factory->Destroy(this);
 	}
 	return;
 }
 
 CPacmanBonus::~CPacmanBonus()
 {	
-	//CFactory::Instance()->Destroy(RenderProxy);
+	//Factory->Destroy(RenderProxy);
 	delete RenderProxy;
 }
 
 CPacmanPlayer::CPacmanPlayer() : Score(0), Damage(0), Velocity(V2_ZERO)
 {
-	Sprite = CFactory::Instance()->New<CSprite>("Player sprite");
-	ScoreText = CFactory::Instance()->New<CText>("Score text");
-	DamageText = CFactory::Instance()->New<CText>("Damage text");
+	Sprite = Factory->New<CSprite>("Player sprite");
+	ScoreText = Factory->New<CText>("Score text");
+	DamageText = Factory->New<CText>("Damage text");
 
 	ScoreText->SetText("Score: " + itos(Score));
 	DamageText->SetText("Damage: " + itos(Damage));
@@ -68,8 +68,8 @@ CPacmanPlayer::CPacmanPlayer() : Score(0), Damage(0), Velocity(V2_ZERO)
 	Sprite->SetTexture("PacmanFrames");
 	Sprite->AddAnimation(true, 50, 32, 32, 4, 2, 7, 32, 32, 0, 0, 0, true);
 	Sprite->AddAnimation(false, 0, 32, 32, 1, 1, 1, 32, 32, 0, 0, 1, false);
-	CEventManager::Instance()->Subscribe("KeyDown", this);
-	CRenderManager::Instance()->Camera.Assign(&Position.x, &Position.y);
+	EventManager->Subscribe("KeyDown", this);
+	RenderManager->Camera.Assign(&Position.x, &Position.y);
 }
 
 void CPacmanPlayer::Update(float dt)
@@ -120,18 +120,18 @@ void CPacmanPlayer::ProcessEvent(const CEvent &AEvent)
 
 CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 {
-	EnemySprite = CFactory::Instance()->New<CSprite>("Enemy sprite");
-	BonusSprite = CFactory::Instance()->New<CSprite>("Bonus sprite");
+	EnemySprite = Factory->New<CSprite>("Enemy sprite");
+	BonusSprite = Factory->New<CSprite>("Bonus sprite");
 
 	BonusSprite->SetVisibility(false);
 	BonusSprite->AddAnimation(true, 50, 32, 32, 4, 2, 6, 32, 32, 0, 0, 0, true);
 	BonusSprite->SetTexture("PacmanBonus");
 
 
-	Tiles = CFactory::Instance()->Get<CTileset>("PacManTileset");
+	Tiles = Factory->Get<CTileset>("PacManTileset");
 	Tiles->CheckLoad();
 	Map = new CLevelMap(LEVEL_WIDTH, LEVEL_HEIGHT, "PacManTileset", "Pac man map");
-	CFactory::Instance()->Add(Map, "Pac man map");
+	Factory->Add(Map, "Pac man map");
 	Map->SetLayer(0);
 	Map->SetScaling(2.0f);
 	//	Map.TileSet = Tiles;
@@ -150,20 +150,20 @@ CPacmanGame::CPacmanGame(CPacmanPlayer *APlayer) : Player(APlayer)
 					{
 						CPacmanBonus *Bonus = new CPacmanBonus(Vector2(i * 64 + 32, j * 64 + 32), BonusSprite);
 						Bonus->Player = Player;
-						CFactory::Instance()->Add(Bonus);
+						Factory->Add(Bonus);
 					}
 					else if (rand() % 20 < 2)
 					{
 						CPacmanEnemy *Enemy = new CPacmanEnemy(Vector2(i * 64 + 32, j * 64 + 32));
 						Enemy->Player = Player;
 						Enemy->Map = Map;
-						CFactory::Instance()->Add(Enemy);
+						Factory->Add(Enemy);
 					}
 				}
 			}
 
 			Map->GenCells();
-			//CSoundMixer::Instance()->SetMusicVolume(100);
+			//SoundMixer->SetMusicVolume(100);
 }
 
 
@@ -259,7 +259,7 @@ void CPacmanGame::Update(float dt)
 CPacmanEnemy::CPacmanEnemy(Vector2 APosition) : Position(APosition), Player(NULL),
 Direction(static_cast<EDirection>(rand()%4))
 {
-	Sprite = CFactory::Instance()->New<CSprite>("PacmanEnemy sprite " + itos(GetID()));
+	Sprite = Factory->New<CSprite>("PacmanEnemy sprite " + itos(GetID()));
 	SetName("Pacman enemy");
 	Sprite->SetLayer(1);
 	Sprite->SetTexture("PacmanEnemy");
@@ -294,7 +294,7 @@ void CPacmanEnemy::Update(float dt)
 		Ps->SizeVariability = 2;
 		Ps->Emission = 10;
 		Ps->Life = 0.5;
-		Ps->Texture = CFactory::Instance()->Get<CTexture>("ParticlePacmanBlood");
+		Ps->Texture = Factory->Get<CTexture>("ParticlePacmanBlood");
 		Ps->PtrPosition = &Player->Position;
 	}
 	Sprite->SetPosition(Position);

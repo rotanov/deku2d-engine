@@ -112,7 +112,7 @@ namespace Deku2d
 	*	in order to access texture; So @todo: get rid of CTextureManager
 	*/
 
-	class CTextureManager : public CCommonManager <vector <CTexture*> >, public CTSingleton <CTextureManager> 
+	class CTextureManager : public CCommonManager <vector <CTexture*> >
 	{
 	public:
 		bool UnloadTextures();
@@ -121,6 +121,8 @@ namespace Deku2d
 		CTextureManager();
 		friend class CTSingleton <CTextureManager>;
 	};
+
+	static CTSingleton<CTextureManager> TextureManager;
 
 	/**
 	*	CTransformation - class describes placement in space and some other properties
@@ -538,7 +540,7 @@ namespace Deku2d
 	*	So if we somehow manage to put this functiality somehere else we'll be able to get rid of that class.
 	*/
 
-	class CFontManager : public CCommonManager <list <CFont*> >, public CTSingleton <CFontManager>
+	class CFontManager : public CCommonManager <list <CFont*> >
 	{
 	public:
 		void Init();
@@ -554,6 +556,8 @@ namespace Deku2d
 		CFont *DefaultFont;
 	};
 
+	static CTSingleton<CFontManager> FontManager;
+
 	/**
 	*	CRenderManager - some monster which definitely can't be eliminated.
 	*	Manages all stuff for drawing stuff. Traverse tree, applying transformations,
@@ -563,7 +567,7 @@ namespace Deku2d
 	class CText;
 	class CRenderableComponent;
 
-	class CRenderManager : /*public CCommonManager <std::vector <CRenderableComponent*> >,*/ public CTSingleton <CRenderManager>
+	class CRenderManager : public CObject /*, public CCommonManager <std::vector <CRenderableComponent*> >*/
 	{
 	protected:
 		CRenderManager();
@@ -598,11 +602,13 @@ namespace Deku2d
 		void SetSwapInterval(int interval = 1);
 	};
 
+	static CTSingleton<CRenderManager> RenderManager;
+
 	/**
 	* CGLWindow - a class that represents a GL window, is mostly used to create and resize it, and also holds video-mode-related things.
 	*/
 
-	class CGLWindow : public CTSingleton<CGLWindow>
+	class CGLWindow : public CObject
 	{
 	public:
 		struct WindowVideoParameters	// Where is fucking "C"? "struct" is deprecated by our docs. I missed this with variable, really.
@@ -657,8 +663,9 @@ namespace Deku2d
 		string Caption;
 		RGBAf BackgroundColor;
 		bool isCreated;
-
 	};
+
+	static CTSingleton<CGLWindow> GLWindow;
 
 	/**
 	*	CAbstractScene - common interface to Scene. There are two of them - Common Scene and
@@ -718,7 +725,7 @@ namespace Deku2d
 	*	CSceneManager
 	*/
 
-	class CSceneManager : CCommonManager <list<CScene*> >, public CTSingleton<CSceneManager>
+	class CSceneManager : CCommonManager <list<CScene*> >
 	{
 		friend class CTSingleton<CSceneManager>;
 	public:	
@@ -737,6 +744,8 @@ namespace Deku2d
 		~CSceneManager();
 		CSceneManager();
 	};
+
+	static CTSingleton<CSceneManager> SceneManager;
 
 }	//	namespace Deku2d
 

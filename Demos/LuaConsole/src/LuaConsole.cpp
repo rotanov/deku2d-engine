@@ -10,9 +10,9 @@ namespace Deku2d
 		int ConsoleWrite(lua_State *L)
 		{
 			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect argument given to ConsoleWrite API call");
+				LuaVirtualMachine->TriggerError("incorrect argument given to ConsoleWrite API call");
 
-			CFactory::Instance()->Get<CLuaConsole>("Lua Console")->WriteLine(lua_tostring(L, -1));
+			Factory->Get<CLuaConsole>("Lua Console")->WriteLine(lua_tostring(L, -1));
 			return 0;
 		}
 
@@ -22,26 +22,26 @@ namespace Deku2d
 
 CLuaConsole::CLuaConsole()
 {
-	CEventManager::Instance()->Subscribe("KeyDown", this);
+	EventManager->Subscribe("KeyDown", this);
 
-	CLuaVirtualMachine::Instance()->RegisterAPIFunction("ConsoleWrite", &LuaAPI::ConsoleWrite);
+	LuaVirtualMachine->RegisterAPIFunction("ConsoleWrite", &LuaAPI::ConsoleWrite);
 
-	MaxLines = (CGLWindow::Instance()->GetHeight() - 70) / 20; // ohlol.... need something like CFont::GetMaximumHeight()
+	MaxLines = (GLWindow->GetHeight() - 70) / 20; // ohlol.... need something like CFont::GetMaximumHeight()
 	CurLines = 0;
 
 	CommandHistory.push_front("");
 	CommandHistoryIterator = CommandHistory.begin();
 
-	//CommandLineEdit = CFactory::Instance()->New<CEdit>("CommandLineEdit");
-	//CommandLineEdit->SetBox(CBox(10, 30, CGLWindow::Instance()->GetWidth() - 20, 30));
+	//CommandLineEdit = Factory->New<CEdit>("CommandLineEdit");
+	//CommandLineEdit->SetBox(CBox(10, 30, GLWindow->GetWidth() - 20, 30));
 
-	CommandLineEdit = dynamic_cast<CGameObject *>(CFactory::Instance()->CreateByName("TempEdit", "CommandLineEdit"));
+	CommandLineEdit = dynamic_cast<CGameObject *>(Factory->CreateByName("TempEdit", "CommandLineEdit"));
 	CEngine::Instance()->RootGameObject->Attach(CommandLineEdit);
 
-	CommandOutput = CFactory::Instance()->New<CText>("CommandOutput");
+	CommandOutput = Factory->New<CText>("CommandOutput");
 
-	CPlaceableComponent *CommandOutputPlace = CFactory::Instance()->New<CPlaceableComponent>("CommandOutputPlace");
-	CommandOutputPlace->SetPosition(Vector2(10, CGLWindow::Instance()->GetHeight() - 20));
+	CPlaceableComponent *CommandOutputPlace = Factory->New<CPlaceableComponent>("CommandOutputPlace");
+	CommandOutputPlace->SetPosition(Vector2(10, GLWindow->GetHeight() - 20));
 
 	CommandOutputPlace->Attach(CommandOutput);
 	CEngine::Instance()->RootGameObject->Attach(CommandOutputPlace);
@@ -122,9 +122,9 @@ void CLuaConsole::Input(const string &AText)
 	CommandHistoryIterator = CommandHistory.begin();
 
 	WriteLine(AText);
-	if (!CLuaVirtualMachine::Instance()->RunString(AText))
+	if (!LuaVirtualMachine->RunString(AText))
 	{
-		WriteLine(CLuaVirtualMachine::Instance()->GetLastError());
+		WriteLine(LuaVirtualMachine->GetLastError());
 	}
 	WritePrompt();
 	dynamic_cast<CText *>(CommandLineEdit->GetChild(0)->GetChild(0)->GetChild(0)->GetChild(0))->SetText("");

@@ -8,8 +8,8 @@ namespace Deku2d
 
 	CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 	{
-		PutIntoScene(CSceneManager::Instance()->GetCurrentScene());
-		CEventManager::Instance()->Subscribe("Create", this);
+		PutIntoScene(SceneManager->GetCurrentScene());
+		EventManager->Subscribe("Create", this);
 	}
 
 	CGameObject::~CGameObject()
@@ -22,7 +22,7 @@ namespace Deku2d
 
 		SetParent(NULL);
 
-		CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
+		LuaVirtualMachine->DestroyLuaObject(*this);
 	}
 
 	CGameObject* CGameObject::Clone(const string &ACloneName /*= ""*/) const
@@ -139,8 +139,8 @@ namespace Deku2d
 
 				// i already hate this isFinalizing kludge, but the following call segfaults at finalizing time without it..
 				// may be we will get rid of it when we have some cool memory managers, etc., but now i leave it as is..
-				if (!CEngine::Instance()->isFinalizing() && CLuaVirtualMachine::Instance()->IsMethodFunctionExists(GetName(), "OnDetached"))
-					CLuaVirtualMachine::Instance()->CallMethodFunction(GetName(), "OnDetached");
+				if (!CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnDetached"))
+					LuaVirtualMachine->CallMethodFunction(GetName(), "OnDetached");
 			}
 		}
 
@@ -152,8 +152,8 @@ namespace Deku2d
 			{
 				Parent->Children.push_back(this);
 
-				if (!CEngine::Instance()->isFinalizing() && CLuaVirtualMachine::Instance()->IsMethodFunctionExists(GetName(), "OnAttached"))
-					CLuaVirtualMachine::Instance()->CallMethodFunction(GetName(), "OnAttached");
+				if (!CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnAttached"))
+					LuaVirtualMachine->CallMethodFunction(GetName(), "OnAttached");
 			}
 		}
 
@@ -245,13 +245,13 @@ namespace Deku2d
 
 		if (AXML->HasAttribute("Script"))
 		{
-			SetScript(CFactory::Instance()->Get<CScript>(AXML->GetAttribute("Script")));
+			SetScript(Factory->Get<CScript>(AXML->GetAttribute("Script")));
 		}
 	}
 
 	void CGameObject::FinalizeCreation()
 	{
-		CLuaVirtualMachine::Instance()->SetLocalNamesFields(this);
+		LuaVirtualMachine->SetLocalNamesFields(this);
 		UpdateParentAndProtoFields();
 		Created = true;
 	}
@@ -259,7 +259,7 @@ namespace Deku2d
 	void CGameObject::ProcessEvent(const CEvent &AEvent)
 	{
 		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
-		CLuaVirtualMachine::Instance()->PushEventTable(AEvent);
+		LuaVirtualMachine->PushEventTable(AEvent);
 		fc.SetArgumentsCount(1);
 		fc.Call();
 	}
@@ -273,13 +273,13 @@ namespace Deku2d
 	{
 		Script = AScript;
 
-		CLuaVirtualMachine::Instance()->DestroyLuaObject(*this);
-		CLuaVirtualMachine::Instance()->RunScript(AScript);
+		LuaVirtualMachine->DestroyLuaObject(*this);
+		LuaVirtualMachine->RunScript(AScript);
 		CreateLuaObject();
 
 		if (Created)
 		{
-			CLuaVirtualMachine::Instance()->SetLocalNamesFields(this);
+			LuaVirtualMachine->SetLocalNamesFields(this);
 			UpdateParentAndProtoFields();
 		}
 	}
@@ -312,7 +312,7 @@ namespace Deku2d
 		Enabled = true;
 
 		PutIntoScene(Scene);
-		CEventManager::Instance()->Subscribe("Create", this);
+		EventManager->Subscribe("Create", this);
 		Script = AGameObject.Script;
 	}
 
@@ -341,21 +341,21 @@ namespace Deku2d
 		for (ChildrenIterator it = Children.begin(); it != Children.end(); ++it)
 			(*it)->UpdateParentAndProtoFields();
 
-		CLuaVirtualMachine::Instance()->SetReferenceField(this, "parent", Parent);
+		LuaVirtualMachine->SetReferenceField(this, "parent", Parent);
 
 		CGameObject *proto = FindPrototype();
-		CLuaVirtualMachine::Instance()->SetReferenceField(this, "proto", proto);
+		LuaVirtualMachine->SetReferenceField(this, "proto", proto);
 
 		CGameObject *ParentProto = NULL;
 		if (proto)
 			ParentProto = proto->FindPrototype();
-		CLuaVirtualMachine::Instance()->SetReferenceField(this, "parentProto", ParentProto);
+		LuaVirtualMachine->SetReferenceField(this, "parentProto", ParentProto);
 	}
 
 	void CGameObject::CreateLuaObject()
 	{
-		if (!CLuaVirtualMachine::Instance()->IsObjectExists(Name))
-			CLuaVirtualMachine::Instance()->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
+		if (!LuaVirtualMachine->IsObjectExists(Name))
+			LuaVirtualMachine->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -638,7 +638,7 @@ namespace Deku2d
 				EModelType ModelType = MODEL_TYPE_LINES;
 				if (AXML->HasAttribute("ModelType"))
 					ModelType = CRenderManager::SelectModelTypeByStringIdentifier(AXML->GetAttribute("ModelType"));
-				SetModel(CRenderManager::Instance()->CreateModelCircle(Radius, ModelType, Precision));
+				SetModel(RenderManager->CreateModelCircle(Radius, ModelType, Precision));
 			}
 			else if (ModelName == "Box")
 			{
@@ -649,7 +649,7 @@ namespace Deku2d
 					Height = from_string<float>(AXML->GetAttribute("Height"));
 				CTexture *Texture = NULL;
 				if (AXML->HasAttribute("Texture"))
-					Texture = CFactory::Instance()->Get<CTexture>(AXML->GetAttribute("Texture"));
+					Texture = Factory->Get<CTexture>(AXML->GetAttribute("Texture"));
 				Vector2Array<4> TexCoords;
 				if (Texture != NULL && AXML->HasAttribute("TexCoords"))
 				{
@@ -669,7 +669,7 @@ namespace Deku2d
 				if (AXML->HasAttribute("ModelType"))
 					ModelType = CRenderManager::SelectModelTypeByStringIdentifier(AXML->GetAttribute("ModelType"));
 
-				SetModel(CRenderManager::Instance()->CreateModelBox(Width, Height, ModelType, Texture, TexCoords));
+				SetModel(RenderManager->CreateModelBox(Width, Height, ModelType, Texture, TexCoords));
 				
 			}
 			else if (ModelName == "Line")
@@ -690,7 +690,7 @@ namespace Deku2d
 					else
 						Log("WARNING", "Attribute 'Points' has improper format");
 				}
-				SetModel(CRenderManager::Instance()->CreateModelLine(p0, p1));
+				SetModel(RenderManager->CreateModelLine(p0, p1));
 			}
 			else if (ModelName == "Line loop" && AXML->HasAttribute("Points"))
 			{
@@ -705,12 +705,12 @@ namespace Deku2d
 					Vertices[i + 1] = Vector2(from_string<float>(tokens[(i + 2) % tokens.size()]), from_string<float>(tokens[(i + 3) % tokens.size()]));
 				}
 				CModel *LinesModel = new CModel(MODEL_TYPE_LINES, 0, (tokens.size() / 2) * 2, Vertices);
-				CFactory::Instance()->Add(LinesModel);
+				Factory->Add(LinesModel);
 				LinesModel->DisableLoading();
 				SetModel(LinesModel);
 			}
 			else
-				SetModel(CFactory::Instance()->Get<CModel>(ModelName));
+				SetModel(Factory->Get<CModel>(ModelName));
 		}
 
 		if (AXML->HasAttribute("Visible"))
@@ -792,13 +792,13 @@ namespace Deku2d
 	//////////////////////////////////////////////////////////////////////////
 	// CText
 
-	CText::CText() : Font(CFontManager::Instance()->GetDefaultFont())
+	CText::CText() : Font(FontManager->GetDefaultFont())
 	{	
 		assert(Font != NULL);
 		SetText("");
 	}
 
-	CText::CText(const string &AText) : Font(CFontManager::Instance()->GetDefaultFont())
+	CText::CText(const string &AText) : Font(FontManager->GetDefaultFont())
 	{
 		assert(Font != NULL);
 		SetText(Characters);
@@ -876,7 +876,7 @@ namespace Deku2d
 		}
 		if (AXML->HasAttribute("Font"))
 		{
-			SetFont(CFactory::Instance()->Get<CFont>(AXML->GetAttribute("Font")));
+			SetFont(Factory->Get<CFont>(AXML->GetAttribute("Font")));
 		}
 	}
 
@@ -920,7 +920,7 @@ namespace Deku2d
 			{
 				CEvent *TimerTickEvent = new CEvent("TimerTick", this);
 				TimerTickEvent->SetData("Name", GetName());
-				CEventManager::Instance()->TriggerEvent(TimerTickEvent);
+				EventManager->TriggerEvent(TimerTickEvent);
 				Accumulated = 0.0f;
 			}
 		}
@@ -935,9 +935,9 @@ namespace Deku2d
 	{
 		Enabled = AEnabled;
 		if (Enabled)
-			CEventManager::Instance()->Subscribe("EveryFrame", this);
+			EventManager->Subscribe("EveryFrame", this);
 		else
-			CEventManager::Instance()->Unsubscribe("EveryFrame", this);
+			EventManager->Unsubscribe("EveryFrame", this);
 
 		Accumulated = 0.0f;
 	}

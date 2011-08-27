@@ -36,10 +36,10 @@ public:
 	CRenderableComponent *Visual;
 	CLiveBox() : TTL(0.0f), Accumulated(0.0f)
 	{
-		CEventManager::Instance()->Subscribe("EveryFrame", this);
-		this->Attach(Placing = CFactory::Instance()->New<CPlaceableComponent>());
-		Placing->Attach(Visual = CFactory::Instance()->New<CRenderableComponent>());
-		Visual->SetModel(CRenderManager::Instance()->CreateModelBox(1.0f, 1.0f, MODEL_TYPE_TRIANGLES));
+		EventManager->Subscribe("EveryFrame", this);
+		this->Attach(Placing = Factory->New<CPlaceableComponent>());
+		Placing->Attach(Visual = Factory->New<CRenderableComponent>());
+		Visual->SetModel(RenderManager->CreateModelBox(1.0f, 1.0f, MODEL_TYPE_TRIANGLES));
 	}
 	void ProcessEvent(const CEvent &AEvent)
 	{
@@ -54,9 +54,6 @@ public:
 
 class CGridGame : public CGameObject
 {
-private:
-	CEventManager *EventManager;
-	CFactory *Factory;
 private:
 	class CCellSelection
 	{

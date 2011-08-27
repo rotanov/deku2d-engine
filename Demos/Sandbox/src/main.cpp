@@ -23,24 +23,24 @@ class CTest : public Deku2d::CGameObject
 public:
 	CTest()
 	{
-		Deku2d::CEventManager::Instance()->Subscribe("KeyDown", this);
+		Deku2d::EventManager->Subscribe("KeyDown", this);
 	}
 
 	void ProcessEvent(const Deku2d::CEvent &AEvent)
 	{
 		if (AEvent.GetName() == "KeyDown" && AEvent.GetData<Uint16>("Sym") == SDLK_SPACE)
 		{
-			if (Deku2d::CGLWindow::Instance()->GetFullscreen())
+			if (Deku2d::GLWindow->GetFullscreen())
 			{
-				Deku2d::CGLWindow::Instance()->SetFullscreen(false);
-				Deku2d::CGLWindow::Instance()->SetSize(640, 480);
-				Deku2d::CGLWindow::Instance()->Initialize();
+				Deku2d::GLWindow->SetFullscreen(false);
+				Deku2d::GLWindow->SetSize(640, 480);
+				Deku2d::GLWindow->Initialize();
 			}
 			else
 			{
-				/*CGLWindow::Instance()->SetSize(2048, 1152);
-				CGLWindow::Instance()->SetFullscreen(true);*/
- 				Deku2d::CGLWindow::Instance()->SetVideoMode(Deku2d::CGLWindow::Instance()->GetDesktopVideoMode());
+				/*GLWindow->SetSize(2048, 1152);
+				GLWindow->SetFullscreen(true);*/
+ 				Deku2d::GLWindow->SetVideoMode(Deku2d::GLWindow->GetDesktopVideoMode());
 			}
 		}
 	}
@@ -56,12 +56,12 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	Deku2d::CAbstractScene *NewScene = Deku2d::CSceneManager::Instance()->CreateScene();
-	Deku2d::CSceneManager::Instance()->SetCurrentScene(NewScene);
-	Deku2d::CLuaVirtualMachine::Instance()->RunScript(Deku2d::CFactory::Instance()->Get<Deku2d::CScript>(Deku2d::CConfig::Instance()->Section("Data")["InitScript"]));
-	Deku2d::CEngine::Instance()->RootGameObject->Attach(Deku2d::CFactory::Instance()->New<CTest>("SetSizeTest"));
-	//CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("Iggy"), 0, -1);
-	Deku2d::CSoundMixer::Instance()->SetMusicVolume(128);
+	Deku2d::CAbstractScene *NewScene = Deku2d::SceneManager->CreateScene();
+	Deku2d::SceneManager->SetCurrentScene(NewScene);
+	Deku2d::LuaVirtualMachine->RunScript(Deku2d::Factory->Get<Deku2d::CScript>(Deku2d::Config->Section("Data")["InitScript"]));
+	Deku2d::CEngine::Instance()->RootGameObject->Attach(Deku2d::Factory->New<CTest>("SetSizeTest"));
+	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
+	Deku2d::SoundMixer->SetMusicVolume(128);
 	return true;
 }
 

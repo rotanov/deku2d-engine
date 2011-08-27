@@ -7,10 +7,10 @@ class CRotatingQuad : public CRenderableComponent
 public:
 	CRotatingQuad()
 	{
-		CEventManager::Instance()->Subscribe("EveryFrame", this);
+		EventManager->Subscribe("EveryFrame", this);
 		SetBlendingMode(BLEND_MODE_OPAQUE);
-		float ScrWidth = CGLWindow::Instance()->GetWidth();
-		float ScrHeight = CGLWindow::Instance()->GetHeight();
+		float ScrWidth = GLWindow->GetWidth();
+		float ScrHeight = GLWindow->GetHeight();
 		int Width_d2 = Random_Int(5, 10);
 		int Height_d2 = Random_Int(5, 10);
 		float x = Random_Float(Width_d2, ScrWidth - Width_d2);
@@ -19,7 +19,7 @@ public:
 		CBox b(Vector2(-Width_d2, -Height_d2), Vector2(Width_d2, Height_d2));
 		SetColor(RGBAf(Random_Float(0.0f, 1.0f), Random_Float(0.0f, 1.0f), Random_Float(0.0f, 1.0f), 1.0f));
 		SetModel(CRenderManager::CreateModelBox(b.Width(), b.Height(), MODEL_TYPE_TRIANGLES));
-		Place = CFactory::Instance()->New<CPlaceableComponent>("");
+		Place = Factory->New<CPlaceableComponent>("");
 		Place->SetPosition(Vector2(x, y));
 		Place->SetLayer(-1);
 		Place->Attach(this);
@@ -46,21 +46,21 @@ public:
 	int RectangleCount;
 	CRectangleTest()
 	{
-		CounterText = CFactory::Instance()->New<CText>();
+		CounterText = Factory->New<CText>();
 		RectangleCount = 0;
-		CEventManager::Instance()->Subscribe("KeyPress", this);
-		if (CCommandLineArgumentsManager::Instance()->IsOptionExists("rectangles"))
+		EventManager->Subscribe("KeyPress", this);
+		if (CommandLineArgumentsManager->IsOptionExists("rectangles"))
 		{
-			RectangleCount = stoi(CCommandLineArgumentsManager::Instance()->GetOption("rectangles"));
+			RectangleCount = stoi(CommandLineArgumentsManager->GetOption("rectangles"));
 			for (int i = 0; i < RectangleCount; i++)
-				CFactory::Instance()->New<CRotatingQuad>("");
-				//CEngine::Instance()->RootGameObject->Attach(CFactory::Instance()->New<CRotatingQuad>(""));
+				Factory->New<CRotatingQuad>("");
+				//CEngine::Instance()->RootGameObject->Attach(Factory->New<CRotatingQuad>(""));
 		}
 		else
 		{
 			RectangleCount = 0;
 		}
-		CPlaceableComponent *TextPlace = CFactory::Instance()->New<CPlaceableComponent>("TextPlace");
+		CPlaceableComponent *TextPlace = Factory->New<CPlaceableComponent>("TextPlace");
 		TextPlace->Attach(CounterText);
 		CounterText->SetText("Rectangles count: " + itos(RectangleCount));
 		TextPlace->SetLayer(1);
@@ -73,7 +73,7 @@ public:
 		if (AEvent.GetName() == "KeyPress" && AEvent.GetData<Uint16>("Sym") == SDLK_UP)
 		{
 			//for(int i = 0; i < 43000; i++)
-			CFactory::Instance()->New<CRotatingQuad>("");
+			Factory->New<CRotatingQuad>("");
 			//CounterText.SetText("Rectangles count: " + itos(RectangleCount += 43000));
 			CounterText->SetText("Rectangles count: " + itos(RectangleCount += 1));
 		}
@@ -89,7 +89,7 @@ public:
 
 bool CCustomStateHandler::OnArgumentsProcessing()
 {
-	if (!CCommandLineArgumentsManager::Instance()->RegisterOption("rectangles"))
+	if (!CommandLineArgumentsManager->RegisterOption("rectangles"))
 		return false;
 
 	return true;
@@ -98,7 +98,7 @@ bool CCustomStateHandler::OnArgumentsProcessing()
 bool CCustomStateHandler::OnInitialize()
 {
 	CEngine::Instance()->SetDoKeyRepeat(true);
-	CFactory::Instance()->New<CRectangleTest>("Rectangle test");
+	Factory->New<CRectangleTest>("Rectangle test");
 	return true;
 }
 

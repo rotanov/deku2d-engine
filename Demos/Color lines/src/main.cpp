@@ -10,11 +10,11 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	CGLWindow::Instance()->SetBackgroundColor(RGBAf(0.2f, 0.2f, 0.2f, 1.0f));
- 	CAbstractScene *NewScene = CSceneManager::Instance()->CreateScene();
- 	CSceneManager::Instance()->SetCurrentScene(NewScene);
-//	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
-	CGridGame * GridGame = CFactory::Instance()->New<CGridGame>("GridGame");
+	GLWindow->SetBackgroundColor(RGBAf(0.2f, 0.2f, 0.2f, 1.0f));
+ 	CAbstractScene *NewScene = SceneManager->CreateScene();
+ 	SceneManager->SetCurrentScene(NewScene);
+//	LuaVirtualMachine->RunScript(Factory->Get<CScript>(Config->Section("Data")["InitScript"]));
+	CGridGame * GridGame = Factory->New<CGridGame>("GridGame");
 	return true;
 }
 

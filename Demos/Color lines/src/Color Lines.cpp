@@ -19,24 +19,16 @@ enum EPossibleDirections	// Constants for filled lines processing
 
 //////////////////////////////////////////////////////////////////////////
 // CGridGame
-CGridGame::CGridGame() : EventManager(NULL), Factory(NULL)
+CGridGame::CGridGame()
 {
-	EventManager = CEventManager::Instance();
-	Factory = CFactory::Instance();
-	if (Factory == NULL || EventManager == NULL)
-	{
-		CEngine::Instance()->ShutDown();
-		return;
-	}
-
-	CGLWindow::Instance()->Resize(320, 340);
+	GLWindow->Resize(320, 340);
 
 	Grid = static_cast<CGameObject*>(Factory->CreateByName("GridProto", "LinesGrid"));
 	CEngine::Instance()->RootGameObject->Attach(Grid);
 
 	static_cast<CRenderableComponent*>(Grid->GetChild(0)->GetChild(0))->SetColor(RGBAf(.6f, 0.6f, 0.8f, 1.0f));
 	static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetScaling(static_cast<float>(CELL_SIZE));
-	GridPos = CGLWindow::Instance()->GetSize() * 0.5f - Vector2(CELLS_COUNT * CELL_SIZE / 2, CELLS_COUNT * CELL_SIZE / 2);
+	GridPos = GLWindow->GetSize() * 0.5f - Vector2(CELLS_COUNT * CELL_SIZE / 2, CELLS_COUNT * CELL_SIZE / 2);
 	static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetPosition(GridPos);
 
 	EventManager->Subscribe("MouseDown", this);
@@ -75,7 +67,7 @@ void CGridGame::ProcessEvent( const CEvent &AEvent )
 {
 	if (AEvent.GetName() == "WindowResize")
 	{
-		GridPos = CGLWindow::Instance()->GetSize() * 0.5f - 
+		GridPos = GLWindow->GetSize() * 0.5f - 
 			Vector2(CELLS_COUNT * CELL_SIZE / 2, CELLS_COUNT* CELL_SIZE / 2);
 		static_cast<CPlaceableComponent*>(Grid->GetChild(0))->SetPosition(GridPos);	
 		return;
@@ -449,7 +441,7 @@ bool CGridGame::CCell::isClear()
 
 void CGridGame::CCell::MakeVisualPart()
 {
-	VisualPart = static_cast<CGameObject*>(CFactory::Instance()->CreateByName("BallProto", ""));
+	VisualPart = static_cast<CGameObject*>(Factory->CreateByName("BallProto", ""));
 	static_cast<CPlaceableComponent*>(VisualPart->GetChild(0))->SetPosition
 		(
 			Vector2

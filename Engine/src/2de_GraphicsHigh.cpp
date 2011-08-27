@@ -66,7 +66,7 @@ namespace Deku2d
 				Emission = 0;
 			if (Age <= 0.0f && ParticlesActive == 0)
 			{
-				CFactory::Instance()->Destroy(this);
+				Factory->Destroy(this);
 				return;
 			}
 		}

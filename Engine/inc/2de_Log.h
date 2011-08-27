@@ -10,7 +10,7 @@ namespace Deku2d
 	* CLog - a class for logging.
 	*/
 
-	class CLog : public CTSingleton<CLog>
+	class CLog : public CObject
 	{
 	public:
 		enum ELogMode
@@ -79,11 +79,13 @@ namespace Deku2d
 		char LogStr[MAX_LOG_STR_LENGTH];
 	};
 
+	static CTSingleton<CLog> SLog;
+
 	// #define SIMPLIFIED_LOG // to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
 	#ifdef SIMPLIFIED_LOG
 		#define Log Environment::LogToStdOut
 	#else
-		#define Log CLog::Instance()->WriteToLog
+		#define Log SLog->WriteToLog
 	#endif // SIMPLIFIED_LOG
 
 }	//	namespace Deku2d

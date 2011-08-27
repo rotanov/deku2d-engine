@@ -50,7 +50,7 @@ namespace Deku2d
 	* CSoundManager - sound samples resource manager.
 	*/
 
-	class CSoundManager : public CCommonManager <list <CSound*> >, public CTSingleton <CSoundManager>
+	class CSoundManager : public CCommonManager <list <CSound*> >
 	{
 	public:
 		CSound* GetSoundByName(const string &SoundName);
@@ -60,11 +60,13 @@ namespace Deku2d
 		friend class CTSingleton <CSoundManager>;
 	};
 
+	static CTSingleton<CSoundManager> SoundManager;
+
 	/**
 	* CMusicManager - music resource manager.
 	*/
 
-	class CMusicManager : public CCommonManager <list <CMusic*> >, public CTSingleton <CMusicManager>
+	class CMusicManager : public CCommonManager <list <CMusic*> >
 	{
 	public:
 		CMusic* GetMusicByName(const string &MusicName);
@@ -73,6 +75,8 @@ namespace Deku2d
 		CMusicManager();
 		friend class CTSingleton <CMusicManager>;
 	};
+
+	static CTSingleton<CMusicManager> MusicManager;
 
 	/**
 	* CSoundMixer - sound mixer, that is responsible for initialization/deinitialization of sound system and playing sounds and music.
@@ -87,7 +91,7 @@ namespace Deku2d
 	};
 
 
-	class CSoundMixer : public CTSingleton<CSoundMixer>
+	class CSoundMixer : public CObject
 	{
 	public:
 		bool PlaySound(CSound *Sound, int Time = -1);
@@ -121,6 +125,8 @@ namespace Deku2d
 		friend void SoundMixerHooks::OnMusicFinished();
 		friend void SoundMixerHooks::OnSoundFinished(int AChannel);
 	};
+
+	static CTSingleton<CSoundMixer> SoundMixer;
 
 }	//	namespace Deku2d
 

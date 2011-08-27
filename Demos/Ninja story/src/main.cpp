@@ -16,8 +16,8 @@ class CTempKeyBindMan : public CObject
 public:
 	CTempKeyBindMan()
 	{
-		CEventManager::Instance()->Subscribe("KeyDown", this);
-		CEventManager::Instance()->Subscribe("KeyUp", this);
+		EventManager->Subscribe("KeyDown", this);
+		EventManager->Subscribe("KeyUp", this);
 	}
 	void ProcessEvent(const CEvent &AEvent)
 	{
@@ -27,19 +27,19 @@ public:
 			switch (key)
 			{
 			case SDLK_z:
-				CEventManager::Instance()->TriggerEvent("Jump", this);
+				EventManager->TriggerEvent("Jump", this);
 				break;
 			case SDLK_LEFT:
-				CEventManager::Instance()->TriggerEvent("PlayerMoveLeft", this);
+				EventManager->TriggerEvent("PlayerMoveLeft", this);
 				break;
 			case SDLK_RIGHT:
-				CEventManager::Instance()->TriggerEvent("PlayerMoveRight", this);
+				EventManager->TriggerEvent("PlayerMoveRight", this);
 				break;
 			case SDLK_UP:
-				CEventManager::Instance()->TriggerEvent("PlayerMoveUp", this);
+				EventManager->TriggerEvent("PlayerMoveUp", this);
 				break;
 			case SDLK_DOWN:
-				CEventManager::Instance()->TriggerEvent("PlayerMoveDown", this);
+				EventManager->TriggerEvent("PlayerMoveDown", this);
 				break;
 			}
 
@@ -51,11 +51,11 @@ public:
 			{
 			case SDLK_w:
 			case SDLK_s:
-				CEventManager::Instance()->TriggerEvent("PlayerOneStop", this);
+				EventManager->TriggerEvent("PlayerOneStop", this);
 				break;
 			case SDLK_UP:
 			case SDLK_DOWN:
-				CEventManager::Instance()->TriggerEvent("PlayerTwoStop", this);
+				EventManager->TriggerEvent("PlayerTwoStop", this);
 				break;
 			}
 		}
@@ -67,24 +67,24 @@ public:
 bool CCustomStateHandler::OnInitialize()
 {
 
-	CTempKeyBindMan *tkbm = CFactory::Instance()->New<CTempKeyBindMan>("TempKeyBindMan");
+	CTempKeyBindMan *tkbm = Factory->New<CTempKeyBindMan>("TempKeyBindMan");
 	//CNinjaStoryGame *NinjaStoryGame = new CNinjaStoryGame();
-// 	CAbstractScene *SomeNewScene = CSceneManager::Instance()->CreateScene();
-// 	CSceneManager::Instance()->SetCurrentScene(SomeNewScene);
+// 	CAbstractScene *SomeNewScene = SceneManager->CreateScene();
+// 	SceneManager->SetCurrentScene(SomeNewScene);
 
 	CRenderableComponent *PlayerR = new CRenderableComponent(CRenderManager::CreateModelBox(32, 64));
 
-	CGameObject *PlayerScriptable = CFactory::Instance()->New<CGameObject>("PlayerOneScriptable");
+	CGameObject *PlayerScriptable = Factory->New<CGameObject>("PlayerOneScriptable");
 	
-	PlayerScriptable->SetScript(CFactory::Instance()->Get<CScript>("Player"));
+	PlayerScriptable->SetScript(Factory->Get<CScript>("Player"));
 
-//	CScriptableComponent *PongGame = new CScriptableComponent(CFactory::Instance()->Get<CScript>("PongGameScript"));
+//	CScriptableComponent *PongGame = new CScriptableComponent(Factory->Get<CScript>("PongGameScript"));
 
-	CFactory::Instance()->Add(PlayerR, "PlayerOne");
-	//CFactory::Instance()->Add(PlayerScriptable, "PlayerOneScriptable");
-//	CFactory::Instance()->Add(PongGame, "PongGame");
+	Factory->Add(PlayerR, "PlayerOne");
+	//Factory->Add(PlayerScriptable, "PlayerOneScriptable");
+//	Factory->Add(PongGame, "PongGame");
 
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
+	LuaVirtualMachine->RunScript(Factory->Get<CScript>(Config->Section("Data")["InitScript"]));
 
 
 	return true;

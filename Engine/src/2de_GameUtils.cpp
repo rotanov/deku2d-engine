@@ -10,13 +10,13 @@ namespace Deku2d
 
 	CTileset::CTileset() : TileWidth(0), TileHeight(0), HorNumTiles(0), VerNumTiles(0), BBox(NULL), Texture(NULL)
 	{
-		CTileSetManager::Instance()->Add(this);
+		TileSetManager->Add(this);
 	}
 
 	CTileset::~CTileset()
 	{
 		Unload();
-		CTileSetManager::Instance()->Remove(this);
+		TileSetManager->Remove(this);
 	}
 
 	bool CTileset::Load()
@@ -53,7 +53,7 @@ namespace Deku2d
 		string TextureName;
 		storage->ReadString(TextureName);
 
-		Texture = CTextureManager::Instance()->Get(TextureName);
+		Texture = TextureManager->Get(TextureName);
 		Texture->CheckLoad();
 
 		storage->Read(&TileWidth, sizeof(TileWidth));
@@ -147,7 +147,7 @@ namespace Deku2d
 
 	void CTileset::SetTexture(const string &TextureName)
 	{
-		Texture = CTextureManager::Instance()->Get(TextureName);
+		Texture = TextureManager->Get(TextureName);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -172,18 +172,18 @@ namespace Deku2d
 
 	CDefaultTitleScreen::CDefaultTitleScreen()
 	{
-		TextDeku = CFactory::Instance()->New<CText>();
-		TextTeam = CFactory::Instance()->New<CText>();
+		TextDeku = Factory->New<CText>();
+		TextTeam = Factory->New<CText>();
 
-		CEventManager::Instance()->Subscribe("WindowResize", this);
-		CPlaceableComponent *tempPlacing = CFactory::Instance()->New<CPlaceableComponent>();
-		int ScrWidth = CGLWindow::Instance()->GetWidth();
-		int ScrHeight = CGLWindow::Instance()->GetHeight();
+		EventManager->Subscribe("WindowResize", this);
+		CPlaceableComponent *tempPlacing = Factory->New<CPlaceableComponent>();
+		int ScrWidth = GLWindow->GetWidth();
+		int ScrHeight = GLWindow->GetHeight();
 		tempPlacing->SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
 		CEngine::Instance()->RootGameObject->Attach(tempPlacing);
 		tempPlacing->Attach(this);
-		CPlaceableComponent *DekuTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
-		CPlaceableComponent *TeamTextPlacing = CFactory::Instance()->New<CPlaceableComponent>();
+		CPlaceableComponent *DekuTextPlacing = Factory->New<CPlaceableComponent>();
+		CPlaceableComponent *TeamTextPlacing = Factory->New<CPlaceableComponent>();
 		tempPlacing->Attach(DekuTextPlacing);
 		tempPlacing->Attach(TeamTextPlacing);
 		DekuTextPlacing->Attach(TextDeku);
@@ -207,7 +207,7 @@ namespace Deku2d
 		if (AEvent.GetName() != "WindowResize")
 			return;
 		if (this->GetParent() != NULL)
-			static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(CGLWindow::Instance()->GetSize() * 0.5f);
+			static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(GLWindow->GetSize() * 0.5f);
 	}
 
 }	//	namespace Deku2d

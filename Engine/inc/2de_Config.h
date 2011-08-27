@@ -93,7 +93,7 @@ namespace Deku2d
 	* CConfig - класс, представляющий собой главную конфигурацию движка.
 	*/
 
-	class CConfig : public CTSingleton<CConfig>
+	class CConfig : public CObject
 	{
 	public:
 		class CConfigParameter
@@ -166,6 +166,8 @@ namespace Deku2d
 		friend class CTSingleton<CConfig>;
 	};
 
+	static CTSingleton<CConfig> Config;
+
 	enum ECommandLineArgumentType
 	{
 		COMMAND_LINE_ARGUMENT_TYPE_SHORT_OPTION,
@@ -190,7 +192,7 @@ namespace Deku2d
 	* CCommandLineArgumentsManager - менеджер аргументов коммандной строки. Разбивает аргументы на лексемы и предоставляет к ним доступ.
 	*/
 
-	class CCommandLineArgumentsManager : public CTSingleton<CCommandLineArgumentsManager>
+	class CCommandLineArgumentsManager : public CObject
 	{
 	public:
 		typedef list<CCommandLineArgument> ArgumentsStorage;
@@ -232,6 +234,8 @@ namespace Deku2d
 		friend class CTSingleton<CCommandLineArgumentsManager>;
 	};
 
+	static CTSingleton<CCommandLineArgumentsManager> CommandLineArgumentsManager;
+
 	struct CArgumentsConfigMapping
 	{
 		CArgumentsConfigMapping(const string &AArgumentLongName, char AArgumentShortName, const string &ASection, const string &AParameter, bool AOption);
@@ -249,7 +253,7 @@ namespace Deku2d
 	* CArgumentsConfigMappingsManager - менеджер отображений из аргументов командной строки в конфигурационные парамеры.
 	*/
 
-	class CArgumentsConfigMappingsManager : public CTSingleton<CArgumentsConfigMappingsManager>
+	class CArgumentsConfigMappingsManager : public CObject
 	{
 	public:
 		typedef list<CArgumentsConfigMapping> MappingsStorage;
@@ -267,6 +271,8 @@ namespace Deku2d
 
 		friend class CTSingleton<CArgumentsConfigMappingsManager>;
 	};
+
+	static CTSingleton<CArgumentsConfigMappingsManager> ArgumentsConfigMappingsManager;
 
 }	//	namespace Deku2d
 

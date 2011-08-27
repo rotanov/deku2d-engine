@@ -34,7 +34,7 @@ namespace Deku2d
 	CObject::~CObject()
 	{
 		if (!CEngine::Instance()->isFinalizing())
-			CEventManager::Instance()->UnsubscribeFromAll(this);
+			EventManager->UnsubscribeFromAll(this);
 	}
 
 	string CObject::GetName() const
@@ -68,7 +68,7 @@ namespace Deku2d
 			return;
 
 		if (Managed)
-			CFactory::Instance()->Destroy(this);
+			Factory->Destroy(this);
 		else
 			Destroyed = true;
 	}

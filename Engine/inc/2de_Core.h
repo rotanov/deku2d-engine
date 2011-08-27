@@ -522,38 +522,40 @@ namespace Deku2d
 
 
 	/**
-	 * CTSingleton - singleton template class with automatic deletion using CSingletonManager.
+	 * CTSingleton - singleton template class with automatic deletion using CSingletonManager. Acts like a singleton holder.
 	 *
-	 * To use it just inherit a class from it as follows:
-	 * 	class CSomeClass : public CTSingleton<CSomeClass>
+	 * To use it just create a static instance of this class as follows:
+	 * 
+	 * 	class CSomeClass
 	 * 	{
 	 * 	public:
 	 * 		<...>
 	 * 	private:
 	 * 		<...>
 	 *	protected:
-	 *		friend class CTSingleton<CSomeClass>;
+	 *		friend class CTSingleton<CSomeClass>;	// <-- don't forget it
 	 *		CSomeClass() { }
 	 * 	};
+	 *
+	 * 	static CTSingleton<CSomeClass> SomeClass;
+	 *
+	 * Now you can acces your singletoned class with -> operator, like this:
+	 * 	SomeClass->SomeMethod();
+	 *
 	 *
 	 * @todo: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
 	 *	@todo: переделать всё это, как_у_александреску.
 	 */
 
 	template <typename T>
-	class CTSingleton : public virtual CObject
+	class CTSingleton
 	{
 	public:
 		static T* Instance();
 
-	protected:
-		CTSingleton()
+		T* operator->()
 		{
-		}
-
-		virtual ~CTSingleton()
-		{
-			_instance = 0;
+			return Instance();
 		}
 
 	private:

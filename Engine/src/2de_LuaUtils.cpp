@@ -16,8 +16,8 @@ namespace Deku2d
 		int Create(lua_State *L)
 		{
 			if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Create API call");
-			CGameObject* GameObject = dynamic_cast<CGameObject*>(CFactory::Instance()->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
+				LuaVirtualMachine->TriggerError("incorrect arguments given to Create API call");
+			CGameObject* GameObject = dynamic_cast<CGameObject*>(Factory->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
 			if (GameObject)
 				lua_getglobal(L, GameObject->GetName().c_str());
 			else
@@ -30,9 +30,9 @@ namespace Deku2d
 		int GetObject(lua_State *L)
 		{
 			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetObject API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to GetObject API call");
 
-			lua_pushlightuserdata(L, CFactory::Instance()->Get<CObject>(lua_tostring(L, -1)));
+			lua_pushlightuserdata(L, Factory->Get<CObject>(lua_tostring(L, -1)));
 			return 1;
 		}
 
@@ -41,9 +41,9 @@ namespace Deku2d
 		{
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Destroy API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in Destroy API call");
 
-			CFactory::Instance()->Destroy(obj);
+			Factory->Destroy(obj);
 			return 0;
 		}
 
@@ -51,7 +51,7 @@ namespace Deku2d
 		{
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in DestroySubtree API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in DestroySubtree API call");
 			obj->SetDestroyedSubtree();
 			return 0;
 		}
@@ -61,7 +61,7 @@ namespace Deku2d
 		{
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Clone API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in Clone API call");
 
 			lua_pushlightuserdata(L, obj->Clone());
 			return 1;
@@ -72,7 +72,7 @@ namespace Deku2d
 		{
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in CloneTree API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in CloneTree API call");
 
 
 			lua_pushlightuserdata(L, obj->CloneTree());
@@ -84,7 +84,7 @@ namespace Deku2d
 		{
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetName API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetName API call");
 
 			lua_pushstring(L, obj->GetName().c_str());
 			return 1;
@@ -95,7 +95,7 @@ namespace Deku2d
 		{
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetParent API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetParent API call");
 
 			lua_pushlightuserdata(L, obj->GetParent());
 			return 1;
@@ -107,14 +107,14 @@ namespace Deku2d
 		{
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -2));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetChild API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetChild API call");
 
 			if (!lua_isnumber(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetChild API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to GetChild API call");
 
 			int ChildIndex = lua_tonumber(L, -1);
 			if (ChildIndex >= obj->GetChildCount())
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to GetChild API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to GetChild API call");
 
 			lua_pushlightuserdata(L, obj->GetChild(ChildIndex));
 			return 1;
@@ -125,10 +125,10 @@ namespace Deku2d
 		{
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -3));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in FindFirstOfClass API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in FindFirstOfClass API call");
 		
 			if (!lua_isstring(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to FindFirstOfClass API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to FindFirstOfClass API call");
 
 			lua_pushlightuserdata(L, obj->FindFirstOfClass(lua_tostring(L, -2), lua_toboolean(L, -1)));
 			return 1;
@@ -140,11 +140,11 @@ namespace Deku2d
 			CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
 			GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -2));
 			if (!GameObjectDestination)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in Attach API call");
 
 			GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -1));
 			if (!GameObjectSource)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Attach API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in Attach API call");
 
 			GameObjectDestination->Attach(GameObjectSource);
 			return 0;
@@ -156,11 +156,11 @@ namespace Deku2d
 			CGameObject *GameObjectSource = NULL, *GameObjectDestination = NULL;
 			GameObjectDestination = static_cast<CGameObject *>(lua_touserdata(L, -2));
 			if (!GameObjectDestination)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Detach API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in Detach API call");
 
 			GameObjectSource = static_cast<CGameObject *>(lua_touserdata(L, -1));
 			if (!GameObjectSource)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in Detach API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in Detach API call");
 
 			GameObjectDestination->Detach(GameObjectSource);
 			return 0;
@@ -170,7 +170,7 @@ namespace Deku2d
 		int WriteToLog(lua_State *L)
 		{
 			if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Log API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to Log API call");
 
 			Log(lua_tostring(L, -2), lua_tostring(L, -1));
 			return 0;
@@ -188,7 +188,7 @@ namespace Deku2d
 		{
 			CText *text = static_cast< CText *>(lua_touserdata(L, -1));
 			if (!CheckType(text))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetText API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetText API call");
 
 			lua_pushstring(L, text->GetText().c_str());
 			return 1;
@@ -200,10 +200,10 @@ namespace Deku2d
 		{
 			CText *text = static_cast<CText *>(lua_touserdata(L, -2));
 			if (!CheckType(text))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetText API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetText API call");
 
 			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetText API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetText API call");
 
 			text->SetText(lua_tostring(L, -1));
 
@@ -215,11 +215,11 @@ namespace Deku2d
 		{
 			CText *text = static_cast<CText *>(lua_touserdata(L, -2));
 			if (!CheckType(text))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetTextFont API call");
 		
 			CFont *font = static_cast<CFont *>(lua_touserdata(L, -1));
 			if (!CheckType(font))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTextFont API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetTextFont API call");
 
 			text->SetFont(font);
 			return 0;
@@ -231,7 +231,7 @@ namespace Deku2d
 			CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
 			if (!CheckType(obj))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetPosition API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetPosition API call");
 			}
 
 			lua_pushnumber(L, obj->GetPosition().x);
@@ -243,12 +243,12 @@ namespace Deku2d
 		int SetPosition(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetPosition API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetPosition API call");
 
 			CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -3));
 			if (!CheckType(obj))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetPosition API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetPosition API call");
 				return 0;
 			}
 
@@ -262,7 +262,7 @@ namespace Deku2d
 			CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
 			if (!CheckType(obj))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetBox API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetBox API call");
 			}
 
 			CLuaFunctionCall fc3("CBox", 1);
@@ -290,7 +290,7 @@ namespace Deku2d
 			CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -1));
 			if (!CheckType(obj))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in GetAngle API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetAngle API call");
 			}
 
 			lua_pushnumber(L, obj->GetAngle());
@@ -301,12 +301,12 @@ namespace Deku2d
 		int SetAngle(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetAngle API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetAngle API call");
 
 			CPlaceableComponent *obj = static_cast<CPlaceableComponent *>(lua_touserdata(L, -2));
 			if (!CheckType(obj))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetAngle API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetAngle API call");
 				return 0;
 			}
 
@@ -318,13 +318,13 @@ namespace Deku2d
 		int SetColor(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2) || !lua_isnumber(L, -3) || !lua_isnumber(L, -4))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetColor API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetColor API call");
 
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -5));
 			CRenderableComponent *rcobj = dynamic_cast<CRenderableComponent *>(obj);
 			if (rcobj == NULL)
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetColor API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetColor API call");
 				return 0;
 			}
 
@@ -338,14 +338,14 @@ namespace Deku2d
 			CGameObject *ScriptableComponent = static_cast<CGameObject *>(lua_touserdata(L, -2));
 			if (!CheckType(ScriptableComponent))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetScript API call");
 				return 0;
 			}
 
 			CScript *Script = static_cast<CScript *>(lua_touserdata(L, -1));
 			if (!CheckType(Script))
 			{
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetScript API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetScript API call");
 				return 0;
 			}
 
@@ -356,22 +356,22 @@ namespace Deku2d
 		// number GetWindowWidth()
 		int GetWindowWidth(lua_State *L)
 		{
-			lua_pushnumber(L, CGLWindow::Instance()->GetWidth());
+			lua_pushnumber(L, GLWindow->GetWidth());
 			return 1;
 		}
 
 		// number GetWindowHeight()
 		int GetWindowHeight(lua_State *L)
 		{
-			lua_pushnumber(L, CGLWindow::Instance()->GetHeight());
+			lua_pushnumber(L, GLWindow->GetHeight());
 			return 1;
 		}
 
 		// (number, number) GetWindowDimensions()
 		int GetWindowDimensions(lua_State *L)
 		{
-			lua_pushnumber(L, CGLWindow::Instance()->GetWidth());
-			lua_pushnumber(L, CGLWindow::Instance()->GetHeight());
+			lua_pushnumber(L, GLWindow->GetWidth());
+			lua_pushnumber(L, GLWindow->GetHeight());
 			return 2;
 		}
 
@@ -379,11 +379,11 @@ namespace Deku2d
 		int SetClassName(lua_State *L)
 		{
 			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetClassName API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetClassName API call");
 
 			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -2));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetClassName API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetClassName API call");
 
 			obj->SetClassName(lua_tostring(L, -1));
 
@@ -394,11 +394,11 @@ namespace Deku2d
 		int SetInterval(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetInterval API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetInterval API call");
 
 			CTimerComponent *obj = static_cast<CTimerComponent *>(lua_touserdata(L, -2));
 			if (!CheckType(obj))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetInterval API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetInterval API call");
 
 			obj->SetInterval(lua_tonumber(L, -1));
 		}
@@ -407,11 +407,11 @@ namespace Deku2d
 		int SetTimerEnabled(lua_State *L)
 		{
 			if (!lua_isboolean(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SetTimerEnabled API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SetTimerEnabled API call");
 
 			CTimerComponent *obj = static_cast<CTimerComponent *>(lua_touserdata(L, -2));
 			if (!CheckType(obj))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SetTimerEnabled API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetTimerEnabled API call");
 
 			obj->SetEnabled(lua_toboolean(L, -1));
 		}
@@ -420,13 +420,13 @@ namespace Deku2d
 		int SubscribeToEvent(lua_State *L)
 		{
 			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to SubscribeToEvent API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to SubscribeToEvent API call");
 
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -2));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in SubscribeToEvent API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SubscribeToEvent API call");
 
-			CEventManager::Instance()->Subscribe(lua_tostring(L, -1), obj);
+			EventManager->Subscribe(lua_tostring(L, -1), obj);
 
 			return 0;
 		}
@@ -435,13 +435,13 @@ namespace Deku2d
 		int UnsubscribeFromEvent(lua_State *L)
 		{
 			if (!lua_isstring(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to UnsubscribeFromEvent API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to UnsubscribeFromEvent API call");
 
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1));
 			if (!obj)
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect usage of light user data in UnsubscribeFromEvent API call");
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in UnsubscribeFromEvent API call");
 
-			CEventManager::Instance()->Unsubscribe(lua_tostring(L, -2), obj);
+			EventManager->Unsubscribe(lua_tostring(L, -2), obj);
 
 			return 0;
 		}
@@ -452,7 +452,7 @@ namespace Deku2d
 			bool gotEventData = lua_istable(L, -1);
 
 			if (!lua_isstring(L, -2 - gotEventData))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to TriggerEvent API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to TriggerEvent API call");
 
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1 - gotEventData));
 
@@ -467,7 +467,7 @@ namespace Deku2d
 				}
 
 			}
-			CEventManager::Instance()->TriggerEvent(e);
+			EventManager->TriggerEvent(e);
 
 			return 0;
 		}
@@ -476,7 +476,7 @@ namespace Deku2d
 		int sin(lua_State *L)	// WHAT?! Lua cannot into sin() or what? // having multiple implementations (C++ and Lua) of the same functions can generally lead to some troubles.. it's VERY unlikely, though, but who knows?..
 		{
 			if (!lua_isnumber(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to sin API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to sin API call");
 
 			lua_pushnumber(L, ::sin(lua_tonumber(L, -1)));
 			return 1;
@@ -486,7 +486,7 @@ namespace Deku2d
 		int cos(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to cos API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to cos API call");
 
 			lua_pushnumber(L, ::cos(lua_tonumber(L, -1)));
 			return 1;
@@ -496,7 +496,7 @@ namespace Deku2d
 		int Abs(lua_State *L)	// same as above
 		{
 			if (!lua_isnumber(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Abs API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to Abs API call");
 
 			lua_pushnumber(L, ::std::fabs(lua_tonumber(L, -1)));
 			return 1;
@@ -506,7 +506,7 @@ namespace Deku2d
 		int Random_Int(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Int API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to Random_Int API call");
 
 			lua_pushnumber(L, RandomRange<int>(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 			return 1;
@@ -517,7 +517,7 @@ namespace Deku2d
 		int Random_Float(lua_State *L)
 		{
 			if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to Random_Float API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to Random_Float API call");
 
 			lua_pushnumber(L, RandomRange<float>(lua_tonumber(L, -2), lua_tonumber(L, -1)));
 			return 1;
@@ -526,7 +526,7 @@ namespace Deku2d
 		// number GetMemoryUsage()
 		int GetMemoryUsage(lua_State *L)
 		{
-			lua_pushnumber(L, CLuaVirtualMachine::Instance()->GetMemoryUsage());
+			lua_pushnumber(L, LuaVirtualMachine->GetMemoryUsage());
 			return 1;
 		}
 
@@ -575,7 +575,7 @@ namespace Deku2d
 
 			CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
 			consoleOutputEvent->SetData("Text", out.c_str());
-			CEventManager::Instance()->TriggerEvent(consoleOutputEvent);
+			EventManager->TriggerEvent(consoleOutputEvent);
 
 			nesting++;
 			for (unsigned i = 0; i < GO->GetChildCount(); i++)
@@ -599,11 +599,11 @@ namespace Deku2d
 		int ConsoleOutput(lua_State *L)
 		{
 			if (!lua_isstring(L, -1))
-				CLuaVirtualMachine::Instance()->TriggerError("incorrect arguments given to ConsoleOutput API call");
+				LuaVirtualMachine->TriggerError("incorrect arguments given to ConsoleOutput API call");
 
 			CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
 			consoleOutputEvent->SetData("Text", lua_tostring(L, -1));
-			CEventManager::Instance()->TriggerEvent(consoleOutputEvent);
+			EventManager->TriggerEvent(consoleOutputEvent);
 
 			return 0;
 		}
@@ -684,7 +684,7 @@ namespace Deku2d
 			return;
 		}
 
-		string scriptsPath = Environment::Paths::GetWorkingDirectory() + "/" + CResourceManager::Instance()->GetDataPath() + "/Scripts/";
+		string scriptsPath = Environment::Paths::GetWorkingDirectory() + "/" + ResourceManager->GetDataPath() + "/Scripts/";
 		lua_getglobal(L, "package");
 		lua_getfield(L, -1, "path");
 		lua_pushstring(L, (";" + scriptsPath + "?.lua").c_str() );
@@ -1044,7 +1044,7 @@ namespace Deku2d
 		CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
 		consoleOutputEvent->SetData("Text", AError);
 		consoleOutputEvent->SetData("Type", "Error");
-		CEventManager::Instance()->TriggerEvent(consoleOutputEvent);
+		EventManager->TriggerEvent(consoleOutputEvent);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1053,7 +1053,7 @@ namespace Deku2d
 	CLuaFunctionCall::CLuaFunctionCall(const string &AFunctionName, int AResultsCount /*= 0*/) : FunctionName(AFunctionName), ArgumentsCount(0),
 		ResultsCount(AResultsCount), Called(false), Broken(false), MethodCall(false)
 	{
-		L = CLuaVirtualMachine::Instance()->L;
+		L = LuaVirtualMachine->L;
 		if (!L)
 		{
 			Broken = true;
@@ -1074,7 +1074,7 @@ namespace Deku2d
 	CLuaFunctionCall::CLuaFunctionCall(const string &AObjectName, const string &AFunctionName, int AResultsCount /*= 0*/) : ObjectName(AObjectName),
 		FunctionName(AFunctionName), ResultsCount(AResultsCount), ArgumentsCount(0), Called(false), Broken(false), MethodCall(true)
 	{
-		L = CLuaVirtualMachine::Instance()->L;
+		L = LuaVirtualMachine->L;
 		if (!L)
 		{
 			Broken = true;
@@ -1121,7 +1121,7 @@ namespace Deku2d
 		Called = true;
 		if (lua_pcall(L, MethodCall ? ArgumentsCount + 1 : ArgumentsCount, ResultsCount, 0) != 0)
 		{
-			CLuaVirtualMachine::Instance()->OutputError(lua_tostring(L, -1));
+			LuaVirtualMachine->OutputError(lua_tostring(L, -1));
 			return false;
 		}
 		return true;

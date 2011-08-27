@@ -39,7 +39,7 @@ namespace Deku2d
 	};
 
 
-	class CEventManager : public CTSingleton<CEventManager>
+	class CEventManager : public CObject
 	{
 	public:
 		void Subscribe(const string &AEventName, CObject *Subscriber);
@@ -62,6 +62,8 @@ namespace Deku2d
 
 		friend class CTSingleton<CEventManager>;
 	};
+
+	static CTSingleton<CEventManager> EventManager;
 
 
 	template<typename T>

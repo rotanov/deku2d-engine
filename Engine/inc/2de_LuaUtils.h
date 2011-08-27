@@ -32,7 +32,7 @@ namespace Deku2d
 	*
 	* Registers engine Lua API functions, and allows running Lua-scripts by filename, resource pointer or from string.
 	*/
-	class CLuaVirtualMachine : public CTSingleton<CLuaVirtualMachine>
+	class CLuaVirtualMachine : public CObject
 	{
 	public:
 		bool RunFile(const string &AFilename);
@@ -72,6 +72,8 @@ namespace Deku2d
 		friend class CTSingleton<CLuaVirtualMachine>;
 		friend class CLuaFunctionCall;
 	};
+
+	static CTSingleton<CLuaVirtualMachine> LuaVirtualMachine;
 
 	class CLuaFunctionCall
 	{

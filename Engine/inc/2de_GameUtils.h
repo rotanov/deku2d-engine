@@ -40,7 +40,7 @@ namespace Deku2d
 
 	};
 
-	class CTileSetManager : public CCommonManager <list <CTileset*> >/*public CList*/, public CTSingleton<CTileSetManager>
+	class CTileSetManager : public CCommonManager <list <CTileset*> >
 	{
 	public:
 		CTileset* GetTileset(const string &ATilesetName);
@@ -49,6 +49,8 @@ namespace Deku2d
 		CTileSetManager();
 		friend class CTSingleton<CTileSetManager>;
 	};
+
+	static CTSingleton<CTileSetManager> TileSetManager;
 
 	struct CMapCellInfo
 	{

@@ -84,7 +84,7 @@ namespace Deku2d
 		{
 			CEvent *logOutputEvent = new CEvent("LogOutput", this);
 			logOutputEvent->SetData("Text", message);
-			CEventManager::Instance()->TriggerEvent(logOutputEvent);
+			EventManager->TriggerEvent(logOutputEvent);
 		}
 	}
 

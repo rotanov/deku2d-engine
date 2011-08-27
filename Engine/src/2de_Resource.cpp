@@ -251,7 +251,7 @@ namespace Deku2d
 
 	bool CResourceManager::LoadResources()
 	{
-		ResourceList = DataLister.List(DataPath, CConfig::Instance()->Section("Data")["ForceReindex"]);
+		ResourceList = DataLister.List(DataPath, Config->Section("Data")["ForceReindex"]);
 
 		for (list<CResourceSectionLoaderBase *>::iterator it = SectionsLoaders.begin(); it != SectionsLoaders.end(); ++it)
 		{
@@ -284,7 +284,7 @@ namespace Deku2d
 		for (set<CResource *>::iterator it = UnloadQueue.begin(); it != UnloadQueue.end(); ++it)
 		{
 			if ((*it)->GetLoadSource() == CResource::LOAD_SOURCE_DISABLED)
-				CFactory::Instance()->Destroy(*it);
+				Factory->Destroy(*it);
 			else
 				(*it)->Unload(); 
 		}
@@ -318,7 +318,7 @@ namespace Deku2d
 	CResourceManager::CResourceManager() : SinceLastUnload(0.0f), AutoUnloadInterval(15.0f)
 	{
 		SetName("ResourceManager");
-		CEventManager::Instance()->Subscribe("EveryFrame", this);
+		EventManager->Subscribe("EveryFrame", this);
 	}
 
 	CResourceManager::~CResourceManager()

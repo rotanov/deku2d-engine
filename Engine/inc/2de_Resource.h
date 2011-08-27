@@ -168,7 +168,7 @@ namespace Deku2d
 	* CResourceManager - resources manager.
 	*/
 
-	class CResourceManager : public CTSingleton<CResourceManager>
+	class CResourceManager : public CObject
 	{
 	public:
 		bool LoadResources();
@@ -205,6 +205,8 @@ namespace Deku2d
 		float AutoUnloadInterval;
 	};
 
+	static CTSingleton<CResourceManager> ResourceManager;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Templates implementations
@@ -230,7 +232,7 @@ namespace Deku2d
 		CXMLNode *ResNode = NULL;
 		string ResName;
 
-		CFactory *Factory = CFactory::Instance();
+		CFactory *FactoryI = Factory.Instance();
 		CResource *Resource = NULL;
 
 		for (CXMLNode::ChildrenIterator it = section->Children.Begin(); it != section->Children.End(); ++it)
@@ -247,7 +249,7 @@ namespace Deku2d
 
 			ResName = ResNode->GetAttribute("name");
 
-			Resource = Factory->New<T>(ResName);
+			Resource = FactoryI->New<T>(ResName);
 			if (Resource == NULL)
 			{
 				Log("WARNING", "Error loading resource: '%s'", ResName.c_str());
@@ -307,7 +309,7 @@ namespace Deku2d
 			Pointer->RefCount--;
 			if (!Pointer->isPersistent() && Pointer->RefCount == 0)
 			{
-				CResourceManager::Instance()->AddToUnloadQueue(Pointer);
+				ResourceManager->AddToUnloadQueue(Pointer);
 			}
 		}
 
@@ -317,7 +319,7 @@ namespace Deku2d
 		{
 			if (Pointer->RefCount == 0)
 			{
-				CResourceManager::Instance()->RemoveFromUnloadQueue(Pointer);
+				ResourceManager->RemoveFromUnloadQueue(Pointer);
 			}
 			Pointer->RefCount++;
 		}

@@ -10,13 +10,13 @@ class CSoundObject : public CObject
 public:
 	CSoundObject()
 	{
-		CEventManager::Instance()->Subscribe("KeyDown", this);
-		CEventManager::Instance()->Subscribe("ButtonClick", this);
+		EventManager->Subscribe("KeyDown", this);
+		EventManager->Subscribe("ButtonClick", this);
 
-		VolumeLabel = CFactory::Instance()->New<CLabel>("VolumeLabel");
+		VolumeLabel = Factory->New<CLabel>("VolumeLabel");
 		VolumeLabel->SetBox(CBox(530, 270, 100, 32));
 
-		Volume = CSoundMixer::Instance()->GetMusicVolume();
+		Volume = SoundMixer->GetMusicVolume();
 		UpdateVolumeLabel();
 	}
 
@@ -29,17 +29,17 @@ public:
 			switch (key)
 			{
 			case SDLK_q:
-				CSoundMixer::Instance()->PlaySound(CSoundManager::Instance()->GetSoundByName("chord"));
+				SoundMixer->PlaySound(SoundManager->GetSoundByName("chord"));
 				break;
 			case SDLK_w:
-				CSoundMixer::Instance()->StopAllSound();
+				SoundMixer->StopAllSound();
 				break;
 
 			case SDLK_a:
-				CSoundMixer::Instance()->PlayMusic(CMusicManager::Instance()->GetMusicByName("bender1"));
+				SoundMixer->PlayMusic(MusicManager->GetMusicByName("bender1"));
 				break;
 			case SDLK_s:
-				CSoundMixer::Instance()->StopMusic();
+				SoundMixer->StopMusic();
 				break;
 
 			case SDLK_z:
@@ -48,7 +48,7 @@ public:
 					Volume--;
 					UpdateVolumeLabel();
 				}
-				CSoundMixer::Instance()->SetMusicVolume(Volume);
+				SoundMixer->SetMusicVolume(Volume);
 				break;
 			case SDLK_x:
 				if (Volume < MIX_MAX_VOLUME)
@@ -56,7 +56,7 @@ public:
 					Volume++;
 					UpdateVolumeLabel();
 				}
-				CSoundMixer::Instance()->SetMusicVolume(Volume);
+				SoundMixer->SetMusicVolume(Volume);
 				break;
 			}
 		}
@@ -64,8 +64,8 @@ public:
 		{
 			if (AEvent.GetSender()->GetName() == "LoadFileButton")
 			{
-				string test = CFactory::Instance()->Get<CEdit>("FileNameEdit")->GetText();
-				CMusic *mus = CFactory::Instance()->New<CMusic>(""); // WRONG, i think
+				string test = Factory->Get<CEdit>("FileNameEdit")->GetText();
+				CMusic *mus = Factory->New<CMusic>(""); // WRONG, i think
 											// i mean we should specify just name of music file, that already
 											// lies int the music folder
 											// 	i just wanted to play some music from filesystem, why not?..
@@ -73,7 +73,7 @@ public:
 											// 	but there are too few files in our Data/Music directory to properly test sound system..
 				mus->SetLoadSource(test);
 				mus->Load();
-				CSoundMixer::Instance()->PlayMusic(mus);
+				SoundMixer->PlayMusic(mus);
 			}
 		}
 	}
@@ -92,10 +92,10 @@ class CHelpText
 public:
 	CHelpText()
 	{
-		CText *HelpText = CFactory::Instance()->New<CText>("HelpText");
+		CText *HelpText = Factory->New<CText>("HelpText");
 		//  We can't set position to text, since placing is a separate component
 		//	So i commented it out
-		//	HelpText->SetPosition(Vector2(5.0f, CGLWindow::Instance()->GetHeight() - 260.0f));
+		//	HelpText->SetPosition(Vector2(5.0f, GLWindow->GetHeight() - 260.0f));
 		HelpText->SetText("Sound: q - play, w - stop\nMusic: a - play, s - stop\nMusic volume: z - down, x - up\n"
 			"You can try to enter file name and click Play\nto play it as music");
 		CEngine::Instance()->RootGameObject->Attach(HelpText);
@@ -107,12 +107,12 @@ class CLoadFileGUI : public CObject
 public:
 	CLoadFileGUI()
 	{
-		LoadFileButton = CFactory::Instance()->New<CButton>("LoadFileButton");
+		LoadFileButton = Factory->New<CButton>("LoadFileButton");
 		LoadFileButton->SetBox(CBox(400, 270, 100, 32));
 		LoadFileButton->SetText("Play");
 		CEngine::Instance()->RootGameObject->Attach(LoadFileButton);
 
-		FileNameEdit = CFactory::Instance()->New<CEdit>("FileNameEdit");
+		FileNameEdit = Factory->New<CEdit>("FileNameEdit");
 		FileNameEdit->SetBox(CBox(80, 270, 300, 32));
 		CEngine::Instance()->RootGameObject->Attach(FileNameEdit);
 	}

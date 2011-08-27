@@ -13,7 +13,7 @@ namespace Deku2d
 	* CFactory - oversees creation of any objects. The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
 	*/
 
-	class CFactory : public CTSingleton<CFactory>
+	class CFactory : public CObject
 	{
 	public:
 		typedef CObject* (CFactory::*TNewFunction)(const string &);
@@ -81,6 +81,8 @@ namespace Deku2d
 		map<string, CGameObject *> CachedProtos;
 
 	};
+
+	static CTSingleton<CFactory> Factory;
 
 	/**
 	* CFactory::New - creates managed object of specified class and returns pointer to it.

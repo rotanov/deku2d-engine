@@ -9,13 +9,13 @@ namespace Deku2d
 	{
 		Data = NULL;
 		SetName("CSound");
-		CSoundManager::Instance()->Add(this);
+		SoundManager->Add(this);
 	}
 
 	CSound::~CSound()
 	{
 		Unload();
-		CSoundManager::Instance()->Remove(this);
+		SoundManager->Remove(this);
 	}
 
 	bool CSound::Load()
@@ -87,13 +87,13 @@ namespace Deku2d
 	{
 		Data = NULL;
 		SetName("CMusic");
-		CMusicManager::Instance()->Add(this);
+		MusicManager->Add(this);
 	}
 
 	CMusic::~CMusic()
 	{
 		Unload();
-		CMusicManager::Instance()->Remove(this);
+		MusicManager->Remove(this);
 	}
 
 	bool CMusic::Load()
@@ -202,13 +202,13 @@ namespace Deku2d
 
 	void OnMusicFinished()
 	{
-		CSoundMixer::Instance()->CurrentMusic = NULL;
+		SoundMixer->CurrentMusic = NULL;
 		Mix_HookMusicFinished(NULL);
 	}
 
 	void OnSoundFinished(int AChannel)
 	{
-		CSoundMixer::Instance()->CurrentSounds.erase(AChannel);
+		SoundMixer->CurrentSounds.erase(AChannel);
 		Mix_ChannelFinished(NULL);
 	}
 

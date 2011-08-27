@@ -142,7 +142,7 @@ void CTank::Render()
 // 	glRotatef(Angle, 0.0f, 0.0f, -1.0f);
 // 	glTranslatef(-Position.x - 16, -Position.y - 16, 0.0f);
 	SetLayer(2);
-	CRenderManager::Instance()->DrawTexturedBox(this, CBox(V2_ZERO, Vector2(32.0f, 32.0f)), Tileset->GetTexture(), Tileset->GetCellTC(csTank));
+	RenderManager->DrawTexturedBox(this, CBox(V2_ZERO, Vector2(32.0f, 32.0f)), Tileset->GetTexture(), Tileset->GetCellTC(csTank));
 
 //Draw bullets
 //Tileset->GetTexture()	
@@ -214,7 +214,7 @@ void CTankManager::Render()
 {
 //	glLoadIdentity();
 //	gSetBlendingMode();	
-	CFont *Font = CFontManager::Instance()->GetFont("Font");
+	CFont *Font = FontManager->GetFont("Font");
 	return;
 }
 
@@ -247,7 +247,7 @@ void CTankMap::Render()
 		{
 			//if (Cells[j][i].TileIndex == csBlock || Cells[j][i].TileIndex  == csDestr || Cells[j][i].TileIndex  == csFree1)
 			{
-				CRenderManager::Instance()->DrawTexturedBox(this, CBox(Vector2(i, j) * CellSize, Vector2(i+1, j+1) * CellSize),
+				RenderManager->DrawTexturedBox(this, CBox(Vector2(i, j) * CellSize, Vector2(i+1, j+1) * CellSize),
 					Tileset->GetTexture(), Tileset->GetCellTC(Cells[j][i].TileIndex));
 			}
 		}

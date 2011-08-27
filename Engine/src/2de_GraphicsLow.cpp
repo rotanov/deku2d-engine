@@ -40,7 +40,7 @@ namespace Deku2d
 
 		void VisitOnEnter(CRenderableComponent &Graphics)
 		{
-			CRenderManager::Instance()->Renderer->PushModel(Graphics.WorldTransform,
+			RenderManager->Renderer->PushModel(Graphics.WorldTransform,
 				&Graphics.GetConfiguration(), Graphics.GetModel());
 		}
 
@@ -51,7 +51,7 @@ namespace Deku2d
 
 		void VisitOnEnter(CDebugBoxComponent &DebugBox)
 		{
-			CRenderManager::Instance()->Renderer->PushModel(DebugBox.WorldTransform,
+			RenderManager->Renderer->PushModel(DebugBox.WorldTransform,
 				&DebugBox.GetConfiguration(), DebugBox.GetModel());
 		}
 		void VisitOnLeave(CDebugBoxComponent &DebugBox)
@@ -68,14 +68,14 @@ namespace Deku2d
 
 		void VisitOnEnter(CPlaceableComponent &Placing)
 		{
-			if (!Placing.isDestroyed() && CSceneManager::Instance()->InScope(Placing.GetScene()))
+			if (!Placing.isDestroyed() && SceneManager->InScope(Placing.GetScene()))
 			{
-				CRenderManager::Instance()->Transformator.PushTransformation(Placing.GetTransformation());
+				RenderManager->Transformator.PushTransformation(Placing.GetTransformation());
 				Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
 					std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
 			}
 			Placing.SetActive(true);
-			if (Placing.isDestroyed() || !CSceneManager::Instance()->InScope(Placing.GetScene()))
+			if (Placing.isDestroyed() || !SceneManager->InScope(Placing.GetScene()))
 				Placing.SetActive(false);
 			if (Placing.IsActive())
 				LPPStack.push(&Placing);
@@ -88,7 +88,7 @@ namespace Deku2d
 			assert(&Placing == LPPStack.top());
 			CBox newBox = Placing.GetBox();
 			LPPStack.pop();
-			CRenderManager::Instance()->Transformator.PopTransformation();
+			RenderManager->Transformator.PopTransformation();
 			if (LPPStack.size() > 0)
 			{
 				LPPStack.top()->UpdateBox(newBox);
@@ -98,15 +98,15 @@ namespace Deku2d
 		void VisitOnEnter(CRenderableComponent &Graphics)
 		{
 			if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
-					CSceneManager::Instance()->InScope(Graphics.GetScene()))
+					SceneManager->InScope(Graphics.GetScene()))
 			{
 				Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
 					std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
-				Graphics.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+				Graphics.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
 			}
 			Graphics.SetActive(true);
-			// if (/*!Graphics.GetVisibility() ||*/ Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
-			if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !CSceneManager::Instance()->InScope(Graphics.GetScene()))
+			// if (/*!Graphics.GetVisibility() ||*/ Graphics.isDestroyed() || !SceneManager->InScope(Graphics.GetScene()))
+			if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !SceneManager->InScope(Graphics.GetScene()))
 				Graphics.SetActive(false);
 		}
 
@@ -124,12 +124,12 @@ namespace Deku2d
 		void VisitOnEnter(CDebugBoxComponent &DebugBox)
 		{
 			if (DebugBox.GetVisibility() && !DebugBox.isDestroyed() &&
-				CSceneManager::Instance()->InScope(DebugBox.GetScene()))
+				SceneManager->InScope(DebugBox.GetScene()))
 			{
-				DebugBox.WorldTransform = CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+				DebugBox.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
 			}
 			DebugBox.SetActive(true);
-			if (!DebugBox.GetVisibility() || DebugBox.isDestroyed() || !CSceneManager::Instance()->InScope(DebugBox.GetScene()))
+			if (!DebugBox.GetVisibility() || DebugBox.isDestroyed() || !SceneManager->InScope(DebugBox.GetScene()))
 				DebugBox.SetActive(false);
 		}
 
@@ -253,7 +253,7 @@ namespace Deku2d
 	bool CGLWindow::Initialize()
 	{
 		if (isCreated)
-			CTextureManager::Instance()->UnloadTextures();
+			TextureManager->UnloadTextures();
 
 		int flags = SDL_OPENGL | SDL_RESIZABLE | (NewParameters.isFullscreen * SDL_FULLSCREEN);	// | SDL_NOFRAME;
 
@@ -318,7 +318,7 @@ namespace Deku2d
 
 		GLInit();
 
-		CEventManager::Instance()->TriggerEvent(new CEvent("WindowResize", NULL));
+		EventManager->TriggerEvent(new CEvent("WindowResize", NULL));
 
 		return isCreated = true;
 	}
@@ -346,7 +346,7 @@ namespace Deku2d
 		glDepthFunc(GL_LEQUAL);
 		glClearDepth(1.0);
 
-		CRenderManager::Instance()->SetSwapInterval(0);
+		RenderManager->SetSwapInterval(0);
 
 		//	glEnable(GL_BLEND);
 		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	//(GL_SRC_ALPHA,GL_ONE)
@@ -457,13 +457,13 @@ namespace Deku2d
 
 	CFont::CFont() : Distance(1.0f)// Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение.// Пользователь потом сам попроавит, если надо.
 	{
-		CFontManager::Instance()->Add(this);
+		FontManager->Add(this);
 	}
 
 	CFont::~CFont()
 	{
 		Unload();
-		CFontManager::Instance()->Remove(this);
+		FontManager->Remove(this);
 	}
 
 	bool CFont::Load()
@@ -501,7 +501,7 @@ namespace Deku2d
 		string FontImageName;
 		storage->ReadString(FontImageName);
 
-		Texture = CFactory::Instance()->Get<CTexture>(FontImageName);
+		Texture = Factory->Get<CTexture>(FontImageName);
 		if (Texture == NULL)
 		{
 			Log("ERROR", "Can't load font: font texture is NULL");
@@ -616,7 +616,7 @@ namespace Deku2d
 
 	void CFont::SetTexture(const string &TextureName)
 	{
-		Texture = CTextureManager::Instance()->Get(TextureName);
+		Texture = TextureManager->Get(TextureName);
 	}
 
 	CBox CFont::GetSymbolsBBOX()
@@ -670,8 +670,8 @@ namespace Deku2d
 	void CCamera::Assign(float *x, float *y)
 	{
 		CEngine* engine = CEngine::Instance();  // too mush routines // укоротить
-		h = CGLWindow::Instance()->GetHeight();
-		w = CGLWindow::Instance()->GetWidth();
+		h = GLWindow->GetHeight();
+		w = GLWindow->GetWidth();
 		//engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &h);
 		//engine->GetState(CEngine::STATE_SCREEN_HEIGHT, &w); // OMG, HEIGHT to w? is it intentionally or accidentally? damn it, i don't know..
 
@@ -744,7 +744,7 @@ namespace Deku2d
 		Point = p = v = Const::Math::V2_ZERO;
 		Atx = Aty = NULL;
 		Assigned = false;
-		SetWidthAndHeight(CGLWindow::Instance()->GetWidth(), CGLWindow::Instance()->GetHeight());
+		SetWidthAndHeight(GLWindow->GetWidth(), GLWindow->GetHeight());
 	}
 
 	void CCamera::SetWidthAndHeight(int AWidth, int AHeight)
@@ -850,7 +850,7 @@ namespace Deku2d
 			dx += Font->Boxes[RText[i] - 32].Width() + 1; // FIXME: magic number (1) - horizontal spacing
 		}
 		CModel *Model = new CModel(MODEL_TYPE_TRIANGLES, AText->GetFont()->GetTexture(), 6 * AText->Length(), Vertices, TexCoords);
-		CFactory::Instance()->Add(Model);
+		Factory->Add(Model);
 		Model->DisableLoading();
 		delete [] Vertices;
 		delete [] TexCoords;
@@ -879,7 +879,7 @@ namespace Deku2d
 	{
 		string identString = "Circle" + CRenderManager::StringIdentifierByModelType(AModelType) + "R" + to_string(Radius) + "P" + to_string(Precision);
 
-		CModel *Result = CFactory::Instance()->Get<CModel>(identString, false);
+		CModel *Result = Factory->Get<CModel>(identString, false);
 		if (Result != NULL)
 			return Result;
 
@@ -941,7 +941,7 @@ namespace Deku2d
 		}
 
 		Result = new CModel(AModelType, 0, NumberOfVertices, Vertices);
-		CFactory::Instance()->Add(Result, identString);
+		Factory->Add(Result, identString);
 		Result->DisableLoading();
 		SAFE_DELETE_ARRAY(Vertices);
 		return Result;
@@ -954,7 +954,7 @@ namespace Deku2d
 			tcIdent += "x" + to_string(ATexCoords[i].x) + "y" + to_string(ATexCoords[i].y);
 		string identString = "Box" + CRenderManager::StringIdentifierByModelType(AModelType) + (ATexture != NULL ? ATexture->GetName() : "NA") + "w" + to_string(Width) + "h" + to_string(Height) + tcIdent;
 
-		CModel *Result = CFactory::Instance()->Get<CModel>(identString, false);
+		CModel *Result = Factory->Get<CModel>(identString, false);
 		if (Result != NULL)
 			return Result;
 
@@ -976,7 +976,7 @@ namespace Deku2d
 				Vertices[6] = Vector2(-wd2,  hd2);
 				Vertices[7] = Vector2(-wd2, -hd2);
 				Result = new CModel(AModelType, 0, 8, Vertices);
-				CFactory::Instance()->Add(Result, identString);
+				Factory->Add(Result, identString);
 				Result->DisableLoading();
 			}
 			break;
@@ -1001,7 +1001,7 @@ namespace Deku2d
 				TexCoords[5] = ATexCoords[3];
 
 				Result = new CModel(AModelType, ATexture, 6, Vertices, TexCoords);
-				CFactory::Instance()->Add(Result, identString);
+				Factory->Add(Result, identString);
 				Result->DisableLoading();
 			}
 			break;
@@ -1015,7 +1015,7 @@ namespace Deku2d
 	{
 		string identString = "Line" + ( "x" + to_string(v0.x) ) + "y" + to_string(v0.y) + "x" + to_string(v1.x) + "y" + to_string(v1.y);
 
-		CModel *Result = CFactory::Instance()->Get<CModel>(identString, false);
+		CModel *Result = Factory->Get<CModel>(identString, false);
 		if (Result != NULL)
 			return Result;
 
@@ -1023,7 +1023,7 @@ namespace Deku2d
 		Vertices[0] = v0;
 		Vertices[1] = v1;
 		Result = new CModel(MODEL_TYPE_LINES, 0, 2, Vertices);
-		CFactory::Instance()->Add(Result, identString);
+		Factory->Add(Result, identString);
 		Result->DisableLoading();
 		return Result;
 	}
@@ -1072,7 +1072,7 @@ namespace Deku2d
 
 	void CFontManager::Init()
 	{
-		CTexture* DefaultFontTexture = CFactory::Instance()->New<CTexture>("DefaultFontTexture");
+		CTexture* DefaultFontTexture = Factory->New<CTexture>("DefaultFontTexture");
 		DefaultFontTexture->SetLoadSource(reinterpret_cast<unsigned char*>(Const::Graphics::BINARY_DATA_DEFAULT_FONT_TEXTURE),
 			Const::Graphics::BINARY_DATA_DEFAULT_FONT_TEXTURE_SIZE);
 		DefaultFontTexture->SetPersistent(true);
@@ -1080,7 +1080,7 @@ namespace Deku2d
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// wtf is it? incapsulate it please or whatever...
 		
-		DefaultFont = CFactory::Instance()->New<CFont>("DefaultFont");
+		DefaultFont = Factory->New<CFont>("DefaultFont");
 		DefaultFont->SetLoadSource(reinterpret_cast<unsigned char*>(Const::Graphics::BINARY_DATA_DEFAULT_FONT),
 			Const::Graphics::BINARY_DATA_DEFAULT_FONT_SIZE);
 		DefaultFont->SetPersistent(true);
@@ -1161,13 +1161,13 @@ namespace Deku2d
 	CTexture::CTexture() : TexID(0), doCleanData(true)
 	{
 		SetName("CTexture");
-		CTextureManager::Instance()->Add(this);
+		TextureManager->Add(this);
 	}
 
 	CTexture::~CTexture()
 	{
 		Unload();
-		CTextureManager::Instance()->Remove(this);
+		TextureManager->Remove(this);
 	}
 
 	bool CTexture::Load()
@@ -1246,7 +1246,7 @@ namespace Deku2d
 	void CScene::Add(CGameObject *AObject)
 	{
 		GameObjects.push_back(AObject);
-		//CRenderManager::Instance()->Add(AObject);
+		//RenderManager->Add(AObject);
 	}
 
 
@@ -1273,7 +1273,7 @@ namespace Deku2d
 
 	void CGlobalScene::Add(CGameObject *AObject)
 	{
-		//CRenderManager::Instance()->Add(AObject);
+		//RenderManager->Add(AObject);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1354,7 +1354,7 @@ namespace Deku2d
 			CVertexHolder<Vector3> * VertexHolder = texturedGeometry[Sender->GetBlendingMode()][AModel->GetTexture()];
 
 			Vector2 TempVector = Const::Math::V2_ZERO, Vertex = Const::Math::V2_ZERO;
-			CTransformation Transformation = ATransform; //CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+			CTransformation Transformation = ATransform; //RenderManager->Transformator.GetCurrentTransfomation();
 			for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 			{
 				Vertex = AModel->GetVertices()[i];
@@ -1365,8 +1365,8 @@ namespace Deku2d
 					if (!Equal(Transformation.GetAngle(), 0.0f))
 						TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 					TempVector += Transformation.GetTranslation();
-					if (!CRenderManager::Instance()->Transformator.doConsiderCamera) // BUG: doConsiderCamera used unitialized
-						TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+					if (!RenderManager->Transformator.doConsiderCamera) // BUG: doConsiderCamera used unitialized
+						TempVector += RenderManager->Camera.GetTranslation();
 				}
 				VertexHolder->PushVertex(Vector3
 											(
@@ -1398,7 +1398,7 @@ namespace Deku2d
 		}
 
 		Vector2 TempVector = Const::Math::V2_ZERO, Vertex = Const::Math::V2_ZERO;
-		CTransformation Transformation = ATransform;//CRenderManager::Instance()->Transformator.GetCurrentTransfomation();
+		CTransformation Transformation = ATransform;//RenderManager->Transformator.GetCurrentTransfomation();
 		for(unsigned i  = 0; i < AModel->GetVertexNumber(); i++)
 		{
 			Vertex = AModel->GetVertices()[i];
@@ -1410,7 +1410,7 @@ namespace Deku2d
  					TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
 				TempVector += Transformation.GetTranslation();
 		// 		if (!Sender->doIgnoreCamera)
-		// 			TempVector += CRenderManager::Instance()->Camera.GetTranslation();
+		// 			TempVector += RenderManager->Camera.GetTranslation();
 			}
 			VertexHolder->PushVertex(Vector3(static_cast<int>(TempVector.x), static_cast<int>(TempVector.y), Transformation.GetDepth()), Sender->Color);
 		}
@@ -1730,7 +1730,7 @@ namespace Deku2d
 		}
 
 		if (XMLNode->HasAttribute("Texture"))
-			SetTexture( CFactory::Instance()->Get<CTexture>(XMLNode->GetAttribute("Texture")) );
+			SetTexture( Factory->Get<CTexture>(XMLNode->GetAttribute("Texture")) );
 
 		string ModelTypeArgValue = XMLNode->GetAttribute("ModelType");
 		ModelType = CRenderManager::SelectModelTypeByStringIdentifier(ModelTypeArgValue);

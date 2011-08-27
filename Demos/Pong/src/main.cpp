@@ -7,8 +7,8 @@ class CTempKeyBindMan : public CObject
 public:
 	CTempKeyBindMan()
 	{
-		CEventManager::Instance()->Subscribe("KeyDown", this);
-		CEventManager::Instance()->Subscribe("KeyUp", this);
+		EventManager->Subscribe("KeyDown", this);
+		EventManager->Subscribe("KeyUp", this);
 	}
 	void ProcessEvent(const CEvent &AEvent)
 	{
@@ -18,19 +18,19 @@ public:
 			switch (key)
 			{
 			case SDLK_SPACE:
-				CEventManager::Instance()->TriggerEvent("Reset", this);
+				EventManager->TriggerEvent("Reset", this);
 				break;
 			case SDLK_w:
-				CEventManager::Instance()->TriggerEvent("PlayerOneMoveUp", this);
+				EventManager->TriggerEvent("PlayerOneMoveUp", this);
 				break;
 			case SDLK_s:
-				CEventManager::Instance()->TriggerEvent("PlayerOneMoveDown", this);
+				EventManager->TriggerEvent("PlayerOneMoveDown", this);
 				break;
 			case SDLK_UP:
-				CEventManager::Instance()->TriggerEvent("PlayerTwoMoveUp", this);
+				EventManager->TriggerEvent("PlayerTwoMoveUp", this);
 				break;
 			case SDLK_DOWN:
-				CEventManager::Instance()->TriggerEvent("PlayerTwoMoveDown", this);
+				EventManager->TriggerEvent("PlayerTwoMoveDown", this);
 				break;
 			}
 
@@ -42,11 +42,11 @@ public:
 			{
 			case SDLK_w:
 			case SDLK_s:
-				CEventManager::Instance()->TriggerEvent("PlayerOneStop", this);
+				EventManager->TriggerEvent("PlayerOneStop", this);
 				break;
 			case SDLK_UP:
 			case SDLK_DOWN:
-				CEventManager::Instance()->TriggerEvent("PlayerTwoStop", this);
+				EventManager->TriggerEvent("PlayerTwoStop", this);
 				break;
 			}
 		}
@@ -63,19 +63,19 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	CAbstractScene *PongScene = CSceneManager::Instance()->CreateScene();
-	CAbstractScene *SomeScene = CSceneManager::Instance()->GetCurrentScene();
-	CSceneManager::Instance()->SetCurrentScene(PongScene);
+	CAbstractScene *PongScene = SceneManager->CreateScene();
+	CAbstractScene *SomeScene = SceneManager->GetCurrentScene();
+	SceneManager->SetCurrentScene(PongScene);
 
-	//CSceneManager::Instance()->SetCurrentScene(SomeScene);
+	//SceneManager->SetCurrentScene(SomeScene);
 
-	CTempKeyBindMan *tkbm = CFactory::Instance()->New<CTempKeyBindMan>("TempKeyBindMan");
+	CTempKeyBindMan *tkbm = Factory->New<CTempKeyBindMan>("TempKeyBindMan");
 
 	// TODO:
 	// 	1. precompile built-in Lua scripts
 	// 	2. automatically load them
 
-	CLuaVirtualMachine::Instance()->RunScript(CFactory::Instance()->Get<CScript>(CConfig::Instance()->Section("Data")["InitScript"]));
+	LuaVirtualMachine->RunScript(Factory->Get<CScript>(Config->Section("Data")["InitScript"]));
 
 	return true;
 }

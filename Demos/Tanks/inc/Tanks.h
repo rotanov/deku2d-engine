@@ -95,9 +95,9 @@ public:
 	CTank(CTankMap* AMap, CTankManager* AHost, CTankAI* AAI) : Map(AMap), Host(AHost), AI(AAI)
 	{
 		isWalking = false;
-		CEventManager::Instance()->Subscribe("KeyDown", this);
-		CEventManager::Instance()->Subscribe("KeyUp", this);
-		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
+		EventManager->Subscribe("KeyDown", this);
+		EventManager->Subscribe("KeyUp", this);
+		Tileset = TileSetManager->GetTileset("TanksTileset");
 		isAlive = true;
 		isFiring = false;
 		for (int i = 0; i < 5; i++)
@@ -149,7 +149,7 @@ public:
 	CTileset* Tileset;
 	CTankMap(CTankManager* AHost) : Host(AHost)
 	{
-		Tileset = CTileSetManager::Instance()->GetTileset("TanksTileset");
+		Tileset = TileSetManager->GetTileset("TanksTileset");
 
 		CellSize = DEFAULT_CELL_SIZE;
 		for (int i = 0; i < MAP_SIZE_X; i++)

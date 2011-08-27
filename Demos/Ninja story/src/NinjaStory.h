@@ -109,7 +109,7 @@ public:
 		Text->SetPosition(t0);
 		if (Age >= Life)
 		{
-			CFactory::Instance()->Destroy(this);
+			Factory->Destroy(this);
 		}
 	}
 private:
@@ -129,7 +129,7 @@ public:
 		age += dt;
 		if (CEngine::Instance()->keys[SDLK_SPACE] && age >= 0.001f)
 		{
-			CBouncingText *newbt = CFactory::Instance()->New<CBouncingText>(""); //new CBouncingText();
+			CBouncingText *newbt = Factory->New<CBouncingText>(""); //new CBouncingText();
 			newbt->SetText(itos(Random_Int(1, 999)) + "dmg");
 			age = 0.0f;
 		}

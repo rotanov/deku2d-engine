@@ -13,10 +13,10 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	CAbstractScene *MainScene = CSceneManager::Instance()->CreateScene();
-	CSceneManager::Instance()->SetCurrentScene(MainScene);
+	CAbstractScene *MainScene = SceneManager->CreateScene();
+	SceneManager->SetCurrentScene(MainScene);
 
-	CLuaConsole *LuaConsole = CFactory::Instance()->New<CLuaConsole>("Lua Console");
+	CLuaConsole *LuaConsole = Factory->New<CLuaConsole>("Lua Console");
 
 	return true;
 }
