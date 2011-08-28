@@ -7,7 +7,7 @@
 namespace Deku2d
 {
 	/**
-	* CConfigStorage - класс, представляющий собой некое абстрактное хранилище конфигурации. Используется как базовый класс для всех конкретных видов хранилищ.
+	* CConfigStorage - a class that represents some abstract configuration storage. It's used as the base class for all concrete storage types.
 	*/
 
 	class CConfigStorage
@@ -34,7 +34,7 @@ namespace Deku2d
 	};
 
 	/**
-	* CConfigCommandLineStorage - класс, представляющий собой хранилище конфигурации, получемой преобразованием из аргументов командой строки.
+	* CConfigCommandLineStorage - a class that represents a configuration storage, that is obtained by conversion from command line arguments.
 	*/
 
 	class CConfigCommandLineStorage : public CConfigStorage
@@ -45,7 +45,7 @@ namespace Deku2d
 	};
 
 	/**
-	* CConfigFileStorage - класс, представляющий собой файловое хранилище конфигурации.
+	* CConfigFileStorage - a class that represents a file configuration storage.
 	*/
 
 	class CConfigFileStorage : public CConfigStorage
@@ -65,7 +65,7 @@ namespace Deku2d
 	};
 
 	/**
-	* CConfigDefaultsStorage - класс, представляющий собой хранилище конфигурации по-умолчанию. Необходимо наследоваться от него для создания умолчальных значений для конкретной конфигурации.
+	* CConfigDefaultsStorage - a class that represents a default configuration storage. Should be inhereted from to create defaults for some concrete configuration.
 	*/
 
 	class CConfigDefaultsStorage : public CConfigStorage
@@ -75,31 +75,18 @@ namespace Deku2d
 
 	};
 
-	/**
-	* CMainConfigDefaults - класс, представляющий собой хранилище конфигурации по-умолчанию для главной конфигурации движка.
-	*/
-
-	class CMainConfigDefaults : public CConfigDefaultsStorage
-	{
-	public:
-		CMainConfigDefaults(const string &ARootNodeName);
-
-	};
-
-	// ON_DEMAND_TODO:
-	// class CAbstractConfig to make configs apart of main config.. should just describe interface..
 
 	/**
-	* CConfig - класс, представляющий собой главную конфигурацию движка.
+	* CAbstractConfig - an abstract class that defines an interface for setting and getting configuration values, and provides convinience classes and functions.
 	*/
 
-	class CConfig : public CObject
+	class CAbstractConfig
 	{
 	public:
 		class CConfigParameter
 		{
 		public:
-			CConfigParameter(CConfig *AConfig, const string &ASection, const string &AParameter);
+			CConfigParameter(CAbstractConfig *AConfig, const string &ASection, const string &AParameter);
 
 			template<typename T>
 			CConfigParameter& operator=(const T &ASource)
@@ -121,7 +108,7 @@ namespace Deku2d
 			}
 
 		private:
-			CConfig *Config;
+			CAbstractConfig *Config;
 			string Section;
 			string Name;
 		};
@@ -129,39 +116,48 @@ namespace Deku2d
 		class CConfigSection
 		{
 		public:
-			CConfigSection(CConfig *AConfig, const string &ASection);
+			CConfigSection(CAbstractConfig *AConfig, const string &ASection);
 
 			CConfigParameter operator[](const string &AParameter);
 
 		private:
-			CConfig *Config;
+			CAbstractConfig *Config;
 			string Name;
 
 		};
 
+		virtual string Get(const string &ASection, const string &AParameter) = 0;
+		virtual void Set(const string &ASection, const string &AParameter, const string &AValue) = 0;
+
+		CConfigSection Section(const string &ASection);
+	};
+
+
+	/**
+	* CConfig - a class that represents main engine configuration.
+	*/
+
+	class CConfig : public CAbstractConfig, public CObject
+	{
+	public:
 		string Get(const string &ASection, const string &AParameter);
 		void Set(const string &ASection, const string &AParameter, const string &AValue);
 
-		CConfigSection Section(const string &ASection);
 
-		void AddDefault(const string &ASection, const string &AParameter, const string &AValue);
+		static void AddDefault(const string &ASection, const string &AParameter, const string &AValue);
 
 		// ON_DEMAND_TODO: void RestoreDefaults(); - copy settings from Defaults to FileConfig..
 		// ON_DEMAND_TODO: maybe functions to access storages, for example for deleting parameters, adding sections, etc.
 
 	private:
 		CConfig();
-		~CConfig();
+		void FillDefaults();
 
-		void Initialize();
+		static const char *MAIN_CONFIG_ROOT_NODE_NAME;
 
-		const char *MAIN_CONFIG_ROOT_NODE_NAME;
-
-		bool Initialized;
-		CConfigFileStorage *FileConfig;
-		CConfigCommandLineStorage *CommandLineConfig;
-		CMainConfigDefaults Defaults;
-
+		CConfigFileStorage FileConfig;
+		CConfigCommandLineStorage CommandLineConfig;
+		static CConfigDefaultsStorage Defaults;
 
 		friend class CTSingleton<CConfig>;
 	};
@@ -177,7 +173,7 @@ namespace Deku2d
 	};
 
 	/**
-	* CCommandLineArgument - структура, представляющая собой отдельный аргумент как лексему.
+	* CCommandLineArgument - a structure that represents single command line argument as a token.
 	*/
 
 	struct CCommandLineArgument
@@ -189,7 +185,7 @@ namespace Deku2d
 	};
 
 	/**
-	* CCommandLineArgumentsManager - менеджер аргументов коммандной строки. Разбивает аргументы на лексемы и предоставляет к ним доступ.
+	* CCommandLineArgumentsManager - command line arguments manager. It performs lexical analysis of arguments and provides access to them.
 	*/
 
 	class CCommandLineArgumentsManager : public CObject
@@ -250,7 +246,7 @@ namespace Deku2d
 	};
 
 	/**
-	* CArgumentsConfigMappingsManager - менеджер отображений из аргументов командной строки в конфигурационные парамеры.
+	* CArgumentsConfigMappingsManager - a manager tht maps command line arguments to configuration parameters.
 	*/
 
 	class CArgumentsConfigMappingsManager : public CObject

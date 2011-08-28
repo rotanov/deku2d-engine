@@ -171,48 +171,46 @@ namespace Deku2d
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// CMainConfigDefaults
+	// CAbstractConfig::CConfigParameter
 
-	CMainConfigDefaults::CMainConfigDefaults(const string &ARootNodeName) : CConfigDefaultsStorage(ARootNodeName)
-	{
-		// fill Data with defaults
-		Set("Video", "Fullscreen", "false");
-		Set("Video", "FpsLimit", "60");
-		Set("Data", "LogLevel", "0");
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	// CConfig::CConfigParameter
-
-	CConfig::CConfigParameter::CConfigParameter(CConfig *AConfig, const string &ASection, const string &AParameter) : Config(AConfig), Section(ASection), Name(AParameter)
+	CAbstractConfig::CConfigParameter::CConfigParameter(CAbstractConfig *AConfig, const string &ASection, const string &AParameter) : Config(AConfig), Section(ASection), Name(AParameter)
 	{
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// CConfig::CConfigSection
+	// CAbstractConfig::CConfigSection
 
-	CConfig::CConfigSection::CConfigSection(CConfig *AConfig, const string &ASection) : Config(AConfig), Name(ASection)
+	CAbstractConfig::CConfigSection::CConfigSection(CAbstractConfig *AConfig, const string &ASection) : Config(AConfig), Name(ASection)
 	{
 	}
 
-	CConfig::CConfigParameter CConfig::CConfigSection::operator[](const string &AParameter)
+	CAbstractConfig::CConfigParameter CAbstractConfig::CConfigSection::operator[](const string &AParameter)
 	{
 		return CConfigParameter(Config, Name, AParameter);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	// CAbstractConfig
+
+	CAbstractConfig::CConfigSection CAbstractConfig::Section(const string &ASection)
+	{
+		return CConfigSection(this, ASection);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	// CConfig
+
+	const char *CConfig::MAIN_CONFIG_ROOT_NODE_NAME = "Configuration";
+
+	CConfigDefaultsStorage CConfig::Defaults(MAIN_CONFIG_ROOT_NODE_NAME);
 
 	string CConfig::Get(const string &ASection, const string &AParameter)
 	{
-		if (!Initialized)
-			Initialize();
+		if (CommandLineConfig.Exists(ASection, AParameter))
+			return CommandLineConfig.Get(ASection, AParameter);
 
-		if (CommandLineConfig->Exists(ASection, AParameter))
-			return CommandLineConfig->Get(ASection, AParameter);
-
-		if (FileConfig->Exists(ASection, AParameter))
-			return FileConfig->Get(ASection, AParameter);
+		if (FileConfig.Exists(ASection, AParameter))
+			return FileConfig.Get(ASection, AParameter);
 
 		if (Defaults.Exists(ASection, AParameter))
 			return Defaults.Get(ASection, AParameter);
@@ -223,15 +221,7 @@ namespace Deku2d
 
 	void CConfig::Set(const string &ASection, const string &AParameter, const string &AValue)
 	{
-		if (!Initialized)
-			Initialize();
-
-		FileConfig->Set(ASection, AParameter, AValue);
-	}
-
-	CConfig::CConfigSection CConfig::Section(const string &ASection)
-	{
-		return CConfigSection(this, ASection);
+		FileConfig.Set(ASection, AParameter, AValue);
 	}
 
 	void CConfig::AddDefault(const string &ASection, const string &AParameter, const string &AValue)
@@ -239,22 +229,17 @@ namespace Deku2d
 		Defaults.Set(ASection, AParameter, AValue);
 	}
 
-	CConfig::CConfig() : MAIN_CONFIG_ROOT_NODE_NAME("Configuration"), Initialized(false), FileConfig(NULL), CommandLineConfig(NULL), Defaults(MAIN_CONFIG_ROOT_NODE_NAME)
+	CConfig::CConfig() : FileConfig(Environment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml", MAIN_CONFIG_ROOT_NODE_NAME), CommandLineConfig(MAIN_CONFIG_ROOT_NODE_NAME)
 	{
+		FillDefaults();
 	}
 
-	CConfig::~CConfig()
+	void CConfig::FillDefaults()
 	{
-		delete FileConfig;
-		delete CommandLineConfig;
-	}
-
-	void CConfig::Initialize()
-	{
-		FileConfig = new CConfigFileStorage(Environment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml", MAIN_CONFIG_ROOT_NODE_NAME);
-		CommandLineConfig = new CConfigCommandLineStorage(MAIN_CONFIG_ROOT_NODE_NAME);
-
-		Initialized = true;
+		Defaults.Set("Video", "Fullscreen", "false");
+		Defaults.Set("Video", "FpsLimit", "60");
+		Defaults.Set("Data", "LogLevel", "0");
+		// TODO: add more
 	}
 
 	//////////////////////////////////////////////////////////////////////////
