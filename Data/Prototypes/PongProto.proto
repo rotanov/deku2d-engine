@@ -3,17 +3,17 @@
 	<TimerComponent Name="MemoryUsageUpdateTimer" Enabled="true" Interval="3" />
 	<PlaceableComponent Name="PlayerOnePlace">
 		<RenderableComponent Name="PlayerOne" Model="Box" Width="24" Height="96">
-			<GameObject Name="PlayerOneScriptable" Script="PongPlayers" />
+			<GameObject Name="PlayerOneScriptable" Script="PongPlayers" ClassName="PongPlayerOne" />
 		</RenderableComponent>
 	</PlaceableComponent>
 	<PlaceableComponent Name="PlayerTwoPlace">
 		<RenderableComponent Name="PlayerTwo" Model="Box" Width="24" Height="96">
-			<GameObject Name="PlayerTwoScriptable" Script="PongPlayers" />
+			<GameObject Name="PlayerTwoScriptable" Script="PongPlayers" ClassName="PongPlayerTwo" />
 		</RenderableComponent>
 	</PlaceableComponent>
 	<PlaceableComponent Name="BallPlace">
 		<RenderableComponent Name="Ball" Model="Box" Width="24" Height="24">
-			<GameObject Name="BallScriptable" Script="BallScript" />
+			<GameObject Name="BallScriptableObj" Script="BallScript" ClassName="BallScriptable" />
 		</RenderableComponent>
 	</PlaceableComponent>
 	<PlaceableComponent Name="PlayerOneScoreTextPlace">
@@ -22,5 +22,5 @@
 	<PlaceableComponent Name="PlayerTwoScoreTextPlace">
 		<Text Name="PlayerTwoScoreText" Text="0" Font="hge" />
 	</PlaceableComponent>
-	<GameObject Name="PongGame" Script="PongGameScript" />
+	<GameObject Name="PongGameObj" Script="PongGameScript" ClassName="PongGame" />
 </Prototype>

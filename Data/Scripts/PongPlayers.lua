@@ -2,89 +2,105 @@ PONG_PLAYER_WIDTH = 24
 PONG_PLAYER_HEIGHT = 96
 PONG_MARGIN = 10
 
-function PongPlayer()
-	local t = {
-		Position = Vector2(),
-		Velocity = Vector2(),
-		Acceleration = Vector2(),
-		MovingUp = false,
-		MovingDown = false,
-		OnCreate = function(self)
-			SubscribeToEvent(self.object, "EveryFrame")
-		end,
-		OnAttached = function(self)
-			self.Place = GetParent(GetParent(self.object))
-		end,
-		MoveUp = function(self)
-			self.MovingUp = true
-		end,
-		MoveDown = function(self)
-			self.MovingDown = true
-		end,
-		Stop = function(self)
-			self.MovingUp = false
-			self.MovingDown = false
-		end,
-		OnEveryFrame = function(self)
-			if self.MovingUp then
-				self.Acceleration.y = 3200
-			end
-			if self.MovingDown then
-				self.Acceleration.y = -3200
-			end
-			self.Position = self.Position + self.Velocity * GetDeltaTime()
-			self.Velocity = self.Velocity + self.Acceleration * GetDeltaTime()
-			self.Velocity = self.Velocity * 0.9995
-			self.Acceleration = Vector2(0, 0)
+PongPlayer = GameObject:Derive()
 
-			if (self.Position.y - 48) < 0 then
-				self.Position.y= 96/2
-				self.Velocity.y = -self.Velocity.y * 0.5
-			end
-			if (self.Position.y + PONG_PLAYER_HEIGHT/2) > GetWindowHeight() then
-				self.Position.y = GetWindowHeight() - PONG_PLAYER_HEIGHT/2
-				self.Velocity.y = -self.Velocity.y * 0.5
-			end
-
-			SetPosition(self.Place, self.Position.x, self.Position.y)
-		end,
-		GetBox = function(self)
-			return CBox(self.Position, self.Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT))
-		end,
-	}
-
-	return t
+function PongPlayer:OnCreate()
+	self.Position = Vector2()
+	self.Velocity = Vector2()
+	self.Acceleration = Vector2()
+	self.MovingUp = false
+	self.MovingDown = false
+	self:Subscribe("EveryFrame")
+	self:Subscribe("KeyDown")
+	self:Subscribe("KeyUp")
 end
 
-function PongPlayerOne()
-	local t = PongPlayer()	-- inheritance
-	t.Position = Vector2(PONG_MARGIN + 12, GetWindowHeight()/2)
-	t.OnPlayerOneMoveUp = t.MoveUp
-	t.OnPlayerOneMoveDown = t.MoveDown
-	t.OnPlayerOneStop = t.Stop
-	t.OnCreate = function(self)
-		PongPlayer().OnCreate(self)	-- calling superclass method
-		SubscribeToEvent(self.object, "PlayerOneMoveUp")
-		SubscribeToEvent(self.object, "PlayerOneMoveDown")
-		SubscribeToEvent(self.object, "PlayerOneStop")
+function PongPlayer:MoveUp()
+	self.MovingUp = true
+end
+
+function PongPlayer:MoveDown()
+	self.MovingDown = true
+
+end
+
+function PongPlayer:Stop()
+	self.MovingUp = false
+	self.MovingDown = false
+end
+
+function PongPlayer:OnEveryFrame()
+	if self.MovingUp then
+		self.Acceleration.y = 3200
 	end
-	return t
-end
-
-function PongPlayerTwo()
-	local t = PongPlayer()
-	t.Position = Vector2(GetWindowWidth() - PONG_MARGIN - PONG_PLAYER_WIDTH/2, PONG_MARGIN)
-	t.OnPlayerTwoMoveUp = t.MoveUp
-	t.OnPlayerTwoMoveDown = t.MoveDown
-	t.OnPlayerTwoStop = t.Stop
-	t.OnCreate = function(self)
-		PongPlayer().OnCreate(self)
-		SubscribeToEvent(self.object, "PlayerTwoMoveUp")
-		SubscribeToEvent(self.object, "PlayerTwoMoveDown")
-		SubscribeToEvent(self.object, "PlayerTwoStop")
+	if self.MovingDown then
+		self.Acceleration.y = -3200
 	end
-	return t
+	self.Position = self.Position + self.Velocity * GetDeltaTime()
+	self.Velocity = self.Velocity + self.Acceleration * GetDeltaTime()
+	self.Velocity = self.Velocity * 0.9995
+	self.Acceleration = Vector2(0, 0)
+
+	if (self.Position.y - 48) < 0 then
+		self.Position.y= 96/2
+		self.Velocity.y = -self.Velocity.y * 0.5
+	end
+	if (self.Position.y + PONG_PLAYER_HEIGHT/2) > GetWindowHeight() then
+		self.Position.y = GetWindowHeight() - PONG_PLAYER_HEIGHT/2
+		self.Velocity.y = -self.Velocity.y * 0.5
+	end
+
+	self.parent.parent:SetPosition(self.Position.x, self.Position.y)
 end
 
-PlayerOneScriptable = PlayerOneScriptable or PongPlayerOne()	-- instancing
-PlayerTwoScriptable = PlayerTwoScriptable or PongPlayerTwo()
+function PongPlayer:GetBox()
+	return CBox(self.Position, self.Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT))
+end
+
+PongPlayerOne = PongPlayer:Derive()
+
+function PongPlayerOne:OnCreate()
+	PongPlayer.OnCreate(self)
+	self.Position = Vector2(PONG_MARGIN + 12, GetWindowHeight()/2)
+	self.OnPlayerOneMoveUp = self.MoveUp
+	self.OnPlayerOneMoveDown = self.MoveDown
+	self.OnPlayerOneStop = self.Stop
+end
+
+function PongPlayerOne:OnKeyDown(event)
+	if IsBound(event.Sym, 'Player1', 'MoveUp') then
+		self:MoveUp()
+	elseif IsBound(event.Sym, 'Player1', 'MoveDown') then
+		self:MoveDown()
+	end
+end
+
+function PongPlayerOne:OnKeyUp(event)
+	if IsBound(event.Sym, 'Player1', 'MoveUp') or IsBound(event.Sym, 'Player1', 'MoveDown') then
+		self:Stop()
+	end
+end
+
+PongPlayerTwo = PongPlayer:Derive()
+
+function PongPlayerTwo:OnCreate()
+	PongPlayer.OnCreate(self)
+	self.Position = Vector2(GetWindowWidth() - PONG_MARGIN - PONG_PLAYER_WIDTH/2, PONG_MARGIN)
+	self.OnPlayerTwoMoveUp = self.MoveUp
+	self.OnPlayerTwoMoveDown = self.MoveDown
+	self.OnPlayerTwoStop = self.Stop
+end
+
+function PongPlayerTwo:OnKeyDown(event)
+	if IsBound(event.Sym, 'Player2', 'MoveUp') then
+		self:MoveUp()
+	elseif IsBound(event.Sym, 'Player2', 'MoveDown') then
+		self:MoveDown()
+	end
+end
+
+function PongPlayerTwo:OnKeyUp(event)
+	if IsBound(event.Sym, 'Player2', 'MoveUp') or IsBound(event.Sym, 'Player2', 'MoveDown') then
+		self:Stop()
+	end
+end

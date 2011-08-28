@@ -1,6 +1,8 @@
-Create("PongProto", "PongProtoInst")
+local pongProto = Create("PongProto", "PongProtoInst")
 
-SetPosition(GetObject("PlayerOneScoreTextPlace"), PONG_MARGIN + 40, GetWindowHeight() - 30)
-SetPosition(GetObject("PlayerTwoScoreTextPlace"), GetWindowWidth() - PONG_MARGIN - 60, GetWindowHeight() - 30)
+GetObject("PlayerOneScoreTextPlace"):SetPosition(PONG_MARGIN + 40, GetWindowHeight() - 30)
+GetObject("PlayerTwoScoreTextPlace"):SetPosition(GetWindowWidth() - PONG_MARGIN - 60, GetWindowHeight() - 30)
 
-Root:Attach(GetObject("PongProtoInst"))
+Root:Attach(pongProto)
+
+DebugPrintComponentTree()

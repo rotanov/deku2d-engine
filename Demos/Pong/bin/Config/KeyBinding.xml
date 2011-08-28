@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<KeyBinding>
+	<General>
+		<GameReset>
+			<Key ident="32" />
+		</GameReset>
+	</General>
+	<Player1>
+		<MoveUp>
+			<Key ident="119" />
+		</MoveUp>
+		<MoveDown>
+			<Key ident="115" />
+		</MoveDown>
+	</Player1>
+	<Player2>
+		<MoveUp>
+			<Key ident="273" />
+		</MoveUp>
+		<MoveDown>
+			<Key ident="274" />
+		</MoveDown>
+	</Player2>
+</KeyBinding>

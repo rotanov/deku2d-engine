@@ -61,10 +61,10 @@ function BlackNinja:OnKeyDown(event)
 		self.vn = Vector2( self.v.x / vLen, self.v.y / vLen )		
 	end
 	if IsBound(sym, 'General', 'Shoot') then
-	--if sym == SDLK._z then
 		self.shooting = true
 	end
 
+	
 	if sym == SDLK._RETURN then
 		ev = {
 			Char = '',

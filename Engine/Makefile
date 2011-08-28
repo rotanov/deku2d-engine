@@ -11,6 +11,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_GraphicsHigh.cpp \
 			src/2de_GraphicsLow.cpp \
 			src/2de_ImageUtils.cpp \
+			src/2de_Input.cpp \
 			src/2de_Log.cpp \
 			src/2de_LuaUtils.cpp \
 			src/2de_Math.cpp \
@@ -37,6 +38,7 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_GraphicsHigh.o \
 			obj/2de_GraphicsLow.o \
 			obj/2de_ImageUtils.o \
+			obj/2de_Input.o \
 			obj/2de_Log.o \
 			obj/2de_LuaUtils.o \
 			obj/2de_Math.o \

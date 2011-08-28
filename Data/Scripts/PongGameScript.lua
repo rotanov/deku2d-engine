@@ -1,4 +1,4 @@
-PongGame = { }
+PongGame = GameObject:Derive()
 
 function PongGame:OnCreate()
 	self.Score = {
@@ -11,37 +11,35 @@ function PongGame:OnCreate()
 		pos = Create("PlaceableComponent", "MemUsageTextPlace"),
 	}
 
-	SetPosition(self.MemUsageText.pos, 10, 30)
-	SetText(self.MemUsageText.text, "not updated yet")
-	Attach(self.MemUsageText.pos, self.MemUsageText.text);
+	self.MemUsageText.pos:SetPosition(10, 30)
+	self.MemUsageText.text:SetText("not updated yet")
+	self.MemUsageText.pos:Attach(self.MemUsageText.text)
 	Root:Attach(self.MemUsageText.pos)
 
-	SubscribeToEvent(self.object, "PlayerOneScored")
-	SubscribeToEvent(self.object, "PlayerTwoScored")
-	SubscribeToEvent(self.object, "TimerTick")
+	self:Subscribe("PlayerOneScored")
+	self:Subscribe("PlayerTwoScored")
+	self:Subscribe("TimerTick")
 end
 
 function PongGame:OnPlayerOneScored()
 	self.Score.PlayerOne = self.Score.PlayerOne + 1
-	SetText(GetObject("PlayerOneScoreText"), self.Score.PlayerOne)
+
+	GetObject("PlayerOneScoreText"):SetText(self.Score.PlayerOne)
 	self:LogScore()
 end
 
 function PongGame:OnPlayerTwoScored()
 	self.Score.PlayerTwo = self.Score.PlayerTwo + 1
-	SetText(GetObject("PlayerTwoScoreText"), self.Score.PlayerTwo)
+	GetObject("PlayerTwoScoreText"):SetText(self.Score.PlayerTwo)
 	self:LogScore()
 end
 
-function PongGame:OnEveryFrame()
-end
-
 function PongGame:OnTimerTick(event)
-	if event.sender ~= GetObject("MemoryUsageUpdateTimer") then
+	if event.sender ~= GetObject("MemoryUsageUpdateTimer").object then
 		return
 	end
 
-	SetText(self.MemUsageText.text, "Lua memory usage: " .. GetMemoryUsage())
+	self.MemUsageText.text:SetText("Lua memory usage: " .. GetMemoryUsage())
 end
 
 function PongGame:LogScore()

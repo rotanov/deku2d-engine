@@ -1,16 +1,15 @@
-BallScriptable = { }
-
 PONG_BALL_SIZE = 24
+
+BallScriptable = GameObject:Derive()
 
 function BallScriptable:OnCreate()
 	self.BallSpeed = 250
-	SubscribeToEvent(self.object, "EveryFrame")
-	SubscribeToEvent(self.object, "Reset")
+	self:Subscribe("EveryFrame")
+	self:Subscribe("KeyDown")
+	self:Initialize()
 end
 
 function BallScriptable:OnAttached()
-	self.Place = GetParent(GetParent(self.object))
-	self:Initialize()
 end
 
 function BallScriptable:Initialize()
@@ -29,7 +28,7 @@ function BallScriptable:Initialize()
 	self.Velocity = Vector2(cos(Angle), sin(Angle)) * self.BallSpeed
 	self.Position = Vector2(GetWindowWidth() * 0.5, GetWindowHeight() * 0.5)
 
-	SetPosition(self.Place, self.Position.x, self.Position.y)
+	--SetPosition(self.Place, self.Position.x, self.Position.y)
 end
 
 function BallScriptable:OnEveryFrame()
@@ -74,9 +73,11 @@ function BallScriptable:OnEveryFrame()
 		TriggerEvent("PlayerOneScored", self.object)
 	end
 	
-	SetPosition(self.Place, self.Position.x, self.Position.y)
+	self.parent.parent:SetPosition(self.Position.x, self.Position.y)
 end
 
-function BallScriptable:OnReset()
-	self:Initialize()
+function BallScriptable:OnKeyDown(event)
+	if IsBound(event.Sym, 'General', 'GameReset') then
+		self:Initialize()
+	end
 end
