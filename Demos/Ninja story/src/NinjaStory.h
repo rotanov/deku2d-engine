@@ -2,7 +2,7 @@
 #define _NINJA_STORY_H_
 
 #include "2de_Engine.h"
-using namespace Deku2d;
+using namespace Deku2D;
 
 class CLifeBarBase /*:*/ /*public CRenderable, *//*public CUpdatable*/
 {

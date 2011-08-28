@@ -5,7 +5,7 @@
 #include "2de_Components.h"
 #include "2de_GraphicsLow.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	*	The concept of tile set as it is now needs to be reinvented.
@@ -83,7 +83,7 @@ namespace Deku2d
 		CText *TextTeam;
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_GAME_UTILS_H
 

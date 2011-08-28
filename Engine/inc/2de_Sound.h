@@ -6,7 +6,7 @@
 #include "2de_Core.h"
 #include "2de_Resource.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	* CSound - sound as resource class.
@@ -128,6 +128,6 @@ namespace Deku2d
 
 	static CTSingleton<CSoundMixer> SoundMixer;
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_SOUND_H_

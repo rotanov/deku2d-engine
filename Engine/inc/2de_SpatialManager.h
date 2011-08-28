@@ -5,7 +5,7 @@
 #include "2de_Math.h"
 #include "2de_Box.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	*	CAbstractSpatialManager - abstract data structure, which can support us with list of
@@ -66,6 +66,6 @@ namespace Deku2d
 
 	// @todo: implement and test performance of UniformGrid, HierarchicalGrid, KDTree, BVH, QuadTree
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_SPATIAL_MANAGER_H_

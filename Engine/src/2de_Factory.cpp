@@ -2,7 +2,7 @@
 
 #include "2de_Components.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CFactory
@@ -299,4 +299,4 @@ namespace Deku2d
 
 	#endif
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

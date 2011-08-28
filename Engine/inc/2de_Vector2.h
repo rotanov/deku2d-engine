@@ -3,7 +3,7 @@
 
 #include "2de_Math.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	// If enabled then optimized version of 
 	// Vector2.Length() used. It costs 5% accuracy.
@@ -197,6 +197,6 @@ namespace Deku2d
 		}
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	//	_2DE_VECTOR2_H_

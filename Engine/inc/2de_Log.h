@@ -3,7 +3,7 @@
 
 #include "2de_Core.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 
 	/**
@@ -88,6 +88,6 @@ namespace Deku2d
 		#define Log SLog->WriteToLog
 	#endif // SIMPLIFIED_LOG
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	// _2DE_LOG_H_

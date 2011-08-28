@@ -1,7 +1,7 @@
 #include "2de_Xml.h"
 #include "2de_Log.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CChildrenList::ConstIterator
@@ -1281,4 +1281,4 @@ namespace Deku2d
 
 	CXMLHelper CXMLHelper::_instance;
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

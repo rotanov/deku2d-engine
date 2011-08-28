@@ -10,7 +10,7 @@
 #include "2de_Box.h"
 #include "2de_RGBA.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	#define _2DE_DEBUG_DRAW_BOXES
 
@@ -747,6 +747,6 @@ namespace Deku2d
 
 	static CTSingleton<CSceneManager> SceneManager;
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_GRAPHICS_LOW_H_

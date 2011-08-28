@@ -1,6 +1,6 @@
 #include "2de_Box.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CBox
@@ -196,4 +196,4 @@ namespace Deku2d
 		return (Min + Max) * 0.5f;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

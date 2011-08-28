@@ -1,2 +1,2 @@
 #include "NinjaStory.h"
-using namespace Deku2d;
+using namespace Deku2D;

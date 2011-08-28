@@ -2,7 +2,7 @@
 
 #include "2de_Engine.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CEvent
@@ -129,4 +129,4 @@ namespace Deku2d
 						// Such convention if fine if it lies within a private methods of class, but these are public.
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

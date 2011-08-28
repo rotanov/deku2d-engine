@@ -7,7 +7,7 @@
 	#include "2de_Log.h"
 #endif
 
-namespace Deku2d
+namespace Deku2D
 {
 	CImageData::CImageData() : Data(NULL), Height(0), Width(0), BPP(0)
 	{

@@ -3,7 +3,7 @@
 
 #include "2de_Engine.h"
 #include "2de_GameUtils.h"
-using namespace Deku2d;
+using namespace Deku2D;
 
 const int LEVEL_WIDTH = 32;
 const int LEVEL_HEIGHT = 16;

@@ -3,7 +3,7 @@
 
 #include "2de_Core.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	class CXMLNode; // forward declaration
 
@@ -393,6 +393,6 @@ namespace Deku2d
 		static CXMLHelper _instance;
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_XML_H_

@@ -7,7 +7,7 @@
 #include "2de_Matrix2.h"
 #include "2de_Geometry.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	class CPhysicalObject /*: public CUpdatable*/
 	{
@@ -66,6 +66,6 @@ namespace Deku2d
 	//	... 
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_PHYSICS_H_

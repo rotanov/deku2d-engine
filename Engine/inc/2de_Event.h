@@ -4,7 +4,7 @@
 #include "2de_Core.h"
 #include "2de_Log.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	class CEvent
 	{
@@ -85,6 +85,6 @@ namespace Deku2d
 		Data[AName] = to_string(AValue);
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_EVENT_H_

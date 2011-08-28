@@ -1,5 +1,5 @@
 #include "2de_Engine.h"
-using namespace Deku2d;
+using namespace Deku2D;
 
 //	There should be (and acttually ever was) demo of Battle city based game
 

@@ -6,7 +6,7 @@
 using std::pair;
 using std::queue;
 using std::make_pair;
-using namespace Deku2d;
+using namespace Deku2D;
 
 const unsigned CELL_SIZE = 32;
 const unsigned CELLS_COUNT = 9;

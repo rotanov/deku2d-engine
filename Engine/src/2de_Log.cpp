@@ -1,7 +1,7 @@
 #include "2de_Log.h"
 #include "2de_Engine.h"	// bad
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CLog
@@ -234,4 +234,4 @@ namespace Deku2d
 		SetEventPriority("ERROR", 3);
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

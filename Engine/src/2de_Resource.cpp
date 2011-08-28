@@ -3,7 +3,7 @@
 #include "2de_Core.h"
 #include "2de_Engine.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CResourceSectionLoaderBase

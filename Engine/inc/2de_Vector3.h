@@ -3,7 +3,7 @@
 
 #include "2de_Math.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	class Vector3
 	{
@@ -139,6 +139,6 @@ namespace Deku2d
 		return result;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	//	_2DE_VECTOR3_H_

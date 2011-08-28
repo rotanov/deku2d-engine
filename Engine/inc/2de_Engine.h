@@ -17,7 +17,7 @@
 #include "2de_SpatialManager.h"
 #include "2de_Xml.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	const int ENGINE_VERSION = 0x001;	// it's a pity that it's not used.. i DO WANT some build counter, that increments automatically every build :)
 	const float FIXED_DELTA_TIME = 0.02f;
@@ -138,6 +138,6 @@ namespace Deku2d
 		StateHandler = new T;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_ENGINE_H_

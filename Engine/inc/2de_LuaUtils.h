@@ -7,7 +7,7 @@
 #include "2de_Resource.h"
 #include "2de_Log.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	* CScript - represents script resource type.
@@ -205,6 +205,6 @@ namespace Deku2d
 
 	}	//	namespace LuaAPI
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_LUA_UTILS_H_

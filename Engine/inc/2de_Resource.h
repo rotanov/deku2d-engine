@@ -5,7 +5,7 @@
 #include "2de_Factory.h"
 #include "2de_Xml.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	* CResourceSectionLoaderBase - base class of resources sections loader for polymorphism.
@@ -373,6 +373,6 @@ namespace Deku2d
 		return (Pointer != Operand);
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_RESOURCE_H_

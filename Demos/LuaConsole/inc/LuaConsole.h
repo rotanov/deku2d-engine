@@ -2,7 +2,7 @@
 #define _LUA_CONSOLE_H_
 
 #include "2de_Engine.h"
-using namespace Deku2d;
+using namespace Deku2D;
 
 class CLuaConsole : public CObject
 {

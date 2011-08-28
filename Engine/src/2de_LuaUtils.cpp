@@ -2,7 +2,7 @@
 
 #include "2de_Engine.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	* LuaAPI - namespace for functions that is called from Lua scripts. The engine itself doesn't use them.
@@ -401,6 +401,8 @@ namespace Deku2d
 				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetInterval API call");
 
 			obj->SetInterval(lua_tonumber(L, -1));
+
+			return 0;
 		}
 
 		// void SetTimerEnabled(userdata Timer, bool Enabled)
@@ -414,6 +416,8 @@ namespace Deku2d
 				LuaVirtualMachine->TriggerError("incorrect usage of light user data in SetTimerEnabled API call");
 
 			obj->SetEnabled(lua_toboolean(L, -1));
+
+			return 0;
 		}
 
 		// void SubscribeToEvent(userdata Object, string EventName)
@@ -1183,4 +1187,4 @@ namespace Deku2d
 		ArgumentsCount = AArgumentsCount;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

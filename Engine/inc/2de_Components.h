@@ -7,7 +7,7 @@
 #include "2de_Resource.h"
 #include "2de_Xml.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	// shouldn't be here..
 	#if defined(GetClassName)
@@ -365,6 +365,6 @@ namespace Deku2d
 
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_COMPONENTS_H_

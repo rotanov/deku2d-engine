@@ -1,6 +1,6 @@
 #include "2de_Sound.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CSound
@@ -408,4 +408,4 @@ namespace Deku2d
 		Mix_CloseAudio();
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

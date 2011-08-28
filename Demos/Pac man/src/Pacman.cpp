@@ -1,5 +1,5 @@
 #include "Pacman.h"
-using namespace Deku2d;
+using namespace Deku2D;
 
 #define NewObject(A) Factory->New<A>("")
 

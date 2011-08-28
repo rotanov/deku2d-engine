@@ -5,7 +5,7 @@
 #include "2de_Vector2.h"
 #include "2de_Box.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	//	CGeometry
@@ -157,6 +157,6 @@ namespace Deku2d
 	// 	return CPolygon::Collide(A, Apos, Avel, Aorient, B, Bpos, Bvel, Borient, Normal, Depth);
 	// }
 
-}	// namespace Deku2d
+}	// namespace Deku2D
 
 #endif

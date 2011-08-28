@@ -4,7 +4,7 @@
 #include "2de_Core.h"
 #include "2de_Xml.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	* CConfigStorage - a class that represents some abstract configuration storage. It's used as the base class for all concrete storage types.
@@ -270,6 +270,6 @@ namespace Deku2d
 
 	static CTSingleton<CArgumentsConfigMappingsManager> ArgumentsConfigMappingsManager;
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_CONFIG_H_

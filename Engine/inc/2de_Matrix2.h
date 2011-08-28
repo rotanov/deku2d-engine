@@ -4,7 +4,7 @@
 #include "2de_Math.h"
 #include "2de_Vector2.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	class Matrix2
 	{
@@ -161,6 +161,6 @@ namespace Deku2d
 		}
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	//	_2DE_MATRIX2_H_

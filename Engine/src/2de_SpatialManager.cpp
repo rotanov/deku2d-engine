@@ -2,7 +2,7 @@
 #include "2de_Components.h"
 #include "2de_Engine.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	CAbstractSpatialManager::~CAbstractSpatialManager()
 	{
@@ -57,4 +57,4 @@ namespace Deku2d
 		// later
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

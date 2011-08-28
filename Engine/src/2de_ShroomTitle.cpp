@@ -1,6 +1,6 @@
 #include "2de_ImageUtils.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	namespace Const
 	{

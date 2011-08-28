@@ -2,7 +2,7 @@
 
 #include "2de_Engine.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CConfigStorage
@@ -493,4 +493,4 @@ namespace Deku2d
 		// TODO: add more mappings
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

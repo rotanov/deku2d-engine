@@ -3,7 +3,7 @@
 
 #include "2de_Math.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	template <typename T>
 	class RGBA
@@ -312,6 +312,6 @@ namespace Deku2d
 
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	//	_2DE_RGBA_H_

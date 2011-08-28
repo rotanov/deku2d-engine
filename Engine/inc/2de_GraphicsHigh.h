@@ -6,7 +6,7 @@
 #include "2de_GraphicsLow.h"
 #include "2de_Math.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	*	CSprite	was here. Approach to make animated sprite before is incorrect.
@@ -64,6 +64,6 @@ namespace Deku2d
 		vector<CNewSuperParticle> Particles;
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_GRAPHICS_HIGH_H_

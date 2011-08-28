@@ -1,8 +1,8 @@
 #include "2de_Engine.h"
 
-#define ENGINE Deku2d::CEngine::Instance()
-#define RENDER Deku2d::CRenderManager::Instance()
-Deku2d::CEngine* Ninja = ENGINE;
+#define ENGINE Deku2D::CEngine::Instance()
+#define RENDER Deku2D::CRenderManager::Instance()
+Deku2D::CEngine* Ninja = ENGINE;
 
 /*
 Вот например у нас есть некий DraggeablePrototype;
@@ -18,36 +18,36 @@ Deku2d::CEngine* Ninja = ENGINE;
 
 */
 
-class CTest : public Deku2d::CGameObject
+class CTest : public Deku2D::CGameObject
 {
 public:
 	CTest()
 	{
-		Deku2d::EventManager->Subscribe("KeyDown", this);
+		Deku2D::EventManager->Subscribe("KeyDown", this);
 	}
 
-	void ProcessEvent(const Deku2d::CEvent &AEvent)
+	void ProcessEvent(const Deku2D::CEvent &AEvent)
 	{
 		if (AEvent.GetName() == "KeyDown" && AEvent.GetData<Uint16>("Sym") == SDLK_SPACE)
 		{
-			if (Deku2d::GLWindow->GetFullscreen())
+			if (Deku2D::GLWindow->GetFullscreen())
 			{
-				Deku2d::GLWindow->SetFullscreen(false);
-				Deku2d::GLWindow->SetSize(640, 480);
-				Deku2d::GLWindow->Initialize();
+				Deku2D::GLWindow->SetFullscreen(false);
+				Deku2D::GLWindow->SetSize(640, 480);
+				Deku2D::GLWindow->Initialize();
 			}
 			else
 			{
 				/*GLWindow->SetSize(2048, 1152);
 				GLWindow->SetFullscreen(true);*/
- 				Deku2d::GLWindow->SetVideoMode(Deku2d::GLWindow->GetDesktopVideoMode());
+ 				Deku2D::GLWindow->SetVideoMode(Deku2D::GLWindow->GetDesktopVideoMode());
 			}
 		}
 	}
 
 };
 
-class CCustomStateHandler : public Deku2d::CAbstractStateHandler
+class CCustomStateHandler : public Deku2D::CAbstractStateHandler
 {
 public:
 	bool OnInitialize();
@@ -56,12 +56,12 @@ public:
 
 bool CCustomStateHandler::OnInitialize()
 {
-	Deku2d::CAbstractScene *NewScene = Deku2d::SceneManager->CreateScene();
-	Deku2d::SceneManager->SetCurrentScene(NewScene);
-	Deku2d::LuaVirtualMachine->RunScript(Deku2d::Factory->Get<Deku2d::CScript>(Deku2d::Config->Section("Data")["InitScript"]));
-	Deku2d::CEngine::Instance()->RootGameObject->Attach(Deku2d::Factory->New<CTest>("SetSizeTest"));
+	Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
+	Deku2D::SceneManager->SetCurrentScene(NewScene);
+	Deku2D::LuaVirtualMachine->RunScript(Deku2D::Factory->Get<Deku2D::CScript>(Deku2D::Config->Section("Data")["InitScript"]));
+	Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
 	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
-	Deku2d::SoundMixer->SetMusicVolume(128);
+	Deku2D::SoundMixer->SetMusicVolume(128);
 	return true;
 }
 

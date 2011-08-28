@@ -3,7 +3,7 @@
 #include "2de_GraphicsHigh.h"
 #include "2de_Engine.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CTileset
@@ -210,4 +210,4 @@ namespace Deku2d
 			static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(GLWindow->GetSize() * 0.5f);
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

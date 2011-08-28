@@ -11,7 +11,7 @@
 // 	}
 // 	glEnd();
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// New particle system
@@ -104,4 +104,4 @@ namespace Deku2d
 
 	*/
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

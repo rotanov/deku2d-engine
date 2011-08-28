@@ -1,7 +1,7 @@
 #include "LuaConsole.h"
-using namespace Deku2d;
+using namespace Deku2D;
 
-namespace Deku2d
+namespace Deku2D
 {
 	namespace LuaAPI
 	{
@@ -18,7 +18,7 @@ namespace Deku2d
 
 	}	//	namespace LuaAPI
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 CLuaConsole::CLuaConsole()
 {

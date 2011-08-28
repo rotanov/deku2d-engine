@@ -2,7 +2,7 @@
 
 #include <IL/il.h>
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CEngine
@@ -622,4 +622,4 @@ namespace Deku2d
 		RootGameObject = NULL;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

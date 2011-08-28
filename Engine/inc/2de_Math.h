@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace Deku2d
+namespace Deku2D
 {
 	#ifndef __INLINE
 		#if defined(_MSC_VER)
@@ -247,6 +247,6 @@ namespace Deku2d
 	*/
 	__INLINE void CalcConvexHull (std::vector<Vector2> &a);
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_MATH_UTILS_H_

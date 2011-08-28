@@ -5,7 +5,7 @@
 #include "2de_Xml.h"
 #include "2de_Log.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	class CGameObject;
 
@@ -207,6 +207,6 @@ namespace Deku2d
 		return result;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_FACTORY_H_

@@ -46,6 +46,7 @@
 #define _SECURE_SCL 0
 
 #include <SDL/SDL.h>
+//#undef main
 
 #include <algorithm>
 #include <cassert>
@@ -85,7 +86,7 @@
 #define MAX_PATH 260
 #endif //_WIN32
 
-namespace Deku2d
+namespace Deku2D
 {
 	using std::string;
 	using std::vector;
@@ -970,6 +971,6 @@ namespace Deku2d
 
 	#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_CORE_H_

@@ -1,6 +1,6 @@
 #include "2de_Matrix2.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	Vector2 Vector2::operator *(const Matrix2& M) const
 	{
@@ -34,4 +34,4 @@ namespace Deku2d
 		return *this;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

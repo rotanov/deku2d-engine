@@ -3,7 +3,7 @@
 
 #include "2de_Vector2.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	/**
 	*	CBox - rectangle representation for common needs.	
@@ -46,6 +46,6 @@ namespace Deku2d
 		Vector2Array<4> GetVertices() const;
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	//	_2DE_BOX_H_

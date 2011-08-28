@@ -3,7 +3,7 @@
 
 #include "2de_Core.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CGeometry
@@ -201,4 +201,4 @@ namespace Deku2d
 		return true;
 	}
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D

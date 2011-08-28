@@ -8,7 +8,7 @@
 #include "2de_Geometry.h"
 #include "2de_Matrix2.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	unsigned g_seed = 152406923;
 	//unsigned g_seed = time(NULL);

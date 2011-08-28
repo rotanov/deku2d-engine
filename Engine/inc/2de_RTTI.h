@@ -4,7 +4,7 @@
 #include <typeinfo>
 #include <string>
 
-namespace Deku2d
+namespace Deku2D
 {
 	class CObject;
 
@@ -129,6 +129,6 @@ namespace Deku2d
 	};
 
 	// RegisterProperty<uint>( "Mah property" ) for example
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif	// _2DE_RTTI_H_

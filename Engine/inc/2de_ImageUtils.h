@@ -3,12 +3,12 @@
 
 #include "2de_RGBA.h"
 
-namespace Deku2d
+namespace Deku2D
 {
 	typedef unsigned int ILuint;
 
 	/**
-	*	Since I found it useful to use this module separated from Deku2d I did that:
+	*	Since I found it useful to use this module separated from Deku2D I did that:
 	*	#define _2DE_IMAGE_UTILS_SEPARATED_ - you can define it somewhere before header appers
 	*	and it should work fine.
 	*/
@@ -32,6 +32,6 @@ namespace Deku2d
 		void InitImageData();
 	};
 
-}	//	namespace Deku2d
+}	//	namespace Deku2D
 
 #endif // _2DE_IMAGE_UTILS_H_
