@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<KeyBinding>
+	<General>
+		<Shoot>
+			<Key ident="122" />
+			<Key ident="109" />
+		</Shoot>
+	</General>
+	<Test>
+		<Act>
+			<Key ident="48" />
+			<Key ident="13" />
+			<Key ident="38" />
+		</Act>
+	</Test>
+</KeyBinding>

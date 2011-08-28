@@ -476,6 +476,18 @@ namespace Deku2D
 			return 0;
 		}
 
+		// bool IsBound(number|string Key, string BindGroup, string BindAction)
+		int IsBound(lua_State *L)
+		{
+			if (!lua_isstring(L, -1) || !lua_isstring(L, -2) || !lua_isnumber(L, -3))
+				LuaVirtualMachine->TriggerError("incorrect arguments given to IsBound API call");
+
+			SDLKey key = (SDLKey) lua_tonumber(L, -3);
+
+			lua_pushboolean(L, KeyBindingManager->IsBound(key, lua_tostring(L, -2), lua_tostring(L, -1)));
+			return 1;
+		}
+
 		// number sin(number n)
 		int sin(lua_State *L)	// WHAT?! Lua cannot into sin() or what? // having multiple implementations (C++ and Lua) of the same functions can generally lead to some troubles.. it's VERY unlikely, though, but who knows?..
 		{
@@ -1019,6 +1031,9 @@ namespace Deku2D
 		lua_register(L, "SubscribeToEvent", &LuaAPI::SubscribeToEvent);
 		lua_register(L, "UnsubscribeFromEvent", &LuaAPI::UnsubscribeFromEvent);
 		lua_register(L, "TriggerEvent", &LuaAPI::TriggerEvent);
+
+		// key binding
+		lua_register(L, "IsBound", &LuaAPI::IsBound);
 
 		// math
 		lua_register(L, "sin", &LuaAPI::sin);

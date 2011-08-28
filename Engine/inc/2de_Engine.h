@@ -10,6 +10,7 @@
 #include "2de_GraphicsLow.h"
 #include "2de_GraphicsHigh.h"
 #include "2de_ImageUtils.h"
+#include "2de_Input.h"
 #include "2de_LuaUtils.h"
 #include "2de_Math.h"
 #include "2de_Resource.h"

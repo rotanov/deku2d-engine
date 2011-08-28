@@ -60,7 +60,8 @@ function BlackNinja:OnKeyDown(event)
 		local vLen = math.sqrt( self.v.x * self.v.x + self.v.y * self.v.y )
 		self.vn = Vector2( self.v.x / vLen, self.v.y / vLen )		
 	end
-	if sym == SDLK._z then
+	if IsBound(sym, 'General', 'Shoot') then
+	--if sym == SDLK._z then
 		self.shooting = true
 	end
 
@@ -81,7 +82,8 @@ function BlackNinja:OnKeyUp(event)
 		self.v = self.v - inc
 		--local vLen = math.sqrt( self.v.x * self.v.x + self.v.y * self.v.y )
 		--self.vn = Vector2( self.v.x / vLen, self.v.y / vLen )		
-	elseif sym == SDLK._z then
+	elseif IsBound(sym, 'General', 'Shoot') then
+	--elseif sym == SDLK._z then
 		self.shooting = false
 	end
 end

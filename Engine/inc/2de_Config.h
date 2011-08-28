@@ -65,7 +65,7 @@ namespace Deku2D
 	};
 
 	/**
-	* CConfigDefaultsStorage - a class that represents a default configuration storage. Should be inhereted from to create defaults for some concrete configuration.
+	* CConfigDefaultsStorage - a class that represents a default configuration storage.
 	*/
 
 	class CConfigDefaultsStorage : public CConfigStorage

@@ -62,6 +62,17 @@ bool CCustomStateHandler::OnInitialize()
 	Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
 	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
 	Deku2D::SoundMixer->SetMusicVolume(128);
+
+	Deku2D::KeyBindingManager->UnbindAction("Test", "Act");
+	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_0);
+	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_RETURN);
+	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_AMPERSAND);
+
+	if (!Deku2D::KeyBindingManager->IsBound(SDLK_m, "General", "Shoot"))
+	{
+		Deku2D::KeyBindingManager->Bind("General", "Shoot", SDLK_m);
+	}
+	Deku2D::KeyBindingManager->Save();
 	return true;
 }
 
