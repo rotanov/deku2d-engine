@@ -10,6 +10,9 @@ local Vector2_mt = {
 	__mul = function(a, b)
 		return Vector2(a.x * b, a.y * b)
 	end,
+	__div = function(a, b)
+		return Vector2(a.x / b, a.y / b)
+	end,
 	__unm = function(a)
 		return Vector2(-a.x, -a.y)
 	end,

@@ -44,16 +44,18 @@ function BallScriptable:OnEveryFrame()
 		self.Velocity.y = -self.Velocity.y * 0.5
 	end
 
-	local BallBox = CBox(self.Position, self.Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE))
+	local BallBox = CBox(self.Position - Vector2(PONG_BALL_SIZE) / 2, self.Position + Vector2(PONG_BALL_SIZE, PONG_BALL_SIZE) / 2)
 	local CollidedPlayer
 	local CollideFlag = 0
 
 	if BallBox:Intersect(PlayerOneScriptable:GetBox()) then
+		self.Position.x = self.Position.x + 0.5 * PONG_BALL_SIZE
 		CollidedPlayer = PlayerOneScriptable
 		CollideFlag = 0.5
 	end
 
 	if BallBox:Intersect(PlayerTwoScriptable:GetBox()) then
+		self.Position.x = self.Position.x - 0.5 * PONG_BALL_SIZE
 		CollidedPlayer = PlayerTwoScriptable
 		CollideFlag = -0.5
 	end
@@ -61,6 +63,7 @@ function BallScriptable:OnEveryFrame()
 	if CollideFlag ~= 0 then
 		self.Velocity.x = -self.Velocity.x + CollideFlag * Abs(CollidedPlayer.Velocity.y)
 		self.Velocity.y = self.Velocity.y + Abs(CollidedPlayer.Velocity.y) * 0.01
+		PlaySound("chord")
 	end
 
 	if self.Position.x < 0.0 then

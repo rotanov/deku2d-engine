@@ -488,6 +488,24 @@ namespace Deku2D
 			return 1;
 		}
 
+		// void PlaySound(string SoundName)
+		int PlaySound(lua_State *L)
+		{
+			if (!lua_isstring(L, -1))
+				LuaVirtualMachine->TriggerError("incorrect arguments given to PlaySound API call");
+
+			SoundMixer->PlaySound(SoundManager->GetSoundByName(lua_tostring(L, -1)));
+		}
+
+		// void PlayMusic(string MusicName)
+		int PlayMusic(lua_State *L)
+		{
+			if (!lua_isstring(L, -1))
+				LuaVirtualMachine->TriggerError("incorrect arguments given to PlayMusic API call");
+
+			SoundMixer->PlayMusic(MusicManager->GetMusicByName(lua_tostring(L, -1)));
+		}
+
 		// number sin(number n)
 		int sin(lua_State *L)	// WHAT?! Lua cannot into sin() or what? // having multiple implementations (C++ and Lua) of the same functions can generally lead to some troubles.. it's VERY unlikely, though, but who knows?..
 		{
@@ -1034,6 +1052,10 @@ namespace Deku2D
 
 		// key binding
 		lua_register(L, "IsBound", &LuaAPI::IsBound);
+
+		// sound
+		lua_register(L, "PlaySound", &LuaAPI::PlaySound);
+		lua_register(L, "PlayMusic", &LuaAPI::PlayMusic);
 
 		// math
 		lua_register(L, "sin", &LuaAPI::sin);

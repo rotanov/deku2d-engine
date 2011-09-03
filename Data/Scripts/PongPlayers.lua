@@ -54,7 +54,7 @@ function PongPlayer:OnEveryFrame()
 end
 
 function PongPlayer:GetBox()
-	return CBox(self.Position, self.Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT))
+	return CBox(self.Position - Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT) / 2, self.Position + Vector2(PONG_PLAYER_WIDTH, PONG_PLAYER_HEIGHT) / 2)
 end
 
 PongPlayerOne = PongPlayer:Derive()
