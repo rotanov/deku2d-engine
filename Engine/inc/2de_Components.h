@@ -139,7 +139,7 @@ namespace Deku2D
 
 		/**
 		*	Layers should be from SOME_NEGATIVE_VALUE to SOME_POSITIVE_VALUE. Layer with greater number is drawn over layer with lower one.
-		*	implicitly Depth => [-1; 1]?	
+		*	implicitly Depth => [-1; 1]?
 		*/
 		void SetLayer(int Layer);
 		void SetScaling(float AScaling);
@@ -278,9 +278,7 @@ namespace Deku2D
 
 	/**
 	*	Text.
-	*	Shouldn't render itself, should be inherited from CRenderableComponent, not Renderable
-	*	So it will have Model and Configuration and there will become some unclear stuff.
-	*	Cause CModel wants to be Resource.
+	*	Place for comment.
 	*/
 
 	class CText : public CRenderableComponent

@@ -12,7 +12,7 @@
 
 namespace Deku2D
 {
-	#define _2DE_DEBUG_DRAW_BOXES
+	#define _2DE_DEBUG_DRAW_BOXES // wtf? I found no other occurrences
 
 	// OpenGL is not included in the interface now, so I'll redefine it myself
 	typedef unsigned GLuint;

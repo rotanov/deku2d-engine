@@ -482,7 +482,7 @@ namespace Deku2D
 			if (!lua_isstring(L, -1) || !lua_isstring(L, -2) || !lua_isnumber(L, -3))
 				LuaVirtualMachine->TriggerError("incorrect arguments given to IsBound API call");
 
-			SDLKey key = (SDLKey) lua_tonumber(L, -3);
+			SDLKey key = static_cast<SDLKey>(static_cast<int>(lua_tonumber(L, -3)));
 
 			lua_pushboolean(L, KeyBindingManager->IsBound(key, lua_tostring(L, -2), lua_tostring(L, -1)));
 			return 1;
@@ -495,6 +495,7 @@ namespace Deku2D
 				LuaVirtualMachine->TriggerError("incorrect arguments given to PlaySound API call");
 
 			SoundMixer->PlaySound(SoundManager->GetSoundByName(lua_tostring(L, -1)));
+			return 0;
 		}
 
 		// void PlayMusic(string MusicName)
@@ -504,6 +505,7 @@ namespace Deku2D
 				LuaVirtualMachine->TriggerError("incorrect arguments given to PlayMusic API call");
 
 			SoundMixer->PlayMusic(MusicManager->GetMusicByName(lua_tostring(L, -1)));
+			return 0;
 		}
 
 		// number sin(number n)

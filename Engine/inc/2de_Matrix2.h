@@ -56,13 +56,12 @@ namespace Deku2D
 			return T;
 		}
 
-		static Matrix2 Zer0()
+		static Matrix2 Zero()
 		{
 			static const Matrix2 T(0.0f, 0.0f, 0.0f, 0.0f);
 
 			return T;
 		}
-
 
 		Matrix2 Tranpose()
 		{

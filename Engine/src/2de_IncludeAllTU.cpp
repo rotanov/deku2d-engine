@@ -23,4 +23,5 @@
 #include "2de_GraphicsLow.cpp"
 #include "2de_Resource.cpp"
 #include "2de_SpatialManager.cpp"
+#include "2de_Input.cpp"
 #include "2de_ShroomTitle.cpp"
