@@ -156,7 +156,7 @@ namespace Deku2D
 	#define DEAD_FOOD 0xdeadf00d
 
 	#define DISABLE_DEBUG_BOXES
-	#undef DISABLE_DEBUG_BOXES
+	//#undef DISABLE_DEBUG_BOXES
 
 	namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html 
 							// if it won't come in handy, I'll remove it.

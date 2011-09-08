@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="Deku2d"
 	ProjectGUID="{35F1F297-4147-41B6-9B7D-09F5670F3E54}"
 	RootNamespace="Deku2d"
@@ -159,6 +159,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\2de_DebugBox.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\2de_IncludeAllTU.cpp"
 				>
 			</File>
@@ -185,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_DebugBox.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Engine.h"
 				>
 			</File>
@@ -197,7 +205,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_GameObject.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_GameUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_GeometricComponent.h"
 				>
 			</File>
 			<File
@@ -237,6 +253,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_PlaceableComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Prototype.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_RenderableComponent.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Resource.h"
 				>
 			</File>
@@ -254,6 +282,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\2de_SpatialManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Text.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_TimerComponent.h"
 				>
 			</File>
 			<File

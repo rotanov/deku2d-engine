@@ -2,7 +2,7 @@
 #define _2DE_GRAPHICS_HIGH_H_
 
 #include "2de_Core.h"
-#include "2de_Components.h"
+#include "2de_RenderableComponent.h"
 #include "2de_GraphicsLow.h"
 #include "2de_Math.h"
 

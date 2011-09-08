@@ -3,6 +3,13 @@
 
 #include "2de_Core.h"
 #include "2de_Components.h"
+#include "2de_GameObject.h"
+#include "2de_PlaceableComponent.h"
+#include "2de_RenderableComponent.h"
+#include "2de_DebugBox.h"
+#include "2de_Text.h"
+#include "2de_TimerComponent.h"
+#include "2de_Prototype.h"
 #include "2de_Config.h"
 #include "2de_Event.h"
 #include "2de_Factory.h"

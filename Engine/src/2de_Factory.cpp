@@ -1,6 +1,8 @@
 #include "2de_Factory.h"
 
 #include "2de_Components.h"
+#include "2de_GeometricComponent.h"
+#include "2de_DebugBox.h"
 
 namespace Deku2D
 {
