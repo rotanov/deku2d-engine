@@ -1,6 +1,8 @@
 #ifndef _2DE_PROTOTYPE_H_
 #define _2DE_PROTOTYPE_H_
 
+#include "2de_Resource.h"
+
 namespace Deku2D
 {
 	/**

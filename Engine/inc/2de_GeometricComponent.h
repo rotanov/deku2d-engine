@@ -1,6 +1,8 @@
 #ifndef _2DE_GEOMETRIC_COMPONENT_H_
 #define _2DE_GEOMETRIC_COMPONENT_H_
 
+#include "2de_GameObject.h"
+
 namespace Deku2D
 {
 	/**

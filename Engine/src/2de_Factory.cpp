@@ -1,7 +1,12 @@
 #include "2de_Factory.h"
 
-#include "2de_Components.h"
+#include "2de_Prototype.h"
+#include "2de_GameObject.h"
+#include "2de_RenderableComponent.h"
+#include "2de_PlaceableComponent.h"
 #include "2de_GeometricComponent.h"
+#include "2de_Text.h"
+#include "2de_TimerComponent.h"
 #include "2de_DebugBox.h"
 
 namespace Deku2D

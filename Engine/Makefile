@@ -1,12 +1,14 @@
 SOURCES		=	src/2de_Core.cpp \
 			src/2de_Box.cpp \
-			src/2de_Components.cpp \
 			src/2de_Config.cpp \
+			src/2de_DebugBox.cpp \
 			src/2de_DefaultFont.cpp \
 			src/2de_Engine.cpp \
 			src/2de_Event.cpp \
 			src/2de_Factory.cpp \
+			src/2de_GameObject.cpp \
 			src/2de_GameUtils.cpp \
+			src/2de_GeometricComponent.cpp \
 			src/2de_Geometry.cpp \
 			src/2de_GraphicsHigh.cpp \
 			src/2de_GraphicsLow.cpp \
@@ -16,24 +18,31 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_LuaUtils.cpp \
 			src/2de_Math.cpp \
 			src/2de_Matrix2.cpp \
+			src/2de_PlaceableComponent.cpp \
 			src/2de_Physics.cpp \
+			src/2de_Prototype.cpp \
+			src/2de_RenderableComponent.cpp \
 			src/2de_Resource.cpp \
 			src/2de_RTTI.cpp \
 			src/2de_ShroomTitle.cpp \
 			src/2de_SpatialManager.cpp \
 			src/2de_Sound.cpp \
+			src/2de_Text.cpp \
+			src/2de_TimerComponent.cpp \
 			src/2de_Vector3.cpp \
 			src/2de_Xml.cpp
 
 OBJECTS		=	obj/2de_Core.o \
 			obj/2de_Box.o \
-			obj/2de_Components.o \
 			obj/2de_Config.o \
+			obj/2de_DebugBox.o \
 			obj/2de_DefaultFont.o \
 			obj/2de_Engine.o \
 			obj/2de_Event.o \
 			obj/2de_Factory.o \
+			obj/2de_GameObject.o \
 			obj/2de_GameUtils.o \
+			obj/2de_GeometricComponent.o \
 			obj/2de_Geometry.o \
 			obj/2de_GraphicsHigh.o \
 			obj/2de_GraphicsLow.o \
@@ -43,14 +52,20 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_LuaUtils.o \
 			obj/2de_Math.o \
 			obj/2de_Matrix2.o \
+			obj/2de_PlaceableComponent.o \
 			obj/2de_Physics.o \
+			obj/2de_Prototype.o \
+			obj/2de_RenderableComponent.o \
 			obj/2de_Resource.o \
 			obj/2de_RTTI.o \
 			obj/2de_ShroomTitle.o \
 			obj/2de_SpatialManager.o \
 			obj/2de_Sound.o \
+			obj/2de_Text.o \
+			obj/2de_TimerComponent.o \
 			obj/2de_Vector3.o \
 			obj/2de_Xml.o
+
 
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)

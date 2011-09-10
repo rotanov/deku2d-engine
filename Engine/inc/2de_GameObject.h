@@ -2,6 +2,7 @@
 #define _2DE_GAME_OBJECT_H_
 
 #include "2de_Core.h"
+#include "2de_Event.h"
 #include "2de_GraphicsLow.h"
 #include "2de_LuaUtils.h"
 
