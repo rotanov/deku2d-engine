@@ -9,6 +9,7 @@ namespace Deku2D
 
 	CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 	{
+		ClassName = "GameObject";
 		PutIntoScene(SceneManager->GetCurrentScene());
 		EventManager->Subscribe("Create", this);
 	}
@@ -259,7 +260,7 @@ namespace Deku2D
 
 	void CGameObject::ProcessEvent(const CEvent &AEvent)
 	{
-		CLuaFunctionCall fc(Name, "On" + AEvent.GetName());
+		CLuaFunctionCall fc(GetName(), "On" + AEvent.GetName());
 		LuaVirtualMachine->PushEventTable(AEvent);
 		fc.SetArgumentsCount(1);
 		fc.Call();
@@ -355,8 +356,8 @@ namespace Deku2D
 
 	void CGameObject::CreateLuaObject()
 	{
-		if (!LuaVirtualMachine->IsObjectExists(Name))
-			LuaVirtualMachine->CreateLuaObject(ClassName.empty() ? Name : ClassName, Name, this);
+		if (!LuaVirtualMachine->IsObjectExists(GetName()))
+			LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
 	}
 
 }	//	namespace Deku2D

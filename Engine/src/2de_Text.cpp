@@ -5,16 +5,11 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CText
 
-	CText::CText() : Font(FontManager->GetDefaultFont())
-	{	
-		assert(Font != NULL);
-		SetText("");
-	}
-
-	CText::CText(const string &AText) : Font(FontManager->GetDefaultFont())
+	CText::CText(const string &AText /*= ""*/) : Font(FontManager->GetDefaultFont())
 	{
+		ClassName = "Text";
 		assert(Font != NULL);
-		SetText(Characters);
+		SetText(AText);
 	}
 
 	CText::~CText()

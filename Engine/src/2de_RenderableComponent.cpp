@@ -9,7 +9,7 @@ namespace Deku2D
 
 	CRenderableComponent::CRenderableComponent(CModel *AModel /*= NULL*/) : Model(AModel), Visible(true)
 	{
-		SetName("CRenderableComponent");	
+		ClassName = "RenderableComponent";
 	}
 
 	CRenderableComponent::~CRenderableComponent()

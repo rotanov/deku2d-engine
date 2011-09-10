@@ -79,7 +79,7 @@ namespace Deku2D
 		template<typename T>
 		T CloneHelper(T AObject, const string &ACloneName = "") const
 		{
-			Factory->Add(AObject, ACloneName.empty() ? GetName() + "copy" + itos(AObject->GetID()) : ACloneName);	// may be names will be too long..
+			Factory->Add(AObject, ACloneName.empty() ? AObject->GetStandardName() : ACloneName);	// may be names will be too long..
 			AObject->SetScript(AObject->GetScript());
 			AObject->FinalizeCreation();	// i'm not sure about this.. this is wrong for prototypes, i think.. // but it works..
 			return AObject;
@@ -99,7 +99,6 @@ namespace Deku2D
 		CAbstractScene *Scene;
 		CScript *Script;
 		ChildrenContainer Children;
-		string ClassName;
 		bool Prototype;
 		bool Created;
 		bool Active;

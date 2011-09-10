@@ -19,7 +19,7 @@ namespace Deku2D
 
 		CGeometricComponent() : Box(0, 0, 0, 0)
 		{
-
+			ClassName = "GeometricComponent";
 		}
 
 		// Danger: When we use it as arg to DrawSolidBox() then it apply scaling two times. @todo: fix this <--

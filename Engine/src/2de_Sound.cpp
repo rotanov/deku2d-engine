@@ -7,8 +7,8 @@ namespace Deku2D
 
 	CSound::CSound()
 	{
+		ClassName = "Sound";
 		Data = NULL;
-		SetName("CSound");
 		SoundManager->Add(this);
 	}
 
@@ -85,8 +85,8 @@ namespace Deku2D
 
 	CMusic::CMusic()
 	{
+		ClassName = "Music";
 		Data = NULL;
-		SetName("CMusic");
 		MusicManager->Add(this);
 	}
 
@@ -173,7 +173,7 @@ namespace Deku2D
 
 	CSoundManager::CSoundManager()
 	{
-		SetName("Sound manager");
+		SetName("SoundManager");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ namespace Deku2D
 
 	CMusicManager::CMusicManager()
 	{
-		SetName("Music manager");
+		SetName("MusicManager");
 	}
 
 

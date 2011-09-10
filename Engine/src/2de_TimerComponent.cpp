@@ -9,6 +9,7 @@ namespace Deku2D
 
 	CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), Interval(AInterval), Accumulated(0.0f)
 	{
+		ClassName = "TimerComponent";
 	}
 
 	CTimerComponent* CTimerComponent::Clone(const string &ACloneName /*= ""*/) const

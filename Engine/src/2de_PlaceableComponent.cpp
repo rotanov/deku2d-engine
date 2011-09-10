@@ -8,7 +8,7 @@ namespace Deku2D
 
 	CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 	{
-		SetName("CPlaceableComponent");	
+		ClassName = "PlaceableComponent";
 	}
 
 	CPlaceableComponent* CPlaceableComponent::Clone(const string &ACloneName /*= ""*/) const

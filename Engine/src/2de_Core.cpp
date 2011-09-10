@@ -11,10 +11,12 @@ namespace Deku2D
 
 	CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name("CObject" + itos(ID))
 	{
+		ClassName = "Object";
 	}
 
 	CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name("CObject" + itos(ID))
 	{
+		ClassName = "Object";
 	}
 
 	CObject& CObject::operator=(const CObject &AObject)
@@ -51,6 +53,11 @@ namespace Deku2D
 		}
 
 		Name = AObjectName;
+	}
+
+	string CObject::GetStandardName() const
+	{
+		return ClassName + itos(ID);
 	}
 
 	unsigned CObject::GetID() const

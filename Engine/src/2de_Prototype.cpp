@@ -7,6 +7,7 @@ namespace Deku2D
 
 	CPrototype::CPrototype()
 	{
+		ClassName = "Prototype";
 		Persistent = true; // persistent by default, at least now..
 	}
 
@@ -36,7 +37,7 @@ namespace Deku2D
 
 		if (XML.Root.First("Prototype")->IsErroneous() || !XML.Root.First("Prototype")->HasAttribute("Name"))
 		{
-			Log("ERROR", "Prototype named '%s' has invalid format", Name.c_str());
+			Log("ERROR", "Prototype named '%s' has invalid format", GetName().c_str());
 			return false;
 		}
 

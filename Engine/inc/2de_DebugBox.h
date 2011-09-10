@@ -15,6 +15,7 @@ namespace Deku2D
 
                 CDebugBoxComponent()
                 {
+			ClassName = "DebugBoxComponent";
                         CRenderConfig NewConfiguration = GetConfiguration();
                         NewConfiguration.doIgnoreTransform = true;
                         SetConfiguration(NewConfiguration);

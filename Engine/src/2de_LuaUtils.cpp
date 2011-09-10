@@ -651,6 +651,11 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CScript
 
+	CScript::CScript() : Runned(false)
+	{
+		ClassName = "Script";
+	}
+
 	bool CScript::Load()
 	{
 		if (Loaded)
@@ -701,17 +706,12 @@ namespace Deku2D
 		return Runned;
 	}
 
-	CScript::CScript() : Runned(false)
-	{
-
-	}
-
 	//////////////////////////////////////////////////////////////////////////
 	// CLuaVirtualMachine
 
 	CLuaVirtualMachine::CLuaVirtualMachine()
 	{
-		SetName("CLuaVirtualMachine");
+		SetName("LuaVirtualMachine");
 		
 		L = luaL_newstate();
 		luaL_openlibs(L);
@@ -849,22 +849,17 @@ namespace Deku2D
 
 	void CLuaVirtualMachine::CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject)
 	{
-		if (AClassName != AName)
+		lua_getglobal(L, AClassName.c_str());
+		if (lua_isnil(L, -1) || !lua_istable(L, -1))
 		{
-			lua_getglobal(L, AClassName.c_str());
-			if (lua_isnil(L, -1) || !lua_istable(L, -1))
-			{
-				Log("ERROR", "An error occurred while creating '%s': its class '%s' must be defined in Lua script first", AName.c_str(), AClassName.c_str());
-				lua_pop(L, 1);
-				return;
-			}
-
-			DeepCopy(L);
-
-			lua_setglobal(L, AName.c_str());
-
-	//		lua_pop(L, 1);
+			Log("ERROR", "An error occurred while creating '%s': its class '%s' must be defined in Lua script first", AName.c_str(), AClassName.c_str());
+			lua_pop(L, 1);
+			return;
 		}
+
+		DeepCopy(L);
+
+		lua_setglobal(L, AName.c_str());
 
 		lua_getglobal(L, AName.c_str());
 		if (lua_isnil(L, -1))

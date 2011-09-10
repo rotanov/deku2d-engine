@@ -55,7 +55,7 @@ namespace Deku2D
 
 	CEventManager::CEventManager()
 	{
-		SetName("CEventManager");
+		SetName("EventManager");
 	}
 
 	CEventManager::~CEventManager()

@@ -231,6 +231,7 @@ namespace Deku2D
 
 	CConfig::CConfig() : FileConfig(Environment::Paths::GetConfigPath() + CEngine::Instance()->GetProgramName() + ".xml", MAIN_CONFIG_ROOT_NODE_NAME), CommandLineConfig(MAIN_CONFIG_ROOT_NODE_NAME)
 	{
+		SetName("Config");
 		FillDefaults();
 	}
 
@@ -400,6 +401,7 @@ namespace Deku2D
 
 	CCommandLineArgumentsManager::CCommandLineArgumentsManager() : ErrorState(false)
 	{
+		SetName("CommandLineArgumentsManager");
 	}
 
 	bool CCommandLineArgumentsManager::Lex(int argc, char *argv[])
@@ -485,6 +487,8 @@ namespace Deku2D
 
 	CArgumentsConfigMappingsManager::CArgumentsConfigMappingsManager()
 	{
+		SetName("ArgumentsConfigMappingsManager");
+
 		Add(CArgumentsConfigMapping("data-path", 0, "Data", "DataPath", true));
 		Add(CArgumentsConfigMapping("window-width", 0, "Video", "WindowWidth", true));
 		Add(CArgumentsConfigMapping("window-height", 0, "Video", "WindowHeight", true));

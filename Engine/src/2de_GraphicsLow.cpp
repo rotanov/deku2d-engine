@@ -457,6 +457,7 @@ namespace Deku2D
 
 	CFont::CFont() : Distance(1.0f)// Нет! Грузить её из файла!!! Ну, по крайне мере по умолчанию ставить из файла значение.// Пользователь потом сам попроавит, если надо.
 	{
+		ClassName = "Font";
 		FontManager->Add(this);
 	}
 
@@ -738,7 +739,7 @@ namespace Deku2D
 
 	CCamera::CCamera()
 	{
-		SetName("CCamera");
+		SetName("Camera");
 		//view = world = CBox(100, 100, 540, 380);
 		//outer = CBox(-1024, 0, 2048, 512);
 		Point = p = v = Const::Math::V2_ZERO;
@@ -759,7 +760,7 @@ namespace Deku2D
 
 	CRenderManager::CRenderManager()
 	{
-		SetName("Render Manager");
+		SetName("RenderManager");
 		Renderer = new CFFPRenderer();
 	}
 
@@ -1066,7 +1067,7 @@ namespace Deku2D
 
 	CFontManager::CFontManager() : DefaultFont(NULL)
 	{
-		SetName("Font manager");
+		SetName("FontManager");
 	}
 
 
@@ -1114,7 +1115,7 @@ namespace Deku2D
 
 	CTextureManager::CTextureManager()
 	{
-		SetName("Texture manager");
+		SetName("TextureManager");
 	}
 
 	bool CTextureManager::UnloadTextures()
@@ -1160,7 +1161,7 @@ namespace Deku2D
 
 	CTexture::CTexture() : TexID(0), doCleanData(true)
 	{
-		SetName("CTexture");
+		ClassName = "Texture";
 		TextureManager->Add(this);
 	}
 
@@ -1281,7 +1282,7 @@ namespace Deku2D
 
 	CSceneManager::CSceneManager() : CurrentScene(&GlobalScene)
 	{
-		SetName("Scene manager");
+		SetName("SceneManager");
 	}
 
 	CAbstractScene* CSceneManager::GetCurrentScene()
@@ -1628,6 +1629,8 @@ namespace Deku2D
 				   Vector2* AVertices /*= NULL*/, Vector2* ATexCoords /*= NULL*/) : 
 		Box(), Texture(ATexture), ModelType(AModelType), Vertices(ATexture != NULL)
 	{
+		ClassName = "Model";
+
 		if (AVerticesNumber == 0)
 			return;
 		Vertices.Reserve(AVerticesNumber);
@@ -1725,7 +1728,7 @@ namespace Deku2D
 
 		if (XMLNode->IsErroneous() || !XMLNode->HasAttribute("Name") || !XMLNode->HasAttribute("ModelType"))
 		{
-			Log("ERROR", "Model named '%s' has invalid format", Name.c_str());
+			Log("ERROR", "Model named '%s' has invalid format", GetName().c_str());
 			return false;
 		}
 

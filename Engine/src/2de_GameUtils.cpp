@@ -10,6 +10,7 @@ namespace Deku2D
 
 	CTileset::CTileset() : TileWidth(0), TileHeight(0), HorNumTiles(0), VerNumTiles(0), BBox(NULL), Texture(NULL)
 	{
+		ClassName = "Tileset";
 		TileSetManager->Add(this);
 	}
 
@@ -155,7 +156,7 @@ namespace Deku2D
 
 	CTileSetManager::CTileSetManager()
 	{
-		SetName("Tileset manager");
+		SetName("TileSetManager");
 	}
 
 	CTileset* CTileSetManager::GetTileset(const string &ATilesetName)
@@ -172,6 +173,8 @@ namespace Deku2D
 
 	CDefaultTitleScreen::CDefaultTitleScreen()
 	{
+		SetName("DefaultTitleScreen");
+
 		TextDeku = Factory->New<CText>();
 		TextTeam = Factory->New<CText>();
 

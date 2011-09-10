@@ -34,7 +34,7 @@ namespace Deku2D
 
 	CResource::CResource() : Source(LOAD_SOURCE_UNSPECIFIED), MemoryLoadData(NULL), MemoryLoadLength(0), Loaded(false), FirstTimeLoaded(false), Persistent(false), RefCount(0)
 	{
-		SetName("CResource");
+		ClassName = "Resource";
 	}
 
 	CResource::~CResource()

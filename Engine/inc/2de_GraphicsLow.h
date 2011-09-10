@@ -705,7 +705,7 @@ namespace Deku2D
 
 		CScene()
 		{
-
+			ClassName = "Scene";
 		}
 		~CScene();
 	};

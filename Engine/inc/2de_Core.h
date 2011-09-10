@@ -351,6 +351,8 @@ namespace Deku2D
 		string GetName() const;
 		virtual void SetName(const string &AObjectName);
 
+		string GetStandardName() const;
+
 		unsigned GetID() const;
 
 		bool isDestroyed() const;
@@ -367,9 +369,11 @@ namespace Deku2D
 		bool Managed;
 		bool Destroyed;
 		unsigned ID;
-		string Name;
+		string ClassName;
 
 	private:
+		string Name;
+
 		static unsigned CObjectCount;
 
 		friend class CFactory;
@@ -451,6 +455,11 @@ namespace Deku2D
 			if (temp == NULL)
 				return;
 			Objects.remove(temp);
+		}
+
+		CCommonManager()
+		{
+			ClassName = "CommonManager";
 		}
 
 		virtual ~CCommonManager()

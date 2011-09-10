@@ -9,6 +9,7 @@ namespace Deku2D
 
 	CKeyBindingManager::CKeyBindingManager() : ROOT_NODE_NAME("KeyBinding"), Filename(Environment::Paths::GetConfigPath() + ROOT_NODE_NAME + ".xml")
 	{
+		SetName("KeyBindingManager");
 		Load();
 	}
 

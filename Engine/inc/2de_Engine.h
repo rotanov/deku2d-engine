@@ -2,7 +2,6 @@
 #define _2DE_ENGINE_H_
 
 #include "2de_Core.h"
-#include "2de_Components.h"
 #include "2de_GameObject.h"
 #include "2de_PlaceableComponent.h"
 #include "2de_RenderableComponent.h"

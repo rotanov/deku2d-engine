@@ -85,7 +85,7 @@ namespace Deku2D
 	SizeOver(ASizeEnd), SizeVariability(ASizeVariability),
 	NotCreated(0), ParticlesActive(0), Age(0.0f)
 	{
-
+		ClassName = "NewSuperParticleSystem";
 	}
 
 	CNewSuperParticleSystem::~CNewSuperParticleSystem()

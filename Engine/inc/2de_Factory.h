@@ -138,7 +138,7 @@ namespace Deku2D
 
 		// we generate name for object if it isn't specified..
 		if (AName.empty())
-			AObject->SetName(typeid(T).name() + itos(AObject->GetID()));
+			AObject->SetName(AObject->GetStandardName());
 		else
 			AObject->SetName(AName);
 
