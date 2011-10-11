@@ -10,10 +10,25 @@ namespace Deku2D
 
 	CGeometry::CGeometry() : Box() {}
 
+	CGeometry::CGeometry( const CGeometry &rhs )
+	{
+		Box = rhs.GetBox();
+	}
+
 	Vector2 CGeometry::SupportMapping(const Vector2 &Direction)
 	{
+		// since it is not implemented down in hierarchy, I'll make sure no one will call it.
+		assert(false);
 		return Box.Center() + Vector2(	Sign(Direction.x) * Box.Width() * 0.5f,
 			Sign(Direction.y) * Box.Height() * 0.5f);
+	}
+
+	CGeometry CGeometry::operator=( const CGeometry &rhs )
+	{
+		if (this == &rhs)
+			return *this;
+		Box = rhs.GetBox();
+		return *this;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -21,6 +36,7 @@ namespace Deku2D
 
 	CCircle::CCircle(Vector2 APosition, float ARadius) : Position(APosition), Radius(ARadius)
 	{
+		assert( false );
 		CalcBox();
 	}
 
@@ -68,6 +84,27 @@ namespace Deku2D
 		memset(Vertices, 0, sizeof(Vertices));
 	}
 
+	CPolygon::CPolygon( const CPolygon &rhs )
+	{
+		Box = rhs.Box;
+		this->Vertices = NULL;
+		this->Reset( rhs.VerticesCount );
+		for(unsigned i = 0; i < rhs.VerticesCount; i++)
+			this->Vertices[i] = rhs[i];
+	}
+
+	CPolygon CPolygon::operator=( const CPolygon &rhs )
+	{
+		if ( this == &rhs )
+			return *this;
+		Box = rhs.Box;
+		this->Vertices = NULL;
+		this->Reset( rhs.VerticesCount );
+		for(unsigned i = 0; i < rhs.VerticesCount; i++)
+			this->Vertices[i] = rhs[i];
+		return *this;
+	}
+
 	CPolygon::~CPolygon()
 	{
 		delete [] Vertices;
@@ -99,13 +136,10 @@ namespace Deku2D
 	{
 		assert(Index >= 0 && Index < VerticesCount);
 		Vector2 *TempVertices = new Vector2 [VerticesCount - 1];
-		for (unsigned i = 0; i < VerticesCount; i++)
-		{
-			if (i > Index)
-				TempVertices[i - 1] = Vertices[i];
-			if (i < Index)
-				TempVertices[i] = Vertices[i];
-		}
+		for (unsigned i = 0; i < Index; i++)
+			TempVertices[i] = Vertices[i];
+		for (unsigned i = Index + 1; i < VerticesCount; i++)
+			TempVertices[i - 1] = Vertices[i];
 		delete [] Vertices;
 		Vertices = TempVertices;
 	}
@@ -149,6 +183,7 @@ namespace Deku2D
 			angle = Const::Math::PI * static_cast<float>(i) * _1dstuff;
 			NewPolygon[i] = Vector2(cos(angle), sin(angle)) * Radius;
 		}
+		NewPolygon.CalcBox();
 		return NewPolygon;
 	}
 
@@ -157,14 +192,15 @@ namespace Deku2D
 		float Width_d2 = Width * 0.5f;
 		float Height_d2 = Height * 0.5f;
 		CPolygon NewPolygon(4);
-		NewPolygon.Reset(4);
 		NewPolygon[0] = Vector2(-Width_d2, -Height_d2);
 		NewPolygon[1] = Vector2(+Width_d2, -Height_d2);
 		NewPolygon[2] = Vector2(+Width_d2, +Height_d2);
 		NewPolygon[3] = Vector2(-Width_d2, +Height_d2);
+		NewPolygon.CalcBox();
 		return NewPolygon;
 	}
 
+	// Has not been tested. I'm sure, it'll need tweaks.
 	bool CPolygon::IsSelfIntersects() const
 	{
 		for (unsigned i = 0; i < VerticesCount; i++)
@@ -180,6 +216,7 @@ namespace Deku2D
 		return false;
 	}
 
+	// Has not been tested.
 	bool CPolygon::IsConvex() const
 	{
 		if (VerticesCount < 4)
@@ -199,6 +236,34 @@ namespace Deku2D
 				return false;
 		}
 		return true;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	CRectangle::CRectangle( const Vector2 &Min, const Vector2 &Max )
+	{
+		assert( false );
+		assert(Min.x <= Max.x);
+		assert(Min.y <= Max.y);
+		v0 = Min;
+		v1 = Vector2(Max.x, Min.y);
+		v2 = Max;
+		v3 = Vector2(Min.x, Max.y);
+	}
+
+	CRectangle::CRectangle( const Vector2 &Center, float Width, float Height )
+	{
+		Vector2 wh_2 = Vector2(Width, Height) * 0.5f;
+		v0 = Center - wh_2;
+		v1 = Vector2(Center.x + Width * 0.5f, Center.y - Height * 0.5f);
+		v2 = Center + wh_2;
+		v3 = Vector2(Center.x - Width * 0.5f, Center.y + Height * 0.5f);
+	}
+
+
+	CSegment::CSegment( const Vector2 &Av0, const Vector2 &Av1 ) : v0(Av0), v1(Av1)
+	{
+		assert( false );
+		assert(v0 != v1);
 	}
 
 }	//	namespace Deku2D

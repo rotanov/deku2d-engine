@@ -9,15 +9,25 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	//	CGeometry
+	//	Base class for geometrical primitives. Collision methods for all of them
+	//	will be implemented when I'll start writing physics in my Deku2D.
+	//	--
+	//	All classes except the CPolygon have no use, cause there is no
+	//	collision method implemented for them.
 	class CGeometry
 	{
 	public:
 		CGeometry();
+		CGeometry(const CGeometry &rhs);
+		CGeometry operator=( const CGeometry &rhs);
+		// This function waits till I start implement GJK.
 		virtual Vector2 SupportMapping(const Vector2 &Direction);
 		virtual const CBox& GetBox() const
 		{
 			return Box;
 		}
+		// What the fuck is this function? Why did I wrote it? It's no use.
+		// It has wrong design.
 		virtual void CopyVertices(Vector2 *Destination, unsigned &VerticesCount)
 		{
 			if (Destination == NULL)
@@ -27,7 +37,9 @@ namespace Deku2D
 				Destination[VerticesCount] = Vertices[VerticesCount];
 		}
 	protected:
+		// Bounding Box. At least, it should be.
 		CBox Box;
+		// implement to custom BBox calculation. It's necessary to re-implement.
 		virtual void CalcBox(){}
 	};
 
@@ -51,6 +63,8 @@ namespace Deku2D
 	public:
 		CPolygon(unsigned AVerticesCount = 0);
 		~CPolygon();
+		CPolygon(const CPolygon &rhs);
+		CPolygon operator=(const CPolygon &rhs);
 		void Reset(unsigned AVerticesCount);
 		void CalcBox();
 		void AddVertex(const Vector2 &Vertex);
@@ -67,51 +81,41 @@ namespace Deku2D
 		bool IsSelfIntersects() const;
 		static CPolygon MakeCircle(float Radius = 1.0f, unsigned Precision = 16);
 		static CPolygon MakeBox(float Width = 1.0f, float Height = 1.0f);
-
+		// orient - Body orientation matrix. n will be modified by function
+		// depth should be dt ( frame delta time )
+		// If collision occurred returns true then depth will be depth of collision, n will be normal of collision
 		static bool	Collide	(	const CPolygon &A,
-			const Vector2 &Apos,
-			const Vector2 &Avel,
-			const Matrix2 &Aorient,
-			const CPolygon &B,
-			const Vector2 &Bpos, 
-			const Vector2 &Bvel, 
-			const Matrix2 &Borient,
-			Vector2& n,
-			float& depth);
+								const Vector2 &Apos,
+								const Vector2 &Avel,
+								const Matrix2 &Aorient,
+								const CPolygon &B,
+								const Vector2 &Bpos, 
+								const Vector2 &Bvel, 
+								const Matrix2 &Borient,
+								Vector2& n,
+								float& depth);
+
 	private:
 		unsigned VerticesCount;
 		Vector2 *Vertices;
 	};
 
+	//////////////////////////////////////////////////////////////////////////
+	// Classes below this point are not implemented yet.
 	class CRectangle : public CGeometry
 	{
 	public:
-		// влепить сюда union, когда будешь дома, а не в больничке @todo
+		// should be union with Box, I guess.
 		Vector2 v0;	// Lower left 
 		Vector2 v1;	// Lower right
 		Vector2 v2;	// Upper right
 		Vector2 v3;	// Upper left
 
-		CRectangle(const Vector2 &Min, const Vector2 &Max)
-		{
-			assert(Min.x <= Max.x);
-			assert(Min.y <= Max.y);
-			v0 = Min;
-			v1 = Vector2(Max.x, Min.y);
-			v2 = Max;
-			v3 = Vector2(Min.x, Max.y);
-		}
+		CRectangle(const Vector2 &Min, const Vector2 &Max);
 		CRectangle(const Vector2 &Av0, const Vector2 &Av1, const Vector2 &Av2, const Vector2 &Av3) :
 		v0(Av0), v1(Av1), v2(Av2), v3(Av3)
 		{}
-		CRectangle(const Vector2 &Center, float Width, float Height)
-		{
-			Vector2 wh_2 = Vector2(Width, Height) * 0.5f;
-			v0 = Center - wh_2;
-			v1 = Vector2(Center.x + Width * 0.5f, Center.y - Height * 0.5f);
-			v2 = Center + wh_2;
-			v3 = Vector2(Center.x - Width * 0.5f, Center.y + Height * 0.5f);
-		}
+		CRectangle(const Vector2 &Center, float Width, float Height);
 		//bool CheckOrienation();
 	};
 
@@ -120,10 +124,7 @@ namespace Deku2D
 	public:
 		Vector2 v0, v1;
 
-		CSegment(const Vector2 &Av0, const Vector2 &Av1) : v0(Av0), v1(Av1)
-		{
-			assert(v0 != v1);
-		}
+		CSegment(const Vector2 &Av0, const Vector2 &Av1);
 	};
 
 	// @todo: Design below-like family of Collide functions for

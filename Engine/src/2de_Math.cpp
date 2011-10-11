@@ -97,7 +97,7 @@ namespace Deku2D
 			}
 			iNumAxes++;
 		}
-
+		// test separation axes of A
 		for (unsigned j = A.GetVertexCount() - 1, i = 0; i < A.GetVertexCount(); j = i, i ++)
 		{
 			Vector2 E0 = A[j];
@@ -113,7 +113,7 @@ namespace Deku2D
 
 			iNumAxes++;
 		}
-
+		// test separation axes of B
 		for (unsigned j = B.GetVertexCount() - 1, i = 0; i < B.GetVertexCount(); j = i, i++)
 		{
 			Vector2 E0 = B[j];
@@ -161,7 +161,7 @@ namespace Deku2D
 
 		if (!FindMTD(xAxis, taxis, iNumAxes, n, depth))
 			return false;
-
+		// make sure the polygons gets pushed away from each other.
 		if (n * xOffset < 0.0f)
 			n = -n;
 
@@ -170,7 +170,7 @@ namespace Deku2D
 		return true;
 	}
 
-
+	// calculate the projection range of a polygon along an axis
 	void GetInterval(const CPolygon &Polygon, const Vector2& xAxis, float& min, float& max)
 	{
 		min = max = (Polygon[0] * xAxis);
@@ -200,18 +200,20 @@ namespace Deku2D
 		min0 += h;
 		max0 += h;
 
-		float d0 = min0 - max1;
-		float d1 = min1 - max0;
-
+		float d0 = min0 - max1; // if overlapped, do < 0
+		float d1 = min1 - max0; // if overlapped, d1 > 0
+		
+		// separated, test dynamic intervals
 		if (d0 > 0.0f || d1 > 0.0f)
 		{
 			float v = xVel * xAxis;
 
+			// small velocity, so only the overlap test will be relevant. 
 			if (fabs(v) < 0.0000001f)
 				return false;
 
-			float t0 =-d0 / v;
-			float t1 = d1 / v;
+			float t0 =-d0 / v; // time of impact to d0 reaches 0
+			float t1 = d1 / v; // time of impact to d0 reaches 1
 
 			if (t0 > t1) { float temp = t0; t0 = t1; t1 = temp; }
 			taxis  = (t0 > 0.0f)? t0 : t1;
@@ -223,12 +225,15 @@ namespace Deku2D
 		}
 		else
 		{
+			// overlap. get the interval, as a the smallest of |d0| and |d1|
+			// return negative number to mark it as an overlap
 			taxis = (d0 > d1)? d0 : d1;
 			return true;
 		}
 	}
 	bool FindMTD(Vector2* xAxis, float* taxis, int iNumAxes, Vector2& N, float& t)
 	{
+		// find collision first
 		int mini = -1;
 		t = 0.0f;
 		for (int i = 0; i < iNumAxes; i ++)
@@ -244,10 +249,11 @@ namespace Deku2D
 				}
 			}
 		}
-
+		// found one
 		if (mini != -1)
 			return true;
 
+		// nope, find overlaps
 		mini = -1;
 		for (int i = 0; i < iNumAxes; i ++)
 		{

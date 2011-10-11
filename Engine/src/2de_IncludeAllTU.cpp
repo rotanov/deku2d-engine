@@ -9,7 +9,6 @@
 #include "2de_ImageUtils.cpp"
 #include "2de_LuaUtils.cpp"
 #include "2de_Physics.cpp"
-#include "2de_Components.cpp"
 #include "2de_GameObject.cpp"
 #include "2de_PlaceableComponent.cpp"
 #include "2de_RenderableComponent.cpp"
