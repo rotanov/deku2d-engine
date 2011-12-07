@@ -15,6 +15,15 @@ namespace Deku2D
 
 		__INLINE Vector2(float Ax = 0.0f, float Ay = 0.0f) : x(Ax), y(Ay){}
 
+		__INLINE Vector2(const vector<float> &values)
+		{
+			if (values.size() >= 2 )
+			{
+				x = values[0];
+				y = values[1];
+			}
+		}
+
 		__INLINE float operator[](int i)
 		{
 			assert(i >= 0 && i <= 1);
@@ -138,11 +147,17 @@ namespace Deku2D
 		namespace Math
 		{
 			const Vector2 V2_ZERO = Vector2(0.0f, 0.0f);
-			const Vector2 LEFT = Vector2(-1.0f, 0.0f);
-			const Vector2 RIGHT	= (-LEFT);
-			const Vector2 UP = Vector2(0.0f, 1.0f);
-			const Vector2 DOWN = (-UP);
-			const Vector2 V2_DIRECTIONS[4] = {LEFT, DOWN, RIGHT, UP,};
+			const Vector2 V2_LEFT = Vector2(-1.0f, 0.0f);
+			const Vector2 V2_RIGHT	= (-V2_LEFT);
+			const Vector2 V2_UP = Vector2(0.0f, 1.0f);
+			const Vector2 V2_DOWN = (-V2_UP);
+			const Vector2 V2_MIDDLE = Vector2(0.5f, 0.5f);
+			const Vector2 V2_BOTTOM_LEFT = Vector2(-1.0f, -1.0f);
+			const Vector2 V2_BOTTOM_RIGHT = Vector2(1.0f, -1.0f);
+			const Vector2 V2_TOP_LEFT = Vector2(1.0f, -1.0f);
+			const Vector2 V2_TOP_RIGHT = Vector2(1.0f, 1.0f);
+			const Vector2 V2_DIRECTIONS[4] = {V2_LEFT, V2_DOWN, V2_RIGHT, V2_UP,};
+			const Vector2 V2_DIRECTIONS_DIAG[4] = {V2_BOTTOM_LEFT, V2_BOTTOM_RIGHT, V2_TOP_RIGHT, V2_TOP_LEFT,};
 		}	//	namespace Math
 
 	}	//	namespace Const

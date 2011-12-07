@@ -39,17 +39,17 @@ namespace Deku2D
 			const Vector2 V2_QuadBin[4] = // Four vectors representing the quad with vertices (0 0) (1 0) (1 1) (0 1)
 			{
 				Math::V2_ZERO,
-				Math::RIGHT,
-				Math::RIGHT + Math::UP,
-				Math::UP,
+				Math::V2_RIGHT,
+				Math::V2_RIGHT + Math::V2_UP,
+				Math::V2_UP,
 			};
 
 			const Vector2 V2_QuadBinCenter[4] = // Four vectors representing the quad with vertices (-1 -1) (1 -1) (1 1) (-1 1)
 			{
-				Math::LEFT + Math::DOWN,
-				Math::RIGHT + Math::DOWN,
-				Math::RIGHT + Math::UP,
-				Math::LEFT + Math::UP,
+				Math::V2_LEFT + Math::V2_DOWN,
+				Math::V2_RIGHT + Math::V2_DOWN,
+				Math::V2_RIGHT + Math::V2_UP,
+				Math::V2_LEFT + Math::V2_UP,
 			};
 
 			const Vector2Array<4> V2_QUAD_BIN =  Vector2Array<4>(V2_QuadBin);
@@ -136,27 +136,27 @@ namespace Deku2D
 		float DepthOffset;
 		Vector2 Translation;
 		float Rotation;
-		float Scaling;
+		Vector2 Scaling;
+		
 
 	public:
 		CTransformation(float ADepthOffset = 0.0f, const Vector2 &ATranslation = Const::Math::V2_ZERO,
-			float ARotation = 0.0f, float AScaling = 1.0f);
+			float ARotation = 0.0f, const Vector2 &AScaling = Const::Math::V2_TOP_RIGHT);
 		/**
 		*	Don't be confused here: Look to implementation - it applies one transformation
 		*	on other to represent common transformation, not just add members
 		*/
 		CTransformation& operator +=(const CTransformation &rhs);
 
-		float GetAngle() const;
+		float GetRotation() const;
 		float GetDepth() const;
-		float GetScaling() const;
+		const Vector2& GetScaling() const;
 		const Vector2& GetTranslation() const;
-		Vector2& GetTranslation();
 		
-		void SetAngle(float Angle);
+		void SetRotation(float ARotation);
 		void SetDepth(float ADepth);
-		void SetScaling(float AScaling);
-		void SetTranslation(const Vector2 &Position);
+		void SetScaling(const Vector2 &AScaling);
+		void SetTranslation(const Vector2 &ATranslation);
 
 		Vector2 Apply(const Vector2 &AVector);
 		CBox Apply(const CBox &ABox);

@@ -1362,9 +1362,10 @@ namespace Deku2D
 				TempVector = Vertex;
 				if (!Sender->doIgnoreTransform)
 				{
-					TempVector *= Transformation.GetScaling();
-					if (!Equal(Transformation.GetAngle(), 0.0f))
-						TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
+					TempVector.x *= Transformation.GetScaling().x;
+					TempVector.y *= Transformation.GetScaling().y;
+					if (!Equal(Transformation.GetRotation(), 0.0f))
+						TempVector *= Matrix2(DegToRad(-Transformation.GetRotation()));
 					TempVector += Transformation.GetTranslation();
 					if (!RenderManager->Transformator.doConsiderCamera) // BUG: doConsiderCamera used unitialized
 						TempVector += RenderManager->Camera.GetTranslation();
@@ -1406,9 +1407,10 @@ namespace Deku2D
 			TempVector = Vertex;
 			if (!Sender->doIgnoreTransform)
 			{
-				TempVector *= Transformation.GetScaling();
- 				if (!Equal(Transformation.GetAngle(), 0.0f))
- 					TempVector *= Matrix2(DegToRad(-Transformation.GetAngle()));
+				TempVector.x *= Transformation.GetScaling().x;
+				TempVector.y *= Transformation.GetScaling().y;
+ 				if (!Equal(Transformation.GetRotation(), 0.0f))
+ 					TempVector *= Matrix2(DegToRad(-Transformation.GetRotation()));
 				TempVector += Transformation.GetTranslation();
 		// 		if (!Sender->doIgnoreCamera)
 		// 			TempVector += RenderManager->Camera.GetTranslation();
@@ -1497,8 +1499,8 @@ namespace Deku2D
 	// Transformation
 
 	CTransformation::CTransformation(float ADepthOffset, const Vector2 &ATranslation,
-		float ARotation, float AScaling) : DepthOffset(ADepthOffset),
-		Translation(ATranslation), Rotation(ARotation), Scaling(AScaling)
+		float ARotation, const Vector2 &AScaling) : DepthOffset(ADepthOffset), Translation(ATranslation),
+		Rotation(ARotation), Scaling(AScaling)
 	{
 
 	}
@@ -1506,13 +1508,14 @@ namespace Deku2D
 	CTransformation& CTransformation::operator+=(const CTransformation &rhs)
 	{
 		DepthOffset += rhs.DepthOffset;
-		Scaling *= rhs.Scaling;
+		Scaling.x *= rhs.Scaling.x;
+		Scaling.y *= rhs.Scaling.y;
 		Translation += rhs.Translation * Matrix2(DegToRad(-Rotation));
 		Rotation = rhs.Rotation;
 		return *this;
 	}
 
-	float CTransformation::GetAngle() const
+	float CTransformation::GetRotation() const
 	{
 		return Rotation;
 	}
@@ -1522,7 +1525,7 @@ namespace Deku2D
 		return DepthOffset;
 	}
 
-	float CTransformation::GetScaling() const
+	const Vector2& CTransformation::GetScaling() const
 	{
 		return Scaling;
 	}
@@ -1532,14 +1535,9 @@ namespace Deku2D
 		return Translation;
 	}
 
-	Vector2& CTransformation::GetTranslation()
+	void CTransformation::SetRotation(float ARotation)
 	{
-		return Translation;
-	}
-
-	void CTransformation::SetAngle(float Angle)
-	{
-		Rotation = Angle;
+		Rotation = ARotation;
 	}
 
 	void CTransformation::SetDepth(float ADepth)
@@ -1547,7 +1545,7 @@ namespace Deku2D
 		DepthOffset = ADepth;
 	}
 
-	void CTransformation::SetScaling(float AScaling)
+	void CTransformation::SetScaling(const Vector2 &AScaling)
 	{
 		Scaling = AScaling;
 	}
@@ -1561,7 +1559,7 @@ namespace Deku2D
 	{
 		DepthOffset = 0.0f;
 		Translation = Const::Math::V2_ZERO;
-		Scaling = 1.0f;
+		Scaling = Const::Math::V2_TOP_RIGHT;
 		Rotation = 0.0f;
 	}
 

@@ -896,6 +896,20 @@ namespace Deku2D
 		return s.str();
 	}
 
+	__INLINE vector<float> GetNFloatTokensFromString( const string &source, unsigned n)
+	{
+		istringstream iss(source);
+		vector<string> tokens;
+		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		if (tokens.size() != n)
+			throw "pizedc";
+		vector<float> result;
+		result.resize(n);
+		for (unsigned i = 0; i < n; i++)
+			result[i] = from_string<float>(tokens[i]);
+		return result;
+	}
+
 	/**
 	* CCaseInsensitiveComparison - functor-class, that compares strings in case-insensitive manner. Used by STL containers, etc.
 	*/

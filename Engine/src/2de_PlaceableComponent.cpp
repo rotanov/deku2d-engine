@@ -23,12 +23,12 @@ namespace Deku2D
 			Angle = AAngle - Sign(AAngle)*((static_cast<int>(AAngle) / 360) * 360.0f); 
 		if (Angle < 0.0f)
 			Angle = 360.0f + Angle;
-		Transformation.SetAngle(Angle);
+		Transformation.SetRotation(Angle);
 	}
 
 	float CPlaceableComponent::GetAngle() const
 	{
-		return Transformation.GetAngle();
+		return Transformation.GetRotation();
 	}
 
 	void CPlaceableComponent::SetLayer(int Layer)
@@ -41,12 +41,12 @@ namespace Deku2D
 		return Transformation.GetDepth();
 	}
 
-	float CPlaceableComponent::GetScaling() const
+	const Vector2& CPlaceableComponent::GetScaling() const
 	{
 		return Transformation.GetScaling();
 	}
 
-	void CPlaceableComponent::SetScaling(float AScaling)
+	void CPlaceableComponent::SetScaling(const Vector2 &AScaling)
 	{
 		Transformation.SetScaling(AScaling);
 	}
@@ -57,11 +57,6 @@ namespace Deku2D
 	}
 
 	const Vector2& CPlaceableComponent::GetPosition() const
-	{
-		return Transformation.GetTranslation();
-	}
-
-	Vector2& CPlaceableComponent::GetPosition()
 	{
 		return Transformation.GetTranslation();
 	}
@@ -125,22 +120,15 @@ namespace Deku2D
 
 		if (AXML->HasAttribute("Position"))
 		{
-			Vector2 APosition = Const::Math::V2_ZERO;
-			istringstream iss(AXML->GetAttribute("Position"));
-			vector<string> tokens;
-			copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-			if (tokens.size() == 2)
-			{
-				APosition.x = from_string<float>(tokens[0]);
-				APosition.y = from_string<float>(tokens[1]);
-				SetPosition(APosition);
-			}
-			else
-				Log("WARNING", "Incorrect position in prototype");
+			SetPosition(Vector2(GetNFloatTokensFromString(AXML->GetAttribute("Position"), 2)));
+			//Log("WARNING", "Incorrect position in prototype");
 		}
 
 		if (AXML->HasAttribute("Scaling"))
-			SetScaling(from_string<float>(AXML->GetAttribute("Scaling")));
+		{
+			SetScaling(Vector2(GetNFloatTokensFromString(AXML->GetAttribute("Scaling"), 2)));
+			//Log("WARNING", "Incorrect position in prototype");			
+		}
 
 		if (AXML->HasAttribute("Layer"))
 			SetLayer(from_string<int>(AXML->GetAttribute("Layer")));
@@ -187,3 +175,4 @@ namespace Deku2D
 	}
 
 }	//	namespace Deku2D
+

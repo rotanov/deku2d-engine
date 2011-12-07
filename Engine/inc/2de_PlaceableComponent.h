@@ -21,9 +21,8 @@ namespace Deku2D
 		const CBox& GetBox() const;
 		float GetDepth() const;
 		int GetLayer() const;	
-		float GetScaling() const;
+		const Vector2 & GetScaling() const;
 		const Vector2& GetPosition() const;
-		Vector2& GetPosition();
 
 		void SetAngle(float AAngle); //	(Degrees)
 
@@ -35,7 +34,7 @@ namespace Deku2D
 		*	implicitly Depth => [-1; 1]?
 		*/
 		void SetLayer(int Layer);
-		void SetScaling(float AScaling);
+		void SetScaling(const Vector2 &AScaling);
 		void SetPosition(const Vector2 &APosition);
 
 		CTransformation& GetTransformation();
