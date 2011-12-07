@@ -242,7 +242,9 @@ namespace Deku2D
 	{
 		if (AXML->HasAttribute("ClassName"))
 		{
-			ClassName = AXML->GetAttribute("ClassName");
+			string cls = AXML->GetAttribute("ClassName");
+			if (!cls.empty())
+				ClassName = cls;
 		}
 
 		if (AXML->HasAttribute("Script"))

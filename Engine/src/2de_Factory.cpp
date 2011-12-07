@@ -62,11 +62,10 @@ namespace Deku2D
 		result->Prototype = true;
 		result->Deserialize(xml);
 
-		if (result->GetClassName().empty())
-		{
-			result->SetClassName("GameObject");
+		assert(!result->GetClassName().empty());
+
+		if (result->GetClassName() == "GameObject")
 			result->SetScript(Get<CScript>("BaseComponents"));
-		}
 
 		UsedPrototypesContainer *FirstUsedPrototypes = NULL;
 		if (!UsedPrototypes)
