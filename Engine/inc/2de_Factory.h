@@ -37,7 +37,7 @@ namespace Deku2D
 		CObject* CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes = NULL);
 
 		template<typename T>
-		void Add(T *AObject, const string &AName = "");
+		bool Add(T *AObject, const string &AName = "");
 
 		template<typename T>
 		T* Get(const string &AName, bool AMustExist = true);
@@ -103,16 +103,17 @@ namespace Deku2D
 	template<typename T>
 	CObject* CFactory::InternalNew(const string &AName)
 	{
-		if (Objects.count(AName) != 0)
+		/*if (Objects.count(AName) != 0)	// нахуй проверять 2 раза, это не очень долго, но все равно нахуй
 		{
 			Log("ERROR", "Object with name '%s' already exists", AName.c_str());
 			return NULL;
 			//throw std::logic_error("Object with name '" + AName + "' already exists.");
-		}
+		}*/
 
 		T *result = new T;
 
-		Add(result, AName);
+		if (!Add(result, AName))
+			return NULL;
 
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 
@@ -124,16 +125,16 @@ namespace Deku2D
 	}
 
 	/**
-	* CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified.
+	* CFactory::Add - adds object to the list of managed objects. Object must have unique name, so it will be generated, if not specified. Returns true on success, false otherwise.
 	*/
 
 	template<typename T>
-	void CFactory::Add(T *AObject, const string &AName /*= ""*/)
+	bool CFactory::Add(T *AObject, const string &AName /*= ""*/)
 	{
 		if (AObject == NULL)
 		{
 			Log("ERROR", "NULL pointer passed to CFactory::Add");
-			return;
+			return false;
 		}
 
 		// we generate name for object if it isn't specified..
@@ -147,11 +148,12 @@ namespace Deku2D
 		if (!Objects.insert(make_pair(ObjectName, AObject)).second)
 		{
 			Log("ERROR", "Object with name '%s' already exists", ObjectName.c_str());
-			throw std::logic_error("Object with name '" + ObjectName + "' already exists.");
-			return;
+			return false;
 		}
 
 		AObject->Managed = true;
+
+		return true;
 	}
 
 	/**

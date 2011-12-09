@@ -100,16 +100,23 @@ namespace Deku2D
 
 	void CFactory::Rename(const string &AName, const string &ANewName)
 	{
-		if (Objects.count(AName) == 0)
+		ObjectsIterator it = Objects.find(AName);
+		if (it == Objects.end())
 		{
-			Log("WARNING", "Factory isn't managing object named '%s'", AName.c_str());
+			Log("ERROR", "Factory isn't managing object named '%s'", AName.c_str());
 			return;
 		}
 
-		CObject *Object = Objects[AName];
-		Objects.erase(AName);
+		CObject *Object = it->second;
+
+		if (!Objects.insert(make_pair(ANewName, Object)).second)
+		{
+			Log("ERROR", "Can't rename object '%s' to '%s': object with requested name already exists", AName.c_str(), ANewName.c_str());
+			return;
+		}
+
 		Object->Name = ANewName;
-		Objects[ANewName] = Object;
+		Objects.erase(it);
 	}
 
 	/**
@@ -118,23 +125,22 @@ namespace Deku2D
 
 	void CFactory::Destroy(CObject *AObject)
 	{
-		ObjectsIterator i;
-		
-		for (i = Objects.begin(); i != Objects.end(); ++i)
+		if (AObject == NULL)
 		{
-			if (i->second == AObject)
-				break;
-		}
-
-		if (i == Objects.end())
-		{
-			Log("ERROR", "Factory isn't managing object with given pointer");
+			Log("ERROR", "NULL pointer passed to CFactory::Destroy");
 			return;
 		}
-		
+
+		ObjectsIterator it = Objects.find(AObject->GetName());
+		if (it == Objects.end())
+		{
+			Log("ERROR", "Can't destroy object named '%s': factory isn't managing this object", AObject->GetName().c_str());
+			return;
+		}
+
 		AObject->Destroyed = true;
 
-		Objects.erase(i);
+		Objects.erase(it);
 		Deletion.push(AObject);
 	}
 
