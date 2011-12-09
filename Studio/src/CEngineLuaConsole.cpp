@@ -81,7 +81,7 @@ void CEngineLuaConsole::SendInput(const QString &AInput)
 	if (CEngine::Instance()->isRunning())
 	{
 		CEngine::Instance()->Lock();
-		CLuaVirtualMachine::Instance()->RunString(AInput.toStdString());
+		LuaVirtualMachine->RunString(AInput.toStdString());
 		CEngine::Instance()->Unlock();
 	}
 	else

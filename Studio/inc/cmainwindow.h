@@ -6,6 +6,8 @@
 
 #include <2de_Engine.h>
 
+using namespace Deku2D;
+
 namespace Ui
 {
 	class CMainWindow;

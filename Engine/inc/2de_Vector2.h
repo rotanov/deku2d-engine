@@ -15,7 +15,7 @@ namespace Deku2D
 
 		__INLINE Vector2(float Ax = 0.0f, float Ay = 0.0f) : x(Ax), y(Ay){}
 
-		__INLINE Vector2(const vector<float> &values)
+		__INLINE Vector2(const std::vector<float> &values)
 		{
 			if (values.size() >= 2 )
 			{

@@ -16,6 +16,7 @@
 #include "CCodeEditorWidget.h"
 #include "CEngineLuaConsole.h"
 #include "CLogViewer.h"
+#include "CEngineViewport.h"
 
 void CEngineThread::run()
 {
@@ -53,6 +54,10 @@ CMainWindow::CMainWindow(QWidget *parent) :
 	//connect(sci, SIGNAL(textChanged()), sci, SLOT(autoCompleteFromAll()));
 	//connect(sci, SIGNAL(textChanged()), sci, SLOT(callTip()));
 	Tabs->addTab(sci, QIcon(), "Code Editor");
+
+	CEngineViewport *port = new CEngineViewport(this);
+	Tabs->addTab(port, QIcon(), "Engine Viewport");
+
 
 	QDockWidget *EngineConsoleDock = new QDockWidget("Engine Console");
 	EngineConsole = new CEngineLuaConsole;
@@ -139,8 +144,8 @@ void CMainWindow::on_actionStart_engine_triggered()
 	{
 		EngineThread.start();
 		CEngine::Instance()->Lock();
-		CEventManager::Instance()->Subscribe("LogOutput", LogViewer);
-		CEventManager::Instance()->Subscribe("ConsoleOutput", EngineConsole);
+		EventManager->Subscribe("LogOutput", LogViewer);
+		EventManager->Subscribe("ConsoleOutput", EngineConsole);
 		CEngine::Instance()->Unlock();
 	}
 }
@@ -149,8 +154,8 @@ void CMainWindow::on_actionStop_engine_triggered()
 {
 	CEngine::Instance()->Lock();
 	CEngine::Instance()->ShutDown();
-	CEventManager::Instance()->Unsubscribe("LogOutput", LogViewer);
-	CEventManager::Instance()->Unsubscribe("ConsoleOutput", EngineConsole);
+	EventManager->Unsubscribe("LogOutput", LogViewer);
+	EventManager->Unsubscribe("ConsoleOutput", EngineConsole);
 	CEngine::Instance()->Unlock();
 
 	ComponentTree->clear();
@@ -208,7 +213,7 @@ void CMainWindow::PropertyEditItemChanged(QTableWidgetItem *AItem)
 		string newName = AItem->text().toStdString();
 		if (oldName != newName)
 		{
-			CFactory::Instance()->Rename(oldName, newName);
+			Factory->Rename(oldName, newName);
 			ComponentTree->currentItem()->setText(0, QString::fromStdString(newName));
 		}
 	}

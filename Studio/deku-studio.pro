@@ -49,12 +49,14 @@ HEADERS += inc/cmainwindow.h \
     inc/cluasyntaxhighlighter.h \
     inc/CCodeEditorWidget.h \
     inc/CEngineLuaConsole.h \
-    inc/CLogViewer.h
+    inc/CLogViewer.h \
+    inc/CEngineViewport.h
 FORMS += ui/cmainwindow.ui
 SOURCES += src/cmainwindow.cpp \
     src/main.cpp \
     src/cluasyntaxhighlighter.cpp \
     src/CCodeEditorWidget.cpp \
     src/CEngineLuaConsole.cpp \
-    src/CLogViewer.cpp
+    src/CLogViewer.cpp \
+    src/CEngineViewport.cpp
 RESOURCES += ui/resources.qrc

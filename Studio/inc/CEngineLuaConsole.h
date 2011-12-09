@@ -6,6 +6,8 @@
 
 #include "2de_Core.h"
 
+using namespace Deku2D;
+
 class QPlainTextEdit;
 
 class CConsoleInputLine : public QLineEdit

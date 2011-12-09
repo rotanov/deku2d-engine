@@ -5,7 +5,9 @@
 
 #include <QSyntaxHighlighter>
 
-#include "2de_Engine.h"
+#include <2de_Engine.h>
+
+using namespace Deku2D;
 
 class QPlainTextEdit;
 
