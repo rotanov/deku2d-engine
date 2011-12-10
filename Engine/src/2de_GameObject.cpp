@@ -7,11 +7,9 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CGameObject
 
-	CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
+	CGameObject::CGameObject() : Created(false), Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Active(true), Dead(false), Enabled(true)
 	{
 		ClassName = "GameObject";
-		PutIntoScene(SceneManager->GetCurrentScene());
-		EventManager->Subscribe("Create", this);
 	}
 
 	CGameObject::~CGameObject()
@@ -24,7 +22,7 @@ namespace Deku2D
 
 		SetParent(NULL);
 
-		LuaVirtualMachine->DestroyLuaObject(*this);
+		DestroyLuaObject();
 	}
 
 	CGameObject* CGameObject::Clone(const string &ACloneName /*= ""*/) const
@@ -141,7 +139,7 @@ namespace Deku2D
 
 				// i already hate this isFinalizing kludge, but the following call segfaults at finalizing time without it..
 				// may be we will get rid of it when we have some cool memory managers, etc., but now i leave it as is..
-				if (!CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnDetached"))
+				if (Created && !CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnDetached"))
 					LuaVirtualMachine->CallMethodFunction(GetName(), "OnDetached");
 			}
 		}
@@ -154,7 +152,7 @@ namespace Deku2D
 			{
 				Parent->Children.push_back(this);
 
-				if (!CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnAttached"))
+				if (Created && !CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnAttached"))
 					LuaVirtualMachine->CallMethodFunction(GetName(), "OnAttached");
 			}
 		}
@@ -255,17 +253,23 @@ namespace Deku2D
 
 	void CGameObject::FinalizeCreation()
 	{
-		LuaVirtualMachine->SetLocalNamesFields(this);
-		UpdateParentAndProtoFields();
 		Created = true;
+
+		if (Script)
+			LuaVirtualMachine->RunScript(Script);
+		CreateLuaObject();
+		PutIntoScene(SceneManager->GetCurrentScene());
 	}
 
 	void CGameObject::ProcessEvent(const CEvent &AEvent)
 	{
-		CLuaFunctionCall fc(GetName(), "On" + AEvent.GetName());
-		LuaVirtualMachine->PushEventTable(AEvent);
-		fc.SetArgumentsCount(1);
-		fc.Call();
+		if (Created)
+		{
+			CLuaFunctionCall fc(GetName(), "On" + AEvent.GetName());
+			LuaVirtualMachine->PushEventTable(AEvent);
+			fc.SetArgumentsCount(1);
+			fc.Call();
+		}
 	}
 
 	CScript* CGameObject::GetScript() const
@@ -277,14 +281,11 @@ namespace Deku2D
 	{
 		Script = AScript;
 
-		LuaVirtualMachine->DestroyLuaObject(*this);
-		LuaVirtualMachine->RunScript(AScript);
-		CreateLuaObject();
-
 		if (Created)
 		{
-			LuaVirtualMachine->SetLocalNamesFields(this);
-			UpdateParentAndProtoFields();
+			DestroyLuaObject();
+			LuaVirtualMachine->RunScript(AScript);
+			CreateLuaObject();
 		}
 	}
 
@@ -358,8 +359,17 @@ namespace Deku2D
 
 	void CGameObject::CreateLuaObject()
 	{
-		if (!LuaVirtualMachine->IsObjectExists(GetName()))
-			LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
+		if (LuaVirtualMachine->IsObjectExists(GetName()))
+			Log("ERROR", "Lua object named '%s' alredy exists", GetName().c_str());
+
+		LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
+		LuaVirtualMachine->SetLocalNamesFields(this);
+		UpdateParentAndProtoFields();
+	}
+
+	void CGameObject::DestroyLuaObject()
+	{
+		LuaVirtualMachine->DestroyLuaObject(*this);
 	}
 
 }	//	namespace Deku2D

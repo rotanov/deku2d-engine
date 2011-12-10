@@ -14,7 +14,7 @@ namespace Deku2D
 	public:
 		D2D_DECLARE_VISITABLE()
 
-		CTimerComponent(float AInterval = 0.0f);
+		CTimerComponent();
 
 		CTimerComponent* Clone(const string &ACloneName = "") const;
 
@@ -27,6 +27,7 @@ namespace Deku2D
 		void SetInterval(float AInterval);
 
 		void Deserialize(CXMLNode *AXML);
+		void FinalizeCreation();
 
 	private:
 		bool Enabled;

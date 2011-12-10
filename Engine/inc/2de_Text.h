@@ -16,7 +16,7 @@ namespace Deku2D
 		// Treat as CRenderableComponent for now, if not uncomment the following and support visitors with one more branch
 		//D2D_DECLARE_VISITABLE()
 
-		CText(const string &AText = "");
+		CText();
 		~CText();
 
 		CText* Clone(const string &ACloneName = "") const;
