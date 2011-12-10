@@ -1,4 +1,4 @@
-all: engine demos studio
+all: engine demos
 
 debug: MAKETARGET = debug
 debug: all

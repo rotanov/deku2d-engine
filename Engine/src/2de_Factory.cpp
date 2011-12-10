@@ -14,7 +14,7 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CFactory
 
-	CFactory::CFactory()
+	CFactory::CFactory() : CreationLevel(0)
 	{
 		SetName("Factory");
 
@@ -40,6 +40,8 @@ namespace Deku2D
 
 	CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes /*= NULL*/)
 	{
+		// TODO: make New and CreateByName behave similar
+
 		if (CObject *result = CreateClassInstance(AClassName, AName))
 			return result;
 
@@ -56,6 +58,8 @@ namespace Deku2D
 		}
 
 		CGameObject *result = New<CGameObject>(AName);
+		IncreaseCreationLevel(result);
+
 		if (AName.empty())
 			Rename(result->GetName(), AClassName + itos(result->GetID()));
 
@@ -71,16 +75,13 @@ namespace Deku2D
 		if (!UsedPrototypes)
 			UsedPrototypes = FirstUsedPrototypes = new UsedPrototypesContainer;
 
-		int ProtoRecursionLimit = -1;
-		if (xml->HasAttribute("RecursionLimit"))
-			ProtoRecursionLimit = from_string<int>(xml->GetAttribute("RecursionLimit"));
+		int ProtoRecursionLimit = xml->HasAttribute("RecursionLimit") ?
+			from_string<int>(xml->GetAttribute("RecursionLimit")) : -1;
 
 		if (!UsedPrototypes->count(AClassName))
 			(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
 
 		TraversePrototypeNode(xml, result, UsedPrototypes, result);
-
-		result->FinalizeCreation();
 
 		if (FirstUsedPrototypes)
 		{
@@ -91,6 +92,7 @@ namespace Deku2D
 	#endif
 		}
 
+		DecreaseCreationLevel();
 		return result;
 	}
 
@@ -278,9 +280,10 @@ namespace Deku2D
 		CGameObject *go = dynamic_cast<CGameObject*>(result);
 		if (go)
 		{
+			IncreaseCreationLevel(go);
 			go->SetClassName(AClassName);
 			go->SetScript(Get<CScript>("BaseComponents"));
-			go->FinalizeCreation();
+			DecreaseCreationLevel();
 		}
 
 		return result;
@@ -294,6 +297,23 @@ namespace Deku2D
 			return NULL;
 
 		return it->second->CloneTree(AName);
+	}
+
+	void CFactory::IncreaseCreationLevel(CGameObject *AObject)
+	{
+		++CreationLevel;
+		CreationQueue.push_back(AObject);
+	}
+
+	void CFactory::DecreaseCreationLevel()
+	{
+		if (!--CreationLevel)
+		{
+			for (list<CGameObject *>::iterator it = CreationQueue.begin(); it != CreationQueue.end(); ++it)
+				(*it)->FinalizeCreation();
+
+			CreationQueue.clear();
+		}
 	}
 
 

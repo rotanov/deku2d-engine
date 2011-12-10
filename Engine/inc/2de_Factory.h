@@ -68,6 +68,9 @@ namespace Deku2D
 		CObject* CreateClassInstance(const string &AClassName, const string &AName);
 		CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
 
+		void IncreaseCreationLevel(CGameObject *AObject);
+		void DecreaseCreationLevel();
+
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 		void InsertDebugInfo( CObject* Source );
 	#endif
@@ -79,6 +82,8 @@ namespace Deku2D
 		ObjectsContainer Objects;
 		queue<CObject *> Deletion;
 		map<string, CGameObject *> CachedProtos;
+		list<CGameObject *> CreationQueue;
+		int CreationLevel;
 
 	};
 
@@ -91,7 +96,9 @@ namespace Deku2D
 	template<typename T>
 	T* CFactory::New(const string &AName)
 	{
-		return dynamic_cast<T*>(InternalNew<T>(AName));
+		T *obj = dynamic_cast<T*>(InternalNew<T>(AName));
+		/// insert some hack here.. or refactor it..
+		return obj;
 	}
 
 	template <typename T>
