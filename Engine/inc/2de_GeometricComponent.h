@@ -17,7 +17,7 @@ namespace Deku2D
 	public:
 		D2D_DECLARE_VISITABLE()
 
-		CGeometricComponent()
+		CGeometricComponent() : Box(0, 0, 0, 0)
 		{
 			ClassName = "GeometricComponent";
 		}

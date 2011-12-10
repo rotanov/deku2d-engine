@@ -7,7 +7,7 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CTimerComponent
 
-	CTimerComponent::CTimerComponent() : Enabled(false), Accumulated(0.0f)
+	CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), Interval(AInterval), Accumulated(0.0f)
 	{
 		ClassName = "TimerComponent";
 	}
@@ -40,14 +40,10 @@ namespace Deku2D
 	void CTimerComponent::SetEnabled(bool AEnabled)
 	{
 		Enabled = AEnabled;
-
-		if (Created)
-		{
-			if (Enabled)
-				EventManager->Subscribe("EveryFrame", this);
-			else
-				EventManager->Unsubscribe("EveryFrame", this);
-		}
+		if (Enabled)
+			EventManager->Subscribe("EveryFrame", this);
+		else
+			EventManager->Unsubscribe("EveryFrame", this);
 
 		Accumulated = 0.0f;
 	}
@@ -76,14 +72,6 @@ namespace Deku2D
 		{
 			SetEnabled(from_string<bool>(AXML->GetAttribute("Enabled")));
 		}
-	}
-
-	void CTimerComponent::FinalizeCreation()
-	{
-		CGameObject::FinalizeCreation();
-
-		if (Enabled)
-			EventManager->Subscribe("EveryFrame", this);
 	}
 
 }	// namespace Deku2D
