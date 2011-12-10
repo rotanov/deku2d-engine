@@ -60,7 +60,7 @@ namespace Deku2D
 		bool IsPrototype() const;
 
 		virtual void Deserialize(CXMLNode *AXML);
-		void FinalizeCreation();
+		virtual void FinalizeCreation();
 		void ProcessEvent(const CEvent &AEvent);
 		CScript* GetScript() const;
 		void SetScript(CScript *AScript);
@@ -85,6 +85,8 @@ namespace Deku2D
 			return AObject;
 		}
 
+		bool Created;
+
 	private:
 		typedef vector<CGameObject *> ChildrenContainer;
 		typedef ChildrenContainer::iterator ChildrenIterator;
@@ -94,13 +96,13 @@ namespace Deku2D
 		CGameObject* FindPrototype();
 		void UpdateParentAndProtoFields();
 		void CreateLuaObject();
+		void DestroyLuaObject();
 
 		CGameObject *Parent;
 		CAbstractScene *Scene;
 		CScript *Script;
 		ChildrenContainer Children;
 		bool Prototype;
-		bool Created;
 		bool Active;
 
 		// not used
