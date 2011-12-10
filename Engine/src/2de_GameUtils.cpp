@@ -174,6 +174,7 @@ namespace Deku2D
 	CDefaultTitleScreen::CDefaultTitleScreen()
 	{
 		SetName("DefaultTitleScreen");
+		// TODO: rewrite me..
 
 		TextDeku = Factory->New<CText>();
 		TextTeam = Factory->New<CText>();

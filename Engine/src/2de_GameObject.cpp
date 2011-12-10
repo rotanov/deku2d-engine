@@ -14,7 +14,6 @@ namespace Deku2D
 
 	CGameObject::~CGameObject()
 	{
-		Scene->Remove(this);
 		//	Note, that here we adding children to parent in reverse order, i think it's not that important for now.
 		//	That order is not important at all. Overall comment should be removed.
 		while (!Children.empty())
@@ -22,7 +21,11 @@ namespace Deku2D
 
 		SetParent(NULL);
 
-		DestroyLuaObject();
+		if (Created)
+		{
+			Scene->Remove(this);
+			DestroyLuaObject();
+		}
 	}
 
 	CGameObject* CGameObject::Clone(const string &ACloneName /*= ""*/) const
@@ -253,6 +256,9 @@ namespace Deku2D
 
 	void CGameObject::FinalizeCreation()
 	{
+		if (Created)
+			return;
+
 		Created = true;
 
 		if (Script)

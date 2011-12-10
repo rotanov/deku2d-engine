@@ -368,9 +368,9 @@ namespace Deku2D
 		//Here goes high level initializations, like default scene as title screen
 		//and FPSText
 		// TODO: hide it somewhere..
-		CPlaceableComponent *FPSTextPlacing = Factory->New<CPlaceableComponent>();
+		CPlaceableComponent *FPSTextPlacing = dynamic_cast<CPlaceableComponent *>(Factory->CreateByName("PlaceableComponent", ""));
 		FPSTextPlacing->GetTransformation().SetTranslation(Vector2(200.0f, 300.0f));
-		FPSText = Factory->New<CText>("FPSText");
+		FPSText = dynamic_cast<CText *>(Factory->CreateByName("Text", "FPSText"));
 		FPSText->SetText("FPS: 0");
 		FPSTextPlacing->SetLayer(512);
 		RootGameObject->Attach(FPSTextPlacing);
@@ -386,9 +386,9 @@ namespace Deku2D
 		CAbstractScene *TitleScreen = SceneManager->CreateScene();
 		SceneManager->SetCurrentScene(TitleScreen);
 
-		// Создание класса CDefaultTutleScreen (в текущей сцене)
-		CDefaultTitleScreen *Tscn = Factory->New<CDefaultTitleScreen>("TitleScreenClassForInst");
-		Tscn->SetTexture(TitleScreenShroomTexture);
+		// Создание класса CDefaultTutleScreen (в текущей сцене) - it's broken
+		//CDefaultTitleScreen *Tscn = Factory->New<CDefaultTitleScreen>("TitleScreenClassForInst");
+		//Tscn->SetTexture(TitleScreenShroomTexture);
 		
 		if (!StateHandler->OnInitialize())
 		{

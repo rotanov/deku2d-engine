@@ -302,18 +302,25 @@ namespace Deku2D
 	void CFactory::IncreaseCreationLevel(CGameObject *AObject)
 	{
 		++CreationLevel;
-		CreationQueue.push_back(AObject);
+		CreationQueue.push_front(AObject);
 	}
 
 	void CFactory::DecreaseCreationLevel()
 	{
-		if (!--CreationLevel)
+		if (CreationLevel == 1)
 		{
-			for (list<CGameObject *>::iterator it = CreationQueue.begin(); it != CreationQueue.end(); ++it)
-				(*it)->FinalizeCreation();
-
-			CreationQueue.clear();
+			list<CGameObject *>::iterator dit;
+			while (!CreationQueue.empty())
+			{
+				for (list<CGameObject *>::iterator it = CreationQueue.begin(); it != CreationQueue.end();)
+				{
+					(*it)->FinalizeCreation();
+					dit = it++;
+					CreationQueue.erase(dit);
+				}
+			}
 		}
+		--CreationLevel;
 	}
 
 
