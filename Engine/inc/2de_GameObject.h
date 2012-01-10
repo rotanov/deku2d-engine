@@ -52,6 +52,8 @@ namespace Deku2D
 		CGameObject* GetObjectByLocalName(const string &AName);
 		unsigned GetChildCount();
 
+		void AddLocalName(const string &ALocalName, CGameObject *AChild);
+
 		CGameObject* FindFirstOfClass(const string &AClassName, bool ExceedPrototype = false);
 
 		bool IsActive() const;

@@ -10,6 +10,7 @@ namespace Deku2D
 	CGameObject::CGameObject() : Created(false), Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Active(true), Dead(false), Enabled(true)
 	{
 		ClassName = "GameObject";
+		SetScript(Factory->Get<CScript>("BaseComponents"));
 	}
 
 	CGameObject::~CGameObject()
@@ -199,6 +200,13 @@ namespace Deku2D
 		return Children.size();
 	}
 
+	void CGameObject::AddLocalName(const string &ALocalName, CGameObject *AChild)
+	{
+		if (!ALocalName.empty())
+			LocalNameObjectMapping[ALocalName] = AChild;
+	}
+
+
 	CGameObject* CGameObject::FindFirstOfClass(const string &AClassName, bool ExceedPrototype /*= false*/)
 	{
 		queue<CGameObject *> SearchQueue;
@@ -348,6 +356,9 @@ namespace Deku2D
 
 	void CGameObject::UpdateParentAndProtoFields()
 	{
+		if (!Created)
+			return;
+
 		// this recursive call may greatly affect performance, but it's needed because of creation order to make parentProto work
 		for (ChildrenIterator it = Children.begin(); it != Children.end(); ++it)
 			(*it)->UpdateParentAndProtoFields();

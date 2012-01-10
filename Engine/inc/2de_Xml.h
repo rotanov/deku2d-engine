@@ -152,6 +152,7 @@ namespace Deku2D
 
 		virtual bool HasAttribute(const string &AName) const;
 		virtual string GetAttribute(const string &AName) const;
+		string SafeGetAttribute(const string &AName, const string &ADefault = "") const;
 		virtual void SetAttribute(const string &AName, const string &AValue);
 		virtual void DeleteAttribute(const string &AName);
 

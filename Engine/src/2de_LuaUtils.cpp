@@ -19,9 +19,9 @@ namespace Deku2D
 		{
 			if (!lua_isstring(L, -1) || !lua_isstring(L, -2))
 				LuaVirtualMachine->TriggerError("incorrect arguments given to Create API call");
-			CGameObject* GameObject = dynamic_cast<CGameObject*>(Factory->CreateByName(lua_tostring(L, -2), lua_tostring(L, -1)));
-			// a bit of a HACK..
-			GameObject->FinalizeCreation();
+
+			CGameObject* GameObject = Factory->CreateGameObject(lua_tostring(L, -2), lua_tostring(L, -1));
+
 			if (GameObject)
 				lua_getglobal(L, GameObject->GetName().c_str());
 			else

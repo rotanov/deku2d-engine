@@ -77,6 +77,7 @@ namespace Deku2D
 		CDefaultTitleScreen();
 		void SetTexture(CTexture* ATexture);
 		void ProcessEvent(const CEvent &AEvent);
+		void FinalizeCreation();
 
 	private:
 		CText *TextDeku;

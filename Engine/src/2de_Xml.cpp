@@ -381,6 +381,11 @@ namespace Deku2D
 		return "";
 	}
 
+	string CXMLNode::SafeGetAttribute(const string &AName, const string &ADefault /*= ""*/) const
+	{
+		return HasAttribute(AName) ? GetAttribute(AName) : ADefault;
+	}
+
 	void CXMLNode::SetAttribute(const string &AName, const string &AValue)
 	{
 		Log("WARNING", "This type of XML node can't have any attributes");
