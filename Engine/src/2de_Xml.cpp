@@ -260,6 +260,11 @@ namespace Deku2D
 			LoadFromFile(AFilename);
 	}
 
+	CXML::CXML(CStorage &AStorage) : Root(NULL)
+	{
+		LoadFromStorage(AStorage);
+	}
+
 	CXML::CXML(const CXML &ASource) : Root(NULL)
 	{
 		for (CXMLChildrenList::ConstIterator it = ASource.Root.Begin(); it != ASource.Root.End(); ++it)
@@ -291,16 +296,6 @@ namespace Deku2D
 		LoadFromStorage(mem);
 	}
 
-	void CXML::SaveToFile(const string &AFilename)
-	{
-		CFile file(AFilename, CFile::OPEN_MODE_WRITE);
-
-		for (CXMLNormalNode::ChildrenIterator it = Root.Begin(); it != Root.End(); ++it)
-			file.WriteText((*it)->GetText());
-
-		file.Close();
-	}
-
 	void CXML::LoadFromStorage(CStorage &AStorage)
 	{
 		string AllContent = AStorage.GetContent();
@@ -311,6 +306,21 @@ namespace Deku2D
 		CXMLParser parser(AllContent);
 		Root = parser.Parse();
 	}
+
+	void CXML::SaveToFile(const string &AFilename)
+	{
+		CFile file(AFilename, CFile::OPEN_MODE_WRITE);
+		SaveToStorage(file);
+	}
+
+	void CXML::SaveToStorage(CStorage &AStorage)
+	{
+		for (CXMLNormalNode::ChildrenIterator it = Root.Begin(); it != Root.End(); ++it)
+			AStorage.WriteText((*it)->GetText());
+
+		AStorage.Close();
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// CXMLNode

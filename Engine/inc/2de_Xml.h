@@ -95,19 +95,20 @@ namespace Deku2D
 	{
 	public:
 		CXML(const string &AFilename = "");
+		CXML(CStorage &AStorage);
 		CXML(const CXML &ASource);
 		~CXML();
 		CXML& operator=(const CXML &ASource);
 
 		void LoadFromFile(const string &AFilename);
 		void LoadFromMemory(byte *AData, size_t ALength);
+		void LoadFromStorage(CStorage &AStorage);
 
 		void SaveToFile(const string &AFilename);
+		void SaveToStorage(CStorage &AStorage);
 
 		CXMLChildrenList Root;
 
-	private:
-		void LoadFromStorage(CStorage &AStorage);
 	};
 
 	/**
