@@ -267,8 +267,8 @@ namespace Deku2D
 				}*/
 			}
 
-			ChildName = (*it)->HasAttribute("Name") ? (*it)->GetAttribute("Name") : "";
-			LocalChildName = (*it)->HasAttribute("LocalName") ? (*it)->GetAttribute("LocalName") : "";
+			ChildName = (*it)->SafeGetAttribute("Name");
+			LocalChildName = (*it)->SafeGetAttribute("LocalName");
 
 			if (IsComponentExists(NodeName))
 				child = CreateComponent(NodeName, ChildName);

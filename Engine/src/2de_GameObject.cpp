@@ -249,12 +249,9 @@ namespace Deku2D
 
 	void CGameObject::Deserialize(CXMLNode *AXML)
 	{
-		if (AXML->HasAttribute("ClassName"))
-		{
-			string cls = AXML->GetAttribute("ClassName");
-			if (!cls.empty())
-				ClassName = cls;
-		}
+		string cls = AXML->SafeGetAttribute("ClassName");
+		if (!cls.empty())
+			ClassName = cls;
 
 		if (AXML->HasAttribute("Script"))
 		{
