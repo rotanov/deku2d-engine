@@ -31,13 +31,7 @@ namespace Deku2D
 		CGameObject* CreateComponent(const string &AClassName, const string &AName = "");
 
 		template<typename T>
-		T* CreateComponent(const string &AName = "")
-		{
-			T *result = New<T>(AName);
-			IncreaseCreationLevel(result);
-			DecreaseCreationLevel();
-			return result;
-		}
+		T* CreateComponent(const string &AName = "");
 
 		CGameObject* InstantiatePrototype(const string &AProtoName, const string &AName = "");
 
@@ -69,7 +63,7 @@ namespace Deku2D
 
 		void AddComponent(const string &AClassName, TNewFunction ANewFunctionPointer);
 
-		void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
+		void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, CGameObject *CurrentProto);
 
 		CXMLNode* GetPrototypeXML(const string &AName);
 		CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
@@ -132,6 +126,15 @@ namespace Deku2D
 
 	#endif
 
+		return result;
+	}
+
+	template<typename T>
+	T* CFactory::CreateComponent(const string &AName /*= ""*/)
+	{
+		T *result = New<T>(AName);
+		IncreaseCreationLevel(result);
+		DecreaseCreationLevel();
 		return result;
 	}
 

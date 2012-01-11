@@ -69,17 +69,14 @@ namespace Deku2D
 		CGameObject *result = New<CGameObject>(AName);
 		IncreaseCreationLevel(result);
 
+		// TODO: Rename looks weird.. make it possible to use SetName
 		if (AName.empty())
 			Rename(result->GetName(), AProtoName + itos(result->GetID()));
 
 		result->Prototype = true;
 		result->Deserialize(xml);
 
-		// TODO: incapsulate, should be done automatically
-		if (result->GetClassName() == "GameObject")
-			result->SetScript(Get<CScript>("BaseComponents"));
-
-		TraversePrototypeNode(xml, result, NULL, result);
+		TraversePrototypeNode(xml, result, result);
 
 		DecreaseCreationLevel();
 		return result;
@@ -240,7 +237,7 @@ namespace Deku2D
 		Components[AClassName] = ANewFunctionPointer;
 	}
 
-	void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto)
+	void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, CGameObject *CurrentProto)
 	{
 		CGameObject *child;
 		string NodeName;
@@ -253,31 +250,13 @@ namespace Deku2D
 				continue;
 
 			NodeName = (*it)->GetName(); 
-			if (!IsComponentExists(NodeName))
-			{
-				/*if (UsedPrototypes->count(NodeName) != 0)
-				{
-					if ((*UsedPrototypes)[NodeName] < 1)
-					{
-						if ((*UsedPrototypes)[NodeName] <= -1)
-							Log("ERROR", "Recursive reference in prototype");
-						continue;
-					}
-					--(*UsedPrototypes)[NodeName];
-				}*/
-			}
-
 			ChildName = (*it)->SafeGetAttribute("Name");
 			LocalChildName = (*it)->SafeGetAttribute("LocalName");
 
-			if (IsComponentExists(NodeName))
-				child = CreateComponent(NodeName, ChildName);
-			else
-				child = InstantiatePrototype(NodeName, ChildName);
-
+			child = CreateGameObject(NodeName, ChildName);
 			if (!child)
 			{
-				Log("ERROR", "Can't create object from prototype");
+				Log("ERROR", "Can't create object of class '%s' from prototype", NodeName.c_str());
 				continue;
 			}
 
@@ -286,10 +265,7 @@ namespace Deku2D
 			child->Deserialize(*it);
 			AObject->Attach(child);
 
-			TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
-
-			/*if (UsedPrototypes->count(NodeName) != 0)
-				++(*UsedPrototypes)[NodeName];*/
+			TraversePrototypeNode(*it, child, CurrentProto);
 		}
 	}
 
