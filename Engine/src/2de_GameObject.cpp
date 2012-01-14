@@ -160,9 +160,6 @@ namespace Deku2D
 					LuaVirtualMachine->CallMethodFunction(GetName(), "OnAttached");
 			}
 		}
-
-		if (Created)
-			UpdateParentAndProtoFields();
 	}
 
 	CAbstractScene* CGameObject::GetScene() const
@@ -198,6 +195,16 @@ namespace Deku2D
 	unsigned CGameObject::GetChildCount()
 	{
 		return Children.size();
+	}
+
+	CGameObject* CGameObject::FindPrototype()
+	{
+		CGameObject *result = Parent;
+
+		while (result && !result->Prototype)
+			result = result->Parent;
+
+		return result;
 	}
 
 	void CGameObject::AddLocalName(const string &ALocalName, CGameObject *AChild)
@@ -341,44 +348,12 @@ namespace Deku2D
 		NextObject->SetDestroyed();
 	}
 
-	CGameObject* CGameObject::FindPrototype()
-	{
-		CGameObject *result = Parent;
-
-		while (result && !result->Prototype)
-			result = result->Parent;
-
-		return result;
-	}
-
-	void CGameObject::UpdateParentAndProtoFields()
-	{
-		if (!Created)
-			return;
-
-		// this recursive call may greatly affect performance, but it's needed because of creation order to make parentProto work
-		for (ChildrenIterator it = Children.begin(); it != Children.end(); ++it)
-			(*it)->UpdateParentAndProtoFields();
-
-		LuaVirtualMachine->SetReferenceField(this, "parent", Parent);
-
-		CGameObject *proto = FindPrototype();
-		LuaVirtualMachine->SetReferenceField(this, "proto", proto);
-
-		CGameObject *ParentProto = NULL;
-		if (proto)
-			ParentProto = proto->FindPrototype();
-		LuaVirtualMachine->SetReferenceField(this, "parentProto", ParentProto);
-	}
-
 	void CGameObject::CreateLuaObject()
 	{
 		if (LuaVirtualMachine->IsObjectExists(GetName()))
 			Log("ERROR", "Lua object named '%s' alredy exists", GetName().c_str());
 
 		LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
-		LuaVirtualMachine->SetLocalNamesFields(this);
-		UpdateParentAndProtoFields();
 	}
 
 	void CGameObject::DestroyLuaObject()

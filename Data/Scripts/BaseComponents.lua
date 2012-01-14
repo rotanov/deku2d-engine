@@ -1,5 +1,25 @@
 GameObject = Class:Derive()
 
+GameObject_mt = getmetatable(GameObject)
+
+GameObject_mt.__index = function(t, k)
+	local result
+
+	if k == "parent" then
+		result = GetParent(t.object)
+	elseif k == "proto" then
+		result = GetPrototype(t.object)
+	elseif k == "protoParent" then
+		result = GetParentProtype(t.object)
+	else
+		result = GetObjectByLocalName(t.object, k)
+	end
+
+	return GetObjectTable(result)
+end
+
+setmetatable(GameObject, GameObject_mt)
+
 function GameObject:OnCreate()
 end
 

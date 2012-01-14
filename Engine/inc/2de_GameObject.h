@@ -52,6 +52,8 @@ namespace Deku2D
 		CGameObject* GetObjectByLocalName(const string &AName);
 		unsigned GetChildCount();
 
+		CGameObject* FindPrototype();
+
 		void AddLocalName(const string &ALocalName, CGameObject *AChild);
 
 		CGameObject* FindFirstOfClass(const string &AClassName, bool ExceedPrototype = false);
@@ -95,8 +97,6 @@ namespace Deku2D
 		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
 
 		static void _DestroySubtree(CGameObject *NextObject);
-		CGameObject* FindPrototype();
-		void UpdateParentAndProtoFields();
 		void CreateLuaObject();
 		void DestroyLuaObject();
 

@@ -14,6 +14,14 @@ namespace Deku2D
 	{
 		// some of these functions are really will be left in the API, others are just temporarily ones for testing..
 
+		void PushDataOrNil(lua_State *L, void *AData)
+		{
+			if (AData)
+				lua_pushlightuserdata(L, AData);
+			else
+				lua_pushnil(L);
+		}
+
 		// userdata Create(string ClassName, string Name)
 		int Create(lua_State *L)
 		{
@@ -102,6 +110,46 @@ namespace Deku2D
 				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetParent API call");
 
 			lua_pushlightuserdata(L, obj->GetParent());
+			return 1;
+		}
+
+		// userdata GetPrototype(userdata Object)
+		int GetPrototype(lua_State *L)
+		{
+			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
+			if (!obj)
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetPrototype API call");
+
+			PushDataOrNil(L, obj->FindPrototype());
+			return 1;
+		}
+
+		// userdata GetParentPrototype(userdata Object)
+		int GetParentPrototype(lua_State *L)
+		{
+			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -1));
+			if (!obj)
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetParentPrototype API call");
+
+			obj = obj->FindPrototype();
+			if (obj)
+				obj = obj->FindPrototype();
+
+			PushDataOrNil(L, obj);
+			return 1;
+		}
+
+		// userdata GetObjectByLocalName(userdata PrototypeRoot, string LocalName)
+		int GetObjectByLocalName(lua_State *L)
+		{
+			CGameObject *obj = static_cast<CGameObject *>(lua_touserdata(L, -2));
+			if (!obj)
+				LuaVirtualMachine->TriggerError("incorrect usage of light user data in GetObjectByLocalName API call");
+
+			if (!lua_isstring(L, -1))
+				LuaVirtualMachine->TriggerError("incorrect arguments given to GetObjectByLocalName API call");
+
+			PushDataOrNil(L, obj->GetObjectByLocalName(lua_tostring(L, -1)));
 			return 1;
 		}
 
@@ -841,7 +889,7 @@ namespace Deku2D
 		}
 
 		lua_insert(L, -2);
-		lua_setmetatable(L, -1);
+		lua_setmetatable(L, -2);
 	}
 
 	/**
@@ -878,15 +926,6 @@ namespace Deku2D
 			CallMethodFunction(AName, "OnCreate");
 
 		Log("INFO", "Lua object CREATED: '%s' of class '%s'", AName.c_str(), AClassName.c_str());
-	}
-
-	void CLuaVirtualMachine::SetLocalNamesFields(CGameObject *AGameObject)
-	{
-		for (CGameObject::LNOMType::iterator i = AGameObject->LocalNameObjectMapping.begin(); 
-			i != AGameObject->LocalNameObjectMapping.end(); ++i)
-		{
-			SetReferenceField(AGameObject, i->first, i->second);
-		}
 	}
 
 	void CLuaVirtualMachine::SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference)
@@ -1019,6 +1058,9 @@ namespace Deku2D
 		lua_register(L, "CloneTree", &LuaAPI::CloneTree);
 		lua_register(L, "GetName", &LuaAPI::GetName);
 		lua_register(L, "GetParent", &LuaAPI::GetParent);
+		lua_register(L, "GetPrototype", &LuaAPI::GetPrototype);
+		lua_register(L, "GetParentPrototype", &LuaAPI::GetParentPrototype);
+		lua_register(L, "GetObjectByLocalName", &LuaAPI::GetObjectByLocalName);
 		lua_register(L, "GetChild", &LuaAPI::GetChild);
 		lua_register(L, "FindFirstOfClass", &LuaAPI::FindFirstOfClass);
 		lua_register(L, "Attach", &LuaAPI::Attach);
