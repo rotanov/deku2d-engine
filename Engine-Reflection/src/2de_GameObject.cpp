@@ -6,6 +6,7 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CGameObject
+	D2D_DEFINE_RTTI(CGameObject, IVisitableObject<>)
 
 	CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 	{

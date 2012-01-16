@@ -15,6 +15,37 @@ namespace Deku2D
 	using std::map;
 	using std::vector;
 
+	template<typename T>
+	class IsAbstract
+	{
+		// todo: add assertions to ensure sizeof(char) == 1 and sizeof(short) == 2
+		template<class U> static char test( U (*)[1] );
+		template<class U> static short test( ... );
+
+	public:
+		enum { result = sizeof( test<T>( 0 ) ) - 1 }; 
+	};
+
+	template<typename T, int A = IsAbstract<T>::result>
+	class Make
+	{
+	public:
+		static T* Instance()
+		{
+			return new T();
+		}
+	};
+
+	template<typename T>
+	class Make<T, 1>
+	{
+	public:
+		static T* Instance()
+		{
+			throw("pizdec");		
+		}
+	};
+
 	class CRTTI
 	{
 	public:
@@ -64,6 +95,7 @@ namespace Deku2D
 		static CRTTI* GetRTTIByName(const std::string& aName);
 		virtual const CRTTI* GetBaseClassInfo() const = 0;
 		virtual void InvokePropertyRegistration() const = 0;
+		virtual bool IsAbstract() const = 0;
 
 	private:
 		string name;
@@ -101,14 +133,13 @@ namespace Deku2D
 
 		CTypedRTTI(const string aName) : CRTTI(aName), baseRTTI(TBase::GetRTTIStatic()) {}
 		virtual const CRTTI* GetBaseClassInfo() const { return static_cast<CRTTI*>(baseRTTI); }
-		virtual void InvokePropertyRegistration() const
-		{
-			Heir::RegisterReflection();
-		}
+		virtual void InvokePropertyRegistration() const	{ Heir::RegisterReflection(); }
+		virtual bool IsAbstract() const { return Deku2D::IsAbstract<THeir>::result == 1; }
+
 	private:
 		TBaseClassInfo *baseRTTI;
-		THeir* MakeNew() const	{ return new THeir; }
-		virtual const CRTTI* GetBase() const	{return static_cast<CRTTI*>(baseRTTI);}
+		THeir* MakeNew() const	{ return Make<THeir>::Instance(); }
+		virtual const CRTTI* GetBase() const {return static_cast<CRTTI*>(baseRTTI);}
 	};
 
 	//	Note: classInfo is not private because we want access in form TYPE::classInfo in some cases.
@@ -141,6 +172,14 @@ namespace Deku2D
 		TYPE_HEIR::TClassInfo TYPE_HEIR::classInfo##TYPE_HEIR(#TYPE_HEIR);	\
 		template <>	\
 		bool IsRTTIzed<TYPE_HEIR>()	\
+		{	\
+			return true;	\
+		}
+
+	#define D2D_DEFINE_CLASS_TEMPLATE_RTTI(TYPE_HEIR, TYPE_BASE)	\
+		TYPE_HEIR<>::TClassInfo TYPE_HEIR<>::classInfo##TYPE_HEIR(#TYPE_HEIR);	\
+		template <>	\
+		bool IsRTTIzed<TYPE_HEIR<> >()	\
 		{	\
 			return true;	\
 		}

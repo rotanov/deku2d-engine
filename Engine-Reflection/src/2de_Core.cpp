@@ -4,6 +4,7 @@
 
 namespace Deku2D
 {
+	D2D_DEFINE_CLASS_TEMPLATE_RTTI(IVisitableObject, CObject)
 	//////////////////////////////////////////////////////////////////////////
 	// Environment
 

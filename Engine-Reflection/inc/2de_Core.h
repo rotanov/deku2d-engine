@@ -630,7 +630,8 @@ namespace Deku2D
 	template <typename R = void>
 	class IVisitableObject : public CObject
 	{
-	D2D_DECLARE_RTTI(IVisitableObject, CObject) 
+		D2D_DECLARE_RTTI(IVisitableObject, CObject)
+
 	public:
 		typedef R CReturnType;
 		virtual ~IVisitableObject() {}
