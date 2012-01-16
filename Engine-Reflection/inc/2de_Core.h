@@ -134,11 +134,7 @@ namespace Deku2D
 
 	//	#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
-
 	typedef unsigned char byte;
-
-	//	"Forever" instead of "for(;;)", anyway, just kidding.
-	//#define forever for(;;)
 
 	template<typename T>
 	__INLINE void SAFE_DELETE(T*& a)
@@ -154,136 +150,8 @@ namespace Deku2D
 		a = NULL;
 	}
 
-	#define DEAD_BEEF 0xdeadbeef
-	#define DEAD_FOOD 0xdeadf00d
-
 	#define DISABLE_DEBUG_BOXES
 	//#undef DISABLE_DEBUG_BOXES
-
-	namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html 
-							// if it won't come in handy, I'll remove it.
-		namespace typetag_private {
-
-		/**
-		*  address of this structure is used as typetag
-		*/
-		template <typename _Ty> struct typetag_holder {};
-
-		template <typename _Ty>
-		inline const void* GenTypeTag()
-		{
-			static typetag_holder<_Ty> typetagInst;
-			return reinterpret_cast<void*>(&typetagInst);
-		}
-
-		} // namespace typetag_private
-
-		template <typename C>
-		inline const void * typetag()
-		{
-			return _details::typetag_private::GenTypeTag<C>();
-		}
-
-		/** 
-		*  remove modifier removes const, volatile and others modifiers
-		*/
-		template <typename _Ty>
-		struct remove_modifier
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<volatile _Ty>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<_Ty&>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty&>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<_Ty*>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty*>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty* const>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<volatile _Ty*>
-		{
-			typedef _Ty type;
-		};
-
-
-		// А вот это уже из александреску
-		// Счетчик значений
-		template <class C>
-		class CType2ValCounter
-		{
-		protected:
-			static C Counter;
-		};
-
-		template<class C> C CType2ValCounter<C>::Counter;
-
-		// Генератор значений
-		template<class T, class C>
-		class CType2ValGenerator : public CType2ValCounter<C>
-		{
-		public:
-			C ID;
-			CType2ValGenerator()
-			{
-				ID = CType2ValCounter<C>::Counter;
-				++CType2ValCounter<C>::Counter;
-			}
-		};
-
-
-	} // namespace _details
-
-	template <typename C>
-	inline const void * typetag()
-	{
-		return _details::typetag_private::
-		GenTypeTag<typename _details::remove_modifier<C>::type>();
-	}
-
-	// Шаблонная функция получения идентификатора типа
-	template <class T, class C>
-	C Type2Val()
-	{
-		static _details::CType2ValGenerator<T, C> ValueGenerator;
-
-		return ValueGenerator.ID;
-	}
 
 	template<typename T>
 	struct identity

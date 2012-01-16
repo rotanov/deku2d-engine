@@ -30,6 +30,10 @@ namespace Deku2D
 			out >> value;
 		}
 */
+
+	class CNullClass;
+	void SerializeObjectToXml(CNullClass* object, const std::string& name);
+
 }; // namespace Deku2D
 
 #endif //	_2DE_SERIALIZATION_H_
