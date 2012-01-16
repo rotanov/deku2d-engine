@@ -363,4 +363,8 @@ namespace Deku2D
 			LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
 	}
 
+	void CGameObject::RegisterReflection()
+	{
+	}
+
 }	//	namespace Deku2D

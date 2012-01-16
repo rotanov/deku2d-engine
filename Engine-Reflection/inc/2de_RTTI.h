@@ -53,7 +53,7 @@ namespace Deku2D
 		class PropertyIterator
 		{
 		public:
-			PropertyIterator(CRTTI* aRTTI) : idx(-1), RTTI(aRTTI)
+			PropertyIterator(const CRTTI* aRTTI) : idx(-1), RTTI(aRTTI)
 			{
 				assert(aRTTI != NULL);
 				(*this)++;
@@ -92,12 +92,14 @@ namespace Deku2D
 		virtual CNullClass* MakeNew() const = 0;
 		static TRTTIVector& GetClasses();
 		static void FinalizeDeclaration();
+		static string DumpRTTIDebugInfo();
 		static CRTTI* GetRTTIByName(const std::string& aName);
 		virtual const CRTTI* GetBaseClassInfo() const = 0;
 		virtual void InvokePropertyRegistration() const = 0;
 		virtual bool IsAbstract() const = 0;
 
 	private:
+		static bool finalized;
 		string name;
 		unsigned id;
 		TPropertyVector properties;
@@ -155,18 +157,20 @@ namespace Deku2D
 			virtual CRTTI* GetRTTI() const { return &classInfo##TYPE_HEIR; }	\
 			template<typename T>	\
 			static void RegisterProperty(	const string &aName,	\
+											const string &aTypeName,	\
 											typename COwnedProperty<T, TYPE_HEIR>::TGetter aGetter,	\
 											typename COwnedProperty<T, TYPE_HEIR>::TSetter aSetter	\
 										)	\
 			{	\
-				COwnedProperty<T, TYPE_HEIR>* property = new COwnedProperty<T, TYPE_HEIR>(aName, aGetter, aSetter);	\
+				COwnedProperty<T, TYPE_HEIR>* property = new COwnedProperty<T, TYPE_HEIR>(aName, aTypeName, aGetter, aSetter);	\
 				classInfo##TYPE_HEIR.RegisterProperty(property);	\
 			}	\
 			static TClassInfo* GetRTTIStatic() { return &classInfo##TYPE_HEIR; }	\
 			static TYPE_HEIR* MakeInstance()	\
 			{	\
 				return new TYPE_HEIR();	\
-			}
+			}	\
+			static void RegisterReflection();	\
 
 	#define D2D_DEFINE_RTTI(TYPE_HEIR, TYPE_BASE)	\
 		TYPE_HEIR::TClassInfo TYPE_HEIR::classInfo##TYPE_HEIR(#TYPE_HEIR);	\

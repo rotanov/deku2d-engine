@@ -5,6 +5,7 @@ namespace Deku2D
 
 	bool* CRTTI::isFirstKindOfSecond = NULL;
 	unsigned CRTTI::count = 0;
+	bool CRTTI::finalized = false;
 
 	CNullClass::TClassInfo CNullClass::classInfoCNullClass("CNullClass");
 
@@ -30,7 +31,8 @@ namespace Deku2D
 
 	void CRTTI::FinalizeDeclaration()	// Someone should invoke this surely once and after all.
 	{
-		// like: assert(!finalized); finalized = true;
+		assert(!finalized);
+		finalized = true;
 		count = GetClasses().size();
 		isFirstKindOfSecond = new bool [count*count];
 		for (unsigned i = 0; i < count; i++)
@@ -47,6 +49,28 @@ namespace Deku2D
 		{
 			GetClasses()[i]->InvokePropertyRegistration();
 		}
+		finalized = true;
+	}
+
+	string CRTTI::DumpRTTIDebugInfo()
+	{
+		assert(finalized);
+		string result;
+		for (unsigned i = 0; i < count; i++)
+		{
+			result += GetClasses()[i]->GetName();
+			result += "\r\n";
+
+			for (CRTTI::PropertyIterator j(GetClasses()[i]); j.Ok(); j++)
+			{
+				result += "\t";
+				result += j->GetTypeName();
+				result += " : ";
+				result += j->GetName();				
+				result += "\r\n";
+			}
+		}
+		return result;
 	}
 
 	void CRTTI::RegisterProperty(CProperty* aProperty)
@@ -81,7 +105,6 @@ namespace Deku2D
 		return GetClassesMap()[aName];
 	}
 
-
 	CRTTI::PropertyIterator& CRTTI::PropertyIterator::operator ++()
 	{
 		int size = (RTTI->GetProperties().size() - 1);
@@ -93,7 +116,7 @@ namespace Deku2D
 		idx = 0;
 		do 
 			RTTI = RTTI->GetBaseClassInfo();
-		while( RTTI->GetProperties().size() == 0 && !RTTI->IsKindOf(CNullClass::GetRTTIStatic()));
+		while (RTTI->GetProperties().size() == 0 && RTTI != CNullClass::GetRTTIStatic());
 		if (RTTI->GetProperties().size() > 0)
 			return *this;
 		idx = -1;

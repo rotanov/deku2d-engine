@@ -6,6 +6,11 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CObject
 	D2D_DEFINE_RTTI(CObject, CNullClass)
+	
+	void CObject::RegisterReflection()
+	{
+		REGISTER_PROPERTY(string, Name, CObject)
+	}
 
 	unsigned CObject::CObjectCount = 0;
 

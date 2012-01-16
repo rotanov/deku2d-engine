@@ -29,6 +29,7 @@ namespace Deku2D
 		//virtual void Deserialize(istream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
 		virtual bool IfRTTIzed() const = 0;
 		virtual const void* GetRaw(const CNullClass* owner) const = 0;
+		virtual const string& GetTypeName() const = 0;
 
 	protected:
 		string name;
@@ -39,24 +40,28 @@ namespace Deku2D
 	template<typename T>
 	class CTypedProperty : public CProperty
 	{
+	private:
+		string typeName;
+
 	public:
-		CTypedProperty(const string& aName) : CProperty(aName){}
+		CTypedProperty(const string& aName, const string& aTypeName) : CProperty(aName), typeName(aTypeName){}
 		//virtual void Serialize(ostream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
 		//virtual void Deserialize(istream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
 		virtual const void* GetRaw(const CNullClass* owner) const = 0;
 		virtual bool IfRTTIzed() const = 0;
 		virtual string GetStringValue(const CNullClass* owner) const = 0;
+		virtual const string& GetTypeName() const { return typeName; }
 	};
 
 	template<typename T, typename TOwner>
 	class COwnedProperty : public CTypedProperty<T>
 	{
 	public:
-		typedef const T& (TOwner::*TGetter)()const;
+		typedef T (TOwner::*TGetter)()const;
 		typedef void (TOwner::*TSetter)(const T& aValue);
 		typedef T Type;
 		typedef TOwner TOwner;
-		COwnedProperty(const string& aName, TGetter aGetter, TSetter aSetter) : CTypedProperty<T>(aName), getter(aGetter), setter(aSetter)
+		COwnedProperty(const string& aName, const string& aTypeName, TGetter aGetter, TSetter aSetter) : CTypedProperty<T>(aName, aTypeName), getter(aGetter), setter(aSetter)
 		{
 		
 		}
@@ -94,12 +99,13 @@ namespace Deku2D
 		{
 			return reinterpret_cast<const void*>(&GetValue(owner));
 		}
+
 	private:
 		TGetter	getter;
 		TSetter	setter;
 	};
 
-	#define DECLARE_TRIVIAL_PROPERTY(TYPE, NAME)	\
+	#define D2D_PROPERTY(TYPE, NAME)	\
 		private:	\
 			TYPE NAME;	\
 		public:	\
@@ -107,7 +113,7 @@ namespace Deku2D
 			void Set##NAME(const TYPE& a##NAME) { NAME = a##NAME; }
 
 	#define REGISTER_PROPERTY(TYPE, NAME, CLASS)	\
-		CLASS::RegisterProperty<TYPE>(#NAME, &CLASS::Get##NAME, &CLASS::Set##NAME);
+		CLASS::RegisterProperty<TYPE>(#NAME, #TYPE, &CLASS::Get##NAME, &CLASS::Set##NAME);
 
 };	// namespace Deku2D
 
