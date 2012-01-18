@@ -6,8 +6,6 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CGameObject
-	D2D_DEFINE_RTTI(CGameObject, IVisitableObject<>)
-
 	CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 	{
 		ClassName = "GameObject";
@@ -361,10 +359,6 @@ namespace Deku2D
 	{
 		if (!LuaVirtualMachine->IsObjectExists(GetName()))
 			LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
-	}
-
-	void CGameObject::RegisterReflection()
-	{
 	}
 
 }	//	namespace Deku2D

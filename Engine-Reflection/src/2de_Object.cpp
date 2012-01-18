@@ -4,14 +4,7 @@
 namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
-	// CObject
-	D2D_DEFINE_RTTI(CObject, CNullClass)
-	
-	void CObject::RegisterReflection()
-	{
-		REGISTER_PROPERTY(string, Name, CObject)
-	}
-
+	// CObject	
 	unsigned CObject::CObjectCount = 0;
 
 	CObject::CObject() : Managed(false), Destroyed(false), ID(++CObjectCount), Name("CObject" + itos(ID))

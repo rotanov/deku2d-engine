@@ -5,14 +5,6 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CPlaceableComponent
-
-	D2D_DEFINE_RTTI(CPlaceableComponent, CGameObject)
-
-	void CPlaceableComponent::RegisterReflection()
-	{
-
-	}
-
 	CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
 	{
 		ClassName = "PlaceableComponent";

@@ -36,3 +36,4 @@
 #include "2de_SpatialManager.cpp"
 #include "2de_Input.cpp"
 #include "2de_ShroomTitle.cpp"
+#include "2de_Registration.cpp"
