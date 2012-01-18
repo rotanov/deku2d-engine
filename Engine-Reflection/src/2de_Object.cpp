@@ -21,6 +21,8 @@ namespace Deku2D
 
 	CObject::CObject(const CObject &AObject) : Managed(false), Destroyed(false), ID(++CObjectCount), Name("CObject" + itos(ID))
 	{
+		AObject;	// warning eliminator
+					// also, why no info is taken from AObject? Looks suspicious.
 		ClassName = "Object";
 	}
 

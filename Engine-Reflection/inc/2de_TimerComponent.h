@@ -11,9 +11,9 @@ namespace Deku2D
 
 	class CTimerComponent : public CGameObject
 	{
-	public:
 		D2D_DECLARE_VISITABLE()
 
+	public:
 		CTimerComponent(float AInterval = 0.0f);
 
 		CTimerComponent* Clone(const string &ACloneName = "") const;

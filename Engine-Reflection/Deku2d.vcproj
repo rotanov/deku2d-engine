@@ -297,6 +297,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Storage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Text.h"
 				>
 			</File>
@@ -310,6 +314,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\2de_Vector3.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Visitor.h"
 				>
 			</File>
 			<File

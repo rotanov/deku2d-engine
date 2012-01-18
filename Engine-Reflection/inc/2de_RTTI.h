@@ -2,6 +2,8 @@
 #define _2DE_RTTI_H_
 
 #define _SECURE_SCL 0
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
 #include <typeinfo>
 #include <string>
 #include <vector>
@@ -56,7 +58,7 @@ namespace Deku2D
 			PropertyIterator(const CRTTI* aRTTI) : idx(-1), RTTI(aRTTI)
 			{
 				assert(aRTTI != NULL);
-				(*this)++;
+				++(*this);
 			}
 
 			CProperty* operator ->() const

@@ -6,7 +6,7 @@
 namespace Deku2D
 {
 
-	class CEvent; // forward declaration
+	class CEvent;
 
 	/**
 	* CObject - base class for many classes.

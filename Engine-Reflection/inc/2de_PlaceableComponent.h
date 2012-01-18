@@ -11,10 +11,9 @@ namespace Deku2D
 	class CPlaceableComponent : public CGameObject
 	{
 		D2D_DECLARE_RTTI(CPlaceableComponent, CGameObject)
-
-	public:
 		D2D_DECLARE_VISITABLE()
 
+	public:
 		CPlaceableComponent();
 
 		CPlaceableComponent* Clone(const string &ACloneName = "") const;

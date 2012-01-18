@@ -14,9 +14,9 @@ namespace Deku2D
 	 */
 	class CGeometricComponent : public CGameObject	// "Geometric" or "Geometrical"?
 	{
-	public:
 		D2D_DECLARE_VISITABLE()
 
+	public:
 		CGeometricComponent() : Box(0, 0, 0, 0)
 		{
 			ClassName = "GeometricComponent";
