@@ -19,7 +19,7 @@ namespace Deku2D
 						Helper(newNode, reinterpret_cast<const CNullClass*>(i->GetRaw(next)));
 					}
 					else
-						node->SetAttribute(i->GetName(), i->GetStringValue(next));
+ 						node->SetAttribute(i->GetName(), i->GetStringValue(next));
 				}
 			}
 		};

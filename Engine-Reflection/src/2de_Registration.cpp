@@ -13,7 +13,7 @@ namespace Deku2D
 
 	void CObject::RegisterReflection()
 	{
-		REGISTER_PROPERTY(string, Name, CObject)
+		D2D_REGISTER_PROPERTY(string, Name, CObject)
 	}
 
 	void IVisitableObject<>::RegisterReflection()

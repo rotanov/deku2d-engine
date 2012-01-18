@@ -112,7 +112,7 @@ namespace Deku2D
 			const TYPE& Get##NAME() const { return NAME; }	\
 			void Set##NAME(const TYPE& a##NAME) { NAME = a##NAME; }
 
-	#define REGISTER_PROPERTY(TYPE, NAME, CLASS)	\
+	#define D2D_REGISTER_PROPERTY(TYPE, NAME, CLASS)	\
 		CLASS::RegisterProperty<TYPE>(#NAME, #TYPE, &CLASS::Get##NAME, &CLASS::Set##NAME);
 
 };	// namespace Deku2D
