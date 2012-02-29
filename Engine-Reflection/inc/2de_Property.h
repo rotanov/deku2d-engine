@@ -83,13 +83,14 @@ namespace Deku2D
 		{
 			(static_cast<TOwner*>(owner)->*setter)(value);
 		}
-		const T& GetValue(const CNullClass* owner) const
+		const T GetValue(const CNullClass* owner) const
 		{
 			return (static_cast<const TOwner*>(owner)->*getter)();
 		}
 		virtual string GetStringValue(const CNullClass* owner) const
 		{
-			return Deku2D::to_string(GetValue(owner));
+			const T value = GetValue(owner);
+			return Deku2D::to_string(value);
 		}
 		virtual bool IfRTTIzed() const
 		{

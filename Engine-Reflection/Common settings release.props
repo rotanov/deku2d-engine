@@ -3,6 +3,9 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir>$(ProjectDir)\bin\</OutDir>
+    <TargetName>$(ProjectName).$(Configuration)</TargetName>
+    <IncludePath>D:\Dev\inc\lua;D:\Dev\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Dev\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

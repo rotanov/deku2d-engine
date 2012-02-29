@@ -5,6 +5,7 @@
     <OutDir>$(ProjectDir)\bin\</OutDir>
     <IncludePath>D:\Dev\inc\lua;D:\Dev\inc;$(IncludePath)</IncludePath>
     <LibraryPath>D:\Dev\lib;$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName).$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
