@@ -51,7 +51,7 @@ public:
 		EventManager->Subscribe("KeyPress", this);
 		if (CommandLineArgumentsManager->IsOptionExists("rectangles"))
 		{
-			RectangleCount = stoi(CommandLineArgumentsManager->GetOption("rectangles"));
+			RectangleCount = Deku2D::stoi(CommandLineArgumentsManager->GetOption("rectangles"));
 			for (int i = 0; i < RectangleCount; i++)
 				Factory->New<CRotatingQuad>("");
 				//CEngine::Instance()->RootGameObject->Attach(Factory->New<CRotatingQuad>(""));
