@@ -26,16 +26,14 @@ namespace Deku2D
 		template<typename T>
 		T* New();
 
-		CGameObject* CreateGameObject(const string &AClassName, const string &AName = "");
+		CGameObject* CreateGameObject(const string &AClassName, const string &AName = "", bool AFinalizeCreation = true);
 
-		CGameObject* CreateComponent(const string &AClassName, const string &AName = "");
+		CGameObject* CreateComponent(const string &AClassName, const string &AName = "", bool AFinalizeCreation = true);
 
 		template<typename T>
 		T* CreateComponent(const string &AName = "");
 
 		CGameObject* InstantiatePrototype(const string &AProtoName, const string &AName = "");
-
-		//CObject* CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes = NULL);
 
 		template<typename T>
 		bool Add(T *AObject, const string &AName = "");
@@ -68,8 +66,10 @@ namespace Deku2D
 		CXMLNode* GetPrototypeXML(const string &AName);
 		CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
 
-		void IncreaseCreationLevel(CGameObject *AObject);
-		void DecreaseCreationLevel();
+		void SetRecursionLimit(const string &AProtoName, int ARecursionLimit);
+		int GetRecursionsLeft(const string &AProtoName);
+		void IncreaseUsedCount(const string &AProtoName);
+		void DecreaseUsedCount(const string &AProtoName);
 
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 		void InsertDebugInfo( CObject* Source );
@@ -82,8 +82,7 @@ namespace Deku2D
 		ObjectsContainer Objects;
 		queue<CObject *> Deletion;
 		map<string, CGameObject *> CachedProtos;
-		list<CGameObject *> CreationQueue;
-		int CreationLevel;
+		UsedPrototypesContainer UsedPrototypes;
 
 	};
 
@@ -133,8 +132,7 @@ namespace Deku2D
 	T* CFactory::CreateComponent(const string &AName /*= ""*/)
 	{
 		T *result = New<T>(AName);
-		IncreaseCreationLevel(result);
-		DecreaseCreationLevel();
+		result->FinalizeCreation();
 		return result;
 	}
 

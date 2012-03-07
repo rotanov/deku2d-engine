@@ -354,6 +354,9 @@ namespace Deku2D
 			Log("ERROR", "Lua object named '%s' alredy exists", GetName().c_str());
 
 		LuaVirtualMachine->CreateLuaObject(ClassName, GetName(), this);
+
+		if (IsPrototype() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnPrototypeInstantiate"))
+			LuaVirtualMachine->CallMethodFunction(GetName(), "OnPrototypeInstantiate");
 	}
 
 	void CGameObject::DestroyLuaObject()

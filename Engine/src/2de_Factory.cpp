@@ -14,7 +14,7 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CFactory
 
-	CFactory::CFactory() : CreationLevel(0)
+	CFactory::CFactory()
 	{
 		SetName("Factory");
 
@@ -30,19 +30,19 @@ namespace Deku2D
 	{	
 	}
 
-	CGameObject* CFactory::CreateGameObject(const string &AClassName, const string &AName /*= ""*/)
+	CGameObject* CFactory::CreateGameObject(const string &AClassName, const string &AName /*= ""*/, bool AFinalizeCreation /*= true*/)
 	{
 		CGameObject *result;
 
 		if (IsComponentExists(AClassName))
-			result = CreateComponent(AClassName, AName);
+			result = CreateComponent(AClassName, AName, AFinalizeCreation);
 		else
 			result = InstantiatePrototype(AClassName, AName);
 
 		return result;
 	}
 
-	CGameObject* CFactory::CreateComponent(const string &AClassName, const string &AName /*= ""*/)
+	CGameObject* CFactory::CreateComponent(const string &AClassName, const string &AName /*= ""*/, bool AFinalizeCreation /*= true*/)
 	{
 		ComponentsContainer::iterator it = Components.find(AClassName);
 		if (it == Components.end())
@@ -52,8 +52,10 @@ namespace Deku2D
 		}
 
 		CGameObject *result = dynamic_cast<CGameObject *>((this->*(it->second))(AName));
-		IncreaseCreationLevel(result);
-		DecreaseCreationLevel();
+
+		if (AFinalizeCreation)
+			result->FinalizeCreation();
+
 		return result;
 	}
 
@@ -67,84 +69,24 @@ namespace Deku2D
 		}
 
 		CGameObject *result = New<CGameObject>(AName);
-		IncreaseCreationLevel(result);
 
-		// TODO: Rename looks weird.. make it possible to use SetName
 		if (AName.empty())
-			Rename(result->GetName(), AProtoName + itos(result->GetID()));
+			result->SetName(AProtoName + itos(result->GetID()));
 
 		result->Prototype = true;
 		result->Deserialize(xml);
+
+		SetRecursionLimit(AProtoName, from_string<int>(xml->SafeGetAttribute("RecursionLimit", "-1")));
 
 		TraversePrototypeNode(xml, result, result);
 
-		DecreaseCreationLevel();
+		result->FinalizeCreation();
+
+		Log("INFO", "Prototype INSTANTIATED: '%s', instance name: '%s'", AProtoName.c_str(), result->GetName().c_str());
+
 		return result;
 	}
 
-	/**
-	* CFactory::CreateByName - creates an object of AClassName type with AName name.
-	*
-	* AClassName could be an internal class or a prototype resource name.
-	*/
-
-	//#define USE_PROTOTYPE_CACHING
-
-	/*CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes [>= NULL<])
-	{
-		if (CObject *result = CreateClassInstance(AClassName, AName))
-			return result;
-
-	#ifdef USE_PROTOTYPE_CACHING
-		if (CGameObject *cached = TryUseCachedPrototype(AClassName, AName))
-			return cached;
-	#endif
-
-		CXMLNode *xml = GetPrototypeXML(AClassName);
-		if (!xml)
-		{
-			Log("ERROR", "Can't create '%s' by name", AClassName.c_str());
-			return NULL;
-		}
-
-		CGameObject *result = New<CGameObject>(AName);
-		IncreaseCreationLevel(result);
-
-		if (AName.empty())
-			Rename(result->GetName(), AClassName + itos(result->GetID()));
-
-		result->Prototype = true;
-		result->Deserialize(xml);
-
-		assert(!result->GetClassName().empty());
-
-		if (result->GetClassName() == "GameObject")
-			result->SetScript(Get<CScript>("BaseComponents"));
-
-		UsedPrototypesContainer *FirstUsedPrototypes = NULL;
-		if (!UsedPrototypes)
-			UsedPrototypes = FirstUsedPrototypes = new UsedPrototypesContainer;
-
-		int ProtoRecursionLimit = xml->HasAttribute("RecursionLimit") ?
-			from_string<int>(xml->GetAttribute("RecursionLimit")) : -1;
-
-		if (!UsedPrototypes->count(AClassName))
-			(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
-
-		TraversePrototypeNode(xml, result, UsedPrototypes, result);
-
-		if (FirstUsedPrototypes)
-		{
-			delete FirstUsedPrototypes;
-
-	#ifdef USE_PROTOTYPE_CACHING
-			CachedProtos[AClassName] = result->CloneTree("proto" + AClassName);
-	#endif
-		}
-
-		DecreaseCreationLevel();
-		return result;
-	}*/
 
 	/**
 	* CFactory::Rename - renames managed object.
@@ -250,10 +192,22 @@ namespace Deku2D
 				continue;
 
 			NodeName = (*it)->GetName(); 
+
+			int recursionsLeft = GetRecursionsLeft(NodeName);
+			if (recursionsLeft < 1)
+			{
+				if (recursionsLeft == -1)
+					Log("ERROR", "Unlimited recursive reference of prototype '%s'", NodeName.c_str());
+
+				continue;
+			}
+
+			IncreaseUsedCount(NodeName);
+
 			ChildName = (*it)->SafeGetAttribute("Name");
 			LocalChildName = (*it)->SafeGetAttribute("LocalName");
 
-			child = CreateGameObject(NodeName, ChildName);
+			child = CreateGameObject(NodeName, ChildName, false);
 			if (!child)
 			{
 				Log("ERROR", "Can't create object of class '%s' from prototype", NodeName.c_str());
@@ -265,7 +219,12 @@ namespace Deku2D
 			child->Deserialize(*it);
 			AObject->Attach(child);
 
+			if (!child->IsPrototype())
+				child->FinalizeCreation();
+
 			TraversePrototypeNode(*it, child, CurrentProto);
+
+			DecreaseUsedCount(NodeName);
 		}
 	}
 
@@ -288,6 +247,34 @@ namespace Deku2D
 		return xml;
 	}
 
+	void CFactory::SetRecursionLimit(const string &AProtoName, int ARecursionLimit)
+	{
+		if (!UsedPrototypes.count(AProtoName))
+			UsedPrototypes[AProtoName] = ARecursionLimit;
+	}
+
+	int CFactory::GetRecursionsLeft(const string &AProtoName)
+	{
+		int result = 1;
+
+		if (UsedPrototypes.count(AProtoName))
+			result = UsedPrototypes[AProtoName];
+
+		return result;
+	}
+
+	void CFactory::IncreaseUsedCount(const string &AProtoName)
+	{
+		if (UsedPrototypes.count(AProtoName))
+			--UsedPrototypes[AProtoName];
+	}
+
+	void CFactory::DecreaseUsedCount(const string &AProtoName)
+	{
+		if (UsedPrototypes.count(AProtoName))
+			++UsedPrototypes[AProtoName];
+	}
+
 	CGameObject* CFactory::TryUseCachedPrototype(const string &AClassName, const string &AName)
 	{
 		map<string, CGameObject *>::iterator it = CachedProtos.find(AClassName);
@@ -297,31 +284,6 @@ namespace Deku2D
 
 		return it->second->CloneTree(AName);
 	}
-
-	void CFactory::IncreaseCreationLevel(CGameObject *AObject)
-	{
-		++CreationLevel;
-		CreationQueue.push_front(AObject);
-	}
-
-	void CFactory::DecreaseCreationLevel()
-	{
-		if (CreationLevel == 1)
-		{
-			list<CGameObject *>::iterator dit;
-			while (!CreationQueue.empty())
-			{
-				for (list<CGameObject *>::iterator it = CreationQueue.begin(); it != CreationQueue.end();)
-				{
-					(*it)->FinalizeCreation();
-					dit = it++;
-					CreationQueue.erase(dit);
-				}
-			}
-		}
-		--CreationLevel;
-	}
-
 
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 
