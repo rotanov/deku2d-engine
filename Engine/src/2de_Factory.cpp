@@ -18,81 +18,75 @@ namespace Deku2D
 	{
 		SetName("Factory");
 
-		AddClass("RenderableComponent", &CFactory::InternalNew<CRenderableComponent>);
-		AddClass("PlaceableComponent", &CFactory::InternalNew<CPlaceableComponent>);
-		AddClass("GeometricComponent", &CFactory::InternalNew<CGeometricComponent>);
-		AddClass("GameObject", &CFactory::InternalNew<CGameObject>);
-		AddClass("Text", &CFactory::InternalNew<CText>);
-		AddClass("TimerComponent", &CFactory::InternalNew<CTimerComponent>);
+		AddComponent("RenderableComponent", &CFactory::InternalNew<CRenderableComponent>);
+		AddComponent("PlaceableComponent", &CFactory::InternalNew<CPlaceableComponent>);
+		AddComponent("GeometricComponent", &CFactory::InternalNew<CGeometricComponent>);
+		AddComponent("GameObject", &CFactory::InternalNew<CGameObject>);
+		AddComponent("Text", &CFactory::InternalNew<CText>);
+		AddComponent("TimerComponent", &CFactory::InternalNew<CTimerComponent>);
 	}
 
 	CFactory::~CFactory()
 	{	
 	}
 
-	/**
-	* CFactory::CreateByName - creates an object of AClassName type with AName name.
-	*
-	* AClassName could be an internal class or a prototype resource name.
-	*/
-
-	//#define USE_PROTOTYPE_CACHING
-
-	CObject* CFactory::CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes /*= NULL*/)
+	CGameObject* CFactory::CreateGameObject(const string &AClassName, const string &AName /*= ""*/, bool AFinalizeCreation /*= true*/)
 	{
-		if (CObject *result = CreateClassInstance(AClassName, AName))
-			return result;
+		CGameObject *result;
 
-	#ifdef USE_PROTOTYPE_CACHING
-		if (CGameObject *cached = TryUseCachedPrototype(AClassName, AName))
-			return cached;
-	#endif
+		if (IsComponentExists(AClassName))
+			result = CreateComponent(AClassName, AName, AFinalizeCreation);
+		else
+			result = InstantiatePrototype(AClassName, AName);
 
-		CXMLNode *xml = GetPrototypeXML(AClassName);
+		return result;
+	}
+
+	CGameObject* CFactory::CreateComponent(const string &AClassName, const string &AName /*= ""*/, bool AFinalizeCreation /*= true*/)
+	{
+		ComponentsContainer::iterator it = Components.find(AClassName);
+		if (it == Components.end())
+		{
+			Log("ERROR", "Can't create component: no such component class: '%s'", AClassName.c_str());
+			return NULL;
+		}
+
+		CGameObject *result = dynamic_cast<CGameObject *>((this->*(it->second))(AName));
+
+		if (AFinalizeCreation)
+			result->FinalizeCreation();
+
+		return result;
+	}
+
+	CGameObject* CFactory::InstantiatePrototype(const string &AProtoName, const string &AName /*= ""*/)
+	{
+		CXMLNode *xml = GetPrototypeXML(AProtoName);
 		if (!xml)
 		{
-			Log("ERROR", "Can't create '%s' by name", AClassName.c_str());
+			Log("ERROR", "Can't create prototype instance: no such prototype: '%s'", AProtoName.c_str());
 			return NULL;
 		}
 
 		CGameObject *result = New<CGameObject>(AName);
+
 		if (AName.empty())
-			Rename(result->GetName(), AClassName + itos(result->GetID()));
+			result->SetName(AProtoName + itos(result->GetID()));
 
 		result->Prototype = true;
 		result->Deserialize(xml);
 
-		assert(!result->GetClassName().empty());
+		SetRecursionLimit(AProtoName, from_string<int>(xml->SafeGetAttribute("RecursionLimit", "-1")));
 
-		if (result->GetClassName() == "GameObject")
-			result->SetScript(Get<CScript>("BaseComponents"));
-
-		UsedPrototypesContainer *FirstUsedPrototypes = NULL;
-		if (!UsedPrototypes)
-			UsedPrototypes = FirstUsedPrototypes = new UsedPrototypesContainer;
-
-		int ProtoRecursionLimit = -1;
-		if (xml->HasAttribute("RecursionLimit"))
-			ProtoRecursionLimit = from_string<int>(xml->GetAttribute("RecursionLimit"));
-
-		if (!UsedPrototypes->count(AClassName))
-			(*UsedPrototypes)[AClassName] = ProtoRecursionLimit;
-
-		TraversePrototypeNode(xml, result, UsedPrototypes, result);
+		TraversePrototypeNode(xml, result, result);
 
 		result->FinalizeCreation();
 
-		if (FirstUsedPrototypes)
-		{
-			delete FirstUsedPrototypes;
-
-	#ifdef USE_PROTOTYPE_CACHING
-			CachedProtos[AClassName] = result->CloneTree("proto" + AClassName);
-	#endif
-		}
+		Log("INFO", "Prototype INSTANTIATED: '%s', instance name: '%s'", AProtoName.c_str(), result->GetName().c_str());
 
 		return result;
 	}
+
 
 	/**
 	* CFactory::Rename - renames managed object.
@@ -175,17 +169,17 @@ namespace Deku2D
 		CleanUp();
 	}
 
-	bool CFactory::IsClassExists(const string &AName)
+	bool CFactory::IsComponentExists(const string &AClassName)
 	{
-		return (Classes.count(AName) != 0);
+		return (Components.count(AClassName) != 0);
 	}
 
-	void CFactory::AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent /*= true*/)
+	void CFactory::AddComponent(const string &AClassName, TNewFunction ANewFunctionPointer)
 	{
-		Classes[AClassName] = CClassDescription(ANewFunctionPointer, AIsComponent);
+		Components[AClassName] = ANewFunctionPointer;
 	}
 
-	void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto)
+	void CFactory::TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, CGameObject *CurrentProto)
 	{
 		CGameObject *child;
 		string NodeName;
@@ -198,53 +192,39 @@ namespace Deku2D
 				continue;
 
 			NodeName = (*it)->GetName(); 
-			if (IsClassExists(NodeName))
+
+			int recursionsLeft = GetRecursionsLeft(NodeName);
+			if (recursionsLeft < 1)
 			{
-				if (!Classes[NodeName].IsComponent)
-				{
-					Log("ERROR", "Prototypes can't contain non-component clasees");
-					continue;
-				}
-			}
-			else
-			{
-				if (UsedPrototypes->count(NodeName) != 0)
-				{
-					if ((*UsedPrototypes)[NodeName] < 1)
-					{
-						if ((*UsedPrototypes)[NodeName] <= -1)
-							Log("ERROR", "Recursive reference in prototype");
-						continue;
-					}
-					--(*UsedPrototypes)[NodeName];
-				}
-			}
+				if (recursionsLeft == -1)
+					Log("ERROR", "Unlimited recursive reference of prototype '%s'", NodeName.c_str());
 
-			ChildName = (*it)->HasAttribute("Name") ? (*it)->GetAttribute("Name") : "";
-			LocalChildName = (*it)->HasAttribute("LocalName") ? (*it)->GetAttribute("LocalName") : "";
-
-			child = dynamic_cast<CGameObject *>(CreateByName(NodeName, ChildName, UsedPrototypes));
-
-			if (!LocalChildName.empty())
-				CurrentProto->LocalNameObjectMapping[LocalChildName] = child;
-
-			if (!child)
-			{
-				Log("ERROR", "Can't create object from prototype: NULL returned by CreateByName");
 				continue;
 			}
+
+			IncreaseUsedCount(NodeName);
+
+			ChildName = (*it)->SafeGetAttribute("Name");
+			LocalChildName = (*it)->SafeGetAttribute("LocalName");
+
+			child = CreateGameObject(NodeName, ChildName, false);
+			if (!child)
+			{
+				Log("ERROR", "Can't create object of class '%s' from prototype", NodeName.c_str());
+				continue;
+			}
+
+			CurrentProto->AddLocalName(LocalChildName, child);
+
 			child->Deserialize(*it);
 			AObject->Attach(child);
 
-			// Uncomment the following if you want to disallow additional children attached to prototype included within other prototype.
-			//if (!IsClassExists(NodeName))
-			//	Log("ERROR", "Prototype references can't have children");
-			//else
+			if (!child->IsPrototype())
+				child->FinalizeCreation();
 
-			TraversePrototypeNode(*it, child, UsedPrototypes, CurrentProto);
+			TraversePrototypeNode(*it, child, CurrentProto);
 
-			if (UsedPrototypes->count(NodeName) != 0)
-				++(*UsedPrototypes)[NodeName];
+			DecreaseUsedCount(NodeName);
 		}
 	}
 
@@ -267,23 +247,32 @@ namespace Deku2D
 		return xml;
 	}
 
-	CObject* CFactory::CreateClassInstance(const string &AClassName, const string &AName)
+	void CFactory::SetRecursionLimit(const string &AProtoName, int ARecursionLimit)
 	{
-		ClassesContainer::iterator it = Classes.find(AClassName);
-		if (it == Classes.end())
-			return NULL;
+		if (!UsedPrototypes.count(AProtoName))
+			UsedPrototypes[AProtoName] = ARecursionLimit;
+	}
 
-		CObject *result = (this->*(it->second.NewFunction))(AName);
+	int CFactory::GetRecursionsLeft(const string &AProtoName)
+	{
+		int result = 1;
 
-		CGameObject *go = dynamic_cast<CGameObject*>(result);
-		if (go)
-		{
-			go->SetClassName(AClassName);
-			go->SetScript(Get<CScript>("BaseComponents"));
-			go->FinalizeCreation();
-		}
+		if (UsedPrototypes.count(AProtoName))
+			result = UsedPrototypes[AProtoName];
 
 		return result;
+	}
+
+	void CFactory::IncreaseUsedCount(const string &AProtoName)
+	{
+		if (UsedPrototypes.count(AProtoName))
+			--UsedPrototypes[AProtoName];
+	}
+
+	void CFactory::DecreaseUsedCount(const string &AProtoName)
+	{
+		if (UsedPrototypes.count(AProtoName))
+			++UsedPrototypes[AProtoName];
 	}
 
 	CGameObject* CFactory::TryUseCachedPrototype(const string &AClassName, const string &AName)
@@ -295,7 +284,6 @@ namespace Deku2D
 
 		return it->second->CloneTree(AName);
 	}
-
 
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 

@@ -47,12 +47,9 @@ namespace Deku2D
 	void CObject::SetName(const string &AObjectName)
 	{
 		if (Managed)
-		{
-			Log("ERROR", "Name of managed objects can only be changed by calling CFactory::Rename");
-			return;
-		}
-
-		Name = AObjectName;
+			Factory->Rename(Name, AObjectName);
+		else
+			Name = AObjectName;
 	}
 
 	string CObject::GetStandardName() const

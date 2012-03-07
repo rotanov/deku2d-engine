@@ -63,7 +63,7 @@ bool CCustomStateHandler::OnInitialize()
 	Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
 	Deku2D::SceneManager->SetCurrentScene(NewScene);
 	Deku2D::LuaVirtualMachine->RunScript(Deku2D::Factory->Get<Deku2D::CScript>(Deku2D::Config->Section("Data")["InitScript"]));
-	Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
+	//Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
 	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
 	Deku2D::SoundMixer->SetMusicVolume(128);
 

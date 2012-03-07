@@ -174,29 +174,6 @@ namespace Deku2D
 	CDefaultTitleScreen::CDefaultTitleScreen()
 	{
 		SetName("DefaultTitleScreen");
-
-		TextDeku = Factory->New<CText>();
-		TextTeam = Factory->New<CText>();
-
-		EventManager->Subscribe("WindowResize", this);
-		CPlaceableComponent *tempPlacing = Factory->New<CPlaceableComponent>();
-		int ScrWidth = GLWindow->GetWidth();
-		int ScrHeight = GLWindow->GetHeight();
-		tempPlacing->SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
-		CEngine::Instance()->RootGameObject->Attach(tempPlacing);
-		tempPlacing->Attach(this);
-		CPlaceableComponent *DekuTextPlacing = Factory->New<CPlaceableComponent>();
-		CPlaceableComponent *TeamTextPlacing = Factory->New<CPlaceableComponent>();
-		tempPlacing->Attach(DekuTextPlacing);
-		tempPlacing->Attach(TeamTextPlacing);
-		DekuTextPlacing->Attach(TextDeku);
-		TeamTextPlacing->Attach(TextTeam);
-		DekuTextPlacing->SetPosition(Vector2(40.0f, -47.0f));
-		TeamTextPlacing->SetPosition(Vector2(40.0f, -74.0f));
-		DekuTextPlacing->SetScaling(2);
-		TeamTextPlacing->SetScaling(2);
-		TextDeku->SetText("Deku");
-		TextTeam->SetText("Team");
 	}
 
 	void CDefaultTitleScreen::SetTexture(CTexture* ATexture)
@@ -211,6 +188,34 @@ namespace Deku2D
 			return;
 		if (this->GetParent() != NULL)
 			static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(GLWindow->GetSize() * 0.5f);
+	}
+
+	void CDefaultTitleScreen::FinalizeCreation()
+	{
+		CRenderableComponent::FinalizeCreation();
+
+		TextDeku = Factory->CreateComponent<CText>();
+		TextTeam = Factory->CreateComponent<CText>();
+
+		EventManager->Subscribe("WindowResize", this);
+		CPlaceableComponent *tempPlacing = Factory->CreateComponent<CPlaceableComponent>();
+		int ScrWidth = GLWindow->GetWidth();
+		int ScrHeight = GLWindow->GetHeight();
+		tempPlacing->SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
+		CEngine::Instance()->RootGameObject->Attach(tempPlacing);
+		tempPlacing->Attach(this);
+		CPlaceableComponent *DekuTextPlacing = Factory->CreateComponent<CPlaceableComponent>();
+		CPlaceableComponent *TeamTextPlacing = Factory->CreateComponent<CPlaceableComponent>();
+		tempPlacing->Attach(DekuTextPlacing);
+		tempPlacing->Attach(TeamTextPlacing);
+		DekuTextPlacing->Attach(TextDeku);
+		TeamTextPlacing->Attach(TextTeam);
+		DekuTextPlacing->SetPosition(Vector2(40.0f, -47.0f));
+		TeamTextPlacing->SetPosition(Vector2(40.0f, -74.0f));
+		DekuTextPlacing->SetScaling(2);
+		TeamTextPlacing->SetScaling(2);
+		TextDeku->SetText("Deku");
+		TextTeam->SetText("Team");
 	}
 
 }	//	namespace Deku2D

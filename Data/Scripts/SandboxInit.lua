@@ -50,9 +50,11 @@ Root:Attach(another_ninja)
 
 -- Cloned Ninja
 
+--[[
 local cloned_ninja = another_ninja:CloneTree()
 cloned_ninja:FindFirstOfClass("PlaceableComponent"):SetPosition(250, 100)
 Root:Attach(cloned_ninja)
+--]]
 
 -- Some shit, I don't recall what is it
 --[[

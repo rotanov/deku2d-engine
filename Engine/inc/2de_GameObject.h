@@ -52,6 +52,10 @@ namespace Deku2D
 		CGameObject* GetObjectByLocalName(const string &AName);
 		unsigned GetChildCount();
 
+		CGameObject* FindPrototype();
+
+		void AddLocalName(const string &ALocalName, CGameObject *AChild);
+
 		CGameObject* FindFirstOfClass(const string &AClassName, bool ExceedPrototype = false);
 
 		bool IsActive() const;
@@ -60,7 +64,7 @@ namespace Deku2D
 		bool IsPrototype() const;
 
 		virtual void Deserialize(CXMLNode *AXML);
-		void FinalizeCreation();
+		virtual void FinalizeCreation();
 		void ProcessEvent(const CEvent &AEvent);
 		CScript* GetScript() const;
 		void SetScript(CScript *AScript);
@@ -85,22 +89,22 @@ namespace Deku2D
 			return AObject;
 		}
 
+		bool Created;
+
 	private:
 		typedef vector<CGameObject *> ChildrenContainer;
 		typedef ChildrenContainer::iterator ChildrenIterator;
 		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
 
 		static void _DestroySubtree(CGameObject *NextObject);
-		CGameObject* FindPrototype();
-		void UpdateParentAndProtoFields();
 		void CreateLuaObject();
+		void DestroyLuaObject();
 
 		CGameObject *Parent;
 		CAbstractScene *Scene;
 		CScript *Script;
 		ChildrenContainer Children;
 		bool Prototype;
-		bool Created;
 		bool Active;
 
 		// not used

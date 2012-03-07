@@ -356,9 +356,9 @@ namespace Deku2D
 		}
 		LuaVirtualMachine->RunScript(mainScript);	
 
-		RootGameObject = dynamic_cast<CPlaceableComponent *>(Factory->CreateByName("PlaceableComponent", "Root"));
+		RootGameObject = Factory->CreateComponent<CPlaceableComponent>("Root");
 
-		CGameObject* Cursor = dynamic_cast<CGameObject*>(Factory->CreateByName("MouseProto", "Mouse cursor"));
+		CGameObject* Cursor = Factory->InstantiatePrototype("MouseProto", "Mouse cursor");
 		if (Cursor != NULL)
 			RootGameObject->Attach(Cursor);
 		else
@@ -368,9 +368,9 @@ namespace Deku2D
 		//Here goes high level initializations, like default scene as title screen
 		//and FPSText
 		// TODO: hide it somewhere..
-		CPlaceableComponent *FPSTextPlacing = Factory->New<CPlaceableComponent>();
+		CPlaceableComponent *FPSTextPlacing = Factory->CreateComponent<CPlaceableComponent>();
 		FPSTextPlacing->GetTransformation().SetTranslation(Vector2(200.0f, 300.0f));
-		FPSText = Factory->New<CText>("FPSText");
+		FPSText = Factory->CreateComponent<CText>("FPSText");
 		FPSText->SetText("FPS: 0");
 		FPSTextPlacing->SetLayer(512);
 		RootGameObject->Attach(FPSTextPlacing);
@@ -386,8 +386,8 @@ namespace Deku2D
 		CAbstractScene *TitleScreen = SceneManager->CreateScene();
 		SceneManager->SetCurrentScene(TitleScreen);
 
-		// Создание класса CDefaultTutleScreen (в текущей сцене)
-		CDefaultTitleScreen *Tscn = Factory->New<CDefaultTitleScreen>("TitleScreenClassForInst");
+		// Создание класса CDefaultTutleScreen (в текущей сцене) - it's broken
+		CDefaultTitleScreen *Tscn = Factory->CreateComponent<CDefaultTitleScreen>("TitleScreenClassForInst");
 		Tscn->SetTexture(TitleScreenShroomTexture);
 		
 		if (!StateHandler->OnInitialize())

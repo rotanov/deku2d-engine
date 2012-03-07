@@ -60,3 +60,5 @@ SOURCES += src/cmainwindow.cpp \
     src/CLogViewer.cpp \
     src/CEngineViewport.cpp
 RESOURCES += ui/resources.qrc
+
+QMAKE_CLEAN += bin/Logs/*.log bin/Config/Resources.xml
