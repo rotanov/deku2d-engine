@@ -61,6 +61,9 @@ namespace Deku2D
 		bool IsActive() const;
 		void SetActive(bool AActive);
 
+		bool IsEnabled() const;
+		void SetEnabled(bool AEnabled);
+
 		bool IsPrototype() const;
 
 		virtual void Deserialize(CXMLNode *AXML);
@@ -105,11 +108,18 @@ namespace Deku2D
 		CScript *Script;
 		ChildrenContainer Children;
 		bool Prototype;
+
+		// don't mix these two:
+		// 	Active - means that an object is participating in current tree iteration,
+		// 		it's internal flag that is rewritten on every iteration and should not be changed by general public
+		// 	Enabled - is the flag that provides an ability to enable/disable an object unconditionally,
+		// 		can be used anywhere by anyone
+
 		bool Active;
+		bool Enabled;
 
 		// not used
 		bool Dead;	
-		bool Enabled;
 
 		friend class CFactory;
 	};

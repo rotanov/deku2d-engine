@@ -249,6 +249,16 @@ namespace Deku2D
 		Active = AActive;
 	}
 
+	bool CGameObject::IsEnabled() const
+	{
+		return Enabled;
+	}
+
+	void CGameObject::SetEnabled(bool AEnabled)
+	{
+		Enabled = AEnabled;
+	}
+
 	bool CGameObject::IsPrototype() const
 	{
 		return Prototype;
@@ -263,6 +273,11 @@ namespace Deku2D
 		if (AXML->HasAttribute("Script"))
 		{
 			SetScript(Factory->Get<CScript>(AXML->GetAttribute("Script")));
+		}
+
+		if (AXML->HasAttribute("Enabled"))
+		{
+			SetEnabled(from_string<bool>(AXML->GetAttribute("Enabled")));
 		}
 	}
 
@@ -281,7 +296,7 @@ namespace Deku2D
 
 	void CGameObject::ProcessEvent(const CEvent &AEvent)
 	{
-		if (Created)
+		if (Created && Enabled)
 		{
 			CLuaFunctionCall fc(GetName(), "On" + AEvent.GetName());
 			LuaVirtualMachine->PushEventTable(AEvent);
@@ -309,11 +324,12 @@ namespace Deku2D
 
 	void CGameObject::DFSIterate(CGameObject *Next, IVisitorBase *Visitor)
 	{
-		if (!Next->IsActive())
-			return;
 		Next->AcceptOnEnter(*Visitor);
-		for (unsigned i = 0; i < Next->GetChildCount(); i++)
-			DFSIterate(Next->Children[i], Visitor);
+		if (Next->IsActive())
+		{
+			for (unsigned i = 0; i < Next->GetChildCount(); i++)
+				DFSIterate(Next->Children[i], Visitor);
+		}
 		Next->AcceptOnLeave(*Visitor);
 	}
 

@@ -30,7 +30,6 @@ namespace Deku2D
 		void FinalizeCreation();
 
 	private:
-		bool Enabled;
 		float Interval;
 		float Accumulated;
 

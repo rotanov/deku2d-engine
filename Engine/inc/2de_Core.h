@@ -634,6 +634,7 @@ namespace Deku2D
 	{
 	public:
 		typedef R CReturnType;
+		virtual bool ShouldVisit(T&) = 0;
 		virtual CReturnType VisitOnEnter(T&) = 0;
 		virtual CReturnType VisitOnLeave(T&) = 0;
 	};
@@ -683,7 +684,8 @@ namespace Deku2D
 		{
 			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
 			{
-				return ptr->VisitOnEnter(visited);
+				if (ptr->ShouldVisit(visited))
+					return ptr->VisitOnEnter(visited);
 			}
 			return CReturnType();
 		}
@@ -692,7 +694,8 @@ namespace Deku2D
 		{
 			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
 			{
-				return ptr->VisitOnLeave(visited);
+				if (ptr->ShouldVisit(visited))
+					return ptr->VisitOnLeave(visited);
 			}
 			return CReturnType();
 		}
