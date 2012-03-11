@@ -11,9 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\2de_DebugBox.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\2de_IncludeAllTU.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -131,6 +128,12 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="inc\2de_Xml.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\2de_Memory.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\2de_Define.h">
       <Filter>inc</Filter>
     </ClInclude>
   </ItemGroup>

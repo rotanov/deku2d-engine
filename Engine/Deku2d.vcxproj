@@ -84,7 +84,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\2de_DebugBox.cpp" />
     <ClCompile Include="src\2de_IncludeAllTU.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +91,7 @@
     <ClInclude Include="inc\2de_Config.h" />
     <ClInclude Include="inc\2de_Core.h" />
     <ClInclude Include="inc\2de_DebugBox.h" />
+    <ClInclude Include="inc\2de_Define.h" />
     <ClInclude Include="inc\2de_Engine.h" />
     <ClInclude Include="inc\2de_Event.h" />
     <ClInclude Include="inc\2de_Factory.h" />
@@ -107,6 +107,7 @@
     <ClInclude Include="inc\2de_LuaUtils.h" />
     <ClInclude Include="inc\2de_Math.h" />
     <ClInclude Include="inc\2de_Matrix2.h" />
+    <ClInclude Include="inc\2de_Memory.h" />
     <ClInclude Include="inc\2de_Object.h" />
     <ClInclude Include="inc\2de_Physics.h" />
     <ClInclude Include="inc\2de_PlaceableComponent.h" />

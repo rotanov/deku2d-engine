@@ -86,6 +86,13 @@ namespace Deku2D
 		typedef map<string, CRTTI*> TRTTIMap;
 
 		CRTTI(const string aName);
+		virtual ~CRTTI()
+		{
+			count--;
+			if (count == 0)
+				delete [] isFirstKindOfSecond;
+			isFirstKindOfSecond = NULL;
+		}
 
 		bool IsKindOf(const CRTTI* RTTI) const;
 		void RegisterProperty(CProperty* aProperty);

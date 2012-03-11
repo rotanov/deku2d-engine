@@ -1,4 +1,8 @@
 // rebuild all compilation speed ftw
+
+#include "2de_Define.h"
+
+#include "2de_Memory.cpp"
 #include "2de_Object.cpp"
 #include "2de_Log.cpp"
 #include "2de_Core.cpp"
