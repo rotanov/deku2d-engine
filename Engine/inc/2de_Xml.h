@@ -2,10 +2,11 @@
 #define _2DE_XML_H_
 
 #include "2de_Core.h"
+#include "2de_Storage.h"
 
 namespace Deku2D
 {
-	class CXMLNode; // forward declaration
+	class CXMLNode;
 
 	/**
 	* CXMLChildrenList - a class that represents XML-node children list.

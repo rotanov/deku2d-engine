@@ -2,45 +2,13 @@
 #define _2DE_CORE_H_
 
 #ifdef _MSC_VER
-
-// DAMNIT, move it somewhere and delete unnecessary ones, please.. // I have already commented it out, so some time will pass and I'll check most of warnings.
-
-//	#pragma warning (disable	:	4312)   //
-// 	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
-// 	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
-// 	#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
-// 	#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
-// 	#pragma warning (disable	:	4996)	
-// 	#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
-// 	#pragma warning (disable	:	4996)	//	rare
-// 	#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
-// 	#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
-// 	#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
-// 	#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
-// 	#pragma warning (disable	:	4291)	//	void *operator new(unsigned,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
-//after w4
-// 	#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
-// 	#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
-// 	 #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
-// 	#pragma warning (disable	:	4100)	//	unreferenced formal parameter
-// 	 #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
-// 	#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
-// 	 #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
-// 	#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
-// 	#pragma warning (disable	:	4702)	//	unreachable code ^^"
-// 	#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
-// 	#pragma warning (disable	:	4005)	// Macro redefinition
-// 	#pragma warning (disable	:	4714)	// __forceinline not inlined
-// 	#pragma warning (disable	:	4005)	// Macro redefinition
-// 	#pragma warning (disable	:	4355)	// this in initializer list
-// 	#pragma warning (disable	:	4505)	// for dirent: unreferenced function has been removed
-
-#define VC_LEANMEAN
-#define _CRT_SECURE_NO_DEPRECATE
-#define NOMINMAX
-#undef min
-#undef max
-#undef GetClassName
+	#define VC_LEANMEAN
+	#define _CRT_SECURE_NO_DEPRECATE
+	#define _CRT_SECURE_NO_WARNINGS
+	#define NOMINMAX
+	#undef min
+	#undef max
+	#undef GetClassName
 #endif // _MSC_VER
 
 #define _SECURE_SCL 0
@@ -85,6 +53,8 @@
 #include <dirent.h>
 #define MAX_PATH 260
 #endif //_WIN32
+
+#include "2de_Object.h"
 
 namespace Deku2D
 {
@@ -132,11 +102,7 @@ namespace Deku2D
 
 	//	#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
-
 	typedef unsigned char byte;
-
-	//	"Forever" instead of "for(;;)", anyway, just kidding.
-	//#define forever for(;;)
 
 	template<typename T>
 	__INLINE void SAFE_DELETE(T*& a)
@@ -152,136 +118,8 @@ namespace Deku2D
 		a = NULL;
 	}
 
-	#define DEAD_BEEF 0xdeadbeef
-	#define DEAD_FOOD 0xdeadf00d
-
 	#define DISABLE_DEBUG_BOXES
 	//#undef DISABLE_DEBUG_BOXES
-
-	namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html 
-							// if it won't come in handy, I'll remove it.
-		namespace typetag_private {
-
-		/**
-		*  address of this structure is used as typetag
-		*/
-		template <typename _Ty> struct typetag_holder {};
-
-		template <typename _Ty>
-		inline const void* GenTypeTag()
-		{
-			static typetag_holder<_Ty> typetagInst;
-			return reinterpret_cast<void*>(&typetagInst);
-		}
-
-		} // namespace typetag_private
-
-		template <typename C>
-		inline const void * typetag()
-		{
-			return _details::typetag_private::GenTypeTag<C>();
-		}
-
-		/** 
-		*  remove modifier removes const, volatile and others modifiers
-		*/
-		template <typename _Ty>
-		struct remove_modifier
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<volatile _Ty>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<_Ty&>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty&>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<_Ty*>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty*>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty* const>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<volatile _Ty*>
-		{
-			typedef _Ty type;
-		};
-
-
-		// А вот это уже из александреску
-		// Счетчик значений
-		template <class C>
-		class CType2ValCounter
-		{
-		protected:
-			static C Counter;
-		};
-
-		template<class C> C CType2ValCounter<C>::Counter;
-
-		// Генератор значений
-		template<class T, class C>
-		class CType2ValGenerator : public CType2ValCounter<C>
-		{
-		public:
-			C ID;
-			CType2ValGenerator()
-			{
-				ID = CType2ValCounter<C>::Counter;
-				++CType2ValCounter<C>::Counter;
-			}
-		};
-
-
-	} // namespace _details
-
-	template <typename C>
-	inline const void * typetag()
-	{
-		return _details::typetag_private::
-		GenTypeTag<typename _details::remove_modifier<C>::type>();
-	}
-
-	// Шаблонная функция получения идентификатора типа
-	template <class T, class C>
-	C Type2Val()
-	{
-		static _details::CType2ValGenerator<T, C> ValueGenerator;
-
-		return ValueGenerator.ID;
-	}
 
 	template<typename T>
 	struct identity
@@ -308,7 +146,8 @@ namespace Deku2D
 
 		__INLINE bool from_string_impl(const string &s, identity<bool>)
 		{
-			// ios::boolalpha - have you looked for it, while trying to reinvent the wheel? // it doesn't suit our needs.. i don't remember why, though..
+			// ios::boolalpha - have you looked for it, while trying to reinvent the wheel?
+			// it doesn't suit our needs.. i don't remember why, though..
 			if (s == "false" || s.empty())
 				return false;
 
@@ -335,49 +174,6 @@ namespace Deku2D
 	{
 		return VariantConvert::from_string_impl(s, identity<T>());
 	}
-
-	class CEvent; // forward declaration
-
-	/**
-	* CObject - base class for many classes.
-	*/
-
-	class CObject
-	{
-	public:
-		CObject();
-		virtual ~CObject();
-
-		string GetName() const;
-		virtual void SetName(const string &AObjectName);
-
-		string GetStandardName() const;
-
-		unsigned GetID() const;
-
-		bool isDestroyed() const;
-		void SetDestroyed();
-
-		bool isManaged() const;
-
-		virtual void ProcessEvent(const CEvent &AEvent);
-
-	protected:
-		CObject(const CObject &AObject);
-		CObject& operator=(const CObject &AObject);
-
-		bool Managed;
-		bool Destroyed;
-		unsigned ID;
-		string ClassName;
-
-	private:
-		string Name;
-
-		static unsigned CObjectCount;
-
-		friend class CFactory;
-	};
 
 	// Template class for some manager
 	template <typename C>	// C - container type
@@ -614,247 +410,6 @@ namespace Deku2D
 	set<const std::type_info *> CTSingleton<T>::UnderConstruction;
 	#endif // _DEBUG
 
-	/**
-	 * Let there be Visitor
-	 * Taken from http://www.everfall.com/paste/id.php?bqa1eibc559f
-	 * http://www.gamedev.ru/community/oo_design/articles/?id=431
-	 * Cause it's Hierarchical visitor there will be
-	 * VisitOnEnter
-	 * VisitOnLeave
-	 */
-
-	class IVisitorBase
-	{
-	public:	
-		virtual ~IVisitorBase() {};
-	};
-
-	template <typename T, typename R = void>
-	class IVisitor : virtual public IVisitorBase
-	{
-	public:
-		typedef R CReturnType;
-		virtual CReturnType VisitOnEnter(T&) = 0;
-		virtual CReturnType VisitOnLeave(T&) = 0;
-	};
-
-	template <typename R = void>
-	class IVisitableBase
-	{
-	public:
-		typedef R CReturnType;
-		virtual ~IVisitableBase() {}
-		virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
-		virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
-
-	protected:
-		template <typename T>
-		static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				return ptr->VisitOnEnter(visited);
-			}
-			return CReturnType();
-		}
-		template <typename T>
-		static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				return ptr->VisitOnLeave(visited);
-			}
-			return CReturnType();
-		}
-	};
-
-	template <typename R = void>
-	class IVisitableObject : public CObject
-	{
-	public:
-		typedef R CReturnType;
-		virtual ~IVisitableObject() {}
-		virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
-		virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
-
-	protected:
-		template <typename T> 
-		static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				return ptr->VisitOnEnter(visited);
-			}
-			return CReturnType();
-		}
-		template <typename T> 
-		static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				return ptr->VisitOnLeave(visited);
-			}
-			return CReturnType();
-		}
-	};
-
-	#define D2D_DECLARE_VISITABLE()	\
-		virtual CReturnType AcceptOnEnter(IVisitorBase& visitor)	\
-		{ return ConcreteAcceptOnEnter(*this, visitor); }	\
-		virtual CReturnType AcceptOnLeave(IVisitorBase& visitor)	\
-		{ return ConcreteAcceptOnLeave(*this, visitor); }
-
-	/**
-	* CStorage - base class for CFile and CMemory classes, that describes their interface.
-	*/
-
-	class CStorage
-	{
-	public:
-		enum EOpenMode
-		{
-			OPEN_MODE_READ,
-			OPEN_MODE_WRITE,
-		};
-		
-		enum ESeekOrigin
-		{
-			SEEK_ORIGIN_BEGINNING,
-			SEEK_ORIGIN_CURRENT,
-			SEEK_ORIGIN_END,
-		};
-
-		CStorage();
-
-		virtual bool Close() = 0;
-
-		virtual bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1) = 0;
-		virtual bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1) = 0;
-		
-		// kinda-type-and-size-safe versions of Read and Write.. don't work with arrays, though..
-		template<typename T>
-		bool Read(T *Buffer)
-		{
-			return Read(Buffer, sizeof(T));
-		}
-
-		template<typename T>
-		bool Write(const T *Data)
-		{
-			return Write(Data, sizeof(T));
-		}
-
-		bool ReadByte(byte *Buffer);
-		bool WriteByte(byte *Data);
-		bool WriteByte(byte Data);
-
-		// i think, that CFile should not provide posibility to read 0-terminated strings from files..
-		// formats should be developed in such way, that does NOT include reading variable-length strings from binary files.. it's bad design of data structures to do so..
-		// BUT even if someone ever need to store string in binary file, they should develop structure for storing string size too, together with string.. and then deal with it in higher level of abstraction..
-		// YES OFCOURSE YOU"RE FUCKIING RIGHT> LET"S DO IT
-
-		bool ReadString(char *Buffer, int ASize);
-		bool ReadString(string &Buffer);
-		bool WriteString(const char *Data);
-		bool WriteString(const string &Data);
-
-		bool WriteText(const char *Data);
-		bool WriteText(const string &Data);
-
-		virtual bool ReadLine(char *Buffer, int ASize) = 0;
-		virtual bool ReadLineS(string &Buffer);
-		bool WriteLine(const char *Data);
-		bool WriteLine(const string &Data);
-
-		virtual string GetContent() = 0;
-		bool SetContent(const string &Data);
-
-		virtual bool Seek(long Offset, ESeekOrigin Origin) = 0;
-		bool Rewind();
-		virtual bool Flush();
-
-		virtual bool Eof() const = 0;
-		virtual bool Good() const = 0;
-		virtual long Size() const = 0;
-
-	protected:
-		bool WriteLine(const char *Data, size_t Size);
-
-		EOpenMode Mode;
-
-		const int READ_BUFFER_DEFAULT_SIZE;
-
-	private:
-		// CStorage can't be copied or assigned.
-		CStorage(const CStorage &Source);
-		CStorage& operator=(const CStorage &Source);
-	};
-
-	/**
-	* CFile - a class that provides interface to reading and writing of files.
-	*
-	* Each instance of the class represents a single file, implementing RAII principle.
-	* This class is a front-end for stdio. Also extends it with some lazy-functions, like get file contents into a string.
-	* Can't be copied or assigned.
-	*/
-
-	class CFile : public CStorage
-	{
-	public:
-		CFile();
-		CFile(const string &AFilename, EOpenMode AMode);
-		~CFile();
-
-		bool Open(const string &AFilename, EOpenMode AMode);
-		bool Close();
-
-		bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
-		bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
-		
-		bool ReadLine(char *Buffer, int ASize);
-
-		string GetContent();
-
-		bool Seek(long Offset, ESeekOrigin Origin);
-		bool Flush();
-
-		bool Eof() const;
-		bool Good() const;
-		long Size() const;
-
-	private:
-		FILE *File;
-		string Filename;
-	};
-
-	class CMemory : public CStorage
-	{
-	public:
-		CMemory();
-		CMemory(byte *ABeginningPointer, long ALength, EOpenMode AMode);
-		~CMemory();
-
-		bool Open(byte *ABeginningPointer, long ALength, EOpenMode AMode);
-		bool Close();
-
-		bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
-		bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
-
-		bool ReadLine(char *Buffer, int ASize);
-
-		string GetContent();
-
-		bool Seek(long Offset, ESeekOrigin Origin);
-
-		bool Eof() const;
-		bool Good() const;
-		long Size() const;
-
-	private:
-		byte *BeginningPointer;
-		byte *CurrentPointer;
-		long Length;
-	};
 
 	/**
 	* FileSystem - a namespace that contains functions for working with file system in a cross-platform way.

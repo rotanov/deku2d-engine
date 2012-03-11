@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>$(ProjectDir)\bin\</OutDir>
+    <IncludePath>D:\Dev\inc\lua;D:\Dev\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Dev\lib;$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName).$(Configuration)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>Glew32s.lib;OpenGl32.lib;Glu32.lib;Sdl.lib;SDLMain.lib;Lua5.1.lib;Deku2d.$(Configuration).lib;SDL_mixer.lib;DevIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>
+      </AssemblyDebug>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

@@ -168,8 +168,8 @@ namespace Deku2D
 	{
 		return Vector2
 			(
-			Random_Float(AMin.x, AMax.x),
-			Random_Float(AMin.y, AMax.y)
+				Random_Float(AMin.x, AMax.x),
+				Random_Float(AMin.y, AMax.y)
 			);
 	}
 
@@ -187,23 +187,27 @@ namespace Deku2D
 	{
 	private:
 		Vector2 Elements[N];
+
 	public:
 		Vector2Array(const Vector2 *Vertices)
 		{
 			for(unsigned i = 0; i < N; i++)
 				Elements[i] = Vertices[i];
 		}
+
 		Vector2Array()
 		{
 			for(unsigned i = 0; i < N; i++)
 				Elements[i] = Const::Math::V2_ZERO;
 		}
+
 		Vector2& operator [](size_t Index)
 		{
 			if (Index >= N)
 				throw std::runtime_error("CCoitus or CReproductor or CBreeding or CPropagation index out of bounds");
 			return Elements[Index];
 		}
+
 		const Vector2& operator [](size_t Index) const
 		{
 			if (Index >= N)

@@ -1,6 +1,8 @@
 // rebuild all compilation speed ftw
+#include "2de_Object.cpp"
 #include "2de_Log.cpp"
 #include "2de_Core.cpp"
+#include "2de_Storage.cpp"
 #include "2de_Box.cpp"
 #include "2de_Matrix2.cpp"
 #include "2de_Vector3.cpp"
@@ -21,6 +23,8 @@
 #include "2de_Factory.cpp"
 #include "2de_GraphicsHigh.cpp"
 #include "2de_Math.cpp"
+#include "2de_Property.cpp"
+#include "2de_Serialization.cpp"
 #include "2de_RTTI.cpp"
 #include "2de_Sound.cpp"
 #include "2de_Xml.cpp"
@@ -32,3 +36,4 @@
 #include "2de_SpatialManager.cpp"
 #include "2de_Input.cpp"
 #include "2de_ShroomTitle.cpp"
+#include "2de_Registration.cpp"

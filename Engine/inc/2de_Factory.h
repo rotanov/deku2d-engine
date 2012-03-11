@@ -10,7 +10,8 @@ namespace Deku2D
 	class CGameObject;
 
 	/**
-	* CFactory - oversees creation of any objects. The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
+	* CFactory - oversees creation of any objects.
+	* The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
 	*/
 
 	class CFactory : public CObject

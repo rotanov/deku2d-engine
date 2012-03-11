@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="Deku2d"
 	ProjectGUID="{35F1F297-4147-41B6-9B7D-09F5670F3E54}"
 	RootNamespace="Deku2d"
@@ -177,10 +177,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\2de_Components.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\2de_Config.h"
 				>
 			</File>
@@ -233,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Input.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Log.h"
 				>
 			</File>
@@ -249,11 +249,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Object.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Physics.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\2de_PlaceableComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Property.h"
 				>
 			</File>
 			<File
@@ -277,11 +285,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Serialization.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Sound.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\2de_SpatialManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\2de_Storage.h"
 				>
 			</File>
 			<File
@@ -301,14 +317,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\2de_Visitor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\2de_Xml.h"
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\ClassDiagram1.cd"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

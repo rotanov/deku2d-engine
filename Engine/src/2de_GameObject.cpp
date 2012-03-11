@@ -6,7 +6,6 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CGameObject
-
 	CGameObject::CGameObject() : Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Created(false), Active(true), Dead(false), Enabled(true)
 	{
 		ClassName = "GameObject";

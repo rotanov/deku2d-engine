@@ -11,9 +11,9 @@ namespace Deku2D
 
 	class CRenderableComponent : public CGameObject
 	{
-	public:
 		D2D_DECLARE_VISITABLE()
 
+	public:
 		CTransformation WorldTransform;
 
 		CRenderableComponent(CModel *AModel = NULL);

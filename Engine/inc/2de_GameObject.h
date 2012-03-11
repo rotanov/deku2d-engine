@@ -5,6 +5,7 @@
 #include "2de_Event.h"
 #include "2de_GraphicsLow.h"
 #include "2de_LuaUtils.h"
+#include "2de_Visitor.h"
 
 namespace Deku2D
 {
@@ -19,9 +20,10 @@ namespace Deku2D
 
 	class CGameObject : public IVisitableObject<>
 	{
-	public:	
+		D2D_DECLARE_RTTI(CGameObject, IVisitableObject<>)
 		D2D_DECLARE_VISITABLE()
 
+	public:	
 		typedef map<string, CGameObject*> LNOMType;	// ???
 		LNOMType LocalNameObjectMapping; // ???
 
