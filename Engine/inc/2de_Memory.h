@@ -1,82 +1,79 @@
 #ifndef _2DE_MEMORY_H_
 #define _2DE_MEMORY_H_
 
-#include <list>
-#define MAX_PATH 260
+#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
-//namespace Deku2D
-//{
-	//////////////////////////////////////////////////////////////////////////
-	// All memory related stuff in this file.
-	/**
-	*	Memory leaks catching.
-	*	Some issues are fixed but there's still a room for improvement.
-	*	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
-	*	@todo: Implement new[] and delete []
-	*	@todo: Remove inline from AddTrack and RemoveTrack and others.
-	*/
+#include <map>
 
-	#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
+//////////////////////////////////////////////////////////////////////////
+// All memory related stuff in this file.
 
-	struct ALLOC_INFO
+#define MAX_PATH 16
+
+struct CAllocationInfo
+{	
+	unsigned long size;
+	unsigned long line;
+	char path[MAX_PATH];	
+};
+
+typedef std::map<unsigned long, CAllocationInfo> TAllocationList;
+
+extern TAllocationList *allocationList;
+
+inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fname, unsigned long lnum)
+{
+	static CAllocationInfo info;
+
+	if (allocationList == NULL)
+		allocationList = new(TAllocationList);
+
+	memset(info.path, 0, MAX_PATH);
+	int l = strlen(fname);
+	int i = l-1;
+	int j = l > MAX_PATH - 1 ? MAX_PATH - 2 : l - 1;
+	while ( i >= 0 && j >= 0 )
 	{
-		unsigned long address;
-		unsigned long size;
-		char file[MAX_PATH];	//bad but anyway... probably needs replacement with string type
-		unsigned long line;
-	};
+		info.path[j] = fname[i];
+		i--;
+		j--;
+	}
 
-	typedef std::list<ALLOC_INFO*> AllocList;
+	info.line = lnum;
+	info.size = asize;
 
-	extern AllocList *allocList;
+	(*allocationList)[addr] = info;
+};
 
-	inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fname, unsigned long lnum)
-	{
-		ALLOC_INFO *info;
+void RemoveTrack(unsigned long addr);
+void DumpUnfreed();
 
-		if (allocList == NULL)
-			allocList = new(AllocList);
+inline void * operator new(unsigned size, const char *file, int line)
+{
+	void *ptr = (void *)malloc(size);
+	AddTrack((unsigned long)ptr, size, file, line);
+	return(ptr);
+};
 
-		info = new(ALLOC_INFO);
-		info->address = addr;
-		strncpy(info->file, fname, MAX_PATH);
-		info->file[MAX_PATH] = 0;
-		info->line = lnum;
-		info->size = asize;
-		allocList->insert(allocList->begin(), info);
-	};
+inline void operator delete(void *p)
+{
+	RemoveTrack((unsigned long)p);
+	free(p);
+};
 
-	void RemoveTrack(unsigned long addr);
-	void DumpUnfreed();
+inline void operator delete[](void *p)
+{
+	RemoveTrack((unsigned long)p);
+	free(p);
+};
 
-	inline void * operator new(unsigned size, const char *file, int line)
-	{
-		void *ptr = (void *)malloc(size);
-		AddTrack((unsigned long)ptr, size, file, line);
-		return(ptr);
-	};
+#ifdef _DEBUG
+	#define DEBUG_NEW new(__FILE__, __LINE__)
+#else
+	#define DEBUG_NEW new
+#endif
+	#define new DEBUG_NEW
 
-	inline void operator delete(void *p)
-	{
-		RemoveTrack((unsigned long)p);
-		free(p);
-	};
-
-	inline void operator delete[](void *p)
-	{
-		RemoveTrack((unsigned long)p);
-		free(p);
-	};
-
-	#ifdef _DEBUG
-		#define DEBUG_NEW new(__FILE__, __LINE__)
-	#else
-		#define DEBUG_NEW new
-	#endif
-		#define new DEBUG_NEW
-
-	#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
-
-//} // namespace Deku2D
+#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
 #endif // _2DE_MEMORY_H_
