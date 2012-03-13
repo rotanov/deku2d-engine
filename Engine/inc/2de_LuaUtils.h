@@ -14,6 +14,8 @@ namespace Deku2D
 	*/
 	class CScript : public CResource
 	{
+		D2D_DECLARE_RTTI(CScript, CResource)
+
 	public:
 		CScript();
 		bool Load();

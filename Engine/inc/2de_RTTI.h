@@ -175,11 +175,13 @@ namespace Deku2D
 				classInfo##TYPE_HEIR.RegisterProperty(property);	\
 			}	\
 			static TClassInfo* GetRTTIStatic() { return &classInfo##TYPE_HEIR; }	\
-			static TYPE_HEIR* MakeInstance()	\
-			{	\
-				return new TYPE_HEIR();	\
-			}	\
 			static void RegisterReflection();	\
+
+//			static TYPE_HEIR* MakeInstance()	\
+//			{	\
+//				return new TYPE_HEIR();	\
+//			}	\
+
 
 	#define D2D_DEFINE_RTTI(TYPE_HEIR, TYPE_BASE)	\
 		TYPE_HEIR::TClassInfo TYPE_HEIR::classInfo##TYPE_HEIR(#TYPE_HEIR);	\

@@ -7,6 +7,8 @@
 namespace Deku2D
 {
 	D2D_DEFINE_RTTI(CGameObject, IVisitableObject<>)
+	D2D_DEFINE_RTTI(CResource, CObject)
+	D2D_DEFINE_RTTI(CScript, CResource)
 	D2D_DEFINE_RTTI(CObject, CNullClass)
 	D2D_DEFINE_RTTI(CPlaceableComponent, CGameObject)
 	D2D_DEFINE_CLASS_TEMPLATE_RTTI(IVisitableObject, CObject)
@@ -22,11 +24,21 @@ namespace Deku2D
 
 	void CGameObject::RegisterReflection()
 	{
+		D2D_REGISTER_PROPERTY(CScript, Script, CGameObject)
 	}
 
 	void CPlaceableComponent::RegisterReflection()
 	{
 
+	}
+
+	void CResource::RegisterReflection()
+	{
+
+	}
+
+	void CScript::RegisterReflection()
+	{
 	}
 
 };	// namespace Deku2D

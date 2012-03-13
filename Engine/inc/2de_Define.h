@@ -4,7 +4,7 @@
 // define-driven project configuration may appear in the place like this.
 
 // enables memory leak tracking, msvc only, _DEBUG only.
-#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
+// #define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
 
 
 

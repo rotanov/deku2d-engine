@@ -81,6 +81,8 @@ namespace Deku2D
 
 	class CResource : public CObject
 	{
+		D2D_DECLARE_RTTI(CResource, CObject)
+
 	public:
 		enum ELoadSource
 		{
@@ -110,7 +112,6 @@ namespace Deku2D
 
 		virtual bool SaveToFile(const string &AFilename)
 		{
-			AFilename;	// warning eliminator
 			throw std::logic_error("Unimplemented for this type of resource");
 			return false;
 		}
