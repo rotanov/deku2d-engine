@@ -19,7 +19,6 @@ public:
 	void run();
 };
 
-class CLuaSyntaxHighlighter;
 class CLogViewer;
 class CEngineLuaConsole;
 class QTabWidget;
@@ -27,6 +26,8 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QTableWidget;
 class QTableWidgetItem;
+class CComponentTreeWidget;
+class CPropertyEditWidget;
 
 class CMainWindow : public QMainWindow
 {
@@ -41,13 +42,14 @@ protected:
 private:
 	Ui::CMainWindow *ui;
 	CEngineThread EngineThread;
-	CLuaSyntaxHighlighter *LuaSyntaxHL;
 
 	QTabWidget *Tabs;
 	CLogViewer *LogViewer;
 	CEngineLuaConsole *EngineConsole;
-	QTreeWidget *ComponentTree;
-	QTableWidget *PropertyEdit;
+	CComponentTreeWidget *ComponentTree;
+	CPropertyEditWidget *PropertyEdit;
+
+	void InitUI();
 
 private slots:
 	void on_actionStart_engine_triggered();
@@ -55,7 +57,6 @@ private slots:
 	void on_menuFile_aboutToShow();
 	void on_actionBuild_tree_triggered();
 	void ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious);
-	void PropertyEditItemChanged(QTableWidgetItem *AItem);
 };
 
 #endif // CMAINWINDOW_H
