@@ -35,7 +35,7 @@ namespace Deku2D
 
 	CObject::~CObject()
 	{
-		if (!CEngine::Instance()->isFinalizing())
+		if (CEngine::Instance()->isRunning())
 			EventManager->UnsubscribeFromAll(this);
 	}
 

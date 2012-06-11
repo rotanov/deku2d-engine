@@ -512,13 +512,13 @@ namespace Deku2D
 
 			CObject *obj = static_cast<CObject *>(lua_touserdata(L, -1 - gotEventData));
 
-			CEvent *e = new CEvent(lua_tostring(L, -2 - gotEventData), obj);
+			CEvent e(lua_tostring(L, -2 - gotEventData), obj);
 			if (gotEventData)
 			{
 				lua_pushnil(L);
 				while (lua_next(L, -2) != 0)
 				{
-					e->SetData(lua_tostring(L, -2), lua_tostring(L, -1));
+					e.SetData(lua_tostring(L, -2), lua_tostring(L, -1));
 					lua_pop(L, 1);
 				}
 
@@ -661,8 +661,8 @@ namespace Deku2D
 
 			Log("INFO", out.c_str());
 
-			CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
-			consoleOutputEvent->SetData("Text", out.c_str());
+			CEvent consoleOutputEvent("ConsoleOutput", NULL);
+			consoleOutputEvent.SetData("Text", out.c_str());
 			EventManager->TriggerEvent(consoleOutputEvent);
 
 			nesting++;
@@ -689,8 +689,8 @@ namespace Deku2D
 			if (!lua_isstring(L, -1))
 				LuaVirtualMachine->TriggerError("incorrect arguments given to ConsoleOutput API call");
 
-			CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
-			consoleOutputEvent->SetData("Text", lua_tostring(L, -1));
+			CEvent consoleOutputEvent("ConsoleOutput", NULL);
+			consoleOutputEvent.SetData("Text", lua_tostring(L, -1));
 			EventManager->TriggerEvent(consoleOutputEvent);
 
 			return 0;
@@ -1125,9 +1125,9 @@ namespace Deku2D
 		LastError = AError;
 		Log("ERROR", "Lua: %s", AError.c_str());
 
-		CEvent *consoleOutputEvent = new CEvent("ConsoleOutput", NULL);
-		consoleOutputEvent->SetData("Text", AError);
-		consoleOutputEvent->SetData("Type", "Error");
+		CEvent consoleOutputEvent("ConsoleOutput", NULL);
+		consoleOutputEvent.SetData("Text", AError);
+		consoleOutputEvent.SetData("Type", "Error");
 		EventManager->TriggerEvent(consoleOutputEvent);
 	}
 

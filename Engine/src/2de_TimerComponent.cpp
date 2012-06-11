@@ -25,9 +25,9 @@ namespace Deku2D
 			Accumulated += CEngine::Instance()->GetDeltaTime();
 			if (Accumulated >= Interval)
 			{
-				CEvent *TimerTickEvent = new CEvent("TimerTick", this);
-				TimerTickEvent->SetData("Name", GetName());
-				EventManager->TriggerEvent(TimerTickEvent);
+				CEvent timerTickEvent("TimerTick", this);
+				timerTickEvent.SetData("Name", GetName());
+				EventManager->TriggerEvent(timerTickEvent);
 				Accumulated = 0.0f;
 			}
 		}

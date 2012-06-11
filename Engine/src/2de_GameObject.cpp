@@ -143,7 +143,8 @@ namespace Deku2D
 
 				// i already hate this isFinalizing kludge, but the following call segfaults at finalizing time without it..
 				// may be we will get rid of it when we have some cool memory managers, etc., but now i leave it as is..
-				if (Created && !CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnDetached"))
+				// !CEngine::Instance()->isFinalizing has been replaced by CEngine::Instance()->isRunning() which is a bit better..
+				if (Created && CEngine::Instance()->isRunning() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnDetached"))
 					LuaVirtualMachine->CallMethodFunction(GetName(), "OnDetached");
 			}
 		}
@@ -156,7 +157,7 @@ namespace Deku2D
 			{
 				Parent->Children.push_back(this);
 
-				if (Created && !CEngine::Instance()->isFinalizing() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnAttached"))
+				if (Created && CEngine::Instance()->isRunning() && LuaVirtualMachine->IsMethodFunctionExists(GetName(), "OnAttached"))
 					LuaVirtualMachine->CallMethodFunction(GetName(), "OnAttached");
 			}
 		}

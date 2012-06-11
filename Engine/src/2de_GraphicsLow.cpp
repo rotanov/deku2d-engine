@@ -360,7 +360,7 @@ namespace Deku2D
 
 		GLInit();
 
-		EventManager->TriggerEvent(new CEvent("WindowResize", NULL));
+		EventManager->TriggerEvent("WindowResize", NULL);
 
 		return isCreated = true;
 	}

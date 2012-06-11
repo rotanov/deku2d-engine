@@ -34,8 +34,13 @@ CMainWindow::CMainWindow(QWidget *parent) :
 CMainWindow::~CMainWindow()
 {
 	delete ui;
-	CEngine::Instance()->ShutDown();
-	EngineThread.wait();
+	if (CEngine::Instance()->isRunning())
+	{
+		CEngine::Instance()->Lock();
+		CEngine::Instance()->ShutDown();
+		CEngine::Instance()->Unlock();
+		EngineThread.wait();
+	}
 }
 
 void CMainWindow::InitUI()

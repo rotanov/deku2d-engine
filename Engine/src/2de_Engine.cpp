@@ -435,19 +435,17 @@ namespace Deku2D
 
 					if (!Keys[keysym.sym])
 					{
-						CEvent *e = new CEvent;
-						e->SetName("KeyDown");
-						e->SetData("Char", TempChar);
-						e->SetData("Sym", keysym.sym);
-						e->SetData("Modifiers", keysym.mod);
+						CEvent e("KeyDown", NULL);
+						e.SetData("Char", TempChar);
+						e.SetData("Sym", keysym.sym);
+						e.SetData("Modifiers", keysym.mod);
 						EventManager->TriggerEvent(e);
 					}
 
-					CEvent *e = new CEvent;
-					e->SetName("KeyPress");
-					e->SetData("Char", TempChar);
-					e->SetData("Sym", keysym.sym);
-					e->SetData("Modifiers", keysym.mod);
+					CEvent e("KeyPress", NULL);
+					e.SetData("Char", TempChar);
+					e.SetData("Sym", keysym.sym);
+					e.SetData("Modifiers", keysym.mod);
 					EventManager->TriggerEvent(e);
 
 					Keys[keysym.sym] = true;
@@ -461,11 +459,10 @@ namespace Deku2D
 					char TempChar = TranslateKeyFromUnicodeToChar(event);
 					SDL_keysym keysym = event.key.keysym;				
 
-					CEvent *e = new CEvent;
-					e->SetName("KeyUp");
-					e->SetData("Char", TempChar);
-					e->SetData("Sym", keysym.sym);
-					e->SetData("Modifiers", keysym.mod);
+					CEvent e("KeyUp", NULL);
+					e.SetData("Char", TempChar);
+					e.SetData("Sym", keysym.sym);
+					e.SetData("Modifiers", keysym.mod);
 					EventManager->TriggerEvent(e);
 
 					Keys[keysym.sym] = 0;
@@ -473,31 +470,31 @@ namespace Deku2D
 				}
 				case SDL_MOUSEBUTTONDOWN:
 				{
-					CEvent *e = new CEvent("MouseDown", NULL);
-					e->SetData("X", MousePosition.x);
-					e->SetData("Y", MousePosition.y);
-					e->SetData("Button", event.button.button);
-					e->SetData("Modifiers", SDL_GetModState());
+					CEvent e("MouseDown", NULL);
+					e.SetData("X", MousePosition.x);
+					e.SetData("Y", MousePosition.y);
+					e.SetData("Button", event.button.button);
+					e.SetData("Modifiers", SDL_GetModState());
 					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_MOUSEBUTTONUP:
 				{
-					CEvent *e = new CEvent("MouseUp", NULL);
-					e->SetData("X", MousePosition.x);
-					e->SetData("Y", MousePosition.y);
-					e->SetData("Button", event.button.button);
-					e->SetData("Modifiers", SDL_GetModState());
+					CEvent e("MouseUp", NULL);
+					e.SetData("X", MousePosition.x);
+					e.SetData("Y", MousePosition.y);
+					e.SetData("Button", event.button.button);
+					e.SetData("Modifiers", SDL_GetModState());
 					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_MOUSEMOTION:
 				{
 					MousePosition = Vector2(event.motion.x, GLWindow->GetHeight() - event.motion.y);
-					CEvent *e = new CEvent("MouseMove", NULL);
-					e->SetData("X", MousePosition.x);
-					e->SetData("Y", MousePosition.y);
-					e->SetData("Modifiers", SDL_GetModState());
+					CEvent e("MouseMove", NULL);
+					e.SetData("X", MousePosition.x);
+					e.SetData("Y", MousePosition.y);
+					e.SetData("Modifiers", SDL_GetModState());
 					EventManager->TriggerEvent(e);
 					break;
 				}

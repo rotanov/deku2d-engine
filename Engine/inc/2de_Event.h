@@ -35,7 +35,7 @@ namespace Deku2D
 	private:
 		string Name;
 		CObject *Sender;
-		map<string, string> Data;
+		DataContainer Data;
 	};
 
 
@@ -49,7 +49,7 @@ namespace Deku2D
 		bool IsSubscribed(const string &AEventName, CObject *Subscriber) const;
 
 		void TriggerEvent(const string &AEventName, CObject *ASender);
-		void TriggerEvent(CEvent *AEvent);
+		void TriggerEvent(CEvent &AEvent);
 		
 	protected:
 		CEventManager();

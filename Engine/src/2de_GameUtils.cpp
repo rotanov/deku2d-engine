@@ -182,7 +182,7 @@ namespace Deku2D
 		SetModel(CRenderManager::CreateModelBox(256, 256, MODEL_TYPE_TRIANGLES, ATexture));
 	}
 
-	void CDefaultTitleScreen::ProcessEvent( const CEvent &AEvent )
+	void CDefaultTitleScreen::ProcessEvent(const CEvent &AEvent)
 	{
 		if (AEvent.GetName() != "WindowResize")
 			return;

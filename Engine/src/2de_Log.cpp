@@ -82,8 +82,8 @@ namespace Deku2D
 
 		if (CEngine::Instance()->isRunning())
 		{
-			CEvent *logOutputEvent = new CEvent("LogOutput", this);
-			logOutputEvent->SetData("Text", message);
+			CEvent logOutputEvent("LogOutput", this);
+			logOutputEvent.SetData("Text", message);
 			EventManager->TriggerEvent(logOutputEvent);
 		}
 	}
