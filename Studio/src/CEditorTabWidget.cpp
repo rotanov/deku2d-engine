@@ -64,6 +64,7 @@ bool CEditorTabWidget::RequestTabClose(int AIndex)
 	{
 		while (true)
 		{
+			setCurrentIndex(AIndex);
 			int result = QMessageBox::warning(this, "Confirmation",
 				"File " + ed->GetFileName() + " has been modified.\n\n" +
 				"Do you want to save changes?",
