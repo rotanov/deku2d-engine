@@ -6,6 +6,8 @@
 
 #include <2de_Engine.h>
 
+#include "CEditorRegistry.h"
+
 using namespace Deku2D;
 
 namespace Ui
@@ -21,7 +23,7 @@ public:
 
 class CLogViewer;
 class CEngineLuaConsole;
-class QTabWidget;
+class CEditorTabWidget;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QTableWidget;
@@ -38,12 +40,13 @@ public:
 
 protected:
 	void changeEvent(QEvent *e);
+	void closeEvent(QCloseEvent *AEvent);
 
 private:
 	Ui::CMainWindow *ui;
 	CEngineThread EngineThread;
 
-	QTabWidget *Tabs;
+	CEditorTabWidget *Tabs;
 	CLogViewer *LogViewer;
 	CEngineLuaConsole *EngineConsole;
 	CComponentTreeWidget *ComponentTree;
@@ -52,11 +55,19 @@ private:
 	void InitUI();
 
 private slots:
+	void ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious);
+
+	void on_menuFile_aboutToShow();
+	void on_menuFile_aboutToHide();
+	void on_actionNew_triggered();
+	void on_actionOpen_triggered();
+	void on_actionSave_triggered();
+	void on_actionSave_As_triggered();
+
+	void on_menuEngine_aboutToShow();
 	void on_actionStart_engine_triggered();
 	void on_actionStop_engine_triggered();
-	void on_menuFile_aboutToShow();
 	void on_actionBuild_tree_triggered();
-	void ComponentTreeItemChanged(QTreeWidgetItem *ACurrent, QTreeWidgetItem *APrevious);
 };
 
 #endif // CMAINWINDOW_H

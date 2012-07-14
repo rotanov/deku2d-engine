@@ -10,12 +10,21 @@
 
 #include <QWindowsStyle>
 
+#include <QFileDialog>
+#include <QMessageBox>
+
+#include "CEditorTabWidget.h"
 #include "CCodeEditorWidget.h"
 #include "CEngineLuaConsole.h"
 #include "CLogViewer.h"
 #include "CEngineViewport.h"
 #include "CComponentTreeWidget.h"
 #include "CPropertyEditWidget.h"
+
+#include "Editors/CCodeEditor.h"
+
+#include "Dialogs/CFileSaveDialog.h"
+#include "Dialogs/CSelectEditorDialog.h"
 
 void CEngineThread::run()
 {
@@ -27,6 +36,8 @@ CMainWindow::CMainWindow(QWidget *parent) :
 {
 	CEngine::Instance()->SetProgramName("Deku Studio");
 	CEngine::Instance()->SetIdleWhenInBackground(false);
+
+	CEditorRegistry::Instance()->RegisterEditor<CCodeEditor>();
 
 	InitUI();
 }
@@ -48,16 +59,8 @@ void CMainWindow::InitUI()
 	ui->setupUi(this);
 	connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
-	Tabs = new QTabWidget;
+	Tabs = new CEditorTabWidget;
 	setCentralWidget(Tabs);
-	Tabs->setTabsClosable(true);
-	Tabs->setMovable(true);
-	Tabs->setContextMenuPolicy(Qt::DefaultContextMenu);
-
-	Tabs->addTab(new CCodeEditorWidget, QIcon(), "Code Editor");
-
-	//CEngineViewport *port = new CEngineViewport(this);
-	//Tabs->addTab(port, QIcon(), "Engine Viewport");
 
 	EngineConsole = new CEngineLuaConsole;
 	LogViewer = new CLogViewer;
@@ -109,6 +112,124 @@ void CMainWindow::changeEvent(QEvent *e)
 	}
 }
 
+void CMainWindow::closeEvent(QCloseEvent *AEvent)
+{
+	if (Tabs->close())
+		AEvent->accept();
+	else
+		AEvent->ignore();
+}
+
+void CMainWindow::ComponentTreeItemChanged(QTreeWidgetItem *ACurrent,
+	QTreeWidgetItem *APrevious)
+{
+	// TODO: rewrite me
+	if (!ACurrent)
+		return;
+
+	CGameObject *go = NULL;
+	go = (CGameObject *) ACurrent->data(0, Qt::UserRole).value<void *>();
+
+	PropertyEdit->SetObject(go);
+}
+
+// kind of hack to enable/disable menu items and still have access to shortcuts
+// TODO: rewrite using idle timer, manual key processing or event-based enable/disable
+
+void CMainWindow::on_menuFile_aboutToShow()
+{
+	CAbstractEditor *ed = Tabs->GetActiveEditor();
+	bool maySave = ed && (ed->isModified() || ed->isNew());
+	ui->actionSave->setEnabled(maySave);
+	ui->actionSave_As->setEnabled(maySave);
+}
+
+void CMainWindow::on_menuFile_aboutToHide()
+{
+	ui->actionSave->setEnabled(true);
+	ui->actionSave_As->setEnabled(true);
+}
+
+void CMainWindow::on_actionNew_triggered()
+{
+	QString edName = CSelectEditorDialog::Execute(CEditorRegistry::Instance()->GetAllEditors());
+	if (edName.isEmpty())
+		return;
+
+	CAbstractEditor *ed = CEditorRegistry::Instance()->CreateEditorByName(edName);
+	if (ed)
+		Tabs->Add(ed);
+}
+
+void CMainWindow::on_actionOpen_triggered()
+{
+	QFileDialog dlg(this, "Open...");
+	dlg.setFileMode(QFileDialog::ExistingFile);
+	dlg.setNameFilters(CEditorRegistry::Instance()->GetFilters());
+	if (!dlg.exec())
+		return;
+
+	QString filter = dlg.selectedNameFilter();
+	CAbstractEditor *ed = NULL;
+	if (CEditorRegistry::Instance()->CountByFilter(filter) > 1)
+	{
+		QString edName = CSelectEditorDialog::Execute(
+			CEditorRegistry::Instance()->GetEditorsForFilter(filter));
+		if (edName.isEmpty())
+			return;
+
+		ed = CEditorRegistry::Instance()->CreateEditorByName(edName);
+	}
+	else
+		ed = CEditorRegistry::Instance()->CreateEditorByFilter(filter);
+
+	if (ed)
+	{
+		QString filePath = dlg.selectedFiles()[0];
+		Tabs->Add(ed);
+		ed->Open(filePath);
+	}
+}
+
+void CMainWindow::on_actionSave_triggered()
+{
+	CAbstractEditor *ed = Tabs->GetActiveEditor();
+	if (!ed)
+		return;
+
+	if (ed->isNew())
+	{
+		QString fn = CFileSaveDialog::Execute(ed->GetFilters());
+		if (fn.isEmpty())
+			return;
+
+		ed->SaveAs(fn);
+	}
+	else
+		ed->Save();
+}
+
+void CMainWindow::on_actionSave_As_triggered()
+{
+	CAbstractEditor *ed = Tabs->GetActiveEditor();
+	if (!ed)
+		return;
+
+	QString fn = CFileSaveDialog::Execute(ed->GetFilters());
+	if (fn.isEmpty())
+		return;
+
+	ed->SaveAs(fn);
+}
+
+
+void CMainWindow::on_menuEngine_aboutToShow()
+{
+	bool engineRunning = EngineThread.isRunning();
+	ui->actionStart_engine->setDisabled(engineRunning);
+	ui->actionStop_engine->setDisabled(!engineRunning);
+}
+
 void CMainWindow::on_actionStart_engine_triggered()
 {
 	if (!EngineThread.isRunning())
@@ -132,13 +253,6 @@ void CMainWindow::on_actionStop_engine_triggered()
 	ComponentTree->clear();
 }
 
-void CMainWindow::on_menuFile_aboutToShow()
-{
-	bool engineRunning = EngineThread.isRunning();
-	ui->actionStart_engine->setDisabled(engineRunning);
-	ui->actionStop_engine->setDisabled(!engineRunning);
-}
-
 void CMainWindow::on_actionBuild_tree_triggered()
 {
 	if (CEngine::Instance()->isRunning())
@@ -149,17 +263,4 @@ void CMainWindow::on_actionBuild_tree_triggered()
 			ComponentTree->invisibleRootItem());
 		CEngine::Instance()->Unlock();
 	}
-}
-
-void CMainWindow::ComponentTreeItemChanged(QTreeWidgetItem *ACurrent,
-	QTreeWidgetItem *APrevious)
-{
-	// TODO: rewrite me
-	if (!ACurrent)
-		return;
-
-	CGameObject *go = NULL;
-	go = (CGameObject *) ACurrent->data(0, Qt::UserRole).value<void *>();
-
-	PropertyEdit->SetObject(go);
 }

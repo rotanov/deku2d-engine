@@ -5,23 +5,29 @@
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexerlua.h>
 
-CCodeEditorWidget::CCodeEditorWidget(QWidget *parent) : QWidget(parent)
+CCodeEditorWidget::CCodeEditorWidget(CAbstractEditor *AEditor) : CEditorWidget(AEditor)
 {
-	QsciScintilla *sci = new QsciScintilla;
-	sci->setIndentationsUseTabs(true);
-	sci->setIndentationGuides(true);
-	sci->setAutoIndent(true);
-	sci->setFolding(QsciScintilla::BoxedTreeFoldStyle);
-	sci->setMarginType(1, QsciScintilla::NumberMargin);
-	sci->setLexer(new QsciLexerLua);
-	//sci->setAnnotationDisplay(QsciScintilla::AnnotationBoxed);
-	sci->setAutoCompletionSource(QsciScintilla::AcsAll);
-	sci->setAutoCompletionThreshold(2);
-	sci->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+	SCI = new QsciScintilla;
+	SCI->setIndentationsUseTabs(true);
+	SCI->setIndentationGuides(true);
+	SCI->setAutoIndent(true);
+	SCI->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+	SCI->setMarginType(1, QsciScintilla::NumberMargin);
+	SCI->setLexer(new QsciLexerLua);
+	//SCI->setAnnotationDisplay(QsciScintilla::AnnotationBoxed);
+	SCI->setAutoCompletionSource(QsciScintilla::AcsAll);
+	SCI->setAutoCompletionThreshold(2);
+	SCI->setBraceMatching(QsciScintilla::SloppyBraceMatch);
 
-	//connect(sci, SIGNAL(textChanged()), sci, SLOT(autoCompleteFromAll()));
-	//connect(sci, SIGNAL(textChanged()), sci, SLOT(callTip()));
+	//connect(SCI, SIGNAL(textChanged()), SCI, SLOT(autoCompleteFromAll()));
+	//connect(SCI, SIGNAL(textChanged()), SCI, SLOT(callTip()));
 
 	setLayout(new QGridLayout);
-	layout()->addWidget(sci);
+	layout()->addWidget(SCI);
+}
+
+void CCodeEditorWidget::focusInEvent(QFocusEvent *AEvent)
+{
+	QWidget::focusInEvent(AEvent);
+	SCI->setFocus();
 }

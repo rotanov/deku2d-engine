@@ -54,8 +54,16 @@ HEADERS += inc/cmainwindow.h \
     inc/CLogViewer.h \
     inc/CEngineViewport.h \
     inc/CComponentTreeWidget.h \
-    inc/CPropertyEditWidget.h
-FORMS += ui/cmainwindow.ui
+    inc/CPropertyEditWidget.h \
+    inc/Editors/CAbstractEditor.h \
+    inc/CEditorTabWidget.h \
+    inc/Editors/CCodeEditor.h \
+    inc/CEditorRegistry.h \
+    inc/CEditorWidget.h \
+    inc/Dialogs/CFileSaveDialog.h \
+    inc/Dialogs/CSelectEditorDialog.h
+FORMS += ui/cmainwindow.ui \
+    ui/CSelectEditorDialog.ui
 SOURCES += src/cmainwindow.cpp \
     src/main.cpp \
     src/CCodeEditorWidget.cpp \
@@ -63,7 +71,14 @@ SOURCES += src/cmainwindow.cpp \
     src/CLogViewer.cpp \
     src/CEngineViewport.cpp \
     src/CComponentTreeWidget.cpp \
-    src/CPropertyEditWidget.cpp
+    src/CPropertyEditWidget.cpp \
+    src/Editors/CAbstractEditor.cpp \
+    src/CEditorTabWidget.cpp \
+    src/Editors/CCodeEditor.cpp \
+    src/CEditorRegistry.cpp \
+    src/CEditorWidget.cpp \
+    src/Dialogs/CFileSaveDialog.cpp \
+    src/Dialogs/CSelectEditorDialog.cpp
 RESOURCES += ui/resources.qrc
 QMAKE_CLEAN += bin/Logs/*.log \
     bin/Config/Resources.xml
