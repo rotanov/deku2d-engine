@@ -8,13 +8,13 @@
 //////////////////////////////////////////////////////////////////////////
 // All memory related stuff in this file.
 
-#define MAX_PATH 16
+#define D2D_MEMORY_TRACK_MAX_PATH 16
 
 struct CAllocationInfo
 {	
 	unsigned long size;
 	unsigned long line;
-	char path[MAX_PATH];	
+	char path[D2D_MEMORY_TRACK_MAX_PATH];	
 };
 
 typedef std::map<unsigned long, CAllocationInfo> TAllocationList;
@@ -28,10 +28,10 @@ inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fnam
 	if (allocationList == NULL)
 		allocationList = new(TAllocationList);
 
-	memset(info.path, 0, MAX_PATH);
+	memset(info.path, 0, D2D_MEMORY_TRACK_MAX_PATH);
 	int l = strlen(fname);
 	int i = l-1;
-	int j = l > MAX_PATH - 1 ? MAX_PATH - 2 : l - 1;
+	int j = l > D2D_MEMORY_TRACK_MAX_PATH - 1 ? D2D_MEMORY_TRACK_MAX_PATH - 2 : l - 1;
 	while ( i >= 0 && j >= 0 )
 	{
 		info.path[j] = fname[i];
