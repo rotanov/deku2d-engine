@@ -27,26 +27,25 @@ win32 {
 	DEFINES -= UNICODE
 }
 
-# TODO: adapt this for unix
-# TODO: put common stuff for win and unix outside
 unix {
 	LIBS += $$system(sdl-config --libs)
 	LIBS += $$system(pkg-config --libs lua5.1)
 	LIBS += -lGLU \
 		-lGLEW \
 		-lSDL_mixer \
-		-lIL \
-		-L../Engine/lib \
-		-lDeku2D
+		-lIL
 	QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1)
+	CONFIG -= warn_on
 }
 
 CONFIG(debug, debug|release) {
-	win32 {
-		LIBS += -lDeku2d.debug
+	DEFINES += \
+		_DEBUG
 
+	LIBS += -lDeku2d.debug
+
+	win32 {
 		DEFINES +=	\
-			_DEBUG \
 			WIN32 \
 			_WINDOWS \
 
@@ -54,13 +53,12 @@ CONFIG(debug, debug|release) {
 
 		QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libci \
 			/NODEFAULTLIB:libcmt
-
 	}
 
 } else {
-	win32 {
-		LIBS += -lDeku2d.release
+	LIBS += -lDeku2d.release
 
+	win32 {
 		DEFINES +=	\
 			WIN32 \
 			_WINDOWS \
@@ -69,7 +67,6 @@ CONFIG(debug, debug|release) {
 
 		QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libci \
 			/NODEFAULTLIB:libcmt
-
 	}
 
 }
