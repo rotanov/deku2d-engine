@@ -1,29 +1,17 @@
-TEMPLATE = lib
+!include(SharedSettings.pri) {
+	error("Can not include shared settings.")
 
-win32 {
-	TARGET =
-	DESTDIR = lib
 }
 
+TEMPLATE = lib
+DESTDIR = lib
 CONFIG += staticlib
 
-OBJECTS_DIR = tmp
-MOC_DIR = tmp
-UI_DIR = tmp
-RCC_DIR = tmp
-
-win32 {
-	QMAKE_CXXFLAGS_RELEASE -= /Zc:wchar_t
-	QMAKE_CXXFLAGS_DEBUG -= /Zc:wchar_t
-	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libci \
-		/NODEFAULTLIB:libcmt
-	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libci \
-		/NODEFAULTLIB:libcmt
-	DEFINES -= UNICODE
+CONFIG( debug, debug|release ) {
+	TARGET = Deku2d.debug
+} else {
+	TARGET = Deku2d.release
 }
-
-INCLUDEPATH += \	# is it essential on unix platform?
-	inc
 
 HEADERS += \
 	inc/2de_Vector3.h \
@@ -95,15 +83,3 @@ SOURCES += \
 	src/2de_Core.cpp \
 	src/2de_Config.cpp \
 	src/2de_Box.cpp
-
-win32 {
-	LIBS +=	-lOpenGl32 \
-			-lGlu32 \
-			-lSdl \
-			-lSDLMain \
-			-lLua5.1 \
-			-lSDL_mixer \
-			-lDevIL \
-			-lGLEW32s \
-			-lUser32
-}

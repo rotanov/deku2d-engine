@@ -1,53 +1,32 @@
-TEMPLATE = app
-TARGET = 
-DESTDIR = bin
-DEPENDPATH += . \
-    inc \
-    src \
-    ui
-INCLUDEPATH += . \
-    inc \
-    ../Engine/inc
-OBJECTS_DIR = tmp
-MOC_DIR = tmp
-UI_DIR = tmp
-RCC_DIR = tmp
+!include(../Engine/SharedSettings.pri) {
+	error("Can not include shared settings.")
 
-unix { 
-    LIBS += $$system(sdl-config --libs)
-    LIBS += $$system(pkg-config --libs lua5.1)
-    LIBS += -lGLU \
-        -lGLEW \
-        -lSDL_mixer \
-        -lIL \
-        -lqscintilla2 \
-        -L../Engine/lib \
-        -lDeku2D
-    QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1)
 }
 
-#message( $$INCLUDE )
+CONFIG += qt
+
+DEPENDPATH += . \
+	inc \
+	src \
+	ui
+
+INCLUDEPATH += . \
+	inc
+
+unix {
+	LIBS += -lqscintilla2
+
+}
 
 win32 {
-    # INCLUDEPATH += D:\Devel\inc
-    # INCLUDEPATH += D:\Devel\Lua\5.1\include
-    # LIBS += -LD:\Devel\lib
-    # LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.0A\Lib"
-    # LIBS += -lGLU32 -lSDL_mixer -lDevIL -L../Engine/lib -lDeku2d.Release -lSDL -lSDLmain -llua5.1 -lopengl32 -lGLEW32s -lUser32
-    LIBS += -lOpenGl32 \
-	-lGlu32 \
-	-lSdl \
-	-lSDLMain \
-	-lLua5.1 \
-	#-lDeku2d.Release \
-	-lDeku2d \
-	-lSDL_mixer \
-	-lDevIL \
-	-lGLEW32s \
-	-lUser32 \
-	-lqscintilla2 \
+	CONFIG( debug, debug|release ) {
+		LIBS += -lqscintilla2d
 
-DESTDIR = ../Studio/bin
+	} else {
+		LIBS += -lqscintilla2
+
+	}
+
 }
 
 # Input
