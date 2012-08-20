@@ -24,6 +24,11 @@ namespace Deku2D
 			}
 		}
 
+		__INLINE float GetX() const { return x; }
+		__INLINE float GetY() const { return y; }
+		__INLINE void SetX(const float value) { x = value; }
+		__INLINE void SetY(const float value) { y = value; }
+
 		__INLINE float operator[](int i)
 		{
 			assert(i >= 0 && i <= 1);

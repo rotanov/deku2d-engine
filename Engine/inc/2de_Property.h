@@ -1,7 +1,6 @@
 #ifndef _2DE_PROPERTY_H_
 #define _2DE_PROPERTY_H_
 
-//#include "2de_Core.h"
 #include "2de_Serialization.h"
 #include <string>
 #include <vector>
@@ -10,6 +9,7 @@ namespace Deku2D
 {
 	using std::string;
 	using std::vector;
+	
 	class CNullClass;
 
 	template <typename T>
@@ -18,18 +18,41 @@ namespace Deku2D
 		return false;
 	}
 
+	template <typename T>
+	bool IsCollection()
+	{
+		return false;
+	}
+
+	template <typename T>
+	bool IsCompound()
+	{
+		return false;
+	}
+
+	template <typename T>
+	bool IsSimple()
+	{
+		return false;
+	}
+
 	class CProperty
 	{
 	public:
 		CProperty(const string& aName) : name(aName){}
+
 		const string& GetName() const;
 		void SetName(const string& aName);
-		virtual string GetStringValue(const CNullClass* owner) const = 0;
-		//virtual void Serialize(ostream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
-		//virtual void Deserialize(istream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
-		virtual bool IfRTTIzed() const = 0;
-		virtual const void* GetRaw(const CNullClass* owner) const = 0;
+
 		virtual const string& GetTypeName() const = 0;
+		virtual void SetTypeName(const string& aName) = 0;
+
+		virtual unsigned GetSize() const = 0;
+		virtual void SetSize(unsigned aSize) = 0;
+
+		virtual string GetStringValue(const CNullClass* owner) const = 0;
+		virtual const void* GetRaw(const CNullClass* owner) const = 0;
+		virtual bool IfRTTIzed() const = 0;
 
 	protected:
 		string name;
@@ -40,18 +63,55 @@ namespace Deku2D
 	template<typename T>
 	class CTypedProperty : public CProperty
 	{
-	private:
-		string typeName;
-
 	public:
-		CTypedProperty(const string& aName, const string& aTypeName) : CProperty(aName), typeName(aTypeName){}
-		//virtual void Serialize(ostream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
-		//virtual void Deserialize(istream &out, CStreamSerializer* serializer, CNullClass* owner) = 0;
+		CTypedProperty(const string& aName, const string& aTypeName) : CProperty(aName), typeName(aTypeName), size(sizeof(T)){}
+
+		virtual const string& GetTypeName() const { return typeName; }
+		virtual void SetTypeName(const string& aName) { throw "pizdec nelzya"; }
+
+		virtual unsigned GetSize() const { return size; }
+		virtual void SetSize(unsigned aSize) { throw "pizec net"; }
+
+		virtual string GetStringValue(const CNullClass* owner) const = 0;
 		virtual const void* GetRaw(const CNullClass* owner) const = 0;
 		virtual bool IfRTTIzed() const = 0;
-		virtual string GetStringValue(const CNullClass* owner) const = 0;
-		virtual const string& GetTypeName() const { return typeName; }
+
+		virtual void SetValue(CNullClass* owner, const T& value) = 0;
+		virtual const T GetValue(const CNullClass* owner) const = 0;
+
+	private:
+		string typeName;
+		unsigned size;
 	};
+
+	/*
+	template<>
+	class CTypedProperty<string> : public CProperty
+	{
+	public:
+		CTypedProperty(const string& aName, const string& aTypeName) : CProperty(aName), typeName(aTypeName), size(sizeof(string)){}
+
+		virtual const string& GetTypeName() const { return typeName; }
+		virtual void SetTypeName(const string& aName) { throw "pizdec nelzya"; }
+
+		virtual unsigned GetSize() const { return size; }
+		virtual void SetSize(unsigned aSize) { throw "pizec net"; }
+
+		virtual string GetStringValue(const CNullClass* owner) const = 0;
+		virtual const void* GetRaw(const CNullClass* owner)
+		{
+			return GetValue(owner).c_str();
+		}
+		virtual bool IfRTTIzed() const = 0;
+
+		virtual void SetValue(CNullClass* owner, const string& value) = 0;
+		virtual const string GetValue(const CNullClass* owner) const = 0;
+
+	private:
+		string typeName;
+		unsigned size;
+	};
+	*/
 
 	template<typename T, typename TOwner>
 	class COwnedProperty : public CTypedProperty<T>
@@ -61,41 +121,30 @@ namespace Deku2D
 		typedef void (TOwner::*TSetter)(const T& aValue);
 		typedef T Type;
 		typedef TOwner TOwner;
-		COwnedProperty(const string& aName, const string& aTypeName, TGetter aGetter, TSetter aSetter) : CTypedProperty<T>(aName, aTypeName), getter(aGetter), setter(aSetter)
-		{
-		
-		}
-		/*
-		virtual void Serialize(ostream &out, CStreamSerializer* serializer,  CNullClass* owner)
-		{
-			serializer;	// eliminates warning for now
-			serializer->Serialize<T>(out, name, GetValue( owner ));
-		}
-		virtual void Deserialize(istream &out, CStreamSerializer* serializer,  CNullClass* owner)
-		{
-			serializer;	// eliminates warning for now
-			T value = GetValue( owner );
-			serializer->Deserialize<T>(out, name, value);
-			SetValue( owner, value );
-		}
-		*/
+
+		COwnedProperty(const string& aName, const string& aTypeName, TGetter aGetter, TSetter aSetter) : CTypedProperty<T>(aName, aTypeName), getter(aGetter), setter(aSetter) { }
+
 		void SetValue(CNullClass* owner, const T& value)
 		{
 			(static_cast<TOwner*>(owner)->*setter)(value);
 		}
+
 		const T GetValue(const CNullClass* owner) const
 		{
 			return (static_cast<const TOwner*>(owner)->*getter)();
 		}
+
 		virtual string GetStringValue(const CNullClass* owner) const
 		{
 			const T value = GetValue(owner);
 			return Deku2D::to_string(value);
 		}
+
 		virtual bool IfRTTIzed() const
 		{
 			return IsRTTIzed<Type>();
 		}
+
 		virtual const void* GetRaw(const CNullClass* owner) const
 		{
 			return reinterpret_cast<const void*>(&GetValue(owner));

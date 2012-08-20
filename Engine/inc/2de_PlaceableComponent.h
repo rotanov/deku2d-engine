@@ -10,7 +10,6 @@ namespace Deku2D
 	*/
 	class CPlaceableComponent : public CGameObject
 	{
-		D2D_DECLARE_RTTI(CPlaceableComponent, CGameObject)
 		D2D_DECLARE_VISITABLE()
 
 	public:
@@ -19,11 +18,11 @@ namespace Deku2D
 		CPlaceableComponent* Clone(const string &ACloneName = "") const;
 
 		float GetAngle() const;
-		const CBox& GetBox() const;
+		const CBox GetBox() const;
 		float GetDepth() const;
 		int GetLayer() const;	
-		const Vector2 & GetScaling() const;
-		const Vector2& GetPosition() const;
+		const Vector2 GetScaling() const;
+		const Vector2 GetPosition() const;
 
 		void SetAngle(float AAngle); //	(Degrees)
 
@@ -38,8 +37,8 @@ namespace Deku2D
 		void SetScaling(const Vector2 &AScaling);
 		void SetPosition(const Vector2 &APosition);
 
-		CTransformation& GetTransformation();
-		const CTransformation& GetTransformation() const;
+		CTransformation GetTransformation();
+		const CTransformation GetTransformation() const;
 		void SetTransformation(const CTransformation &ATransformation);
 
 		bool isMirrorHorizontal() const;

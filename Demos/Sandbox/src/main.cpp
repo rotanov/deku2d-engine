@@ -1,4 +1,5 @@
 #include "2de_Engine.h"
+#include "2de_TypeInfo.h"
 
 #define ENGINE Deku2D::CEngine::Instance()
 #define RENDER Deku2D::CRenderManager::Instance()
@@ -45,7 +46,10 @@ public:
 		}
 		else if (AEvent.GetName() == "KeyDown" && AEvent.GetData<Uint16>("Sym") == SDLK_d)
 		{
-			Deku2D::SerializeObjectToXml(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.xml");
+			//Deku2D::SerializeObjectToXml(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.xml");
+			//Deku2D::SerializeObjectToJSON(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.json");
+			Deku2D::DeserializeObjectFromJSON("rootdump.json");
+			Log( "%s\r\n", TypeInfo::GetTypeInfo( "Vector2" )->GetProperty( "X" )->Name() );
 		}
 	}
 

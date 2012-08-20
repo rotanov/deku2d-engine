@@ -14,8 +14,6 @@ namespace Deku2D
 
 	class CObject : public CNullClass
 	{
-		D2D_DECLARE_RTTI(CObject, CNullClass)
-
 	public:		
 		CObject();
 		virtual ~CObject();

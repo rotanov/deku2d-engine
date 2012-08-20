@@ -17,37 +17,6 @@ namespace Deku2D
 	using std::map;
 	using std::vector;
 
-	template<typename T>
-	class IsAbstract
-	{
-		// todo: add assertions to ensure sizeof(char) == 1 and sizeof(short) == 2
-		template<class U> static char test( U (*)[1] );
-		template<class U> static short test( ... );
-
-	public:
-		enum { result = sizeof( test<T>( 0 ) ) - 1 }; 
-	};
-
-	template<typename T, int A = IsAbstract<T>::result>
-	class Make
-	{
-	public:
-		static T* Instance()
-		{
-			return new T();
-		}
-	};
-
-	template<typename T>
-	class Make<T, 1>
-	{
-	public:
-		static T* Instance()
-		{
-			throw("pizdec");		
-		}
-	};
-
 	class CRTTI
 	{
 	public:
@@ -149,7 +118,7 @@ namespace Deku2D
 
 	private:
 		TBaseClassInfo *baseRTTI;
-		THeir* MakeNew() const	{ return Make<THeir>::Instance(); }
+		THeir* MakeNew() const	{ return Make<THeir>::New(); }
 		virtual const CRTTI* GetBase() const {return static_cast<CRTTI*>(baseRTTI);}
 	};
 
@@ -210,6 +179,24 @@ namespace Deku2D
 		static void RegisterReflection(){}
 		static TClassInfo*	GetRTTIStatic() { return &classInfoCNullClass; }
 		virtual CRTTI* GetRTTI() const { return &classInfoCNullClass; }
+	};
+
+	enum EPropertyKind
+	{
+		RTTIzed,
+		Trivial,
+		Compound,
+		Collection,
+		Ptr,
+	};
+
+	template<typename kind>
+	class CRTTIInfoStatic
+	{
+	public:
+		TPropertyVector properties;
+	private:
+
 	};
 
 }	//	namespace Deku2D

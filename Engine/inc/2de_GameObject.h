@@ -20,7 +20,6 @@ namespace Deku2D
 
 	class CGameObject : public IVisitableObject<>
 	{
-		D2D_DECLARE_RTTI(CGameObject, IVisitableObject<>)
 		D2D_DECLARE_VISITABLE()
 
 	public:	
@@ -75,6 +74,13 @@ namespace Deku2D
 	// 	void SetDead();
 	//	virtual void Update(float dt) = 0;
 
+		typedef vector<CGameObject *> ChildrenContainer;
+		typedef ChildrenContainer::iterator ChildrenIterator;
+		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
+
+		void SetChildren( const ChildrenContainer& ) { throw "pizdec"; }
+		ChildrenContainer GetChildren() const { throw "pizdec"; }
+
 	protected:
 		CGameObject(const CGameObject &AGameObject);
 
@@ -88,9 +94,6 @@ namespace Deku2D
 		}
 
 	private:
-		typedef vector<CGameObject *> ChildrenContainer;
-		typedef ChildrenContainer::iterator ChildrenIterator;
-		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
 
 		static void _DestroySubtree(CGameObject *NextObject);
 		CGameObject* FindPrototype();

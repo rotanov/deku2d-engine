@@ -165,12 +165,32 @@ namespace Deku2D
 			return s;
 		}
 
+		template <typename T>
+		__INLINE string to_string_impl(const T& t)
+		{
+				ostringstream s;
+				s << t;
+				return s.str();
+		}
+
+		template <>
+		__INLINE string to_string_impl(const bool& t)
+		{
+			return t ? "true" : "false";
+		}
+
 	}	//	namespace VariantConvert
 
 	template<typename T>
 	T from_string(const string &s)
 	{
 		return VariantConvert::from_string_impl(s, identity<T>());
+	}
+
+	template<typename T>
+	string to_string(const T& t)
+	{
+		return VariantConvert::to_string_impl(t);
 	}
 
 	// Template class for some manager
@@ -441,14 +461,6 @@ namespace Deku2D
 		return i;
 	}
 
-	template <typename T>
-	__INLINE string to_string(const T& t)
-	{
-		ostringstream s;
-		s << t;
-		return s.str();
-	}
-
 	__INLINE vector<float> GetNFloatTokensFromString( const string &source, unsigned n)
 	{
 		istringstream iss(source);
@@ -474,6 +486,92 @@ namespace Deku2D
 		{
 			return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
 		}
+	};
+
+	template <typename T>
+	class IsIntegral
+	{
+	public:
+		enum { result = false };
+	};
+
+	#define D2D_DECLARE_INTEGRAL_TYPE(T)	\
+		template <>	\
+		class IsIntegral<T>	\
+		{	\
+		public:	\
+			enum { result = true };	\
+		};	\
+
+	D2D_DECLARE_INTEGRAL_TYPE(char)
+	D2D_DECLARE_INTEGRAL_TYPE(int)
+	D2D_DECLARE_INTEGRAL_TYPE(float)
+	D2D_DECLARE_INTEGRAL_TYPE(bool)
+	D2D_DECLARE_INTEGRAL_TYPE(std::string)
+
+	template<typename T>
+	class IsAbstract
+	{
+		// In case you forgot how it works: google SFINAE (Substitution failure is not an error)
+		// todo: add assertions to ensure sizeof(char) == 1 and sizeof(short) == 2
+		template<class U> static char test( U (*)[1] );
+		template<class U> static short test( ... );
+
+	public:
+		enum { result = sizeof( test<T>( 0 ) ) - 1 };
+	};
+
+	template<typename T, int A = IsAbstract<T>::result>
+	class Make
+	{
+	public:
+		static T* New()
+		{
+			return new T();
+		}
+	};
+
+	template<typename T>
+	class Make<T, 1>
+	{
+	public:
+		static T* New()
+		{
+				throw("pizdec");                
+		}
+	};
+
+	// Conversion from Type to Type for the case, when exception should be thrown at runtime when there is no implementation for a conversion.
+	template<typename T, int A = IsIntegral<T>::result>
+	class Convert
+	{
+	public:
+		static T FromString(const string &s)
+		{
+				return VariantConvert::from_string_impl(s, identity<T>());
+		}
+
+		static string ToString(const T &value)
+		{
+			return VariantConvert::to_string_impl(value);
+		}
+
+	};
+
+	template<typename T>
+	class Convert<T, 0>
+	{
+	public:
+		static T FromString(const string &s)
+		{
+			throw "Conversion from string to the type %s is not implemented."; // TODO substitute typename if possible
+		}
+
+		static string ToString(const T &value)
+		{
+			throw "Conversion to string from type %s is not implemented."; // TODO substitute typename if possible
+		}
+
 	};
 
 }	//	namespace Deku2D

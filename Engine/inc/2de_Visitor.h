@@ -65,8 +65,6 @@ namespace Deku2D
 	template <typename R = void>
 	class IVisitableObject : public CObject	// Inherit from CObject to inject visitable interface into branch of the inheritance
 	{
-		D2D_DECLARE_RTTI(IVisitableObject, CObject)
-
 	public:
 		typedef R CReturnType;
 		virtual ~IVisitableObject() {}

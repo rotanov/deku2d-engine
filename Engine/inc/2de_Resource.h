@@ -81,8 +81,6 @@ namespace Deku2D
 
 	class CResource : public CObject
 	{
-		D2D_DECLARE_RTTI(CResource, CObject)
-
 	public:
 		enum ELoadSource
 		{
