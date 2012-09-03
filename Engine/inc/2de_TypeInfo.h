@@ -1,9 +1,12 @@
-#pragma once
+#ifndef _2DE_TYPEINFO_H_
+#define _2DE_TYPEINFO_H_
 
-#include "2de_PropertyInfo.h"
 #include <map>
 #include <string>
 #include "rapidjson/document.h"
+
+#include "2de_PropertyInfo.h"
+
 using std::map;
 using std::string;
 
@@ -98,4 +101,7 @@ map<string, PropertyInfo*> TypeInfo##TYPE::_props;	\
 #define D2D_INJECT_TYPE_INFO(TYPE)	\
 	public:	\
 	virtual TypeInfo* GetTypeInfo() const { return TypeInfo::GetTypeInfo(#TYPE); }	\
+
+
+#endif // _2DE_TYPEINFO_H_
 

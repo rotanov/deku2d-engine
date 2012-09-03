@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 namespace Deku2D
 {
 	using std::string;
@@ -113,14 +115,14 @@ namespace Deku2D
 	};
 	*/
 
-	template<typename T, typename TOwner>
+	template<typename T, typename Owner>
 	class COwnedProperty : public CTypedProperty<T>
 	{
 	public:
-		typedef T (TOwner::*TGetter)()const;
-		typedef void (TOwner::*TSetter)(const T& aValue);
+		typedef T (Owner::*TGetter)()const;
+		typedef void (Owner::*TSetter)(const T& aValue);
 		typedef T Type;
-		typedef TOwner TOwner;
+		typedef Owner TOwner;
 
 		COwnedProperty(const string& aName, const string& aTypeName, TGetter aGetter, TSetter aSetter) : CTypedProperty<T>(aName, aTypeName), getter(aGetter), setter(aSetter) { }
 
@@ -137,7 +139,7 @@ namespace Deku2D
 		virtual string GetStringValue(const CNullClass* owner) const
 		{
 			const T value = GetValue(owner);
-			return Deku2D::to_string(value);
+			return to_string(value);
 		}
 
 		virtual bool IfRTTIzed() const

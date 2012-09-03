@@ -1,6 +1,8 @@
 #ifndef _2DE_SERIALIZATION_H_
 #define _2DE_SERIALIZATION_H_
 
+#include <string>
+
 namespace Deku2D
 {
 

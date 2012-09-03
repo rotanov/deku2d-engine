@@ -1,5 +1,3 @@
-#pragma once
-
 #include "2de_TypeInfo.h"
 #include "2de_Object.h"
 #include "2de_Vector2.h"

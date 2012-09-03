@@ -1,5 +1,7 @@
 #include "2de_RTTI.h"
 
+#include <algorithm>
+
 namespace Deku2D
 {
 
@@ -61,7 +63,7 @@ namespace Deku2D
 			result += GetClasses()[i]->GetName();
 			result += "\r\n";
 
-			for (CRTTI::PropertyIterator j(GetClasses()[i]); j.Ok(); j++)
+			for (CRTTI::PropertyIterator j(GetClasses()[i]); j.Ok(); ++j)
 			{
 				result += "\t";
 				result += j->GetTypeName();

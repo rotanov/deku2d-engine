@@ -488,59 +488,6 @@ namespace Deku2D
 		}
 	};
 
-	template <typename T>
-	class IsIntegral
-	{
-	public:
-		enum { result = false };
-	};
-
-	#define D2D_DECLARE_INTEGRAL_TYPE(T)	\
-		template <>	\
-		class IsIntegral<T>	\
-		{	\
-		public:	\
-			enum { result = true };	\
-		};	\
-
-	D2D_DECLARE_INTEGRAL_TYPE(char)
-	D2D_DECLARE_INTEGRAL_TYPE(int)
-	D2D_DECLARE_INTEGRAL_TYPE(float)
-	D2D_DECLARE_INTEGRAL_TYPE(bool)
-	D2D_DECLARE_INTEGRAL_TYPE(std::string)
-
-	template<typename T>
-	class IsAbstract
-	{
-		// In case you forgot how it works: google SFINAE (Substitution failure is not an error)
-		// todo: add assertions to ensure sizeof(char) == 1 and sizeof(short) == 2
-		template<class U> static char test( U (*)[1] );
-		template<class U> static short test( ... );
-
-	public:
-		enum { result = sizeof( test<T>( 0 ) ) - 1 };
-	};
-
-	template<typename T, int A = IsAbstract<T>::result>
-	class Make
-	{
-	public:
-		static T* New()
-		{
-			return new T();
-		}
-	};
-
-	template<typename T>
-	class Make<T, 1>
-	{
-	public:
-		static T* New()
-		{
-				throw("pizdec");                
-		}
-	};
-
 	// Conversion from Type to Type for the case, when exception should be thrown at runtime when there is no implementation for a conversion.
 	template<typename T, int A = IsIntegral<T>::result>
 	class Convert
@@ -573,6 +520,7 @@ namespace Deku2D
 		}
 
 	};
+
 
 }	//	namespace Deku2D
 

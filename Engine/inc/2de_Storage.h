@@ -1,6 +1,8 @@
 #ifndef _2DE_STORAGE_H_
 #define _2DE_STORAGE_H_
 
+#include "2de_Core.h"
+
 namespace Deku2D
 {
 	/**
