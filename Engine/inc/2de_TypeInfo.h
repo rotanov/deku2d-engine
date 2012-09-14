@@ -51,11 +51,31 @@ public:
 		throw "FillJSONValue unimplemented for this type";
 	}
 
-
-
 protected:
 	static map<string, TypeInfo*> _typeInfos;
 };
+
+template <typename Type, int Implemented = Deku2D::IsConvertible<string, Type>::result>
+class TypeInfoHelper
+{
+public:
+	static void StringToType( const string& s, Type* instance )
+	{
+		throw "pizdec conversion not implemented";
+	}
+};
+
+template <typename Type>
+class TypeInfoHelper<Type, 1>
+{
+public:
+	static void StringToType( const string& s, Type* instance )
+	{
+		*instance = Deku2D::Convert<Type>::FromString(s);
+	}
+};
+
+// Convert<TYPE>::FromString(value);	\
 
 #define _D2D_BEGIN_TYPE_INFO_DECL(TYPE)	\
 	class TypeInfo##TYPE : public TypeInfo	\
@@ -68,13 +88,11 @@ protected:
 		char* Name() const { return #TYPE; }	\
 		virtual void SetString(void *instance, const string &value)	\
 		{	\
-			TYPE *typedInstance = static_cast<TYPE*>(instance);	\
-			*typedInstance = Convert<TYPE>::FromString(value);	\
+			TypeInfoHelper<TYPE>::StringToType(value, static_cast<TYPE*>(instance));	\
 		}	\
 		string GetString(void *instance)	\
 		{	\
-			TYPE *typedInstance = static_cast<TYPE*>(instance);	\
-			return Convert<TYPE>::ToString(*typedInstance);	\
+			return Convert<TYPE>::ToString(*(static_cast<TYPE*>(instance)));	\
 		}	\
 		PropertyInfo* GetProperty(const string &name) const { return _props[name]; }	\
 		map<string, PropertyInfo*>& Properties() { return _props; }	\

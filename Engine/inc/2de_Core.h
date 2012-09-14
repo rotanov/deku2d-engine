@@ -488,6 +488,29 @@ namespace Deku2D
 		}
 	};
 
+	template <typename From, typename To>
+	class IsConvertible
+	{
+	public:
+		enum { result = 0, };
+	};
+
+	#define	D2D_DECLARE_CONVERTIBLE(FROM, TO)	\
+		template <>	\
+		class IsConvertible<FROM, TO>	\
+		{	\
+		public:	\
+			enum { result = 1, };	\
+		};	\
+
+	D2D_DECLARE_CONVERTIBLE(string, string)
+	D2D_DECLARE_CONVERTIBLE(string, bool)
+	D2D_DECLARE_CONVERTIBLE(string, int)
+	D2D_DECLARE_CONVERTIBLE(string, float)
+	D2D_DECLARE_CONVERTIBLE(bool, string)
+	D2D_DECLARE_CONVERTIBLE(int, string)
+	D2D_DECLARE_CONVERTIBLE(float, string)
+
 	// Conversion from Type to Type for the case, when exception should be thrown at runtime when there is no implementation for a conversion.
 	template<typename T, int A = IsIntegral<T>::result>
 	class Convert
@@ -495,7 +518,7 @@ namespace Deku2D
 	public:
 		static T FromString(const string &s)
 		{
-				return VariantConvert::from_string_impl(s, identity<T>());
+			return VariantConvert::from_string_impl(s, identity<T>());
 		}
 
 		static string ToString(const T &value)

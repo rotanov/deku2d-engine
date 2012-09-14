@@ -4,6 +4,9 @@
 
 namespace Deku2D
 {
+	D2D_DECL_TYPE_INFO(char)
+	D2D_DECL_TYPE_INFO(unsigned)
+	D2D_DECL_TYPE_INFO(double)
 	D2D_DECL_TYPE_INFO(float)
 	D2D_DECL_TYPE_INFO(int)
 	D2D_DECL_TYPE_INFO(bool)
@@ -12,6 +15,10 @@ namespace Deku2D
 	D2D_DECL_TYPE_INFO(Vector2)
 		D2D_DECLARE_PROPERTY_INFO(Vector2, float, X)
 		D2D_DECLARE_PROPERTY_INFO(Vector2, float, Y)
+
+	D2D_DECL_TYPE_INFO(CObject)
+		D2D_DECLARE_PROPERTY_INFO(CObject, string, Name)
+
 /*
 	D2D_DECL_TYPE_INFO(CFoo)
 		D2D_DECLARE_PROPERTY_INFO(CFoo, Vector2, Position)
