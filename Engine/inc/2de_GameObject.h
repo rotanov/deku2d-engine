@@ -18,7 +18,7 @@ namespace Deku2D
 	* CGameObject - the base class for all components.
 	*/
 
-	class CGameObject : public IVisitableObject<>
+	class CGameObject : public IVisitableObject
 	{
 		D2D_DECLARE_VISITABLE()
 

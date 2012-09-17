@@ -50,6 +50,12 @@ public:
 			//Deku2D::SerializeObjectToJSON(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.json");
 			Deku2D::DeserializeObjectFromJSON("rootdump.json");
 			Log( "%s\r\n", TypeInfo::GetTypeInfo( "Vector2" )->GetProperty( "X" )->Name() );
+			for( int i = 0; i < TypeInfo::GetTypeInfo("CGameObject")->GetProperty("Children")->GetArraySize(Deku2D::CEngine::Instance()->RootGameObject); i++)
+			{
+				CObject* o = (CObject*) TypeInfo::GetTypeInfo("CGameObject")->GetProperty("Children")->GetValue(Deku2D::CEngine::Instance()->RootGameObject, i);				Log( "ASDALKDJAKD", "%s", o->GetName());
+			}
+
+			Log( "ASD:LKAJFL:KDJFLKDSFJ", "%d", Deku2D::IsConvertible<string, Deku2D::CResource>::result );
 		}
 	}
 

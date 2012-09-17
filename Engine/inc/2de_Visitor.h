@@ -22,83 +22,74 @@ namespace Deku2D
 		virtual ~IVisitorBase() {};
 	};
 
-	template <typename T, typename R = void>
+	template <typename T>
 	class IVisitor : virtual public IVisitorBase
 	{
 	public:
-		typedef R CReturnType;
-		virtual CReturnType VisitOnEnter(T&) = 0;
-		virtual CReturnType VisitOnLeave(T&) = 0;
+		virtual void VisitOnEnter(T&) = 0;
+		virtual void VisitOnLeave(T&) = 0;
 	};
 
-	template <typename R = void>
 	class IVisitableBase	// Actually never used anywhere in code for now.
 	{
 	public:
-		typedef R CReturnType;
 		virtual ~IVisitableBase() {}
-		virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
-		virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
+		virtual void AcceptOnEnter(IVisitorBase&) = 0;
+		virtual void AcceptOnLeave(IVisitorBase&) = 0;
 
 	protected:
 		template <typename T>
-		static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
+		static void ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
 		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+			if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
 			{
 				return ptr->VisitOnEnter(visited);
 			}
-			return CReturnType();
 		}
 
 		template <typename T>
-		static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
+		static void ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
 		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+			if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
 			{
 				return ptr->VisitOnLeave(visited);
 			}
-			return CReturnType();
 		}
 	};
 
-	template <typename R = void>
 	class IVisitableObject : public CObject	// Inherit from CObject to inject visitable interface into branch of the inheritance
 	{
 	public:
-		typedef R CReturnType;
 		virtual ~IVisitableObject() {}
-		virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
-		virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
+		virtual void AcceptOnEnter(IVisitorBase&) = 0;
+		virtual void AcceptOnLeave(IVisitorBase&) = 0;
 
 	protected:
 		template <typename T> 
-		static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
+		static void ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
 		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+			if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
 			{
 				return ptr->VisitOnEnter(visited);
 			}
-			return CReturnType();
 		}
 
 		template <typename T> 
-		static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
+		static void ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
 		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
+			if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
 			{
 				return ptr->VisitOnLeave(visited);
 			}
-			return CReturnType();
 		}
 	};
 
 	// Inject this in visitable class
 	#define D2D_DECLARE_VISITABLE()	\
 		public:	\
-			virtual CReturnType AcceptOnEnter(IVisitorBase& visitor)	\
+			virtual void AcceptOnEnter(IVisitorBase& visitor)	\
 			{ return ConcreteAcceptOnEnter(*this, visitor); }	\
-			virtual CReturnType AcceptOnLeave(IVisitorBase& visitor)	\
+			virtual void AcceptOnLeave(IVisitorBase& visitor)	\
 			{ return ConcreteAcceptOnLeave(*this, visitor); }
 
 };	//	namespace Deku2D

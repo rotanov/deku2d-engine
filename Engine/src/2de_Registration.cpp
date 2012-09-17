@@ -1,6 +1,8 @@
 #include "2de_TypeInfo.h"
 #include "2de_Object.h"
 #include "2de_Vector2.h"
+#include "2de_Resource.h"
+#include "2de_Visitor.h"
 
 namespace Deku2D
 {
@@ -19,6 +21,17 @@ namespace Deku2D
 	D2D_DECL_TYPE_INFO(CObject)
 		D2D_DECLARE_PROPERTY_INFO(CObject, string, Name)
 
+		D2D_DECL_DERIVED_TYPE_INFO(CResource, CObject)
+
+			D2D_DECL_DERIVED_TYPE_INFO(CScript, CResource)
+
+		D2D_DECL_DERIVED_TYPE_INFO(IVisitableObject, CObject)
+
+			D2D_DECL_DERIVED_TYPE_INFO(CGameObject, IVisitableObject)
+				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CGameObject, CGameObject*, Children, Attach, GetChild, GetChildCount)
+
+				D2D_DECL_DERIVED_TYPE_INFO(CPlaceableComponent, CGameObject)
+
 /*
 	D2D_DECL_TYPE_INFO(CFoo)
 		D2D_DECLARE_PROPERTY_INFO(CFoo, Vector2, Position)
@@ -32,18 +45,5 @@ namespace Deku2D
 		D2D_DECLARE_PROPERTY_INFO(CBarDerived, int, H)
 		D2D_DECLARE_PTR_PROPERTY_INFO(CBarDerived, CBarDerived, SingleBarPtr)
 		*/
-
-	//  indentations illustrates inheritance
-/*
-	D2D_DEFINE_RTTI(CObject, CNullClass)
-
-		D2D_DEFINE_RTTI(CResource, CObject)
-			D2D_DEFINE_RTTI(CScript, CResource)
-
-		D2D_DEFINE_CLASS_TEMPLATE_RTTI(IVisitableObject, CObject)
-			D2D_DEFINE_RTTI(CGameObject, IVisitableObject<>)
-				D2D_DEFINE_RTTI(CPlaceableComponent, CGameObject)
-*/		
-		//D2D_REGISTER_PROPERTY(string, Name, CObject)
 
 };	// namespace Deku2D

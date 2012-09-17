@@ -56,17 +56,17 @@ protected:
 };
 
 template <typename Type, int Implemented = Deku2D::IsConvertible<string, Type>::result>
-class TypeInfoHelper
+class TypeInfoStringToTypeHelper
 {
 public:
-	static void StringToType( const string& s, Type* instance )
+	static void StringToType(const string& s, Type* instance)
 	{
 		throw "pizdec conversion not implemented";
 	}
 };
 
 template <typename Type>
-class TypeInfoHelper<Type, 1>
+class TypeInfoStringToTypeHelper<Type, 1>
 {
 public:
 	static void StringToType( const string& s, Type* instance )
@@ -75,7 +75,25 @@ public:
 	}
 };
 
-// Convert<TYPE>::FromString(value);	\
+template <typename Type, int Implemented = Deku2D::IsConvertible<Type, string>::result>
+class TypeInfoTypeToStringHelper
+{
+public:
+	static string TypeToString(Type* instance)
+	{
+		throw "pizdec conversion not implemented";
+	}
+};
+
+template <typename Type>
+class TypeInfoTypeToStringHelper<Type, 1>
+{
+public:
+	static string TypeToString(Type* instance)
+	{
+		return Deku2D::Convert<Type>::ToString(*instance);
+	}
+};
 
 #define _D2D_BEGIN_TYPE_INFO_DECL(TYPE)	\
 	class TypeInfo##TYPE : public TypeInfo	\
@@ -88,11 +106,11 @@ public:
 		char* Name() const { return #TYPE; }	\
 		virtual void SetString(void *instance, const string &value)	\
 		{	\
-			TypeInfoHelper<TYPE>::StringToType(value, static_cast<TYPE*>(instance));	\
+			TypeInfoStringToTypeHelper<TYPE>::StringToType(value, static_cast<TYPE*>(instance));	\
 		}	\
 		string GetString(void *instance)	\
 		{	\
-			return Convert<TYPE>::ToString(*(static_cast<TYPE*>(instance)));	\
+			return TypeInfoTypeToStringHelper<TYPE>::TypeToString(static_cast<TYPE*>(instance));	\
 		}	\
 		PropertyInfo* GetProperty(const string &name) const { return _props[name]; }	\
 		map<string, PropertyInfo*>& Properties() { return _props; }	\
