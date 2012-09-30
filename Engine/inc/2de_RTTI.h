@@ -20,10 +20,24 @@ namespace Deku2D
 	using std::vector;
 
 	template <typename T>
+	class IsPointer
+	{
+	public:
+		enum { result = false, };
+	};
+
+	template <typename T>
+	class IsPointer<T*>
+	{
+	public:
+		enum { result = true, };
+	};
+
+	template <typename T>
 	class IsIntegral
 	{
 	public:
-		enum { result = false };
+		enum { result = false, };
 	};
 
 	#define D2D_DECLARE_INTEGRAL_TYPE(T)	\
@@ -31,7 +45,7 @@ namespace Deku2D
 		class IsIntegral<T>	\
 		{	\
 		public:	\
-			enum { result = true };	\
+			enum { result = true, };	\
 		};	\
 
 	D2D_DECLARE_INTEGRAL_TYPE(char)

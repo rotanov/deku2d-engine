@@ -47,15 +47,15 @@ HEADERS += \
 	inc/2de_Config.h \
 	inc/2de_Box.h \
 	inc/2de_Xml.h \
-    inc/2de_Visitor.h \
-    inc/2de_TypeInfo.h \
-    inc/2de_Storage.h \
-    inc/2de_Serialization.h \
-    inc/2de_PropertyInfo.h \
-    inc/2de_Property.h \
-    inc/2de_Object.h \
-    inc/2de_Memory.h \
-    inc/2de_Define.h
+	inc/2de_Visitor.h \
+	inc/2de_TypeInfo.h \
+	inc/2de_Storage.h \
+	inc/2de_Serialization.h \
+	inc/2de_PropertyInfo.h \
+	inc/2de_Property.h \
+	inc/2de_Object.h \
+	inc/2de_Memory.h \
+	inc/2de_Define.h
 
 SOURCES += \
 	src/2de_Xml.cpp \
@@ -92,10 +92,10 @@ SOURCES += \
 	src/2de_Core.cpp \
 	src/2de_Config.cpp \
 	src/2de_Box.cpp \
-    src/2de_TypeInfo.cpp \
-    src/2de_Storage.cpp \
-    src/2de_Serialization.cpp \
-    src/2de_Registration.cpp \
-    src/2de_Property.cpp \
-    src/2de_Object.cpp \
-    src/2de_Memory.cpp
+	src/2de_TypeInfo.cpp \
+	src/2de_Storage.cpp \
+	src/2de_Serialization.cpp \
+	src/2de_Registration.cpp \
+	src/2de_Property.cpp \
+	src/2de_Object.cpp \
+	src/2de_Memory.cpp

@@ -7,8 +7,10 @@ namespace Deku2D
 {
 
 	class CNullClass;
+	class CObject;
 	void SerializeObjectToXml(CNullClass* object, const std::string& name);
-	void SerializeObjectToJSON(CNullClass* object, const std::string& name);
+	//void SerializeObjectToJSON(CNullClass* object, const std::string& name);
+	void SerializeObjectToJSON(CObject* o, const std::string& name);
 	class CGameObject;
 	CGameObject* DeserializeObjectFromJSON(const std::string &name);
 
