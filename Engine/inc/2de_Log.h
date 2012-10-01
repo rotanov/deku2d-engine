@@ -2,6 +2,7 @@
 #define _2DE_LOG_H_
 
 #include "2de_Core.h"
+#include "2de_Singleton.h"
 
 namespace Deku2D
 {

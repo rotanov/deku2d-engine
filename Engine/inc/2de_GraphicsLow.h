@@ -325,6 +325,8 @@ namespace Deku2D
 		const CBox& GetBox() const;
 		bool Load();
 		void Unload();
+		Vector2 GetVertex(unsigned index) const { return GetVertices()[ index ]; }
+		void SetVertex(const Vector2& vertex) { } // TODO: stub
 
 	private:
 		CBox Box;
@@ -472,6 +474,8 @@ namespace Deku2D
 	#define CFONT_MAX_SYMBOLS 256
 	class CFont : public CResource
 	{
+		D2D_INJECT_TYPE_INFO(CFont)
+
 	public:
 		CBox Boxes[256];	// why 256? // TODO: make this private and getter that checks for FirstTimeLoaded..
 
@@ -482,6 +486,10 @@ namespace Deku2D
 		void Unload();
 
 		bool SaveToFile(const string &AFilename);
+
+		CBox GetBox(int index) const { return Boxes[ index ]; }
+		void SetBox(const CBox& box) { } // TODO: stub
+		int GetBoxCount() const { return 256; }
 
 		float GetStringWidth(const string &text);
 		float GetStringWidthEx(int t1, int t2, const string &text);

@@ -59,6 +59,8 @@ namespace Deku2D
 
 	class IVisitableObject : public CObject	// Inherit from CObject to inject visitable interface into branch of the inheritance
 	{
+		D2D_INJECT_TYPE_INFO(IVisitableObject);
+
 	public:
 		virtual ~IVisitableObject() {}
 		virtual void AcceptOnEnter(IVisitorBase&) = 0;

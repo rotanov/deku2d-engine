@@ -2,6 +2,7 @@
 #define _2DE_OBJECT_H_
 
 #include "2de_RTTI.h"
+#include "2de_TypeInfo.h"
 
 namespace Deku2D
 {
@@ -14,6 +15,8 @@ namespace Deku2D
 
 	class CObject : public CNullClass
 	{
+		D2D_INJECT_TYPE_INFO(CObject);
+
 	public:		
 		CObject();
 		virtual ~CObject();

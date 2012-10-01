@@ -20,7 +20,8 @@ namespace Deku2D
 
 	class CGameObject : public IVisitableObject
 	{
-		D2D_DECLARE_VISITABLE()
+		D2D_INJECT_TYPE_INFO(CGameObject);
+		D2D_DECLARE_VISITABLE();
 
 	public:	
 		typedef map<string, CGameObject*> LNOMType;	// ???

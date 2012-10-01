@@ -112,6 +112,16 @@ namespace Deku2D
 			return *this;
 		}
 
+		float GetA() const { return a; }
+		float GetR() const { return r; }
+		float GetG() const { return g; }
+		float GetB() const { return b; }
+
+		void SetA(const float& _a) { a = _a; }
+		void SetR(const float& _r) { r = _r; }
+		void SetG(const float& _g) { g = _g; }
+		void SetB(const float& _b) { b = _b; }
+
 		__INLINE RGBA operator +(const RGBA &rhs) const
 		{			
 			return RGBA(r + rhs.r , g + rhs.g, b + rhs.b, a + rhs.a);

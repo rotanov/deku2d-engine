@@ -7,6 +7,7 @@
 #include "2de_Object.cpp"
 #include "2de_Log.cpp"
 #include "2de_Core.cpp"
+#include "2de_Singleton.cpp"
 #include "2de_Storage.cpp"
 #include "2de_Box.cpp"
 #include "2de_Matrix2.cpp"

@@ -10,12 +10,11 @@
 using std::map;
 using std::string;
 
-#define TEMPLATED_CALL( TYPEINFO, FUNCTION, A0 )	\
-	TYPEINFO->CastedCall??????
-
 class TypeInfo
 {
 public:
+	TypeInfo() : _hasDerived( false ) {}
+	bool HasDerived() const { return _hasDerived; }
 	virtual char* Name() const = 0;
 	virtual void* New() const = 0;
 	virtual PropertyInfo* GetProperty(const string &name) const = 0;
@@ -23,6 +22,7 @@ public:
 	virtual TypeInfo* BaseInfo() = 0;
 	virtual string GetString(void *instance) = 0;
 	virtual void SetString(void *instance, const string &value) = 0;
+	virtual bool IsIntegral() const = 0;
 	PropertyInfo *FindProperty(const string &name)
 	{
 		TypeInfo *typeInfo = this;
@@ -35,6 +35,7 @@ public:
 		}
 		return prop;
 	}
+	virtual TypeInfo* GetRunTimeTypeInfo(void* instance) const { throw "Not implemented."; }
 	static TypeInfo* GetTypeInfo(const string &typeName)
 	{
 		if (_typeInfos.find(typeName) == _typeInfos.end())
@@ -51,8 +52,26 @@ public:
 		throw "FillJSONValue unimplemented for this type";
 	}
 
+	static void Initialize() // Run time initialization and checks
+	{
+		for (map<string, TypeInfo*>::iterator i = _typeInfos.begin(); i != _typeInfos.end(); ++i)
+		{
+			if (i->second->BaseInfo())
+			{
+				i->second->BaseInfo()->SetHasDerived( true );
+			}
+		}
+	}
+
+
+
 protected:
 	static map<string, TypeInfo*> _typeInfos;
+
+	void SetHasDerived( bool hasDerived ) { _hasDerived = hasDerived; }
+
+private:
+	bool _hasDerived;
 };
 
 template <typename Type, int Implemented = Deku2D::IsConvertible<string, Type>::result>
@@ -104,6 +123,7 @@ public:
 		TypeInfo##TYPE() { _typeInfos[#TYPE] = &_instance; }	\
 		void* New() const { return Make<TYPE>::New(); }	\
 		char* Name() const { return #TYPE; }	\
+		virtual bool IsIntegral() const { return Deku2D::IsIntegral<TYPE>::result; }	\
 		virtual void SetString(void *instance, const string &value)	\
 		{	\
 			TypeInfoStringToTypeHelper<TYPE>::StringToType(value, static_cast<TYPE*>(instance));	\
@@ -132,11 +152,12 @@ map<string, PropertyInfo*> TypeInfo##TYPE::_props;	\
 	_D2D_BEGIN_TYPE_INFO_DECL(TYPE_DERIVED)	\
 	_D2D_TYPE_INFO_DECL_BASE(TYPE_DERIVED)	\
 		TypeInfo* BaseInfo() { return _typeInfos[#TYPE_BASE]; }	\
+		virtual TypeInfo* GetRunTimeTypeInfo(void* instance) const { return static_cast<TYPE_DERIVED*>(instance)->GetTypeInfo(); }	\
 	_D2D_END_TYPE_INFO_DECL(TYPE_DERIVED)	\
 
 #define D2D_INJECT_TYPE_INFO(TYPE)	\
 	public:	\
-	virtual TypeInfo* GetTypeInfo() const { return TypeInfo::GetTypeInfo(#TYPE); }	\
+	virtual TypeInfo* GetTypeInfo() const { return TypeInfo::GetTypeInfo(#TYPE); }
 
 
 #endif // _2DE_TYPEINFO_H_

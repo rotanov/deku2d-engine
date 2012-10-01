@@ -10,7 +10,8 @@ namespace Deku2D
 	*/
 	class CPlaceableComponent : public CGameObject
 	{
-		D2D_DECLARE_VISITABLE()
+		D2D_INJECT_TYPE_INFO(CPlaceableComponent);
+		D2D_DECLARE_VISITABLE();
 
 	public:
 		CPlaceableComponent();

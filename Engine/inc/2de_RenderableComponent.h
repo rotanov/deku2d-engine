@@ -12,6 +12,7 @@ namespace Deku2D
 
 	class CRenderableComponent : public CGameObject
 	{
+		D2D_INJECT_TYPE_INFO(CRenderableComponent)
 		D2D_DECLARE_VISITABLE()
 
 	public:

@@ -195,14 +195,27 @@ namespace Deku2D
 					r += str, count--;
 				return r;
 			}
+			static string RepeatString(char* str, unsigned count)
+			{
+				return RepeatString(string(str), count);
+			}
+
 
 			static void Helper(CStateInfo& state, void* next, const string &nextName)
 			{
-				state.s += RepeatString("\t", state.depth);
+				const static char* ident = " "; // "\t"
+				state.s += RepeatString(ident, state.depth);
 				state.s += "{\n";
 				state.depth++;
 
 				TypeInfo *typeInfo = TypeInfo::GetTypeInfo(nextName);
+				while (typeInfo->HasDerived())
+				{
+					if( typeInfo == typeInfo->GetRunTimeTypeInfo( next ) )
+						break;	// TODO: костыль убрать.
+					typeInfo = typeInfo->GetRunTimeTypeInfo( next );
+				}
+
 				while (typeInfo)
 				{
 					map<string, PropertyInfo*> &props = typeInfo->Properties();
@@ -222,7 +235,7 @@ namespace Deku2D
 							TypeInfo* _typeInfo = TypeInfo::GetTypeInfo(stringTypeName);
 							std::string stringValue = _typeInfo->GetString(value);
 
-							state.s += RepeatString("\t", state.depth) +
+							state.s += RepeatString(ident, state.depth) +
 									   "\"" +
 									   i->second->Name() +
 									   "\" : \"" +
@@ -233,36 +246,38 @@ namespace Deku2D
 						}
 						else if (i->second->IsArray())
 						{
-							state.s += RepeatString("\t", state.depth) +
+							state.s += RepeatString(ident, state.depth) +
 									   "\"" +
 									   i->second->Name() +
 									   "\" : \n" +
-									   RepeatString("\t", state.depth) +
+									   RepeatString(ident, state.depth) +
 									   "[\n";
 							state.depth++;
-							for (int j = 0; j < i->second->GetArraySize(next); j++)
-							{
-								void *value = i->second->GetValue(next, j);
-								char floatStr[256];
-								sprintf(floatStr, "%f", *(static_cast<float*>(value)));
-
-								state.s += RepeatString("\t", state.depth) +
-										   "\"" +
-										   floatStr +
-										   "\"" +
-										   RepeatString(",", j != i->second->GetArraySize(next) - 1 ) +
-										   "\n";
-								delete value;
-							}
+							TypeInfo* elementInfo = TypeInfo::GetTypeInfo(i->second->TypeName());
+							if(elementInfo->IsIntegral())
+								for (int j = 0; j < i->second->GetArraySize(next); j++)
+								{
+									state.s += RepeatString(ident, state.depth) +
+											   "\"" +
+											   elementInfo->GetString(i->second->GetValue(next, j)) +
+											   "\"" +
+											   RepeatString(",", j != i->second->GetArraySize(next) - 1 ) +
+											   "\n";
+								}
+							else
+								for (int j = 0; j < i->second->GetArraySize(next); j++)
+								{
+									Helper(state, i->second->GetValue(next, j), elementInfo->Name());
+								}
 							state.depth--;
-							state.s += RepeatString("\t", state.depth) +
+							state.s += RepeatString(ident, state.depth) +
 									   "]" +
 									   RepeatString(",", nextIter != props.end() || typeInfo->BaseInfo()) +
 									   "\n";
 						}
 						else
 						{
-							state.s += RepeatString("\t", state.depth) +
+							state.s += RepeatString(ident, state.depth) +
 									   "\"" +
 									   i->second->Name() +
 									   "\" : \n";
@@ -289,13 +304,13 @@ namespace Deku2D
 									{
 										state.ptrCount++;
 										state.addresTable[ i->second->GetValue(next) ] = state.ptrCount;
-										state.s += RepeatString("\t", state.depth) +
+										state.s += RepeatString(ident, state.depth) +
 												   "{\n" +
-												   RepeatString("\t", state.depth + 1) +
+												   RepeatString(ident, state.depth + 1) +
 												   "\"@ptr\" : " +
 												   Convert<int>::ToString(state.ptrCount) +
 												   ",\n" +
-												   RepeatString("\t", state.depth + 1) +
+												   RepeatString(ident, state.depth + 1) +
 												   "\"@value\" :\n";
 										state.depth++;
 									}
@@ -308,7 +323,7 @@ namespace Deku2D
 								if ( i->second->IsPointer() )
 								{
 									state.depth--;
-									state.s += RepeatString("\t", state.depth) +
+									state.s += RepeatString(ident, state.depth) +
 											   "}\n";
 								}
 								else
@@ -319,7 +334,7 @@ namespace Deku2D
 					typeInfo = typeInfo->BaseInfo();
 				}
 				state.depth--;
-				state.s += RepeatString( "\t", state.depth );
+				state.s += RepeatString( ident, state.depth );
 				if (state.depth == 0)
 					state.s += "}\n";
 				else

@@ -22,6 +22,11 @@ namespace Deku2D
 		CBox(const Vector2 &Center, float Width, float Height);
 		CBox(const Vector2 &Center, float Radius);
 		CBox(const Vector2Array<4> &Vertices);
+
+		Vector2 GetMin() const { return Min; }
+		Vector2 GetMax() const { return Max; }
+		void SetMin(const Vector2& min) { Min = min; }
+		void SetMax(const Vector2& max) { Max = max; }
 		
 		void Add(const Vector2 &Point);
 		Vector2 Center();

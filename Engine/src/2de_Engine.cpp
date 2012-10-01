@@ -285,6 +285,7 @@ namespace Deku2D
 	bool CEngine::Initialize()
 	{
 		CRTTI::FinalizeDeclaration();
+		TypeInfo::Initialize();
 		SLog->SetLogFilePath(Environment::Paths::GetLogPath());
 		SLog->SetLogName("System");
 		Log("INFO", "Working directory is '%s'", Environment::Paths::GetWorkingDirectory().c_str());

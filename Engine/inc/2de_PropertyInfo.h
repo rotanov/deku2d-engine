@@ -89,12 +89,12 @@ public:
 		bool Integral() { return false; }	\
 		bool IsPointer() { return true; }	\
 		bool IsArray() { return true; }	\
-		void PushValue(void *owner, void *value) { static_cast<OWNER*>(owner)->PUSHER(*(static_cast<TYPE*>(value)));	}	\
+		void PushValue(void *owner, void *value) { static_cast<OWNER*>(owner)->PUSHER(static_cast<TYPE*>(value));	}	\
 		unsigned GetArraySize(void *owner) { return static_cast<OWNER*>(owner)->SIZEGETTER(); }	\
 		void* GetValue(void *owner, unsigned index)	\
 		{	\
-			TYPE *value = new TYPE;	\
-			*value = static_cast<OWNER*>(owner)->GETTER(index);	\
+			TYPE *value = NULL;	\
+			value = static_cast<OWNER*>(owner)->GETTER(index);	\
 			return value;	\
 		}	\
 	_D2D_END_DECLARE_PROPERTY(OWNER, NAME)	\

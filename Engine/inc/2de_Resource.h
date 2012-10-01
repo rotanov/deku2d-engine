@@ -4,6 +4,7 @@
 #include "2de_Core.h"
 #include "2de_Factory.h"
 #include "2de_Xml.h"
+#include "2de_TypeInfo.h"
 
 namespace Deku2D
 {
@@ -81,6 +82,8 @@ namespace Deku2D
 
 	class CResource : public CObject
 	{
+		D2D_INJECT_TYPE_INFO(CResource);
+
 	public:
 		enum ELoadSource
 		{
