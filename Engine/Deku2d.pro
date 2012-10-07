@@ -55,7 +55,8 @@ HEADERS += \
 	inc/2de_Property.h \
 	inc/2de_Object.h \
 	inc/2de_Memory.h \
-	inc/2de_Define.h
+	inc/2de_Define.h \
+	inc/2de_Singleton.h
 
 SOURCES += \
 	src/2de_Xml.cpp \
@@ -98,4 +99,5 @@ SOURCES += \
 	src/2de_Registration.cpp \
 	src/2de_Property.cpp \
 	src/2de_Object.cpp \
-	src/2de_Memory.cpp
+	src/2de_Memory.cpp \
+	src/2de_Singleton.cpp
