@@ -3,188 +3,143 @@
 #include "2de_RTTI.h"
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/filestream.h>
 
 namespace Deku2D
 {
-	void SerializeObjectToJSON(CObject* o, const std::string& name)
+	namespace Serialization
 	{
+		using namespace rapidjson;
+
 		class CStateInfo
 		{
 		public:
-			int depth;
-			string s;
 			std::map<void*, int> addresTable;
 			int ptrCount;
+			FileStream fileStream;
+			PrettyWriter<FileStream> writer;
 
-			CStateInfo() : depth(0), s(""), ptrCount(0) {}
-			void SaveToFile(const string& filename)
+			CStateInfo(FILE *file)
+				: ptrCount(0)
+				, fileStream(file)
+				, writer(fileStream)
 			{
-				FILE* fo = fopen(filename.c_str(), "w");
-				fprintf(fo, "%s", s.c_str());
-				fclose(fo);
 			}
 		};
 
-		struct T
+		static void Helper(CStateInfo& state, void* next, const string &nextName)
 		{
-			static string RepeatString(string str, unsigned count)
+			state.writer.StartObject();
+
+			TypeInfo *typeInfo = TypeInfo::GetTypeInfo(nextName);
+			while (typeInfo->HasDerived())
 			{
-				string r = "";
-				while (count)
-					r += str, count--;
-				return r;
-			}
-			static string RepeatString(char* str, unsigned count)
-			{
-				return RepeatString(string(str), count);
+				if( typeInfo == typeInfo->GetRunTimeTypeInfo( next ) )
+					break;	// TODO: костыль убрать.
+				typeInfo = typeInfo->GetRunTimeTypeInfo( next );
 			}
 
-
-			static void Helper(CStateInfo& state, void* next, const string &nextName)
+			while (typeInfo)
 			{
-				const static char* ident = " "; // "\t"
-				state.s += RepeatString(ident, state.depth);
-				state.s += "{\n";
-				state.depth++;
-
-				TypeInfo *typeInfo = TypeInfo::GetTypeInfo(nextName);
-				while (typeInfo->HasDerived())
+				map<string, PropertyInfo*> &props = typeInfo->Properties();
+				for (map<string, PropertyInfo*>::iterator i = props.begin(); i != props.end(); ++i)
 				{
-					if( typeInfo == typeInfo->GetRunTimeTypeInfo( next ) )
-						break;	// TODO: костыль убрать.
-					typeInfo = typeInfo->GetRunTimeTypeInfo( next );
-				}
+					map<string, PropertyInfo*>::iterator nextIter = ++i;
+					i--;
 
-				while (typeInfo)
-				{
-					map<string, PropertyInfo*> &props = typeInfo->Properties();
-					for (map<string, PropertyInfo*>::iterator i = props.begin(); i != props.end(); ++i)
+					if (i->second->Integral())
 					{
-						map<string, PropertyInfo*>::iterator nextIter = ++i;
-						i--;
-
-						if (i->second->Integral())
+						if ( i->second->IsPointer() )
 						{
-							if ( i->second->IsPointer() )
+							printf( "we are here ");
+						}
+						void *value = i->second->GetValue(next);
+						std::string stringTypeName = i->second->TypeName();
+						TypeInfo* _typeInfo = TypeInfo::GetTypeInfo(stringTypeName);
+						std::string stringValue = _typeInfo->GetString(value);
+
+						state.writer.String(i->second->Name());
+						state.writer.String(stringValue.c_str());
+					}
+					else if (i->second->IsArray())
+					{
+						state.writer.String(i->second->Name());
+						state.writer.StartArray();
+
+						TypeInfo* elementInfo = TypeInfo::GetTypeInfo(i->second->TypeName());
+						if(elementInfo->IsIntegral())
+							for (int j = 0; j < i->second->GetArraySize(next); j++)
 							{
-								printf( "we are here ");
+								state.writer.String(elementInfo->GetString(i->second->GetValue(next, j)).c_str());
 							}
-							void *value = i->second->GetValue(next);
-							std::string stringTypeName = i->second->TypeName();
-							TypeInfo* _typeInfo = TypeInfo::GetTypeInfo(stringTypeName);
-							std::string stringValue = _typeInfo->GetString(value);
-
-							state.s += RepeatString(ident, state.depth) +
-									   "\"" +
-									   i->second->Name() +
-									   "\" : \"" +
-									   stringValue.c_str() +
-									   "\"" +
-									   RepeatString(",", typeInfo->BaseInfo() != 0 || nextIter != props.end()) +
-										"\n";
-						}
-						else if (i->second->IsArray())
-						{
-							state.s += RepeatString(ident, state.depth) +
-									   "\"" +
-									   i->second->Name() +
-									   "\" : \n" +
-									   RepeatString(ident, state.depth) +
-									   "[\n";
-							state.depth++;
-							TypeInfo* elementInfo = TypeInfo::GetTypeInfo(i->second->TypeName());
-							if(elementInfo->IsIntegral())
-								for (int j = 0; j < i->second->GetArraySize(next); j++)
-								{
-									state.s += RepeatString(ident, state.depth) +
-											   "\"" +
-											   elementInfo->GetString(i->second->GetValue(next, j)) +
-											   "\"" +
-											   RepeatString(",", j != i->second->GetArraySize(next) - 1 ) +
-											   "\n";
-								}
-							else
-								for (int j = 0; j < i->second->GetArraySize(next); j++)
-								{
-									Helper(state, i->second->GetValue(next, j), elementInfo->Name());
-								}
-							state.depth--;
-							state.s += RepeatString(ident, state.depth) +
-									   "]" +
-									   RepeatString(",", nextIter != props.end() || typeInfo->BaseInfo()) +
-									   "\n";
-						}
 						else
+							for (int j = 0; j < i->second->GetArraySize(next); j++)
+							{
+								Helper(state, i->second->GetValue(next, j), elementInfo->Name());
+							}
+						state.writer.EndArray();
+					}
+					else
+					{
+						state.writer.String(i->second->Name());
+						bool alreadySerialized = false;
+						bool nullPtr = false;
+						if ( i->second->IsPointer() )
 						{
-							state.s += RepeatString(ident, state.depth) +
-									   "\"" +
-									   i->second->Name() +
-									   "\" : \n";
-							bool alreadySerialized = false;
-							bool nullPtr = false;
+							if (i->second->GetValue(next) == 0)
+								nullPtr = true;
+							if (nullPtr)
+							{
+								state.writer.String("0");
+							}
+							else
+							{
+								alreadySerialized = state.addresTable.count( i->second->GetValue(next) ) == 1;
+								if (alreadySerialized)
+								{
+									state.writer.String(("@ptr" + Convert<int>::
+										ToString(state.addresTable[i->second->GetValue(next)])).c_str());
+
+								}
+								else
+								{
+									state.ptrCount++;
+									state.addresTable[ i->second->GetValue(next) ] = state.ptrCount;
+									state.writer.StartObject();
+									state.writer.String("@ptr");
+									state.writer.String(Convert<int>::ToString(state.ptrCount).c_str());
+									state.writer.String("@value");
+								}
+							}
+						}
+						if (!alreadySerialized && !nullPtr)
+						{
+							void *value = i->second->GetValue(next);
+							Helper(state, value, i->second->TypeName());
 							if ( i->second->IsPointer() )
 							{
-								if (i->second->GetValue(next) == 0)
-									nullPtr = true;
-								if (nullPtr)
-								{
-									state.s += "0";
-								}
-								else
-								{
-									alreadySerialized = state.addresTable.count( i->second->GetValue(next) ) == 1;
-									if (alreadySerialized)
-									{
-										state.s += "\"@ptr" +
-												   Convert<int>::ToString( state.addresTable[ i->second->GetValue(next) ] ) +
-												   "\",\n";
-									}
-									else
-									{
-										state.ptrCount++;
-										state.addresTable[ i->second->GetValue(next) ] = state.ptrCount;
-										state.s += RepeatString(ident, state.depth) +
-												   "{\n" +
-												   RepeatString(ident, state.depth + 1) +
-												   "\"@ptr\" : " +
-												   Convert<int>::ToString(state.ptrCount) +
-												   ",\n" +
-												   RepeatString(ident, state.depth + 1) +
-												   "\"@value\" :\n";
-										state.depth++;
-									}
-								}
+								state.writer.EndObject();
 							}
-							if (!alreadySerialized && !nullPtr)
-							{
-								void *value = i->second->GetValue(next);
-								Helper(state, value, i->second->TypeName());
-								if ( i->second->IsPointer() )
-								{
-									state.depth--;
-									state.s += RepeatString(ident, state.depth) +
-											   "}\n";
-								}
-								else
-									delete value;
-							}
+							else
+								delete value;
 						}
 					}
-					typeInfo = typeInfo->BaseInfo();
 				}
-				state.depth--;
-				state.s += RepeatString( ident, state.depth );
-				if (state.depth == 0)
-					state.s += "}\n";
-				else
-					state.s += "},\n";
+				typeInfo = typeInfo->BaseInfo();
 			}
-		};
+			state.writer.EndObject();
+		}
 
-		CStateInfo state;
-		//state.s += (string)"\"" + name + "\" : \n";
-		T::Helper(state, o, "CObject");
-		state.SaveToFile(name);
-	}
+		void ToJSON(void *o, const string &className, const std::string& filename)
+		{
+			FILE* file = fopen(filename.c_str(), "w");
+			CStateInfo state(file);
+			Helper(state, o, className);
+			fclose(file);
+		}
+
+	};	// namespace Serialization
 
 };	// namespace Deku2D

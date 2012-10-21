@@ -1,5 +1,5 @@
 -- Rotating squares, with relative positioning
----[[
+--[[
 for i = 0, 3 do
 	local a = Create("A", "")
 	a.pos:SetPosition(0, 0)
@@ -42,17 +42,20 @@ end
 
 
 -- Another Ninja
----[[
+--[[
 local another_ninja = Create("BlackNinja", "")
 another_ninja.pos:SetPosition(350, 100)
 Root:Attach(another_ninja)
---]]
 
 -- Cloned Ninja
 
 local cloned_ninja = another_ninja:CloneTree()
 cloned_ninja:FindFirstOfClass("PlaceableComponent"):SetPosition(250, 100)
 Root:Attach(cloned_ninja)
+
+--]]
+
+
 
 -- Some shit, I don't recall what is it
 --[[
@@ -107,10 +110,25 @@ Root:Attach(es)
 Root:Attach(er)
 
 -- LuaPerfCounter - a text that shows how much memory lua is using
+--[[
 local lpc = Create("LuaPerfCounter", "")
+lpc.pos:SetPosition(10, 300)
 Root:Attach(lpc)
+--]]
+
+local fonts = { 'DefaultFont', 'iich', 'iich2', 'Font', 'hge', }
+
+for i = 1,5 do
+	local pos = Create("PlaceableComponent", "")	-- пизда днище, если не передать эту пустую строку, то ниху€ не работает и мы обосрались. » всЄ проходит тихо. —иди потом лог читай.
+	local text = Create("Text", "")
+	pos:Attach( text )
+	Root:Attach( pos )
+	text:SetText("jackdaws love my big sphinx of quartz. JACKDAWS LOVE MY BIG SPHINX OF QUARTZ!?,.. —ъешь же ещЄ этих м€гких булок да выпей чаю.")
+	pos:SetPosition( 10, 10 + 50 * i )
+	text:SetTextFont(fonts[ i ])
+end
 
 -- Makes LuaPerfCounter text draggable
-lpc:Attach(Create("Draggable", ""))
+--lpc:Attach(Create("Draggable", ""))
 
-DebugPrintComponentTree()
+--DebugPrintComponentTree()

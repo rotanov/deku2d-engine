@@ -45,7 +45,7 @@ namespace Deku2D
 			D2D_DECLARE_PROPERTY_INFO_EX(CResource, string, Filename, SetLoadSource, GetFilename)
 
 			D2D_DECL_DERIVED_TYPE_INFO(CFont, CResource)
-				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CFont, CBox, Boxex, SetBox, GetBox, GetBoxCount)
+				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CFont, CBox, Boxes, SetBox, GetBox, GetBoxCount)
 
 			D2D_DECL_DERIVED_TYPE_INFO(CScript, CResource)
 				D2D_DECLARE_PROPERTY_INFO(CScript, string, ScriptText)
