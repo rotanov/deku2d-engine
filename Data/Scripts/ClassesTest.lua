@@ -1,5 +1,7 @@
 A = GameObject:Derive()
 
+-- OnCreate is a handler of GameObject itself creation
+
 function A:OnCreate()
 	self.depth = 1
 	self.life = 5
@@ -7,9 +9,19 @@ function A:OnCreate()
 	self:Subscribe("EveryFrame")
 end
 
-function A:OnAttached()
+-- OnPrototypeInstantiate is executed when prototype is completely instantiated
+
+function A:OnPrototypeInstantiate()
 	self.model:SetColor(1, 0, 0, 1)
 end
+
+-- And OnAttached is executed even later - when a prototype instance is attached to another object
+
+function A:OnAttached()
+	self.model:SetColor(0, 1, 0, 1)
+end
+
+-- So, model color in this demo should be green, not red
 
 function A:OnEveryFrame()
 	-- Here until order of attach and creation will not be Ok.

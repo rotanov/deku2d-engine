@@ -1,25 +1,20 @@
 #ifndef CCODEEDITORWIDGET_H
 #define CCODEEDITORWIDGET_H
 
-#include <QWidget>
+#include "CEditorWidget.h"
 
-#include <QPlainTextEdit>
+class QsciScintilla;
 
-class QSyntaxHighlighter;
-
-class CCodeEditorWidget : public QWidget
+class CCodeEditorWidget : public CEditorWidget
 {
 Q_OBJECT
 public:
-	explicit CCodeEditorWidget(QWidget *parent = 0);
+	explicit CCodeEditorWidget(CAbstractEditor *AEditor);
 
-signals:
+	QsciScintilla *SCI;
 
-public slots:
-
-private:
-	QPlainTextEdit *TextEdit;
-	QSyntaxHighlighter *SyntaxHighlighter;
+protected:
+	void focusInEvent(QFocusEvent *AEvent);
 
 };
 

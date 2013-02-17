@@ -54,15 +54,22 @@ namespace Deku2D
 		CGameObject* GetObjectByLocalName(const string &AName);
 		unsigned GetChildCount();
 
+		CGameObject* FindPrototype();
+
+		void AddLocalName(const string &ALocalName, CGameObject *AChild);
+
 		CGameObject* FindFirstOfClass(const string &AClassName, bool ExceedPrototype = false);
 
 		bool IsActive() const;
 		void SetActive(bool AActive);
 
+		bool IsEnabled() const;
+		void SetEnabled(bool AEnabled);
+
 		bool IsPrototype() const;
 
 		virtual void Deserialize(CXMLNode *AXML);
-		void FinalizeCreation();
+		virtual void FinalizeCreation();
 		void ProcessEvent(const CEvent &AEvent);
 		CScript* GetScript() const;
 		void SetScript(CScript *AScript);
@@ -94,24 +101,31 @@ namespace Deku2D
 			return AObject;
 		}
 
+		bool Created;
+
 	private:
 
 		static void _DestroySubtree(CGameObject *NextObject);
-		CGameObject* FindPrototype();
-		void UpdateParentAndProtoFields();
 		void CreateLuaObject();
+		void DestroyLuaObject();
 
 		CGameObject *Parent;
 		CAbstractScene *Scene;
 		CScript *Script;
 		ChildrenContainer Children;
 		bool Prototype;
-		bool Created;
+
+		// don't mix these two:
+		// 	Active - means that an object is participating in current tree iteration,
+		// 		it's internal flag that is rewritten on every iteration and should not be changed by general public
+		// 	Enabled - is the flag that provides an ability to enable/disable an object unconditionally,
+		// 		can be used anywhere by anyone
+
 		bool Active;
+		bool Enabled;
 
 		// not used
-		bool Dead;	
-		bool Enabled;
+		bool Dead;
 
 		friend class CFactory;
 	};

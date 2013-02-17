@@ -174,19 +174,38 @@ namespace Deku2D
 	CDefaultTitleScreen::CDefaultTitleScreen()
 	{
 		SetName("DefaultTitleScreen");
+	}
 
-		TextDeku = Factory->New<CText>();
-		TextTeam = Factory->New<CText>();
+	void CDefaultTitleScreen::SetTexture(CTexture* ATexture)
+	{
+		assert(ATexture != NULL);
+		SetModel(CRenderManager::CreateModelBox(256, 256, MODEL_TYPE_TRIANGLES, ATexture));
+	}
+
+	void CDefaultTitleScreen::ProcessEvent(const CEvent &AEvent)
+	{
+		if (AEvent.GetName() != "WindowResize")
+			return;
+		if (this->GetParent() != NULL)
+			static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(GLWindow->GetSize() * 0.5f);
+	}
+
+	void CDefaultTitleScreen::FinalizeCreation()
+	{
+		CRenderableComponent::FinalizeCreation();
+
+		TextDeku = Factory->CreateComponent<CText>();
+		TextTeam = Factory->CreateComponent<CText>();
 
 		EventManager->Subscribe("WindowResize", this);
-		CPlaceableComponent *tempPlacing = Factory->New<CPlaceableComponent>();
+		CPlaceableComponent *tempPlacing = Factory->CreateComponent<CPlaceableComponent>();
 		int ScrWidth = GLWindow->GetWidth();
 		int ScrHeight = GLWindow->GetHeight();
 		tempPlacing->SetPosition(Vector2(ScrWidth * 0.5f, ScrHeight * 0.5f));
 		CEngine::Instance()->RootGameObject->Attach(tempPlacing);
 		tempPlacing->Attach(this);
-		CPlaceableComponent *DekuTextPlacing = Factory->New<CPlaceableComponent>();
-		CPlaceableComponent *TeamTextPlacing = Factory->New<CPlaceableComponent>();
+		CPlaceableComponent *DekuTextPlacing = Factory->CreateComponent<CPlaceableComponent>();
+		CPlaceableComponent *TeamTextPlacing = Factory->CreateComponent<CPlaceableComponent>();
 		tempPlacing->Attach(DekuTextPlacing);
 		tempPlacing->Attach(TeamTextPlacing);
 		DekuTextPlacing->Attach(TextDeku);
@@ -197,20 +216,6 @@ namespace Deku2D
 		TeamTextPlacing->SetScaling(2);
 		TextDeku->SetText("Deku");
 		TextTeam->SetText("Team");
-	}
-
-	void CDefaultTitleScreen::SetTexture(CTexture* ATexture)
-	{
-		assert(ATexture != NULL);
-		SetModel(CRenderManager::CreateModelBox(256, 256, MODEL_TYPE_TRIANGLES, ATexture));
-	}
-
-	void CDefaultTitleScreen::ProcessEvent( const CEvent &AEvent )
-	{
-		if (AEvent.GetName() != "WindowResize")
-			return;
-		if (this->GetParent() != NULL)
-			static_cast<CPlaceableComponent*>(this->GetParent())->SetPosition(GLWindow->GetSize() * 0.5f);
 	}
 
 }	//	namespace Deku2D

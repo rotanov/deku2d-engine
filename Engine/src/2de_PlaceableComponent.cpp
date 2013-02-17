@@ -5,7 +5,7 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CPlaceableComponent
-	CPlaceableComponent::CPlaceableComponent() : Box(), doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false), Transformation()
+	CPlaceableComponent::CPlaceableComponent() : doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false)
 	{
 		ClassName = "PlaceableComponent";
 	}

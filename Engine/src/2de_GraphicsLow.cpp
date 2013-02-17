@@ -30,12 +30,22 @@ namespace Deku2D
 	{
 	public:
 
+		bool ShouldVisit(CPlaceableComponent &Placing)
+		{
+			return false;
+		}
+
 		void VisitOnEnter(CPlaceableComponent &Placing)
 		{
 		}
 
 		void VisitOnLeave(CPlaceableComponent &Placing)
 		{
+		}
+
+		bool ShouldVisit(CRenderableComponent &Graphics)
+		{
+			return Graphics.IsActive();
 		}
 
 		void VisitOnEnter(CRenderableComponent &Graphics)
@@ -49,6 +59,11 @@ namespace Deku2D
 
 		}
 
+		bool ShouldVisit(CDebugBoxComponent &DebugBox)
+		{
+			return DebugBox.IsActive();
+		}
+
 		void VisitOnEnter(CDebugBoxComponent &DebugBox)
 		{
 			RenderManager->Renderer->PushModel(DebugBox.WorldTransform,
@@ -60,31 +75,50 @@ namespace Deku2D
 		}
 	};
 
-	class CUpdateVisitor : virtual public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
+	class CUpdateVisitor : virtual public IVisitorBase, public IVisitor<CGameObject>, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
 	{
 	public:
 		CBox UpwayBox;
 		stack<CPlaceableComponent *> LPPStack; // Last Placeable Parent
 
+		bool ShouldVisit(CGameObject &Object)
+		{
+			return true;
+		}
+
+		void VisitOnEnter(CGameObject &Object)
+		{
+			Object.SetActive(Object.IsEnabled() && !Object.isDestroyed());
+		}
+
+		void VisitOnLeave(CGameObject &Object)
+		{
+
+		}
+
+		bool ShouldVisit(CPlaceableComponent &Placing)
+		{
+			return true;
+		}		
+
 		void VisitOnEnter(CPlaceableComponent &Placing)
 		{
-			if (!Placing.isDestroyed() && SceneManager->InScope(Placing.GetScene()))
-			{
-				RenderManager->Transformator.PushTransformation(Placing.GetTransformation());
-				Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
-					std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
-			}
-			Placing.SetActive(true);
-			if (Placing.isDestroyed() || !SceneManager->InScope(Placing.GetScene()))
-				Placing.SetActive(false);
-			if (Placing.IsActive())
-				LPPStack.push(&Placing);
+			Placing.SetActive(Placing.IsEnabled() && !Placing.isDestroyed() &&
+				SceneManager->InScope(Placing.GetScene()));
+			if (!Placing.IsActive())
+				return;
+
+			RenderManager->Transformator.PushTransformation(Placing.GetTransformation());
+			Placing.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+			LPPStack.push(&Placing);
 		}
 
 		void VisitOnLeave(CPlaceableComponent &Placing)
 		{
 			if (!Placing.IsActive())
 				return;
+
 			assert(&Placing == LPPStack.top());
 			CBox newBox = Placing.GetBox();
 			LPPStack.pop();
@@ -95,23 +129,28 @@ namespace Deku2D
 			}
 		}
 
+		bool ShouldVisit(CRenderableComponent &Graphics)
+		{
+			return true;
+		}
+
 		void VisitOnEnter(CRenderableComponent &Graphics)
 		{
-			if (Graphics.GetVisibility() && !Graphics.isDestroyed() &&
-					SceneManager->InScope(Graphics.GetScene()))
-			{
-				Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
-					std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
-				Graphics.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
-			}
-			Graphics.SetActive(true);
-			// if (/*!Graphics.GetVisibility() ||*/ Graphics.isDestroyed() || !SceneManager->InScope(Graphics.GetScene()))
-			if (!Graphics.GetVisibility() || Graphics.isDestroyed() || !SceneManager->InScope(Graphics.GetScene()))
-				Graphics.SetActive(false);
+			Graphics.SetActive(Graphics.IsEnabled() && Graphics.GetVisibility() &&
+				!Graphics.isDestroyed() && SceneManager->InScope(Graphics.GetScene()));
+			if (!Graphics.IsActive())
+				return;
+
+			Graphics.SetBox(CBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
+				std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+			Graphics.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
 		}
 
 		void VisitOnLeave(CRenderableComponent &Graphics)
 		{
+			if (!Graphics.IsActive())
+				return;
+
 			if (LPPStack.size() == 0)
 				return;
 			CBox newBox = Graphics.GetBox();
@@ -121,16 +160,19 @@ namespace Deku2D
 			CEngine::Instance()->SpatialManager->PushBox(&Graphics, newBox);
 		}
 
+		bool ShouldVisit(CDebugBoxComponent &DebugBox)
+		{
+			return true;
+		}
+		
 		void VisitOnEnter(CDebugBoxComponent &DebugBox)
 		{
-			if (DebugBox.GetVisibility() && !DebugBox.isDestroyed() &&
-				SceneManager->InScope(DebugBox.GetScene()))
-			{
-				DebugBox.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
-			}
-			DebugBox.SetActive(true);
-			if (!DebugBox.GetVisibility() || DebugBox.isDestroyed() || !SceneManager->InScope(DebugBox.GetScene()))
-				DebugBox.SetActive(false);
+			DebugBox.SetActive(DebugBox.IsEnabled() && DebugBox.GetVisibility() &&
+				!DebugBox.isDestroyed() && SceneManager->InScope(DebugBox.GetScene()));
+			if (!DebugBox.IsActive())
+				return;
+
+			DebugBox.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
 		}
 
 		void VisitOnLeave(CDebugBoxComponent &DebugBox)
@@ -318,7 +360,7 @@ namespace Deku2D
 
 		GLInit();
 
-		EventManager->TriggerEvent(new CEvent("WindowResize", NULL));
+		EventManager->TriggerEvent("WindowResize", NULL);
 
 		return isCreated = true;
 	}

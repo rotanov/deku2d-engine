@@ -44,7 +44,6 @@ namespace Deku2D
 		bool CallFunction(const string &AFunctionName);
 		bool CallMethodFunction(const string &AObjectName, const string &AFunctionName);
 		void CreateLuaObject(const string &AClassName, const string &AName, CObject *AObject);
-		void SetLocalNamesFields(CGameObject *AGameObject);
 		void SetReferenceField(CObject *AObject, const string &AFieldName, CObject *AReference);
 		void DestroyLuaObject(const CGameObject &AObject);
 		void PushEventTable(const CEvent &AEvent);

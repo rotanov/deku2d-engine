@@ -18,15 +18,7 @@ namespace Deku2D
 	{
 	public:
 		typedef CObject* (CFactory::*TNewFunction)(const string &);
-		struct CClassDescription
-		{
-			CClassDescription(TNewFunction ANewFunction = NULL, bool AIsComponent = false) : NewFunction(ANewFunction), IsComponent(AIsComponent)
-			{
-			}
-			TNewFunction NewFunction;
-			bool IsComponent;
-		};
-		typedef map<string, CClassDescription> ClassesContainer;
+		typedef map<string, TNewFunction> ComponentsContainer;
 		typedef map<string, int> UsedPrototypesContainer;
 
 		template<typename T>
@@ -35,7 +27,14 @@ namespace Deku2D
 		template<typename T>
 		T* New();
 
-		CObject* CreateByName(const string &AClassName, const string &AName, UsedPrototypesContainer *UsedPrototypes = NULL);
+		CGameObject* CreateGameObject(const string &AClassName, const string &AName = "", bool AFinalizeCreation = true);
+
+		CGameObject* CreateComponent(const string &AClassName, const string &AName = "", bool AFinalizeCreation = true);
+
+		template<typename T>
+		T* CreateComponent(const string &AName = "");
+
+		CGameObject* InstantiatePrototype(const string &AProtoName, const string &AName = "");
 
 		template<typename T>
 		bool Add(T *AObject, const string &AName = "");
@@ -51,7 +50,7 @@ namespace Deku2D
 		void CleanUp();
 		void DestroyAll();
 
-		bool IsClassExists(const string &AName);
+		bool IsComponentExists(const string &AClassName);
 
 	protected:
 		typedef map<string, CObject *> ObjectsContainer;
@@ -61,13 +60,17 @@ namespace Deku2D
 		~CFactory();
 		friend class CTSingleton<CFactory>;
 
-		void AddClass(const string &AClassName, TNewFunction ANewFunctionPointer, bool AIsComponent = true);
+		void AddComponent(const string &AClassName, TNewFunction ANewFunctionPointer);
 
-		void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, UsedPrototypesContainer *UsedPrototypes, CGameObject *CurrentProto);
+		void TraversePrototypeNode(CXMLNode *ANode, CGameObject *AObject, CGameObject *CurrentProto);
 
 		CXMLNode* GetPrototypeXML(const string &AName);
-		CObject* CreateClassInstance(const string &AClassName, const string &AName);
 		CGameObject* TryUseCachedPrototype(const string &AClassName, const string &AName);
+
+		void SetRecursionLimit(const string &AProtoName, int ARecursionLimit);
+		int GetRecursionsLeft(const string &AProtoName);
+		void IncreaseUsedCount(const string &AProtoName);
+		void DecreaseUsedCount(const string &AProtoName);		
 
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 		void InsertDebugInfo( CObject* Source );
@@ -76,11 +79,12 @@ namespace Deku2D
 		template<typename T>
 		CObject* InternalNew(const string &AName);
 
-		ClassesContainer Classes;
+		ComponentsContainer Components;
 		ObjectsContainer Objects;
 		queue<CObject *> Deletion;
 		map<string, CGameObject *> CachedProtos;
-
+		UsedPrototypesContainer UsedPrototypes;
+		
 	};
 
 	static CTSingleton<CFactory> Factory;
@@ -122,6 +126,14 @@ namespace Deku2D
 
 	#endif
 
+		return result;
+	}
+
+	template<typename T>
+	T* CFactory::CreateComponent(const string &AName /*= ""*/)
+	{
+		T *result = New<T>(AName);
+		result->FinalizeCreation();
 		return result;
 	}
 

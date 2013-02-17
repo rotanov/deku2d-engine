@@ -357,9 +357,9 @@ namespace Deku2D
 		}
 		LuaVirtualMachine->RunScript(mainScript);	
 
-		RootGameObject = dynamic_cast<CPlaceableComponent *>(Factory->CreateByName("PlaceableComponent", "Root"));
+		RootGameObject = Factory->CreateComponent<CPlaceableComponent>("Root");
 
-		CGameObject* Cursor = dynamic_cast<CGameObject*>(Factory->CreateByName("MouseProto", "Mouse cursor"));
+		CGameObject* Cursor = Factory->InstantiatePrototype("MouseProto", "Mouse cursor");
 		if (Cursor != NULL)
 			RootGameObject->Attach(Cursor);
 		else
@@ -369,9 +369,9 @@ namespace Deku2D
 		//Here goes high level initializations, like default scene as title screen
 		//and FPSText
 		// TODO: hide it somewhere..
-		CPlaceableComponent *FPSTextPlacing = Factory->New<CPlaceableComponent>();
+		CPlaceableComponent *FPSTextPlacing = Factory->CreateComponent<CPlaceableComponent>();
 		FPSTextPlacing->GetTransformation().SetTranslation(Vector2(200.0f, 300.0f));
-		FPSText = Factory->New<CText>("FPSText");
+		FPSText = Factory->CreateComponent<CText>("FPSText");
 		FPSText->SetText("FPS: 0");
 		FPSTextPlacing->SetLayer(512);
 		RootGameObject->Attach(FPSTextPlacing);
@@ -387,8 +387,8 @@ namespace Deku2D
 		CAbstractScene *TitleScreen = SceneManager->CreateScene();
 		SceneManager->SetCurrentScene(TitleScreen);
 
-		// Создание класса CDefaultTutleScreen (в текущей сцене)
-		CDefaultTitleScreen *Tscn = Factory->New<CDefaultTitleScreen>("TitleScreenClassForInst");
+		// Создание класса CDefaultTutleScreen (в текущей сцене) - it's broken
+		CDefaultTitleScreen *Tscn = Factory->CreateComponent<CDefaultTitleScreen>("TitleScreenClassForInst");
 		Tscn->SetTexture(TitleScreenShroomTexture);
 		
 		if (!StateHandler->OnInitialize())
@@ -436,19 +436,17 @@ namespace Deku2D
 
 					if (!Keys[keysym.sym])
 					{
-						CEvent *e = new CEvent;
-						e->SetName("KeyDown");
-						e->SetData("Char", TempChar);
-						e->SetData("Sym", keysym.sym);
-						e->SetData("Modifiers", keysym.mod);
+						CEvent e("KeyDown", NULL);
+						e.SetData("Char", TempChar);
+						e.SetData("Sym", keysym.sym);
+						e.SetData("Modifiers", keysym.mod);
 						EventManager->TriggerEvent(e);
 					}
 
-					CEvent *e = new CEvent;
-					e->SetName("KeyPress");
-					e->SetData("Char", TempChar);
-					e->SetData("Sym", keysym.sym);
-					e->SetData("Modifiers", keysym.mod);
+					CEvent e("KeyPress", NULL);
+					e.SetData("Char", TempChar);
+					e.SetData("Sym", keysym.sym);
+					e.SetData("Modifiers", keysym.mod);
 					EventManager->TriggerEvent(e);
 
 					Keys[keysym.sym] = true;
@@ -462,11 +460,10 @@ namespace Deku2D
 					char TempChar = TranslateKeyFromUnicodeToChar(event);
 					SDL_keysym keysym = event.key.keysym;				
 
-					CEvent *e = new CEvent;
-					e->SetName("KeyUp");
-					e->SetData("Char", TempChar);
-					e->SetData("Sym", keysym.sym);
-					e->SetData("Modifiers", keysym.mod);
+					CEvent e("KeyUp", NULL);
+					e.SetData("Char", TempChar);
+					e.SetData("Sym", keysym.sym);
+					e.SetData("Modifiers", keysym.mod);
 					EventManager->TriggerEvent(e);
 
 					Keys[keysym.sym] = 0;
@@ -474,31 +471,31 @@ namespace Deku2D
 				}
 				case SDL_MOUSEBUTTONDOWN:
 				{
-					CEvent *e = new CEvent("MouseDown", NULL);
-					e->SetData("X", MousePosition.x);
-					e->SetData("Y", MousePosition.y);
-					e->SetData("Button", event.button.button);
-					e->SetData("Modifiers", SDL_GetModState());
+					CEvent e("MouseDown", NULL);
+					e.SetData("X", MousePosition.x);
+					e.SetData("Y", MousePosition.y);
+					e.SetData("Button", event.button.button);
+					e.SetData("Modifiers", SDL_GetModState());
 					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_MOUSEBUTTONUP:
 				{
-					CEvent *e = new CEvent("MouseUp", NULL);
-					e->SetData("X", MousePosition.x);
-					e->SetData("Y", MousePosition.y);
-					e->SetData("Button", event.button.button);
-					e->SetData("Modifiers", SDL_GetModState());
+					CEvent e("MouseUp", NULL);
+					e.SetData("X", MousePosition.x);
+					e.SetData("Y", MousePosition.y);
+					e.SetData("Button", event.button.button);
+					e.SetData("Modifiers", SDL_GetModState());
 					EventManager->TriggerEvent(e);
 					break;
 				}
 				case SDL_MOUSEMOTION:
 				{
 					MousePosition = Vector2(event.motion.x, GLWindow->GetHeight() - event.motion.y);
-					CEvent *e = new CEvent("MouseMove", NULL);
-					e->SetData("X", MousePosition.x);
-					e->SetData("Y", MousePosition.y);
-					e->SetData("Modifiers", SDL_GetModState());
+					CEvent e("MouseMove", NULL);
+					e.SetData("X", MousePosition.x);
+					e.SetData("Y", MousePosition.y);
+					e.SetData("Modifiers", SDL_GetModState());
 					EventManager->TriggerEvent(e);
 					break;
 				}

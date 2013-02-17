@@ -23,7 +23,7 @@ CGridGame::CGridGame()
 {
 	GLWindow->Resize(320, 340);
 
-	Grid = static_cast<CGameObject*>(Factory->CreateByName("GridProto", "LinesGrid"));
+	Grid = Factory->InstantiatePrototype("GridProto", "LinesGrid");
 	CEngine::Instance()->RootGameObject->Attach(Grid);
 
 	static_cast<CRenderableComponent*>(Grid->GetChild(0)->GetChild(0))->SetColor(RGBAf(.6f, 0.6f, 0.8f, 1.0f));
@@ -441,7 +441,7 @@ bool CGridGame::CCell::isClear()
 
 void CGridGame::CCell::MakeVisualPart()
 {
-	VisualPart = static_cast<CGameObject*>(Factory->CreateByName("BallProto", ""));
+	VisualPart = Factory->InstantiatePrototype("BallProto");
 	static_cast<CPlaceableComponent*>(VisualPart->GetChild(0))->SetPosition
 		(
 			Vector2

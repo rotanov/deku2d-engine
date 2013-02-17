@@ -35,7 +35,7 @@ CLuaConsole::CLuaConsole()
 	//CommandLineEdit = Factory->New<CEdit>("CommandLineEdit");
 	//CommandLineEdit->SetBox(CBox(10, 30, GLWindow->GetWidth() - 20, 30));
 
-	CommandLineEdit = dynamic_cast<CGameObject *>(Factory->CreateByName("TempEdit", "CommandLineEdit"));
+	CommandLineEdit = Factory->InstantiatePrototype("TempEdit", "CommandLineEdit");
 	CEngine::Instance()->RootGameObject->Attach(CommandLineEdit);
 
 	CommandOutput = Factory->New<CText>("CommandOutput");

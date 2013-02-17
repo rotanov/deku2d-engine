@@ -30,27 +30,42 @@ public:
 
 	void ProcessEvent(const Deku2D::CEvent &AEvent)
 	{
-		if (AEvent.GetName() == "KeyDown" && AEvent.GetData<Uint16>("Sym") == SDLK_SPACE)
+		if (AEvent.GetName() == "KeyDown")
 		{
-			if (Deku2D::GLWindow->GetFullscreen())
+			Uint16 sym = AEvent.GetData<Uint16>("Sym");
+			if (sym == SDLK_SPACE)
 			{
-				Deku2D::GLWindow->SetFullscreen(false);
-				Deku2D::GLWindow->SetSize(640, 480);
-				Deku2D::GLWindow->Initialize();
+				if (Deku2D::GLWindow->GetFullscreen())
+				{
+					Deku2D::GLWindow->SetFullscreen(false);
+					Deku2D::GLWindow->SetSize(640, 480);
+					Deku2D::GLWindow->Initialize();
+				}
+				else
+				{
+					/*GLWindow->SetSize(2048, 1152);
+					GLWindow->SetFullscreen(true);*/
+					Deku2D::GLWindow->SetVideoMode(Deku2D::GLWindow->GetDesktopVideoMode());
+				}
 			}
-			else
+			else if (sym == SDLK_e)
 			{
-				/*GLWindow->SetSize(2048, 1152);
-				GLWindow->SetFullscreen(true);*/
- 				Deku2D::GLWindow->SetVideoMode(Deku2D::GLWindow->GetDesktopVideoMode());
+				Deku2D::CGameObject *obj = Deku2D::Factory->Get<Deku2D::CGameObject>("Mouse cursor");
+				obj->SetEnabled(!obj->IsEnabled());
 			}
-		}
-		else if (AEvent.GetName() == "KeyDown" && AEvent.GetData<Uint16>("Sym") == SDLK_d)
-		{
-			//Deku2D::SerializeObjectToXml(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.xml");
-			//Deku2D::SerializeObjectToJSON(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.json");
-			Deku2D::Serialization::ToJSON(Deku2D::CEngine::Instance()->RootGameObject, "CObject", "rootdump.json");
-			//Deku2D::DeserializeObjectFromJSON("rootdump.json");
+			else if (sym == SDLK_v)
+			{
+				Deku2D::CRenderableComponent *obj = Deku2D::Factory->Get<Deku2D::CRenderableComponent>("FPSText");
+				obj->SetVisibility(!obj->GetVisibility());
+
+			}
+			else if (sym == SDLK_d)
+			{
+				//Deku2D::SerializeObjectToXml(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.xml");
+				//Deku2D::SerializeObjectToJSON(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.json");
+				Deku2D::Serialization::ToJSON(Deku2D::CEngine::Instance()->RootGameObject, "CObject", "rootdump.json");
+				//Deku2D::DeserializeObjectFromJSON("rootdump.json");
+			}
 		}
 	}
 

@@ -26,6 +26,7 @@ namespace Deku2D
 	class IVisitor : virtual public IVisitorBase
 	{
 	public:
+		virtual bool ShouldVisit(T&) = 0;
 		virtual void VisitOnEnter(T&) = 0;
 		virtual void VisitOnLeave(T&) = 0;
 	};
@@ -72,7 +73,8 @@ namespace Deku2D
 		{
 			if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
 			{
-				return ptr->VisitOnEnter(visited);
+				if (ptr->ShouldVisit(visited))
+					ptr->VisitOnEnter(visited);
 			}
 		}
 
@@ -81,7 +83,8 @@ namespace Deku2D
 		{
 			if (IVisitor<T>* ptr = dynamic_cast<IVisitor<T>*>(&visitor))
 			{
-				return ptr->VisitOnLeave(visited);
+				if (ptr->ShouldVisit(visited))
+					ptr->VisitOnLeave(visited);
 			}
 		}
 	};

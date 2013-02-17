@@ -7,9 +7,10 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// CTimerComponent
 
-	CTimerComponent::CTimerComponent(float AInterval /*= 0.0f*/) : Enabled(false), Interval(AInterval), Accumulated(0.0f)
+	CTimerComponent::CTimerComponent() : Accumulated(0.0f)
 	{
 		ClassName = "TimerComponent";
+		SetEnabled(false);
 	}
 
 	CTimerComponent* CTimerComponent::Clone(const string &ACloneName /*= ""*/) const
@@ -24,26 +25,25 @@ namespace Deku2D
 			Accumulated += CEngine::Instance()->GetDeltaTime();
 			if (Accumulated >= Interval)
 			{
-				CEvent *TimerTickEvent = new CEvent("TimerTick", this);
-				TimerTickEvent->SetData("Name", GetName());
-				EventManager->TriggerEvent(TimerTickEvent);
+				CEvent timerTickEvent("TimerTick", this);
+				timerTickEvent.SetData("Name", GetName());
+				EventManager->TriggerEvent(timerTickEvent);
 				Accumulated = 0.0f;
 			}
 		}
 	}
 
-	bool CTimerComponent::isEnabled() const
-	{
-		return Enabled;
-	}
-
 	void CTimerComponent::SetEnabled(bool AEnabled)
 	{
-		Enabled = AEnabled;
-		if (Enabled)
-			EventManager->Subscribe("EveryFrame", this);
-		else
-			EventManager->Unsubscribe("EveryFrame", this);
+		CGameObject::SetEnabled(AEnabled);
+
+		if (Created)
+		{
+			if (IsEnabled())
+				EventManager->Subscribe("EveryFrame", this);
+			else
+				EventManager->Unsubscribe("EveryFrame", this);
+		}
 
 		Accumulated = 0.0f;
 	}
@@ -67,11 +67,14 @@ namespace Deku2D
 		{
 			SetInterval(from_string<float>(AXML->GetAttribute("Interval")));
 		}
-
-		if (AXML->HasAttribute("Enabled"))
-		{
-			SetEnabled(from_string<bool>(AXML->GetAttribute("Enabled")));
-		}
 	}
+
+	void CTimerComponent::FinalizeCreation()
+	{
+		CGameObject::FinalizeCreation();
+
+		if (IsEnabled())
+			EventManager->Subscribe("EveryFrame", this);
+	}	
 
 }	// namespace Deku2D
