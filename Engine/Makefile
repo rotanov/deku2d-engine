@@ -18,17 +18,23 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_LuaUtils.cpp \
 			src/2de_Math.cpp \
 			src/2de_Matrix2.cpp \
+			src/2de_Object.cpp \
 			src/2de_PlaceableComponent.cpp \
 			src/2de_Physics.cpp \
+			src/2de_Property.cpp \
 			src/2de_Prototype.cpp \
+			src/2de_Registration.cpp \
 			src/2de_RenderableComponent.cpp \
 			src/2de_Resource.cpp \
 			src/2de_RTTI.cpp \
+			src/2de_Serialization.cpp \
 			src/2de_ShroomTitle.cpp \
 			src/2de_SpatialManager.cpp \
 			src/2de_Sound.cpp \
+			src/2de_Storage.cpp \
 			src/2de_Text.cpp \
 			src/2de_TimerComponent.cpp \
+			src/2de_TypeInfo.cpp \
 			src/2de_Vector3.cpp \
 			src/2de_Xml.cpp
 
@@ -52,17 +58,23 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_LuaUtils.o \
 			obj/2de_Math.o \
 			obj/2de_Matrix2.o \
+			obj/2de_Object.o \
 			obj/2de_PlaceableComponent.o \
 			obj/2de_Physics.o \
+			obj/2de_Property.o \
 			obj/2de_Prototype.o \
+			obj/2de_Registration.o \
 			obj/2de_RenderableComponent.o \
 			obj/2de_Resource.o \
 			obj/2de_RTTI.o \
+			obj/2de_Serialization.o \
 			obj/2de_ShroomTitle.o \
 			obj/2de_SpatialManager.o \
 			obj/2de_Sound.o \
+			obj/2de_Storage.o \
 			obj/2de_Text.o \
 			obj/2de_TimerComponent.o \
+			obj/2de_TypeInfo.o \
 			obj/2de_Vector3.o \
 			obj/2de_Xml.o
 

@@ -2,10 +2,11 @@
 #define _2DE_XML_H_
 
 #include "2de_Core.h"
+#include "2de_Storage.h"
 
 namespace Deku2D
 {
-	class CXMLNode; // forward declaration
+	class CXMLNode;
 
 	/**
 	* CXMLChildrenList - a class that represents XML-node children list.
@@ -153,7 +154,7 @@ namespace Deku2D
 
 		virtual bool HasAttribute(const string &AName) const;
 		virtual string GetAttribute(const string &AName) const;
-		string SafeGetAttribute(const string &AName, const string &ADefault = "") const;
+		string SafeGetAttribute(const string &AName, const string &ADefault = "") const;		
 		virtual void SetAttribute(const string &AName, const string &AValue);
 		virtual void DeleteAttribute(const string &AName);
 

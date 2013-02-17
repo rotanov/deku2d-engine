@@ -19,6 +19,7 @@ namespace Deku2D
 		bool Load();
 		void Unload();
 		string GetScriptText() const;
+		void SetScriptText(const string& _scriptText) {};	// TODO: stub
 		void SetRunned();
 		bool IsRunned();
 

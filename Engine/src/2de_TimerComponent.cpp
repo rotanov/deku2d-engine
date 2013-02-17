@@ -75,6 +75,6 @@ namespace Deku2D
 
 		if (IsEnabled())
 			EventManager->Subscribe("EveryFrame", this);
-	}
+	}	
 
 }	// namespace Deku2D

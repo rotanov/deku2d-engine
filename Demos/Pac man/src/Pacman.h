@@ -10,6 +10,8 @@ const int LEVEL_HEIGHT = 16;
 const float DEFAULT_VELOCITY = 100.0f;
 const Vector2 DEFAULT_POSITION = Vector2(96.0f, 96.0f);
 
+/* for intelisense errors not to disturb my eyesight.
+
 class CPacmanPlayer : public CUpdatable
 {
 public:
@@ -74,5 +76,7 @@ public:
 
 	void Update(float dt);
 };
+
+*/
 
 #endif	//	_PACMAN_H_

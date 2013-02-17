@@ -4,6 +4,7 @@
 #include "2de_Core.h"
 #include "2de_Factory.h"
 #include "2de_Xml.h"
+#include "2de_TypeInfo.h"
 
 namespace Deku2D
 {
@@ -18,6 +19,8 @@ namespace Deku2D
 		virtual ~CResourceSectionLoaderBase();
 		virtual bool Load(CXML *ResourceList) = 0;
 		string GetName() const;
+
+		std::vector<std::pair<std::string, std::string> > ResourceNames;
 
 	protected:
 		string Name;
@@ -81,6 +84,8 @@ namespace Deku2D
 
 	class CResource : public CObject
 	{
+		D2D_INJECT_TYPE_INFO(CResource);
+
 	public:
 		enum ELoadSource
 		{
@@ -189,13 +194,14 @@ namespace Deku2D
 		string GetDataPath() const;
 		void SetDataPath(const string &ADataPath);
 
+		list<CResourceSectionLoaderBase*> SectionsLoaders;
+
 	protected:
 		CResourceManager();
 		~CResourceManager();
 		friend class CTSingleton<CResourceManager>;
 
-	private:
-		list<CResourceSectionLoaderBase *> SectionsLoaders;
+	private:		
 		set<CResource *> UnloadQueue;
 		CDataLister DataLister;
 		CXML *ResourceList;
@@ -262,7 +268,11 @@ namespace Deku2D
 				continue;
 			}
 
-			Resource->SetLoadSource(ResNode->Children.First()->GetValue());
+			std::string filepath = ResNode->Children.First()->GetValue();
+
+			ResourceNames.push_back(std::make_pair(ResName, filepath));
+
+			Resource->SetLoadSource(filepath);
 		}
 
 		return true;

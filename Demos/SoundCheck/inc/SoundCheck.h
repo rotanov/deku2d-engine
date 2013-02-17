@@ -2,9 +2,9 @@
 #define _SOUND_CHECK_H
 
 #include "2de_Engine.h"
-#include "2de_Gui.h"
+//#include "2de_Gui.h"
 using namespace Deku2D;
-
+/*
 class CSoundObject : public CObject
 {
 public:
@@ -128,5 +128,5 @@ class CSoundCheck : public CObject
 	CHelpText HelpText;
 	CLoadFileGUI LoadFileGUI;
 };
-
+*/
 #endif // _SOUND_CHECK_H

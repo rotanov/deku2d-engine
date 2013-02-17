@@ -37,7 +37,7 @@ namespace Deku2D
 		if (IsComponentExists(AClassName))
 			result = CreateComponent(AClassName, AName, AFinalizeCreation);
 		else
-			result = InstantiatePrototype(AClassName, AName);
+			result = InstantiatePrototype(AClassName, AName);		
 
 		return result;
 	}

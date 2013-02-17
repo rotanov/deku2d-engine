@@ -5,6 +5,7 @@
 #include "2de_Event.h"
 #include "2de_GraphicsLow.h"
 #include "2de_LuaUtils.h"
+#include "2de_Visitor.h"
 
 namespace Deku2D
 {
@@ -17,11 +18,12 @@ namespace Deku2D
 	* CGameObject - the base class for all components.
 	*/
 
-	class CGameObject : public IVisitableObject<>
+	class CGameObject : public IVisitableObject
 	{
-	public:	
-		D2D_DECLARE_VISITABLE()
+		D2D_INJECT_TYPE_INFO(CGameObject);
+		D2D_DECLARE_VISITABLE();
 
+	public:	
 		typedef map<string, CGameObject*> LNOMType;	// ???
 		LNOMType LocalNameObjectMapping; // ???
 
@@ -80,6 +82,13 @@ namespace Deku2D
 	// 	void SetDead();
 	//	virtual void Update(float dt) = 0;
 
+		typedef vector<CGameObject *> ChildrenContainer;
+		typedef ChildrenContainer::iterator ChildrenIterator;
+		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
+
+		void SetChildren( const ChildrenContainer& ) { throw "pizdec"; }
+		ChildrenContainer GetChildren() const { throw "pizdec"; }
+
 	protected:
 		CGameObject(const CGameObject &AGameObject);
 
@@ -95,9 +104,6 @@ namespace Deku2D
 		bool Created;
 
 	private:
-		typedef vector<CGameObject *> ChildrenContainer;
-		typedef ChildrenContainer::iterator ChildrenIterator;
-		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
 
 		static void _DestroySubtree(CGameObject *NextObject);
 		void CreateLuaObject();
@@ -119,7 +125,7 @@ namespace Deku2D
 		bool Enabled;
 
 		// not used
-		bool Dead;	
+		bool Dead;
 
 		friend class CFactory;
 	};

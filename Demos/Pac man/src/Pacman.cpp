@@ -1,6 +1,8 @@
 #include "Pacman.h"
 using namespace Deku2D;
 
+/*
+
 #define NewObject(A) Factory->New<A>("")
 
 CPacmanBonus::CPacmanBonus(Vector2 APosition, CSprite *ASprite) : Position(APosition),
@@ -299,3 +301,5 @@ void CPacmanEnemy::Update(float dt)
 	}
 	Sprite->SetPosition(Position);
 }
+
+*/

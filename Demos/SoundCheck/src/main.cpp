@@ -4,7 +4,7 @@ using namespace Deku2D;
 
 CEngine *Engine = CEngine::Instance();
 
-CSoundCheck *SoundCheck = NULL;
+//CSoundCheck *SoundCheck = NULL;
 
 class CCustomStateHandler : public CAbstractStateHandler
 {
@@ -18,7 +18,7 @@ bool CCustomStateHandler::OnInitialize()
 	CAbstractScene *MainScene = SceneManager->CreateScene();
 	SceneManager->SetCurrentScene(MainScene);
 
-	SoundCheck = Factory->New<CSoundCheck>("SoundCheck");
+	//SoundCheck = Factory->New<CSoundCheck>("SoundCheck");
 	return true;
 }
 

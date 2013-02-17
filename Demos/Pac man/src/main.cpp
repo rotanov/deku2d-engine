@@ -1,7 +1,7 @@
 #include "2de_Engine.h"
 #include "2de_GameUtils.h"
 #include "Pacman.h"
-#include "2de_Gui.h"
+//#include "2de_Gui.h"
 using namespace Deku2D;
 
 class CCustomStateHandler : public CAbstractStateHandler
@@ -27,7 +27,7 @@ bool CCustomStateHandler::OnInitialize()
 	CAbstractScene *MainScene = SceneManager->CreateScene();
 	SceneManager->SetCurrentScene(MainScene);
 
-	Factory->Add(new CPacmanGame(Factory->New<CPacmanPlayer>("CPacmanPlayer")), "CPacmanGame");
+	//Factory->Add(new CPacmanGame(Factory->New<CPacmanPlayer>("CPacmanPlayer")), "CPacmanGame");
 	SoundMixer->PlayMusic(MusicManager->GetMusicByName("PacMan"), 5000);
 
 	return true;

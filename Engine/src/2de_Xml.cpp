@@ -390,7 +390,7 @@ namespace Deku2D
 		Log("WARNING", "This type of XML node can't have any attributes");
 		return "";
 	}
-
+	
 	string CXMLNode::SafeGetAttribute(const string &AName, const string &ADefault /*= ""*/) const
 	{
 		return HasAttribute(AName) ? GetAttribute(AName) : ADefault;

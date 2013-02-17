@@ -124,6 +124,7 @@ namespace Deku2D
 
 		friend void SoundMixerHooks::OnMusicFinished();
 		friend void SoundMixerHooks::OnSoundFinished(int AChannel);
+		CSoundMixer& operator =(const CSoundMixer& rhs);
 	};
 
 	static CTSingleton<CSoundMixer> SoundMixer;

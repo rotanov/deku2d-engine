@@ -2,45 +2,13 @@
 #define _2DE_CORE_H_
 
 #ifdef _MSC_VER
-
-// DAMNIT, move it somewhere and delete unnecessary ones, please.. // I have already commented it out, so some time will pass and I'll check most of warnings.
-
-//	#pragma warning (disable	:	4312)   //
-// 	#pragma warning (disable	:	4311)	//	'type cast' : pointer truncation from 'void *' to
-// 	#pragma warning (disable	:	4267)	//	conversion from 'size_t' to 'int', possible loss of data
-// 	#pragma warning (disable	:	4305)	//	'initializing' : truncation from 'int' to 'scalar'
-// 	#pragma warning (disable	:	4244)	//	 conversion from 'int' to 'scalar', possible loss of data
-// 	#pragma warning (disable	:	4996)	
-// 	#pragma warning (disable	:	4172)	//	returning address of local variable or temporary (!!!)
-// 	#pragma warning (disable	:	4996)	//	rare
-// 	#pragma warning (disable	:	4312)	//	conversion from 'int' to 'void *' of greater size (!!)
-// 	#pragma warning (disable	:	4800)	//	forcing value to bool 'true' or 'false' (performance warning)
-// 	#pragma warning (disable	:	4018)	//	signed/unsigned mismatch (!)
-// 	#pragma warning (disable	:	4715)	//	not all control paths return a value (!!)
-// 	#pragma warning (disable	:	4291)	//	void *operator new(unsigned,const char *,int)' : no matching operator delete found; memory will not be freed if initialization throws an exception
-//after w4
-// 	#pragma warning (disable	:	4706)	//	assignment within conditional expression (!!!)
-// 	#pragma warning (disable	:	4701)	//	potentially uninitialized local variable 'origin_const' used
-// 	 #pragma warning (disable	:	4201)	//	nonstandard extension used : nameless struct/union (!!!)
-// 	#pragma warning (disable	:	4100)	//	unreferenced formal parameter
-// 	 #pragma warning (disable	:	4239)	//	nonstandard extension used : 'return' : conversion from 'Matrix3' to 'Matrix3 &' (!!!)
-// 	#pragma warning (disable	:	4189)	//	local variable is initialized but not referenced
-// 	 #pragma warning (disable	:	4238)	//	nonstandard extension used : class rvalue used as lvalue (!!!)
-// 	#pragma warning (disable	:	4389)	//	signed/unsigned mismatch
-// 	#pragma warning (disable	:	4702)	//	unreachable code ^^"
-// 	#pragma warning (disable	:	4611)	//	interaction between '_setjmp' and C++ object destruction is non-portable (???)
-// 	#pragma warning (disable	:	4005)	// Macro redefinition
-// 	#pragma warning (disable	:	4714)	// __forceinline not inlined
-// 	#pragma warning (disable	:	4005)	// Macro redefinition
-// 	#pragma warning (disable	:	4355)	// this in initializer list
-// 	#pragma warning (disable	:	4505)	// for dirent: unreferenced function has been removed
-
-#define VC_LEANMEAN
-#define _CRT_SECURE_NO_DEPRECATE
-#define NOMINMAX
-#undef min
-#undef max
-#undef GetClassName
+	#define VC_LEANMEAN
+	#define _CRT_SECURE_NO_DEPRECATE
+	#define _CRT_SECURE_NO_WARNINGS
+	#define NOMINMAX
+	#undef min
+	#undef max
+	#undef GetClassName
 #endif // _MSC_VER
 
 #define _SECURE_SCL 0
@@ -86,6 +54,8 @@
 #define MAX_PATH 260
 #endif //_WIN32
 
+
+
 namespace Deku2D
 {
 	using std::string;
@@ -130,13 +100,7 @@ namespace Deku2D
 		#define snprintf _snprintf
 	#endif //_MSC_VER
 
-	//	#define DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS
-
-
 	typedef unsigned char byte;
-
-	//	"Forever" instead of "for(;;)", anyway, just kidding.
-	//#define forever for(;;)
 
 	template<typename T>
 	__INLINE void SAFE_DELETE(T*& a)
@@ -152,136 +116,8 @@ namespace Deku2D
 		a = NULL;
 	}
 
-	#define DEAD_BEEF 0xdeadbeef
-	#define DEAD_FOOD 0xdeadf00d
-
 	#define DISABLE_DEBUG_BOXES
 	//#undef DISABLE_DEBUG_BOXES
-
-	namespace _details {	// Stolen from http://aka-rider.livejournal.com/4949.html 
-							// if it won't come in handy, I'll remove it.
-		namespace typetag_private {
-
-		/**
-		*  address of this structure is used as typetag
-		*/
-		template <typename _Ty> struct typetag_holder {};
-
-		template <typename _Ty>
-		inline const void* GenTypeTag()
-		{
-			static typetag_holder<_Ty> typetagInst;
-			return reinterpret_cast<void*>(&typetagInst);
-		}
-
-		} // namespace typetag_private
-
-		template <typename C>
-		inline const void * typetag()
-		{
-			return _details::typetag_private::GenTypeTag<C>();
-		}
-
-		/** 
-		*  remove modifier removes const, volatile and others modifiers
-		*/
-		template <typename _Ty>
-		struct remove_modifier
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<volatile _Ty>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<_Ty&>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty&>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<_Ty*>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty*>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<const _Ty* const>
-		{
-			typedef _Ty type;
-		};
-
-		template <typename _Ty>
-		struct remove_modifier<volatile _Ty*>
-		{
-			typedef _Ty type;
-		};
-
-
-		// А вот это уже из александреску
-		// Счетчик значений
-		template <class C>
-		class CType2ValCounter
-		{
-		protected:
-			static C Counter;
-		};
-
-		template<class C> C CType2ValCounter<C>::Counter;
-
-		// Генератор значений
-		template<class T, class C>
-		class CType2ValGenerator : public CType2ValCounter<C>
-		{
-		public:
-			C ID;
-			CType2ValGenerator()
-			{
-				ID = CType2ValCounter<C>::Counter;
-				++CType2ValCounter<C>::Counter;
-			}
-		};
-
-
-	} // namespace _details
-
-	template <typename C>
-	inline const void * typetag()
-	{
-		return _details::typetag_private::
-		GenTypeTag<typename _details::remove_modifier<C>::type>();
-	}
-
-	// Шаблонная функция получения идентификатора типа
-	template <class T, class C>
-	C Type2Val()
-	{
-		static _details::CType2ValGenerator<T, C> ValueGenerator;
-
-		return ValueGenerator.ID;
-	}
 
 	template<typename T>
 	struct identity
@@ -308,7 +144,8 @@ namespace Deku2D
 
 		__INLINE bool from_string_impl(const string &s, identity<bool>)
 		{
-			// ios::boolalpha - have you looked for it, while trying to reinvent the wheel? // it doesn't suit our needs.. i don't remember why, though..
+			// ios::boolalpha - have you looked for it, while trying to reinvent the wheel?
+			// it doesn't suit our needs.. i don't remember why, though..
 			if (s == "false" || s.empty())
 				return false;
 
@@ -328,6 +165,20 @@ namespace Deku2D
 			return s;
 		}
 
+		template <typename T>
+		__INLINE string to_string_impl(const T& t)
+		{
+				ostringstream s;
+				s << t;
+				return s.str();
+		}
+
+		template <>
+		__INLINE string to_string_impl(const bool& t)
+		{
+			return t ? "true" : "false";
+		}
+
 	}	//	namespace VariantConvert
 
 	template<typename T>
@@ -336,48 +187,11 @@ namespace Deku2D
 		return VariantConvert::from_string_impl(s, identity<T>());
 	}
 
-	class CEvent; // forward declaration
-
-	/**
-	* CObject - base class for many classes.
-	*/
-
-	class CObject
+	template<typename T>
+	string to_string(const T& t)
 	{
-	public:
-		CObject();
-		virtual ~CObject();
-
-		string GetName() const;
-		virtual void SetName(const string &AObjectName);
-
-		string GetStandardName() const;
-
-		unsigned GetID() const;
-
-		bool isDestroyed() const;
-		void SetDestroyed();
-
-		bool isManaged() const;
-
-		virtual void ProcessEvent(const CEvent &AEvent);
-
-	protected:
-		CObject(const CObject &AObject);
-		CObject& operator=(const CObject &AObject);
-
-		bool Managed;
-		bool Destroyed;
-		unsigned ID;
-		string ClassName;
-
-	private:
-		string Name;
-
-		static unsigned CObjectCount;
-
-		friend class CFactory;
-	};
+		return VariantConvert::to_string_impl(t);
+	}
 
 	// Template class for some manager
 	template <typename C>	// C - container type
@@ -510,354 +324,7 @@ namespace Deku2D
 	}	//	namespace Environment
 
 
-	/**
-	 * CSingletonManager - a class that is responsible for destroying singletones.
-	 */
 
-	class CSingletonManager
-	{
-	public:
-		static CSingletonManager* Instance();
-		static void Init();
-		void Add(CObject *AObject);
-		void Clear();
-		static void Finalize();
-
-	private:
-		CSingletonManager()
-		{
-		}
-		static CSingletonManager *_instance;
-		stack<CObject*> Singletones;
-	};
-
-
-	/**
-	 * CTSingleton - singleton template class with automatic deletion using CSingletonManager. Acts like a singleton holder.
-	 *
-	 * To use it just create a static instance of this class as follows:
-	 * 
-	 * 	class CSomeClass
-	 * 	{
-	 * 	public:
-	 * 		<...>
-	 * 	private:
-	 * 		<...>
-	 *	protected:
-	 *		friend class CTSingleton<CSomeClass>;	// <-- don't forget it
-	 *		CSomeClass() { }
-	 * 	};
-	 *
-	 * 	static CTSingleton<CSomeClass> SomeClass;
-	 *
-	 * Now you can acces your singletoned class with -> operator, like this:
-	 * 	SomeClass->SomeMethod();
-	 *
-	 *
-	 * @todo: более описательное имя, а то разных реализаций синглтона всё-таки бывает много.
-	 *	@todo: переделать всё это, как_у_александреску.
-	 */
-
-	template <typename T>
-	class CTSingleton
-	{
-	public:
-		static T* Instance();
-
-		T* operator->()
-		{
-			return Instance();
-		}
-
-	private:
-		static T * _instance;
-
-	#ifdef _DEBUG
-		static set<const std::type_info *> UnderConstruction;
-	#endif // _DEBUG
-	};
-
-	template <typename T>
-	T* CTSingleton<T>::Instance()
-	{
-	#ifdef _DEBUG
-		if (UnderConstruction.count(&typeid(T)) == 1)
-		{
-			// we can't use CLog here (because it's singleton too), but still able to log to stdout
-			Environment::LogToStdOut("ERROR", "Recursive singleton constructor call has been discovered, typeid: '%s'", typeid(T).name());
-
-			throw std::logic_error(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name());
-		}
-	#endif // _DEBUG
-
-		if (!_instance)
-		{
-	#ifdef _DEBUG
-			UnderConstruction.insert(&typeid(T));
-	#endif // _DEBUG
-
-			_instance = new T;
-			CSingletonManager::Instance()->Add(_instance);
-
-	#ifdef _DEBUG
-			UnderConstruction.erase(&typeid(T));
-	#endif // _DEBUG
-		}
-		return _instance;
-	}
-
-	template <typename T>
-	T* CTSingleton<T>::_instance = 0;
-
-	#ifdef _DEBUG
-	template <typename T>
-	set<const std::type_info *> CTSingleton<T>::UnderConstruction;
-	#endif // _DEBUG
-
-	/**
-	 * Let there be Visitor
-	 * Taken from http://www.everfall.com/paste/id.php?bqa1eibc559f
-	 * http://www.gamedev.ru/community/oo_design/articles/?id=431
-	 * Cause it's Hierarchical visitor there will be
-	 * VisitOnEnter
-	 * VisitOnLeave
-	 */
-
-	class IVisitorBase
-	{
-	public:	
-		virtual ~IVisitorBase() {};
-	};
-
-	template <typename T, typename R = void>
-	class IVisitor : virtual public IVisitorBase
-	{
-	public:
-		typedef R CReturnType;
-		virtual bool ShouldVisit(T&) = 0;
-		virtual CReturnType VisitOnEnter(T&) = 0;
-		virtual CReturnType VisitOnLeave(T&) = 0;
-	};
-
-	template <typename R = void>
-	class IVisitableBase
-	{
-	public:
-		typedef R CReturnType;
-		virtual ~IVisitableBase() {}
-		virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
-		virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
-
-	protected:
-		template <typename T>
-		static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				return ptr->VisitOnEnter(visited);
-			}
-			return CReturnType();
-		}
-		template <typename T>
-		static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				return ptr->VisitOnLeave(visited);
-			}
-			return CReturnType();
-		}
-	};
-
-	template <typename R = void>
-	class IVisitableObject : public CObject
-	{
-	public:
-		typedef R CReturnType;
-		virtual ~IVisitableObject() {}
-		virtual CReturnType AcceptOnEnter(IVisitorBase&) = 0;
-		virtual CReturnType AcceptOnLeave(IVisitorBase&) = 0;
-
-	protected:
-		template <typename T> 
-		static CReturnType ConcreteAcceptOnEnter(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				if (ptr->ShouldVisit(visited))
-					return ptr->VisitOnEnter(visited);
-			}
-			return CReturnType();
-		}
-		template <typename T> 
-		static CReturnType ConcreteAcceptOnLeave(T& visited, IVisitorBase& visitor)
-		{
-			if (IVisitor<T, R>* ptr = dynamic_cast<IVisitor<T, R>*>(&visitor))
-			{
-				if (ptr->ShouldVisit(visited))
-					return ptr->VisitOnLeave(visited);
-			}
-			return CReturnType();
-		}
-	};
-
-	#define D2D_DECLARE_VISITABLE()	\
-		virtual CReturnType AcceptOnEnter(IVisitorBase& visitor)	\
-		{ return ConcreteAcceptOnEnter(*this, visitor); }	\
-		virtual CReturnType AcceptOnLeave(IVisitorBase& visitor)	\
-		{ return ConcreteAcceptOnLeave(*this, visitor); }
-
-	/**
-	* CStorage - base class for CFile and CMemory classes, that describes their interface.
-	*/
-
-	class CStorage
-	{
-	public:
-		enum EOpenMode
-		{
-			OPEN_MODE_READ,
-			OPEN_MODE_WRITE,
-		};
-		
-		enum ESeekOrigin
-		{
-			SEEK_ORIGIN_BEGINNING,
-			SEEK_ORIGIN_CURRENT,
-			SEEK_ORIGIN_END,
-		};
-
-		CStorage();
-
-		virtual bool Close() = 0;
-
-		virtual bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1) = 0;
-		virtual bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1) = 0;
-		
-		// kinda-type-and-size-safe versions of Read and Write.. don't work with arrays, though..
-		template<typename T>
-		bool Read(T *Buffer)
-		{
-			return Read(Buffer, sizeof(T));
-		}
-
-		template<typename T>
-		bool Write(const T *Data)
-		{
-			return Write(Data, sizeof(T));
-		}
-
-		bool ReadByte(byte *Buffer);
-		bool WriteByte(byte *Data);
-		bool WriteByte(byte Data);
-
-		// i think, that CFile should not provide posibility to read 0-terminated strings from files..
-		// formats should be developed in such way, that does NOT include reading variable-length strings from binary files.. it's bad design of data structures to do so..
-		// BUT even if someone ever need to store string in binary file, they should develop structure for storing string size too, together with string.. and then deal with it in higher level of abstraction..
-		// YES OFCOURSE YOU"RE FUCKIING RIGHT> LET"S DO IT
-
-		bool ReadString(char *Buffer, int ASize);
-		bool ReadString(string &Buffer);
-		bool WriteString(const char *Data);
-		bool WriteString(const string &Data);
-
-		bool WriteText(const char *Data);
-		bool WriteText(const string &Data);
-
-		virtual bool ReadLine(char *Buffer, int ASize) = 0;
-		virtual bool ReadLineS(string &Buffer);
-		bool WriteLine(const char *Data);
-		bool WriteLine(const string &Data);
-
-		virtual string GetContent() = 0;
-		bool SetContent(const string &Data);
-
-		virtual bool Seek(long Offset, ESeekOrigin Origin) = 0;
-		bool Rewind();
-		virtual bool Flush();
-
-		virtual bool Eof() const = 0;
-		virtual bool Good() const = 0;
-		virtual long Size() const = 0;
-
-	protected:
-		bool WriteLine(const char *Data, size_t Size);
-
-		EOpenMode Mode;
-
-		const int READ_BUFFER_DEFAULT_SIZE;
-
-	private:
-		// CStorage can't be copied or assigned.
-		CStorage(const CStorage &Source);
-		CStorage& operator=(const CStorage &Source);
-	};
-
-	/**
-	* CFile - a class that provides interface to reading and writing of files.
-	*
-	* Each instance of the class represents a single file, implementing RAII principle.
-	* This class is a front-end for stdio. Also extends it with some lazy-functions, like get file contents into a string.
-	* Can't be copied or assigned.
-	*/
-
-	class CFile : public CStorage
-	{
-	public:
-		CFile();
-		CFile(const string &AFilename, EOpenMode AMode);
-		~CFile();
-
-		bool Open(const string &AFilename, EOpenMode AMode);
-		bool Close();
-
-		bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
-		bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
-		
-		bool ReadLine(char *Buffer, int ASize);
-
-		string GetContent();
-
-		bool Seek(long Offset, ESeekOrigin Origin);
-		bool Flush();
-
-		bool Eof() const;
-		bool Good() const;
-		long Size() const;
-
-	private:
-		FILE *File;
-		string Filename;
-	};
-
-	class CMemory : public CStorage
-	{
-	public:
-		CMemory();
-		CMemory(byte *ABeginningPointer, long ALength, EOpenMode AMode);
-		~CMemory();
-
-		bool Open(byte *ABeginningPointer, long ALength, EOpenMode AMode);
-		bool Close();
-
-		bool Read(void *Buffer, size_t BytesCount, size_t ElementsCount = 1);
-		bool Write(const void *Data, size_t BytesCount, size_t ElementsCount = 1);
-
-		bool ReadLine(char *Buffer, int ASize);
-
-		string GetContent();
-
-		bool Seek(long Offset, ESeekOrigin Origin);
-
-		bool Eof() const;
-		bool Good() const;
-		long Size() const;
-
-	private:
-		byte *BeginningPointer;
-		byte *CurrentPointer;
-		long Length;
-	};
 
 	/**
 	* FileSystem - a namespace that contains functions for working with file system in a cross-platform way.
@@ -891,14 +358,6 @@ namespace Deku2D
 		return i;
 	}
 
-	template <typename T>
-	__INLINE string to_string(const T& t)
-	{
-		ostringstream s;
-		s << t;
-		return s.str();
-	}
-
 	__INLINE vector<float> GetNFloatTokensFromString( const string &source, unsigned n)
 	{
 		istringstream iss(source);
@@ -926,77 +385,62 @@ namespace Deku2D
 		}
 	};
 
-
-	/**
-	*	Memory leaks catching.
-	*	Some issues are fixed but there's still a room for improvement.
-	*	Taken from http://www.flipcode.com/archives/How_To_Find_Memory_Leaks.shtml by Dion Picco (23 May 2000)
-	*	@todo: Implement new[] and delete []
-	*	@todo: Remove inline from AddTrack and RemoveTrack and others.
-	*/
-
-	#if defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
-
-	#include <list>
-
-	struct ALLOC_INFO
+	template <typename From, typename To>
+	class IsConvertible
 	{
-		unsigned long address;
-		unsigned long size;
-		char file[MAX_PATH];//bad but anyway... probably needs replacement with string type
-		unsigned long line;
+	public:
+		enum { result = 0, };
 	};
 
-	typedef list<ALLOC_INFO*> AllocList;
+	#define	D2D_DECLARE_CONVERTIBLE(FROM, TO)	\
+		template <>	\
+		class IsConvertible<FROM, TO>	\
+		{	\
+		public:	\
+			enum { result = 1, };	\
+		};	\
 
-	extern AllocList *allocList;
+	D2D_DECLARE_CONVERTIBLE(string, string)
+	D2D_DECLARE_CONVERTIBLE(string, bool)
+	D2D_DECLARE_CONVERTIBLE(string, int)
+	D2D_DECLARE_CONVERTIBLE(string, float)
+	D2D_DECLARE_CONVERTIBLE(bool, string)
+	D2D_DECLARE_CONVERTIBLE(int, string)
+	D2D_DECLARE_CONVERTIBLE(float, string)
 
-	inline void AddTrack(unsigned long addr,  unsigned long asize,  const char *fname, unsigned long lnum)
+	// Conversion from Type to Type for the case, when exception should be thrown at runtime when there is no implementation for a conversion.
+	template<typename T, int A = IsIntegral<T>::result>
+	class Convert
 	{
-		ALLOC_INFO *info;
+	public:
+		static T FromString(const string &s)
+		{
+			return VariantConvert::from_string_impl(s, identity<T>());
+		}
 
-		if (allocList == NULL)
-			allocList = new(AllocList);
+		static string ToString(const T &value)
+		{
+			return VariantConvert::to_string_impl(value);
+		}
 
-		info = new(ALLOC_INFO);
-		info->address = addr;
-		strncpy(info->file, fname, MAX_PATH);
-		info->file[MAX_PATH] = 0;
-		info->line = lnum;
-		info->size = asize;
-		allocList->insert(allocList->begin(), info);
 	};
 
-	void RemoveTrack(unsigned long addr);
-	void DumpUnfreed();
-
-	inline void * operator new(unsigned size, const char *file, int line)
+	template<typename T>
+	class Convert<T, 0>
 	{
-		void *ptr = (void *)malloc(size);
-		AddTrack((unsigned long)ptr, size, file, line);
-		return(ptr);
+	public:
+		static T FromString(const string &s)
+		{
+			throw "Conversion from string to the type %s is not implemented."; // TODO substitute typename if possible
+		}
+
+		static string ToString(const T &value)
+		{
+			throw "Conversion to string from type %s is not implemented."; // TODO substitute typename if possible
+		}
+
 	};
 
-	inline void operator delete(void *p)
-	{
-		RemoveTrack((unsigned long)p);
-		free(p);
-	};
-
-	inline void operator delete[](void *p)
-	{
-		RemoveTrack((unsigned long)p);
-		free(p);
-	};
-
-	#ifdef _DEBUG
-		#define DEBUG_NEW new(__FILE__, __LINE__)
-	#else
-		#define DEBUG_NEW new
-	#endif
-		#define new DEBUG_NEW
-
-	#endif // defined(_DEBUG) && defined(_MSC_VER) && defined(DEKU2D_I_WANT_TO_LOOK_AFTER_MEMORY_LEAKS)
 
 }	//	namespace Deku2D
 

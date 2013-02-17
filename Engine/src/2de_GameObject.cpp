@@ -6,7 +6,6 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CGameObject
-
 	CGameObject::CGameObject() : Created(false), Parent(NULL), Scene(NULL), Script(NULL), Prototype(false), Active(true), Dead(false), Enabled(true)
 	{
 		ClassName = "GameObject";
@@ -206,7 +205,7 @@ namespace Deku2D
 			result = result->Parent;
 
 		return result;
-	}
+	}	
 
 	void CGameObject::AddLocalName(const string &ALocalName, CGameObject *AChild)
 	{
@@ -249,7 +248,7 @@ namespace Deku2D
 	{
 		Active = AActive;
 	}
-
+	
 	bool CGameObject::IsEnabled() const
 	{
 		return Enabled;
@@ -274,11 +273,6 @@ namespace Deku2D
 		if (AXML->HasAttribute("Script"))
 		{
 			SetScript(Factory->Get<CScript>(AXML->GetAttribute("Script")));
-		}
-
-		if (AXML->HasAttribute("Enabled"))
-		{
-			SetEnabled(from_string<bool>(AXML->GetAttribute("Enabled")));
 		}
 	}
 

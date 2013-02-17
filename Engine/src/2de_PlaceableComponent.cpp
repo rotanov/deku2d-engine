@@ -5,7 +5,6 @@ namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
 	// CPlaceableComponent
-
 	CPlaceableComponent::CPlaceableComponent() : doIgnoreCamera(false), doMirrorHorizontal(false), doMirrorVertical(false)
 	{
 		ClassName = "PlaceableComponent";
@@ -41,7 +40,7 @@ namespace Deku2D
 		return Transformation.GetDepth();
 	}
 
-	const Vector2& CPlaceableComponent::GetScaling() const
+	const Vector2 CPlaceableComponent::GetScaling() const
 	{
 		return Transformation.GetScaling();
 	}
@@ -56,7 +55,7 @@ namespace Deku2D
 		return Transformation.GetDepth() * 100.0f;
 	}
 
-	const Vector2& CPlaceableComponent::GetPosition() const
+	const Vector2 CPlaceableComponent::GetPosition() const
 	{
 		return Transformation.GetTranslation();
 	}
@@ -71,12 +70,12 @@ namespace Deku2D
 		Transformation = ATransformation;
 	}
 
-	CTransformation& CPlaceableComponent::GetTransformation()
+	CTransformation CPlaceableComponent::GetTransformation()
 	{
 		return Transformation;
 	}
 
-	const CTransformation& CPlaceableComponent::GetTransformation() const
+	const CTransformation CPlaceableComponent::GetTransformation() const
 	{
 		return Transformation;
 	}
@@ -136,7 +135,7 @@ namespace Deku2D
 		// TODO: add more..	// Later
 	}
 
-	const CBox& CPlaceableComponent::GetBox() const
+	const CBox CPlaceableComponent::GetBox() const
 	{
 		return Box;
 	}

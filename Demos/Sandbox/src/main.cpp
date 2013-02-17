@@ -1,20 +1,22 @@
 #include "2de_Engine.h"
+#include "2de_TypeInfo.h"
+#include "2de_Resource.h"
 
 #define ENGINE Deku2D::CEngine::Instance()
 #define RENDER Deku2D::CRenderManager::Instance()
 Deku2D::CEngine* Ninja = ENGINE;
 
 /*
-Âîò íàïğèìåğ ó íàñ åñòü íåêèé DraggeablePrototype;
-Îí äîëæåí îáåñïå÷èâàòü ïğèäàâàíèå ñïîñîáíîñòè îáúåêòàì áûòü ïåğåòàñêèâàåìûìè ìûøüş.
-[Root]->[Ball]->[Draggeabl] èëè [Root]->[Draggeable]->[Ball] 
-ß õç ÷òî áîëüøå ïîäõîäèò äëÿ äèíàìè÷åñêîãî ïğèñîáà÷èâàíèÿ òàêîãî ğîäà ïîâåäåíèé äëÿ îáúåêòîâ, äóìàş ïåğâîå âñ¸ òàêè.
-Â ëşáîì ñëó÷àå, Îí õî÷åò çíàòü î õèòáîêñå îáúåêòà, ê êîòîğîìó åãî ïğèñîáà÷èëè. Ëèáî Õî÷åò çíàòü, ÷òî ñîáûòèå êëèêà ïî õèòáîêñó áûëî è îí õî÷åò åãî ïåğåõâàòèòü/ïîëó÷èòü âìåñòå ñ îáúåêòîì. Ïîòîì îí äîëæåí ïîñëàòü ñîîáùåíèå òèïà "Íàéäè ìíå òîãî, ê êîìó ìåíÿ ïğèñîáà÷èëè, ïîèäåå, ıòî äîëæåí áûòü ComponentRoot è ïåğåäàé ïåğâîìó ñâîåìó PlaceableComponent'ó ÷òî åìó íàäî ñî ìíîé ïîãîâîğèòü (Èëè ïåğåìåñòèòüñÿ íà ñòîëüêî-òî)"
+Ğ’Ğ¾Ñ‚ Ğ½Ğ°Ğ¿Ñ€Ğ¸Ğ¼ĞµÑ€ Ñƒ Ğ½Ğ°Ñ ĞµÑÑ‚ÑŒ Ğ½ĞµĞºĞ¸Ğ¹ DraggeablePrototype;
+ĞĞ½ Ğ´Ğ¾Ğ»Ğ¶ĞµĞ½ Ğ¾Ğ±ĞµÑĞ¿ĞµÑ‡Ğ¸Ğ²Ğ°Ñ‚ÑŒ Ğ¿Ñ€Ğ¸Ğ´Ğ°Ğ²Ğ°Ğ½Ğ¸Ğµ ÑĞ¿Ğ¾ÑĞ¾Ğ±Ğ½Ğ¾ÑÑ‚Ğ¸ Ğ¾Ğ±ÑŠĞµĞºÑ‚Ğ°Ğ¼ Ğ±Ñ‹Ñ‚ÑŒ Ğ¿ĞµÑ€ĞµÑ‚Ğ°ÑĞºĞ¸Ğ²Ğ°ĞµĞ¼Ñ‹Ğ¼Ğ¸ Ğ¼Ñ‹ÑˆÑŒÑ.
+[Root]->[Ball]->[Draggeabl] Ğ¸Ğ»Ğ¸ [Root]->[Draggeable]->[Ball] 
+Ğ¯ Ñ…Ğ· Ñ‡Ñ‚Ğ¾ Ğ±Ğ¾Ğ»ÑŒÑˆĞµ Ğ¿Ğ¾Ğ´Ñ…Ğ¾Ğ´Ğ¸Ñ‚ Ğ´Ğ»Ñ Ğ´Ğ¸Ğ½Ğ°Ğ¼Ğ¸Ñ‡ĞµÑĞºĞ¾Ğ³Ğ¾ Ğ¿Ñ€Ğ¸ÑĞ¾Ğ±Ğ°Ñ‡Ğ¸Ğ²Ğ°Ğ½Ğ¸Ñ Ñ‚Ğ°ĞºĞ¾Ğ³Ğ¾ Ñ€Ğ¾Ğ´Ğ° Ğ¿Ğ¾Ğ²ĞµĞ´ĞµĞ½Ğ¸Ğ¹ Ğ´Ğ»Ñ Ğ¾Ğ±ÑŠĞµĞºÑ‚Ğ¾Ğ², Ğ´ÑƒĞ¼Ğ°Ñ Ğ¿ĞµÑ€Ğ²Ğ¾Ğµ Ğ²ÑÑ‘ Ñ‚Ğ°ĞºĞ¸.
+Ğ’ Ğ»ÑĞ±Ğ¾Ğ¼ ÑĞ»ÑƒÑ‡Ğ°Ğµ, ĞĞ½ Ñ…Ğ¾Ñ‡ĞµÑ‚ Ğ·Ğ½Ğ°Ñ‚ÑŒ Ğ¾ Ñ…Ğ¸Ñ‚Ğ±Ğ¾ĞºÑĞµ Ğ¾Ğ±ÑŠĞµĞºÑ‚Ğ°, Ğº ĞºĞ¾Ñ‚Ğ¾Ñ€Ğ¾Ğ¼Ñƒ ĞµĞ³Ğ¾ Ğ¿Ñ€Ğ¸ÑĞ¾Ğ±Ğ°Ñ‡Ğ¸Ğ»Ğ¸. Ğ›Ğ¸Ğ±Ğ¾ Ğ¥Ğ¾Ñ‡ĞµÑ‚ Ğ·Ğ½Ğ°Ñ‚ÑŒ, Ñ‡Ñ‚Ğ¾ ÑĞ¾Ğ±Ñ‹Ñ‚Ğ¸Ğµ ĞºĞ»Ğ¸ĞºĞ° Ğ¿Ğ¾ Ñ…Ğ¸Ñ‚Ğ±Ğ¾ĞºÑÑƒ Ğ±Ñ‹Ğ»Ğ¾ Ğ¸ Ğ¾Ğ½ Ñ…Ğ¾Ñ‡ĞµÑ‚ ĞµĞ³Ğ¾ Ğ¿ĞµÑ€ĞµÑ…Ğ²Ğ°Ñ‚Ğ¸Ñ‚ÑŒ/Ğ¿Ğ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ Ğ²Ğ¼ĞµÑÑ‚Ğµ Ñ Ğ¾Ğ±ÑŠĞµĞºÑ‚Ğ¾Ğ¼. ĞŸĞ¾Ñ‚Ğ¾Ğ¼ Ğ¾Ğ½ Ğ´Ğ¾Ğ»Ğ¶ĞµĞ½ Ğ¿Ğ¾ÑĞ»Ğ°Ñ‚ÑŒ ÑĞ¾Ğ¾Ğ±Ñ‰ĞµĞ½Ğ¸Ğµ Ñ‚Ğ¸Ğ¿Ğ° "ĞĞ°Ğ¹Ğ´Ğ¸ Ğ¼Ğ½Ğµ Ñ‚Ğ¾Ğ³Ğ¾, Ğº ĞºĞ¾Ğ¼Ñƒ Ğ¼ĞµĞ½Ñ Ğ¿Ñ€Ğ¸ÑĞ¾Ğ±Ğ°Ñ‡Ğ¸Ğ»Ğ¸, Ğ¿Ğ¾Ğ¸Ğ´ĞµĞµ, ÑÑ‚Ğ¾ Ğ´Ğ¾Ğ»Ğ¶ĞµĞ½ Ğ±Ñ‹Ñ‚ÑŒ ComponentRoot Ğ¸ Ğ¿ĞµÑ€ĞµĞ´Ğ°Ğ¹ Ğ¿ĞµÑ€Ğ²Ğ¾Ğ¼Ñƒ ÑĞ²Ğ¾ĞµĞ¼Ñƒ PlaceableComponent'Ñƒ Ñ‡Ñ‚Ğ¾ ĞµĞ¼Ñƒ Ğ½Ğ°Ğ´Ğ¾ ÑĞ¾ Ğ¼Ğ½Ğ¾Ğ¹ Ğ¿Ğ¾Ğ³Ğ¾Ğ²Ğ¾Ñ€Ğ¸Ñ‚ÑŒ (Ğ˜Ğ»Ğ¸ Ğ¿ĞµÑ€ĞµĞ¼ĞµÑÑ‚Ğ¸Ñ‚ÑŒÑÑ Ğ½Ğ° ÑÑ‚Ğ¾Ğ»ÑŒĞºĞ¾-Ñ‚Ğ¾)"
 
-Òàê òåïåğü íàäî ÷¸òêèå ïóíêòèêè îòñşäà âûâåñòè.
-İòîò ñàìûé Message passing êàê-òî şíèôîğìíî äîëæåí âñïëûâàòü.
-+ Ñîîáùåíèå âèäà "òà ñğàíü, ÷òî â çàïğîñå â êàâû÷êàõ" ïğîçğà÷íî êàê-òî ïğèäóìàòü.
-áëÿ, òû ìíå òàì ÷¸-òî íàïèñàë, ÿ í â íåñîñòÿíèè ùàñ ïğî÷èàòòü, ÿ ïüÿí
+Ğ¢Ğ°Ğº Ñ‚ĞµĞ¿ĞµÑ€ÑŒ Ğ½Ğ°Ğ´Ğ¾ Ñ‡Ñ‘Ñ‚ĞºĞ¸Ğµ Ğ¿ÑƒĞ½ĞºÑ‚Ğ¸ĞºĞ¸ Ğ¾Ñ‚ÑÑĞ´Ğ° Ğ²Ñ‹Ğ²ĞµÑÑ‚Ğ¸.
+Ğ­Ñ‚Ğ¾Ñ‚ ÑĞ°Ğ¼Ñ‹Ğ¹ Message passing ĞºĞ°Ğº-Ñ‚Ğ¾ ÑĞ½Ğ¸Ñ„Ğ¾Ñ€Ğ¼Ğ½Ğ¾ Ğ´Ğ¾Ğ»Ğ¶ĞµĞ½ Ğ²ÑĞ¿Ğ»Ñ‹Ğ²Ğ°Ñ‚ÑŒ.
++ Ğ¡Ğ¾Ğ¾Ğ±Ñ‰ĞµĞ½Ğ¸Ğµ Ğ²Ğ¸Ğ´Ğ° "Ñ‚Ğ° ÑÑ€Ğ°Ğ½ÑŒ, Ñ‡Ñ‚Ğ¾ Ğ² Ğ·Ğ°Ğ¿Ñ€Ğ¾ÑĞµ Ğ² ĞºĞ°Ğ²Ñ‹Ñ‡ĞºĞ°Ñ…" Ğ¿Ñ€Ğ¾Ğ·Ñ€Ğ°Ñ‡Ğ½Ğ¾ ĞºĞ°Ğº-Ñ‚Ğ¾ Ğ¿Ñ€Ğ¸Ğ´ÑƒĞ¼Ğ°Ñ‚ÑŒ.
+Ğ±Ğ»Ñ, Ñ‚Ñ‹ Ğ¼Ğ½Ğµ Ñ‚Ğ°Ğ¼ Ñ‡Ñ‘-Ñ‚Ğ¾ Ğ½Ğ°Ğ¿Ğ¸ÑĞ°Ğ», Ñ Ğ½ Ğ² Ğ½ĞµÑĞ¾ÑÑ‚ÑĞ½Ğ¸Ğ¸ Ñ‰Ğ°Ñ Ğ¿Ñ€Ğ¾Ñ‡Ğ¸Ğ°Ñ‚Ñ‚ÑŒ, Ñ Ğ¿ÑŒÑĞ½
 
 */
 
@@ -57,6 +59,13 @@ public:
 				obj->SetVisibility(!obj->GetVisibility());
 
 			}
+			else if (sym == SDLK_d)
+			{
+				//Deku2D::SerializeObjectToXml(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.xml");
+				//Deku2D::SerializeObjectToJSON(Deku2D::CEngine::Instance()->RootGameObject, "rootdump.json");
+				Deku2D::Serialization::ToJSON(Deku2D::CEngine::Instance()->RootGameObject, "CObject", "rootdump.json");
+				//Deku2D::DeserializeObjectFromJSON("rootdump.json");
+			}
 		}
 	}
 
@@ -69,26 +78,107 @@ public:
 	void OnFinalize();
 };
 
+class HRTimer
+{
+public:
+	HRTimer();
+	double GetFrequency();
+	void StartTimer();
+	double StopTimer();
+private:
+	LARGE_INTEGER start;
+	LARGE_INTEGER stop;
+	double frequency;
+};
+
+HRTimer::HRTimer(): start(), stop(),
+frequency()
+{
+	frequency = this->GetFrequency();
+}
+
+double HRTimer::GetFrequency(void)
+{
+	LARGE_INTEGER proc_freq;
+	QueryPerformanceFrequency(&proc_freq);
+	return proc_freq.QuadPart;
+}
+
+void HRTimer::StartTimer(void)
+{
+	DWORD_PTR oldmask = ::SetThreadAffinityMask(::GetCurrentThread(), 0);
+	::QueryPerformanceCounter(&start);
+	::SetThreadAffinityMask(::GetCurrentThread(), oldmask);
+}
+
+double HRTimer::StopTimer(void)
+{
+	DWORD_PTR oldmask = ::SetThreadAffinityMask(::GetCurrentThread(), 0);
+	::QueryPerformanceCounter(&stop);
+	::SetThreadAffinityMask(::GetCurrentThread(), oldmask);
+	return ((stop.QuadPart - start.QuadPart) / frequency);
+}
+
+
 bool CCustomStateHandler::OnInitialize()
 {
 	Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
 	Deku2D::SceneManager->SetCurrentScene(NewScene);
-	Deku2D::LuaVirtualMachine->RunScript(Deku2D::Factory->Get<Deku2D::CScript>(Deku2D::Config->Section("Data")["InitScript"]));
-	//Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
-	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
-	Deku2D::SoundMixer->SetMusicVolume(128);
+	Deku2D::LuaVirtualMachine
+			->RunScript
+			(
+				Deku2D::Factory
+				->Get<Deku2D::CScript>
+				(
+					Deku2D::Config->Section("Data")["InitScript"]
+				)
+			);
 
-	Deku2D::KeyBindingManager->UnbindAction("Test", "Act");
-	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_0);
-	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_RETURN);
-	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_AMPERSAND);
+	HRTimer timer;
+	timer.StartTimer();
 
-	if (!Deku2D::KeyBindingManager->IsBound(SDLK_m, "General", "Shoot"))
+	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
 	{
-		Deku2D::KeyBindingManager->Bind("General", "Shoot", SDLK_m);
+		if (i->GetName() == "Fonts")
+		{
+			for (auto j : i->ResourceNames)
+			{
+				if (j.second.rfind(".fif", j.second.length() - 4) == j.second.length() - 4)
+				{
+					Log( "RESOURCE", "Name: %s, filename: %s.", j.first.c_str(), j.second.c_str());
+					Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>(j.first), "CObject", j.second + ".json" );
+				}
+			}
+		}
 	}
-	Deku2D::KeyBindingManager->Save();
-	CTest *test = Deku2D::Factory->New<CTest>("");
+
+	double time = timer.StopTimer();
+	Log( "TIME", "%lf", time );
+	Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDOUT);
+	Log( "TIME", "%lf", time );
+	Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDERR);
+	Log( "TIME", "%lf", time );
+
+	Deku2D::CEngine::Instance()
+			->RootGameObject
+			->Attach(Deku2D::Factory
+					 ->New<CTest>("SetSizeTest"));
+//	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
+//	Deku2D::SoundMixer->SetMusicVolume(128);
+
+//	Deku2D::KeyBindingManager->UnbindAction("Test", "Act");
+//	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_0);
+//	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_RETURN);
+//	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_AMPERSAND);
+
+//	if (!Deku2D::KeyBindingManager->IsBound(SDLK_m, "General", "Shoot"))
+//	{
+//		Deku2D::KeyBindingManager->Bind("General", "Shoot", SDLK_m);
+//	}
+//	Deku2D::KeyBindingManager->Save();
+
+	//Deku2D::CResourceManager::Instance();
+
 	return true;
 }
 

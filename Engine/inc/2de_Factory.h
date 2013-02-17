@@ -10,7 +10,8 @@ namespace Deku2D
 	class CGameObject;
 
 	/**
-	* CFactory - oversees creation of any objects. The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
+	* CFactory - oversees creation of any objects.
+	* The real purpose at this moment: managing memory at creation and destuction of each object and getting pointer by name.
 	*/
 
 	class CFactory : public CObject
@@ -69,7 +70,7 @@ namespace Deku2D
 		void SetRecursionLimit(const string &AProtoName, int ARecursionLimit);
 		int GetRecursionsLeft(const string &AProtoName);
 		void IncreaseUsedCount(const string &AProtoName);
-		void DecreaseUsedCount(const string &AProtoName);
+		void DecreaseUsedCount(const string &AProtoName);		
 
 	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
 		void InsertDebugInfo( CObject* Source );
@@ -83,7 +84,7 @@ namespace Deku2D
 		queue<CObject *> Deletion;
 		map<string, CGameObject *> CachedProtos;
 		UsedPrototypesContainer UsedPrototypes;
-
+		
 	};
 
 	static CTSingleton<CFactory> Factory;

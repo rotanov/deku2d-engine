@@ -145,8 +145,8 @@ end
 function Text:SetTextFont(font)
 	if type(font) == "userdata" then
 		SetTextFont(self.object, font)
-	elseif type(font) == "string" and GetFont(font) then
-		SetTextFont(self.object, GetFont(font))
+	elseif type(font) == "string" and GetObject(font) then
+		SetTextFont(self.object, GetObject(font))
 	end
 end
 

@@ -2,6 +2,7 @@
 #define _2DE_LOG_H_
 
 #include "2de_Core.h"
+#include "2de_Singleton.h"
 
 namespace Deku2D
 {
@@ -83,9 +84,9 @@ namespace Deku2D
 
 	// #define SIMPLIFIED_LOG // to use simple logging to std-out, instead of singleton-helled CLog... sometimes it's useful for debugging..
 	#ifdef SIMPLIFIED_LOG
-		#define Log Environment::LogToStdOut
+		#define Log Deku2D::Environment::LogToStdOut
 	#else
-		#define Log SLog->WriteToLog
+		#define Log Deku2D::SLog->WriteToLog
 	#endif // SIMPLIFIED_LOG
 
 }	//	namespace Deku2D

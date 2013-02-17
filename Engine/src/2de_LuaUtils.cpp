@@ -1060,7 +1060,7 @@ namespace Deku2D
 		lua_register(L, "GetParent", &LuaAPI::GetParent);
 		lua_register(L, "GetPrototype", &LuaAPI::GetPrototype);
 		lua_register(L, "GetParentPrototype", &LuaAPI::GetParentPrototype);
-		lua_register(L, "GetObjectByLocalName", &LuaAPI::GetObjectByLocalName);
+		lua_register(L, "GetObjectByLocalName", &LuaAPI::GetObjectByLocalName);		
 		lua_register(L, "GetChild", &LuaAPI::GetChild);
 		lua_register(L, "FindFirstOfClass", &LuaAPI::FindFirstOfClass);
 		lua_register(L, "Attach", &LuaAPI::Attach);

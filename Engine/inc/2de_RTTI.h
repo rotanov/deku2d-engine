@@ -1,134 +1,101 @@
 #ifndef _2DE_RTTI_H_
 #define _2DE_RTTI_H_
 
+#define _SECURE_SCL 0
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <typeinfo>
 #include <string>
+#include <vector>
+#include <map>
+#include <cassert>
+
+#include "2de_Property.h"
+
+/**
+ *	TODO:
+ *	Right now contents of this module have no relation to it's name.
+ *	This should be resolved.
+ */
 
 namespace Deku2D
 {
-	class CObject;
+	using std::string;
+	using std::map;
+	using std::vector;
 
-	// I hope we won't ever use this sand-witch approach.
-	// Hope clReflect soon will be usable
-
-	class CRTTI
+	template <typename T>
+	class IsPointer
 	{
 	public:
-		CRTTI(const std::string &AClassName, CRTTI *ABaseClassRTTI);
-
-	private:
-		std::string ClassName;
-		CRTTI *BaseRTTI;
+		enum { result = false, };
 	};
 
-	class CNullRTTIClass
+	template <typename T>
+	class IsPointer<T*>
 	{
 	public:
-		static inline CRTTI* GetClassRTTI() { return &RTTI; }
-		virtual CRTTI* GetRTTI() { return &RTTI; }
-
-	protected:
-		static CRTTI RTTI;
-
+		enum { result = true, };
 	};
 
-	template <typename Heir, typename BaseClass>
-	class CRTTIClass: public BaseClass
+	template <typename T>
+	class IsIntegral
 	{
 	public:
-		CRTTIClass();
-		typedef BaseClass Base;
-
-		static Heir* Create();
-		static void RegisterReflection();
-		static inline CRTTI* GetClassRTTI() { return &RTTI; }
-		virtual CRTTI* GetRTTI() { return &RTTI; }
-
-	protected:
-		static CRTTI RTTI;
-
+		enum { result = false, };
 	};
 
-	template<typename Heir, typename BaseClass>
-	CRTTI CRTTIClass<Heir, BaseClass>::RTTI( typeid(Heir).name, BaseClass::GetClassRTTI());
+	#define D2D_DECLARE_INTEGRAL_TYPE(T)	\
+		template <>	\
+		class IsIntegral<T>	\
+		{	\
+		public:	\
+			enum { result = true, };	\
+		};	\
 
-	template<typename Heir, typename BaseClass>
-	inline CRTTIClass<Heir, BaseClass>::CRTTIClass()
+	D2D_DECLARE_INTEGRAL_TYPE(char)
+	D2D_DECLARE_INTEGRAL_TYPE(int)
+	D2D_DECLARE_INTEGRAL_TYPE(float)
+	D2D_DECLARE_INTEGRAL_TYPE(bool)
+	D2D_DECLARE_INTEGRAL_TYPE(std::string)
+
+	template<typename T>
+	class IsAbstract
 	{
+		// In case you forgot how it works: google SFINAE (Substitution failure is not an error)
+		// todo: add assertions to ensure sizeof(char) == 1 and sizeof(short) == 2
+		template<class U> static char test( U (*)[1] );
+		template<class U> static short test( ... );
 
-	}
+	public:
+		enum { result = sizeof( test<T>( 0 ) ) - 1 };
+	};
 
-	template<typename Heir, typename BaseClass>
-	Heir* CRTTIClass<Heir, BaseClass>::Create()
+	template<typename T, int A = IsAbstract<T>::result>
+	class Make
 	{
-		return new Heir();
-	}
-
-	template<typename Heir, typename BaseClass>
-	void CRTTIClass<Heir, BaseClass>::RegisterReflection()
-	{
-		
-	}
-
-	namespace EPropertyType
-	{
-		enum E
+	public:
+		static T* New()
 		{
-			UNKNOWN,
-			INT,
-			UINT,
-			FLOAT,
-			DOUBLE,
-			STRING,
-			CHAR,
-			PTR,
-			LAST,
-		};
-	}
-
-	template < typename T >
-	class CPropertyType
-	{
-	public:
-		static EPropertyType::E Type;
-	};
-
-	template<typename T> EPropertyType::E CPropertyType<T>::Type = EPropertyType::UNKNOWN;
-	template<> EPropertyType::E CPropertyType<unsigned int>::Type = EPropertyType::UINT;
-	template<> EPropertyType::E CPropertyType<int>::Type = EPropertyType::FLOAT;
-
-	class CAbstractProperty
-	{
-	public:
-		virtual EPropertyType::E GetType() const = 0;
-
-	protected:
-		const char *name;
+			return new T();
+		}
 	};
 
 	template<typename T>
-	class CTypedProperty : public CAbstractProperty
+	class Make<T, 1>
 	{
 	public:
-		virtual EPropertyType::E GetType() const;
-		virtual T GetValue( CObject* pObject ) = 0;
-		virtual void SetValue( CObject* pObject, T value ) = 0;
+		static T* New()
+		{
+				throw("pizdec");                
+		}
 	};
 
-	template<typename OwnerType, typename T>
-	class CProperty : public CTypedProperty<T>
+	class CNullClass
 	{
-	public:
-		typedef T (OwnerType::*GetterType)();
-		typedef void (OwnerType::*SetterType)( T Value );
-		virtual T GetValue( CObject * pObject);
-		virtual void SetValue( CObject* pObject, T Value);
-	protected:
-		GetterType Getter;
-		SetterType Setter;
 	};
 
-	// RegisterProperty<uint>( "Mah property" ) for example
 }	//	namespace Deku2D
 
 #endif	// _2DE_RTTI_H_

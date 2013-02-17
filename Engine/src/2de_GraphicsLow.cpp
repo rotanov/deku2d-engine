@@ -99,7 +99,7 @@ namespace Deku2D
 		bool ShouldVisit(CPlaceableComponent &Placing)
 		{
 			return true;
-		}
+		}		
 
 		void VisitOnEnter(CPlaceableComponent &Placing)
 		{
@@ -164,7 +164,7 @@ namespace Deku2D
 		{
 			return true;
 		}
-
+		
 		void VisitOnEnter(CDebugBoxComponent &DebugBox)
 		{
 			DebugBox.SetActive(DebugBox.IsEnabled() && DebugBox.GetVisibility() &&

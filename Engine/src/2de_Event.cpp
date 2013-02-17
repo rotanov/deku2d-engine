@@ -17,7 +17,7 @@ namespace Deku2D
 
 	bool CEvent::IsDataExists(const string &AName) const
 	{
-		return Data.count(AName);
+		return Data.count(AName) > 0;
 	}
 
 	CEvent::DataIterator CEvent::Begin() const

@@ -2,5 +2,4 @@
 
 namespace Deku2D
 {
-
 }	//	namespace Deku2d

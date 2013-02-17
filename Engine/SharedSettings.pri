@@ -11,8 +11,6 @@ INCLUDEPATH += $$PWD/inc
 LIBS += -L$$PWD/lib
 
 win32 {
-	CONFIG += windows
-
 	#environment variable LIB should be used for these to be found
 	LIBS +=	-lOpenGl32 \
 			-lGlu32 \
@@ -45,6 +43,8 @@ CONFIG(debug, debug|release) {
 	LIBS += -lDeku2d.debug
 
 	win32 {
+		CONFIG += console
+
 		DEFINES +=	\
 			WIN32 \
 			_WINDOWS \
@@ -59,6 +59,8 @@ CONFIG(debug, debug|release) {
 	LIBS += -lDeku2d.release
 
 	win32 {
+		CONFIG += windows
+
 		DEFINES +=	\
 			WIN32 \
 			_WINDOWS \
@@ -68,5 +70,4 @@ CONFIG(debug, debug|release) {
 		QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libci \
 			/NODEFAULTLIB:libcmt
 	}
-
 }
