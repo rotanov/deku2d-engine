@@ -194,7 +194,7 @@ namespace Deku2D
 		string GetDataPath() const;
 		void SetDataPath(const string &ADataPath);
 
-		list<CResourceSectionLoaderBase *> SectionsLoaders;
+		list<CResourceSectionLoaderBase*> SectionsLoaders;
 
 	protected:
 		CResourceManager();

@@ -122,26 +122,19 @@ bool CCustomStateHandler::OnInitialize()
 	HRTimer timer;
 	timer.StartTimer();
 
-	for
-	(
-		std::list<Deku2D::CResourceSectionLoaderBase*>::iterator i
-	 = Deku2D::ResourceManager.Instance()->SectionsLoaders.begin();
-	 i != Deku2D::ResourceManager.Instance()->SectionsLoaders.end();
-	 ++i
-	)
+	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
 	{
-		if((*i)->GetName() == "Fonts" )
-			for
-			(
-				std::vector<std::pair<std::string, std::string> >::iterator j
-					= (*i)->ResourceNames.begin();
-				j != (*i)->ResourceNames.end();
-				++j
-			)
+		if (i->GetName() == "Fonts")
+		{
+			for (auto j : i->ResourceNames)
 			{
-				//Log( "RESOURCE", "Name: %s, filename: %s.", (*j).first.c_str(), (*j).second.c_str());
-				Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>((*j).first), "CObject", (*j).second + ".json" );
+				if (j.second.rfind(".fif", j.second.length() - 4) == j.second.length() - 4)
+				{
+					Log( "RESOURCE", "Name: %s, filename: %s.", j.first.c_str(), j.second.c_str());
+					Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>(j.first), "CObject", j.second + ".json" );
+				}
 			}
+		}
 	}
 
 	double time = timer.StopTimer();
@@ -151,10 +144,10 @@ bool CCustomStateHandler::OnInitialize()
 	Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDERR);
 	Log( "TIME", "%lf", time );
 
-//	Deku2D::CEngine::Instance()
-//			->RootGameObject
-//			->Attach(Deku2D::Factory
-//					 ->New<CTest>("SetSizeTest"));
+	Deku2D::CEngine::Instance()
+			->RootGameObject
+			->Attach(Deku2D::Factory
+					 ->New<CTest>("SetSizeTest"));
 //	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
 //	Deku2D::SoundMixer->SetMusicVolume(128);
 

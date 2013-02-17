@@ -70,5 +70,4 @@ CONFIG(debug, debug|release) {
 		QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libci \
 			/NODEFAULTLIB:libcmt
 	}
-
 }
