@@ -15,7 +15,7 @@ class TypeInfo
 public:
 	TypeInfo() : _hasDerived( false ) {}
 	bool HasDerived() const { return _hasDerived; }
-	virtual char* Name() const = 0;
+	virtual const char* Name() const = 0;
 	virtual void* New() const = 0;
 	virtual PropertyInfo* GetProperty(const string &name) const = 0;
 	virtual map<string, PropertyInfo*>& Properties() = 0;
@@ -122,7 +122,7 @@ public:
 #define _D2D_TYPE_INFO_DECL_BASE(TYPE)	\
 		TypeInfo##TYPE() { _typeInfos[#TYPE] = &_instance; }	\
 		void* New() const { return Make<TYPE>::New(); }	\
-		char* Name() const { return #TYPE; }	\
+		const char* Name() const { return #TYPE; }	\
 		virtual bool IsIntegral() const { return Deku2D::IsIntegral<TYPE>::result; }	\
 		virtual void SetString(void *instance, const string &value)	\
 		{	\

@@ -7,6 +7,7 @@
 #include "2de_Visitor.h"
 #include "2de_PlaceableComponent.h"
 #include "2de_RenderableComponent.h"
+#include "2de_Text.h"
 
 namespace Deku2D
 {

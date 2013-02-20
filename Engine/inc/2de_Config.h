@@ -3,6 +3,8 @@
 
 #include "2de_Core.h"
 #include "2de_Xml.h"
+#include "2de_Object.h"
+#include "2de_Singleton.h"
 
 namespace Deku2D
 {

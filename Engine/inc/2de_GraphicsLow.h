@@ -9,6 +9,7 @@
 #include "2de_Vector3.h"
 #include "2de_Box.h"
 #include "2de_RGBA.h"
+#include "2de_CommonManager.h"
 
 namespace Deku2D
 {

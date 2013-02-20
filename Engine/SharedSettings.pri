@@ -40,9 +40,10 @@ CONFIG(debug, debug|release) {
 	DEFINES += \
 		_DEBUG
 
-	LIBS += -lDeku2d.debug
 
 	win32 {
+		LIBS += -lDeku2d.debug
+
 		CONFIG += console
 
 		DEFINES +=	\
@@ -55,10 +56,15 @@ CONFIG(debug, debug|release) {
 			/NODEFAULTLIB:libcmt
 	}
 
+	unix {
+		LIBS += -lDeku2D
+	}
+
 } else {
-	LIBS += -lDeku2d.release
 
 	win32 {
+		LIBS += -lDeku2d.release
+
 		CONFIG += windows
 
 		DEFINES +=	\
@@ -69,5 +75,9 @@ CONFIG(debug, debug|release) {
 
 		QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libci \
 			/NODEFAULTLIB:libcmt
+	}
+
+	unix {
+		LIBS += -lDeku2D
 	}
 }

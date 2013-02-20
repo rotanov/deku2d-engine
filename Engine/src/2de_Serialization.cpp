@@ -1,11 +1,14 @@
 #include "2de_Serialization.h"
-#include "2de_Xml.h"
-#include "2de_RTTI.h"
+
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/filestream.h>
+
+#include "2de_Xml.h"
+#include "2de_RTTI.h"
+#include "2de_TypeInfo.h"
 
 namespace Deku2D
 {

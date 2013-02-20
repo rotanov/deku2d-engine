@@ -4,6 +4,7 @@
 #include "2de_Core.h"
 #include "2de_Math.h"
 #include "2de_Box.h"
+#include "2de_Object.h"
 
 namespace Deku2D
 {

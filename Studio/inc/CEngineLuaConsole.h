@@ -5,6 +5,7 @@
 #include <QLineEdit>
 
 #include "2de_Core.h"
+#include "2de_Object.h"
 
 using namespace Deku2D;
 

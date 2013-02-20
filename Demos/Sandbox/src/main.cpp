@@ -78,6 +78,7 @@ public:
 	void OnFinalize();
 };
 
+/*
 class HRTimer
 {
 public:
@@ -118,6 +119,7 @@ double HRTimer::StopTimer(void)
 	::SetThreadAffinityMask(::GetCurrentThread(), oldmask);
 	return ((stop.QuadPart - start.QuadPart) / frequency);
 }
+*/
 
 
 bool CCustomStateHandler::OnInitialize()
@@ -134,9 +136,10 @@ bool CCustomStateHandler::OnInitialize()
 				)
 			);
 
-	HRTimer timer;
-	timer.StartTimer();
+	//HRTimer timer;
+	//timer.StartTimer();
 
+	/*
 	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
 	{
 		if (i->GetName() == "Fonts")
@@ -151,13 +154,14 @@ bool CCustomStateHandler::OnInitialize()
 			}
 		}
 	}
+	*/
 
-	double time = timer.StopTimer();
-	Log( "TIME", "%lf", time );
-	Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDOUT);
-	Log( "TIME", "%lf", time );
-	Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDERR);
-	Log( "TIME", "%lf", time );
+	//double time = timer.StopTimer();
+	//Log( "TIME", "%lf", time );
+	//Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDOUT);
+	//Log( "TIME", "%lf", time );
+	//Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDERR);
+	//Log( "TIME", "%lf", time );
 
 	Deku2D::CEngine::Instance()
 			->RootGameObject

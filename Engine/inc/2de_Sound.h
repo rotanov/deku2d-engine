@@ -5,6 +5,9 @@
 
 #include "2de_Core.h"
 #include "2de_Resource.h"
+#include "2de_CommonManager.h"
+#include "2de_Object.h"
+#include "2de_Singleton.h"
 
 namespace Deku2D
 {

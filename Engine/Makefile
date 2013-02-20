@@ -18,6 +18,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_LuaUtils.cpp \
 			src/2de_Math.cpp \
 			src/2de_Matrix2.cpp \
+			src/2de_Memory.cpp \
 			src/2de_Object.cpp \
 			src/2de_PlaceableComponent.cpp \
 			src/2de_Physics.cpp \
@@ -29,6 +30,7 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_RTTI.cpp \
 			src/2de_Serialization.cpp \
 			src/2de_ShroomTitle.cpp \
+			src/2de_Singleton.cpp \
 			src/2de_SpatialManager.cpp \
 			src/2de_Sound.cpp \
 			src/2de_Storage.cpp \
@@ -69,6 +71,7 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_RTTI.o \
 			obj/2de_Serialization.o \
 			obj/2de_ShroomTitle.o \
+			obj/2de_Singleton.o \
 			obj/2de_SpatialManager.o \
 			obj/2de_Sound.o \
 			obj/2de_Storage.o \
@@ -82,7 +85,7 @@ OBJECTS		=	obj/2de_Core.o \
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
 LUA_CFLAGS	:=	$(shell pkg-config --cflags lua5.1)
 
-CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -Iinc
+CFLAGS		:= 	${CFLAGS} ${SDL_CFLAGS} ${LUA_CFLAGS} -Iinc -std=c++0x
 
 SDL_LDFLAGS	:=	$(shell sdl-config --libs)
 LUA_LDFLAGS	:=	$(shell pkg-config --libs lua5.1)

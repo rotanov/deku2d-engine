@@ -8,9 +8,9 @@ using std::string;
 class PropertyInfo
 {
 public:
-	virtual char* Name() const = 0;
-	virtual char* TypeName() const = 0;
-	virtual char* OwnerName() const = 0;	
+	virtual const char* Name() const = 0;
+	virtual const char* TypeName() const = 0;
+	virtual const char* OwnerName() const = 0;	
 	virtual void SetValue(void *owner, void *property) = 0;
 	virtual void* GetValue(void *owner) = 0;
 	virtual bool IsPointer() = 0;
@@ -31,9 +31,9 @@ public:
 		{	\
 			TypeInfo::GetTypeInfo(#OWNER)->Properties()[#NAME] = &_instance;	\
 		}	\
-		virtual char* Name() const { return #NAME; }	\
-		virtual char* TypeName() const { return #TYPE; }	\
-		virtual char* OwnerName() const { return #OWNER; }	\
+		virtual const char* Name() const { return #NAME; }	\
+		virtual const char* TypeName() const { return #TYPE; }	\
+		virtual const char* OwnerName() const { return #OWNER; }	\
 
 #define _D2D_END_DECLARE_PROPERTY(OWNER, NAME)	\
 		static OwnedPropertyInfo##OWNER##NAME _instance;	\

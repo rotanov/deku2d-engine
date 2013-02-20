@@ -2,6 +2,7 @@
 
 #include <Qsci/qsciscintilla.h>
 #include <2de_Core.h>
+#include <2de_Storage.h>
 
 using namespace Deku2D;
 
