@@ -52,7 +52,7 @@ namespace Deku2D
 				D2D_DECLARE_PROPERTY_INFO(CScript, string, ScriptText)
 
 			D2D_DECL_DERIVED_TYPE_INFO(CModel, CResource)
-				// D2D_DECLARE_PROPERTY_INFO(CModel, EModelType, ModelType) потом. Там enum за int конверсия в стринг не считает
+				// D2D_DECLARE_PROPERTY_INFO(CModel, EModelType, ModelType) РїРѕС‚РѕРј. РўР°Рј enum Р·Р° int РєРѕРЅРІРµСЂСЃРёСЏ РІ СЃС‚СЂРёРЅРі РЅРµ СЃС‡РёС‚Р°РµС‚
 				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CModel, Vector2, Vertices, SetVertex, GetVertex, GetVertexNumber)
 
 		D2D_DECL_DERIVED_TYPE_INFO(IVisitableObject, CObject)

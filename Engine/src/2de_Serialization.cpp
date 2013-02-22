@@ -40,7 +40,7 @@ namespace Deku2D
 			while (typeInfo->HasDerived())
 			{
 				if( typeInfo == typeInfo->GetRunTimeTypeInfo( next ) )
-					break;	// TODO: êîñòûëü óáðàòü.
+					break;	// TODO: ÐºÐ¾ÑÑ‚Ñ‹Ð»ÑŒ ÑƒÐ±Ñ€Ð°Ñ‚ÑŒ.
 				typeInfo = typeInfo->GetRunTimeTypeInfo( next );
 			}
 
