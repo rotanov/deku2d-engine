@@ -65,7 +65,6 @@ namespace Deku2D
 	/**
 	* CObject::SetDestroyed - marks non-managed objects as destroyed, calls CFactory::Destroy for managed ones. Does nothing for objects already marked as destroyed.
 	*/
-
 	void CObject::SetDestroyed()
 	{
 		if (Destroyed)
@@ -92,4 +91,4 @@ namespace Deku2D
 		Log("INFO", "Unhandled event '%s' in object '%s'", AEvent.GetName().c_str(), Name.c_str());
 	}
 
-};	// namespace Deku2D
+}	// namespace Deku2D

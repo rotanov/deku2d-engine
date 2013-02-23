@@ -15,7 +15,7 @@ namespace Deku2D
 
 	class CObject : public CNullClass
 	{
-		D2D_INJECT_TYPE_INFO(CObject);
+		D2D_TYPE_INFO_INJECT(CObject)
 
 	public:		
 		CObject();
@@ -53,6 +53,6 @@ namespace Deku2D
 	};
 
 
-};	// namespace Deku2D
+}	// namespace Deku2D
 
 #endif // _2DE_OBJECT_H_

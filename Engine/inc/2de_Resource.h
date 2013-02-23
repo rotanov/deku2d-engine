@@ -84,7 +84,7 @@ namespace Deku2D
 
 	class CResource : public CObject
 	{
-		D2D_INJECT_TYPE_INFO(CResource);
+		D2D_TYPE_INFO_INJECT(CResource);
 
 	public:
 		enum ELoadSource

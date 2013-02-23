@@ -38,14 +38,14 @@ public:
 	virtual TypeInfo* GetRunTimeTypeInfo(void* instance) const { throw "Not implemented."; }
 	static TypeInfo* GetTypeInfo(const string &typeName)
 	{
-		if (_typeInfos.find(typeName) == _typeInfos.end())
+		if (_getTypeInfos().find(typeName) == _getTypeInfos().end())
 		{
 			char errMsg[128];
 			sprintf(errMsg, "Type info for type: \"%s\" doesn't exist.", typeName.c_str());
 			throw(errMsg);
 		}
 		else
-			return _typeInfos[typeName];
+			return _getTypeInfos()[typeName];
 	}
 	virtual void FillJSONValue( rapidjson::Value*, void* instance)
 	{
@@ -54,7 +54,7 @@ public:
 
 	static void Initialize() // Run time initialization and checks
 	{
-		for (map<string, TypeInfo*>::iterator i = _typeInfos.begin(); i != _typeInfos.end(); ++i)
+		for (map<string, TypeInfo*>::iterator i = _getTypeInfos().begin(); i != _getTypeInfos().end(); ++i)
 		{
 			if (i->second->BaseInfo())
 			{
@@ -63,10 +63,56 @@ public:
 		}
 	}
 
+	// returns string with human-readable type summary
+	static string GetTypeDescriptionString(const string& typeName, unsigned depth = 0)
+	{
+		if (_getTypeInfos()[typeName] == 0)
+			return "Type info record for type \"" + typeName + "\" doesn't exist.\n";
 
+		TypeInfo& typeInfo= *_getTypeInfos()[typeName];
+		string identStr(depth, '\t');
+		string identStr1 = identStr + "\t";
+		string identStr2 = identStr + "\t\t";
+		string identStr3 = identStr + "\t\t\t";
+		string eolStr = "\n";
+		string r;
+
+		r = identStr + "Description of type\"" + typeName + "\":" + eolStr + eolStr +
+			identStr1 + "name: " + typeInfo.Name() + eolStr + eolStr +
+			identStr1 + "Properties:" + eolStr;
+
+		for (auto i : typeInfo.Properties())
+		{
+			PropertyInfo& p = *i.second;
+			r += identStr2 + "key: \"" + i.first + "\"" + eolStr +
+				 identStr3 + "name: \"" + p.Name() + "\"" + eolStr +
+				 identStr3 + "type name: \"" + p.TypeName() + "\"" + eolStr +
+				 identStr3 + "owner name: \"" + p.OwnerName() + "\"" + eolStr +
+				 identStr3 + "valid flags: ";
+
+			if (p.IsArray())
+				r += "array, ";
+			if (p.IsPointer())
+				r += "pointer, ";
+			if (p.Integral())
+				r += "integral, ";
+			r += eolStr;
+		}
+
+		if (typeInfo.BaseInfo() != NULL)
+		{
+			r += eolStr;
+			string baseName = typeInfo.BaseInfo()->Name();
+			r += identStr1 + "Derived from type: \"" + baseName + "\"" + eolStr;
+			r += TypeInfo::GetTypeDescriptionString(baseName, depth + 1);
+		}
+
+		return r;
+	}
 
 protected:
-	static map<string, TypeInfo*> _typeInfos;
+	//static map<string, TypeInfo*> _typeInfos;
+	static map<string, TypeInfo*>& _getTypeInfos();
 
 	void SetHasDerived( bool hasDerived ) { _hasDerived = hasDerived; }
 
@@ -114,14 +160,14 @@ public:
 	}
 };
 
-#define _D2D_BEGIN_TYPE_INFO_DECL(TYPE)	\
+#define _D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE)	\
 	class TypeInfo##TYPE : public TypeInfo	\
 	{	\
 	public:	\
 
-#define _D2D_TYPE_INFO_DECL_BASE(TYPE)	\
-		TypeInfo##TYPE() { _typeInfos[#TYPE] = &_instance; }	\
-		void* New() const { return Make<TYPE>::New(); }	\
+#define _D2D_TYPE_INFO_DECLARATION_BASE(TYPE)	\
+		TypeInfo##TYPE() { _getTypeInfos()[#TYPE] = &_instance; }	\
+		void* New() const { return Deku2D::Make<TYPE>::New(); }	\
 		const char* Name() const { return #TYPE; }	\
 		virtual bool IsIntegral() const { return Deku2D::IsIntegral<TYPE>::result; }	\
 		virtual void SetString(void *instance, const string &value)	\
@@ -135,27 +181,27 @@ public:
 		PropertyInfo* GetProperty(const string &name) const { return _props[name]; }	\
 		map<string, PropertyInfo*>& Properties() { return _props; }	\
 
-#define _D2D_END_TYPE_INFO_DECL(TYPE)	\
+#define _D2D_TYPE_INFO_DECLARATION_END(TYPE)	\
 	static TypeInfo##TYPE _instance;	\
 	static map<string, PropertyInfo*> _props;	\
 };	\
 TypeInfo##TYPE TypeInfo##TYPE::_instance;	\
 map<string, PropertyInfo*> TypeInfo##TYPE::_props;	\
 
-#define D2D_DECL_TYPE_INFO(TYPE)	\
-	_D2D_BEGIN_TYPE_INFO_DECL(TYPE)	\
-	_D2D_TYPE_INFO_DECL_BASE(TYPE)	\
+#define D2D_TYPE_INFO_DECLARE(TYPE)	\
+	_D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE)	\
+	_D2D_TYPE_INFO_DECLARATION_BASE(TYPE)	\
 		TypeInfo* BaseInfo() { return 0; }	\
-	_D2D_END_TYPE_INFO_DECL(TYPE)	\
+	_D2D_TYPE_INFO_DECLARATION_END(TYPE)	\
 
-#define D2D_DECL_DERIVED_TYPE_INFO(TYPE_DERIVED, TYPE_BASE)	\
-	_D2D_BEGIN_TYPE_INFO_DECL(TYPE_DERIVED)	\
-	_D2D_TYPE_INFO_DECL_BASE(TYPE_DERIVED)	\
-		TypeInfo* BaseInfo() { return _typeInfos[#TYPE_BASE]; }	\
+#define D2D_TYPE_INFO_DECLARE_DERIVED(TYPE_DERIVED, TYPE_BASE)	\
+	_D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE_DERIVED)	\
+	_D2D_TYPE_INFO_DECLARATION_BASE(TYPE_DERIVED)	\
+		TypeInfo* BaseInfo() { return _getTypeInfos()[#TYPE_BASE]; }	\
 		virtual TypeInfo* GetRunTimeTypeInfo(void* instance) const { return static_cast<TYPE_DERIVED*>(instance)->GetTypeInfo(); }	\
-	_D2D_END_TYPE_INFO_DECL(TYPE_DERIVED)	\
+	_D2D_TYPE_INFO_DECLARATION_END(TYPE_DERIVED)	\
 
-#define D2D_INJECT_TYPE_INFO(TYPE)	\
+#define D2D_TYPE_INFO_INJECT(TYPE)	\
 	public:	\
 	virtual TypeInfo* GetTypeInfo() const { return TypeInfo::GetTypeInfo(#TYPE); }
 

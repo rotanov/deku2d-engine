@@ -475,7 +475,7 @@ namespace Deku2D
 	#define CFONT_MAX_SYMBOLS 256
 	class CFont : public CResource
 	{
-		D2D_INJECT_TYPE_INFO(CFont)
+		D2D_TYPE_INFO_INJECT(CFont)
 
 	public:
 		CBox Boxes[256];	// why 256? // TODO: make this private and getter that checks for FirstTimeLoaded..

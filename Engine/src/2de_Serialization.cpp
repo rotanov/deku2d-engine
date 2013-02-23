@@ -19,7 +19,7 @@ namespace Deku2D
 		class CStateInfo
 		{
 		public:
-			std::map<void*, int> addresTable;
+			std::map<void*, int> addressTable;
 			int ptrCount;
 			FileStream fileStream;
 			PrettyWriter<FileStream> writer;
@@ -64,7 +64,7 @@ namespace Deku2D
 						std::string stringValue = _typeInfo->GetString(value);
 
 						state.writer.String(i->second->Name());
-						state.writer.String(stringValue.c_str());
+						state.writer.String(stringValue.c_str());											
 					}
 					else if (i->second->IsArray())
 					{
@@ -99,17 +99,17 @@ namespace Deku2D
 							}
 							else
 							{
-								alreadySerialized = state.addresTable.count( i->second->GetValue(next) ) == 1;
+								alreadySerialized = state.addressTable.count( i->second->GetValue(next) ) == 1;
 								if (alreadySerialized)
 								{
 									state.writer.String(("@ptr" + Convert<int>::
-										ToString(state.addresTable[i->second->GetValue(next)])).c_str());
+										ToString(state.addressTable[i->second->GetValue(next)])).c_str());
 
 								}
 								else
 								{
 									state.ptrCount++;
-									state.addresTable[ i->second->GetValue(next) ] = state.ptrCount;
+									state.addressTable[ i->second->GetValue(next) ] = state.ptrCount;
 									state.writer.StartObject();
 									state.writer.String("@ptr");
 									state.writer.String(Convert<int>::ToString(state.ptrCount).c_str());

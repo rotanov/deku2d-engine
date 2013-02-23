@@ -12,7 +12,7 @@ namespace Deku2D
 
 	class CText : public CRenderableComponent
 	{
-		D2D_INJECT_TYPE_INFO(CText);
+		D2D_TYPE_INFO_INJECT(CText);
 
 	public:
 		// Treat as CRenderableComponent for now, if not uncomment the following and support visitors with one more branch

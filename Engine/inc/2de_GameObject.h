@@ -20,7 +20,7 @@ namespace Deku2D
 
 	class CGameObject : public IVisitableObject
 	{
-		D2D_INJECT_TYPE_INFO(CGameObject);
+		D2D_TYPE_INFO_INJECT(CGameObject);
 		D2D_DECLARE_VISITABLE();
 
 	public:	

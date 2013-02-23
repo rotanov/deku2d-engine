@@ -20,6 +20,16 @@ Deku2D::CEngine* Ninja = ENGINE;
 
 */
 
+class TestSerializationBase
+{
+	D2D_TYPE_INFO_INJECT(TestSerializationBase);
+public:
+	TestSerializationBase(){}
+	~TestSerializationBase(){}
+};
+
+D2D_TYPE_INFO_DECLARE(TestSerializationBase)
+
 class CTest : public Deku2D::CGameObject
 {
 public:
@@ -92,8 +102,7 @@ private:
 	double frequency;
 };
 
-HRTimer::HRTimer(): start(), stop(),
-frequency()
+HRTimer::HRTimer(): start(), stop(), frequency()
 {
 	frequency = this->GetFrequency();
 }
@@ -126,11 +135,9 @@ bool CCustomStateHandler::OnInitialize()
 {
 	Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
 	Deku2D::SceneManager->SetCurrentScene(NewScene);
-	Deku2D::LuaVirtualMachine
-			->RunScript
+	Deku2D::LuaVirtualMachine->RunScript
 			(
-				Deku2D::Factory
-				->Get<Deku2D::CScript>
+				Deku2D::Factory->Get<Deku2D::CScript>
 				(
 					Deku2D::Config->Section("Data")["InitScript"]
 				)
@@ -139,7 +146,15 @@ bool CCustomStateHandler::OnInitialize()
 	//HRTimer timer;
 	//timer.StartTimer();
 
-	/*
+	//*
+
+	TestSerializationBase test;
+	Deku2D::Serialization::ToJSON(&test, "TestSerializationBase", "test.json");
+
+	FILE *f = fopen("typeinfo.txt", "w");
+	fprintf(f, "%s", TypeInfo::GetTypeDescriptionString("CFont").c_str());
+	fclose(f);
+
 	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
 	{
 		if (i->GetName() == "Fonts")
@@ -154,7 +169,7 @@ bool CCustomStateHandler::OnInitialize()
 			}
 		}
 	}
-	*/
+	//*/
 
 	//double time = timer.StopTimer();
 	//Log( "TIME", "%lf", time );
