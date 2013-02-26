@@ -1,7 +1,5 @@
 #include "2de_RenderableComponent.h"
 
-#include "2de_DebugBox.h"
-
 namespace Deku2D
 {
 	//////////////////////////////////////////////////////////////////////////
@@ -215,30 +213,6 @@ namespace Deku2D
 	void CRenderableComponent::UpdateBox(const CBox& ABox)
 	{
 		Box.Union(ABox);
-		if (typeid(*this) == typeid(CDebugBoxComponent))
-			return;
-	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
-
-		CDebugBoxComponent *DebugBox = dynamic_cast<CDebugBoxComponent*>(GetChild(0));
-		if (NULL != DebugBox)
-		{
-			if (DebugBox->GetModel() == NULL)
-				DebugBox->SetModel(CRenderManager::CreateModelBox(Box.Width(), Box.Height(), MODEL_TYPE_LINES));
-			{
-				DebugBox->Model->Vertices[0] = Vector2(Box.Min.x, Box.Min.y);
-				DebugBox->Model->Vertices[1] = Vector2(Box.Max.x, Box.Min.y);
-
-				DebugBox->Model->Vertices[2] = Vector2(Box.Max.x, Box.Min.y);
-				DebugBox->Model->Vertices[3] = Vector2(Box.Max.x, Box.Max.y);
-
-				DebugBox->Model->Vertices[4] = Vector2(Box.Max.x, Box.Max.y);
-				DebugBox->Model->Vertices[5] = Vector2(Box.Min.x, Box.Max.y);
-
-				DebugBox->Model->Vertices[6] = Vector2(Box.Min.x, Box.Max.y);
-				DebugBox->Model->Vertices[7] = Vector2(Box.Min.x, Box.Min.y);
-			}
-		}
-	#endif
 	}
 
 	CRenderableComponent::CRenderableComponent(const CRenderableComponent &ARenderableComponent) : CGameObject(ARenderableComponent)

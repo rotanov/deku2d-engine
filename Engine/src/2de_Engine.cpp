@@ -78,9 +78,14 @@ namespace Deku2D
 			return false;
 		}
 
-		if (!(Initialized = Initialize()))
+		try
 		{
-			Log("ERROR", "Initialization failed");
+			if (!Initialize())
+				throw std::runtime_error("Initialize() returned false.");
+		}
+		catch(const std::exception& e)
+		{
+			Log("ERROR", (string("Initialization failed: ") + e.what()).c_str());
 			SDL_Quit();	// maybe Finalize() to clean-up already initialized systems?
 			return false;
 		}

@@ -119,9 +119,6 @@ namespace Deku2D
 		a = NULL;
 	}
 
-	#define DISABLE_DEBUG_BOXES
-	//#undef DISABLE_DEBUG_BOXES
-
 	template<typename T>
 	struct identity
 	{

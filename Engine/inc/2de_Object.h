@@ -13,7 +13,7 @@ namespace Deku2D
 	* CObject - base class for many classes.
 	*/
 
-	class CObject : public CNullClass
+	class CObject
 	{
 		D2D_TYPE_INFO_INJECT(CObject)
 

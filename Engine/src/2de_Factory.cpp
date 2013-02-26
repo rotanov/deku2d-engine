@@ -7,7 +7,6 @@
 #include "2de_GeometricComponent.h"
 #include "2de_Text.h"
 #include "2de_TimerComponent.h"
-#include "2de_DebugBox.h"
 
 namespace Deku2D
 {
@@ -284,19 +283,5 @@ namespace Deku2D
 
 		return it->second->CloneTree(AName);
 	}
-
-	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
-
-	void CFactory::InsertDebugInfo( CObject* Source )
-	{
-		if (typeid(*Source) == typeid(CDebugBoxComponent))
-			return;
-		CGameObject *GameObject = dynamic_cast<CGameObject*>(Source);
-		if (GameObject == NULL)
-			return;
-		GameObject->Attach(New<CDebugBoxComponent>());
-	}
-
-	#endif
 
 }	//	namespace Deku2D

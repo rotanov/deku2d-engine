@@ -21,6 +21,7 @@ namespace Deku2D
 		public:
 			std::map<void*, int> addressTable;
 			int ptrCount;
+			unsigned depth;
 			FileStream fileStream;
 			PrettyWriter<FileStream> writer;
 
@@ -28,20 +29,28 @@ namespace Deku2D
 				: ptrCount(0)
 				, fileStream(file)
 				, writer(fileStream)
+				, depth(0)
 			{
 			}
 		};
 
 		static void Helper(CStateInfo& state, void* next, const string &nextName)
 		{
+			state.depth++;
 			state.writer.StartObject();
 
 			TypeInfo *typeInfo = TypeInfo::GetTypeInfo(nextName);
 			while (typeInfo->HasDerived())
 			{
-				if( typeInfo == typeInfo->GetRunTimeTypeInfo( next ) )
+				if (typeInfo == typeInfo->GetRunTimeTypeInfo(next))
 					break;	// TODO: костыль убрать.
-				typeInfo = typeInfo->GetRunTimeTypeInfo( next );
+				typeInfo = typeInfo->GetRunTimeTypeInfo(next);
+			}
+
+			if (state.depth == 1)
+			{
+				state.writer.String("@type");
+				state.writer.String(typeInfo->Name());
 			}
 
 			while (typeInfo)
@@ -54,7 +63,7 @@ namespace Deku2D
 
 					if (i->second->Integral())
 					{
-						if ( i->second->IsPointer() )
+						if (i->second->IsPointer())
 						{
 							printf( "we are here ");
 						}
@@ -133,6 +142,7 @@ namespace Deku2D
 				typeInfo = typeInfo->BaseInfo();
 			}
 			state.writer.EndObject();
+			state.depth--;
 		}
 
 		void ToJSON(void *o, const string &className, const std::string& filename)
@@ -141,6 +151,66 @@ namespace Deku2D
 			CStateInfo state(file);
 			Helper(state, o, className);
 			fclose(file);
+		}
+
+		void* FromJSON(const string& filename)
+		{
+			void* result = NULL;
+			rapidjson::Document document;
+			char* buffer;
+			FILE* fi = fopen(filename.c_str(), "rb");
+			struct stat fileStat;
+			stat(filename.c_str(), &fileStat);
+			buffer = new char [fileStat.st_size + 1];
+			buffer[fileStat.st_size] = 0;
+			fread(buffer, 1, fileStat.st_size, fi);
+			fclose(fi);
+			document.Parse<0>(buffer);
+
+			class T
+			{
+			public:
+				// Properly working breakpoints on windows with msvc10 and cdb inside static-function-inside-class-inside-function?
+				// Qt-Creator: "No, not heard."
+				static void* Helper(rapidjson::Document::ValueType* document, const char *nextName)
+				{
+					bool isObject = document->IsObject();
+					TypeInfo *typeInfo = TypeInfo::GetTypeInfo(nextName);
+					void *next = typeInfo->New();
+					for (rapidjson::Document::ValueType::MemberIterator i = document->MemberBegin(); i != document->MemberEnd(); ++i)
+					{
+						std::string propertyName = i->name.GetString();
+						PropertyInfo *prop = typeInfo->FindProperty(propertyName);
+						if (i->value.IsObject())
+						{
+							prop->SetValue(next, Helper(&(i->value), prop->TypeName()));
+						}
+						else if( i->value.IsArray())
+						{
+							for (int j = 0; j < i->value.Size(); j++)
+							{
+								TypeInfo *tempTypeInfo = TypeInfo::GetTypeInfo(prop->TypeName());
+								void *temp = tempTypeInfo->New();
+								tempTypeInfo->SetString(temp, i->value[j].GetString());
+								prop->PushValue(next, temp);
+								delete temp;
+							}
+						}
+						else
+						{
+							TypeInfo *tempTypeInfo = TypeInfo::GetTypeInfo(prop->TypeName());
+							void *temp = tempTypeInfo->New();
+							tempTypeInfo->SetString(temp, i->value.GetString());
+							prop->SetValue(next, temp);
+							delete temp;
+						}
+					}
+					return next;
+				}
+			};
+
+			result = T::Helper(&document, "Pes");
+			return result;
 		}
 
 	};	// namespace Serialization

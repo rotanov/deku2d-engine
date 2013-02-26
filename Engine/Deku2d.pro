@@ -42,7 +42,6 @@ HEADERS += \
 	inc/2de_Factory.h \
 	inc/2de_Event.h \
 	inc/2de_Engine.h \
-	inc/2de_DebugBox.h \
 	inc/2de_Core.h \
 	inc/2de_Config.h \
 	inc/2de_Box.h \
@@ -89,7 +88,6 @@ SOURCES += \
 	src/2de_Event.cpp \
 	src/2de_Engine.cpp \
 	src/2de_DefaultFont.cpp \
-	src/2de_DebugBox.cpp \
 	src/2de_Core.cpp \
 	src/2de_Config.cpp \
 	src/2de_Box.cpp \

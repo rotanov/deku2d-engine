@@ -26,10 +26,12 @@ namespace Deku2D
 	//////////////////////////////////////////////////////////////////////////
 	// temp
 
-	class CDrawVisitor : virtual public IVisitorBase, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
+	class CDrawVisitor
+			: virtual public IVisitorBase
+			, public IVisitor<CPlaceableComponent>
+			, public IVisitor<CRenderableComponent>
 	{
 	public:
-
 		bool ShouldVisit(CPlaceableComponent &Placing)
 		{
 			return false;
@@ -59,27 +61,17 @@ namespace Deku2D
 
 		}
 
-		bool ShouldVisit(CDebugBoxComponent &DebugBox)
-		{
-			return DebugBox.IsActive();
-		}
-
-		void VisitOnEnter(CDebugBoxComponent &DebugBox)
-		{
-			RenderManager->Renderer->PushModel(DebugBox.WorldTransform,
-				&DebugBox.GetConfiguration(), DebugBox.GetModel());
-		}
-		void VisitOnLeave(CDebugBoxComponent &DebugBox)
-		{
-
-		}
 	};
 
-	class CUpdateVisitor : virtual public IVisitorBase, public IVisitor<CGameObject>, public IVisitor<CPlaceableComponent>, public IVisitor<CRenderableComponent>, public IVisitor<CDebugBoxComponent>
+	class CUpdateVisitor
+			: virtual public IVisitorBase
+			, public IVisitor<CGameObject>
+			, public IVisitor<CPlaceableComponent>
+			, public IVisitor<CRenderableComponent>
 	{
 	public:
-		CBox UpwayBox;
-		stack<CPlaceableComponent *> LPPStack; // Last Placeable Parent
+		// Last Placeable Parent
+		stack<CPlaceableComponent *> LPPStack;
 
 		bool ShouldVisit(CGameObject &Object)
 		{
@@ -160,25 +152,6 @@ namespace Deku2D
 			CEngine::Instance()->SpatialManager->PushBox(&Graphics, newBox);
 		}
 
-		bool ShouldVisit(CDebugBoxComponent &DebugBox)
-		{
-			return true;
-		}
-		
-		void VisitOnEnter(CDebugBoxComponent &DebugBox)
-		{
-			DebugBox.SetActive(DebugBox.IsEnabled() && DebugBox.GetVisibility() &&
-				!DebugBox.isDestroyed() && SceneManager->InScope(DebugBox.GetScene()));
-			if (!DebugBox.IsActive())
-				return;
-
-			DebugBox.WorldTransform = RenderManager->Transformator.GetCurrentTransfomation();
-		}
-
-		void VisitOnLeave(CDebugBoxComponent &DebugBox)
-		{
-
-		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////

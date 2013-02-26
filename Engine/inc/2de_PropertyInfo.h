@@ -55,7 +55,7 @@ public:
 			*value = static_cast<OWNER*>(owner)->GETTER();	\
 			return value;	\
 		}	\
-		bool Integral() { return IsIntegral<TYPE>::result; }	\
+		bool Integral() { return Deku2D::IsIntegral<TYPE>::result; }	\
 		bool IsPointer() { return false; }	\
 		bool IsArray() { return false;	}	\
 		void PushValue(void *owner, void *value) { throw "pizdec"; }	\
@@ -112,7 +112,7 @@ public:
 	{	\
 		return static_cast<OWNER*>(owner)->GETTER();	\
 	}	\
-	bool Integral() { return IsIntegral<TYPE>::result; }	\
+	bool Integral() { return Deku2D::IsIntegral<TYPE>::result; }	\
 	bool IsPointer() { return true; }	\
 	bool IsArray() { return false;	}	\
 	void PushValue(void *owner, void *value) { throw "pizdec"; }	\

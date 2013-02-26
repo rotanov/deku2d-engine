@@ -22,13 +22,31 @@ Deku2D::CEngine* Ninja = ENGINE;
 
 class TestSerializationBase
 {
-	D2D_TYPE_INFO_INJECT(TestSerializationBase);
+	D2D_TYPE_INFO_INJECT(TestSerializationBase)
+
 public:
-	TestSerializationBase(){}
-	~TestSerializationBase(){}
+	TestSerializationBase() : x(0)
+	{}
+	~TestSerializationBase()
+	{}
+
+	int GetFoo() const { return x; }
+	void SetFoo(int foo) { x = foo; }
+
+private:
+	int x;
 };
 
 D2D_TYPE_INFO_DECLARE(TestSerializationBase)
+	D2D_DECLARE_PROPERTY_INFO(TestSerializationBase, int, Foo)
+
+class TestSerializationAbstractCase
+{
+public:
+	virtual void Foo() = 0;
+};
+
+D2D_TYPE_INFO_DECLARE(TestSerializationAbstractCase)
 
 class CTest : public Deku2D::CGameObject
 {
@@ -150,6 +168,8 @@ bool CCustomStateHandler::OnInitialize()
 
 	TestSerializationBase test;
 	Deku2D::Serialization::ToJSON(&test, "TestSerializationBase", "test.json");
+
+	// TypeInfo::GetTypeInfo("TestSerializationAbstractCase")->New();
 
 	FILE *f = fopen("typeinfo.txt", "w");
 	fprintf(f, "%s", TypeInfo::GetTypeDescriptionString("CFont").c_str());

@@ -35,7 +35,7 @@ public:
 		}
 		return prop;
 	}
-	virtual TypeInfo* GetRunTimeTypeInfo(void* instance) const { throw "Not implemented."; }
+	virtual TypeInfo* GetRunTimeTypeInfo(void*) const { throw "Not implemented."; }
 	static TypeInfo* GetTypeInfo(const string &typeName)
 	{
 		if (_getTypeInfos().find(typeName) == _getTypeInfos().end())
@@ -47,7 +47,7 @@ public:
 		else
 			return _getTypeInfos()[typeName];
 	}
-	virtual void FillJSONValue( rapidjson::Value*, void* instance)
+	virtual void FillJSONValue(rapidjson::Value*, void*)
 	{
 		throw "FillJSONValue unimplemented for this type";
 	}
@@ -124,7 +124,7 @@ template <typename Type, int Implemented = Deku2D::IsConvertible<string, Type>::
 class TypeInfoStringToTypeHelper
 {
 public:
-	static void StringToType(const string& s, Type* instance)
+	static void StringToType(const string&, Type*)
 	{
 		throw "pizdec conversion not implemented";
 	}
@@ -144,7 +144,7 @@ template <typename Type, int Implemented = Deku2D::IsConvertible<Type, string>::
 class TypeInfoTypeToStringHelper
 {
 public:
-	static string TypeToString(Type* instance)
+	static string TypeToString(Type*)
 	{
 		throw "pizdec conversion not implemented";
 	}

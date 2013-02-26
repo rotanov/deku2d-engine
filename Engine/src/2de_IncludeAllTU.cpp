@@ -20,7 +20,6 @@
 #include "2de_GameObject.cpp"
 #include "2de_PlaceableComponent.cpp"
 #include "2de_RenderableComponent.cpp"
-#include "2de_DebugBox.cpp"
 #include "2de_Text.cpp"
 #include "2de_TimerComponent.cpp"
 #include "2de_GeometricComponent.cpp"

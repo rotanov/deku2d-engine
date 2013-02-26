@@ -63,8 +63,7 @@ namespace Deku2D
 	template<typename T>
 	class IsAbstract
 	{
-		// In case you forgot how it works: google SFINAE (Substitution failure is not an error)
-		// todo: add assertions to ensure sizeof(char) == 1 and sizeof(short) == 2
+		// todo: ensure sizeof(char) == 1 and sizeof(short) == 2
 		template<class U> static char test( U (*)[1] );
 		template<class U> static short test( ... );
 
@@ -88,12 +87,8 @@ namespace Deku2D
 	public:
 		static T* New()
 		{
-				throw("pizdec");                
+			throw std::runtime_error("Deku2D::Make can't instantiate an abstract class.");
 		}
-	};
-
-	class CNullClass
-	{
 	};
 
 }	//	namespace Deku2D

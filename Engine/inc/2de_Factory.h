@@ -72,10 +72,6 @@ namespace Deku2D
 		void IncreaseUsedCount(const string &AProtoName);
 		void DecreaseUsedCount(const string &AProtoName);		
 
-	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
-		void InsertDebugInfo( CObject* Source );
-	#endif
-
 		template<typename T>
 		CObject* InternalNew(const string &AName);
 
@@ -119,12 +115,6 @@ namespace Deku2D
 
 		if (!Add(result, AName))
 			return NULL;
-
-	#if defined(_DEBUG) && !defined(DISABLE_DEBUG_BOXES)
-
-		InsertDebugInfo(result);
-
-	#endif
 
 		return result;
 	}
