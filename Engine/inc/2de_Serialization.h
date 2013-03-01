@@ -7,10 +7,12 @@ namespace Deku2D
 {
 	namespace Serialization
 	{
-		// @todo: Serialize to abstract stream, not file.
-		void ToJSON(void* o, const std::string& className, const std::string& filename);
-	} // namespace Serialization
+		// @todo: Serialize to (and from) abstract stream, not file.
+		void ToJSON(const void* instance, const std::string& typeName, const std::string& filename);
+		void FromJSON(void* instance, const std::string& typeName, const std::string& filename);
 
-}; // namespace Deku2D
+	}	// namespace Serialization
+
+}	// namespace Deku2D
 
 #endif //	_2DE_SERIALIZATION_H_

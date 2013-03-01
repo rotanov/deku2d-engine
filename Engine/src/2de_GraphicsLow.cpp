@@ -198,7 +198,10 @@ namespace Deku2D
 	CGLWindow::CGLWindow()
 	{
 		SetName("GLWindow");
-		NewParameters.Width = 640;	//@todo!!! Default magic numbers - delete them! // well, this is not the worst place for magic numbers..
+
+		//@todo!!! Default magic numbers - delete them!
+		// well, this is not the worst place for magic numbers..
+		NewParameters.Width = 640;
 		NewParameters.Height = 480;
 		NewParameters.BPP = 32;
 		NewParameters.isFullscreen = false;
@@ -476,7 +479,7 @@ namespace Deku2D
 	CFont::CFont() : Distance(1.0f)
 	{
 		ClassName = "Font";
-		FontManager->Add(this);
+		FontManager->Add(this);		
 	}
 
 	CFont::~CFont()

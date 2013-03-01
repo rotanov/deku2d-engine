@@ -34,7 +34,7 @@ namespace Deku2D
 			}
 		};
 
-		static void Helper(CStateInfo& state, void* next, const string &nextName)
+		static void Helper(CStateInfo& state, const void* next, const std::string &nextName)
 		{
 			state.depth++;
 			state.writer.StartObject();
@@ -145,17 +145,16 @@ namespace Deku2D
 			state.depth--;
 		}
 
-		void ToJSON(void *o, const string &className, const std::string& filename)
+		void ToJSON(const void* instance, const std::string& typeName, const std::string& filename)
 		{
 			FILE* file = fopen(filename.c_str(), "w");
 			CStateInfo state(file);
-			Helper(state, o, className);
+			Helper(state, instance, typeName);
 			fclose(file);
 		}
 
-		void* FromJSON(const string& filename)
+		void FromJSON(void* instance, const std::string& typeName, const std::string& filename)
 		{
-			void* result = NULL;
 			rapidjson::Document document;
 			char* buffer;
 			FILE* fi = fopen(filename.c_str(), "rb");
@@ -172,18 +171,25 @@ namespace Deku2D
 			public:
 				// Properly working breakpoints on windows with msvc10 and cdb inside static-function-inside-class-inside-function?
 				// Qt-Creator: "No, not heard."
-				static void* Helper(rapidjson::Document::ValueType* document, const char *nextName)
+				static void* Helper(rapidjson::Document::ValueType* document, const std::string& nextName, void* next)
 				{
 					bool isObject = document->IsObject();
 					TypeInfo *typeInfo = TypeInfo::GetTypeInfo(nextName);
-					void *next = typeInfo->New();
+					//void *next = typeInfo->New();
 					for (rapidjson::Document::ValueType::MemberIterator i = document->MemberBegin(); i != document->MemberEnd(); ++i)
 					{
 						std::string propertyName = i->name.GetString();
+
+						if (propertyName.length() > 0 && propertyName[0] == '@')
+						{
+							continue;
+						}
+
 						PropertyInfo *prop = typeInfo->FindProperty(propertyName);
 						if (i->value.IsObject())
 						{
-							prop->SetValue(next, Helper(&(i->value), prop->TypeName()));
+							// won't work
+							//prop->SetValue(next, Helper(&(i->value), prop->TypeName()));
 						}
 						else if( i->value.IsArray())
 						{
@@ -209,10 +215,9 @@ namespace Deku2D
 				}
 			};
 
-			result = T::Helper(&document, "Pes");
-			return result;
+			T::Helper(&document, typeName, instance);
 		}
 
-	};	// namespace Serialization
+	}	// namespace Serialization
 
-};	// namespace Deku2D
+}	// namespace Deku2D

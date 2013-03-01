@@ -177,7 +177,7 @@ namespace Deku2D
 		Scene->Add(this);
 	}
 
-	CGameObject* CGameObject::GetChild(unsigned index)
+	CGameObject* CGameObject::GetChild(unsigned index) const
 	{
 		return Children[index];
 	}
@@ -192,7 +192,7 @@ namespace Deku2D
 		return it->second;
 	}
 
-	unsigned CGameObject::GetChildCount()
+	unsigned CGameObject::GetChildCount() const
 	{
 		return Children.size();
 	}

@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "2de_Engine.h"
 #include "2de_TypeInfo.h"
 #include "2de_Resource.h"
@@ -25,20 +27,21 @@ class TestSerializationBase
 	D2D_TYPE_INFO_INJECT(TestSerializationBase)
 
 public:
-	TestSerializationBase() : x(0)
-	{}
-	~TestSerializationBase()
-	{}
-
-	int GetFoo() const { return x; }
-	void SetFoo(int foo) { x = foo; }
+	TestSerializationBase() : _x(0) {}
+	~TestSerializationBase() {}
+	int GetFoo() const { return _x; }
+	void SetFoo(int foo) { _x = foo; }
+	string GetStr() const { return _str; }
+	void SetStr(const string& str) { _str = str; }
 
 private:
-	int x;
+	int _x;
+	string _str;
 };
 
 D2D_TYPE_INFO_DECLARE(TestSerializationBase)
 	D2D_DECLARE_PROPERTY_INFO(TestSerializationBase, int, Foo)
+	D2D_DECLARE_PROPERTY_INFO(TestSerializationBase, string, Str)
 
 class TestSerializationAbstractCase
 {
@@ -47,6 +50,53 @@ public:
 };
 
 D2D_TYPE_INFO_DECLARE(TestSerializationAbstractCase)
+
+void TestSerialization()
+{
+	TestSerializationBase input;
+	input.SetFoo(666);
+	input.SetStr("Well, now I'm pretty sure I initialized it myself.");
+
+	TestSerializationBase output;
+
+	Deku2D::Serialization::ToJSON(&input, "TestSerializationBase", "input.json");
+	Deku2D::Serialization::FromJSON(&output, "TestSerializationBase", "input.json");
+	Deku2D::Serialization::ToJSON(&output, "TestSerializationBase", "output.json");
+
+	try
+	{
+		TypeInfo::GetTypeInfo("TestSerializationAbstractCase")->New();
+	}
+	catch(const std::runtime_error& e)
+	{
+		cout << e.what() << std::endl;
+	}
+
+	FILE *f = fopen("typeinfo.txt", "w");
+	fprintf(f, "%s", TypeInfo::GetTypeDescriptionString("CFont").c_str());
+	fclose(f);
+
+	using namespace std::chrono;
+	high_resolution_clock::time_point timeStart = high_resolution_clock::now();
+
+	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
+	{
+		if (i->GetName() == "Fonts")
+		{
+			for (auto j : i->ResourceNames)
+			{
+				if (j.second.rfind(".fif", j.second.length() - 4) == j.second.length() - 4)
+				{
+					Log( "RESOURCE", "Name: %s, filename: %s.", j.first.c_str(), j.second.c_str());
+					Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>(j.first), "CObject", j.second + ".json" );
+				}
+			}
+		}
+	}
+
+	high_resolution_clock::time_point timeEnd = high_resolution_clock::now();
+	std::cout << duration_cast<microseconds>(timeEnd - timeStart).count() << std::endl;
+}
 
 class CTest : public Deku2D::CGameObject
 {
@@ -106,49 +156,6 @@ public:
 	void OnFinalize();
 };
 
-/*
-class HRTimer
-{
-public:
-	HRTimer();
-	double GetFrequency();
-	void StartTimer();
-	double StopTimer();
-private:
-	LARGE_INTEGER start;
-	LARGE_INTEGER stop;
-	double frequency;
-};
-
-HRTimer::HRTimer(): start(), stop(), frequency()
-{
-	frequency = this->GetFrequency();
-}
-
-double HRTimer::GetFrequency(void)
-{
-	LARGE_INTEGER proc_freq;
-	QueryPerformanceFrequency(&proc_freq);
-	return proc_freq.QuadPart;
-}
-
-void HRTimer::StartTimer(void)
-{
-	DWORD_PTR oldmask = ::SetThreadAffinityMask(::GetCurrentThread(), 0);
-	::QueryPerformanceCounter(&start);
-	::SetThreadAffinityMask(::GetCurrentThread(), oldmask);
-}
-
-double HRTimer::StopTimer(void)
-{
-	DWORD_PTR oldmask = ::SetThreadAffinityMask(::GetCurrentThread(), 0);
-	::QueryPerformanceCounter(&stop);
-	::SetThreadAffinityMask(::GetCurrentThread(), oldmask);
-	return ((stop.QuadPart - start.QuadPart) / frequency);
-}
-*/
-
-
 bool CCustomStateHandler::OnInitialize()
 {
 	Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
@@ -161,47 +168,9 @@ bool CCustomStateHandler::OnInitialize()
 				)
 			);
 
-	//HRTimer timer;
-	//timer.StartTimer();
+	TestSerialization();
 
-	//*
-
-	TestSerializationBase test;
-	Deku2D::Serialization::ToJSON(&test, "TestSerializationBase", "test.json");
-
-	// TypeInfo::GetTypeInfo("TestSerializationAbstractCase")->New();
-
-	FILE *f = fopen("typeinfo.txt", "w");
-	fprintf(f, "%s", TypeInfo::GetTypeDescriptionString("CFont").c_str());
-	fclose(f);
-
-	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
-	{
-		if (i->GetName() == "Fonts")
-		{
-			for (auto j : i->ResourceNames)
-			{
-				if (j.second.rfind(".fif", j.second.length() - 4) == j.second.length() - 4)
-				{
-					Log( "RESOURCE", "Name: %s, filename: %s.", j.first.c_str(), j.second.c_str());
-					Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>(j.first), "CObject", j.second + ".json" );
-				}
-			}
-		}
-	}
-	//*/
-
-	//double time = timer.StopTimer();
-	//Log( "TIME", "%lf", time );
-	//Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDOUT);
-	//Log( "TIME", "%lf", time );
-	//Deku2D::SLog->SetLogMode(Deku2D::CLog::LOG_MODE_STDERR);
-	//Log( "TIME", "%lf", time );
-
-	Deku2D::CEngine::Instance()
-			->RootGameObject
-			->Attach(Deku2D::Factory
-					 ->New<CTest>("SetSizeTest"));
+	Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
 //	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
 //	Deku2D::SoundMixer->SetMusicVolume(128);
 

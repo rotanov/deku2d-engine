@@ -50,9 +50,9 @@ namespace Deku2D
 		CAbstractScene* GetScene() const;
 		void PutIntoScene(CAbstractScene *AScene);
 
-		CGameObject* GetChild(unsigned index);
+		CGameObject* GetChild(unsigned index) const;
 		CGameObject* GetObjectByLocalName(const string &AName);
-		unsigned GetChildCount();
+		unsigned GetChildCount() const;
 
 		CGameObject* FindPrototype();
 
