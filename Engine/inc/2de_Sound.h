@@ -17,6 +17,7 @@ namespace Deku2D
 
 	class CSound : public CResource
 	{
+		D2D_TYPE_INFO_INJECT(CSound)
 	public:
 		CSound();
 		~CSound();
@@ -36,6 +37,7 @@ namespace Deku2D
 
 	class CMusic : public CResource
 	{
+		D2D_TYPE_INFO_INJECT(CMusic)
 	public:
 		CMusic();
 		~CMusic();

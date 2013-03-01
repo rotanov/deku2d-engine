@@ -93,10 +93,10 @@ public:
 			identStr1 + "name: " + typeInfo.Name() + eolStr + eolStr +
 			identStr1 + "Properties:" + eolStr;
 
-		for (auto i : typeInfo.Properties())
+		for (map<string, PropertyInfo*>::iterator i = typeInfo.Properties().begin(); i != typeInfo.Properties().end(); ++i)
 		{
-			PropertyInfo& p = *i.second;
-			r += identStr2 + "key: \"" + i.first + "\"" + eolStr +
+			PropertyInfo& p = *(i->second);
+			r += identStr2 + "key: \"" + (i->first) + "\"" + eolStr +
 				 identStr3 + "name: \"" + p.Name() + "\"" + eolStr +
 				 identStr3 + "type name: \"" + p.TypeName() + "\"" + eolStr +
 				 identStr3 + "owner name: \"" + p.OwnerName() + "\"" + eolStr +

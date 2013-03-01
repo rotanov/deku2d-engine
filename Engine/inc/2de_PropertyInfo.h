@@ -120,6 +120,7 @@ public:
 		void* GetValue(const void *owner)													\
 		{																					\
 			throw std::runtime_error("Not Implemented.");									\
+		}															\
 																							\
 		bool Integral()																		\
 		{																					\
@@ -238,17 +239,17 @@ public:
 																			\
 	void PushValue(void *owner, void *value)								\
 	{																		\
-		throw std::runtime_error("Not implemented.")						\
+		throw std::runtime_error("Not implemented.");						\
 	}																		\
 																			\
 	unsigned GetArraySize(const void *owner)								\
 	{																		\
-		throw std::runtime_error("Not implemented.")						\
+		throw std::runtime_error("Not implemented.");						\
 	}																		\
 																			\
 	void* GetValue(const void *owner, unsigned index)						\
 	{																		\
-		throw std::runtime_error("Not implemented.")						\
+		throw std::runtime_error("Not implemented.");						\
 	}																		\
 																			\
 	_D2D_END_DECLARE_PROPERTY(OWNER, NAME)									\

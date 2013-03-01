@@ -7,6 +7,7 @@
 #include "2de_Visitor.h"
 #include "2de_PlaceableComponent.h"
 #include "2de_RenderableComponent.h"
+#include "2de_Sound.h"
 #include "2de_Text.h"
 
 namespace Deku2D
@@ -55,6 +56,10 @@ namespace Deku2D
 			D2D_TYPE_INFO_DECLARE_DERIVED(CModel, CResource)
 				// D2D_DECLARE_PROPERTY_INFO(CModel, EModelType, ModelType) потом. Там enum за int конверсия в стринг не считает
 				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CModel, Vector2, Vertices, SetVertex, GetVertex, GetVertexNumber)
+
+			D2D_TYPE_INFO_DECLARE_DERIVED(CMusic, CResource)
+
+			D2D_TYPE_INFO_DECLARE_DERIVED(CSound, CResource)
 
 		D2D_TYPE_INFO_DECLARE_DERIVED(IVisitableObject, CObject)
 

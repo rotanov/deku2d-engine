@@ -1,7 +1,6 @@
 SOURCES		=	src/2de_Core.cpp \
 			src/2de_Box.cpp \
 			src/2de_Config.cpp \
-			src/2de_DebugBox.cpp \
 			src/2de_DefaultFont.cpp \
 			src/2de_Engine.cpp \
 			src/2de_Event.cpp \
@@ -43,7 +42,6 @@ SOURCES		=	src/2de_Core.cpp \
 OBJECTS		=	obj/2de_Core.o \
 			obj/2de_Box.o \
 			obj/2de_Config.o \
-			obj/2de_DebugBox.o \
 			obj/2de_DefaultFont.o \
 			obj/2de_Engine.o \
 			obj/2de_Event.o \
@@ -80,6 +78,9 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_TypeInfo.o \
 			obj/2de_Vector3.o \
 			obj/2de_Xml.o
+
+SINGLE_FILE_SOURCE	=	src/2de_IncludeAllTU.cpp
+SINGLE_FILE_OBJECT	=	obj/2de_IncludeAllTU.o
 
 
 SDL_CFLAGS	:=	$(shell sdl-config --cflags)
@@ -119,6 +120,10 @@ obj:
 static: obj $(TARGET_STATIC)
 
 shared: obj $(TARGET_SHARED)
+
+singlefile: obj
+	g++ -g3 -c $(CFLAGS) -o $(SINGLE_FILE_OBJECT) $(SINGLE_FILE_SOURCE)
+	ar rv $(TARGET_STATIC) $(SINGLE_FILE_OBJECT)
 
 debug: DEBUGFLAG = -g3 -D_DEBUG
 debug: static

@@ -32,7 +32,7 @@ unix {
 		-lGLEW \
 		-lSDL_mixer \
 		-lIL
-	QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1)
+	QMAKE_CXXFLAGS += $$system(pkg-config --cflags lua5.1) -std=c++0x
 	CONFIG -= warn_on
 }
 

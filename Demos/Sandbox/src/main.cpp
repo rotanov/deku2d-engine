@@ -79,6 +79,8 @@ void TestSerialization()
 	using namespace std::chrono;
 	high_resolution_clock::time_point timeStart = high_resolution_clock::now();
 
+	/*
+	// I don't want to update compiler
 	for (auto i : Deku2D::ResourceManager.Instance()->SectionsLoaders)
 	{
 		if (i->GetName() == "Fonts")
@@ -91,6 +93,23 @@ void TestSerialization()
 					Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>(j.first), "CObject", j.second + ".json" );
 				}
 			}
+		}
+	}
+	*/
+
+	for (auto i = Deku2D::ResourceManager->SectionsLoaders.begin(); i != Deku2D::ResourceManager->SectionsLoaders.end(); ++i)
+	{
+		if ((*i)->GetName() == "Fonts")
+		{
+			for (auto j = (*i)->ResourceNames.begin(); j != (*i)->ResourceNames.end(); ++j)
+			{
+				if (j->second.rfind(".fif", j->second.length() - 4) == j->second.length() - 4)
+				{
+					Log("RESOURCE", "Name: %s, filename: %s.", j->first.c_str(), j->second.c_str());
+					Deku2D::Serialization::ToJSON(Deku2D::Factory->Get<Deku2D::CObject>(j->first), "CObject", j->second + ".json");
+				}
+			}
+
 		}
 	}
 
@@ -170,7 +189,19 @@ bool CCustomStateHandler::OnInitialize()
 
 	TestSerialization();
 
-	Deku2D::CEngine::Instance()->RootGameObject->Attach(Deku2D::Factory->New<CTest>("SetSizeTest"));
+	TypeInfo *charType = TypeInfo::GetTypeInfo("char");
+	char *c = (char *) charType->New();
+	*c = 'a';
+	Log("REFLECTION", charType->GetString(c).c_str());
+	Deku2D::CObject *obj = Deku2D::Factory->Get<Deku2D::CObject>("Iggy");
+	TypeInfo *objType = TypeInfo::GetTypeInfo("CObject")->GetRunTimeTypeInfo(obj);
+	Log("REFLECTION", objType->Name());
+	Log("REFLECTION", ((string *)objType->FindProperty("Filename")->GetValue(obj))->c_str());
+
+	Deku2D::CEngine::Instance()
+			->RootGameObject
+			->Attach(Deku2D::Factory
+					 ->New<CTest>("SetSizeTest"));
 //	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
 //	Deku2D::SoundMixer->SetMusicVolume(128);
 

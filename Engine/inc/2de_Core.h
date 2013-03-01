@@ -318,6 +318,7 @@ namespace Deku2D
 	D2D_DECLARE_CONVERTIBLE(bool, string)
 	D2D_DECLARE_CONVERTIBLE(int, string)
 	D2D_DECLARE_CONVERTIBLE(float, string)
+	D2D_DECLARE_CONVERTIBLE(char, string)
 
 	// Conversion from Type to Type for the case, when exception should be thrown at runtime when there is no implementation for a conversion.
 	template<typename T, int A = IsIntegral<T>::result>
