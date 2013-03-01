@@ -11,6 +11,8 @@ namespace Deku2D
 
 	CEngine::CEngine()
 	{
+		TypeInfo::Initialize();
+
 		BigEngineLock = SDL_CreateMutex();
 
 		SetInitialValues();
@@ -289,14 +291,12 @@ namespace Deku2D
 
 	bool CEngine::Initialize()
 	{
-		TypeInfo::Initialize();
 		SLog->SetLogFilePath(Environment::Paths::GetLogPath());
 		SLog->SetLogName("System");
 		Log("INFO", "Working directory is '%s'", Environment::Paths::GetWorkingDirectory().c_str());
+		SLog->SetLogLevel(Config->Section("Data")["LogLevel"]);
 
 		Environment::Variables::Set("SDL_VIDEO_CENTERED", "center");
-
-		SLog->SetLogLevel(Config->Section("Data")["LogLevel"]);
 
 		CConfig::CConfigSection VideoSection = Config->Section("Video");
 
@@ -309,9 +309,6 @@ namespace Deku2D
 		doCalcFPS = VideoSection["DoCalcFps"];
 		doLimitFPS = VideoSection["DoLimitFps"];
 		SetFPSLimit(VideoSection["FpsLimit"]);
-
-		ResourceManager->SetDataPath(Config->Section("Data")["DataPath"]);
-		doLoadDefaultResourceList = Config->Section("Data")["doLoadDefaultResourceList"];
 
 		// Update camera due to update of wh from config
 		RenderManager->Camera.SetWidthAndHeight(GLWindow->GetWidth(), GLWindow->GetHeight());
@@ -331,6 +328,8 @@ namespace Deku2D
 
 		//ToggleKeyRepeat(true); // now can be dynamically switched on/off..
 
+		ResourceManager->SetDataPath(Config->Section("Data")["DataPath"]);
+
 		// Default sections:
 		ResourceManager->AddSection<CFont>("Fonts");
 		ResourceManager->AddSection<CTexture>("Textures");
@@ -341,7 +340,7 @@ namespace Deku2D
 		ResourceManager->AddSection<CPrototype>("Prototypes");
 		ResourceManager->AddSection<CModel>("Models");
 
-		if (doLoadDefaultResourceList)
+		if (Config->Section("Data")["doLoadDefaultResourceList"])
 		{
 			if (!ResourceManager->LoadResources())
 				return false;

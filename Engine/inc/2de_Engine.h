@@ -109,7 +109,6 @@ namespace Deku2D
 		bool IdleWhenInBackground;
 
 		bool doExitOnEscape;
-		bool doLoadDefaultResourceList;
 		bool doLimitFPS;
 		bool doCalcFPS;
 		unsigned long FPSCount;
