@@ -56,6 +56,7 @@
 
 
 // FIXME: bad.. 2de_Core shouldn't include anything from engine
+#include "2de_Error.h"
 #include "2de_RTTI.h"
 
 
@@ -274,8 +275,7 @@ namespace Deku2D
 		istringstream iss(source);
 		vector<string> tokens;
 		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-		if (tokens.size() != n)
-			throw "pizedc";
+		D2D_ASSERT(tokens.size() == n)
 		vector<float> result;
 		result.resize(n);
 		for (unsigned i = 0; i < n; i++)
@@ -343,12 +343,14 @@ namespace Deku2D
 	public:
 		static T FromString(const string &s)
 		{
-			throw "Conversion from string to the type %s is not implemented."; // TODO substitute typename if possible
+			// TODO substitute typename if possible
+			D2D_RUNTIME_ERROR("Conversion from string to the type %s is not implemented.")
 		}
 
 		static string ToString(const T &value)
 		{
-			throw "Conversion to string from type %s is not implemented."; // TODO substitute typename if possible
+			// TODO substitute typename if possible
+			D2D_RUNTIME_ERROR("Conversion to string from type %s is not implemented.")
 		}
 
 	};

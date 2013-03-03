@@ -83,7 +83,7 @@ namespace Deku2D
 		try
 		{
 			if (!Initialize())
-				throw std::runtime_error("Initialize() returned false.");
+				D2D_RUNTIME_ERROR("Initialize() returned false.")
 		}
 		catch(const std::exception& e)
 		{
@@ -313,20 +313,20 @@ namespace Deku2D
 		// Update camera due to update of wh from config
 		RenderManager->Camera.SetWidthAndHeight(GLWindow->GetWidth(), GLWindow->GetHeight());
 
-
 		if (!GLWindow->Create())
 		{
 			Log("ERROR", "Window creation failed");
 			return false;
 		}
 
-		ilInit(); // Инициализация DevIL // Captain Obvious IS Obvious.. // If function was called DevILInit() I shall agree with you. But it's fucking "ilInit()" // You think "il" doesn't clearly denote "Image Library"?
+		ilInit();
 		SoundMixer->SetMusicVolume(Config->Section("Sound")["MusicVolume"]);
 
 		SDL_EnableUNICODE(1);
 		SDL_ShowCursor(0);
 
-		//ToggleKeyRepeat(true); // now can be dynamically switched on/off..
+		// now can be dynamically switched on/off..
+		//ToggleKeyRepeat(true);
 
 		ResourceManager->SetDataPath(Config->Section("Data")["DataPath"]);
 

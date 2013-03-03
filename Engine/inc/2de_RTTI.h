@@ -88,7 +88,7 @@ namespace Deku2D
 	public:
 		static T* New()
 		{
-			throw std::runtime_error("Deku2D::Make can't instantiate an abstract class.");
+			D2D_RUNTIME_ERROR("Deku2D::Make can't instantiate an abstract class.")
 		}
 	};
 

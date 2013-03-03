@@ -109,6 +109,7 @@ namespace Deku2D
 			Log("ERROR", "Object with name '%s' already exists", AName.c_str());
 			return NULL;
 			//throw std::logic_error("Object with name '" + AName + "' already exists.");
+			// D2D_RUNTIME_ERROR ^
 		}*/
 
 		T *result = new T;

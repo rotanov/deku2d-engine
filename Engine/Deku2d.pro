@@ -55,7 +55,8 @@ HEADERS += \
 	inc/2de_Object.h \
 	inc/2de_Memory.h \
 	inc/2de_Define.h \
-	inc/2de_Singleton.h
+	inc/2de_Singleton.h \
+	inc/2de_Error.h
 
 SOURCES += \
 	src/2de_Xml.cpp \

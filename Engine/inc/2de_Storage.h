@@ -50,8 +50,11 @@ namespace Deku2D
 		bool WriteByte(byte Data);
 
 		// i think, that CFile should not provide posibility to read 0-terminated strings from files..
-		// formats should be developed in such way, that does NOT include reading variable-length strings from binary files.. it's bad design of data structures to do so..
-		// BUT even if someone ever need to store string in binary file, they should develop structure for storing string size too, together with string.. and then deal with it in higher level of abstraction..
+		// formats should be developed in such way, that does NOT include
+		// reading variable-length strings from binary files.. it's bad design of data structures to do so..
+		// BUT even if someone ever need to store string in binary file,
+		// they should develop structure for storing string size too,
+		// together with string.. and then deal with it in higher level of abstraction..
 		// YES OFCOURSE YOU"RE FUCKIING RIGHT> LET"S DO IT
 
 		bool ReadString(char *Buffer, int ASize);

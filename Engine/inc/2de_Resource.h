@@ -115,7 +115,8 @@ namespace Deku2D
 
 		virtual bool SaveToFile(const string &AFilename)
 		{
-			throw std::logic_error("Unimplemented for this type of resource");
+			// throw std::logic_error("Unimplemented for this type of resource");
+			D2D_RUNTIME_ERROR("Unimplemented for this type of resource")
 			return false;
 		}
 

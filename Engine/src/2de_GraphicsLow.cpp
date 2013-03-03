@@ -1250,7 +1250,8 @@ namespace Deku2D
 	bool CTexture::SaveToFile(const string &AFilename)
 	{
 		// TODO: implement this..
-		throw std::logic_error("Unimplemented!!");
+		// throw std::logic_error("Unimplemented!!");
+		D2D_RUNTIME_ERROR("Not implemented.")
 	}
 
 
@@ -1709,6 +1710,11 @@ namespace Deku2D
 		return Vertices.GetVertexCount();
 	}
 
+	int CModel::GetTexCoordNumber() const
+	{
+		return Vertices.GetVertexCount();
+	}
+
 	void CModel::Unload()
 	{
 		if (!Loaded)
@@ -1757,6 +1763,35 @@ namespace Deku2D
 		string ModelTypeArgValue = XMLNode->GetAttribute("ModelType");
 		ModelType = CRenderManager::SelectModelTypeByStringIdentifier(ModelTypeArgValue);
 
+		std::vector<Vector2> texCoords;
+
+		if (Texture != NULL)
+		{
+			XMLNode = XMLNode->Children.First("TexCoords")->Children.First();
+			if (XMLNode->IsErroneous())
+				Log("WARNING", "Texture present, but no tex coords found");
+			string texcoords_text = XMLNode->GetValue();
+			istringstream iss(texcoords_text);
+			vector<string> tokens;
+			copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+			if ((tokens.size() % 2 != 0) ||
+				(ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0))// ||
+				//tokens.size() != Vertices.GetVertexCount())
+			{
+				Log("WARNING", "Model vertices count is uneven");
+				return false;
+			}
+
+			for (unsigned i = 0; i < tokens.size() / 2; i++)
+			{
+				Vector2 v;
+				v.x = from_string<float>(tokens[i * 2 + 0]);
+				v.y = from_string<float>(tokens[i * 2 + 1]);
+				texCoords.push_back(v);
+			}
+			XMLNode = XMLNode->GetParent()->GetParent();
+		}
+
 		XMLNode = XMLNode->Children.First("Vertices")->Children.First();
 		if (XMLNode->IsErroneous())
 			Log("WARNING", "Model without vertices");
@@ -1771,6 +1806,9 @@ namespace Deku2D
 				Log("WARNING", "Model vertices count is uneven");
 				return false;
 			}
+			if (GetTexture() != NULL)
+				D2D_ASSERT(texCoords.size() == tokens.size() / 2)
+
 			unsigned VerticesNumber = tokens.size() / 2;
 			Vertices.Reserve(VerticesNumber);
 			Vector2 v;
@@ -1778,30 +1816,10 @@ namespace Deku2D
 			{
 				v.x = from_string<float>(tokens[i * 2 + 0]);
 				v.y = from_string<float>(tokens[i * 2 + 1]);
-				Vertices.PushVertex(v, RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
-			}
-			XMLNode = XMLNode->GetParent()->GetParent();
-		}
-
-		if (Texture != NULL)
-		{
-			XMLNode = XMLNode->Children.First("TexCoords")->Children.First();
-			if (XMLNode->IsErroneous())
-				Log("WARNING", "Texture present, but no tex coords found");
-			string texcoords_text = XMLNode->GetValue();
-			istringstream iss(texcoords_text);
-			vector<string> tokens;
-			copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-			if ((tokens.size() % 2 != 0) || (ModelType == MODEL_TYPE_TRIANGLES && tokens.size() % 3 != 0) || tokens.size() != Vertices.GetVertexCount())
-			{
-				Log("WARNING", "Model vertices count is uneven");
-				return false;
-			}
-
-			for (unsigned i = 0; i < tokens.size() / 2; i++)
-			{
-				Vertices.GetTexCoords()[i].x = from_string<float>(tokens[i * 2 + 0]);
-				Vertices.GetTexCoords()[i].y = from_string<float>(tokens[i * 2 + 1]);
+				if (GetTexture() != NULL )
+					Vertices.PushVertex(v, RGBAf(1.0f, 1.0f, 1.0f, 1.0f), texCoords[i]);
+				else
+					Vertices.PushVertex(v, RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 			XMLNode = XMLNode->GetParent()->GetParent();
 		}

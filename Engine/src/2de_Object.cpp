@@ -21,7 +21,8 @@ namespace Deku2D
 
 	CObject& CObject::operator=(const CObject &AObject)
 	{
-		throw std::logic_error("Forbidden");
+		//throw std::logic_error("Forbidden");
+		D2D_RUNTIME_ERROR("Forbidden")
 
 		if (this == &AObject)
 			return *this;

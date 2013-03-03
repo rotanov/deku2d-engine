@@ -22,6 +22,21 @@ Deku2D::CEngine* Ninja = ENGINE;
 
 */
 
+using namespace std::chrono;
+static high_resolution_clock::time_point timeStart;
+static high_resolution_clock::time_point timeEnd;
+
+void StartTimer()
+{
+	timeStart = high_resolution_clock::now();
+}
+
+void EndTimer(const char* message = "")
+{
+	timeEnd = high_resolution_clock::now();
+	std::cout << message << " : " << duration_cast<microseconds>(timeEnd - timeStart).count() << "us" << std::endl;
+}
+
 class TestSerializationBase
 {
 	D2D_TYPE_INFO_INJECT(TestSerializationBase)
@@ -53,6 +68,19 @@ D2D_TYPE_INFO_DECLARE(TestSerializationAbstractCase)
 
 void TestSerialization()
 {
+	using namespace Deku2D;
+
+////////////////////////////////////////////////////////////////////////////////
+	TypeInfo *charType = TypeInfo::GetTypeInfo("char");
+	char *c = (char *) charType->New();
+	*c = 'a';
+	Log("REFLECTION", charType->GetString(c).c_str());
+	Deku2D::CObject *obj = Deku2D::Factory->Get<Deku2D::CObject>("Iggy");
+	TypeInfo *objType = TypeInfo::GetTypeInfo("CObject")->GetRunTimeTypeInfo(obj);
+	Log("REFLECTION", objType->Name());
+	Log("REFLECTION", ((string *)objType->FindProperty("Filename")->GetValue(obj))->c_str());
+
+////////////////////////////////////////////////////////////////////////////////
 	TestSerializationBase input;
 	input.SetFoo(666);
 	input.SetStr("Well, now I'm pretty sure I initialized it myself.");
@@ -63,6 +91,7 @@ void TestSerialization()
 	Deku2D::Serialization::FromJSON(&output, "TestSerializationBase", "input.json");
 	Deku2D::Serialization::ToJSON(&output, "TestSerializationBase", "output.json");
 
+////////////////////////////////////////////////////////////////////////////////
 	try
 	{
 		TypeInfo::GetTypeInfo("TestSerializationAbstractCase")->New();
@@ -72,10 +101,12 @@ void TestSerialization()
 		cout << e.what() << std::endl;
 	}
 
+////////////////////////////////////////////////////////////////////////////////
 	FILE *f = fopen("typeinfo.txt", "w");
 	fprintf(f, "%s", TypeInfo::GetTypeDescriptionString("CFont").c_str());
 	fclose(f);
 
+////////////////////////////////////////////////////////////////////////////////
 	using namespace std::chrono;
 	high_resolution_clock::time_point timeStart = high_resolution_clock::now();
 
@@ -114,7 +145,28 @@ void TestSerialization()
 	}
 
 	high_resolution_clock::time_point timeEnd = high_resolution_clock::now();
-	std::cout << duration_cast<microseconds>(timeEnd - timeStart).count() << std::endl;
+	std::cout << duration_cast<microseconds>(timeEnd - timeStart).count() << "us" << std::endl;
+
+////////////////////////////////////////////////////////////////////////////////
+	try
+	{
+		CModel* model = Factory.Instance()->Get<CModel>("TestModel");
+		cout << model->GetName() << std::endl;
+		model->Load();
+		Serialization::ToJSON(model, "CModel", "TestModel.json");
+	}
+	catch (const std::runtime_error& e)
+	{
+		cout << e.what() << std::endl;
+	}
+	catch (const char* e)
+	{
+		cout << e << std::endl;
+	}
+	catch (...)
+	{
+		cout << "Unkonwn exception." << std::endl;
+	}
 }
 
 class CTest : public Deku2D::CGameObject
@@ -142,7 +194,9 @@ public:
 				{
 					/*GLWindow->SetSize(2048, 1152);
 					GLWindow->SetFullscreen(true);*/
+					StartTimer();
 					Deku2D::GLWindow->SetVideoMode(Deku2D::GLWindow->GetDesktopVideoMode());
+					EndTimer("Progression to desktop video mode took");
 				}
 			}
 			else if (sym == SDLK_e)
@@ -180,29 +234,21 @@ bool CCustomStateHandler::OnInitialize()
 	Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
 	Deku2D::SceneManager->SetCurrentScene(NewScene);
 	Deku2D::LuaVirtualMachine->RunScript
-			(
-				Deku2D::Factory->Get<Deku2D::CScript>
-				(
-					Deku2D::Config->Section("Data")["InitScript"]
-				)
-			);
+	(
+		Deku2D::Factory->Get<Deku2D::CScript>
+		(
+			Deku2D::Config->Section("Data")["InitScript"]
+		)
+	);
 
 	TestSerialization();
-
-	TypeInfo *charType = TypeInfo::GetTypeInfo("char");
-	char *c = (char *) charType->New();
-	*c = 'a';
-	Log("REFLECTION", charType->GetString(c).c_str());
-	Deku2D::CObject *obj = Deku2D::Factory->Get<Deku2D::CObject>("Iggy");
-	TypeInfo *objType = TypeInfo::GetTypeInfo("CObject")->GetRunTimeTypeInfo(obj);
-	Log("REFLECTION", objType->Name());
-	Log("REFLECTION", ((string *)objType->FindProperty("Filename")->GetValue(obj))->c_str());
 
 	Deku2D::CEngine::Instance()
 			->RootGameObject
 			->Attach(Deku2D::Factory
 					 ->New<CTest>("SetSizeTest"));
-//	//SoundMixer->PlayMusic(MusicManager->GetMusicByName("Iggy"), 0, -1);
+
+	Deku2D::SoundMixer->PlayMusic(Deku2D::MusicManager->GetMusicByName("Iggy"), 0, -1);
 //	Deku2D::SoundMixer->SetMusicVolume(128);
 
 //	Deku2D::KeyBindingManager->UnbindAction("Test", "Act");

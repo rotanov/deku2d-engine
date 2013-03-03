@@ -44,7 +44,7 @@ public:
 
 	virtual TypeInfo* GetRunTimeTypeInfo(const void*) const
 	{
-		throw std::runtime_error("Not implemented.");
+		D2D_RUNTIME_ERROR("Not implemented.");
 	}
 
 	static TypeInfo* GetTypeInfo(const string &typeName)
@@ -61,7 +61,7 @@ public:
 
 	virtual void FillJSONValue(rapidjson::Value*, void*)
 	{
-		throw "FillJSONValue unimplemented for this type";
+		D2D_RUNTIME_ERROR("FillJSONValue unimplemented for this type")
 	}
 
 	static void Initialize() // Run time initialization and checks
@@ -138,7 +138,7 @@ class TypeInfoStringToTypeHelper
 public:
 	static void StringToType(const string&, Type*)
 	{
-		throw std::runtime_error("StringToType conversion not implemented.");
+		D2D_RUNTIME_ERROR("StringToType conversion not implemented.")
 	}
 };
 
@@ -158,7 +158,7 @@ class TypeInfoTypeToStringHelper
 public:
 	static string TypeToString(Type*)
 	{
-		throw std::runtime_error("TypeToString conversion not implemented.");
+		D2D_RUNTIME_ERROR("TypeToString conversion not implemented.")
 	}
 };
 
@@ -172,99 +172,99 @@ public:
 	}
 };
 
-/////////////////////////////////////////////////
-#define _D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE)	\
-	class TypeInfo##TYPE : public TypeInfo		\
-	{											\
-	public:										\
+////////////////////////////////////////////////////////////////////////////////
+#define _D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE)\
+	class TypeInfo##TYPE : public TypeInfo\
+	{\
+	public:\
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-#define _D2D_TYPE_INFO_DECLARATION_BASE(TYPE)														\
-		TypeInfo##TYPE()																			\
-		{																							\
-			_getTypeInfos()[#TYPE] = &_instance;													\
-		}																							\
-																									\
-		void* New() const																			\
-		{																							\
-			return Deku2D::Make<TYPE>::New();														\
-		}																							\
-																									\
-		const char* Name() const																	\
-		{																							\
-			return #TYPE;																			\
-		}																							\
-																									\
-		virtual bool IsIntegral() const																\
-		{																							\
-			return Deku2D::IsIntegral<TYPE>::result;												\
-		}																							\
-																									\
-		virtual void SetString(void *instance, const string &value)									\
-		{																							\
-			TypeInfoStringToTypeHelper<TYPE>::StringToType(value, static_cast<TYPE*>(instance));	\
-		}																							\
-																									\
-		string GetString(void *instance)															\
-		{																							\
-			return TypeInfoTypeToStringHelper<TYPE>::TypeToString(static_cast<TYPE*>(instance));	\
-		}																							\
-																									\
-		PropertyInfo* GetProperty(const string &name) const											\
-		{																							\
-			return _props[name];																	\
-		}																							\
-																									\
-		map<string, PropertyInfo*>& Properties()													\
-		{																							\
-			return _props;																			\
-		}																							\
+////////////////////////////////////////////////////////////////////////////////
+#define _D2D_TYPE_INFO_DECLARATION_BASE(TYPE)\
+		TypeInfo##TYPE()\
+		{\
+			_getTypeInfos()[#TYPE] = &_instance;\
+		}\
+\
+		void* New() const\
+		{\
+			return Deku2D::Make<TYPE>::New();\
+		}\
+\
+		const char* Name() const\
+		{\
+			return #TYPE;\
+		}\
+\
+		virtual bool IsIntegral() const\
+		{\
+			return Deku2D::IsIntegral<TYPE>::result;\
+		}\
+\
+		virtual void SetString(void *instance, const string &value)\
+		{\
+			TypeInfoStringToTypeHelper<TYPE>::StringToType(value, static_cast<TYPE*>(instance));\
+		}\
+\
+		string GetString(void *instance)\
+		{\
+			return TypeInfoTypeToStringHelper<TYPE>::TypeToString(static_cast<TYPE*>(instance));\
+		}\
+\
+		PropertyInfo* GetProperty(const string &name) const\
+		{\
+			return _props[name];\
+		}\
+\
+		map<string, PropertyInfo*>& Properties()\
+		{\
+			return _props;\
+		}\
 
-/////////////////////////////////////////////////////
-#define _D2D_TYPE_INFO_DECLARATION_END(TYPE)		\
-	static TypeInfo##TYPE _instance;				\
-	static map<string, PropertyInfo*> _props;		\
-};													\
-													\
-TypeInfo##TYPE TypeInfo##TYPE::_instance;			\
-map<string, PropertyInfo*> TypeInfo##TYPE::_props;	\
+////////////////////////////////////////////////////////////////////////////////
+#define _D2D_TYPE_INFO_DECLARATION_END(TYPE)\
+	static TypeInfo##TYPE _instance;\
+	static map<string, PropertyInfo*> _props;\
+};\
+\
+TypeInfo##TYPE TypeInfo##TYPE::_instance;\
+map<string, PropertyInfo*> TypeInfo##TYPE::_props;\
 
-/////////////////////////////////////////////
-#define D2D_TYPE_INFO_DECLARE(TYPE)			\
-	_D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE)	\
-	_D2D_TYPE_INFO_DECLARATION_BASE(TYPE)	\
-											\
-		TypeInfo* BaseInfo()				\
-		{									\
-			return 0;						\
-		}									\
-											\
-	_D2D_TYPE_INFO_DECLARATION_END(TYPE)	\
+////////////////////////////////////////////////////////////////////////////////
+#define D2D_TYPE_INFO_DECLARE(TYPE)\
+	_D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE)\
+	_D2D_TYPE_INFO_DECLARATION_BASE(TYPE)\
+\
+		TypeInfo* BaseInfo()\
+		{\
+			return 0;\
+		}\
+\
+	_D2D_TYPE_INFO_DECLARATION_END(TYPE)\
 
-/////////////////////////////////////////////////////////////////////////////
-#define D2D_TYPE_INFO_DECLARE_DERIVED(TYPE_DERIVED, TYPE_BASE)				\
-	_D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE_DERIVED)							\
-	_D2D_TYPE_INFO_DECLARATION_BASE(TYPE_DERIVED)							\
-																			\
-		TypeInfo* BaseInfo()												\
-		{																	\
-			return _getTypeInfos()[#TYPE_BASE];								\
-		}																	\
-																			\
-		virtual TypeInfo* GetRunTimeTypeInfo(const void* instance) const	\
-		{																	\
-			return static_cast<const TYPE_DERIVED*>(instance)->GetTypeInfo();		\
-		}																	\
-																			\
-	_D2D_TYPE_INFO_DECLARATION_END(TYPE_DERIVED)							\
+////////////////////////////////////////////////////////////////////////////////
+#define D2D_TYPE_INFO_DECLARE_DERIVED(TYPE_DERIVED, TYPE_BASE)\
+	_D2D_TYPE_INFO_DECLARATION_BEGIN(TYPE_DERIVED)\
+	_D2D_TYPE_INFO_DECLARATION_BASE(TYPE_DERIVED)\
+\
+		TypeInfo* BaseInfo()\
+		{\
+			return _getTypeInfos()[#TYPE_BASE];\
+		}\
+\
+		virtual TypeInfo* GetRunTimeTypeInfo(const void* instance) const\
+		{\
+			return static_cast<const TYPE_DERIVED*>(instance)->GetTypeInfo();\
+		}\
+\
+	_D2D_TYPE_INFO_DECLARATION_END(TYPE_DERIVED)\
 
-/////////////////////////////////////////////////////
-#define D2D_TYPE_INFO_INJECT(TYPE)					\
-	public:											\
-		virtual TypeInfo* GetTypeInfo() const		\
-		{											\
-			return TypeInfo::GetTypeInfo(#TYPE);	\
-		}											\
+////////////////////////////////////////////////////////////////////////////////
+#define D2D_TYPE_INFO_INJECT(TYPE)\
+	public:\
+		virtual TypeInfo* GetTypeInfo() const\
+		{\
+			return TypeInfo::GetTypeInfo(#TYPE);\
+		}\
 
 #endif // _2DE_TYPEINFO_H_
 

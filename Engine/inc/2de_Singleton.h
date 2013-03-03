@@ -81,7 +81,8 @@ namespace Deku2D
 			// we can't use CLog here (because it's singleton too), but still able to log to stdout
 			Environment::LogToStdOut("ERROR", "Recursive singleton constructor call has been discovered, typeid: '%s'", typeid(T).name());
 
-			throw std::logic_error(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name());
+			//throw std::logic_error(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name());
+			D2D_RUNTIME_ERROR(string("Recursive singleton constructor call has been discovered, typeid: ") + typeid(T).name())
 		}
 	#endif // _DEBUG
 

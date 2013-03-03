@@ -86,8 +86,15 @@ namespace Deku2D
 		typedef ChildrenContainer::iterator ChildrenIterator;
 		typedef ChildrenContainer::const_iterator ChildrenConstIterator;
 
-		void SetChildren( const ChildrenContainer& ) { throw "pizdec"; }
-		ChildrenContainer GetChildren() const { throw "pizdec"; }
+		void SetChildren( const ChildrenContainer& )
+		{
+			D2D_RUNTIME_ERROR("Not implemented.")
+		}
+
+		ChildrenContainer GetChildren() const
+		{
+			D2D_RUNTIME_ERROR("Not implemented.")
+		}
 
 	protected:
 		CGameObject(const CGameObject &AGameObject);

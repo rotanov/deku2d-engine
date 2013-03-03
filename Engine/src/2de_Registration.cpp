@@ -13,6 +13,8 @@
 namespace Deku2D
 {
 	D2D_DECLARE_INTEGRAL_TYPE(EModelType)
+	D2D_DECLARE_CONVERTIBLE(int, EModelType)
+	D2D_DECLARE_CONVERTIBLE(EModelType, int)
 
 	D2D_TYPE_INFO_DECLARE(char)
 	D2D_TYPE_INFO_DECLARE(unsigned)
@@ -24,7 +26,7 @@ namespace Deku2D
 	D2D_TYPE_INFO_DECLARE(string)
 
 	// note: not sure if it works for enums
-	D2D_TYPE_INFO_DECLARE(EModelType)
+	D2D_TYPE_INFO_DECLARE(EModelType)	
 
 	D2D_TYPE_INFO_DECLARE(Vector2)
 		D2D_DECLARE_PROPERTY_INFO(Vector2, float, X)
@@ -47,6 +49,8 @@ namespace Deku2D
 		D2D_TYPE_INFO_DECLARE_DERIVED(CResource, CObject)
 			D2D_DECLARE_PROPERTY_INFO_EX(CResource, string, Filename, SetLoadSource, GetFilename)
 
+			D2D_TYPE_INFO_DECLARE_DERIVED(CTexture, CResource)
+
 			D2D_TYPE_INFO_DECLARE_DERIVED(CFont, CResource)
 				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CFont, CBox, Boxes, SetBox, GetBox, GetBoxCount)
 
@@ -54,8 +58,13 @@ namespace Deku2D
 				D2D_DECLARE_PROPERTY_INFO(CScript, string, ScriptText)
 
 			D2D_TYPE_INFO_DECLARE_DERIVED(CModel, CResource)
-				// D2D_DECLARE_PROPERTY_INFO(CModel, EModelType, ModelType) потом. Там enum за int конверсия в стринг не считает
+				D2D_DECLARE_PROPERTY_INFO(CModel, EModelType, ModelType)
 				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CModel, Vector2, Vertices, SetVertex, GetVertex, GetVertexNumber)
+				D2D_DECLARE_ARRAY_PROPERTY_INFO_EX(CModel, Vector2, TexCoords, SetTexCoord, GetTexCoord, GetTexCoordNumber)
+				D2D_DECLARE_PTR_PROPERTY_INFO(CModel, CTexture, Texture)
+
+//	Texture (string to resource name)
+//	ModelType (enum)
 
 			D2D_TYPE_INFO_DECLARE_DERIVED(CMusic, CResource)
 

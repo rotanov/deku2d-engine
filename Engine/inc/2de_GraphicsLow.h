@@ -13,8 +13,6 @@
 
 namespace Deku2D
 {
-	#define _2DE_DEBUG_DRAW_BOXES // wtf? I found no other occurrences
-
 	// OpenGL is not included in the interface now, so I'll redefine it myself
 	typedef unsigned GLuint;
 	typedef unsigned GLenum;
@@ -322,12 +320,28 @@ namespace Deku2D
 		const Vector2* GetTexCoords() const;
 		EModelType GetModelType() const;
 		virtual int GetVertexNumber() const;
+		int GetTexCoordNumber() const;
 		const RGBAf* GetColors() const;
 		const CBox& GetBox() const;
 		bool Load();
 		void Unload();
-		Vector2 GetVertex(unsigned index) const { return GetVertices()[ index ]; }
-		void SetVertex(const Vector2& vertex) { } // TODO: stub
+
+		Vector2 GetVertex(unsigned index) const
+		{
+			return GetVertices()[ index ];
+		}
+
+		// TODO: stub
+		void SetVertex(const Vector2& vertex)
+		{ }
+
+		Vector2 GetTexCoord(unsigned index) const
+		{
+			return GetTexCoords()[ index ];
+		}
+
+		// TODO: stub
+		void SetTexCoord(const Vector2& vertex) { }
 
 	private:
 		CBox Box;
