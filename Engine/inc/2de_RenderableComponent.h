@@ -6,8 +6,7 @@
 namespace Deku2D
 {
 	/**
-	* CRenderableComponent - AOP way replacement for CRenderable. // these historical notes are very very funny, but we need to write the actual documentation, not the tales of the past..
-	*															  // these sarcastic comments are very very useful indeed.
+	* CRenderableComponent - TODO: write actual description
 	*/
 
 	class CRenderableComponent : public CGameObject

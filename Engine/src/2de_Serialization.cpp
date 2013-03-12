@@ -139,6 +139,8 @@ namespace Deku2D
 						}
 					}
 				}
+				if (typeInfo == typeInfo->BaseInfo())
+					break;
 				typeInfo = typeInfo->BaseInfo();
 			}
 			state.writer.EndObject();

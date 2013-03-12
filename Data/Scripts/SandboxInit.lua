@@ -119,12 +119,21 @@ Root:Attach(lpc)
 local fonts = { 'DefaultFont', 'iich', 'iich2', 'Font', 'hge', }
 
 for i = 1,5 do
-	local pos = Create("PlaceableComponent", "")	-- пизда днище, если не передать эту пустую строку, то ниху€ не работает и мы обосрались. » всЄ проходит тихо. —иди потом лог читай.
+	-- пизда днище, если не передать эту пустую строку,
+	-- то ниху€ не работает и мы обосрались.
+	-- » всЄ проходит тихо. —иди потом лог читай.
+	local pos = Create("PlaceableComponent", "")
 	local text = Create("Text", "")
 	pos:Attach( text )
 	Root:Attach( pos )
-	text:SetText("jackdaws love my big sphinx of quartz. JACKDAWS LOVE MY BIG SPHINX OF QUARTZ!?,.. —ъешь же ещЄ этих м€гких булок да выпей чаю.")
-	pos:SetPosition( 10, 10 + 50 * i )
+	text:SetText(
+[[
+jackdaws love my big sphinx of quartz.
+JACKDAWS LOVE MY BIG SPHINX OF QUARTZ!?,..
+съешь же ещЄ этих м€гких булок да выпей чаю.
+—Џ≈Ў№ ∆≈ ≈ў® Ё“»’ ћя√ »’ Ѕ”Ћќ  ƒј ¬џѕ≈… „јё.
+]]	)
+	pos:SetPosition( 10, 10 + 80 * i )
 	text:SetTextFont(fonts[ i ])
 end
 

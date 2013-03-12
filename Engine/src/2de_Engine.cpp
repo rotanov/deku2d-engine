@@ -11,8 +11,6 @@ namespace Deku2D
 
 	CEngine::CEngine()
 	{
-		TypeInfo::Initialize();
-
 		BigEngineLock = SDL_CreateMutex();
 
 		SetInitialValues();
@@ -98,11 +96,11 @@ namespace Deku2D
 
 		Running = true;
 
-		while (ProcessEvents())
+		try
 		{
-			Lock();
-			try
+			while (ProcessEvents())
 			{
+				Lock();
 				if (isHaveFocus) // not actually. See main loop issue.
 				{
 					ResourceManager->PerformUnload();
@@ -118,27 +116,33 @@ namespace Deku2D
 						RenderManager->BeginFrame();
 						RenderManager->DrawObjects();
 						//SceneManager->Render();
-						
+
 						// @todo: And look here:(yet it's about mainloopissue) http://gafferongames.com/game-physics/fix-your-timestep/
 					}
 					RenderManager->EndFrame();
 				}
 				else
 				{
-		#ifdef _WIN32			
+		#ifdef _WIN32
 					WaitMessage(); // SDL_WaitEvent(NULL);
 		#else
 					SDL_WaitEvent(NULL); // sleep(1);
 		#endif //_WIN32
 				}
+				Unlock();
 			}
-			catch (...)
-			{
-				Log("ERROR", "An unhandled exception occured in main loop. Exiting");
-				throw;
-			}
-			Unlock();
 		}
+		catch (const std::runtime_error& e)
+		{
+			cout << e.what();
+		}
+		catch (...)
+		{
+			cout << "Error: Unknown exception in main loop.";
+			Log("ERROR", "An unhandled exception occured in main loop. Exiting");
+			//throw;
+		}
+
 
 		Running = false;
 
@@ -295,6 +299,8 @@ namespace Deku2D
 		SLog->SetLogName("System");
 		Log("INFO", "Working directory is '%s'", Environment::Paths::GetWorkingDirectory().c_str());
 		SLog->SetLogLevel(Config->Section("Data")["LogLevel"]);
+
+		TypeInfo::Initialize();
 
 		Environment::Variables::Set("SDL_VIDEO_CENTERED", "center");
 

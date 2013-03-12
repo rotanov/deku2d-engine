@@ -2,7 +2,7 @@
 <Configuration>
 	<Video>
 		<Fullscreen value="false" />
-		<WindowWidth value="1600" />
+		<WindowWidth value="640" />
 		<WindowHeight value="480" />
 		<WindowBPP value="32" />
 		<WindowCaption value="Sandbox" />

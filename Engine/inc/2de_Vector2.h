@@ -13,7 +13,7 @@ namespace Deku2D
 	public:
 		float x, y;
 
-		__INLINE Vector2(float Ax = 0.0f, float Ay = 0.0f) : x(Ax), y(Ay){}
+		__INLINE explicit Vector2(float Ax = 0.0f, float Ay = 0.0f) : x(Ax), y(Ay){}
 
 		__INLINE Vector2(const std::vector<float> &values)
 		{

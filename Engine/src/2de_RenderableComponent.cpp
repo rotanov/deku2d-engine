@@ -119,7 +119,7 @@ namespace Deku2D
 					copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 					if (tokens.size() == 4)
 						for(unsigned i = 0; i < 4; i++)
-							TexCoords[i] = from_string<float>(tokens[i]);
+							TexCoords[i] = Vector2(from_string<float>(tokens[i]));
 					else
 						Log("WARNING", "Attribute 'TexCoords' has improper format");
 				}

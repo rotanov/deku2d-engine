@@ -1587,18 +1587,30 @@ namespace Deku2D
 
 	Vector2 CTransformation::Apply(const Vector2 &AVector)
 	{
-		Vector2 newVector = (AVector * Matrix2(DegToRad(-Rotation)) + Translation) * Scaling;
+		Vector2 newVector = AVector * Matrix2(DegToRad(-Rotation)) + Translation;
+		newVector.x *= Scaling.x;
+		newVector.y *= Scaling.y;
 		return newVector;
 	}
 
 	CBox CTransformation::Apply(const CBox &ABox)
 	{
 		CBox newBox(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 
-					std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-		Vector2 newTL = ( Vector2(ABox.Min.x, ABox.Max.y) * Matrix2(DegToRad(-Rotation)) ) * Scaling;
-		Vector2 newBR = ( Vector2(ABox.Max.x, ABox.Min.y) * Matrix2(DegToRad(-Rotation)) ) * Scaling;
-		Vector2 newTR = ( ABox.Max * Matrix2(DegToRad(-Rotation)) ) * Scaling;
-		Vector2 newBL = ( ABox.Min * Matrix2(DegToRad(-Rotation)) ) * Scaling;
+					std::numeric_limits<float>::min(), std::numeric_limits<float>::min());		
+		Vector2 newTL = Vector2(ABox.Min.x, ABox.Max.y) * Matrix2(DegToRad(-Rotation));
+		Vector2 newBR = Vector2(ABox.Max.x, ABox.Min.y) * Matrix2(DegToRad(-Rotation));
+		Vector2 newTR = ABox.Max * Matrix2(DegToRad(-Rotation));
+		Vector2 newBL = ABox.Min * Matrix2(DegToRad(-Rotation));
+
+		newTL.x *= Scaling.x;
+		newTL.y *= Scaling.y;
+		newBR.x *= Scaling.x;
+		newBR.y *= Scaling.y;
+		newTR.x *= Scaling.x;
+		newTR.y *= Scaling.y;
+		newBL.x *= Scaling.x;
+		newBL.y *= Scaling.y;
+
 		newBox.Add(newTL);
 		newBox.Add(newTR);
 		newBox.Add(newBL);
@@ -1681,6 +1693,11 @@ namespace Deku2D
 	void CModel::SetModelType(EModelType AModelType)
 	{
 		ModelType = AModelType;
+	}
+
+	void CModel::SetModelType(int AModelType)
+	{
+		ModelType = static_cast<EModelType>(AModelType);
 	}
 
 	CTexture* CModel::GetTexture() const

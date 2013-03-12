@@ -111,7 +111,7 @@ public:
 			r += eolStr;
 		}
 
-		if (typeInfo.BaseInfo() != NULL)
+		if (typeInfo.BaseInfo() != NULL && typeInfo.BaseInfo() != &typeInfo)
 		{
 			r += eolStr;
 			string baseName = typeInfo.BaseInfo()->Name();

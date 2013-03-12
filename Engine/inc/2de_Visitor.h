@@ -60,7 +60,7 @@ namespace Deku2D
 
 	class IVisitableObject : public CObject	// Inherit from CObject to inject visitable interface into branch of the inheritance
 	{
-		D2D_TYPE_INFO_INJECT(IVisitableObject);
+		D2D_TYPE_INFO_INJECT(IVisitableObject)
 
 	public:
 		virtual ~IVisitableObject() {}
@@ -90,13 +90,18 @@ namespace Deku2D
 	};
 
 	// Inject this in visitable class
-	#define D2D_DECLARE_VISITABLE()	\
-		public:	\
-			virtual void AcceptOnEnter(IVisitorBase& visitor)	\
-			{ return ConcreteAcceptOnEnter(*this, visitor); }	\
-			virtual void AcceptOnLeave(IVisitorBase& visitor)	\
-			{ return ConcreteAcceptOnLeave(*this, visitor); }
+	#define D2D_DECLARE_VISITABLE()\
+		public:\
+			virtual void AcceptOnEnter(IVisitorBase& visitor)\
+			{\
+				return ConcreteAcceptOnEnter(*this, visitor);\
+			}\
+\
+			virtual void AcceptOnLeave(IVisitorBase& visitor)\
+			{\
+				return ConcreteAcceptOnLeave(*this, visitor);\
+			}\
 
-};	//	namespace Deku2D
+}	//	namespace Deku2D
 
 #endif	// _2DE_VISITOR_H_

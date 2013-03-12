@@ -315,6 +315,7 @@ namespace Deku2D
 		~CModel();
 		void SetTexture(CTexture *ATexture);
 		void SetModelType(EModelType AModelType);
+		void SetModelType(int AModelType);
 		CTexture* GetTexture() const;
 		const Vector2* GetVertices() const;
 		const Vector2* GetTexCoords() const;
@@ -337,6 +338,9 @@ namespace Deku2D
 
 		Vector2 GetTexCoord(unsigned index) const
 		{
+			// todo: something just not right here
+			if (GetTexCoords() == NULL)
+				return Vector2();
 			return GetTexCoords()[ index ];
 		}
 

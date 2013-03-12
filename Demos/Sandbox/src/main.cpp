@@ -153,7 +153,13 @@ void TestSerialization()
 		CModel* model = Factory.Instance()->Get<CModel>("TestModel");
 		cout << model->GetName() << std::endl;
 		model->Load();
+
+//		Deku2D::CAbstractScene *NewScene = Deku2D::SceneManager->CreateScene();
+//		Deku2D::SceneManager->SetCurrentScene(NewScene);
+
 		Serialization::ToJSON(model, "CModel", "TestModel.json");
+		CModel newModel;
+		//Serialization::FromJSON(&newModel, "CModel", "TestModel.json");
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -249,7 +255,7 @@ bool CCustomStateHandler::OnInitialize()
 					 ->New<CTest>("SetSizeTest"));
 
 	Deku2D::SoundMixer->PlayMusic(Deku2D::MusicManager->GetMusicByName("Iggy"), 0, -1);
-//	Deku2D::SoundMixer->SetMusicVolume(128);
+	//Deku2D::SoundMixer->SetMusicVolume(128);
 
 //	Deku2D::KeyBindingManager->UnbindAction("Test", "Act");
 //	Deku2D::KeyBindingManager->Bind("Test", "Act", SDLK_0);

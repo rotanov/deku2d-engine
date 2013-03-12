@@ -212,8 +212,8 @@ namespace Deku2D
 		TeamTextPlacing->Attach(TextTeam);
 		DekuTextPlacing->SetPosition(Vector2(40.0f, -47.0f));
 		TeamTextPlacing->SetPosition(Vector2(40.0f, -74.0f));
-		DekuTextPlacing->SetScaling(2);
-		TeamTextPlacing->SetScaling(2);
+		DekuTextPlacing->SetScaling(Vector2(2, 2));
+		TeamTextPlacing->SetScaling(Vector2(2, 2));
 		TextDeku->SetText("Deku");
 		TextTeam->SetText("Team");
 	}
