@@ -1,6 +1,7 @@
 #include "2de_Config.h"
 
 #include "2de_Engine.h"
+#include "2de_Environment.h"
 
 namespace Deku2D
 {

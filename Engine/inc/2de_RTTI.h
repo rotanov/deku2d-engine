@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "2de_Property.h"
+#include "2de_Error.h"
 
 /**
  *	TODO:

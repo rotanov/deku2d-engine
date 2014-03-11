@@ -2,6 +2,8 @@
 
 #include "2de_Core.h"
 #include "2de_Engine.h"
+#include "2de_Environment.h"
+#include "2de_FileSystem.h"
 
 namespace Deku2D
 {

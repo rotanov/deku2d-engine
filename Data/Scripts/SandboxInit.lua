@@ -1,5 +1,5 @@
 -- Rotating squares, with relative positioning
---[[
+---[[
 for i = 0, 3 do
 	local a = Create("A", "")
 	a.pos:SetPosition(0, 0)
@@ -13,7 +13,7 @@ end
 --]]
 
 -- Single BlackNinja
---[[
+---[[
 local ninja = Create("BlackNinja", "")
 ninja.pos:SetPosition(320, 240)
 Root:Attach(ninja)

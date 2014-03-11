@@ -247,7 +247,7 @@ bool CCustomStateHandler::OnInitialize()
 		)
 	);
 
-	TestSerialization();
+	//TestSerialization();
 
 	Deku2D::CEngine::Instance()
 			->RootGameObject

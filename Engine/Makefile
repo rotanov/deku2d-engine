@@ -3,8 +3,10 @@ SOURCES		=	src/2de_Core.cpp \
 			src/2de_Config.cpp \
 			src/2de_DefaultFont.cpp \
 			src/2de_Engine.cpp \
+			src/2de_Environment.cpp \
 			src/2de_Event.cpp \
 			src/2de_Factory.cpp \
+			src/2de_FileSystem.cpp \
 			src/2de_GameObject.cpp \
 			src/2de_GameUtils.cpp \
 			src/2de_GeometricComponent.cpp \
@@ -44,8 +46,10 @@ OBJECTS		=	obj/2de_Core.o \
 			obj/2de_Config.o \
 			obj/2de_DefaultFont.o \
 			obj/2de_Engine.o \
+			obj/2de_Environment.o \
 			obj/2de_Event.o \
 			obj/2de_Factory.o \
+			obj/2de_FileSystem.o \
 			obj/2de_GameObject.o \
 			obj/2de_GameUtils.o \
 			obj/2de_GeometricComponent.o \

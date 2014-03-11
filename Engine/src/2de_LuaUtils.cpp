@@ -1,8 +1,11 @@
 #include "2de_LuaUtils.h"
+
 #include "2de_GameObject.h"
 #include "2de_Text.h"
 #include "2de_PlaceableComponent.h"
 #include "2de_Engine.h"
+#include "2de_Environment.h"
+#include "2de_FileSystem.h"
 
 namespace Deku2D
 {

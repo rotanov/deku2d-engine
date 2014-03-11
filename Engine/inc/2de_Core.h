@@ -54,8 +54,6 @@
 #define MAX_PATH 260
 #endif //_WIN32
 
-
-// FIXME: bad.. 2de_Core shouldn't include anything from engine
 #include "2de_Error.h"
 #include "2de_RTTI.h"
 
@@ -195,65 +193,6 @@ namespace Deku2D
 	}
 
 
-	/**
-	* Environment - contains functions and probably some constants that are related to environment.
-	*
-	* Ideally in future all (or not all) platform-dependent code should be here.
-	*/
-
-	namespace Environment
-	{
-		namespace DateTime
-		{
-			tm* GetLocalTimeAndDate();
-			string GetFormattedTime(tm *TimeStruct, const char *Format);
-		}	//	namespace DateTime
-
-		namespace Paths
-		{
-			string GetExecutablePath();
-
-			string GetWorkingDirectory();
-			void SetWorkingDirectory(const string &AWorkingDirectory);
-
-			string GetConfigPath();
-			void SetConfigPath(const string &AConfigPath);
-
-			string GetLogPath();
-			void SetLogPath(const string &ALogPath);
-
-			string GetUniversalDirectory();
-		}	//	namespace Paths
-
-		namespace Variables
-		{
-			string Get(const string &AName);
-			void Set(const string &AName, const string &AValue);
-		}	//	namespace Variables
-
-		void LogToStdOut(const char *Event, const char *Format, ...);
-		string GetLineTerminator();
-	}	//	namespace Environment
-
-
-
-
-	/**
-	* FileSystem - a namespace that contains functions for working with file system in a cross-platform way.
-	*/
-
-	namespace FileSystem
-	{
-		bool Exists(const string &APath);
-		
-		// TODO: extend, add more functions..
-
-	}	//	namespace FileSystem
-
-
-	// TODO: move this function somewhere.. btw, it's used only in one place: CEnvironment::Paths::GetExecutablePath()
-	void DelFNameFromFPath(char *src); // POSIXes have dirname, that does exactly the same, but windows doesn't have it..
-
 	__INLINE string itos(int i)
 	{
 		ostringstream s;
@@ -270,19 +209,6 @@ namespace Deku2D
 		return i;
 	}
 
-	__INLINE vector<float> GetNFloatTokensFromString( const string &source, unsigned n)
-	{
-		istringstream iss(source);
-		vector<string> tokens;
-		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-		D2D_ASSERT(tokens.size() == n)
-		vector<float> result;
-		result.resize(n);
-		for (unsigned i = 0; i < n; i++)
-			result[i] = from_string<float>(tokens[i]);
-		return result;
-	}
-
 	/**
 	* CCaseInsensitiveComparison - functor-class, that compares strings in case-insensitive manner. Used by STL containers, etc.
 	*/
@@ -295,6 +221,7 @@ namespace Deku2D
 			return (SDL_strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
 		}
 	};
+
 
 	template <typename From, typename To>
 	class IsConvertible
@@ -319,6 +246,7 @@ namespace Deku2D
 	D2D_DECLARE_CONVERTIBLE(int, string)
 	D2D_DECLARE_CONVERTIBLE(float, string)
 	D2D_DECLARE_CONVERTIBLE(char, string)
+
 
 	// Conversion from Type to Type for the case, when exception should be thrown at runtime when there is no implementation for a conversion.
 	template<typename T, int A = IsIntegral<T>::result>
@@ -355,6 +283,19 @@ namespace Deku2D
 
 	};
 
+
+	__INLINE vector<float> GetNFloatTokensFromString( const string &source, unsigned n)
+	{
+		istringstream iss(source);
+		vector<string> tokens;
+		copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+		D2D_ASSERT(tokens.size() == n)
+		vector<float> result;
+		result.resize(n);
+		for (unsigned i = 0; i < n; i++)
+			result[i] = from_string<float>(tokens[i]);
+		return result;
+	}
 
 }	//	namespace Deku2D
 

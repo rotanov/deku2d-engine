@@ -1,5 +1,8 @@
 #include "2de_Log.h"
+
 #include "2de_Engine.h"	// bad
+#include "2de_Environment.h"
+
 
 namespace Deku2D
 {

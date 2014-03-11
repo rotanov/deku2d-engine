@@ -2,6 +2,8 @@
 #define _D2D_SINGLETON_H_
 
 #include "2de_Object.h"
+#include "2de_Error.h"
+#include "2de_Environment.h"
 
 namespace Deku2D
 {
